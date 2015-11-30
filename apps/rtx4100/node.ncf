@@ -4,7 +4,7 @@
 # meaning of the fields in this file.
 ###############################################################################
 NODE_NAME=NabtoSrc
-NODE=Projects\Amelie\COLApps\Apps\Nabto\unabto\demo\rtx4100
+NODE=Projects\Amelie\COLApps\Apps\Nabto\unabto\apps\rtx4100
 
 SUBSYSTEMS=
   Projects\Amelie\COLApps\Apps\Nabto\unabto\src

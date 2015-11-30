@@ -7,7 +7,7 @@ Demo enables user to connect to device via AP or STA mode and toggle OLED text. 
 ## Running the demo
 
 1. Download Nu-Link Keil driver from http://nuvoton.com to program the module.
-2. Open `unabto/demo/nuvoton/KEIL/NuMaker_TRIO.uvproj` using KEIL MDK-ARM IDE.
+2. Open `unabto/apps/nuvoton/KEIL/NuMaker_TRIO.uvproj` using KEIL MDK-ARM IDE.
 3. Compile and Load to board.
 4. Reset board to load new application.
 5. Install browser plugin from [Nabto](http://nabto.com/#download-list), or use the Nabto iOS or Android application.

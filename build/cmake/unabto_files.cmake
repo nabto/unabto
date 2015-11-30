@@ -20,7 +20,7 @@ set(UNABTO_SERVER_SRC_DIR    ${UNABTO_ROOT}/src)
 
 # Other useful directories
 set(UNABTO_SERVER_TEST_DIR ${UNABTO_ROOT}/test)
-set(UNABTO_DEMO_DIR ${UNABTO_ROOT}/demo)
+set(UNABTO_DEMO_DIR ${UNABTO_ROOT}/apps)
 set(UNABTO_DEMO_COMMON_DIR ${UNABTO_DEMO_DIR}/common)
 
 ###############################

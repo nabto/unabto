@@ -3,7 +3,7 @@
 # Node definition and name of this node. MANDATORY
 #
 ###############################################################################
-NODE=Projects\Amelie\COLApps\Apps\Nabto\unabto\demo\rtx4100\Build\RTX4140_WSAB
+NODE=Projects\Amelie\COLApps\Apps\Nabto\unabto\apps\rtx4100\Build\RTX4140_WSAB
 NODE_NAME=Nabto
 
 ###############################################################################

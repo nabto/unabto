@@ -4,9 +4,9 @@
 # meaning of the fields in this file.
 ###############################################################################
 NODE_NAME=RTX4100_WSAB
-NODE=Projects\Amelie\COLApps\Apps\Nabto\unabto\demo\rtx4100\Build\RTX4100_WSAB
+NODE=Projects\Amelie\COLApps\Apps\Nabto\unabto\apps\rtx4100\Build\RTX4100_WSAB
 SUBSYSTEMS=
-  Projects\Amelie\COLApps\Apps\Nabto\unabto\demo\rtx4100
+  Projects\Amelie\COLApps\Apps\Nabto\unabto\apps\rtx4100
   Projects\Amelie\Components\PtApps:PVCS_DONT_GET_NODE
   Projects\Amelie\Components\Drivers:PVCS_DONT_GET_NODE
   Projects\Amelie\COLApps\Scripts:PVCS_DONT_GET_NODE
