@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<unabto_queries 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://www.nabto.com/unabto/query_model.xsd">
+
+  <query name="get_state.json" description="Gets the device status" id="1">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="button_1" type="uint8"/>
+      <parameter name="button_2" type="uint8"/>
+      <parameter name="led_red" type="uint8"/>
+      <parameter name="led_green" type="uint8"/>
+    </response>
+  </query>
+
+  <query name="set_led.json" description="Set the led state" id="2">
+    <request>
+      <parameter name="led_id" type="uint8"/>
+      <parameter name="led_state" type="uint8"/>
+    </request>
+    <response format="json">
+      <parameter name="led_state" type="uint8"/>
+    </response>
+  </query>
+  
+  <query name="get_temp.json" description="Get temperature" id="3">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="temp" type="uint16"/>
+    </response>
+  </query>
+  
+  <query name="get_acc.json" description="Get acceleration data" id="4">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="acc_x" type="uint16"/>
+      <parameter name="acc_y" type="uint16"/>
+      <parameter name="acc_z" type="uint16"/>
+    </response>
+  </query>
+
+  <query name="get_mag.json" description="Get magnetometer data" id="5">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="mag_x" type="uint16"/>
+      <parameter name="mag_y" type="uint16"/>
+      <parameter name="mag_z" type="uint16"/>
+    </response>
+  </query>
+
+</unabto_queries>

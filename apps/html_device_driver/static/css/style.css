@@ -1,0 +1,28 @@
+/**
+ *  CSS for uNabto Demos
+ */
+
+.ui-content .ui-listview {
+  margin-top: 0;
+}
+
+#container {
+  text-align: center;
+}
+
+#light-div-off {
+	position:absolute;
+	top:70px;
+	left:50%;
+	margin-left:-75px;
+	width:150px;
+	height:150px;
+	background:url(../img/light.png) -150px 0 no-repeat;
+}
+
+#light-div-on {
+	width:150px;
+	height:150px;
+	display:none;
+	background:url(../img/light.png) 0 0 no-repeat;
+}

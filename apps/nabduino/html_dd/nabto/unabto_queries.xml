@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<unabto_queries
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://www.nabto.com/unabto/query_model.xsd">
+
+  <query name="button_status.json" description="Button" id="1">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="button_status" type="uint8"/>
+    </response>
+  </query>
+
+  <query name="led.json" description="LED" id="2">
+    <request>
+      <parameter name="led_ids" type="uint8"/>
+    </request>
+    <response format="json">
+      <parameter name="led_status" type="uint8"/>
+    </response>
+  </query>
+
+  <query name="digital_io.json" description="Digital I/O" id="3">
+    <request>
+      <parameter name="io_index" type="uint8"/>
+      <parameter name="io_out" type="uint8"/>
+    </request>
+    <response format="json">
+      <parameter name="io_status" type="uint8"/>
+    </response>
+  </query>
+
+  <query name="temperature.json" description="Temp. sensor" id="5">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="temperature_celcius" type="uint32"/>
+    </response>
+  </query>
+
+  <query name="analog.json" description="Analog inputs" id="6">
+    <request>
+      <parameter name="ch_index" type="uint8"/>
+    </request>
+    <response format="json">
+      <parameter name="analog_ch" type="uint32"/>
+    </response>
+  </query>
+
+  <query name="pwm.json" description="PWM outputs" id="7">
+    <request>
+      <parameter name="pwm_pin" type="uint8"/>
+      <parameter name="pwm_val" type="uint8"/>
+    </request>
+    <response format="json">
+      <parameter name="pwm_status" type="uint8"/>
+    </response>
+  </query>
+
+  <query name="analog_raw.json" description="Raw analog inputs" id="8">
+    <request>
+      <parameter name="ch_index" type="uint8"/>
+    </request>
+    <response format="json">
+      <parameter name="analog_ch" type="uint32"/>
+    </response>
+  </query>
+
+  <query name="get_all_analog_inputs.json" description="Read all analog input channels" id="10">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="channel0" type="uint16"/>
+      <parameter name="channel1" type="uint16"/>
+      <parameter name="channel2" type="uint16"/>
+      <parameter name="channel3" type="uint16"/>
+      <parameter name="channel4" type="uint16"/>
+      <parameter name="channel5" type="uint16"/>
+    </response>
+  </query>
+
+  <query name="get_system_information.json" description="Provides a series of information parameters detailing the systems configuration." id="1000">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="parameters" type="raw" representation="hex"/>
+    </response>
+  </query>
+  
+</unabto_queries>

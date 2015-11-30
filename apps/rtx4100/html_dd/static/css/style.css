@@ -1,0 +1,20 @@
+/**
+ * CSS extension of jQuery Mobile
+ */
+
+.chart {
+  width: 100%;
+}
+
+.logo {
+  text-align: center;
+}
+
+.logo img {
+  max-width: 300px;
+}
+
+.ui-listview .temperature {
+  font-size: 24px;
+  right: 18px;
+}

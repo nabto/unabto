@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html> 
+<head> 
+  <title>uNabto Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <link rel="stylesheet" href="libs/jquery.mobile-1.4.2.min.css"/>
+  <link rel="stylesheet" href="libs/style.css"/>
+  <script src="libs/jquery-1.11.0.min.js"></script>
+  <script src="libs/defaults.js"></script>
+  <script src="libs/jquery.mobile-1.4.2.min.js"></script>
+  <script src="libs/nabto.js"></script>
+  <!-- Custom Application -->
+  <link rel="stylesheet" href="css/style.css"/>
+  <script src="js/app.js"></script>
+</head>
+<body>
+  <div data-role="page">
+    <div data-role="header">
+      <a data-role="button" id="discover-button" href="//self/discover" data-icon="home" data-iconpos="notext">Discover</a>
+      <h1>uNabto Demo</h1>
+    </div>
+    <div data-role="content">
+      <div id="container">
+        <img alt="house" id="house" src="img/house.png"/>
+        <div id="light-div-off"><div id="light-div-on"></div></div>
+      </div>
+      <ul data-role="listview" data-inset="true">
+        <li data-role="list-divider">
+          <h1>Light Switches:</h1>
+        </li>
+        <li>
+          <h2>Living Room</h2>
+          <div class="ui-li-aside">
+            <select id="living-room-status" data-role="slider">
+              <option value="off">OFF</option>
+              <option value="on">ON</option>
+            </select>
+          </div>
+        </li>
+      </ul>
+      <h4>Welcome to the uNabto Remote Light Switch Demo. This is a basic demonstration of the uNabto framework.</h4>
+      <h4>Clicking the switch will send a message to the remote device, turning it's light on or off. Light status is read from the device on page load.</h4>
+    </div>
+    <div class="errors ui-body"></div>
+  </div>
+</body>
+</html>

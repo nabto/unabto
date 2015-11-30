@@ -1,0 +1,1063 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="62">
+  <logicalFolder name="root" displayName="root" projectFiles="true">
+    <logicalFolder name="LinkerScript"
+                   displayName="Linker Files"
+                   projectFiles="true">
+      <itemPath>../lkr/18f67j60.lkr</itemPath>
+      <itemPath>../lkr/18f67j60_crypto.lkr</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ObjectFiles"
+                   displayName="Object Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="f1" displayName="src" projectFiles="true">
+      <logicalFolder name="f3" displayName="bootloader" projectFiles="true">
+        <itemPath>../../../../projects/bootloader/firmware/src/shared/bootloader_base.c</itemPath>
+        <itemPath>../../../../projects/bootloader/firmware/src/shared/bootloader_base.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f2" displayName="device_drivers" projectFiles="true">
+        <logicalFolder name="f1" displayName="eeprom" projectFiles="true">
+          <itemPath>../../../src/device_drivers/eeprom/eeprom.h</itemPath>
+          <itemPath>../../../src/device_drivers/eeprom/eeprom_24xx08.c</itemPath>
+          <itemPath>../../../src/device_drivers/eeprom/eeprom_24xx256.c</itemPath>
+        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="f6" displayName="external" projectFiles="true">
+        <logicalFolder name="f1" displayName="microchip" projectFiles="true">
+          <itemPath>../../../external/Microchip/TCPIP Stack/ARP.c</itemPath>
+          <itemPath>../../../external/Microchip/Include/TCPIP Stack/ARP.h</itemPath>
+          <itemPath>../../../external/Microchip/Include/Compiler.h</itemPath>
+          <itemPath>../../../external/Microchip/Include/TCPIP Stack/Delay.h</itemPath>
+          <itemPath>../../../external/Microchip/TCPIP Stack/DHCP.c</itemPath>
+          <itemPath>../../../external/Microchip/Include/TCPIP Stack/DHCP.h</itemPath>
+          <itemPath>../../../external/Microchip/TCPIP Stack/DNS.c</itemPath>
+          <itemPath>../../../external/Microchip/Include/TCPIP Stack/DNS.h</itemPath>
+          <itemPath>../../../external/Microchip/TCPIP Stack/ETH97J60.c</itemPath>
+          <itemPath>../../../external/Microchip/Include/TCPIP Stack/ETH97J60.h</itemPath>
+          <itemPath>../../../external/Microchip/TCPIP Stack/Helpers.c</itemPath>
+          <itemPath>../../../external/Microchip/Include/TCPIP Stack/Helpers.h</itemPath>
+          <itemPath>../../../external/Microchip/TCPIP Stack/ICMP.c</itemPath>
+          <itemPath>../../../external/Microchip/Include/TCPIP Stack/ICMP.h</itemPath>
+          <itemPath>../../../external/Microchip/TCPIP Stack/IP.c</itemPath>
+          <itemPath>../../../external/Microchip/Include/TCPIP Stack/IP.h</itemPath>
+          <itemPath>../../../external/Microchip/Include/TCPIP Stack/MAC.h</itemPath>
+          <itemPath>../../../external/Microchip/Include/TCPIP Stack/SPIFlash.h</itemPath>
+          <itemPath>../../../external/Microchip/Include/TCPIP Stack/SPIRAM.h</itemPath>
+          <itemPath>../../../external/Microchip/TCPIP Stack/StackTsk.c</itemPath>
+          <itemPath>../../../external/Microchip/Include/TCPIP Stack/StackTsk.h</itemPath>
+          <itemPath>../../../external/Microchip/Include/TCPIP Stack/TCPIP.h</itemPath>
+          <itemPath>../../../external/Microchip/TCPIP Stack/Tick.c</itemPath>
+          <itemPath>../../../external/Microchip/Include/TCPIP Stack/Tick.h</itemPath>
+          <itemPath>../../../external/Microchip/TCPIP Stack/UDP.c</itemPath>
+          <itemPath>../../../external/Microchip/Include/TCPIP Stack/UDP.h</itemPath>
+          <itemPath>../../../external/Microchip/Include/TCPIP Stack/XEEPROM.h</itemPath>
+        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="f5" displayName="modules" projectFiles="true">
+        <logicalFolder name="f3" displayName="configuration_store" projectFiles="true">
+          <itemPath>../../../src/modules/configuration_store/configuration_store.h</itemPath>
+          <itemPath>../../../src/modules/configuration_store/configuration_store_pic18_internal_flash.c</itemPath>
+        </logicalFolder>
+        <logicalFolder name="f2" displayName="crypto" projectFiles="true">
+          <logicalFolder name="f2" displayName="pic18" projectFiles="true">
+            <itemPath>../../../src/modules/crypto/pic18/unabto_hmac_sha256.c</itemPath>
+            <itemPath>../../../src/modules/crypto/pic18/unabto_sha256.h</itemPath>
+          </logicalFolder>
+        </logicalFolder>
+        <logicalFolder name="f1" displayName="network" projectFiles="true">
+          <logicalFolder name="f1" displayName="microchip" projectFiles="true">
+            <itemPath>../../../src/modules/network/microchip/unabto_microchip_arp.c</itemPath>
+            <itemPath>../../../src/modules/network/microchip/unabto_microchip_arp.h</itemPath>
+            <itemPath>../../../src/modules/network/microchip/unabto_microchip_udp.c</itemPath>
+            <itemPath>../../../src/modules/network/microchip/unabto_microchip_udp.h</itemPath>
+            <itemPath>../../../src/modules/network/microchip/unabto_microchip_dns.c</itemPath>
+            <itemPath>../../../src/modules/network/microchip/unabto_microchip_network.c</itemPath>
+            <itemPath>../../../src/modules/network/microchip/unabto_microchip_network.h</itemPath>
+            <itemPath>../../../src/modules/network/microchip/unabto_microchip_time.c</itemPath>
+            <itemPath>../../../src/modules/network/microchip/unabto_microchip_time.h</itemPath>
+            <itemPath>../../../src/modules/network/microchip/unabto_microchip_dns.h</itemPath>
+          </logicalFolder>
+        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="f4" displayName="platforms" projectFiles="true">
+        <logicalFolder name="f1" displayName="pic18" projectFiles="true">
+          <itemPath>../../../src/platforms/pic18/debug_channel.c</itemPath>
+          <itemPath>../../../src/platforms/pic18/debug_channel.h</itemPath>
+          <itemPath>../../../src/platforms/pic18/adc.c</itemPath>
+          <itemPath>../../../src/platforms/pic18/adc.h</itemPath>
+          <itemPath>../../../src/platforms/pic18/flash_io_driver.c</itemPath>
+          <itemPath>../../../src/platforms/pic18/flash_io_driver.h</itemPath>
+          <itemPath>../../../src/platforms/pic18/unabto_platform.c</itemPath>
+          <itemPath>../../../src/platforms/pic18/unabto_platform.h</itemPath>
+          <itemPath>../../../src/platforms/pic18/unabto_platform_logging.h</itemPath>
+          <itemPath>../../../src/platforms/pic18/unabto_platform_types.h</itemPath>
+          <itemPath>../../../src/platforms/pic18/iic.h</itemPath>
+          <itemPath>../../../src/platforms/pic18/iic_sw.c</itemPath>
+        </logicalFolder>
+        <itemPath>../../../src/platforms/unabto_common_types.h</itemPath>
+        <itemPath>../../../src/platforms/unabto_printf_logger.c</itemPath>
+        <itemPath>../../../src/platforms/unabto_printf_logger.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f1" displayName="unabto" projectFiles="true">
+        <logicalFolder name="f3" displayName="util" projectFiles="true">
+          <itemPath>../../../src/unabto/util/unabto_buffer.c</itemPath>
+          <itemPath>../../../src/unabto/util/unabto_buffer.h</itemPath>
+          <itemPath>../../../src/unabto/util/unabto_queue.c</itemPath>
+          <itemPath>../../../src/unabto/util/unabto_queue.h</itemPath>
+        </logicalFolder>
+        <itemPath>../../../src/unabto_version.h</itemPath>
+        <itemPath>../../../src/unabto/unabto.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_app.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_app_adapter.c</itemPath>
+        <itemPath>../../../src/unabto/unabto_app_adapter.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_attach.c</itemPath>
+        <itemPath>../../../src/unabto/unabto_attach.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_common_main.c</itemPath>
+        <itemPath>../../../src/unabto/unabto_common_main.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_config_defaults.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_config_derived.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_connection.c</itemPath>
+        <itemPath>../../../src/unabto/unabto_connection.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_context.c</itemPath>
+        <itemPath>../../../src/unabto/unabto_context.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_crypto.c</itemPath>
+        <itemPath>../../../src/unabto/unabto_crypto.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_env_base.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_environment.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_external_environment.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_logging.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_main_contexts.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_message.c</itemPath>
+        <itemPath>../../../src/unabto/unabto_message.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_packet.c</itemPath>
+        <itemPath>../../../src/unabto/unabto_packet.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_packet_util.c</itemPath>
+        <itemPath>../../../src/unabto/unabto_packet_util.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_protocol_defines.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_protocol_exceptions.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_stream.c</itemPath>
+        <itemPath>../../../src/unabto/unabto_stream.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_stream_event.c</itemPath>
+        <itemPath>../../../src/unabto/unabto_stream_event.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_util.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_aes128_sha256.c</itemPath>
+        <itemPath>../../../src/unabto/unabto_aes128_sha256.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_aes_cbc.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_hmac_sha256.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_prf.c</itemPath>
+        <itemPath>../../../src/unabto/unabto_prf.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_include_platform.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_memory.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_buffers.c</itemPath>
+        <itemPath>../../../src/unabto/unabto_buffers.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_query_rw.c</itemPath>
+        <itemPath>../../../src/unabto/unabto_query_rw.h</itemPath>
+		<itemPath>../../../src/unabto/unabto_extended_rendezvous.c</itemPath>
+		<itemPath>../../../src/unabto/unabto_extended_rendezvous.h</itemPath>
+      </logicalFolder>
+      <itemPath>../src/application.c</itemPath>
+      <itemPath>../src/application.h</itemPath>
+      <itemPath>../src/hal.c</itemPath>
+      <itemPath>../src/hal.h</itemPath>
+      <itemPath>../src/HardwareProfile.h</itemPath>
+      <itemPath>../src/TCPIPConfig.h</itemPath>
+      <itemPath>../src/unabto_config.h</itemPath>
+      <itemPath>../../../external/readme_pic18.txt</itemPath>
+      <itemPath>../src/application_configuration.h</itemPath>
+      <itemPath>../src/main.c</itemPath>
+      <itemPath>../firmware_change_log.txt</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>../../../external/microchip_del</Elem>
+    <Elem>../../../src/unabto</Elem>
+    <Elem>../../../src/platforms/pic18</Elem>
+    <Elem>..</Elem>
+    <Elem>../../../src/device_drivers/eeprom</Elem>
+    <Elem>../../../src/modules/crypto/pic18</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="release" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC18F67J60</targetDevice>
+        <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
+        <platformTool>Simulator</platformTool>
+        <languageToolchain>C18</languageToolchain>
+        <languageToolchainVersion>3.42</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <parseOnProdLoad>true</parseOnProdLoad>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
+      <item path="../../../src/modules/crypto/pic18/unabto_hmac_sha256.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_aes128_sha256.c"
+            ex="false"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_aes128_sha256.h"
+            ex="false"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_aes_cbc.h" ex="false" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_hmac_sha256.h"
+            ex="false"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_prf.c" ex="false" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_prf.h" ex="false" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../lkr/18f67j60_crypto.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <C18>
+        <property key="code-model" value="ml"/>
+        <property key="data-model" value="oa-"/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-multi-bank-stack-model" value="true"/>
+        <property key="enable-ob" value="true"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-opa" value="false"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ow" value="true"/>
+        <property key="extra-include-directories"
+                  value="../src;../../../src/platforms/pic18;../../../src;../../../../projects/bootloader/firmware/src/shared;../../../external/Microchip/Include"/>
+        <property key="optimization-master" value="Custom"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="procedural-abstraction-passes" value="3"/>
+        <property key="storage-class" value="sca"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="2"/>
+      </C18>
+      <C18-AS>
+        <property key="cross.reference.file" value=""/>
+        <property key="default.radix" value="HEX"/>
+        <property key="enable.case.sensitivity" value="true"/>
+        <property key="hex.output.format" value="INHX32"/>
+        <property key="preprocessor.macros" value=""/>
+        <property key="warning.level" value="0"/>
+      </C18-AS>
+      <C18-LD>
+        <property key="cod-file" value="false"/>
+        <property key="extra-lib-directories" value=""/>
+        <property key="hex-output-format" value="INHX32"/>
+        <property key="map-file" value="release.map"/>
+        <appendMe value="-i"/>
+      </C18-LD>
+      <C18LanguageToolchain>
+        <property key="extended-mode" value="false"/>
+        <property key="extended-mode-mcc18" value="false"/>
+        <property key="extended-mode-mpasm" value="false"/>
+        <property key="extended-mode-mplink" value="false"/>
+        <property key="stack-analysis" value="false"/>
+        <property key="stack-analysis-mcc18" value="false"/>
+        <property key="stack-analysis-mplink" value="false"/>
+      </C18LanguageToolchain>
+      <Simulator>
+        <property key="breakoptions.coreerrors" value="Ignore"/>
+        <property key="breakoptions.corewarnings" value="Ignore"/>
+        <property key="breakoptions.peripheralerrors" value="Ignore"/>
+        <property key="breakoptions.peripheralwarnings" value="Ignore"/>
+        <property key="breakoptions.stimulusmessages.notes" value="Ignore"/>
+        <property key="breakoptions.stimulusmessags.errors" value="Ignore"/>
+        <property key="breakoptions.stimulusmessags.warnings" value="Ignore"/>
+        <property key="breakoptions.wdtwarnings" value="Ignore"/>
+        <property key="codecoverage.enabled" value="Disable"/>
+        <property key="codecoverage.enableoutputtofile" value="false"/>
+        <property key="codecoverage.outputfile" value=""/>
+        <property key="oscillator.auxfrequency" value="120"/>
+        <property key="oscillator.auxfrequencyunit" value="Mega"/>
+        <property key="oscillator.frequency" value="1"/>
+        <property key="oscillator.frequencyunit" value="Mega"/>
+        <property key="oscillator.rcfrequency" value="250"/>
+        <property key="oscillator.rcfrequencyunit" value="Kilo"/>
+        <property key="performancedata.show" value="false"/>
+        <property key="periphADC1.altscl" value="false"/>
+        <property key="periphADC1.minTacq" value=""/>
+        <property key="periphADC1.tacqunits" value="microseconds"/>
+        <property key="periphADC2.altscl" value="false"/>
+        <property key="periphADC2.minTacq" value=""/>
+        <property key="periphADC2.tacqunits" value="microseconds"/>
+        <property key="tracecontrol.include.timestamp" value="false"/>
+        <property key="tracecontrol.select" value="0"/>
+        <property key="tracecontrol.stallontracebufferfull" value="false"/>
+        <property key="tracecontrol.timestamp" value="2"/>
+        <property key="tracecontrol.tracebufmax" value="546000"/>
+        <property key="tracecontrol.tracefile"
+                  value="/home/mkm/sandbox/nabto/unabto/demo/nabduino/MPLAB.X/defmplabxtrace.log"/>
+        <property key="tracecontrol.traceresetonrun" value="false"/>
+        <property key="uart10io.output" value="window"/>
+        <property key="uart10io.outputfile" value=""/>
+        <property key="uart10io.uartioenabled" value="false"/>
+        <property key="uart1io.output" value="window"/>
+        <property key="uart1io.outputfile" value=""/>
+        <property key="uart1io.uartioenabled" value="false"/>
+        <property key="uart2io.output" value="window"/>
+        <property key="uart2io.outputfile" value=""/>
+        <property key="uart2io.uartioenabled" value="false"/>
+        <property key="uart3io.output" value="window"/>
+        <property key="uart3io.outputfile" value=""/>
+        <property key="uart3io.uartioenabled" value="false"/>
+        <property key="uart4io.output" value="window"/>
+        <property key="uart4io.outputfile" value=""/>
+        <property key="uart4io.uartioenabled" value="false"/>
+        <property key="uart5io.output" value="window"/>
+        <property key="uart5io.outputfile" value=""/>
+        <property key="uart5io.uartioenabled" value="false"/>
+        <property key="uart6io.output" value="window"/>
+        <property key="uart6io.outputfile" value=""/>
+        <property key="uart6io.uartioenabled" value="false"/>
+        <property key="uart7io.output" value="window"/>
+        <property key="uart7io.outputfile" value=""/>
+        <property key="uart7io.uartioenabled" value="false"/>
+        <property key="uart8io.output" value="window"/>
+        <property key="uart8io.outputfile" value=""/>
+        <property key="uart8io.uartioenabled" value="false"/>
+        <property key="uart9io.output" value="window"/>
+        <property key="uart9io.outputfile" value=""/>
+        <property key="uart9io.uartioenabled" value="false"/>
+      </Simulator>
+    </conf>
+    <conf name="debug" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC18F67J60</targetDevice>
+        <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
+        <platformTool>Simulator</platformTool>
+        <languageToolchain>C18</languageToolchain>
+        <languageToolchainVersion>3.42</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <parseOnProdLoad>true</parseOnProdLoad>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
+      <item path="../../../src/modules/crypto/pic18/unabto_hmac_sha256.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_aes128_sha256.c"
+            ex="false"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_aes128_sha256.h"
+            ex="false"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_aes_cbc.h" ex="false" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_hmac_sha256.h"
+            ex="false"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_prf.c" ex="false" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_prf.h" ex="false" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../lkr/18f67j60_crypto.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <C18>
+        <property key="code-model" value="ml"/>
+        <property key="data-model" value="oa-"/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-multi-bank-stack-model" value="true"/>
+        <property key="enable-ob" value="true"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-opa" value="false"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ow" value="true"/>
+        <property key="extra-include-directories"
+                  value="../src;../../../src/platforms/pic18;../../../src;../../../../projects/bootloader/firmware/src/shared;../../../external/Microchip/Include"/>
+        <property key="optimization-master" value="Enable all"/>
+        <property key="preprocessor-macros" value="__DEBUG__=1"/>
+        <property key="procedural-abstraction-passes" value="3"/>
+        <property key="storage-class" value="sca"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="2"/>
+      </C18>
+      <C18-AS>
+        <property key="cross.reference.file" value=""/>
+        <property key="default.radix" value="HEX"/>
+        <property key="enable.case.sensitivity" value="true"/>
+        <property key="hex.output.format" value="INHX32"/>
+        <property key="preprocessor.macros" value=""/>
+        <property key="warning.level" value="0"/>
+      </C18-AS>
+      <C18-LD>
+        <property key="cod-file" value="false"/>
+        <property key="extra-lib-directories" value=""/>
+        <property key="hex-output-format" value="INHX32"/>
+        <property key="map-file" value="debug.map"/>
+        <appendMe value="-i"/>
+      </C18-LD>
+      <C18LanguageToolchain>
+        <property key="extended-mode" value="false"/>
+        <property key="extended-mode-mcc18" value="false"/>
+        <property key="extended-mode-mpasm" value="false"/>
+        <property key="extended-mode-mplink" value="false"/>
+        <property key="stack-analysis" value="false"/>
+        <property key="stack-analysis-mcc18" value="false"/>
+        <property key="stack-analysis-mplink" value="false"/>
+      </C18LanguageToolchain>
+      <Simulator>
+        <property key="breakoptions.coreerrors" value="Ignore"/>
+        <property key="breakoptions.corewarnings" value="Ignore"/>
+        <property key="breakoptions.peripheralerrors" value="Ignore"/>
+        <property key="breakoptions.peripheralwarnings" value="Ignore"/>
+        <property key="breakoptions.stimulusmessages.notes" value="Ignore"/>
+        <property key="breakoptions.stimulusmessags.errors" value="Ignore"/>
+        <property key="breakoptions.stimulusmessags.warnings" value="Ignore"/>
+        <property key="breakoptions.wdtwarnings" value="Ignore"/>
+        <property key="codecoverage.enabled" value="Disable"/>
+        <property key="codecoverage.enableoutputtofile" value="false"/>
+        <property key="codecoverage.outputfile" value=""/>
+        <property key="oscillator.auxfrequency" value="120"/>
+        <property key="oscillator.auxfrequencyunit" value="Mega"/>
+        <property key="oscillator.frequency" value="1"/>
+        <property key="oscillator.frequencyunit" value="Mega"/>
+        <property key="oscillator.rcfrequency" value="250"/>
+        <property key="oscillator.rcfrequencyunit" value="Kilo"/>
+        <property key="performancedata.show" value="false"/>
+        <property key="periphADC1.altscl" value="false"/>
+        <property key="periphADC1.minTacq" value=""/>
+        <property key="periphADC1.tacqunits" value="microseconds"/>
+        <property key="periphADC2.altscl" value="false"/>
+        <property key="periphADC2.minTacq" value=""/>
+        <property key="periphADC2.tacqunits" value="microseconds"/>
+        <property key="tracecontrol.include.timestamp" value="false"/>
+        <property key="tracecontrol.select" value="0"/>
+        <property key="tracecontrol.stallontracebufferfull" value="false"/>
+        <property key="tracecontrol.timestamp" value="2"/>
+        <property key="tracecontrol.tracebufmax" value="546000"/>
+        <property key="tracecontrol.tracefile"
+                  value="/home/mkm/sandbox/nabto/unabto/demo/nabduino/MPLAB.X/defmplabxtrace.log"/>
+        <property key="tracecontrol.traceresetonrun" value="false"/>
+        <property key="uart10io.output" value="window"/>
+        <property key="uart10io.outputfile" value=""/>
+        <property key="uart10io.uartioenabled" value="false"/>
+        <property key="uart1io.output" value="window"/>
+        <property key="uart1io.outputfile" value=""/>
+        <property key="uart1io.uartioenabled" value="false"/>
+        <property key="uart2io.output" value="window"/>
+        <property key="uart2io.outputfile" value=""/>
+        <property key="uart2io.uartioenabled" value="false"/>
+        <property key="uart3io.output" value="window"/>
+        <property key="uart3io.outputfile" value=""/>
+        <property key="uart3io.uartioenabled" value="false"/>
+        <property key="uart4io.output" value="window"/>
+        <property key="uart4io.outputfile" value=""/>
+        <property key="uart4io.uartioenabled" value="false"/>
+        <property key="uart5io.output" value="window"/>
+        <property key="uart5io.outputfile" value=""/>
+        <property key="uart5io.uartioenabled" value="false"/>
+        <property key="uart6io.output" value="window"/>
+        <property key="uart6io.outputfile" value=""/>
+        <property key="uart6io.uartioenabled" value="false"/>
+        <property key="uart7io.output" value="window"/>
+        <property key="uart7io.outputfile" value=""/>
+        <property key="uart7io.uartioenabled" value="false"/>
+        <property key="uart8io.output" value="window"/>
+        <property key="uart8io.outputfile" value=""/>
+        <property key="uart8io.uartioenabled" value="false"/>
+        <property key="uart9io.output" value="window"/>
+        <property key="uart9io.outputfile" value=""/>
+        <property key="uart9io.uartioenabled" value="false"/>
+      </Simulator>
+    </conf>
+    <conf name="release_full_optimization" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC18F67J60</targetDevice>
+        <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
+        <platformTool>Simulator</platformTool>
+        <languageToolchain>C18</languageToolchain>
+        <languageToolchainVersion>3.42</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <parseOnProdLoad>true</parseOnProdLoad>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
+      <item path="../../../src/modules/crypto/pic18/unabto_hmac_sha256.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/modules/crypto/pic18/unabto_sha256.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_aes128_sha256.c"
+            ex="false"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_aes128_sha256.h"
+            ex="false"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_aes_cbc.h" ex="false" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_hmac_sha256.h"
+            ex="false"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_prf.c" ex="false" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../src/unabto/unabto_prf.h" ex="false" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../lkr/18f67j60_crypto.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <C18>
+        <property key="code-model" value="ml"/>
+        <property key="data-model" value="oa-"/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-multi-bank-stack-model" value="true"/>
+        <property key="enable-ob" value="true"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-opa" value="false"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ow" value="true"/>
+        <property key="extra-include-directories"
+                  value="../src;../../../src/platforms/pic18;../../../src;../../../../projects/bootloader/firmware/src/shared;../../../external/Microchip/Include"/>
+        <property key="optimization-master" value="Enable all"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="procedural-abstraction-passes" value="3"/>
+        <property key="storage-class" value="sca"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="2"/>
+      </C18>
+      <C18-AS>
+        <property key="cross.reference.file" value=""/>
+        <property key="default.radix" value="HEX"/>
+        <property key="enable.case.sensitivity" value="true"/>
+        <property key="hex.output.format" value="INHX32"/>
+        <property key="preprocessor.macros" value=""/>
+        <property key="warning.level" value="0"/>
+      </C18-AS>
+      <C18-LD>
+        <property key="cod-file" value="false"/>
+        <property key="extra-lib-directories" value=""/>
+        <property key="hex-output-format" value="INHX32"/>
+        <property key="map-file" value="release_full_optimization.map"/>
+        <appendMe value="-i"/>
+      </C18-LD>
+      <C18LanguageToolchain>
+        <property key="extended-mode" value="false"/>
+        <property key="extended-mode-mcc18" value="false"/>
+        <property key="extended-mode-mpasm" value="false"/>
+        <property key="extended-mode-mplink" value="false"/>
+        <property key="stack-analysis" value="false"/>
+        <property key="stack-analysis-mcc18" value="false"/>
+        <property key="stack-analysis-mplink" value="false"/>
+      </C18LanguageToolchain>
+      <Simulator>
+        <property key="breakoptions.coreerrors" value="Ignore"/>
+        <property key="breakoptions.corewarnings" value="Ignore"/>
+        <property key="breakoptions.peripheralerrors" value="Ignore"/>
+        <property key="breakoptions.peripheralwarnings" value="Ignore"/>
+        <property key="breakoptions.stimulusmessages.notes" value="Ignore"/>
+        <property key="breakoptions.stimulusmessags.errors" value="Ignore"/>
+        <property key="breakoptions.stimulusmessags.warnings" value="Ignore"/>
+        <property key="breakoptions.wdtwarnings" value="Ignore"/>
+        <property key="codecoverage.enabled" value="Disable"/>
+        <property key="codecoverage.enableoutputtofile" value="false"/>
+        <property key="codecoverage.outputfile" value=""/>
+        <property key="oscillator.auxfrequency" value="120"/>
+        <property key="oscillator.auxfrequencyunit" value="Mega"/>
+        <property key="oscillator.frequency" value="1"/>
+        <property key="oscillator.frequencyunit" value="Mega"/>
+        <property key="oscillator.rcfrequency" value="250"/>
+        <property key="oscillator.rcfrequencyunit" value="Kilo"/>
+        <property key="performancedata.show" value="false"/>
+        <property key="periphADC1.altscl" value="false"/>
+        <property key="periphADC1.minTacq" value=""/>
+        <property key="periphADC1.tacqunits" value="microseconds"/>
+        <property key="periphADC2.altscl" value="false"/>
+        <property key="periphADC2.minTacq" value=""/>
+        <property key="periphADC2.tacqunits" value="microseconds"/>
+        <property key="tracecontrol.include.timestamp" value="false"/>
+        <property key="tracecontrol.select" value="0"/>
+        <property key="tracecontrol.stallontracebufferfull" value="false"/>
+        <property key="tracecontrol.timestamp" value="2"/>
+        <property key="tracecontrol.tracebufmax" value="546000"/>
+        <property key="tracecontrol.tracefile"
+                  value="/home/mkm/sandbox/nabto/unabto/demo/nabduino/MPLAB.X/defmplabxtrace.log"/>
+        <property key="tracecontrol.traceresetonrun" value="false"/>
+        <property key="uart10io.output" value="window"/>
+        <property key="uart10io.outputfile" value=""/>
+        <property key="uart10io.uartioenabled" value="false"/>
+        <property key="uart1io.output" value="window"/>
+        <property key="uart1io.outputfile" value=""/>
+        <property key="uart1io.uartioenabled" value="false"/>
+        <property key="uart2io.output" value="window"/>
+        <property key="uart2io.outputfile" value=""/>
+        <property key="uart2io.uartioenabled" value="false"/>
+        <property key="uart3io.output" value="window"/>
+        <property key="uart3io.outputfile" value=""/>
+        <property key="uart3io.uartioenabled" value="false"/>
+        <property key="uart4io.output" value="window"/>
+        <property key="uart4io.outputfile" value=""/>
+        <property key="uart4io.uartioenabled" value="false"/>
+        <property key="uart5io.output" value="window"/>
+        <property key="uart5io.outputfile" value=""/>
+        <property key="uart5io.uartioenabled" value="false"/>
+        <property key="uart6io.output" value="window"/>
+        <property key="uart6io.outputfile" value=""/>
+        <property key="uart6io.uartioenabled" value="false"/>
+        <property key="uart7io.output" value="window"/>
+        <property key="uart7io.outputfile" value=""/>
+        <property key="uart7io.uartioenabled" value="false"/>
+        <property key="uart8io.output" value="window"/>
+        <property key="uart8io.outputfile" value=""/>
+        <property key="uart8io.uartioenabled" value="false"/>
+        <property key="uart9io.output" value="window"/>
+        <property key="uart9io.outputfile" value=""/>
+        <property key="uart9io.uartioenabled" value="false"/>
+      </Simulator>
+    </conf>
+    <conf name="release_full_optimization_crypto" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC18F67J60</targetDevice>
+        <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
+        <platformTool>Simulator</platformTool>
+        <languageToolchain>C18</languageToolchain>
+        <languageToolchainVersion>3.42</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerLibFileItem>../../../src/modules/crypto/pic18/pic18_crypto_lib.X.lib</linkerLibFileItem>
+          </linkerLibItems>
+        </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <parseOnProdLoad>true</parseOnProdLoad>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
+      <item path="../lkr/18f67j60.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <C18>
+        <property key="code-model" value="ml"/>
+        <property key="data-model" value="oa-"/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-multi-bank-stack-model" value="true"/>
+        <property key="enable-ob" value="true"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-opa" value="false"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ow" value="true"/>
+        <property key="extra-include-directories"
+                  value="../src;../../../src/platforms/pic18;../../../src;../../../../projects/bootloader/firmware/src/shared;../../../external/Microchip/Include"/>
+        <property key="optimization-master" value="Enable all"/>
+        <property key="preprocessor-macros" value="__CRYPTO__=1"/>
+        <property key="procedural-abstraction-passes" value="3"/>
+        <property key="storage-class" value="sca"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="2"/>
+      </C18>
+      <C18-AS>
+        <property key="cross.reference.file" value=""/>
+        <property key="default.radix" value="HEX"/>
+        <property key="enable.case.sensitivity" value="true"/>
+        <property key="hex.output.format" value="INHX32"/>
+        <property key="preprocessor.macros" value=""/>
+        <property key="warning.level" value="0"/>
+      </C18-AS>
+      <C18-LD>
+        <property key="cod-file" value="false"/>
+        <property key="extra-lib-directories" value=""/>
+        <property key="hex-output-format" value="INHX32"/>
+        <property key="map-file" value="release_full_optimization_crypto.map"/>
+        <appendMe value="-i"/>
+      </C18-LD>
+      <C18LanguageToolchain>
+        <property key="extended-mode" value="false"/>
+        <property key="extended-mode-mcc18" value="false"/>
+        <property key="extended-mode-mpasm" value="false"/>
+        <property key="extended-mode-mplink" value="false"/>
+        <property key="stack-analysis" value="false"/>
+        <property key="stack-analysis-mcc18" value="false"/>
+        <property key="stack-analysis-mplink" value="false"/>
+      </C18LanguageToolchain>
+      <Simulator>
+        <property key="breakoptions.coreerrors" value="Ignore"/>
+        <property key="breakoptions.corewarnings" value="Ignore"/>
+        <property key="breakoptions.peripheralerrors" value="Ignore"/>
+        <property key="breakoptions.peripheralwarnings" value="Ignore"/>
+        <property key="breakoptions.stimulusmessages.notes" value="Ignore"/>
+        <property key="breakoptions.stimulusmessags.errors" value="Ignore"/>
+        <property key="breakoptions.stimulusmessags.warnings" value="Ignore"/>
+        <property key="breakoptions.wdtwarnings" value="Ignore"/>
+        <property key="codecoverage.enabled" value="Disable"/>
+        <property key="codecoverage.enableoutputtofile" value="false"/>
+        <property key="codecoverage.outputfile" value=""/>
+        <property key="oscillator.auxfrequency" value="120"/>
+        <property key="oscillator.auxfrequencyunit" value="Mega"/>
+        <property key="oscillator.frequency" value="1"/>
+        <property key="oscillator.frequencyunit" value="Mega"/>
+        <property key="oscillator.rcfrequency" value="250"/>
+        <property key="oscillator.rcfrequencyunit" value="Kilo"/>
+        <property key="performancedata.show" value="false"/>
+        <property key="periphADC1.altscl" value="false"/>
+        <property key="periphADC1.minTacq" value=""/>
+        <property key="periphADC1.tacqunits" value="microseconds"/>
+        <property key="periphADC2.altscl" value="false"/>
+        <property key="periphADC2.minTacq" value=""/>
+        <property key="periphADC2.tacqunits" value="microseconds"/>
+        <property key="tracecontrol.include.timestamp" value="false"/>
+        <property key="tracecontrol.select" value="0"/>
+        <property key="tracecontrol.stallontracebufferfull" value="false"/>
+        <property key="tracecontrol.timestamp" value="2"/>
+        <property key="tracecontrol.tracebufmax" value="546000"/>
+        <property key="tracecontrol.tracefile"
+                  value="/home/mkm/sandbox/nabto/unabto/demo/nabduino/MPLAB.X/defmplabxtrace.log"/>
+        <property key="tracecontrol.traceresetonrun" value="false"/>
+        <property key="uart10io.output" value="window"/>
+        <property key="uart10io.outputfile" value=""/>
+        <property key="uart10io.uartioenabled" value="false"/>
+        <property key="uart1io.output" value="window"/>
+        <property key="uart1io.outputfile" value=""/>
+        <property key="uart1io.uartioenabled" value="false"/>
+        <property key="uart2io.output" value="window"/>
+        <property key="uart2io.outputfile" value=""/>
+        <property key="uart2io.uartioenabled" value="false"/>
+        <property key="uart3io.output" value="window"/>
+        <property key="uart3io.outputfile" value=""/>
+        <property key="uart3io.uartioenabled" value="false"/>
+        <property key="uart4io.output" value="window"/>
+        <property key="uart4io.outputfile" value=""/>
+        <property key="uart4io.uartioenabled" value="false"/>
+        <property key="uart5io.output" value="window"/>
+        <property key="uart5io.outputfile" value=""/>
+        <property key="uart5io.uartioenabled" value="false"/>
+        <property key="uart6io.output" value="window"/>
+        <property key="uart6io.outputfile" value=""/>
+        <property key="uart6io.uartioenabled" value="false"/>
+        <property key="uart7io.output" value="window"/>
+        <property key="uart7io.outputfile" value=""/>
+        <property key="uart7io.uartioenabled" value="false"/>
+        <property key="uart8io.output" value="window"/>
+        <property key="uart8io.outputfile" value=""/>
+        <property key="uart8io.uartioenabled" value="false"/>
+        <property key="uart9io.output" value="window"/>
+        <property key="uart9io.outputfile" value=""/>
+        <property key="uart9io.uartioenabled" value="false"/>
+      </Simulator>
+    </conf>
+  </confs>
+</configurationDescriptor>

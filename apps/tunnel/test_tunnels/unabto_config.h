@@ -1,0 +1,29 @@
+#ifndef UNABTO_CONFIG_H
+#define UNABTO_CONFIG_H
+
+#include <modules/log/dynamic/unabto_dynamic_log.h>
+
+#define NABTO_ENABLE_STREAM 1
+#define NABTO_STREAM_MAX_STREAMS 2
+
+#define NABTO_STREAM_RECEIVE_WINDOW_SIZE 100
+
+#define NABTO_SET_TIME_FROM_ALIVE 0
+
+#define NABTO_APPLICATION_EVENT_MODEL_ASYNC 1
+#define NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS 1
+
+#define NABTO_CONNECTIONS_SIZE 100
+#define NABTO_ENABLE_DEBUG_PACKETS 1
+#define NABTO_ENABLE_DEBUG_SYSLOG_CONFIG 1
+
+#include <assert.h>
+#define UNABTO_ASSERT(expr) assert(expr)
+
+#ifdef LOG_ALL
+#define NABTO_LOG_ALL 1
+#endif
+
+#define NABTO_THREAD_LOCAL_STORAGE __thread
+
+#endif

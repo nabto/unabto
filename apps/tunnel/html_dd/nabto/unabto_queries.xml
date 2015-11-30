@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<unabto_queries 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://www.nabto.com/unabto/query_model.xsd">
+  <query name="stun.json" description="Make a stun analysis" id="1">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="stunResult" type="uint32"/>
+    </response>
+  </query>
+</unabto_queries>

@@ -1,0 +1,55 @@
+/**
+ * CSS extension of jQuery Mobile
+ */
+
+*:not(input, textarea) {
+  -webkit-touch-callout: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.ui-content {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.ui-listview .ui-li-aside {
+  top: 5px;
+}
+
+.ui-li-divider .ui-li-aside {
+  top: -2px;
+}
+
+@media all and (max-width: 765px) {
+  .ui-header .ui-title {
+    margin: 0 10%;
+  }
+}
+
+.hidden {
+  display: none;
+}
+
+.errors {
+  background-color: #FFF3A5;
+  border: 1px solid #F7C942;
+  padding: 0.4em 0;
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  text-align: center;
+  display: none;
+  z-index: 999;
+}
+
+.warnings {
+  display: none;
+}
+
+.bootstrap-text {
+  display: none;
+  text-align: center;
+}

@@ -1,0 +1,25 @@
+# Starter-kit whitelist
+# The following modules will be included in the starter-kit
+acl
+application_event
+cli
+coap
+configuration_store
+crc
+crypto
+diagnostics
+dns
+log
+modbus
+mt
+network
+nslp
+random
+settings
+signal_generator
+syslog
+tcp_fallback
+timers
+list
+util
+dns_fallback

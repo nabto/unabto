@@ -1,0 +1,37 @@
+---------------------------------------------------------------------
+
+How to use this demo.
+
+Please read the uNabto SDK documentation for further details
+about using the demo. http://nabto.com/documentation
+
+Assuming you know the location of the AmelieSdk e.g. c:\AmelieSdk\v1.6.0.54 as of this writing.
+
+1. Create a folder called Nabto in Projects\Amelie\COLApps\Apps
+2. Copy the unabto folder to Projects\Amelie\COLApps\Apps\Nabto
+3. goto unabto\demo\rtx4100\Build\RTX4100_WSAB or RTX4140_WSAB run ba.bat
+
+---------------------------------------------------------------------
+
+How to update the RTX41XX firmware:
+
+Update module firmware:
+1. Set SW3 to VIN
+2. Run FwuRTX41xx_V0105_N0039.exe (or the newest version available)
+3. Select COM4 (or first COM port installed)
+4. Press down SW4 Boot while setting SW3 to USB
+
+Update WiFi firmware (this should runs automatically):
+1. Set SW3 to VIN then to USB (restart)
+2. Setup "RTX EAI Port Server Configuration"
+  - Set COM# to 4 (or first COM port installed)
+  - Set Speed to 115200
+  - See firmware update pdf for more details
+3. Run FwuAR4100.exe (or the newest version available)
+
+Update COLA application:
+1. Run the COLA Controller Application
+2 . Select Nabto.fwu
+3. Click Update
+
+---------------------------------------------------------------------

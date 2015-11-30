@@ -1,0 +1,18 @@
+###############################################################################
+#                         NODE CONFIGURATION FILE
+# Please refer to the PerlBuild documentation for information regarding the
+# meaning of the fields in this file.
+#
+# This file is only a part of the rtx4100 demo project. And is unneccessary
+# for all other purposes.
+###############################################################################
+NODE_NAME=NabtoRtx
+NODE=Projects\Amelie\COLApps\Apps\Nabto\unabto\src\platforms\rtx4100
+
+C-FILES=
+  unabto_environment_rtx4100.c
+  unabto_logging_rtx4100.c
+
+H-FILES=
+  unabto_platform_types.h
+  

@@ -1,0 +1,156 @@
+Nabduino firmware version info
+
+*******************************************************************************
+
+Date:               August 12. 2015
+Build:              21005
+Hardware supported: 0.4 beta, 1.2, 1.3
+
+* Better P2P support
+* Reliability improvements
+
+*******************************************************************************
+
+Date:               August 13. 2014
+Build:              18258
+Hardware supported: 0.4 beta, 1.2, 1.3
+
+* Replaced crypto routines with new optimized versions reducing memory
+* footprint and improving response times.
+
+*******************************************************************************
+
+Date:               June 18. 2014
+Build:              17759
+Hardware supported: 0.4 beta, 1.2, 1.3
+
+* Changed AES routines from C to assembler speeding up crypto operations.
+
+*******************************************************************************
+
+Date:               November 18. 2013
+Build:              15136
+Hardware supported: 0.4 beta, 1.2, 1.3
+
+* Fixed ENCRYPTION_MISMATCH error.
+* Fixed LED on board version 1.3.
+
+*******************************************************************************
+
+Date:               September 11. 2013
+Build:              14160
+Hardware supported: 0.4 beta, 1.2, 1.3
+
+* An Arduino-like API (see hal.h) is now used to access IO etc. so Arduino users should feel right at home.
+
+Known bugs:
+* ENCRYPTION_MISMATCH error is often seen on remote connections.
+* LED doesn't work on board version 1.3.
+
+*******************************************************************************
+
+Date:               July 4. 2013
+Build:              13584
+Hardware supported: 0.4 beta, 1.2, 1.3
+
+* Added support for Nabduino hardware version 1.3.
+* Removed software filtering of analog inputs for hardware version 1.3 (source of the noise was removed on hardware version 1.3).
+
+*******************************************************************************
+
+Date:               May 1. 2013
+Build:              12693
+Hardware supported: 0.4 beta, 1.2
+
+* Optimized crypto to reduce RAM usage - this also killed of the unabto_stack module.
+* Restructured source files to make things more logical.
+
+Known bugs:
+* Temperature sensor is a bit noisy.
+
+*******************************************************************************
+
+Date:               April 17. 2013
+Build:              12577
+Hardware supported: 0.4 beta, 1.2
+
+* Fixed bug that prevented remote access when running in encrypted mode.
+
+Known bugs:
+* Temperature sensor is a bit noisy.
+
+*******************************************************************************
+
+Date:               November 6. 2012
+Build:              11009
+Hardware supported: 0.4 beta, 1.2
+
+* Added streaming demo.
+* Added ACL demo.
+
+Known bugs:
+* Temperature sensor is a bit noisy.
+
+*******************************************************************************
+
+Date:               August 10. 2012
+Build:              10372
+Hardware supported: 0.4 beta, 1.2
+
+* Added support for hardware revision 1.2.
+* Changes to PWM outputs:
+*   Revision 0.4 beta has PWM outputs on IO pins 10, 11 and non-standard IO
+    pin 14.
+*   Revision 1.2+ has PWM outputs on IO pins 3, 5, 6, 10 and 11 (IO pin 14
+    was removed on rev. 1.2+ to be compatible with Arduino shields).
+
+Known bugs:
+* Temperature sensor is a bit noisy.
+
+*******************************************************************************
+
+Date:               April 17. 2012
+Build:              9546
+Hardware supported: 0.4 beta
+
+* All digital IO pins now work.
+* Temperature sensor now works but the temperature value fluctuates a bit.
+
+Known bugs:
+* Temperature sensor is a bit noisy.
+* PWM outputs 0 through 2 do not work. Any attempts to set them are simply
+  ignored.
+
+*******************************************************************************
+
+Date:               March 7. 2012
+Build:              9378
+Hardware supported: 0.4 beta
+
+* PWM outputs 3 through 5 now work. PWM outputs 0 through 2 still only
+  functions as digital IOs due to hardware restrictions. This will be fixed
+  on later hardware revisions.
+* Analog inputs now read correctly.
+  Values are now presented as millivolts instead of the raw ADC value.
+
+Known bugs:
+* Temperature sensor isn't working properly.
+* PWM outputs 0 through 2 do not work. Any attempts to set them are simply
+  ignored.
+* Digital IO State flag isn't working properly.
+
+*******************************************************************************
+
+Date:               March 1. 2012
+Build:              9333
+Hardware supported: 0.4 beta
+
+First public release of Nabduino firmware.
+
+Known bugs:
+* Analog inputs are not read correctly.
+* Temperature sensor isn't working properly.
+* PWM outputs do not work. Any attempts to set them are simply ignored.
+* Digital IO State flag isn't working properly.
+
+*******************************************************************************

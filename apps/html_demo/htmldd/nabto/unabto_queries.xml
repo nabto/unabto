@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<unabto_queries 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://www.nabto.com/unabto/query_model.xsd">
+
+  <query name="readExample.json" description="Read a value" id="1">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="foo" type="uint8"/>
+    </response>
+  </query>
+  
+  <query name="writeExample.json" description="Write a value" id="2">
+    <request>
+      <parameter name="foo" type="uint8"/>
+    </request>
+    <response format="json">
+    </response>
+  </query>
+
+  <query name="readMultipleExample.json" description="Read multiple values" id="3">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="foo" type="uint8"/>
+      <parameter name="bar" type="uint8"/>
+    </response>
+  </query>
+
+  <query name="requestResponseExample.json" description="Request response" id="4">
+    <request>
+      <parameter name="foo" type="uint8"/>
+      <parameter name="bar" type="uint8"/>
+    </request>
+    <response format="json">
+      <parameter name="baz" type="uint8"/>
+      <parameter name="qux" type="uint8"/>
+    </response>
+  </query>
+  
+  <query name="listExample.json" description="Echo a list of uint8_t" id="5">
+    <request>
+      <list name="foo">
+        <parameter name="bar" type="uint8"/>
+      </list>
+    </request>
+    <response format="json"> 
+      <list name="baz">
+        <parameter name="qux" type="uint8"/>
+      </list>
+    </response>
+  </query>
+  
+  <query name="rawExample.json" description="Send and receice raw string" id="6">
+    <request>
+      <parameter name="foo" type="raw"/>
+    </request>
+    <response format="json">
+      <parameter name="bar" type="raw"/>
+    </response>
+  </query>
+
+  <query name="advancedListExample.json" description="Receive list of lists and more" id="7">
+    <request>
+    </request>
+    <response format="json"> 
+      <list name="foo">
+        <parameter name="bar" type="uint8"/>
+        <list name="foo1">
+          <parameter name="baz" type="uint32"/>
+        </list>
+        <list name="foo2">
+          <parameter name="qux" type="raw"/>
+        </list>
+      </list>
+    </response>
+  </query>
+  
+  <query name="rawJsonExample.json" description="Receice raw json data" id="8">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="data" type="raw"/>
+    </response>
+  </query>
+
+</unabto_queries>

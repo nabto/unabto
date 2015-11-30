@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<unabto_queries 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://www.nabto.com/unabto/query_model.xsd">
+
+  <query name="house_temperature.json" description="Measure House Temperature" id="1">
+    <request>
+      <parameter name="sensor_id" type="uint32"/>
+    </request>
+    <response format="json">
+      <parameter name="temperature" type="int32"/>
+    </response>
+  </query>
+
+  <query name="wind_speed.json" description="Measure Wind Speed" id="2">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="speed_m_s" type="uint32"/>
+    </response>
+  </query>
+
+  <query name="weather_station.json" description="Weather Station" id="3">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="temperature" type="uint32"/>
+      <parameter name="windspeed" type="uint32"/>
+      <parameter name="humidity" type="uint32"/>
+    </response>
+  </query>
+
+</unabto_queries>
+

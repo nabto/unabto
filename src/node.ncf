@@ -1,0 +1,19 @@
+###############################################################################
+#                         NODE CONFIGURATION FILE
+# Please refer to the PerlBuild documentation for information regarding the
+# meaning of the fields in this file.
+#
+# This file is only a part of the rtx4100 demo project. And is unneccessary
+# for all other purposes.
+###############################################################################
+NODE_NAME=NabtoSrc
+NODE=Projects\Amelie\COLApps\Apps\Nabto\unabto\src
+
+SUBSYSTEMS=
+  Projects\Amelie\COLApps\Apps\Nabto\unabto\src\unabto
+  Projects\Amelie\COLApps\Apps\Nabto\unabto\src\platforms
+  Projects\Amelie\COLApps\Apps\Nabto\unabto\src\platforms\rtx4100
+  Projects\Amelie\COLApps\Apps\Nabto\unabto\src\modules\timers\tick_timer
+
+PRIVATE-H-FILES=
+  unabto_version.h

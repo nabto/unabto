@@ -1,0 +1,19 @@
+###############################################################################
+#                         NODE CONFIGURATION FILE
+# Please refer to the PerlBuild documentation for information regarding the
+# meaning of the fields in this file.
+#
+# This file is only a part of the rtx4100 demo project. And is unneccessary
+# for all other purposes.
+###############################################################################
+NODE_NAME=NabtoSrc
+NODE=Projects\Amelie\COLApps\Apps\Nabto\unabto\src\unabto\util
+
+C-FILES=
+  unabto_buffer.c
+  unabto_queue.c
+  
+PRIVATE-H-FILES=
+  unabto_buffer.h
+  unabto_queue.h
+  

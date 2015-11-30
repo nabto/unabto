@@ -1,0 +1,17 @@
+###############################################################################
+#                         NODE CONFIGURATION FILE
+# Please refer to the PerlBuild documentation for information regarding the
+# meaning of the fields in this file.
+#
+# This file is only a part of the rtx4100 demo project. And is unneccessary
+# for all other purposes.
+###############################################################################
+NODE_NAME=NabtoCryptoSrc
+NODE=Projects\Amelie\COLApps\Apps\Nabto\unabto\src\crypto\generic
+
+SUBSYSTEMS=
+  Projects\Amelie\COLApps\Apps\Nabto\unabto\src\crypto\generic
+
+C-FILES=
+  unabto_aes.c
+  unabto_aes_cbc.c

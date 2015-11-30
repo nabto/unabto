@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<unabto_queries 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://www.nabto.com/unabto/query_model.xsd">
+
+  <query name="light_write.json" description="Turn light on and off" id="1">
+    <request>
+      <parameter name="light_id" type="uint8"/>
+      <parameter name="light_on" type="uint8"/>
+    </request>
+    <response format="json">
+      <parameter name="light_state" type="uint8"/>
+    </response>
+  </query>
+  
+  <query name="light_read.json" description="Read light status" id="2">
+    <request>
+      <parameter name="light_id" type="uint8"/>
+    </request>
+    <response format="json">
+      <parameter name="light_state" type="uint8"/>
+    </response>
+  </query>
+
+</unabto_queries>
