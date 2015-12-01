@@ -9,7 +9,7 @@
 # include <stdlib.h>
 # include <string.h>
 
-int SHA256_Init(SHA256_CTX *c)
+int SHA256_Init_unabto(SHA256_CTX *c)
 {
     memset(c, 0, sizeof(*c));
     c->h[0] = 0x6a09e667UL;
@@ -54,9 +54,9 @@ int SHA256_Init(SHA256_CTX *c)
         }                               \
         } while (0)
 
-# define HASH_UPDATE             SHA256_Update
-# define HASH_TRANSFORM          SHA256_Transform
-# define HASH_FINAL              SHA256_Final
+# define HASH_UPDATE             SHA256_Update_unabto
+# define HASH_TRANSFORM          SHA256_Transform_unabto
+# define HASH_FINAL              SHA256_Final_unabto
 # define HASH_BLOCK_DATA_ORDER   sha256_block_data_order
 
 void sha256_block_data_order(SHA256_CTX *ctx, const void *in, size_t num);

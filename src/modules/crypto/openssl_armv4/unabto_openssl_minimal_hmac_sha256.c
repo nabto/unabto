@@ -38,11 +38,11 @@ void unabto_hmac_sha256_buffers(const buffer_t keys[], uint8_t keys_size,
         num = SHA256_DIGEST_LENGTH;
         //NABTO_LOG_TRACE(("key size %i", key_size));
         //NABTO_LOG_BUFFER(key, key_size);
-        SHA256_Init(&sha_ctx);
+        SHA256_Init_unabto(&sha_ctx);
         for (i = 0; i < keys_size; i++) {
-            SHA256_Update(&sha_ctx, keys[i].data, keys[i].size);
+            SHA256_Update_unabto(&sha_ctx, keys[i].data, keys[i].size);
         }
-        SHA256_Final(key_temp, &sha_ctx);
+        SHA256_Final_unabto(key_temp, &sha_ctx);
         
         //sha256(key, key_size, key_temp);
         //NABTO_LOG_BUFFER(key_temp, SHA256_DIGEST_LENGTH);
@@ -55,28 +55,28 @@ void unabto_hmac_sha256_buffers(const buffer_t keys[], uint8_t keys_size,
         block_pad[i] = key_used[i] ^ 0x36;
     }
 //    print_sha256_ctx(sha_ctx);
-    SHA256_Init(&sha_ctx);
+    SHA256_Init_unabto(&sha_ctx);
 //    print_sha256_ctx(sha_ctx);
-    SHA256_Update(&sha_ctx, block_pad, SHA256_BLOCK_LENGTH);
+    SHA256_Update_unabto(&sha_ctx, block_pad, SHA256_BLOCK_LENGTH);
 //    print_sha256_ctx(sha_ctx);
     for (i = 0; i < messages_size; i++) {
-        SHA256_Update(&sha_ctx, messages[i].data, messages[i].size);
+        SHA256_Update_unabto(&sha_ctx, messages[i].data, messages[i].size);
     }
 //    print_sha256_ctx(sha_ctx);
-    SHA256_Final(digest_temp, &sha_ctx);
+    SHA256_Final_unabto(digest_temp, &sha_ctx);
 //    print_sha256_ctx(sha_ctx);
     memset(block_pad + num, 0x5c, fill);
     for (i = 0; i < num; i++) {
         block_pad[i] = key_used[i] ^ 0x5c;
     }
    
-    SHA256_Init(&sha_ctx);
+    SHA256_Init_unabto(&sha_ctx);
 //    print_sha256_ctx(sha_ctx);
-    SHA256_Update(&sha_ctx, block_pad, SHA256_BLOCK_LENGTH);
+    SHA256_Update_unabto(&sha_ctx, block_pad, SHA256_BLOCK_LENGTH);
 //    print_sha256_ctx(sha_ctx);
-    SHA256_Update(&sha_ctx, digest_temp, SHA256_DIGEST_LENGTH);
+    SHA256_Update_unabto(&sha_ctx, digest_temp, SHA256_DIGEST_LENGTH);
 //    print_sha256_ctx(sha_ctx);
-    SHA256_Final(digest_temp, &sha_ctx);
+    SHA256_Final_unabto(digest_temp, &sha_ctx);
     
     //UNABTO_ASSERT(mac_size <= 32 );
     memcpy(mac, (void*)digest_temp, mac_size);
