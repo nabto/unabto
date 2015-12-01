@@ -171,16 +171,16 @@ source_group(modules\\crypto\\openssl FILES ${unabto_module_crypto_openssl_src})
 
 
 set(unabto_module_crypto_openssl_minimal_armv4_src
-  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_minimal/unabto_openssl_minimal_sha256.c
-  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_minimal/unabto_openssl_minimal_hmac_sha256.c
-  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_minimal/asm/sha256-armv4.S
-  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_minimal/asm/aes-armv4.S
-  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_minimal/unabto_openssl_minimal_aes_cbc.c)
-set(unabto_random_module_openssl_minimal_armv4_src
-  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_minimal/asm/aes-armv4.S
-  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_minimal/unabto_openssl_minimal_aes_cbc.c
-  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_minimal/unabto_openssl_minimal_random.c)
-source_group(modules\\crypto\\openssl_minimal FILES ${unabto_random_module_openssl_minimal_armv4_src} ${unabto_module_crypto_openssl_minimal_armv4_src})
+  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_armv4/unabto_openssl_minimal_sha256.c
+  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_armv4/unabto_openssl_minimal_hmac_sha256.c
+  ${UNABTO_ROOT}/3rdparty/openssl_armv4/asm/sha256-armv4.S
+  ${UNABTO_ROOT}/3rdparty/openssl_armv4/asm/aes-armv4.S
+  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_armv4/unabto_openssl_minimal_aes_cbc.c)
+set(unabto_module_random_openssl_minimal_armv4_src
+  ${UNABTO_ROOT}/3rdparty/openssl_armv4/asm/aes-armv4.S
+  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_armv4/unabto_openssl_minimal_aes_cbc.c
+  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_armv4/unabto_openssl_minimal_random.c)
+source_group(modules\\crypto\\openssl_armv4 FILES ${unabto_random_module_openssl_minimal_armv4_src} ${unabto_module_crypto_openssl_minimal_armv4_src})
 
 
 set(unabto_module_crypto_libtomcrypt_src
