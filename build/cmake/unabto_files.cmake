@@ -171,7 +171,7 @@ source_group(modules\\crypto\\openssl FILES ${unabto_module_crypto_openssl_src})
 
 
 set(unabto_module_crypto_openssl_minimal_armv4_src
-  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_armv4/unabto_openssl_minimal_sha256.c
+  ${UNABTO_ROOT}/3rdparty/openssl_armv4/unabto_openssl_minimal_sha256.c
   ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_armv4/unabto_openssl_minimal_hmac_sha256.c
   ${UNABTO_ROOT}/3rdparty/openssl_armv4/asm/sha256-armv4.S
   ${UNABTO_ROOT}/3rdparty/openssl_armv4/asm/aes-armv4.S

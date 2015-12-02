@@ -21,10 +21,10 @@ typedef struct SHA256state_st {
     unsigned int num, md_len;
 } SHA256_CTX;
 
-int SHA256_Init(SHA256_CTX *c);
-int SHA256_Update(SHA256_CTX *c, const void *data, size_t len);
-int SHA256_Final(unsigned char *md, SHA256_CTX *c);
-void SHA256_Transform(SHA256_CTX *c, const unsigned char *data);
+int SHA256_Init_unabto(SHA256_CTX *c);
+int SHA256_Update_unabto(SHA256_CTX *c, const void *data, size_t len);
+int SHA256_Final_unabto(unsigned char *md, SHA256_CTX *c);
+void SHA256_Transform_unabto(SHA256_CTX *c, const unsigned char *data);
 
 
 #endif
