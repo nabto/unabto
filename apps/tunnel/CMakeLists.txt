@@ -64,6 +64,10 @@ endif()
 
 add_definitions(${unabto_definitions})
 
+if (UNABTO_HAVE_EPOLL)
+  add_definitions("-DNABTO_ENABLE_EPOLL=1")
+endif()
+
 if (USE_LIB_PROFILER)
   list(APPEND unabto_link_libraries profiler)
 endif()
