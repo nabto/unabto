@@ -348,6 +348,8 @@ int main(int argc, char** argv)
 
     nabto_main_setup* nms = unabto_init_context();
 
+    platform_checks();
+    
 #if NABTO_ENABLE_EPOLL
     unabto_epoll_init();
 #endif

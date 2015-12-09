@@ -34,6 +34,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../src/modules/tunnel ${CMAKE_CU
 source_group(tunnel\\src FILES ${unabto_tunnel_src})
 
 set(tunnel_src
+  ${unabto_server_unabto_tunneling_src}/platform_checks.c
   )
 
 if (USE_TEST_WEBSERVER)
