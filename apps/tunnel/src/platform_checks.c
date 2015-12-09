@@ -27,8 +27,9 @@ bool test_if_lo_exists() {
     
     while (tmp)
     {
+        const char* lo = "lo";
         if (tmp->ifa_addr && tmp->ifa_addr->sa_family == AF_PACKET) {
-            if (strcmp(tmp->ifa_name, "lo") == 0) {
+            if (strncmp(tmp->ifa_name, lo, strlen(lo)) == 0) {
                 foundLoopback = true;
             }
         }
