@@ -16,6 +16,7 @@ bool platform_checks() {
 
 #include <sys/types.h>
 #include <ifaddrs.h>
+#include <net/if.h>
 
 bool test_if_lo_exists() {
     bool foundLoopback = false;
@@ -30,7 +31,13 @@ bool test_if_lo_exists() {
         const char* lo = "lo";
         if (tmp->ifa_addr && tmp->ifa_addr->sa_family == AF_PACKET) {
             if (strncmp(tmp->ifa_name, lo, strlen(lo)) == 0) {
-                foundLoopback = true;
+                if (! (tmp->ifa_flags & (IFF_UP))) {
+                    NABTO_LOG_FATAL(("Loopback interface exists but it's not up"));
+                } else if (! (tmp->ifa_flags & (IFF_UP))) {
+                    NABTO_LOG_FATAL(("Loopback interface exists but it's not running"));
+                } else {
+                    foundLoopback = true;
+                }
             }
         }
         
