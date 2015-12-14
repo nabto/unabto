@@ -20,16 +20,16 @@ bool platform_checks() {
 
 bool test_if_lo_exists() {
     bool foundLoopback = false;
-    
+
     struct ifaddrs *addrs,*tmp;
-    
+
     getifaddrs(&addrs);
     tmp = addrs;
-    
+
     while (tmp)
     {
         const char* lo = "lo";
-        if (tmp->ifa_addr && tmp->ifa_addr->sa_family == AF_PACKET) {
+        if (tmp->ifa_addr) {
             if (strncmp(tmp->ifa_name, lo, strlen(lo)) == 0) {
                 if (! (tmp->ifa_flags & (IFF_UP))) {
                     NABTO_LOG_FATAL(("Loopback interface exists but it's not up"));
@@ -40,7 +40,7 @@ bool test_if_lo_exists() {
                 }
             }
         }
-        
+
         tmp = tmp->ifa_next;
     }
 
