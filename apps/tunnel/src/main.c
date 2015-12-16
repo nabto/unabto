@@ -29,6 +29,7 @@
 #include <modules/network/epoll/unabto_epoll.h>
 
 #include "test_webserver.h"
+#include "platform_checks.h"
 
 #ifdef WINCE
 #define HANDLE_SINGALS 0
