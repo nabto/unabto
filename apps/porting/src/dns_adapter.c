@@ -2,6 +2,9 @@
 
 #include <netdb.h>
 #include <pthread.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 typedef struct {
     const char* id;
