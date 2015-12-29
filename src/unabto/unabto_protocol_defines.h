@@ -151,7 +151,8 @@ enum np_payload_type_e {
     NP_PAYLOAD_TYPE_ATTACH_STATS     = 0x46, /* 'F' Connection statistics */
     NP_PAYLOAD_TYPE_PING             = 0x47, /* 'G' Ping                  */
     NP_PAYLOAD_TYPE_SYSLOG_CONFIG    = 0x48, /* 'H' Syslog Configuration  */
-    NP_PAYLOAD_TYPE_GWWS             = 0x49  /* 'I' websocket gateway payload */
+    NP_PAYLOAD_TYPE_GWWS             = 0x49, /* 'I' websocket gateway payload */
+    NP_PAYLOAD_TYPE_SYSTEM_INFO      = 0x4A, /* 'J' system info payload type */
 };
 
 /* Payload header flags */
@@ -729,6 +730,42 @@ enum np_payload_type_e {
 
 
 /*****************************************************************************/
+/* System info payload */
+/* The system info payload has the following payload data format.
+*      +-----+----------------------------------------------------------------+
+*      |  +0 |  Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)              |
+*      +-----+-----+----------------------------------------------------------+
+*     List of the following data type
+*      +-----+----------------------------------------------------------+
+*      |  +0 |  Value type (uint8_t)                                    |
+*      +-----+----------------------------------------------------------+
+*      |  +1 |  Value Length (uint8_t)                                  |
+*      +-----+----------------------------------------------------------+
+*      |  +2 |  Value format which depends on the type                  |
+*      +-----+----------------------------------------------------------+
+*/
+
+#define NP_PAYLOAD_SYSTEM_INFO_IPV4                  1 /* 4 bytes */
+#define NP_PAYLOAD_SYSTEM_INFO_IPV6                  2 /* 16 bytes */
+#define NP_PAYLOAD_SYSTEM_INFO_STUN_DNS_RESOLVE_TIME 3 /* 4 bytes milliseconds */
+#define NP_PAYLOAD_SYSTEM_INFO_STUN_UDP_LATENCY      4 /* 4 bytes milliseconds */
+#define NP_PAYLOAD_SYSTEM_INFO_STUN_GLOBAL_IPV6_ADDR 5 /* 16 bytes global ipv6 address */
+#define NP_PAYLOAD_SYSTEM_INFO_STUN_GLOBAL_IPV4_ADDR 6 /* 4 bytes */
+#define NP_PAYLOAD_SYSTEM_INFO_STUN_GLOBAL_IPV6_PORT 7 /* 2 bytes */
+#define NP_PAYLOAD_SYSTEM_INFO_STUN_GLOBAL_IPV4_PORT 8 /* 2 bytes */
+#define NP_PAYLOAD_SYSTEM_INFO_STUN_LOCAL_IPV6_ADDR  9 /* 16 bytes global ipv6 address */
+#define NP_PAYLOAD_SYSTEM_INFO_STUN_LOCAL_IPV4_ADDR  10 /* 4 bytes */
+#define NP_PAYLOAD_SYSTEM_INFO_STUN_LOCAL_IPV6_PORT  11 /* 2 bytes */
+#define NP_PAYLOAD_SYSTEM_INFO_STUN_LOCAL_IPV4_PORT  12 /* 2 bytes */
+#define NP_PAYLOAD_SYSTEM_INFO_STUN_NAT_TYPE         13 /* 1 bytes nattype */
+#define NP_PAYLOAD_SYSTEM_INFO_MTU_SIZE              14 /* 2 bytes */
+#define NP_PAYLOAD_SYSTEM_INFO_SYSTEM                15 /* n bytes, string */
+#define NP_PAYLOAD_SYSTEM_INFO_APPLICATION           16 /* n bytes, string */
+#define NP_PAYLOAD_SYSTEM_INFO_CARRIER               17 /* n bytes, string */
+#define NP_PAYLOAD_SYSTEM_INFO_NETWORK_TYPE          18 /* n bytes, string, wifi, 3g, 4g etc. */ 
+
+
+/*****************************************************************************/
 /* DESCR payload */
 /* The DESCR payload data has the following layout:
 *      +-----+----------------------------------------------------------------+
@@ -818,7 +855,6 @@ enum np_payload_type_e {
 * The syslog pattern string is of the format module.level e.g. *.trace
 * The syslog hostname string is a possibility tpo override the
 * hostname string the client would otherwise use.
-*
 */
 
 #define NP_PAYLOAD_SYSLOG_CONFIG_SIZE_WO_STRINGS    16 ///< Size of the syslog payload without data.
