@@ -731,39 +731,54 @@ enum np_payload_type_e {
 
 /*****************************************************************************/
 /* System info payload */
-/* The system info payload has the following payload data format.
-*      +-----+----------------------------------------------------------------+
-*      |  +0 |  Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)              |
-*      +-----+-----+----------------------------------------------------------+
-*     List of the following data type
-*      +-----+----------------------------------------------------------+
-*      |  +0 |  Value type (uint8_t)                                    |
-*      +-----+----------------------------------------------------------+
-*      |  +1 |  Value Length (uint8_t)                                  |
-*      +-----+----------------------------------------------------------+
-*      |  +2 |  Value format which depends on the type                  |
-*      +-----+----------------------------------------------------------+
-*/
+/* The system info payload has the following payload data format. The
+ * idea is to provide a lightweight optional data structure for system
+ * information of statistical characterization.
+ * +-----+----------------------------------------------------------------+
+ * | +0 | Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes) |
+ * +-----+-----+----------------------------------------------------------+
+ * List of the following data type
+ * +-----+----------------------------------------------------------+
+ * | +0 | Value type (uint8_t) |
+ * +-----+----------------------------------------------------------+
+ * | +1 | Value Length (uint8_t) |
+ * +-----+----------------------------------------------------------+
+ * | +2 | Value format which depends on the type |
+ * +-----+----------------------------------------------------------+
+ */
+enum np_payload_system_info_e {
+    NP_PAYLOAD_SYSTEM_INFO_STUN_DNS_RESOLVE_TIME    = 1, /* uint32_t milliseconds */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_UDP_LATENCY         = 2, /* uint32_t milliseconds */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_MAPPING             = 3, /* uint8_t mapping type. */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_FILTERING           = 4, /* uint8_t filtering type. */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_MISSING_FIREWALL    = 5, /* uint8_t boolean. */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_PORT_PRESERVING     = 6, /* uint8_t boolean. */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_HAIR_PINNING        = 7, /* uint8_t boolean. */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_GENERIC_NAT_ALG     = 8, /* uint8_t boolean. */
+    NP_PAYLOAD_SYSTEM_INFO_NAT64                    = 9  /* uint8_t nat64 type. */
+};
 
-#define NP_PAYLOAD_SYSTEM_INFO_IPV4                  1 /* 4 bytes */
-#define NP_PAYLOAD_SYSTEM_INFO_IPV6                  2 /* 16 bytes */
-#define NP_PAYLOAD_SYSTEM_INFO_STUN_DNS_RESOLVE_TIME 3 /* 4 bytes milliseconds */
-#define NP_PAYLOAD_SYSTEM_INFO_STUN_UDP_LATENCY      4 /* 4 bytes milliseconds */
-#define NP_PAYLOAD_SYSTEM_INFO_STUN_GLOBAL_IPV6_ADDR 5 /* 16 bytes global ipv6 address */
-#define NP_PAYLOAD_SYSTEM_INFO_STUN_GLOBAL_IPV4_ADDR 6 /* 4 bytes */
-#define NP_PAYLOAD_SYSTEM_INFO_STUN_GLOBAL_IPV6_PORT 7 /* 2 bytes */
-#define NP_PAYLOAD_SYSTEM_INFO_STUN_GLOBAL_IPV4_PORT 8 /* 2 bytes */
-#define NP_PAYLOAD_SYSTEM_INFO_STUN_LOCAL_IPV6_ADDR  9 /* 16 bytes global ipv6 address */
-#define NP_PAYLOAD_SYSTEM_INFO_STUN_LOCAL_IPV4_ADDR  10 /* 4 bytes */
-#define NP_PAYLOAD_SYSTEM_INFO_STUN_LOCAL_IPV6_PORT  11 /* 2 bytes */
-#define NP_PAYLOAD_SYSTEM_INFO_STUN_LOCAL_IPV4_PORT  12 /* 2 bytes */
-#define NP_PAYLOAD_SYSTEM_INFO_STUN_NAT_TYPE         13 /* 1 bytes nattype */
-#define NP_PAYLOAD_SYSTEM_INFO_MTU_SIZE              14 /* 2 bytes */
-#define NP_PAYLOAD_SYSTEM_INFO_SYSTEM                15 /* n bytes, string */
-#define NP_PAYLOAD_SYSTEM_INFO_APPLICATION           16 /* n bytes, string */
-#define NP_PAYLOAD_SYSTEM_INFO_CARRIER               17 /* n bytes, string */
-#define NP_PAYLOAD_SYSTEM_INFO_NETWORK_TYPE          18 /* n bytes, string, wifi, 3g, 4g etc. */ 
+enum np_payload_system_info_stun_mapping_e {
+    NP_PAYLOAD_SYSTEM_INFO_STUN_MAPPING_BLOCKING          = 0x01, /* StunServer could not be reached. */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_MAPPING_NO_NAT            = 0x02, /* It's a global ip address. */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_MAPPING_NAT               = 0x03, /* There's some kind of NAT but the type is unknown. */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_MAPPING_INDEPENDENT       = 0x04, /* The NAT mapping is independent. */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_MAPPING_ADDRESS_DEPENDENT = 0x05, /* The NAT mapping depends on the remote address. */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_MAPPING_PORT_DEPENDENT    = 0x06  /* The NAT mapping depends on the remote address and port. */
+};
 
+enum np_payload_system_info_stun_filtering_e {
+    NP_PAYLOAD_SYSTEM_INFO_STUN_FILTERING_PENDING           = 0x01, /* The filtering test is not finished. */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_FILTERING_INDEPENDENT       = 0x02, /* The filtering is independent of the remote address (full cone). */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_FILTERING_ADDRESS_DEPENDENT = 0x03, /* The filtering depends on the remote address. */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_FILTERING_PORT_DEPENDENT    = 0x04  /* The filtering depends on the remote address and port. */
+};
+
+enum np_payload_system_info_nat64_e {
+    NP_PAYLOAD_SYSTEM_INFO_NAT64_NOT_PRESENT     =  0x01, /* There's no NAT64 present. */
+    NP_PAYLOAD_SYSTEM_INFO_NAT64_UNPREDICTABLE   =  0x02, /* There's NAT64 but the prefix is unpredictable. */
+    NP_PAYLOAD_SYSTEM_INFO_NAT64_PREDICTABLE     =  0x03  /* There's NAT64 and the prefix is predictable. */
+};
 
 /*****************************************************************************/
 /* DESCR payload */
