@@ -747,7 +747,7 @@ enum np_payload_type_e {
  * +-----+----------------------------------------------------------+
  */
 enum np_payload_system_info_e {
-    NP_PAYLOAD_SYSTEM_INFO_STUN_DNS_RESOLVE_TIME    = 1, /* uint32_t milliseconds */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_DNS_LATENCY         = 1, /* uint32_t milliseconds */
     NP_PAYLOAD_SYSTEM_INFO_STUN_UDP_LATENCY         = 2, /* uint32_t milliseconds */
     NP_PAYLOAD_SYSTEM_INFO_STUN_MAPPING             = 3, /* uint8_t mapping type. */
     NP_PAYLOAD_SYSTEM_INFO_STUN_FILTERING           = 4, /* uint8_t filtering type. */
