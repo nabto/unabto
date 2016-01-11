@@ -13,14 +13,6 @@ struct curl_fetch_st {
     size_t size;
 };
 
-enum {
-    PROVISION_NONE,
-    PROVISION_ID,
-    PROVISION_KEY,
-    PROVISION_MAC,
-    PROVISION_TOKEN
-};
-
 char *filePathPtr;
 
 bool set_unabto_key(nabto_main_setup *nms, char *key)
@@ -101,55 +93,6 @@ bool unabto_provision_parse(nabto_main_setup *nms, char *text)
 
     token = strtok(NULL, delim);
     return set_unabto_key(nms, token);
-}
-
-bool unabto_provision_parse_json(nabto_main_setup *nms, char *json)
-{
-    uint8_t useNext = PROVISION_NONE;
-    bool success = false;
-    char *start = json;
-    char *end = json;
-
-    while (*json) {
-        if (*json == '"' && end == start) {
-            start = json;
-        } else if (*json == '"') {
-            end = json;
-        }
-
-        if (start < end && *start) {
-            *end = 0;
-
-            switch (useNext) {
-                case PROVISION_ID: {
-                    success = true;
-                    if (!set_unabto_id(nms, start+1)) {
-                        return false;
-                    }
-                    break;
-                }
-                case PROVISION_KEY: {
-                  if (!set_unabto_key(nms, start+1)) {
-                      return false;
-                  }
-                  break;
-                }
-            }
-
-            if (strcmp(start+1, "id") == 0) {
-                useNext = PROVISION_ID;
-            } else if (strcmp(start+1, "preSharedKey") == 0) {
-                useNext = PROVISION_KEY;
-            } else {
-                useNext = PROVISION_NONE;
-            }
-
-            start = json = end;
-        }
-        json++;
-    }
-
-    return success;
 }
 
 bool unabto_provision(nabto_main_setup *nms, char *url)
