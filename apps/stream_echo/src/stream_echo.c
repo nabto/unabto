@@ -31,7 +31,7 @@ typedef struct {
     echo_state state;
 } echo_stream;
 
-echo_stream echo_streams[NABTO_STREAM_MAX_STREAMS];
+echo_stream echo_streams[NABTO_MEMORY_STREAM_MAX_STREAMS()];
 
 void stream_echo_init() {
     memset(echo_streams, 0, sizeof(echo_streams));

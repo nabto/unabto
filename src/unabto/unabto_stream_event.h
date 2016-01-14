@@ -54,7 +54,6 @@ void nabto_stream_event(nabto_connect*       con,
  */
 text nabto_stream_state_name(unabto_stream* stream);
 
-
 void stream_initial_config(struct nabto_stream_s* stream);
 
 void stream_init_static_config(struct nabto_stream_s* stream);

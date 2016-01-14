@@ -20,6 +20,8 @@
 
 #define NABTO_ENABLE_GET_LOCAL_IP 1
 
+#define NABTO_ENABLE_DYNAMIC_MEMORY 1
+
 #include <assert.h>
 #define UNABTO_ASSERT(expr) assert(expr)
 

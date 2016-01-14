@@ -1,5 +1,6 @@
 #include <unabto/unabto_stream.h>
 #include <unabto/unabto_app.h>
+#include <unabto/unabto_memory.h>
 #include <unabto/unabto_common_main.h>
 #include <modules/timers/auto_update/unabto_time_auto_update.h>
 #include <modules/network/select/unabto_network_select_api.h>
@@ -23,13 +24,16 @@
 
 void tunnel_loop_select() {
     int i;
-    for (i = 0; i < NABTO_STREAM_MAX_STREAMS; i++) {
-        reset_tunnel_struct(&tunnels[i]);
-    }
-
+    
     if (!unabto_init()) {
         NABTO_LOG_FATAL(("Failed to initialize unabto"));
     }
+
+    if (!init_tunnel_module()) {
+        NABTO_LOG_FATAL(("Cannot initialize tunnel module"));
+        return;
+    }
+
     unabto_time_auto_update(false);
     // time is updated here and after the select since that's the only blocking point.
     unabto_time_update_stamp();
@@ -62,7 +66,7 @@ void tunnel_loop_select() {
         unabto_tcp_fallback_select_add_to_write_fd_set(&write_fds, &max_write_fd);
 #endif
 
-        for (i = 0; i < NABTO_STREAM_MAX_STREAMS; i++) {
+        for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS(); i++) {
             if (tunnels[i].state != TS_IDLE) {
                 if (tunnels[i].state == TS_FORWARD && tunnels[i].tcpReadState == FS_READ) {
                     FD_SET(tunnels[i].sock, &read_fds);
@@ -107,7 +111,7 @@ void tunnel_loop_select() {
             unabto_tcp_fallback_select_read_sockets(&read_fds);
 #endif
             unabto_network_select_read_sockets(&read_fds);
-            for (i = 0; i < NABTO_STREAM_MAX_STREAMS; i++) {
+            for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS(); i++) {
                 if (tunnels[i].sock != INVALID_SOCKET && FD_ISSET(tunnels[i].sock, &read_fds)) {
                     tunnel_event(&tunnels[i], TUNNEL_EVENT_SOURCE_TCP_READ);
                 }
@@ -118,6 +122,7 @@ void tunnel_loop_select() {
         }
         unabto_time_event();
     }
+    deinit_tunnel_module();
     unabto_close();
 }
 

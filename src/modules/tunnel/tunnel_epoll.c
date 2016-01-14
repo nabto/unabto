@@ -23,14 +23,16 @@ void tunnel_loop_epoll() {
     nabto_stamp_t now;
     int nfds;
     int i;
-    
-    for (i = 0; i < NABTO_STREAM_MAX_STREAMS; i++) {
-        reset_tunnel_struct(&tunnels[i]);
-    }
 
     if (!unabto_init()) {
         NABTO_LOG_FATAL(("Failed to initialize unabto"));
     }
+
+    if (!init_tunnel_module()) {
+        NABTO_LOG_FATAL(("Cannot initialize tunnel module"));
+        return;
+    }
+
     unabto_time_auto_update(false);
     // time is updated here and after the select since that's the only blocking point.
     unabto_time_update_stamp();
@@ -83,6 +85,6 @@ void tunnel_loop_epoll() {
 
         unabto_time_event();
     }
-
+    deinit_tunnel_module();
     unabto_close();
 }

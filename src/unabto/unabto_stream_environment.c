@@ -67,22 +67,22 @@ void unabto_stream_init_buffers(struct nabto_stream_s* stream)
     int i;
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
 
-    uint8_t* xmitBase = x_buffer_data + (unabto_stream_index(stream) * NABTO_STREAM_SEND_SEGMENT_SIZE * NABTO_STREAM_SEND_WINDOW_SIZE);
-    uint8_t* recvBase = r_buffer_data + (unabto_stream_index(stream) * NABTO_STREAM_RECEIVE_SEGMENT_SIZE * NABTO_STREAM_RECEIVE_WINDOW_SIZE);
+    uint8_t* xmitBase = x_buffer_data + (unabto_stream_index(stream) * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE() * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE());
+    uint8_t* recvBase = r_buffer_data + (unabto_stream_index(stream) * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE() * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE());
 
-    tcb->xmit = &x_buffers[unabto_stream_index(stream) * NABTO_STREAM_SEND_WINDOW_SIZE];
-    tcb->recv = &r_buffers[unabto_stream_index(stream) * NABTO_STREAM_RECEIVE_WINDOW_SIZE];
+    tcb->xmit = &x_buffers[unabto_stream_index(stream) * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE()];
+    tcb->recv = &r_buffers[unabto_stream_index(stream) * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE()];
 
-    for (i=0;i< NABTO_STREAM_SEND_WINDOW_SIZE;i++)
+    for (i=0;i< NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE(); i++)
     {
         memset(&tcb->xmit[i], 0, sizeof(x_buffer));
-        tcb->xmit[i].buf = xmitBase + (i * NABTO_STREAM_SEND_SEGMENT_SIZE);
+        tcb->xmit[i].buf = xmitBase + (i * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE());
     }
 
-    for (i=0;i< NABTO_STREAM_RECEIVE_WINDOW_SIZE;i++)
+    for (i=0;i< NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE(); i++)
     {
         memset(&tcb->recv[i], 0, sizeof(r_buffer));
-        tcb->recv[i].buf = recvBase + (i * NABTO_STREAM_RECEIVE_SEGMENT_SIZE);
+        tcb->recv[i].buf = recvBase + (i * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE());
     }
 }
 

@@ -43,7 +43,7 @@ static void nabto_connection_update_next_event(nabto_stamp_t* current_min_stamp)
     if (!connection_timeout_cache_cached) {
         // recalculated cached stamp
         nabtoSetFutureStamp(&connection_timeout_cache_stamp, 30000);
-        for (con = connections; con < connections + NABTO_CONNECTIONS_SIZE; con++) {
+        for (con = connections; con < connections + NABTO_MEMORY_CONNECTIONS_SIZE(); con++) {
             if (con->state != CS_IDLE) {
                 nabto_rendezvous_connect_state* rcs = &con->rendezvousConnectState;
                 

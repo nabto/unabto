@@ -38,7 +38,11 @@ typedef socklen_t optlen;
 #define MSG_NOSIGNAL 0
 #endif
 
-static NABTO_THREAD_LOCAL_STORAGE unabto_tcp_fallback_connection fbConns[NABTO_CONNECTIONS_SIZE];
+#if NABTO_ENABLE_DYNAMIC_MEMORY
+static NABTO_THREAD_LOCAL_STORAGE unabto_tcp_fallback_connection* fbConns = 0;
+#else
+static NABTO_THREAD_LOCAL_STORAGE unabto_tcp_fallback_connection fbConns[NABTO_MEMORY_CONNECTIONS_SIZE()];
+#endif
 
 bool unabto_tcp_fallback_handle_connect(nabto_connect* con);
 void unabto_tcp_fallback_read_packet(nabto_connect* con);
@@ -46,9 +50,27 @@ bool unabto_tcp_fallback_handle_write(nabto_connect* con);
 
 void close_tcp_socket(nabto_connect* con);
 
+bool unabto_tcp_fallback_module_init()
+{
+#if NABTO_ENABLE_DYNAMIC_MEMORY
+    fbConns = (unabto_tcp_fallback_connection*)malloc(sizeof(unabto_tcp_fallback_connection) * NABTO_MEMORY_CONNECTIONS_SIZE());
+    if (fbConns == 0) {
+        NABTO_LOG_FATAL(("Could not allocate memory for fallback connections"));
+        return false;
+    }
+#endif
+    return true;
+}
+
+void unabto_tcp_fallback_deinit() {
+#if NABTO_ENABLE_DYNAMIC_MEMORY
+    free(fbConns); fbConns = 0;
+#endif
+}
+
 void unabto_tcp_fallback_select_add_to_read_fd_set(fd_set* readFds, int* maxReadFd) {
     int i;
-    for (i = 0; i < NABTO_CONNECTIONS_SIZE; i++) {
+    for (i = 0; i < NABTO_MEMORY_CONNECTIONS_SIZE(); i++) {
         nabto_connect* con = &connections[i];
 
         if (con->state != CS_IDLE) {
@@ -64,7 +86,7 @@ void unabto_tcp_fallback_select_add_to_read_fd_set(fd_set* readFds, int* maxRead
 
 void unabto_tcp_fallback_select_add_to_write_fd_set(fd_set* writeFds, int* maxWriteFd) {
     int i;
-    for (i = 0; i < NABTO_CONNECTIONS_SIZE; i++) {
+    for (i = 0; i < NABTO_MEMORY_CONNECTIONS_SIZE(); i++) {
         nabto_connect* con = &connections[i];
 
         if (con->state != CS_IDLE) {
@@ -94,7 +116,7 @@ void unabto_tcp_fallback_read_ready(nabto_connect* con) {
 
 void unabto_tcp_fallback_select_read_sockets(fd_set* readFds) {
     int i;
-    for (i = 0; i < NABTO_CONNECTIONS_SIZE; i++) {
+    for (i = 0; i < NABTO_MEMORY_CONNECTIONS_SIZE(); i++) {
         nabto_connect* con = &connections[i];
 
         if (con->state != CS_IDLE) {
@@ -111,7 +133,7 @@ void unabto_tcp_fallback_select_read_sockets(fd_set* readFds) {
 
 void unabto_tcp_fallback_select_write_sockets(fd_set* writeFds) {
     int i;
-    for (i = 0; i < NABTO_CONNECTIONS_SIZE; i++) {
+    for (i = 0; i < NABTO_MEMORY_CONNECTIONS_SIZE(); i++) {
         nabto_connect* con = &connections[i];
 
         if (con->state != CS_IDLE) {

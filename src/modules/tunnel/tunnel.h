@@ -65,7 +65,7 @@ typedef struct tunnel {
     struct tunnel_static_memory* staticMemory;
 } tunnel;
 
-extern NABTO_THREAD_LOCAL_STORAGE tunnel tunnels[NABTO_STREAM_MAX_STREAMS];
+extern NABTO_THREAD_LOCAL_STORAGE tunnel* tunnels;
 
 /**
  * return false to disallow connections to the specified host:port
@@ -81,6 +81,8 @@ void tunnel_set_default_port(int port);
 const char* tunnel_get_default_host();
 int tunnel_get_default_port();
 
+bool init_tunnel_module();
+void deinit_tunnel_module();
 
 void reset_tunnel_struct(tunnel* t);
 

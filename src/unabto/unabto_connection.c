@@ -31,17 +31,6 @@
 
 #include <string.h>
 
-/** the connection resources, shared by all connected clients */
-#if UNABTO_PLATFORM_PIC18
-#pragma udata big_mem
-#endif
-
-NABTO_THREAD_LOCAL_STORAGE nabto_connect connections[NABTO_CONNECTIONS_SIZE];
-
-#if UNABTO_PLATFORM_PIC18
-#pragma udata
-#endif
-
 // cache connection timeout such that it should not be recalculated for each network packet.
 // 1. Whenever a timestamp is modified in a connection the cache should be invalidated.
 // 2. Whenever the cached timeout is passed the cache is invalidated.
@@ -104,14 +93,14 @@ static void nabto_reset_connection(nabto_connect* con)
 void nabto_init_connections(void)
 {
     NABTO_LOG_TRACE(("Init connections"));
-    memset(connections, 0, sizeof(connections));
+    memset(connections, 0, sizeof(struct nabto_connect_s) * NABTO_MEMORY_CONNECTIONS_SIZE());
 }
 
 static nabto_connect* nabto_reserve_connection(void)
 {
     nabto_connect* con;
 
-    for (con = connections; con < connections + NABTO_CONNECTIONS_SIZE; ++con) {
+    for (con = connections; con < connections + NABTO_MEMORY_CONNECTIONS_SIZE(); ++con) {
         if (con->state == CS_IDLE) {
             nabto_reset_connection(con);
             return con;
@@ -172,7 +161,7 @@ void nabto_release_connection(nabto_connect* con)
 void nabto_terminate_connections() {
     nabto_connect* con;
 
-    for (con = connections; con < connections + NABTO_CONNECTIONS_SIZE; ++con) {
+    for (con = connections; con < connections + NABTO_MEMORY_CONNECTIONS_SIZE(); ++con) {
         if (con->state != CS_IDLE) {
             nabto_release_connection(con);
         }
@@ -189,7 +178,7 @@ nabto_connect* nabto_find_connection(uint32_t spnsi) {
         return 0;
     }
 
-    for (con = connections; con < connections + NABTO_CONNECTIONS_SIZE; ++con) {
+    for (con = connections; con < connections + NABTO_MEMORY_CONNECTIONS_SIZE(); ++con) {
         if (con->spnsi == spnsi && con->state != CS_IDLE) {
             return con;
         }
@@ -878,7 +867,7 @@ void nabto_time_event_connection(void)
         nabto_connect* con;
         connection_timeout_cache_cached = false;
         
-        for (con = connections; con < connections + NABTO_CONNECTIONS_SIZE; ++con) {
+        for (con = connections; con < connections + NABTO_MEMORY_CONNECTIONS_SIZE(); ++con) {
             if (con->state != CS_IDLE) {
                 rendezvous_time_event(con);
                 statistics_time_event(con);
@@ -942,7 +931,7 @@ uint16_t unabto_count_active_connections()
     uint16_t activeConnections = 0;
     nabto_connect* con;
 
-    for (con = connections; con < connections + NABTO_CONNECTIONS_SIZE; ++con) {
+    for (con = connections; con < connections + NABTO_MEMORY_CONNECTIONS_SIZE(); ++con) {
         if (con->state != CS_IDLE) {
 	    activeConnections++;
 	}

@@ -58,6 +58,17 @@ typedef enum {
  */
 
 /**
+ * Initialize the fallback module
+ */
+bool unabto_tcp_fallback_module_init();
+
+/**
+ * Deinitialize the fallback module
+ */
+void unabto_tcp_fallback_module_deinit();
+ 
+
+/**
  * Initialize the fallback structure. unabto_tcp_fallback_connection
  */
 bool unabto_tcp_fallback_init(nabto_connect* con);

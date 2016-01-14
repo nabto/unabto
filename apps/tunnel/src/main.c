@@ -70,13 +70,18 @@ const char* testWebserverPortStr;
 static bool useSelectBased = false;
 #endif
 
-#define ALLOW_PORT_OPTION 1
-#define ALLOW_HOST_OPTION 2
-#define ALLOW_ALL_PORTS_OPTION 3
-#define TEST_WEBSERVER_OPTION 4
-#define DISABLE_TCP_FALLBACK_OPTION 5
-#define CONTROLLER_PORT_OPTION 6
-#define SELECT_BASED_OPTION 7
+enum {
+    ALLOW_PORT_OPTION = 1,
+    ALLOW_HOST_OPTION,
+    ALLOW_ALL_PORTS_OPTION,
+    TEST_WEBSERVER_OPTION,
+    DISABLE_TCP_FALLBACK_OPTION,
+    CONTROLLER_PORT_OPTION,
+    SELECT_BASED_OPTION,
+    TUNNELS_OPTION,
+    STREAM_WINDOW_SIZE_OPTION,
+    CONNECTIONS_SIZE_OPTION
+};
 
 #if HANDLE_SIGNALS
 void handle_signal(int signum) {
@@ -112,7 +117,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x2s[] = "V";      const char* x2l[] = { "version", 0 };
     const char x3s[] = "C";      const char* x3l[] = { "config", 0 };
     const char x4s[] = "S";      const char* x4l[] = { "size", 0 };
-    const char x9s[] = "d";      const char* x9l[] = { "deviceName", 0 };
+    const char x9s[] = "d";      const char* x9l[] = { "device_name", 0 };
     const char x10s[] = "H";     const char* x10l[] = { "tunnel_default_host", 0 }; // only used together with the tunnel.
     const char x11s[] = "P";     const char* x11l[] = { "tunnel_default_port", 0 };
     const char x12s[] = "s";     const char* x12l[] = { "use_encryption", 0 };
@@ -126,11 +131,15 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x20s[] = "";      const char* x20l[] = { "test_webserver", 0};
     const char x21s[] = "l";     const char* x21l[] = { "nabtolog", 0 };
     const char x22s[] = "A";     const char* x22l[] = { "controller", 0 };
-    const char x23s[] = "";      const char* x23l[] = { "disable-tcp-fb", 0 };
-    const char x24s[] = "";      const char* x24l[] = { "controller-port", 0 };
+    const char x23s[] = "";      const char* x23l[] = { "disable_tcp_fb", 0 };
+    const char x24s[] = "";      const char* x24l[] = { "controller_port", 0 };
 #if NABTO_ENABLE_EPOLL
-    const char x25s[] = "";      const char* x25l[] = { "select-based", 0 };
+    const char x25s[] = "";      const char* x25l[] = { "select_based", 0 };
 #endif
+
+    const char x26s[] = "";      const char* x26l[] = { "tunnels", 0 };
+    const char x27s[] = "";      const char* x27l[] = { "stream_window_size",0 };
+    const char x28s[] = "";      const char* x28l[] = { "connections", 0 };
 
     const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
         { 'h', GOPT_NOARG,   x1s, x1l },
@@ -154,7 +163,12 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         { DISABLE_TCP_FALLBACK_OPTION, GOPT_NOARG, x23s, x23l },
         { CONTROLLER_PORT_OPTION, GOPT_ARG, x24s, x24l },
 #if NABTO_ENABLE_EPOLL
-        { SELECT_BASED_OPTION, GOPT_NOARG, x25s, x25l},
+        { SELECT_BASED_OPTION, GOPT_NOARG, x25s, x25l },
+#endif
+#if NABTO_ENABLE_DYNAMIC_MEMORY
+        { TUNNELS_OPTION, GOPT_ARG, x26s, x26l },
+        { STREAM_WINDOW_SIZE_OPTION, GOPT_ARG, x27s, x27l },
+        { CONNECTIONS_SIZE_OPTION, GOPT_ARG, x28s, x28l },
 #endif
         { 0,0,0,0 }
     };
@@ -167,6 +181,9 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char* optionString;
     const char* basestationAddress;
     const char* controllerPort;
+    const char* tunnelsOption;
+    const char* streamWindowSizeOption;
+    const char* connectionsOption;
     uint32_t addr;
 
 
@@ -177,14 +194,14 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("  -C, --config                Print configuration (unabto_config.h).\n");
         printf("  -S, --size                  Print size (in bytes) of memory usage.\n");
         printf("  -l, --nabtolog              Speficy log level such as *.trace");
-        printf("  -d, --deviceName            Specify name of this device.\n");
+        printf("  -d, --device_name           Specify name of this device.\n");
         printf("  -H, --tunnel_default_host   Set default host name for tunnel (%s).\n", DEFAULT_HOST);
         printf("  -P, --tunnel_default_port   Set default port for tunnel (%u).\n", DEFAULT_PORT);
         printf("  -s, --use_encryption        Encrypt communication (use CRYPTO).\n");
         printf("  -k, --encryption_key        Specify encryption key.\n");
         printf("  -p, --localport             Specify port for local connections.\n");
         printf("  -A, --controller            Specify controller address\n");
-        printf("      --controller-port       sets the controller port number");
+        printf("      --controller_port       sets the controller port number");
         printf("  -a, --check_acl             Perform ACL check when establishing connection.\n");
         printf("      --allow_all_ports       Allow connections to all port numbers.\n");
         printf("      --allow_port            Ports that are allowed. Requires -a.\n");
@@ -193,9 +210,14 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 #if USE_TEST_WEBSERVER
         printf("      --test_webserver        Specify port of test webserver and enable it\n");
 #endif
-        printf("      --disable-tcp-fb        disable tcp fallback\n");
+        printf("      --disable_tcp_fb        disable tcp fallback\n");
 #if NABTO_ENABLE_EPOLL
-        printf("      --select-based          use select instead of epoll\n");
+        printf("      --select_based          use select instead of epoll\n");
+#endif
+#if NABTO_ENABLE_DYNAMIC_MEMORY
+        printf("      --tunnels               specify how many concurrent tcp streams should be possible.\n");
+        printf("      --stream_window_size    specify the stream window size, the larger the value the more memory the aplication will use, but higher throughput will be possible.\n");
+        printf("      --connections           specify the maximum number of allowed concurrent connections.\n");
 #endif
         exit(0);
     }
@@ -334,6 +356,23 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         useSelectBased = true;
     }
 #endif
+
+#if NABTO_ENABLE_DYNAMIC_MEMORY
+    if (gopt_arg(options, TUNNELS_OPTION, &tunnelsOption)) {
+        nms->streamMaxStreams = atoi(tunnelsOption);
+    }
+
+    if (gopt_arg(options, STREAM_WINDOW_SIZE_OPTION, &streamWindowSizeOption)) {
+        uint16_t windowSize = atoi(streamWindowSizeOption);
+        nms->streamReceiveWindowSize = windowSize;
+        nms->streamSendWindowSize = windowSize;
+    }
+
+    if (gopt_arg(options, CONNECTIONS_SIZE_OPTION, &connectionsOption)) {
+        nms->connectionsSize = atoi(connectionsOption);
+    }
+#endif
+
     return true;
 }
 

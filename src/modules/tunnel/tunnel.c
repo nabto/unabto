@@ -1,5 +1,6 @@
 #include <unabto/unabto_stream.h>
 #include <unabto/unabto_app.h>
+#include <unabto/unabto_memory.h>
 #include <unabto/unabto_common_main.h>
 #include <unabto/unabto_main_contexts.h>
 #include <unabto/unabto_external_environment.h>
@@ -40,11 +41,11 @@
 typedef struct tunnel_static_memory {
     uint8_t command[MAX_COMMAND_LENGTH];
     char host[MAX_HOST_LENGTH];
-    uint8_t tcpReadBuffer[NABTO_STREAM_SEND_SEGMENT_SIZE];
+    uint8_t tcpReadBuffer[NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE()];
 } tunnel_static_memory;
 
-NABTO_THREAD_LOCAL_STORAGE tunnel tunnels[NABTO_STREAM_MAX_STREAMS];
-NABTO_THREAD_LOCAL_STORAGE tunnel_static_memory tunnels_static_memory[NABTO_STREAM_MAX_STREAMS];
+NABTO_THREAD_LOCAL_STORAGE tunnel* tunnels = 0;
+NABTO_THREAD_LOCAL_STORAGE tunnel_static_memory* tunnels_static_memory = 0;
 
 static int tunnelCounter = 0;
 
@@ -64,6 +65,31 @@ bool parse_command(tunnel* tunnel);
 bool opening_socket(tunnel* tunnel);
 
 
+bool init_tunnel_module()
+{
+    int i;
+    tunnels = (tunnel*)malloc(sizeof(struct tunnel) * NABTO_MEMORY_STREAM_MAX_STREAMS());
+    if (tunnels == NULL) {
+        return false;
+    }
+
+    tunnels_static_memory = (tunnel_static_memory*)malloc(sizeof(struct tunnel_static_memory) * NABTO_MEMORY_STREAM_MAX_STREAMS());
+    if (tunnels_static_memory == NULL) {
+        return false;
+    }
+
+    for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS(); i++) {
+        reset_tunnel_struct(&tunnels[i]);
+    }
+
+    return true;
+}
+
+void deinit_tunnel_module()
+{
+    free(tunnels); tunnels = 0;
+    free(tunnels_static_memory); tunnels_static_memory = 0;
+}
 
 void unabto_stream_accept(unabto_stream* stream) {
     tunnel* t = &tunnels[unabto_stream_index(stream)];
@@ -251,7 +277,7 @@ void close_tcp_reader(tunnel* tunnel) {
 void tcp_forward(tunnel* tunnel) {
     while(true) {
         if (tunnel->tcpReadState == FS_READ) {
-            ssize_t readen = recv(tunnel->sock, tunnel->staticMemory->tcpReadBuffer, NABTO_STREAM_SEND_SEGMENT_SIZE, 0);
+            ssize_t readen = recv(tunnel->sock, tunnel->staticMemory->tcpReadBuffer, NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE(), 0);
             if (readen == 0) {
                 // eof
                 close_tcp_reader(tunnel);

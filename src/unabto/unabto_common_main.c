@@ -84,6 +84,14 @@ void unabto_init_default_values(nabto_main_setup* nms) {
     nms->forceDnsFallback = false;
     nms->dnsAddress = INADDR_NONE;
 #endif
+
+#if NABTO_ENABLE_DYNAMIC_MEMORY
+    nms->connectionsSize = NABTO_CONNECTIONS_SIZE;
+    nms->streamMaxStreams = NABTO_STREAM_MAX_STREAMS;
+    nms->streamReceiveWindowSize = NABTO_STREAM_RECEIVE_WINDOW_SIZE;
+    nms->streamSendWindowSize = NABTO_STREAM_SEND_WINDOW_SIZE;
+#endif
+    
 }
 
 /**
@@ -119,6 +127,20 @@ bool unabto_init(void) {
         NABTO_LOG_INFO(("Version string: '%s'", nmc.nabtoMainSetup.version));
     }
 
+#if NABTO_ENABLE_DYNAMIC_MEMORY
+    if (!unabto_allocate_memory(&nmc.nabtoMainSetup))
+    {
+        NABTO_LOG_FATAL(("Could not initialize memory"));
+        return false;
+    }
+#endif
+
+#if NABTO_ENABLE_TCP_FALLBACK
+    if(!unabto_tcp_fallback_module_init()) {
+        NABTO_LOG_FATAL(("Could not initialize tcp fallback module"));
+    }
+#endif
+    
 #if NABTO_ENABLE_CONNECTIONS
     nabto_init_connections();
 #endif
@@ -203,6 +225,11 @@ void unabto_close(void) {
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
     unabto_extended_rendezvous_close();
 #endif
+
+#if NABTO_ENABLE_DYNAMIC_MEMORY
+    unabto_free_memory();
+#endif
+        
 }
 
 /***************************************/

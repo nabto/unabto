@@ -51,6 +51,14 @@ typedef struct {
     uint32_t          dnsAddress;         /**< Force a specific dns server address */
     const char*       dnsFallbackDomain;  /**< Force a specific dns fallback node */
 #endif
+
+#if NABTO_ENABLE_DYNAMIC_MEMORY
+    uint16_t          connectionsSize;
+    uint16_t          streamMaxStreams;
+    uint16_t          streamReceiveWindowSize;
+    uint16_t          streamSendWindowSize;
+#endif
+    
 } nabto_main_setup;
 
 /**

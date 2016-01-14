@@ -79,6 +79,7 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_logging.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_main_contexts.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_memory.h
+  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_memory.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_message.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_next_event.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_packet.h

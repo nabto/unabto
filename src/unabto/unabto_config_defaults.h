@@ -400,8 +400,32 @@
 /* End of debug packets configuration */
 /**************************************/
 
+
+/****************/
+/* Memory model */
+/****************/
+
+/**
+ * By defining the NABTO_THREAD_LOCAL_STORAGE to the platforms thread
+ * local storage option enables that all static variables are in the
+ * threads local storage 
+ */
 #ifndef NABTO_THREAD_LOCAL_STORAGE
 #define NABTO_THREAD_LOCAL_STORAGE
 #endif
+
+/**
+ * If the memory model is dynamic the memory is allocated when the
+ * application starts. Otherwise the memory is allocated static on
+ * compile time.
+ */
+#ifndef NABTO_ENABLE_DYNAMIC_MEMORY
+#define NABTO_ENABLE_DYNAMIC_MEMORY 0
+#endif
+
+/*************************************/
+/* End of memory model configuration */
+/*************************************/
+
 
 #endif

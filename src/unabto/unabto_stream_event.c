@@ -27,13 +27,6 @@
 
 #include <string.h>
 
-static NABTO_THREAD_LOCAL_STORAGE unabto_stream stream__[NABTO_STREAM_MAX_STREAMS];  /**< a pool of streams */
-NABTO_THREAD_LOCAL_STORAGE uint8_t r_buffer_data[NABTO_STREAM_MAX_STREAMS * NABTO_STREAM_RECEIVE_SEGMENT_SIZE * NABTO_STREAM_RECEIVE_WINDOW_SIZE];
-NABTO_THREAD_LOCAL_STORAGE uint8_t x_buffer_data[NABTO_STREAM_MAX_STREAMS * NABTO_STREAM_SEND_SEGMENT_SIZE * NABTO_STREAM_SEND_WINDOW_SIZE];
-
-NABTO_THREAD_LOCAL_STORAGE x_buffer x_buffers[NABTO_STREAM_MAX_STREAMS * NABTO_STREAM_SEND_WINDOW_SIZE];
-NABTO_THREAD_LOCAL_STORAGE r_buffer r_buffers[NABTO_STREAM_MAX_STREAMS * NABTO_STREAM_RECEIVE_WINDOW_SIZE];
-
 static void handle_stream_packet(nabto_connect* con, nabto_packet_header* hdr,
                                  uint8_t* start, uint16_t dlen,
                                  uint8_t* payloadsStart, uint8_t* payloadsEnd,
@@ -196,7 +189,7 @@ bool build_and_send_rst_packet(nabto_connect* con, uint16_t tag, struct nabto_wi
 void unabto_time_event_stream(void)
 {
     int i;
-    for (i = 0; i < NABTO_STREAM_MAX_STREAMS; ++i) {
+    for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS(); ++i) {
         if (stream__[i].state != STREAM_IDLE) {
             struct nabto_stream_s* stream = &stream__[i];
             nabto_stream_tcb_check_xmit(&stream__[i], true, false);
@@ -234,9 +227,9 @@ void unabto_time_event_stream(void)
 
 void unabto_stream_init(void)
 {
-    memset(stream__, 0, sizeof(stream__));
+    memset(stream__, 0, sizeof(struct nabto_stream_s) * NABTO_MEMORY_STREAM_MAX_STREAMS());
     
-    NABTO_LOG_INFO(("sizeof(stream__)=%" PRIsize, sizeof(stream__)));
+    NABTO_LOG_INFO(("sizeof(stream__)=%" PRIsize, sizeof(struct nabto_stream_s) * NABTO_MEMORY_STREAM_MAX_STREAMS()));
     
     unabto_packet_set_handler(NP_PACKET_HDR_TAG_STREAM_MIN, NP_PACKET_HDR_TAG_STREAM_MAX,
                               handle_stream_packet, 0);
@@ -245,10 +238,10 @@ void unabto_stream_init(void)
 void stream_initial_config(struct nabto_stream_s* stream)
 {
     nabto_stream_tcb_config* cfg = &stream->u.tcb.initialConfig;
-    cfg->recvPacketSize = NABTO_STREAM_RECEIVE_SEGMENT_SIZE;
-    cfg->recvWinSize = NABTO_STREAM_RECEIVE_WINDOW_SIZE;
-    cfg->xmitPacketSize = NABTO_STREAM_SEND_SEGMENT_SIZE;
-    cfg->xmitWinSize = NABTO_STREAM_SEND_WINDOW_SIZE;
+    cfg->recvPacketSize = NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE();
+    cfg->recvWinSize = NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE();
+    cfg->xmitPacketSize = NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE();
+    cfg->xmitWinSize = NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE();
     cfg->maxRetrans = NABTO_STREAM_MAX_RETRANS;
     cfg->timeoutMsec = NABTO_STREAM_TIMEOUT;
     cfg->enableWSRF = true;
@@ -282,7 +275,7 @@ void stream_reset(struct nabto_stream_s* stream)
 struct nabto_stream_s* find_stream(uint16_t tag, nabto_connect* con)
 {
     int i;
-    for (i = 0; i < NABTO_STREAM_MAX_STREAMS; ++i) {
+    for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS(); ++i) {
         if (stream__[i].state != STREAM_IDLE) {
             if (stream__[i].streamTag == tag && 
                 stream__[i].connection == con) {
@@ -296,7 +289,7 @@ struct nabto_stream_s* find_stream(uint16_t tag, nabto_connect* con)
 struct nabto_stream_s* find_free_stream(uint16_t tag, nabto_connect* con) 
 {
     int i;
-    for (i = 0; i < NABTO_STREAM_MAX_STREAMS; ++i) {
+    for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS(); ++i) {
         if (stream__[i].state == STREAM_IDLE) {
             struct nabto_stream_s* stream = &stream__[i];
             stream_reset(stream);
@@ -312,7 +305,7 @@ void nabto_stream_connection_closed(nabto_connect* con)
 {
     struct nabto_stream_s* stream;
 
-    for (stream = stream__; stream < stream__ + NABTO_STREAM_MAX_STREAMS; ++stream) {
+    for (stream = stream__; stream < stream__ + NABTO_MEMORY_STREAM_MAX_STREAMS(); ++stream) {
         if (stream->connection == con && stream->state != STREAM_IDLE) {
             NABTO_LOG_TRACE(("Releasing stream, slot=%i, (connection closed) in state %" PRItext, unabto_stream_index(stream), nabto_stream_state_name(stream)));
 
@@ -325,7 +318,7 @@ void nabto_stream_connection_released(nabto_connect* con)
 {
     struct nabto_stream_s* stream;
 
-    for (stream = stream__; stream < stream__ + NABTO_STREAM_MAX_STREAMS; ++stream) {
+    for (stream = stream__; stream < stream__ + NABTO_MEMORY_STREAM_MAX_STREAMS(); ++stream) {
         if (stream->connection == con && stream->state != STREAM_IDLE) {
             NABTO_LOG_TRACE(("Releasing stream, slot=%i, (connection closed) in state %" PRItext, unabto_stream_index(stream), nabto_stream_state_name(stream)));
 
@@ -360,7 +353,7 @@ bool nabto_stream_validate_win(struct nabto_win_info* info, struct nabto_stream_
 void nabto_stream_update_next_event(nabto_stamp_t* current_min_stamp)
 {
     int i;
-    for (i = 0; i < NABTO_STREAM_MAX_STREAMS; i++) {
+    for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS(); i++) {
         struct nabto_stream_s* stream = &stream__[i];
         if (stream->state != STREAM_IDLE) {
             if (stream->applicationEvents.dataReady || 
