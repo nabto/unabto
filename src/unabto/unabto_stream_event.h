@@ -19,11 +19,24 @@
 #include <unabto/unabto_packet_util.h>
 #include <unabto/unabto_stream_window.h>
 #include <unabto/unabto_stream_types.h>
+#include <unabto/unabto_memory.h>
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#if NABTO_ENABLE_DYNAMIC_MEMORY
+
+#else
+extern NABTO_THREAD_LOCAL_STORAGE struct nabto_stream_s stream__[NABTO_MEMORY_STREAM_MAX_STREAMS];
+extern NABTO_THREAD_LOCAL_STORAGE uint8_t r_buffer_data[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE];
+extern NABTO_THREAD_LOCAL_STORAGE uint8_t x_buffer_data[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE];
+
+extern NABTO_THREAD_LOCAL_STORAGE x_buffer x_buffers[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE];
+extern NABTO_THREAD_LOCAL_STORAGE r_buffer r_buffers[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE];
+#endif
+
 
 /******************************************************************************/
 

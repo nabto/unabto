@@ -7,6 +7,16 @@
 #include <unabto/unabto_util.h>
 #include <unabto/unabto_packet.h>
 
+#if NABTO_ENABLE_DYNAMIC_MEMORY
+
+#else
+NABTO_THREAD_LOCAL_STORAGE unabto_stream stream__[NABTO_MEMORY_STREAM_MAX_STREAMS];  /**< a pool of streams */
+NABTO_THREAD_LOCAL_STORAGE uint8_t r_buffer_data[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE];
+NABTO_THREAD_LOCAL_STORAGE uint8_t x_buffer_data[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE];
+
+NABTO_THREAD_LOCAL_STORAGE x_buffer x_buffers[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE];
+NABTO_THREAD_LOCAL_STORAGE r_buffer r_buffers[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE];
+#endif
 
 bool build_and_send_packet(struct nabto_stream_s* stream, uint8_t type, uint32_t seq, const uint8_t* winInfoData, size_t winInfoSize, uint8_t* data, uint16_t size, struct nabto_stream_sack_data* sackData)
 {
@@ -67,22 +77,22 @@ void unabto_stream_init_buffers(struct nabto_stream_s* stream)
     int i;
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
 
-    uint8_t* xmitBase = x_buffer_data + (unabto_stream_index(stream) * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE() * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE());
-    uint8_t* recvBase = r_buffer_data + (unabto_stream_index(stream) * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE() * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE());
+    uint8_t* xmitBase = x_buffer_data + (unabto_stream_index(stream) * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE);
+    uint8_t* recvBase = r_buffer_data + (unabto_stream_index(stream) * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE);
 
-    tcb->xmit = &x_buffers[unabto_stream_index(stream) * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE()];
-    tcb->recv = &r_buffers[unabto_stream_index(stream) * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE()];
+    tcb->xmit = &x_buffers[unabto_stream_index(stream) * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE];
+    tcb->recv = &r_buffers[unabto_stream_index(stream) * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE];
 
-    for (i=0;i< NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE(); i++)
+    for (i=0;i< NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE; i++)
     {
         memset(&tcb->xmit[i], 0, sizeof(x_buffer));
-        tcb->xmit[i].buf = xmitBase + (i * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE());
+        tcb->xmit[i].buf = xmitBase + (i * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE);
     }
 
-    for (i=0;i< NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE(); i++)
+    for (i=0;i< NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE; i++)
     {
         memset(&tcb->recv[i], 0, sizeof(r_buffer));
-        tcb->recv[i].buf = recvBase + (i * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE());
+        tcb->recv[i].buf = recvBase + (i * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE);
     }
 }
 

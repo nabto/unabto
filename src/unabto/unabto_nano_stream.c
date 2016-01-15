@@ -194,9 +194,9 @@ void nano_stream_init_state(unabto_stream * stream, const struct nabto_win_info*
 #pragma udata big_mem
 #endif
 
-static NABTO_THREAD_LOCAL_STORAGE struct nabto_stream_s nano_stream__[NABTO_MEMORY_STREAM_MAX_STREAMS()];  /**< a pool of streams */
-static NABTO_THREAD_LOCAL_STORAGE uint8_t r_buffer_data[NABTO_MEMORY_STREAM_MAX_STREAMS() * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE() * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE()];
-static NABTO_THREAD_LOCAL_STORAGE uint8_t x_buffer_data[NABTO_MEMORY_STREAM_MAX_STREAMS() * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE() * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE()];
+static NABTO_THREAD_LOCAL_STORAGE struct nabto_stream_s nano_stream__[NABTO_MEMORY_STREAM_MAX_STREAMS];  /**< a pool of streams */
+static NABTO_THREAD_LOCAL_STORAGE uint8_t r_buffer_data[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE];
+static NABTO_THREAD_LOCAL_STORAGE uint8_t x_buffer_data[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE];
 
 #if UNABTO_PLATFORM_PIC18
 #pragma udata
@@ -454,7 +454,7 @@ void handle_nano_stream_packet(nabto_connect* con, nabto_packet_header* hdr,
 void unabto_time_event_stream(void)
 {
     uint8_t i;
-    for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS(); ++i) {
+    for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS; ++i) {
         struct nabto_stream_s* stream = &nano_stream__[i];
         if (stream->state != ST_IDLE && stream->state != ST_CLOSED && stream->state != ST_CLOSED_ABORTED) {
             
@@ -515,7 +515,7 @@ void nano_stream_reset(unabto_stream* stream)
 unabto_stream* find_nano_stream(uint16_t tag, nabto_connect* con)
 {
     uint8_t i;
-    for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS(); ++i) {
+    for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS; ++i) {
         
         if (nano_stream__[i].streamTag == tag && 
             nano_stream__[i].connection == con) {
@@ -523,7 +523,7 @@ unabto_stream* find_nano_stream(uint16_t tag, nabto_connect* con)
         }
     }
     
-    for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS(); ++i) {
+    for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS; ++i) {
         if (nano_stream__[i].state == ST_IDLE) {
             unabto_stream* stream = nano_stream__ + i;
             nano_stream_reset(stream);
@@ -587,7 +587,7 @@ void nabto_stream_connection_closed(nabto_connect* con)
 {
     unabto_stream* stream;
 
-    for (stream = nano_stream__; stream < nano_stream__ + NABTO_MEMORY_STREAM_MAX_STREAMS(); ++stream) {
+    for (stream = nano_stream__; stream < nano_stream__ + NABTO_MEMORY_STREAM_MAX_STREAMS; ++stream) {
         if (stream->connection == con && stream->state != ST_IDLE) {
             NABTO_LOG_TRACE(("Releasing stream, slot=%" PRIsize ", (connection closed) in state %i", unabto_stream_index(stream), stream->state));
 
@@ -609,7 +609,7 @@ void nabto_stream_connection_released(nabto_connect* con)
 {
     unabto_stream* stream;
 
-    for (stream = nano_stream__; stream < nano_stream__ + NABTO_MEMORY_STREAM_MAX_STREAMS(); ++stream) {
+    for (stream = nano_stream__; stream < nano_stream__ + NABTO_MEMORY_STREAM_MAX_STREAMS; ++stream) {
         if (stream->connection == con && stream->state != ST_IDLE) {
             NABTO_LOG_TRACE(("Releasing stream, slot=%" PRIsize ", (connection closed) in state %i", unabto_stream_index(stream), stream->state));
 
@@ -682,7 +682,7 @@ uint8_t nano_stream_read_win(const uint8_t* payload, //WINDOW payload without pa
 void nabto_stream_update_next_event(nabto_stamp_t* current_min_stamp)
 {
     uint8_t i;
-    for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS(); i++) {
+    for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS; i++) {
         unabto_stream* stream = &nano_stream__[i];
         if (stream->state != ST_IDLE && stream->state != ST_CLOSED && stream->state != ST_CLOSED_ABORTED) {
             struct nano_stream_state* tcb = &stream->tcb;

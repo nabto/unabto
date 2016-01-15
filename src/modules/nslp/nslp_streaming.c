@@ -60,7 +60,7 @@ typedef struct
   uint32_t totalTransmitted;
 } nslp_stream;
 
-static nslp_stream streams[NABTO_MEMORY_STREAM_MAX_STREAMS()];
+static nslp_stream streams[NABTO_MEMORY_STREAM_MAX_STREAMS];
 
 #endif
 
@@ -77,7 +77,7 @@ void unabto_stream_accept(unabto_stream* uNabtoStream)
 {
   uint8_t i;
 
-  for(i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS(); i++)
+  for(i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS; i++)
   {
     nslp_stream* nslpStream = &streams[i];
 
@@ -105,7 +105,7 @@ void nslp_streaming_tick(void)
   unabto_stream_hint hint;
 
   // tick all streams
-  for(i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS(); i++)
+  for(i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS; i++)
   {
     nslp_stream* stream = &streams[i];
     uint8_t oldState = stream->state;
@@ -328,7 +328,7 @@ void nslp_streaming_tick(void)
                 stream->previousLength = 0;
                 nabtoSetFutureStamp(&stream->timestamp, uartQuietTime);
               }
-              else if(length >= NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE() || nabtoIsStampPassed(&stream->timestamp) || uartQuietTime == 0) // UART has a full segment to send or quite time expired or quite time disabled -> send
+              else if(length >= NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE || nabtoIsStampPassed(&stream->timestamp) || uartQuietTime == 0) // UART has a full segment to send or quite time expired or quite time disabled -> send
               {
                 length = MIN(length, unabto_stream_can_write(stream->handle, &hint)); // bytes that can be moved from UART stream to Nabto stream
                 if(length > 0)

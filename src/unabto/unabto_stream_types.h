@@ -7,8 +7,11 @@
 #include "unabto_env_base.h"
 #endif
 
-#include <unabto/unabto_stream_window.h>
 #include <unabto/unabto_stream.h>
+#include <unabto/unabto_stream_window.h>
+
+
+#if NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM
 
 enum nabto_stream_state
 {
@@ -55,5 +58,7 @@ void unabto_stream_init_data_structure(struct nabto_stream_s* stream);
 #ifdef __cplusplus
 } // extern "C"
 #endif
+
+#endif // NABTO_ENABLE_STREAM
 
 #endif

@@ -1,5 +1,6 @@
 #include "unabto_memory.h"
 #include "unabto_logging.h"
+#include "unabto_stream_window.h"
 #include "unabto_stream_types.h"
 
 #if NABTO_ENABLE_DYNAMIC_MEMORY
@@ -22,7 +23,7 @@ NABTO_THREAD_LOCAL_STORAGE x_buffer* x_buffers = 0;
 bool unabto_allocate_memory(nabto_main_setup* nms)
 {
 #if NABTO_ENABLE_CONNECTIONS
-    connections = (nabto_connect*)malloc(sizeof(struct nabto_connect_s) * NABTO_MEMORY_CONNECTIONS_SIZE());
+    connections = (nabto_connect*)malloc(sizeof(struct nabto_connect_s) * NABTO_MEMORY_CONNECTIONS_SIZE);
     if (connections == NULL) {
         NABTO_LOG_FATAL(("Cannot initialize connections. Number of connections: %" PRIu16, nms->connectionsSize));
         return false;
@@ -30,14 +31,14 @@ bool unabto_allocate_memory(nabto_main_setup* nms)
 #endif
 
 #if NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM
-    stream__ = (unabto_stream*)malloc(sizeof(struct nabto_stream_s) * NABTO_MEMORY_STREAM_MAX_STREAMS());
+    stream__ = (unabto_stream*)malloc(sizeof(struct nabto_stream_s) * NABTO_MEMORY_STREAM_MAX_STREAMS);
     if (stream__ == NULL) {
-        NABTO_LOG_FATAL(("Cannot initialize stream structure. Number of streams: %" PRIu16, NABTO_MEMORY_STREAM_MAX_STREAMS()));
+        NABTO_LOG_FATAL(("Cannot initialize stream structure. Number of streams: %" PRIu16, NABTO_MEMORY_STREAM_MAX_STREAMS));
         return false;
     }
 
     {
-        size_t receiveBuffersSize = (size_t)NABTO_MEMORY_STREAM_MAX_STREAMS() * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE() * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE();
+        size_t receiveBuffersSize = (size_t)NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE;
         r_buffer_data = (uint8_t*)malloc(receiveBuffersSize);
         if (r_buffer_data == NULL) {
             NABTO_LOG_FATAL(("Cannot initialize stream receive buffers. Receive buffers total size: %" PRIsize, receiveBuffersSize));
@@ -46,7 +47,7 @@ bool unabto_allocate_memory(nabto_main_setup* nms)
     }
 
     {
-        size_t sendBuffersSize = (size_t)NABTO_MEMORY_STREAM_MAX_STREAMS() * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE() * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE();
+        size_t sendBuffersSize = (size_t)NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE;
         x_buffer_data = (uint8_t*)malloc(sendBuffersSize);
         if (x_buffer_data == NULL) {
             NABTO_LOG_FATAL(("Cannot initialize stream send buffers. Send buffers total size: %" PRIsize, sendBuffersSize));
@@ -55,7 +56,7 @@ bool unabto_allocate_memory(nabto_main_setup* nms)
     }
 
     {
-        size_t nReceiveBuffers = (size_t)NABTO_MEMORY_STREAM_MAX_STREAMS() * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE();
+        size_t nReceiveBuffers = (size_t)NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE;
         r_buffers = (r_buffer*)malloc(sizeof(r_buffer) * nReceiveBuffers);
         if (r_buffers == NULL) {
             NABTO_LOG_FATAL(("Cannot initialize receive buffers structures"));
@@ -64,7 +65,7 @@ bool unabto_allocate_memory(nabto_main_setup* nms)
     }
 
     {
-        size_t nXmitBuffers = (size_t)NABTO_MEMORY_STREAM_MAX_STREAMS() * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE();
+        size_t nXmitBuffers = (size_t)NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE;
         x_buffers = (x_buffer*)malloc(sizeof(x_buffer) * nXmitBuffers);
         if (x_buffers == NULL) {
             NABTO_LOG_FATAL(("Cannot initialize xmit buffers structures"));
@@ -93,23 +94,12 @@ void unabto_free_memory()
 #pragma udata big_mem
 #endif
 
-NABTO_THREAD_LOCAL_STORAGE nabto_connect connections[NABTO_MEMORY_CONNECTIONS_SIZE()];
+NABTO_THREAD_LOCAL_STORAGE nabto_connect connections[NABTO_MEMORY_CONNECTIONS_SIZE];
 
 #if UNABTO_PLATFORM_PIC18
 #pragma udata
 #endif
 
 #endif
-
-#if NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM
-NABTO_THREAD_LOCAL_STORAGE unabto_stream stream__[NABTO_MEMORY_STREAM_MAX_STREAMS()];  /**< a pool of streams */
-NABTO_THREAD_LOCAL_STORAGE uint8_t r_buffer_data[NABTO_MEMORY_STREAM_MAX_STREAMS() * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE() * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE()];
-NABTO_THREAD_LOCAL_STORAGE uint8_t x_buffer_data[NABTO_MEMORY_STREAM_MAX_STREAMS() * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE() * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE()];
-
-NABTO_THREAD_LOCAL_STORAGE x_buffer x_buffers[NABTO_MEMORY_STREAM_MAX_STREAMS() * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE()];
-NABTO_THREAD_LOCAL_STORAGE r_buffer r_buffers[NABTO_MEMORY_STREAM_MAX_STREAMS() * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE()];
-#endif
-
-
 
 #endif
