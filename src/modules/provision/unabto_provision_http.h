@@ -1,9 +1,10 @@
+
 #ifndef _UNABTO_PROVISION_HTTP_H
 #define _UNABTO_PROVISION_HTTP_H
 
 #include <stdint.h>
 
-#include <src/unabto/unabto_main_contexts.h>
+#include <unabto/unabto_main_contexts.h>
 
 #define KEY_BUFFER_SIZE PRE_SHARED_KEY_SIZE*2+1 
 #define HTTP_MAX_POST_LENGTH 256
@@ -16,12 +17,19 @@ typedef enum {
     UPS_HTTP_OTHER,
     UPS_HTTP_BAD_CACERTFILE,
     UPS_HTTP_SSL_PROBLEM,
-    UPS_INTERNAL_ERROR
+    UPS_INTERNAL_ERROR,
+    UPS_PROV_SERVICE_PROBLEM,
+    UPS_PROV_ALREADY_PROVISIONED,
+    UPS_PROV_INVALID_KEY,
+    UPS_PROV_INVALID_TOKEN,
 } unabto_provision_status_t;
 
 #define SERVICE_URL_MAX_LENGTH 1024
 #define SERVICE_TOKEN_MAX_LENGTH 40
 #define SERVICE_POST_MAX_LENGTH 256
+
+#define NABTO_PROVISION_CREATE_PATH                 "/api/1/device/provision"
+#define NABTO_PROVISION_VALIDATE_PATH               "/api/1/device/validate"
 
 typedef struct {
     const uint8_t* scheme_;
@@ -42,7 +50,14 @@ typedef struct {
  */
 unabto_provision_status_t unabto_provision_http_post(const char* url, const char* data, uint16_t* http_status, char** body, const char* headers);
 
+unabto_provision_status_t unabto_provision_http_get(const char* url, uint16_t* http_status, char** response);
+
 unabto_provision_status_t unabto_provision_http_set_cert_path(const char* path);
+
+unabto_provision_status_t unabto_provision_http_post_json(const char* url, const char* data, uint16_t* http_status, char** body);
+unabto_provision_status_t unabto_provision_validate_key(const uint8_t* id, const uint8_t* key, provision_context_t* context);
+
+unabto_provision_status_t unabto_provision(nabto_main_setup* nms, provision_context_t* context, uint8_t* key);
 
 const char* unabto_provision_http_get_cert_path();
 

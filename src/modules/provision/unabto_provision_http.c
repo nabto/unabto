@@ -1,6 +1,9 @@
 #include "unabto_provision_http.h"
+#include "unabto_provision_http_curl.h"
 
 static const char* sslCaCertPath_;
+
+static unabto_provision_status_t map_ws_response_to_status(uint16_t http_status, uint8_t* response);
 
 unabto_provision_status_t unabto_provision_http_set_cert_path(const char* path)
 {
@@ -16,6 +19,19 @@ unabto_provision_status_t unabto_provision_http_post_json(const char* url, const
     return unabto_provision_http_post(url, data, http_status, body, "Content-Type: application/json");
 }
 
+struct FetchStruct {
+    const char* url;
+    const char* cookie;
+};
+
+void curl_fetch_cb(CURL *curl, void* userData) {
+    struct FetchStruct* data = (struct FetchStruct*)userData;
+    curl_easy_setopt(curl, CURLOPT_URL, data->url);
+    if (data->cookie && strlen(data->cookie) > 0) {
+        curl_easy_setopt(curl, CURLOPT_COOKIE, data->cookie);
+    }
+}
+
 static bool write_provision_url(uint8_t* buffer, size_t len, provision_context_t* context) {
     if (snprintf(buffer, len, "%s://%s%s?APIKEY=%s",
                  context->scheme_, context->host_, NABTO_PROVISION_CREATE_PATH, context->api_key_
@@ -27,10 +43,10 @@ static bool write_provision_url(uint8_t* buffer, size_t len, provision_context_t
     }
 }
 
-static bool write_validate_url(uint8_t* buffer, size_t len, provision_context_t* context, uint8_t* id, uint8_t* key) {
+static bool write_validate_url(uint8_t* buffer, size_t len, const provision_context_t* context, const uint8_t* id, const uint8_t* key) {
     if (snprintf(buffer, len, "%s://%s%s?APIKEY=%s&id=%s&key=%s",
                  context->scheme_, context->host_, NABTO_PROVISION_VALIDATE_PATH,
-                 context->api_key_, id, key)
+                 context->api_key_, id, key
             ) >= len) {
         NABTO_LOG_ERROR(("URL buffer too small for request"));
         return false;
@@ -48,10 +64,20 @@ static bool write_provision_json_doc(uint8_t* buffer, size_t len, const uint8_t*
     }
 }
 
-bool parse_provision_response(nabto_main_setup *nms, char *response, char *key)
+static bool validate_string(char delim, char *string)
+{
+    size_t i, count = 0;
+    for (i = 0; i < strlen(string); i++) {
+        count += (string[i] == delim);
+    }
+    return count == 1 && string[i-1] != delim && string[0] != delim;
+}
+
+static bool parse_provision_response(nabto_main_setup *nms, char *response, char *key)
 {
     NABTO_LOG_TRACE(("Parsing provision response: [%s]", response));
-    char *tok, *delim = ":";
+    char *tok;
+    char *delim = ":";
     if (!validate_string(*delim, response)) {
         NABTO_LOG_ERROR(("Invalid provision string: %s", response));
         return false;
@@ -73,6 +99,11 @@ bool parse_provision_response(nabto_main_setup *nms, char *response, char *key)
     return true;
 }
 
+unabto_provision_status_t unabto_provision_http_get(const char* url, uint16_t* http_status, char** response) {
+    return unabto_provision_http_invoke_curl(url, http_status, response, NULL, NULL);
+}
+
+
 unabto_provision_status_t unabto_provision_validate_key(const uint8_t* id, const uint8_t* key, provision_context_t* context) {
     char url[SERVICE_URL_MAX_LENGTH];
     if (!write_validate_url(url, sizeof(url), context, id, key)) {
@@ -81,7 +112,7 @@ unabto_provision_status_t unabto_provision_validate_key(const uint8_t* id, const
 
     uint16_t http_status = 0;
     uint8_t* response;
-    unabto_provision_status_t status = http_fetch_absolute_url(url, "", &http_status, (char**)&response);
+    unabto_provision_status_t status = unabto_provision_http_get(url, &http_status, (char**)&response);
     if (status == UPS_OK) {
         free(response);
     } else if (status == UPS_HTTP_COMPLETE_NOT_200) {
@@ -90,6 +121,7 @@ unabto_provision_status_t unabto_provision_validate_key(const uint8_t* id, const
     }
     return status;
 }
+
 static unabto_provision_status_t map_ws_response_to_status(uint16_t http_status, uint8_t* response)
 {   
     if (http_status == 403) {
@@ -114,7 +146,7 @@ static unabto_provision_status_t map_ws_response_to_status(uint16_t http_status,
 
     if (strstr(response, "TOKEN_DOES_NOT_EXIST") != NULL) {
         NABTO_LOG_ERROR(("Web service could not validate activation code (user specified wrong value or code already used)"));
-        return UPS_PROV_INVALID_CODE_ENTERED;
+        return UPS_PROV_INVALID_TOKEN;
     }
 
     NABTO_LOG_ERROR(("The web service returned error response [%s]", response));

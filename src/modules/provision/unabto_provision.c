@@ -15,7 +15,7 @@ struct curl_fetch_st {
 
 char *filePathPtr;
 
-bool set_unabto_key(nabto_main_setup *nms, char *key)
+bool unabto_provision_set_key(nabto_main_setup *nms, char *key)
 {
     size_t i;
     size_t pskLen = strlen(key);
@@ -78,7 +78,7 @@ size_t curl_callback (void *contents, size_t size, size_t nmemb, void *userp)
 
 bool unabto_provision_parse(nabto_main_setup *nms, char *text)
 {
-    char *token;
+    char *key;
     char *delim = ":";
 
     if (!validate_string(*delim, text)) {
@@ -86,80 +86,13 @@ bool unabto_provision_parse(nabto_main_setup *nms, char *text)
         return false;
     }
 
-    token = strtok(text, delim);
-    if (!set_unabto_id(nms, token)) {
+    key = strtok(text, delim);
+    if (!set_unabto_id(nms, key)) {
         return false;
     }
 
-    token = strtok(NULL, delim);
-    return set_unabto_key(nms, token);
-}
-
-bool unabto_provision(nabto_main_setup *nms, char *url)
-{
-    bool status;
-    struct curl_fetch_st fetch;
-    char errbuf[CURL_ERROR_SIZE];
-    CURL *curl = curl_easy_init();
-
-    NABTO_LOG_INFO(("Provisioning from '%s'", url));
-
-    if (!curl) {
-        NABTO_LOG_ERROR(("Failed to create curl handle"));
-        return false;
-    }
-
-    fetch.payload = (char *) calloc(1, sizeof(fetch.payload));
-    fetch.size = 0;
-    if (fetch.payload == NULL) {
-        NABTO_LOG_ERROR(("Failed to allocate fetch payload"));
-        return false;
-    }
-
-    CURLcode res;
-#if DEBUG
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-#endif
-    curl_easy_setopt(curl, CURLOPT_URL, url);
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_callback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&fetch);
-    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
-    errbuf[0] = 0;
-
-    res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
-
-    if (res != CURLE_OK || fetch.size < 1) {
-#if DEBUG
-        size_t len = strlen(errbuf);
-        fprintf(stderr, "\nlibcurl: (%d) ", res);
-        if (len) {
-            fprintf(stderr, "%s%s", errbuf, ((errbuf[len - 1] != '\n') ? "\n" : ""));
-        }
-        else {
-            fprintf(stderr, "%s\n", curl_easy_strerror(res));
-        }
-#endif
-
-        NABTO_LOG_ERROR(("Curl failed: %s", curl_easy_strerror(res)));
-        free(fetch.payload);
-        return false;
-    }
-
-    if (fetch.payload == NULL) {
-        NABTO_LOG_ERROR(("Failed to populate curl payload"));
-        free(fetch.payload);
-        return false;
-    }
-
-    NABTO_LOG_INFO(("Curl returned: %s", fetch.payload));
-
-    status = unabto_provision_parse(nms, fetch.payload);
-    free(fetch.payload);
-    return status;
+    key = strtok(NULL, delim);
+    return unabto_provision_set_key(nms, key);
 }
 
 bool read_file(char *text, size_t size)

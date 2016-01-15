@@ -6,19 +6,13 @@
 
 #include "unabto/unabto_common_main.h"
 
+bool unabto_provision_set_key(nabto_main_setup *nms, char *key);
+
+
 // define NABTO_ENABLE_PROVISIONING to add revelvant options to default gopt arg list
 
 bool unabto_provision_parse(nabto_main_setup *nms, char *text);
 bool unabto_provision_parse_json(nabto_main_setup *nms, char *json);
-
-/**
- * Request provisioning information from url and populate nabto_main_setup.
- * @param nms         nabto_main_setup to populate
- * @param url         full url of shared secrets web service including
- *                    queries (token, mac, id)
- * return             true if successful
- */
-bool unabto_provision(nabto_main_setup *nms, char *url);
 
 /**
  * Request provisioning information from url, populate nabto_main_setup and
