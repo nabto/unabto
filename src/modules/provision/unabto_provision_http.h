@@ -61,5 +61,6 @@ unabto_provision_status_t unabto_provision(nabto_main_setup* nms, provision_cont
 
 const char* unabto_provision_http_get_cert_path();
 
+bool unabto_provision_parse(nabto_main_setup *nms, char *response, char *key);
 
 #endif

@@ -76,25 +76,6 @@ size_t curl_callback (void *contents, size_t size, size_t nmemb, void *userp)
     return realsize;
 }
 
-bool unabto_provision_parse(nabto_main_setup *nms, char *text)
-{
-    char *key;
-    char *delim = ":";
-
-    if (!validate_string(*delim, text)) {
-        NABTO_LOG_ERROR(("Invalid provision file string: %s", text));
-        return false;
-    }
-
-    key = strtok(text, delim);
-    if (!set_unabto_id(nms, key)) {
-        return false;
-    }
-
-    key = strtok(NULL, delim);
-    return unabto_provision_set_key(nms, key);
-}
-
 bool read_file(char *text, size_t size)
 {
     FILE *fp = fopen(filePathPtr, "r");

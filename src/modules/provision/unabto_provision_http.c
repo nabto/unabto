@@ -73,7 +73,7 @@ static bool validate_string(char delim, char *string)
     return count == 1 && string[i-1] != delim && string[0] != delim;
 }
 
-static bool parse_provision_response(nabto_main_setup *nms, char *response, char *key)
+bool unabto_provision_parse(nabto_main_setup *nms, char *response, char *key)
 {
     NABTO_LOG_TRACE(("Parsing provision response: [%s]", response));
     char *tok;
@@ -160,7 +160,7 @@ static unabto_provision_status_t invoke_provision_service(const uint8_t* url, co
         return UPS_OK;
     } else {
         if (status == UPS_HTTP_COMPLETE_NOT_200) {
-            status = map_ws_response_to_status(http_status, response);
+            status = map_ws_response_to_status(http_status, *response);
             free(*response);
         }        
         return status;
@@ -192,7 +192,7 @@ unabto_provision_status_t unabto_provision(nabto_main_setup* nms, provision_cont
     }
 
     // parse response
-    if (parse_provision_response(nms, (char*)response, (char*)(key))) {
+    if (unabto_provision_parse(nms, (char*)response, (char*)(key))) {
         status = UPS_OK;
     } else {
         NABTO_LOG_ERROR(("Invalid web service response: [%s]", response));
