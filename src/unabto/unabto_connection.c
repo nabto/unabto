@@ -39,6 +39,22 @@
 NABTO_THREAD_LOCAL_STORAGE nabto_stamp_t connection_timeout_cache_stamp;
 NABTO_THREAD_LOCAL_STORAGE bool connection_timeout_cache_cached = false;
 
+#if !NABTO_ENABLE_DYNAMIC_MEMORY
+
+/** the connection resources, shared by all connected clients */
+#if UNABTO_PLATFORM_PIC18
+#pragma udata big_mem
+#endif
+
+NABTO_THREAD_LOCAL_STORAGE nabto_connect connections[NABTO_MEMORY_CONNECTIONS_SIZE];
+
+#if UNABTO_PLATFORM_PIC18
+#pragma udata
+#endif
+
+#endif
+
+
 static void unabto_connection_set_future_stamp(nabto_stamp_t* stamp, uint16_t future)
 {
     connection_timeout_cache_cached = false;

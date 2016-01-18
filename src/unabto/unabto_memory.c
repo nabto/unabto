@@ -88,18 +88,4 @@ void unabto_free_memory()
 
 #else
 
-#if NABTO_ENABLE_CONNECTIONS
-/** the connection resources, shared by all connected clients */
-#if UNABTO_PLATFORM_PIC18
-#pragma udata big_mem
-#endif
-
-NABTO_THREAD_LOCAL_STORAGE nabto_connect connections[NABTO_MEMORY_CONNECTIONS_SIZE];
-
-#if UNABTO_PLATFORM_PIC18
-#pragma udata
-#endif
-
-#endif
-
 #endif
