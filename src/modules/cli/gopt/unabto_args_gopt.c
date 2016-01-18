@@ -9,11 +9,14 @@
 #include "modules/cli/unabto_args.h"
 #include "modules/diagnostics/unabto_diag.h"
 
-#ifdef NABTO_ENABLE_PROVISIONING
-#  if !(defined(NABTO_PROVISION_HOST) && defined(NABTO_PROVISION_API_KEY) && defined(NABTO_DEVICE_KEY_FILE))
-#    error("Missing static configuration of provisioning host, api key and keyfile")
+#if NABTO_ENABLE_PROVISIONING
+#
+#  ifndef NABTO_DEVICE_KEY_FILE
+#    define NABTO_DEVICE_KEY_FILE "~/.nabto-key.txt"
 #  endif
 #include "modules/provision/unabto_provision.h"
+#include "modules/provision/unabto_provision_http.h"
+#else
 #endif
 
 #include "unabto/unabto_logging.h"
@@ -26,33 +29,22 @@
 #include <netdb.h>
 #include <netinet/in.h>
 
-
-/// Provide the safe version API. @param src source @param format formatstring @param param1 the parameter
-/// TODO: use proper linux variant!!!!
-#define sscanf_s(src, format, param1) sscanf(src, format, param1)
-
 #else
 #define strdup _strdup
 #endif
 
 /**
- * @file
- * The uNabto Program Argument Verification (PC Device) Implementation.
- */
-
-
-/**
  * Print help message
  * @param errmsg  if not 0 this is an error message
  */
-static void help(const char* errmsg, const char *progname)
+static void uhelp(const char* errmsg, const char *progname)
 {
     if (errmsg) {
         NABTO_LOG_INFO(("ERROR: %s", errmsg));
     }
     NABTO_LOG_INFO(("Usage: %s -d <host id> [options]", progname));
 #if NABTO_ENABLE_PROVISIONING
-    NABTO_LOG_INFO((" - or: %s -P <mac address to use for provisioning> [options]", progname));
+    NABTO_LOG_ERROR((" - or: %s -P [<provisioning options>] [general options]", progname));
 #endif
     NABTO_LOG_INFO(("    -d: the host id to use (e.g. myweatherstation.nabto.net)"));
     NABTO_LOG_INFO(("    -s: use encryption (if no -k parameter specified, a null preshared secret is used)"));
@@ -73,14 +65,102 @@ static void help(const char* errmsg, const char *progname)
     NABTO_LOG_INFO(("    --dnsaddress: override system dns server"));
     NABTO_LOG_INFO(("    --dnsfallbackdomain: override default dnsfallback domain"));
 #endif
+#if NABTO_ENABLE_PROVISIONING
+    NABTO_LOG_INFO(("Provisioning options:"));
+    NABTO_LOG_INFO(("    --provision-host=<host>: The hostname of the provisioning service"));
+    NABTO_LOG_INFO(("    --provision-api-key=<key>: The provisioning service api key, matching the hostname pattern used"));
+    NABTO_LOG_INFO(("    --provision-id-input-type=<{mac_addr|nabto_id|none}>: The type of input id specified to the provisioning service"));
+    NABTO_LOG_INFO(("    --provision-id-input=<id>: The input id for the provisioning server (mac address or nabto id)"));
+    NABTO_LOG_INFO(("    --provision-user-token=<token>: Authorization token for the provisioning service"));
+    NABTO_LOG_INFO(("Provisoning examples:"));
+    NABTO_LOG_INFO(("    %s -P --provision-host=customer-a.provision.nabto.com --provision-id-input-type=nabto_id --provision-id-input=u10cgvmlchyypvs1111a  # service issues key for id", progname));
+    NABTO_LOG_INFO(("    %s -P --provision-host=customer-b.provision.nabto.com --provision-id-input-type=mac_addr --provision-id-input=0e:a1:c3:ed:eb:3f  # service issues id and key for mac", progname));
+    NABTO_LOG_INFO(("    %s -P --provision-host=customer-c.provision.nabto.com  # service issues id and key", progname));
+    NABTO_LOG_INFO(("    %s -P --provision-host=customer-d.provision.nabto.com --provision-user-token=e5a4-0c1e-99ed-f01a  # service issues id and key, checks one-time token", progname));
+    NABTO_LOG_INFO(("    %s -P  # use results from earlier provisioning ", progname));
+#endif
+
 } /* help(const char* errmsg) */
 
 enum {
     FORCE_DNS_FALLBACK = 127,
     ENABLE_DNS_FALLBACK,
     DNS_ADDRESS,
-    DNS_FALLBACK_DOMAIN
+    DNS_FALLBACK_DOMAIN,
+    PROV_HOST,
+    PROV_API_KEY,
+    PROV_ID_INPUT_TYPE,
+    PROV_ID_INPUT,
+    PROV_USER_TOKEN,
 };
+
+#if NABTO_ENABLE_PROVISIONING
+
+bool set_default_prov_host(provision_context_t* context) {
+#ifdef NABTO_PROVISION_HOST
+    context->host_ = NABTO_PROVISION_HOST;
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool set_default_prov_apikey(provision_context_t* context) {
+#ifdef NABTO_PROVISION_API_KEY
+    context->api_key_ = NABTO_PROVISION_API_KEY
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool handle_provisioning(const char* progname, void* options) {
+    provision_context_t context;
+    memset(&context, 0, sizeof(context));
+
+    const char* foo;
+    if (!gopt_arg(options, PROV_HOST, (const char**)(&(context.host_))) && !set_default_prov_host(&context)) {
+//    if (!gopt_arg(options, PROV_HOST, foo)) && !set_default_prov_host(&context)) {
+        NABTO_LOG_ERROR(("Provision host not specified on cmd line or in source"));
+        return false;
+    }
+    
+    if (!gopt_arg(options, PROV_API_KEY, (const char**)(&(context.api_key_))) && !set_default_prov_apikey(&context)) {
+        NABTO_LOG_ERROR(("Provision API key not specified on cmd line or in source"));
+        return false;
+    }
+
+    const char* type; 
+    if (gopt_arg(options, PROV_ID_INPUT_TYPE, &type)) {
+        if (strstr(type, "mac")) {
+            context.id_input_type_ = PIT_MAC;
+        } else if (strstr(type, "nabto")) {
+            context.id_input_type_ = PIT_NABTO_ID;
+        } else if (strstr(type, "none")) {
+            context.id_input_type_ = PIT_NONE;
+        } else {
+            NABTO_LOG_ERROR(("Invalid provision-id-input-type '%s'", type));
+            return false;
+        }
+    } else {
+        context.id_input_type_ = PIT_NONE;
+    }
+    
+    if (!gopt_arg(options, PROV_ID_INPUT, (const char**)&(context.id_))) {
+        if (context.id_input_type_ != PIT_NONE) {
+            NABTO_LOG_ERROR(("No provision id input specified (expected as type was set)"));
+            return false;
+        }
+    }
+    
+    gopt_arg(options, PROV_USER_TOKEN, (const char**)(&(context.token_)));
+
+    NABTO_LOG_TRACE(("Provisioning context: host_=%s, api_key_=%s, token_=%s, id_=%s, id_input_type_=%d",
+                     context.host_, context.api_key_, context.token_, context.id_, context.id_input_type_));
+    return false;  // work in progress
+//    return true;
+}
+#endif
 
 bool check_args(int argc, char* argv[], nabto_main_setup *nms)
 {
@@ -104,7 +184,12 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
 #endif
 
 #if NABTO_ENABLE_PROVISIONING
-    const char *macAddr;
+    
+    const char *provInputId;
+    const char *provInputIdType;
+    const char *provHost;
+    const char *provApiKey;
+    const char *provToken;
 #endif
     
     const char x0s[] = "h?";     const char* x0l[] = { "help", "HELP", 0 };
@@ -125,8 +210,13 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
     const char x15s[] = "";      const char* x15l[] = { "forcednsfallback", 0 };
     const char x16s[] = "";      const char* x16l[] = { "dnsaddress", 0 };
     const char x17s[] = "";      const char* x17l[] = { "dnsfallbackdomain", 0 };
-    const char x18s[] = "P";     const char* x18l[] = { "provision-mac", 0 };
+    const char x18s[] = "P";     const char* x18l[] = { "provision", 0 };
     const char x19s[] = "";      const char* x19l[] = { "enablednsfallback", 0 };
+    const char x20s[] = "";      const char* x20l[] = { "provision-host", 0 };
+    const char x21s[] = "";      const char* x21l[] = { "provision-api-key", 0 };
+    const char x22s[] = "";      const char* x22l[] = { "provision-id-input-type", 0 };
+    const char x23s[] = "";      const char* x23l[] = { "provision-id-input", 0 };
+    const char x24s[] = "";      const char* x24l[] = { "provision-user-token", 0 };
 
     const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
         { 'h', 0,           x0s, x0l },
@@ -147,8 +237,13 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
         { FORCE_DNS_FALLBACK, GOPT_NOARG, x15s, x15l },
         { DNS_ADDRESS, GOPT_ARG, x16s, x16l },
         { DNS_FALLBACK_DOMAIN, GOPT_ARG, x17s, x17l },
-        { 'P', GOPT_ARG,    x18s, x18l },
+        { 'P', GOPT_NOARG,    x18s, x18l },
         { ENABLE_DNS_FALLBACK, GOPT_NOARG, x19s, x19l },
+        { PROV_HOST,          GOPT_ARG, x20s, x20l },
+        { PROV_API_KEY,       GOPT_ARG, x21s, x21l },
+        { PROV_ID_INPUT_TYPE, GOPT_ARG, x22s, x22l },
+        { PROV_ID_INPUT,      GOPT_ARG, x23s, x23l },
+        { PROV_USER_TOKEN,    GOPT_ARG, x24s, x24l },
         { 0,0,0,0 }
     };
 
@@ -172,7 +267,7 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
 #endif
 
     if( gopt( options, 'h')) {
-        help("Help", progname);
+        uhelp("Help", progname);
         return false;
     }
     
@@ -194,7 +289,7 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
     if( gopt_arg( options, 'a', & address ) ){
         addr = inet_addr(address);
         if (addr == INADDR_NONE) {
-            help("Illegal local address", progname);
+            uhelp("Illegal local address", progname);
             gopt_free(options);
             return false;
         }
@@ -212,7 +307,7 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
     if( gopt_arg( options, 'A', & basestationAddress ) ){
         addr = inet_addr(basestationAddress);
         if (addr == INADDR_NONE) {
-            help("Illegal basestation address", progname);
+            uhelp("Illegal basestation address", progname);
             gopt_free(options);
             return false;
         }
@@ -224,7 +319,7 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
         size_t pskLen = strlen(preSharedKey);
         // read the pre shared key as a hexadecimal string.
         for (i = 0; i < pskLen/2 && i < 16; i++) {
-            sscanf_s(preSharedKey+(2*i), "%02hhx", &nms->presharedKey[i]);
+            sscanf(preSharedKey+(2*i), "%02hhx", &nms->presharedKey[i]);
         }
     }
 
@@ -248,16 +343,8 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
     }
 
 #if NABTO_ENABLE_PROVISIONING
-    if ( gopt_arg( options, 'P', &macAddr)) {
-        char url[1024];
-        if (snprintf(url, sizeof(url), "https://%s/mr/provision/app_simple.json?mac=%s&api_key=%s", NABTO_PROVISION_HOST, macAddr, NABTO_PROVISION_API_KEY) > sizeof(url)) {
-            help("Illegal provision info", progname);
-            return false;
-        }
-        if (!unabto_provision_persistent(nms, url, NABTO_DEVICE_KEY_FILE)) {
-            NABTO_LOG_FATAL(("uNabto provisioning failed"));
-        }
-        idOk = 1;
+    if (gopt(options, 'P')) {
+        idOk = handle_provisioning(progname, options);
     }
 #endif
     if (!idOk) {
@@ -265,9 +352,9 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
             nms->id = strdup(idParam);
         } else {
 #if NABTO_ENABLE_PROVISIONING
-            help("You must either specify a mac address for your device for provisioning or specify a uNabto device id", progname);
+            uhelp("You must either specify a mac address for your device for provisioning or specify a uNabto device id", progname);
 #else
-            help("You must specify an id for your uNabto device", progname);
+            uhelp("You must specify an id for your uNabto device", progname);
 #endif
             gopt_free(options);
             return false;
@@ -286,7 +373,7 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
     if (gopt_arg(options, DNS_ADDRESS, &dnsAddress)) {
         addr = inet_addr(dnsAddress);
         if (addr == INADDR_NONE) {
-            help("Illegal dns address", progname);
+            uhelp("Illegal dns address", progname);
             gopt_free(options);
             return false;
         }

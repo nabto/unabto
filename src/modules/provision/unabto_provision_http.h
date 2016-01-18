@@ -31,12 +31,19 @@ typedef enum {
 #define NABTO_PROVISION_CREATE_PATH                 "/api/1/device/provision"
 #define NABTO_PROVISION_VALIDATE_PATH               "/api/1/device/validate"
 
+typedef enum {
+    PIT_MAC,
+    PIT_NABTO_ID,
+    PIT_NONE
+} provision_id_input_type_t ;
+
 typedef struct {
     const uint8_t* scheme_;
     const uint8_t* host_;
     const uint8_t* api_key_;
     const uint8_t* token_;
     const uint8_t* id_;
+    provision_id_input_type_t id_input_type_;
     uint8_t* key_;
 } provision_context_t;
 
