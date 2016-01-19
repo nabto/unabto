@@ -6,7 +6,13 @@
 #include <string.h>
 
 #include <curl/curl.h>
+
+#include "unabto_config.h"
+
+#if NABTO_ENABLE_PROVISIONING
+
 #include "unabto_provision.h"
+#include "unabto_provision_http.h"
 
 struct curl_fetch_st {
     char *payload;
@@ -14,7 +20,7 @@ struct curl_fetch_st {
 };
 
 char *filePathPtr;
-
+#if 0
 bool unabto_provision_set_key(nabto_main_setup *nms, char *key)
 {
     size_t i;
@@ -138,3 +144,6 @@ bool unabto_provision_persistent_using_handles(nabto_main_setup *nms,
     }
     return true;
 }
+
+#endif
+#endif

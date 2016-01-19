@@ -40,6 +40,10 @@ set(unabto_definitions
 )
 
 
+set(unabto_module_provision_libraries
+   curl
+)
+
 set(unabto_link_libraries
 
 )

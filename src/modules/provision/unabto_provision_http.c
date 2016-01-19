@@ -1,3 +1,4 @@
+#include "unabto_config.h"
 #include "unabto_provision_http.h"
 #include "unabto_provision_http_curl.h"
 
@@ -57,7 +58,7 @@ static bool write_validate_url(uint8_t* buffer, size_t len, const provision_cont
 
 static bool write_provision_json_doc(uint8_t* buffer, size_t len, const uint8_t* id, provision_context_t* context) {
     if (snprintf(buffer, len, "{\"id\": \"%s\", \"token\": \"%s\", \"simple\": 1}", id, context->token_) >= len) {
-        NABTO_LOG_ERROR("JSON buffer too small for request");
+        NABTO_LOG_ERROR(("JSON buffer too small for request"));
         return false;
     } else {
         return true;
@@ -120,6 +121,25 @@ unabto_provision_status_t unabto_provision_validate_key(const uint8_t* id, const
         free(response);
     }
     return status;
+}
+
+// always succeed - returns body if delimiter found, empty string otherwise
+void unabto_provision_http_extract_body(char** body, char* response) {
+    const char* correct_delimiter = "\r\n\r\n";
+    const char* wapploxx_delimiter = "\n\n";
+    const char* delimiter;
+    delimiter = wapploxx_delimiter; 
+    char* bodyWithPrefix = strstr(response, delimiter);
+    if (!bodyWithPrefix) {
+        delimiter = correct_delimiter;
+        bodyWithPrefix = strstr(response, delimiter);
+    }
+    
+    if (bodyWithPrefix) {
+        *body = strdup(bodyWithPrefix+strlen(delimiter));
+    } else {
+        *body = strdup("");
+    }
 }
 
 static unabto_provision_status_t map_ws_response_to_status(uint16_t http_status, uint8_t* response)

@@ -125,7 +125,7 @@ unabto_provision_status_t unabto_provision_http_post(const char* url, const char
     unabto_provision_status_t status = unabto_provision_http_invoke_curl(url, http_status, &response, curl_post_cb, &postStruct);
     curl_slist_free_all(postStruct.headers);
     if (status == UPS_OK || status == UPS_HTTP_COMPLETE_NOT_200) {
-        http_extract_body(body, response);
+        unabto_provision_http_extract_body(body, response);
         free(response);
     }
     NABTO_LOG_INFO(("Posted data to url %s, internal status %d", url, status));

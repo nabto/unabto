@@ -5,6 +5,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/../../build/cmake/unabto_project.cmake)
 
 set(src
   ${unabto_src}
+  ${unabto_module_provision_src}
   ${unabto_module_cli_gopt_src}
   ${unabto_server_weather_station}
 )
@@ -21,7 +22,7 @@ include_directories(
 
 add_executable(${PROJECT_NAME} ${src})
 
-target_link_libraries(${PROJECT_NAME} ${unabto_link_libraries})
+target_link_libraries(${PROJECT_NAME} ${unabto_module_provision_libraries} ${unabto_link_libraries})
 
 install( TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION bin
