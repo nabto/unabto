@@ -241,7 +241,7 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
 
 #if NABTO_ENABLE_PROVISIONING
     if (gopt(options, 'P')) {
-        idOk = unabto_provision_gopt_apply(progname, options);
+        idOk = unabto_provision_gopt_apply(nms, progname, options);
     }
 #endif
     if (!idOk) {

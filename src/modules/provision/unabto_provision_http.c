@@ -74,32 +74,6 @@ static bool validate_string(char delim, char *string)
     return count == 1 && string[i-1] != delim && string[0] != delim;
 }
 
-bool unabto_provision_parse(nabto_main_setup *nms, char *response, char *key)
-{
-    NABTO_LOG_TRACE(("Parsing provision response: [%s]", response));
-    char *tok;
-    char *delim = ":";
-    if (!validate_string(*delim, response)) {
-        NABTO_LOG_ERROR(("Invalid provision string: %s", response));
-        return false;
-    }
-
-    tok = strtok(response, delim);
-    if (nms->id == NULL || strcmp(nms->id, tok) != 0) {
-        NABTO_LOG_ERROR(("Invalid id in provision string: [id=%s], [tok=%s]", nms->id, tok));
-        return false;
-    }
-
-    tok = strtok(NULL, delim);
-    if (strlen(tok) != PRE_SHARED_KEY_SIZE * 2) {
-        NABTO_LOG_ERROR(("Invalid key in provision string: %s", tok));
-        return false;
-    }
-
-    strcpy(key, tok);
-    return true;
-}
-
 unabto_provision_status_t unabto_provision_http_get(const char* url, uint16_t* http_status, char** response) {
     return unabto_provision_http_invoke_curl(url, http_status, response, NULL, NULL);
 }
@@ -191,7 +165,7 @@ static unabto_provision_status_t invoke_provision_service(const uint8_t* url, co
 // for docs:
 //    may return UPS_PROV_ALREADY_PROVISIONED, validate existing key with unabto_provision_validate_key
 //    UPS_OK: key set
-unabto_provision_status_t unabto_provision(nabto_main_setup* nms, provision_context_t* context, uint8_t* key)
+unabto_provision_status_t unabto_provision_http(nabto_main_setup* nms, provision_context_t* context, uint8_t* key)
 {
     char url[SERVICE_URL_MAX_LENGTH];
     if (!write_provision_url(url, sizeof(url), context)) {
@@ -212,7 +186,7 @@ unabto_provision_status_t unabto_provision(nabto_main_setup* nms, provision_cont
     }
 
     // parse response
-    if (unabto_provision_parse(nms, (char*)response, (char*)(key))) {
+    if (unabto_provision_parse_data(nms, (char*)response, (char*)(key))) {
         status = UPS_OK;
     } else {
         NABTO_LOG_ERROR(("Invalid web service response: [%s]", response));

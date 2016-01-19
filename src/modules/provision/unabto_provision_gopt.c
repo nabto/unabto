@@ -2,6 +2,7 @@
 
 #if NABTO_ENABLE_PROVISIONING
 
+#include "unabto/unabto_main_contexts.h"
 #include "unabto_provision_gopt.h"
 #include "unabto_provision_http.h"
 #include "modules/cli/gopt/gopt.h"
@@ -44,7 +45,7 @@ void unabto_provision_gopt_help(const char* progname) {
     printf("    %s -P   # use results from earlier provisioning \n", progname);
 }
 
-bool unabto_provision_gopt_apply(const char* progname, void* options) {
+bool unabto_provision_gopt_apply(nabto_main_setup* nms, const char* progname, void* options) {
     provision_context_t context;
     memset(&context, 0, sizeof(context));
 
@@ -64,8 +65,8 @@ bool unabto_provision_gopt_apply(const char* progname, void* options) {
 
     NABTO_LOG_TRACE(("Provisioning context: host_=%s, api_key_=%s, token_=%s, id_=%s",
                      context.host_, context.api_key_, context.token_, context.id_));
-    return false;  // work in progress
-//    return true;
+
+    return unabto_provision_execute(nms, &context);
 }
 
 #endif

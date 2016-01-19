@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include <unabto/unabto_main_contexts.h>
+#include "unabto_provision.h"
 
 #define KEY_BUFFER_SIZE PRE_SHARED_KEY_SIZE*2+1 
 #define HTTP_MAX_POST_LENGTH 256
@@ -31,15 +32,6 @@ typedef enum {
 #define NABTO_PROVISION_CREATE_PATH                 "/api/1/device/provision"
 #define NABTO_PROVISION_VALIDATE_PATH               "/api/1/device/validate"
 
-typedef struct {
-    const uint8_t* scheme_;
-    const uint8_t* host_;
-    const uint8_t* api_key_;
-    const uint8_t* token_;
-    const uint8_t* id_;
-    uint8_t* key_;
-} provision_context_t;
-
 /**
  * Post data to specified URL
  * @returns UPS_OK if http request was successfully invoked and http server returned status 200. Caller must free response.
@@ -57,7 +49,7 @@ unabto_provision_status_t unabto_provision_http_set_cert_path(const char* path);
 unabto_provision_status_t unabto_provision_http_post_json(const char* url, const char* data, uint16_t* http_status, char** body);
 unabto_provision_status_t unabto_provision_validate_key(const uint8_t* id, const uint8_t* key, provision_context_t* context);
 
-unabto_provision_status_t unabto_provision(nabto_main_setup* nms, provision_context_t* context, uint8_t* key);
+unabto_provision_status_t unabto_provision_http(nabto_main_setup* nms, provision_context_t* context, uint8_t* key);
 
 const char* unabto_provision_http_get_cert_path();
 

@@ -6,8 +6,16 @@
 
 #include "unabto/unabto_common_main.h"
 
-bool unabto_provision_set_key(nabto_main_setup *nms, char *key);
+typedef struct {
+    const uint8_t* scheme_;
+    const uint8_t* host_;
+    const uint8_t* api_key_;
+    const uint8_t* token_;
+    const uint8_t* id_;
+    uint8_t* key_;
+} provision_context_t;
 
+bool unabto_provision_set_key(nabto_main_setup *nms, char *key);
 
 // define NABTO_ENABLE_PROVISIONING to add revelvant options to default gopt arg list
 
@@ -22,30 +30,10 @@ bool unabto_provision_set_key(nabto_main_setup *nms, char *key);
  *                    provisioning information
  * return             true if successful
  */
-bool unabto_provision_persistent(nabto_main_setup *nms, char *url, char *filePath);
+bool unabto_provision_try_existing(nabto_main_setup *nms,
+                                   provision_context_t* context,
+                                   const char* path);
 
-/**
- * Definition of read and write function handles
- * @param text        fill with characters / write content to persistent storage
- * @param size        max size / size of text
- * return             true if successful
- */
-typedef bool (*unabtoPersistentFunction)(char *text, size_t size);
-
-/**
- * Request provisioning information from url, populate nabto_main_setup and
- * write information using function handles.
- * If persistent values exists this information is used directly.
- * @param nms         nabto_main_setup to populate
- * @param url         full url of shared secrets web service including
- *                    queries (token, mac, id)
- * @param readFunc    pointer to function that reads value from persistent storage
- * @param writeFunc   pointer to function that writes to persistent storage
- * return             true if successful
- */
-bool unabto_provision_persistent_using_handles(nabto_main_setup *nms,
-                                               char *url,
-                                               unabtoPersistentFunction readFunc,
-                                               unabtoPersistentFunction writeFunc);
+bool unabto_provision_execute(nabto_main_setup* nms, provision_context_t* context);
 
 #endif

@@ -28,6 +28,6 @@ enum {
 
 void unabto_provision_gopt_help(const char* progname);
 
-bool unabto_provision_gopt_apply(const char* progname, void* options);
+bool unabto_provision_gopt_apply(nabto_main_setup* nms, const char* progname, void* options);
 
 #endif

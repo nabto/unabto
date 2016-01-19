@@ -5,22 +5,35 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <curl/curl.h>
-
 #include "unabto_config.h"
 
 #if NABTO_ENABLE_PROVISIONING
 
 #include "unabto_provision.h"
 #include "unabto_provision_http.h"
+#include "unabto_provision_file.h"
 
-struct curl_fetch_st {
-    char *payload;
-    size_t size;
-};
+bool unabto_provision_execute(nabto_main_setup* nms, provision_context_t* context) {
+    uint8_t key[KEY_BUFFER_SIZE];
+    unabto_provision_status_t status = unabto_provision_http(nms, context, key);
+    if (status != UPS_OK) {
+        switch (status) {
+        case UPS_PROV_ALREADY_PROVISIONED:
+            NABTO_LOG_FATAL(("Device is already provisioned - customer service must be contacted"));
+            break;
+        case UPS_PROV_INVALID_TOKEN:
+            NABTO_LOG_FATAL(("Invalid user token specified to provisioning service - check token or contact customer service"));
+            break;
+        default:
+            NABTO_LOG_FATAL(("Provisoning failed with status [%d]", status));
+            break;
+        }
+        return false;
+    } else {
+        return true;
+    }
+}
 
-char *filePathPtr;
-#if 0
 bool unabto_provision_set_key(nabto_main_setup *nms, char *key)
 {
     size_t i;
@@ -41,109 +54,24 @@ bool unabto_provision_set_key(nabto_main_setup *nms, char *key)
     return true;
 }
 
-bool set_unabto_id(nabto_main_setup *nms, char *id)
+bool unabto_provision_try_existing(nabto_main_setup *nms,
+                                   provision_context_t* context,
+                                   const char* path)
 {
-    char *nabtoId = malloc(sizeof(char) * strlen(id));
-    if (!nabtoId) {
-        NABTO_LOG_ERROR(("Failed to allocate id"));
-        return false;
-    }
-
-    sprintf(nabtoId, "%s", id);
-    nms->id = nabtoId;
-    return true;
-}
-
-bool validate_string(char delim, char *string) {
-    size_t i, count = 0;
-    for (i = 0; i < strlen(string); i++) {
-        count += (string[i] == delim);
-    }
-    return count == 1 && string[i-1] != delim && string[0] != delim;
-}
-
-size_t curl_callback (void *contents, size_t size, size_t nmemb, void *userp)
-{
-    size_t realsize = size * nmemb;
-    struct curl_fetch_st *p = (struct curl_fetch_st *) userp;
-
-    // Expand buffer and check
-    p->payload = (char *) realloc(p->payload, p->size + realsize + 1);
-    if (p->payload == NULL) {
-        NABTO_LOG_ERROR(("Failed to expand buffer in curl_callback"));
-        return -1;
-    }
-
-    // Copy contents to buffer and ensure null termination
-    memcpy(&(p->payload[p->size]), contents, realsize);
-    p->size += realsize;
-    p->payload[p->size] = 0;
-
-    return realsize;
-}
-
-bool read_file(char *text, size_t size)
-{
-    FILE *fp = fopen(filePathPtr, "r");
-    if (!fp) {
-        return false;
-    }
-    fgets(text, size, fp);
-    fclose(fp);
-    return true;
-}
-
-bool write_file(char *text, size_t size)
-{
-    FILE *fp = fopen(filePathPtr, "wb");
-    if (!fp) {
-        return false;
-    }
-    fprintf(fp, "%.*s", (int)size, text);
-    fclose(fp);
-    return true;
-}
-
-bool unabto_provision_persistent(nabto_main_setup *nms, char *url, char *filePath)
-{
-    filePathPtr = filePath;
-    return unabto_provision_persistent_using_handles(nms,
-                                                     url,
-                                                     (unabtoPersistentFunction)read_file,
-                                                     (unabtoPersistentFunction)write_file);
-}
-
-bool unabto_provision_persistent_using_handles(nabto_main_setup *nms,
-                                               char *url,
-                                               unabtoPersistentFunction readFunc,
-                                               unabtoPersistentFunction writeFunc)
-{
-    char *ch;
-    char text[128] = {0};
-    size_t i = 0, len = 0;
-
+    char text[256];
     // If persistent file exists, use it
-    if (readFunc(text, sizeof(text))) {
-        return unabto_provision_parse(nms, text);
+    if (unabto_provision_read_file(path, text, sizeof(text))) {
+        return unabto_provision_parse_data(nms, text, nms->presharedKey);
     }
 
-    NABTO_LOG_INFO(("Provisioning file not found. Creating one..."));
+    NABTO_LOG_INFO(("Provisioning file not found, creating"));
 
-    if (!unabto_provision(nms, url)) {
+    if (!unabto_provision_execute(nms, context)) {
         return false;
     }
 
-    len = sprintf(text, "%s%s", nms->id, ":");
-    for (i = 0; i < sizeof(nms->presharedKey)/sizeof(nms->presharedKey[0]); i++) {
-        len += sprintf(text + len, "%02x", nms->presharedKey[i]);
-    }
-
-    if (!writeFunc(text, sizeof(text))) {
-        NABTO_LOG_ERROR(("Unable to write persistent data"));
-        return false;
-    }
-    return true;
+    return unabto_provision_write_file(path, nms);
+    
 }
 
-#endif
 #endif
