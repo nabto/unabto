@@ -65,7 +65,7 @@ bool unabto_provision_read_file(const char* path, char *text, size_t size)
     if (!ok) {
         NABTO_LOG_TRACE(("Empty provisioning file found at '%s'", path));
     }
-    return fclose(fp) && ok;
+    return (fclose(fp) == 0) && ok;
 }
 
 bool unabto_provision_test_create_file(const char* path)
@@ -76,7 +76,7 @@ bool unabto_provision_test_create_file(const char* path)
         return false;
     }
     bool ok = fprintf(fp, "") == 0;
-    return fclose(fp) && ok;
+    return (fclose(fp) == 0) && ok;
 }
 
 bool unabto_provision_write_file(const char* path, nabto_main_setup* nms)
@@ -95,8 +95,8 @@ bool unabto_provision_write_file(const char* path, nabto_main_setup* nms)
         NABTO_LOG_ERROR(("Could not open provisioning file '%s' for writing", path));
         return false;
     }
-    bool ok = (fprintf(fp, "%.*s", (int)(sizeof(text)), text) == sizeof(text));
-    return fclose(fp) && ok;
+    bool ok = (fprintf(fp, "%.*s", (int)(sizeof(text)), text) == strlen(text));
+    return (fclose(fp) == 0) && ok;
 }
 
 #endif
