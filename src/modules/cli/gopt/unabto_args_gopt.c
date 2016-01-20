@@ -249,7 +249,7 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
             nms->id = strdup(idParam);
         } else {
 #if NABTO_ENABLE_PROVISIONING
-            help("You must either specify provisioning options or specify a uNabto device id", progname);
+            help("You must either specify valid provisioning options or specify a uNabto device id", progname);
 #else
             help("You must specify an id for your uNabto device", progname);
 #endif

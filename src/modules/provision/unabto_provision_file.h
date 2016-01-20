@@ -13,6 +13,7 @@ typedef bool (*unabtoPersistentFunction)(char* text, size_t size);
 
 bool unabto_provision_parse_data(nabto_main_setup *nms, char *data, char *key);
 bool unabto_provision_read_file(const char* path, char *text, size_t size);
+bool unabto_provision_test_create_file(const char* path);
 bool unabto_provision_write_file(const char* path, nabto_main_setup* nms);
 
 #endif

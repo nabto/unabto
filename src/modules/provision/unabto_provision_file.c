@@ -4,8 +4,6 @@
 
 #if NABTO_ENABLE_PROVISIONING
 
-char *filePathPtr;
-
 static bool validate_string(char *string) {
     size_t i;
     size_t count = 0;
@@ -60,11 +58,25 @@ bool unabto_provision_read_file(const char* path, char *text, size_t size)
 {
     FILE *fp = fopen(path, "r");
     if (!fp) {
+        NABTO_LOG_TRACE(("Provisioning file not found at '%s'", path));
         return false;
     }
-    fgets(text, size, fp);
-    fclose(fp);
-    return true;
+    bool ok = fgets(text, size, fp) > 0;
+    if (!ok) {
+        NABTO_LOG_TRACE(("Empty provisioning file found at '%s'", path));
+    }
+    return fclose(fp) && ok;
+}
+
+bool unabto_provision_test_create_file(const char* path)
+{
+    FILE *fp = fopen(path, "wb");
+    if (!fp) {
+        NABTO_LOG_ERROR(("Could not open provisioning file '%s' for writing", path));
+        return false;
+    }
+    bool ok = fprintf(fp, "") == 0;
+    return fclose(fp) && ok;
 }
 
 bool unabto_provision_write_file(const char* path, nabto_main_setup* nms)
@@ -73,8 +85,8 @@ bool unabto_provision_write_file(const char* path, nabto_main_setup* nms)
     char text[128] = {0};
     size_t i = 0, len = 0;
 
-    len = snprintf(text, sizeof(text), "%s%s", nms->id, UNABTO_PROVISION_FILE_DELIMITER);
-    for (i = 0; i < sizeof(nms->presharedKey)/sizeof(nms->presharedKey[0]); i++) {
+    len = snprintf(text, sizeof(text), "%s%c", nms->id, UNABTO_PROVISION_FILE_DELIMITER);
+    for (i = 0; i < sizeof(nms->presharedKey)/sizeof(nms->presharedKey[0]) && len < sizeof(text); i++) {
         len += sprintf(text + len, "%02x", nms->presharedKey[i]);
     }
 
@@ -83,9 +95,8 @@ bool unabto_provision_write_file(const char* path, nabto_main_setup* nms)
         NABTO_LOG_ERROR(("Could not open provisioning file '%s' for writing", path));
         return false;
     }
-    fprintf(fp, "%.*s", (int)(sizeof(text)), text);
-    fclose(fp);
-    return true;
+    bool ok = (fprintf(fp, "%.*s", (int)(sizeof(text)), text) == sizeof(text));
+    return fclose(fp) && ok;
 }
 
 #endif

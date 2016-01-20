@@ -16,7 +16,9 @@
 bool unabto_provision_execute(nabto_main_setup* nms, provision_context_t* context) {
     uint8_t key[KEY_BUFFER_SIZE];
     unabto_provision_status_t status = unabto_provision_http(nms, context, key);
-    if (status != UPS_OK) {
+    if (status == UPS_OK) {
+        return unabto_provision_set_key(nms, key);
+    } else {
         switch (status) {
         case UPS_PROV_ALREADY_PROVISIONED:
             NABTO_LOG_FATAL(("Device is already provisioned - customer service must be contacted"));
@@ -29,8 +31,6 @@ bool unabto_provision_execute(nabto_main_setup* nms, provision_context_t* contex
             break;
         }
         return false;
-    } else {
-        return true;
     }
 }
 
@@ -54,23 +54,28 @@ bool unabto_provision_set_key(nabto_main_setup *nms, char *key)
     return true;
 }
 
-bool unabto_provision_try_existing(nabto_main_setup *nms,
-                                   provision_context_t* context,
-                                   const char* path)
+bool unabto_provision_try_existing(nabto_main_setup *nms, provision_context_t* context)
 {
     char text[256];
     // If persistent file exists, use it
-    if (unabto_provision_read_file(path, text, sizeof(text))) {
-        return unabto_provision_parse_data(nms, text, nms->presharedKey);
+    if (unabto_provision_read_file(context->file_, text, sizeof(text)) &&
+        unabto_provision_parse_data(nms, text, nms->presharedKey)) {
+        return true;
     }
 
-    NABTO_LOG_INFO(("Provisioning file not found, creating"));
+    NABTO_LOG_INFO(("No valid provisioning file found, creating new"));
 
+    // faily early (prior to invoking service) if filesystem trouble
+    if (unabto_provision_test_create_file(context->file_)) {
+        NABTO_LOG_FATAL(("Error creating provisioning file '%s'"));
+        return false;
+    }
+    
     if (!unabto_provision_execute(nms, context)) {
         return false;
     }
 
-    return unabto_provision_write_file(path, nms);
+    return unabto_provision_write_file(context->file_, nms);
     
 }
 

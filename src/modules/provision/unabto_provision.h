@@ -12,6 +12,7 @@ typedef struct {
     const uint8_t* api_key_;
     const uint8_t* token_;
     const uint8_t* id_;
+    const uint8_t* file_;
     uint8_t* key_;
 } provision_context_t;
 
@@ -30,9 +31,7 @@ bool unabto_provision_set_key(nabto_main_setup *nms, char *key);
  *                    provisioning information
  * return             true if successful
  */
-bool unabto_provision_try_existing(nabto_main_setup *nms,
-                                   provision_context_t* context,
-                                   const char* path);
+bool unabto_provision_try_existing(nabto_main_setup *nms, provision_context_t* context);
 
 bool unabto_provision_execute(nabto_main_setup* nms, provision_context_t* context);
 
