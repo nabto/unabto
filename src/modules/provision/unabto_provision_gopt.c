@@ -12,6 +12,10 @@
 #  define NABTO_DEVICE_KEY_FILE "~/.nabto-key.txt"
 #endif
 
+#ifndef NABTO_PROVISION_SCHEME
+#  define NABTO_PROVISION_SCHEME "http"
+#endif
+
 static bool set_default_prov_host(provision_context_t* context) {
 #ifdef NABTO_PROVISION_HOST
     context->host_ = NABTO_PROVISION_HOST;
@@ -24,6 +28,15 @@ static bool set_default_prov_host(provision_context_t* context) {
 static bool set_default_prov_apikey(provision_context_t* context) {
 #ifdef NABTO_PROVISION_API_KEY
     context->api_key_ = NABTO_PROVISION_API_KEY
+    return true;
+#else
+    return false;
+#endif
+}
+
+static bool set_scheme(provision_context_t* context) {
+#ifdef NABTO_PROVISION_SCHEME
+    context->scheme_ = NABTO_PROVISION_SCHEME;
     return true;
 #else
     return false;
@@ -49,13 +62,18 @@ bool unabto_provision_gopt_apply(nabto_main_setup* nms, const char* progname, vo
     provision_context_t context;
     memset(&context, 0, sizeof(context));
 
-    if (!gopt_arg(options, UNABTO_PROVISION_GOPT_HOST, (const char**)(&(context.host_))) && !set_default_prov_host(&context)) {
+        if (!gopt_arg(options, UNABTO_PROVISION_GOPT_HOST, (const char**)(&(context.host_))) && !set_default_prov_host(&context)) {
         NABTO_LOG_ERROR(("Provision host not specified on cmd line or in source"));
         return false;
     }
     
     if (!gopt_arg(options, UNABTO_PROVISION_GOPT_API_KEY, (const char**)(&(context.api_key_))) && !set_default_prov_apikey(&context)) {
         NABTO_LOG_ERROR(("Provision API key not specified on cmd line or in source"));
+        return false;
+    }
+
+    if (!set_scheme(&context)) {
+        NABTO_LOG_ERROR(("Scheme not set"));
         return false;
     }
 

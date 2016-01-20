@@ -34,7 +34,8 @@ bool unabto_provision_parse_data(nabto_main_setup *nms, char *data, char *key)
     NABTO_LOG_TRACE(("Parsing provision data: [%s]", data));
     char* tok;
     char delim[2];
-    snprintf(delim, sizeof(delim), "%s", UNABTO_PROVISION_FILE_DELIMITER);
+    delim[0] = UNABTO_PROVISION_FILE_DELIMITER;
+    delim[1] = 0;
     if (!validate_string(data)) {
         NABTO_LOG_ERROR(("Invalid provision string: %s", data));
         return false;

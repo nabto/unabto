@@ -1,6 +1,7 @@
 #include "unabto_config.h"
 #include "unabto_provision_http.h"
 #include "unabto_provision_http_curl.h"
+#include "unabto_provision_file.h"
 
 static const char* sslCaCertPath_;
 
@@ -56,8 +57,8 @@ static bool write_validate_url(uint8_t* buffer, size_t len, const provision_cont
     }
 }
 
-static bool write_provision_json_doc(uint8_t* buffer, size_t len, const uint8_t* id, provision_context_t* context) {
-    if (snprintf(buffer, len, "{\"id\": \"%s\", \"token\": \"%s\", \"simple\": 1}", id, context->token_) >= len) {
+static bool write_provision_json_doc(uint8_t* buffer, size_t len, provision_context_t* context) {
+    if (snprintf(buffer, len, "{\"id\": \"%s\", \"token\": \"%s\", \"simple\": 1}", context->id_, context->token_) >= len) {
         NABTO_LOG_ERROR(("JSON buffer too small for request"));
         return false;
     } else {
@@ -173,7 +174,7 @@ unabto_provision_status_t unabto_provision_http(nabto_main_setup* nms, provision
     }
 
     uint8_t json[SERVICE_POST_MAX_LENGTH];
-    if (!write_provision_json_doc(json, sizeof(json), nms->id, context)) {
+    if (!write_provision_json_doc(json, sizeof(json), context)) {
         return UPS_INTERNAL_ERROR;
     }
 
