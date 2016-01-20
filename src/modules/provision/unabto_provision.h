@@ -33,6 +33,6 @@ bool unabto_provision_set_key(nabto_main_setup *nms, char *key);
  */
 bool unabto_provision_try_existing(nabto_main_setup *nms, provision_context_t* context);
 
-bool unabto_provision_execute(nabto_main_setup* nms, provision_context_t* context);
+bool unabto_provision_new(nabto_main_setup* nms, provision_context_t* context);
 
 #endif

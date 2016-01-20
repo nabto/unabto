@@ -72,6 +72,19 @@ bool unabto_provision_gopt_apply(nabto_main_setup* nms, const char* progname, vo
     provision_context_t context;
     memset(&context, 0, sizeof(context));
 
+    if (!gopt_arg(options, UNABTO_PROVISION_GOPT_FILE, (const char**)(&(context.file_))) && !set_default_prov_file(&context)) {
+        NABTO_LOG_ERROR(("File location not specified on cmd line or in source"));
+        return false;
+    }
+
+    gopt_arg(options, UNABTO_PROVISION_GOPT_ID_INPUT, (const char**)&(context.id_));
+
+    if (unabto_provision_try_existing(nms, &context)) {
+        return true;
+    } else {
+        NABTO_LOG_INFO(("Performing new provisioning"));
+    }
+
     if (!gopt_arg(options, UNABTO_PROVISION_GOPT_HOST, (const char**)(&(context.host_))) && !set_default_prov_host(&context)) {
         NABTO_LOG_ERROR(("Provision host not specified on cmd line or in source"));
         return false;
@@ -82,24 +95,17 @@ bool unabto_provision_gopt_apply(nabto_main_setup* nms, const char* progname, vo
         return false;
     }
 
-    if (!gopt_arg(options, UNABTO_PROVISION_GOPT_FILE, (const char**)(&(context.file_))) && !set_default_prov_file(&context)) {
-        NABTO_LOG_ERROR(("File location not specified on cmd line or in source"));
-        return false;
-    }
-
     if (!set_scheme(&context)) {
         NABTO_LOG_ERROR(("Scheme not set"));
         return false;
     }
 
-    gopt_arg(options, UNABTO_PROVISION_GOPT_ID_INPUT, (const char**)&(context.id_));
-    
     gopt_arg(options, UNABTO_PROVISION_GOPT_USER_TOKEN, (const char**)(&(context.token_)));
 
     NABTO_LOG_TRACE(("Provisioning context: host_=%s, api_key_=%s, token_=%s, id_=%s, file_=%s",
                      context.host_, context.api_key_, context.token_, context.id_, context.file_));
 
-    return unabto_provision_try_existing(nms, &context);
+    return unabto_provision_new(nms, &context);
 }
 
 #endif

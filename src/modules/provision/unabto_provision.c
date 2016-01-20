@@ -13,11 +13,18 @@
 #include "unabto_provision_http.h"
 #include "unabto_provision_file.h"
 
-bool unabto_provision_execute(nabto_main_setup* nms, provision_context_t* context) {
+bool unabto_provision_new(nabto_main_setup* nms, provision_context_t* context) {
+    // fail early (prior to invoking service) if filesystem trouble
+    if (!unabto_provision_test_create_file(context->file_)) {
+        NABTO_LOG_FATAL(("Error creating provisioning file '%s'"));
+        return false;
+    }
+    
     uint8_t key[KEY_BUFFER_SIZE];
     unabto_provision_status_t status = unabto_provision_http(nms, context, key);
     if (status == UPS_OK) {
-        return unabto_provision_set_key(nms, key);
+        return unabto_provision_set_key(nms, key) &&
+            unabto_provision_write_file(context->file_, nms);
     } else {
         switch (status) {
         case UPS_PROV_ALREADY_PROVISIONED:
@@ -57,26 +64,18 @@ bool unabto_provision_set_key(nabto_main_setup *nms, char *key)
 bool unabto_provision_try_existing(nabto_main_setup *nms, provision_context_t* context)
 {
     char text[256];
-    // If persistent file exists, use it
-    if (unabto_provision_read_file(context->file_, text, sizeof(text)) &&
-        unabto_provision_parse_data(nms, text, nms->presharedKey)) {
-        return true;
-    }
-
-    NABTO_LOG_INFO(("No valid provisioning file found, creating new"));
-
-    // faily early (prior to invoking service) if filesystem trouble
-    if (unabto_provision_test_create_file(context->file_)) {
-        NABTO_LOG_FATAL(("Error creating provisioning file '%s'"));
+    if (!unabto_provision_read_file(context->file_, text, sizeof(text))) {
         return false;
     }
-    
-    if (!unabto_provision_execute(nms, context)) {
+    char key[PRE_SHARED_KEY_SIZE * 2];
+    if (!unabto_provision_parse_data(nms, text, key)) {
         return false;
     }
-
-    return unabto_provision_write_file(context->file_, nms);
-    
+    if (context->id_ && strcmp(nms->id, context->id_) != 0) {
+        NABTO_LOG_WARN(("Specified id is different than existing id - ignoring existing and treating as new"));
+        return false;
+    }
+    return unabto_provision_set_key(nms, key);
 }
 
 #endif
