@@ -320,6 +320,15 @@ set(unabto_module_timers_tick_timer_src
   ${UNABTO_MODULES_SRC_DIR}/timers/tick_timer/unabto_tick_timer.c)
 
 
+# modules/provision
+set(unabto_module_provision_src
+  ${UNABTO_MODULES_SRC_DIR}/provision/unabto_provision.c
+  ${UNABTO_MODULES_SRC_DIR}/provision/unabto_provision_http.c
+  ${UNABTO_MODULES_SRC_DIR}/provision/unabto_provision_http_curl.c
+  ${UNABTO_MODULES_SRC_DIR}/provision/unabto_provision_file.c
+  ${UNABTO_MODULES_SRC_DIR}/provision/unabto_provision_gopt.c)
+
+
 #######################
 # DEMO SOURCE SECTION #
 #######################

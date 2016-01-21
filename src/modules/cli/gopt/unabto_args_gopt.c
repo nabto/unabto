@@ -8,17 +8,14 @@
 #include "unabto/unabto_env_base.h"
 #include "modules/cli/unabto_args.h"
 #include "modules/diagnostics/unabto_diag.h"
-
-#ifdef NABTO_ENABLE_PROVISIONING
-#  if !(defined(NABTO_PROVISION_HOST) && defined(NABTO_PROVISION_API_KEY) && defined(NABTO_DEVICE_KEY_FILE))
-#    error("Missing static configuration of provisioning host, api key and keyfile")
-#  endif
-#include "modules/provision/unabto_provision.h"
+#if NABTO_ENABLE_PROVISIONING
+#include "modules/provision/unabto_provision_gopt.h"
 #endif
 
 #include "unabto/unabto_logging.h"
 #include "unabto_version.h"
 #include "gopt.h" // http://www.purposeful.co.uk/software/gopt/
+
 
 #ifndef WIN32
 #include <sys/types.h>
@@ -26,20 +23,9 @@
 #include <netdb.h>
 #include <netinet/in.h>
 
-
-/// Provide the safe version API. @param src source @param format formatstring @param param1 the parameter
-/// TODO: use proper linux variant!!!!
-#define sscanf_s(src, format, param1) sscanf(src, format, param1)
-
 #else
 #define strdup _strdup
 #endif
-
-/**
- * @file
- * The uNabto Program Argument Verification (PC Device) Implementation.
- */
-
 
 /**
  * Print help message
@@ -48,39 +34,41 @@
 static void help(const char* errmsg, const char *progname)
 {
     if (errmsg) {
-        NABTO_LOG_INFO(("ERROR: %s", errmsg));
+        printf("ERROR: %s\n", errmsg);
     }
-    NABTO_LOG_INFO(("Usage: %s -d <host id> [options]", progname));
+    printf("Usage: %s -d <host id> [options]\n", progname);
 #if NABTO_ENABLE_PROVISIONING
-    NABTO_LOG_INFO((" - or: %s -P <mac address to use for provisioning> [options]", progname));
+    printf(" - or: %s -P [<provisioning options>] [general options]\n", progname);
 #endif
-    NABTO_LOG_INFO(("    -d: the host id to use (e.g. myweatherstation.nabto.net)"));
-    NABTO_LOG_INFO(("    -s: use encryption (if no -k parameter specified, a null preshared secret is used)"));
-    NABTO_LOG_INFO(("    -k: preshared key to use for encryption"));
-    NABTO_LOG_INFO(("    -A: register with specified basestation"));
-    NABTO_LOG_INFO(("        - if omitted, the basestation address is resolved using the specified server id"));
-    NABTO_LOG_INFO(("    -a: bind to specified local address"));
-    NABTO_LOG_INFO(("    -p: bind to specified local port"));
-    NABTO_LOG_INFO(("    -i: bind to specified local interface (Unix only)"));
-    NABTO_LOG_INFO(("    -V: print version and exit"));
-    NABTO_LOG_INFO(("    -C: print configuration (unabto_config.h) and exit"));
-    NABTO_LOG_INFO(("    -S: print size (in bytes) of memory usage and exit"));
+    printf("    -d: the host id to use (e.g. myweatherstation.nabto.net)\n");
+    printf("    -s: use encryption (if no -k parameter specified, a null preshared secret is used)\n");
+    printf("    -k: preshared key to use for encryption\n");
+    printf("    -A: register with specified basestation\n");
+    printf("        - if omitted, the basestation address is resolved using the specified server id\n");
+    printf("    -a: bind to specified local address\n");
+    printf("    -p: bind to specified local port\n");
+    printf("    -i: bind to specified local interface (Unix only)\n");
+    printf("    -V: print version and exit\n");
+    printf("    -C: print configuration (unabto_config.h) and exit\n");
+    printf("    -S: print size (in bytes) of memory usage and exit\n");
 
-#if NABTO_ENABLE_DNS_FALLBACK
-    NABTO_LOG_INFO(("Dns fallback options"));
-    NABTO_LOG_INFO(("    --enablednsfallback: enable unabto via dns"));
-    NABTO_LOG_INFO(("    --forcednsfallback: force unabto via dns, do not wait for normal udp attach to fail"));
-    NABTO_LOG_INFO(("    --dnsaddress: override system dns server"));
-    NABTO_LOG_INFO(("    --dnsfallbackdomain: override default dnsfallback domain"));
+#if NABTO_ENABLE_PROVISIONING
+    unabto_provision_gopt_help(progname);
 #endif
+
+
 } /* help(const char* errmsg) */
 
 enum {
     FORCE_DNS_FALLBACK = 127,
     ENABLE_DNS_FALLBACK,
     DNS_ADDRESS,
-    DNS_FALLBACK_DOMAIN
+    DNS_FALLBACK_DOMAIN,
 };
+
+#if NABTO_ENABLE_PROVISIONING
+#define UNABTO_PROVISION_GOPT_START_ENUM 255
+#endif
 
 bool check_args(int argc, char* argv[], nabto_main_setup *nms)
 {
@@ -102,10 +90,6 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
     const char *dnsAddress;
     const char *dnsFallbackDomain;
 #endif
-
-#if NABTO_ENABLE_PROVISIONING
-    const char *macAddr;
-#endif
     
     const char x0s[] = "h?";     const char* x0l[] = { "help", "HELP", 0 };
     const char x1s[] = "a";      const char* x1l[] = { "localAddress", 0 };
@@ -125,9 +109,13 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
     const char x15s[] = "";      const char* x15l[] = { "forcednsfallback", 0 };
     const char x16s[] = "";      const char* x16l[] = { "dnsaddress", 0 };
     const char x17s[] = "";      const char* x17l[] = { "dnsfallbackdomain", 0 };
-    const char x18s[] = "P";     const char* x18l[] = { "provision-mac", 0 };
+    const char x18s[] = "P";     const char* x18l[] = { "provision", 0 };
     const char x19s[] = "";      const char* x19l[] = { "enablednsfallback", 0 };
 
+    #define FOO_XXX "size"
+
+//    const char* x19l[] = { "enablednsfallback", 0 };
+    
     const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
         { 'h', 0,           x0s, x0l },
         { 'a', GOPT_ARG,    x1s, x1l },
@@ -143,12 +131,16 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
         { 'U', GOPT_ARG,    x11s, x11l },
         { 'V', GOPT_NOARG,  x12s, x12l },
         { 'C', GOPT_NOARG,  x13s, x13l },
-        { 'S', GOPT_NOARG,  x14s, x14l },        
+        { 'S', GOPT_NOARG,  x14s, x14l },
         { FORCE_DNS_FALLBACK, GOPT_NOARG, x15s, x15l },
         { DNS_ADDRESS, GOPT_ARG, x16s, x16l },
         { DNS_FALLBACK_DOMAIN, GOPT_ARG, x17s, x17l },
-        { 'P', GOPT_ARG,    x18s, x18l },
+        { 'P', GOPT_NOARG,    x18s, x18l },
         { ENABLE_DNS_FALLBACK, GOPT_NOARG, x19s, x19l },
+
+#if NABTO_ENABLE_PROVISIONING
+    UNABTO_PROVISION_GOPT_ARGS()
+#endif
         { 0,0,0,0 }
     };
 
@@ -224,7 +216,7 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
         size_t pskLen = strlen(preSharedKey);
         // read the pre shared key as a hexadecimal string.
         for (i = 0; i < pskLen/2 && i < 16; i++) {
-            sscanf_s(preSharedKey+(2*i), "%02hhx", &nms->presharedKey[i]);
+            sscanf(preSharedKey+(2*i), "%02hhx", &nms->presharedKey[i]);
         }
     }
 
@@ -248,16 +240,8 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
     }
 
 #if NABTO_ENABLE_PROVISIONING
-    if ( gopt_arg( options, 'P', &macAddr)) {
-        char url[1024];
-        if (snprintf(url, sizeof(url), "https://%s/mr/provision/app_simple.json?mac=%s&api_key=%s", NABTO_PROVISION_HOST, macAddr, NABTO_PROVISION_API_KEY) > sizeof(url)) {
-            help("Illegal provision info", progname);
-            return false;
-        }
-        if (!unabto_provision_persistent(nms, url, NABTO_DEVICE_KEY_FILE)) {
-            NABTO_LOG_FATAL(("uNabto provisioning failed"));
-        }
-        idOk = 1;
+    if (gopt(options, 'P')) {
+        idOk = unabto_provision_gopt_apply(nms, progname, options);
     }
 #endif
     if (!idOk) {
@@ -265,7 +249,7 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
             nms->id = strdup(idParam);
         } else {
 #if NABTO_ENABLE_PROVISIONING
-            help("You must either specify a mac address for your device for provisioning or specify a uNabto device id", progname);
+            help("You must either specify valid provisioning options or specify a uNabto device id", progname);
 #else
             help("You must specify an id for your uNabto device", progname);
 #endif
