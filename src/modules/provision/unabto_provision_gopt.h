@@ -1,6 +1,11 @@
 #ifndef _UNABTO_PROVISION_GOPT_H
 #define _UNABTO_PROVISION_GOPT_H
 
+/**
+ * Simplify using provisioning with cli/gopt module. See
+ * weather_station demo for example of usage.
+ */
+
 #include <unabto/unabto_env_base.h>
 #include "unabto_config.h"
 

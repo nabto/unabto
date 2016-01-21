@@ -17,7 +17,13 @@ const char* unabto_provision_http_get_cert_path() {
     return sslCaCertPath_;
 }
 
-unabto_provision_status_t unabto_provision_http_post_json(const char* url, const char* data, uint16_t* http_status, char** body) {
+unabto_provision_status_t unabto_provision_http_post(const char* url, const char* data, uint16_t* http_status, char** body, const char* headers)
+{
+    return unabto_provision_http_post_curl(url, data, http_status, body, headers);
+}
+
+unabto_provision_status_t unabto_provision_http_post_json(const char* url, const char* data, uint16_t* http_status, char** body)
+{
     return unabto_provision_http_post(url, data, http_status, body, "Content-Type: application/json");
 }
 
@@ -98,12 +104,11 @@ unabto_provision_status_t unabto_provision_validate_key(const uint8_t* id, const
     return status;
 }
 
-// always succeed - returns body if delimiter found, empty string otherwise
 void unabto_provision_http_extract_body(char** body, char* response) {
     const char* correct_delimiter = "\r\n\r\n";
-    const char* wapploxx_delimiter = "\n\n";
+    const char* broken_delimiter = "\n\n";
     const char* delimiter;
-    delimiter = wapploxx_delimiter; 
+    delimiter = broken_delimiter; 
     char* bodyWithPrefix = strstr(response, delimiter);
     if (!bodyWithPrefix) {
         delimiter = correct_delimiter;
@@ -120,8 +125,8 @@ void unabto_provision_http_extract_body(char** body, char* response) {
 static unabto_provision_status_t map_ws_response_to_status(uint16_t http_status, uint8_t* response)
 {   
     if (http_status == 403) {
-        NABTO_LOG_ERROR(("Bad api key, we assume this is a transient error in the central service"));
-        return UPS_PROV_SERVICE_PROBLEM;
+        NABTO_LOG_ERROR(("Bad api key"));
+        return UPS_PROV_INVALID_APIKEY;
     }
     if (http_status != 400) {
         NABTO_LOG_ERROR(("Unexpected http status [%d]", http_status));
@@ -162,10 +167,6 @@ static unabto_provision_status_t invoke_provision_service(const uint8_t* url, co
     }
 }
 
-
-// for docs:
-//    may return UPS_PROV_ALREADY_PROVISIONED, validate existing key with unabto_provision_validate_key
-//    UPS_OK: key set
 unabto_provision_status_t unabto_provision_http(nabto_main_setup* nms, provision_context_t* context, uint8_t* key)
 {
     char url[SERVICE_URL_MAX_LENGTH];

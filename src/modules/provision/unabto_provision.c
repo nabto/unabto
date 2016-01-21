@@ -28,7 +28,7 @@ bool unabto_provision_new(nabto_main_setup* nms, provision_context_t* context) {
     } else {
         switch (status) {
         case UPS_PROV_ALREADY_PROVISIONED:
-            NABTO_LOG_FATAL(("Device is already provisioned - customer service must be contacted"));
+            NABTO_LOG_FATAL(("Device is already provisioned - use service administration interface to re-open for new attempt"));
             break;
         case UPS_PROV_INVALID_TOKEN:
             NABTO_LOG_FATAL(("Invalid user token specified to provisioning service - check token or contact customer service"));

@@ -82,7 +82,8 @@ bool unabto_provision_write_file(const char* path, nabto_main_setup* nms)
 {
     char *ch;
     char text[128] = {0};
-    size_t i = 0, len = 0;
+    size_t i = 0;
+    size_t len = 0;
 
     len = snprintf(text, sizeof(text), "%s%c", nms->id, UNABTO_PROVISION_FILE_DELIMITER);
     for (i = 0; i < sizeof(nms->presharedKey)/sizeof(nms->presharedKey[0]) && len < sizeof(text); i++) {

@@ -6,14 +6,16 @@
 
 #include <curl/curl.h>
 
-struct MemoryStruct {
+void unabto_curl_header_cb(CURL *curl, void* userData);
+
+struct memory_struct {
   char *memory;
   size_t size;
 };
 
 size_t curl_writer_cb(char* contents, size_t size, size_t nmemb, void* userp) {
     size_t realsize = size * nmemb;
-    struct MemoryStruct *mem = (struct MemoryStruct *)userp;
+    struct memory_struct *mem = (struct memory_struct *)userp;
  
     mem->memory = realloc(mem->memory, mem->size + realsize + 1);
     if(mem->memory == NULL) {
@@ -29,8 +31,8 @@ size_t curl_writer_cb(char* contents, size_t size, size_t nmemb, void* userp) {
     return realsize;
 }
 
-void curl_post_cb(CURL *curl, void* userData) {
-    struct PostStruct* data = (struct PostStruct*)userData;
+void unabto_curl_post_cb(CURL *curl, void* userData) {
+    struct unabto_curl_post_struct* data = (struct unabto_curl_post_struct*)userData;
     curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data->postData);
     if (data->extra_options_cb) {
@@ -38,8 +40,8 @@ void curl_post_cb(CURL *curl, void* userData) {
     }
 }
 
-void curl_header_cb(CURL *curl, void* userData) {
-    struct PostStruct* data = (struct PostStruct*)userData;
+void unabto_curl_header_cb(CURL *curl, void* userData) {
+    struct unabto_curl_post_struct* data = (struct unabto_curl_post_struct*)userData;
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, data->headers);
 }
 
@@ -54,7 +56,7 @@ unabto_provision_status_t unabto_provision_http_invoke_curl(const char* url, uin
         return UPS_HTTP_OTHER;
     }
 
-    struct MemoryStruct chunk;
+    struct memory_struct chunk;
     chunk.memory = malloc(1024);
     if (!chunk.memory) {
         curl_easy_cleanup(curl);
@@ -110,19 +112,19 @@ unabto_provision_status_t unabto_provision_http_invoke_curl(const char* url, uin
     return status;
 }
 
-unabto_provision_status_t unabto_provision_http_post(const char* url, const char* data, uint16_t* http_status, char** body, const char* headers) {
-    struct PostStruct postStruct;
+unabto_provision_status_t unabto_provision_http_post_curl(const char* url, const char* data, uint16_t* http_status, char** body, const char* headers) {
+    struct unabto_curl_post_struct postStruct;
     snprintf(postStruct.postData, sizeof(postStruct.postData), data);
     NABTO_LOG_TRACE(("Posting to url [%s]: [%s]", url, data));
     postStruct.headers = NULL;
     if (strlen(headers) > 0) {
-        postStruct.extra_options_cb = curl_header_cb;    
+        postStruct.extra_options_cb = unabto_curl_header_cb;    
         postStruct.headers = curl_slist_append(postStruct.headers, "Content-Type: application/json");
     } else {
         postStruct.extra_options_cb = NULL;    
     }
     char* response;
-    unabto_provision_status_t status = unabto_provision_http_invoke_curl(url, http_status, &response, curl_post_cb, &postStruct);
+    unabto_provision_status_t status = unabto_provision_http_invoke_curl(url, http_status, &response, unabto_curl_post_cb, &postStruct);
     curl_slist_free_all(postStruct.headers);
     if (status == UPS_OK || status == UPS_HTTP_COMPLETE_NOT_200) {
         unabto_provision_http_extract_body(body, response);
