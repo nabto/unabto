@@ -13,7 +13,7 @@
 #endif
 
 #ifndef NABTO_PROVISION_SCHEME
-#  define NABTO_PROVISION_SCHEME "http"
+#  define NABTO_PROVISION_SCHEME "https"
 #endif
 
 static bool set_default_prov_host(provision_context_t* context) {
