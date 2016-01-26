@@ -755,7 +755,8 @@ enum np_payload_system_info_e {
     NP_PAYLOAD_SYSTEM_INFO_STUN_PORT_PRESERVING     = 6, /* uint8_t boolean. */
     NP_PAYLOAD_SYSTEM_INFO_STUN_HAIR_PINNING        = 7, /* uint8_t boolean. */
     NP_PAYLOAD_SYSTEM_INFO_STUN_GENERIC_NAT_ALG     = 8, /* uint8_t boolean. */
-    NP_PAYLOAD_SYSTEM_INFO_NAT64                    = 9  /* uint8_t nat64 type. */
+    NP_PAYLOAD_SYSTEM_INFO_NAT64                    = 9, /* uint8_t nat64 type. */
+    NP_PAYLOAD_SYSTEM_INFO_STUN_GLOBAL_IP_CHANGES   = 10 /* uint8_t boolean. */
 };
 
 enum np_payload_system_info_stun_mapping_e {
