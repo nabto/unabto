@@ -91,6 +91,10 @@ void unabto_init_default_values(nabto_main_setup* nms) {
     nms->streamReceiveWindowSize = NABTO_STREAM_RECEIVE_WINDOW_SIZE;
     nms->streamSendWindowSize = NABTO_STREAM_SEND_WINDOW_SIZE;
 #endif
+
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
+    nms->enableExtendedRendezvousMultipleSockets = true;
+#endif
     
 }
 

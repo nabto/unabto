@@ -80,7 +80,8 @@ enum {
     SELECT_BASED_OPTION,
     TUNNELS_OPTION,
     STREAM_WINDOW_SIZE_OPTION,
-    CONNECTIONS_SIZE_OPTION
+    CONNECTIONS_SIZE_OPTION,
+    DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
 };
 
 #if HANDLE_SIGNALS
@@ -140,6 +141,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x26s[] = "";      const char* x26l[] = { "tunnels", 0 };
     const char x27s[] = "";      const char* x27l[] = { "stream_window_size",0 };
     const char x28s[] = "";      const char* x28l[] = { "connections", 0 };
+    const char x29s[] = "";      const char* x29l[] = { "disable_extended_rendezvous_multiple_sockets", 0 };
 
     const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
         { 'h', GOPT_NOARG,   x1s, x1l },
@@ -170,6 +172,9 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         { STREAM_WINDOW_SIZE_OPTION, GOPT_ARG, x27s, x27l },
         { CONNECTIONS_SIZE_OPTION, GOPT_ARG, x28s, x28l },
 #endif
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
+        { DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS, GOPT_NOARG, x29s, x29l },
+#endif
         { 0,0,0,0 }
     };
 
@@ -193,7 +198,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("  -V, --version               Print version.\n");
         printf("  -C, --config                Print configuration (unabto_config.h).\n");
         printf("  -S, --size                  Print size (in bytes) of memory usage.\n");
-        printf("  -l, --nabtolog              Speficy log level such as *.trace");
+        printf("  -l, --nabtolog              Speficy log level such as *.trace.\n");
         printf("  -d, --device_name           Specify name of this device.\n");
         printf("  -H, --tunnel_default_host   Set default host name for tunnel (%s).\n", DEFAULT_HOST);
         printf("  -P, --tunnel_default_port   Set default port for tunnel (%u).\n", DEFAULT_PORT);
@@ -201,23 +206,26 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("  -k, --encryption_key        Specify encryption key.\n");
         printf("  -p, --localport             Specify port for local connections.\n");
         printf("  -A, --controller            Specify controller address\n");
-        printf("      --controller_port       sets the controller port number");
+        printf("      --controller_port       sets the controller port number.\n");
         printf("  -a, --check_acl             Perform ACL check when establishing connection.\n");
         printf("      --allow_all_ports       Allow connections to all port numbers.\n");
         printf("      --allow_port            Ports that are allowed. Requires -a.\n");
         printf("      --allow_host            Hostnames that are allowed. Requires -a.\n");
         printf("  -x, --nice_exit             Close the tunnels nicely when pressing Ctrl+C.\n");
 #if USE_TEST_WEBSERVER
-        printf("      --test_webserver        Specify port of test webserver and enable it\n");
+        printf("      --test_webserver        Specify port of test webserver and enable it.\n");
 #endif
-        printf("      --disable_tcp_fb        disable tcp fallback\n");
+        printf("      --disable_tcp_fb        Disable tcp fallback.\n");
 #if NABTO_ENABLE_EPOLL
-        printf("      --select_based          use select instead of epoll\n");
+        printf("      --select_based          Use select instead of epoll.\n");
 #endif
 #if NABTO_ENABLE_DYNAMIC_MEMORY
-        printf("      --tunnels               specify how many concurrent tcp streams should be possible.\n");
-        printf("      --stream_window_size    specify the stream window size, the larger the value the more memory the aplication will use, but higher throughput will be possible.\n");
-        printf("      --connections           specify the maximum number of allowed concurrent connections.\n");
+        printf("      --tunnels               Specify how many concurrent tcp streams should be possible.\n");
+        printf("      --stream_window_size    Specify the stream window size, the larger the value the more memory the aplication will use, but higher throughput will be possible.\n");
+        printf("      --connections           Specify the maximum number of allowed concurrent connections.\n");
+#endif
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
+        printf("      --disable_extended_rendezvous_multiple_sockets     Disable multiple sockets in extended rendezvous.\n");
 #endif
         exit(0);
     }
@@ -370,6 +378,12 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 
     if (gopt_arg(options, CONNECTIONS_SIZE_OPTION, &connectionsOption)) {
         nms->connectionsSize = atoi(connectionsOption);
+    }
+#endif
+
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
+    if (gopt(options, DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS)) {
+        nms->enableExtendedRendezvousMultipleSockets = false;
     }
 #endif
 

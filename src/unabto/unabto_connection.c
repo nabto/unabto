@@ -717,7 +717,7 @@ void nabto_rendezvous_start(nabto_connect* con)
     unabto_connection_set_future_stamp(&rcs->timestamp, 0);
 
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
-    if (nmc.context.natType == NP_PAYLOAD_IPX_NAT_SYMMETRIC) {
+    if (nmc.context.natType == NP_PAYLOAD_IPX_NAT_SYMMETRIC && nmc.nabtoMainSetup.enableExtendedRendezvousMultipleSockets) {
         con->rendezvousConnectState.openManySockets = true;
         unabto_connection_set_future_stamp(&con->rendezvousConnectState.openManySocketsStamp, 20);
     }

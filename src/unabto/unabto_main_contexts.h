@@ -58,6 +58,10 @@ typedef struct {
     uint16_t          streamReceiveWindowSize;
     uint16_t          streamSendWindowSize;
 #endif
+
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
+    bool              enableExtendedRendezvousMultipleSockets; /**< enabled by default */
+#endif
     
 } nabto_main_setup;
 

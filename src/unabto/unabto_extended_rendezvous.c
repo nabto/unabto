@@ -1,3 +1,4 @@
+#include <unabto/unabto_memory.h>
 #include "unabto_extended_rendezvous.h"
 
 #include <unabto/unabto_external_environment.h>
@@ -47,20 +48,24 @@ uint16_t unabto_extended_rendezvous_next_port(unabto_extended_rendezvous_port_se
 nabto_socket_t extended_rendezvous_sockets[NABTO_EXTENDED_RENDEZVOUS_MAX_SOCKETS];
 
 void unabto_extended_rendezvous_init() {
-    int i;
-    for (i = 0; i < NABTO_EXTENDED_RENDEZVOUS_MAX_SOCKETS; i++) {
-        uint16_t localport = 0;
-        if (!nabto_init_socket(0, &localport, &extended_rendezvous_sockets[i])) {
-            NABTO_LOG_ERROR(("Cannot initialize extended rendezvous socket %i", i));
-            extended_rendezvous_sockets[i] = NABTO_INVALID_SOCKET;
+    if (nmc.nabtoMainSetup.enableExtendedRendezvousMultipleSockets) {
+        int i;
+        for (i = 0; i < NABTO_EXTENDED_RENDEZVOUS_MAX_SOCKETS; i++) {
+            uint16_t localport = 0;
+            if (!nabto_init_socket(0, &localport, &extended_rendezvous_sockets[i])) {
+                NABTO_LOG_ERROR(("Cannot initialize extended rendezvous socket %i", i));
+                extended_rendezvous_sockets[i] = NABTO_INVALID_SOCKET;
+            }
         }
     }
 }
 
 void unabto_extended_rendezvous_close() {
-    int i;
-    for (i = 0; i < NABTO_EXTENDED_RENDEZVOUS_MAX_SOCKETS; i++) {
-        nabto_close_socket(&extended_rendezvous_sockets[i]);
+    if (nmc.nabtoMainSetup.enableExtendedRendezvousMultipleSockets) {
+        int i;
+        for (i = 0; i < NABTO_EXTENDED_RENDEZVOUS_MAX_SOCKETS; i++) {
+            nabto_close_socket(&extended_rendezvous_sockets[i]);
+        }
     }
 }
 
