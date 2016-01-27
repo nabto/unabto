@@ -3,7 +3,7 @@ project(weather_station)
 include (CheckIncludeFiles)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../build/cmake/unabto_project.cmake)
 
-CHECK_INCLUDE_FILES(curl.h HAVE_CURL_H)
+CHECK_INCLUDE_FILES(curl/curl.h HAVE_CURL_H)
 
 
 set(src
@@ -24,8 +24,8 @@ include_directories(
 
 if (HAVE_CURL_H)
   add_definitions(-DNABTO_ENABLE_PROVISIONING=1)
-  list(append src ${unabto_module_provision_src})
-  list(append unabto_link_libraries ${unabto_module_provision_libraries})
+  list(APPEND src ${unabto_module_provision_src})
+  list(APPEND unabto_link_libraries ${unabto_module_provision_libraries})
 endif()
 
 add_executable(${PROJECT_NAME} ${src})
