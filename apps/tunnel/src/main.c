@@ -215,7 +215,9 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 #if USE_TEST_WEBSERVER
         printf("      --test_webserver        Specify port of test webserver and enable it.\n");
 #endif
+#if NABTO_ENABLE_TCP_FALLBACK
         printf("      --disable_tcp_fb        Disable tcp fallback.\n");
+#endif
 #if NABTO_ENABLE_EPOLL
         printf("      --select_based          Use select instead of epoll.\n");
 #endif

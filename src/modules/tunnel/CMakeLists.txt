@@ -15,7 +15,6 @@ set(unabto_tunnel_src
 if (UNABTO_HAVE_EPOLL)
   add_definitions("-DNABTO_ENABLE_EPOLL=1")
   list(APPEND unabto_tunnel_src ${unabto_server_unabto_tunneling_src}/tunnel_epoll.c)
-  
 endif()
 
 source_group(modules\\tunnel\\src FILES ${unabto_tunnel_src})
@@ -27,6 +26,7 @@ list(APPEND unabto_src
   ${unabto_module_diagnostics_src}
   ${unabto_module_log_dynamic_src}
   ${unabto_module_log_syslog_src}
+  ${unabto_module_tcp_fallback_src}
 )
 
 add_definitions(${unabto_definitions})

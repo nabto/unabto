@@ -22,6 +22,8 @@
 
 #define NABTO_ENABLE_DYNAMIC_MEMORY 1
 
+#define NABTO_ENABLE_TCP_FALLBACK 1
+
 #include <assert.h>
 #define UNABTO_ASSERT(expr) assert(expr)
 
