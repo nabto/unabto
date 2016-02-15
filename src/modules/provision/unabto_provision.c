@@ -16,11 +16,11 @@
 bool unabto_provision_new(nabto_main_setup* nms, provision_context_t* context) {
     // fail early (prior to invoking service) if filesystem trouble
     if (!unabto_provision_test_create_file(context->file_)) {
-        NABTO_LOG_FATAL(("Error creating provisioning file '%s'"));
+        NABTO_LOG_FATAL(("Error creating provisioning file '%s'", context->file_));
         return false;
     }
     
-    uint8_t key[KEY_BUFFER_SIZE];
+    char key[KEY_BUFFER_SIZE];
     unabto_provision_status_t status = unabto_provision_http(nms, context, key);
     if (status == UPS_OK) {
         return unabto_provision_set_key(nms, key) &&

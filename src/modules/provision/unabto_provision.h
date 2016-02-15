@@ -18,12 +18,12 @@
  * provided by Nabto.
  */
 typedef struct {
-    const uint8_t* scheme_;   // http/https
-    const uint8_t* host_;     // provisioning webservice hostname 
-    const uint8_t* api_key_;  // apikey to obtain access to webservices
-    const uint8_t* token_;    // optional one-time token (activation code)
-    const uint8_t* id_;       // device id input as configured for project (e.g. mac address)
-    const uint8_t* file_;     // where to store output
+    const char* scheme_;   // http/https
+    const char* host_;     // provisioning webservice hostname 
+    const char* api_key_;  // apikey to obtain access to webservices
+    const char* token_;    // optional one-time token (activation code)
+    const char* id_;       // device id input as configured for project (e.g. mac address)
+    const char* file_;     // where to store output
 } provision_context_t;
 
 /**

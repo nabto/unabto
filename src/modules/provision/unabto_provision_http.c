@@ -5,7 +5,7 @@
 
 static const char* sslCaCertPath_;
 
-static unabto_provision_status_t map_ws_response_to_status(uint16_t http_status, uint8_t* response);
+static unabto_provision_status_t map_ws_response_to_status(uint16_t http_status, const char* response);
 
 unabto_provision_status_t unabto_provision_http_set_cert_path(const char* path)
 {
@@ -40,7 +40,7 @@ void curl_fetch_cb(CURL *curl, void* userData) {
     }
 }
 
-static bool write_provision_url(uint8_t* buffer, size_t len, provision_context_t* context) {
+static bool write_provision_url(char* buffer, size_t len, provision_context_t* context) {
     if (snprintf(buffer, len, "%s://%s%s?APIKEY=%s",
                  context->scheme_, context->host_, NABTO_PROVISION_CREATE_PATH, context->api_key_
             ) >= len) {
@@ -51,7 +51,7 @@ static bool write_provision_url(uint8_t* buffer, size_t len, provision_context_t
     }
 }
 
-static bool write_validate_url(uint8_t* buffer, size_t len, const provision_context_t* context, const uint8_t* id, const uint8_t* key) {
+static bool write_validate_url(char* buffer, size_t len, const provision_context_t* context, const char* id, const char* key) {
     if (snprintf(buffer, len, "%s://%s%s?APIKEY=%s&id=%s&key=%s",
                  context->scheme_, context->host_, NABTO_PROVISION_VALIDATE_PATH,
                  context->api_key_, id, key
@@ -63,7 +63,7 @@ static bool write_validate_url(uint8_t* buffer, size_t len, const provision_cont
     }
 }
 
-static bool write_provision_json_doc(uint8_t* buffer, size_t len, provision_context_t* context) {
+static bool write_provision_json_doc(char* buffer, size_t len, provision_context_t* context) {
     if (snprintf(buffer, len, "{\"id\": \"%s\", \"token\": \"%s\", \"simple\": 1}", context->id_, context->token_) >= len) {
         NABTO_LOG_ERROR(("JSON buffer too small for request"));
         return false;
@@ -86,15 +86,15 @@ unabto_provision_status_t unabto_provision_http_get(const char* url, uint16_t* h
 }
 
 
-unabto_provision_status_t unabto_provision_validate_key(const uint8_t* id, const uint8_t* key, provision_context_t* context) {
+unabto_provision_status_t unabto_provision_validate_key(const char* id, const char* key, provision_context_t* context) {
     char url[SERVICE_URL_MAX_LENGTH];
     if (!write_validate_url(url, sizeof(url), context, id, key)) {
         return UPS_INTERNAL_ERROR;
     }
 
     uint16_t http_status = 0;
-    uint8_t* response;
-    unabto_provision_status_t status = unabto_provision_http_get(url, &http_status, (char**)&response);
+    char* response;
+    unabto_provision_status_t status = unabto_provision_http_get(url, &http_status, &response);
     if (status == UPS_OK) {
         free(response);
     } else if (status == UPS_HTTP_COMPLETE_NOT_200) {
@@ -122,7 +122,7 @@ void unabto_provision_http_extract_body(char** body, char* response) {
     }
 }
 
-static unabto_provision_status_t map_ws_response_to_status(uint16_t http_status, uint8_t* response)
+static unabto_provision_status_t map_ws_response_to_status(uint16_t http_status, const char* response)
 {   
     if (http_status == 403) {
         NABTO_LOG_ERROR(("Bad api key"));
@@ -153,9 +153,9 @@ static unabto_provision_status_t map_ws_response_to_status(uint16_t http_status,
     return UPS_PROV_SERVICE_PROBLEM;
 }
 
-static unabto_provision_status_t invoke_provision_service(const uint8_t* url, const uint8_t* input, uint8_t** response) {
+static unabto_provision_status_t invoke_provision_service(const char* url, const char* input, char** response) {
     uint16_t http_status = 0;
-    unabto_provision_status_t status = unabto_provision_http_post_json(url, input, &http_status, (char**)response);
+    unabto_provision_status_t status = unabto_provision_http_post_json(url, input, &http_status, response);
     if (status == UPS_OK) {
         return UPS_OK;
     } else {
@@ -167,19 +167,19 @@ static unabto_provision_status_t invoke_provision_service(const uint8_t* url, co
     }
 }
 
-unabto_provision_status_t unabto_provision_http(nabto_main_setup* nms, provision_context_t* context, uint8_t* key)
+unabto_provision_status_t unabto_provision_http(nabto_main_setup* nms, provision_context_t* context, char* key)
 {
     char url[SERVICE_URL_MAX_LENGTH];
     if (!write_provision_url(url, sizeof(url), context)) {
         return UPS_INTERNAL_ERROR;
     }
 
-    uint8_t json[SERVICE_POST_MAX_LENGTH];
+    char json[SERVICE_POST_MAX_LENGTH];
     if (!write_provision_json_doc(json, sizeof(json), context)) {
         return UPS_INTERNAL_ERROR;
     }
 
-    uint8_t* response;
+    char* response;
 
     unabto_provision_status_t status = invoke_provision_service(url, json, &response);
 
@@ -188,7 +188,7 @@ unabto_provision_status_t unabto_provision_http(nabto_main_setup* nms, provision
     }
 
     // parse response
-    if (unabto_provision_parse_data(nms, (char*)response, (char*)(key))) {
+    if (unabto_provision_parse_data(nms, (char*)response, key)) {
         status = UPS_OK;
     } else {
         NABTO_LOG_ERROR(("Invalid web service response: [%s]", response));

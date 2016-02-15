@@ -54,7 +54,7 @@ typedef enum {
  * @returns UPS_HTTP_SSL_PROBLEM if an https specific problem occurred
  * @returns UPS_HTTP_OTHER if another http related error occured
  */
-unabto_provision_status_t unabto_provision_http(nabto_main_setup* nms, provision_context_t* context, uint8_t* key);
+unabto_provision_status_t unabto_provision_http(nabto_main_setup* nms, provision_context_t* context, char* key);
 
 /**
  * Invoke provisioning webservice as specified in context to validate specified key.
@@ -70,7 +70,7 @@ unabto_provision_status_t unabto_provision_http(nabto_main_setup* nms, provision
  * @returns UPS_HTTP_SSL_PROBLEM if an https specific problem occurred
  * @returns UPS_HTTP_OTHER if another http related error occured
  */
-unabto_provision_status_t unabto_provision_validate_key(const uint8_t* id, const uint8_t* key, provision_context_t* context);
+unabto_provision_status_t unabto_provision_validate_key(const char* id, const char* key, provision_context_t* context);
 
 /**
  * Set SSL root cert path (full path to file bundle, e.g. cacert.pem).

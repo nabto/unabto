@@ -27,6 +27,7 @@
 #include "unabto_connection.h"
 #include "unabto_memory.h"
 #include "unabto_packet.h"
+#include "unabto_tcp_fallback.h"
 
 #include <string.h>
 #include <ctype.h>

@@ -114,7 +114,7 @@ unabto_provision_status_t unabto_provision_http_invoke_curl(const char* url, uin
 
 unabto_provision_status_t unabto_provision_http_post_curl(const char* url, const char* data, uint16_t* http_status, char** body, const char* headers) {
     struct unabto_curl_post_struct postStruct;
-    snprintf(postStruct.postData, sizeof(postStruct.postData), data);
+    snprintf(postStruct.postData, sizeof(postStruct.postData), "%s", data);
     NABTO_LOG_TRACE(("Posting to url [%s]: [%s]", url, data));
     postStruct.headers = NULL;
     if (strlen(headers) > 0) {
