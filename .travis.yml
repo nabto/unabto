@@ -1,0 +1,19 @@
+language: c
+
+compiler:
+  - gcc
+
+addons:
+  apt:
+    packages:
+      - cmake
+    sources:
+      - kalakris-cmake
+
+before_script:
+  - cmake --version
+
+script:
+  - mkdir cibuild
+  - cd cibuild
+  - cmake .. && make
