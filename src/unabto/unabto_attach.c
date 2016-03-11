@@ -780,7 +780,7 @@ void handle_as_idle(void) {
     }
 #endif
     nmc.controllerEp = nmc.nabtoMainSetup.controllerArg;
-    if (nmc.nabtoMainSetup.controllerArg.addr != INADDR_NONE) {
+    if (nmc.nabtoMainSetup.controllerArg.addr != UNABTO_INADDR_NONE) {
         SET_CTX_STATE_STAMP(NABTO_AS_WAIT_BS, 0);
         return;
     }
@@ -1005,7 +1005,7 @@ void send_basestation_attach_failure(uint8_t statusCode) {
     length = ptr - nabtoCommunicationBuffer;
     insert_length(nabtoCommunicationBuffer, length);
 
-    if (nmc.controllerEp.addr == INADDR_NONE) {
+    if (nmc.controllerEp.addr == UNABTO_INADDR_NONE) {
         NABTO_LOG_TRACE(("There is no valid address to send statistics packets to"));
     } else {
         send_to_basestation(nabtoCommunicationBuffer, length, &nmc.controllerEp);
