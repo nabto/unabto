@@ -61,9 +61,9 @@ NABTO_THREAD_LOCAL_STORAGE nabto_main_context nmc;
 
 void unabto_init_default_values(nabto_main_setup* nms) {
     nms->controllerArg.port = 5566;
-    nms->controllerArg.addr = INADDR_NONE; // NONE==> use DNS, ANY ==> don't use BS/GSP, other ==> use option as BS address
+    nms->controllerArg.addr = UNABTO_INADDR_NONE; // NONE==> use DNS, ANY ==> don't use BS/GSP, other ==> use option as BS address
     nms->localPort = 5570;
-    nms->ipAddress = INADDR_ANY; // If non zero, the client will use the address
+    nms->ipAddress = UNABTO_INADDR_ANY; // If non zero, the client will use the address
     nms->bufsize = NABTO_COMMUNICATION_BUFFER_SIZE;
     nms->id = 0;
     nms->version = 0;
@@ -83,7 +83,7 @@ void unabto_init_default_values(nabto_main_setup* nms) {
 #if NABTO_ENABLE_DNS_FALLBACK
     nms->enableDnsFallback = false;
     nms->forceDnsFallback = false;
-    nms->dnsAddress = INADDR_NONE;
+    nms->dnsAddress = UNABTO_INADDR_NONE;
 #endif
 
 #if NABTO_ENABLE_DYNAMIC_MEMORY
@@ -159,7 +159,7 @@ bool unabto_init(void) {
 
 #if NABTO_ENABLE_REMOTE_ACCESS
     nmc.socketGSPLocalEndpoint.port = 0;
-    if (nmc.nabtoMainSetup.controllerArg.addr != INADDR_ANY) {
+    if (nmc.nabtoMainSetup.controllerArg.addr != UNABTO_INADDR_ANY) {
         if (!nabto_init_socket(nmc.nabtoMainSetup.ipAddress, &nmc.socketGSPLocalEndpoint.port, &nmc.socketGSP))
         {
             return false;
@@ -247,7 +247,7 @@ void unabto_tick(void) {
 #endif
 
 #if NABTO_ENABLE_REMOTE_ACCESS
-    if (nmc.nabtoMainSetup.controllerArg.addr == INADDR_ANY) {
+    if (nmc.nabtoMainSetup.controllerArg.addr == UNABTO_INADDR_ANY) {
         return; // not ready to operate remote connections
     }
     if (unabto_read_socket(nmc.socketGSP)) {
