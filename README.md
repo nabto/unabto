@@ -1,4 +1,4 @@
-# uNabto SDK
+# uNabto SDK [![Build Status](https://travis-ci.org/nabto/unabto.svg?branch=master)](https://travis-ci.org/nabto/unabto)
 
 Nabto provides a full communication infrastructure to allow direct, encrypted communication between clients and IoT devices - the Nabto  communication platform. The platform supports direct peer-to-peer connectivity through NAT traversal.
 
