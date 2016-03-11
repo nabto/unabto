@@ -86,13 +86,11 @@
 #endif
 
 
-#ifndef WIN32
 #ifndef UNABTO_INADDR_NONE
 #define UNABTO_INADDR_NONE (0xffffffffu)
 #endif
 #ifndef UNABTO_INADDR_ANY
 #define UNABTO_INADDR_ANY 0x00000000u
-#endif
 #endif
 
 //#include <unabto/unabto_external_environment.h>
