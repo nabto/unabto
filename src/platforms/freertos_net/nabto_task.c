@@ -80,6 +80,12 @@ static void prvNabtoTask( void *pvParameters );
  */
 extern const char *pcApplicationNabtoDeviceURL( void );
 
+/*
+* The function that must be supplied by the application to return the preshared
+* crypto key used by the device.
+*/
+extern const char *pcApplicationNabtoDeviceKey(void);
+
 /*-----------------------------------------------------------*/
 
 /* The socket set used to block on the local and remote sockets 
@@ -194,8 +200,7 @@ portBASE_TYPE xReturn = pdPASS;
         nms->secureAttach = true;
         nms->secureData = true;
         nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
-  //      memcpy(nms->presharedKey, SHARED_CRYPTO_KEY, sizeof(nms->presharedKey));
-        memset(nms->presharedKey, 0, sizeof(nms->presharedKey));
+		memcpy(nms->presharedKey, pcApplicationNabtoDeviceKey(), PRE_SHARED_KEY_SIZE);
 
 		if( unabto_init() == false )
 		{
