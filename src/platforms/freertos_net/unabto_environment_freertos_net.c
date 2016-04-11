@@ -174,4 +174,9 @@ nabto_dns_status_t nabto_dns_is_resolved( const char *id, uint32_t* v4addr )
 
     return status;
 }
+/******************************************************************************/
 
+void setTimeFromGSP(uint32_t stamp)
+{
+	NABTO_NOT_USED(stamp);
+}
