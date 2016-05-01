@@ -30,7 +30,9 @@
 #include "unabto_tcp_fallback.h"
 
 #include <string.h>
+#ifndef ESP8266
 #include <ctype.h>
+#endif
 
 #if UNABTO_PLATFORM_PIC18
 #pragma udata big_mem
