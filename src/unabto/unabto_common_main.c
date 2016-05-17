@@ -30,7 +30,6 @@
 #include "unabto_tcp_fallback.h"
 
 #include <string.h>
-#include <ctype.h>
 
 #if UNABTO_PLATFORM_PIC18
 #pragma udata big_mem
@@ -121,7 +120,7 @@ nabto_main_setup* unabto_init_context(void) {
 
 bool unabto_init(void) {
     if (!checkValidDeviceId(nmc.nabtoMainSetup.id)) {
-        NABTO_LOG_FATAL(("%s is not a valid device id, uppercase letters are not allowed in a device id.", nmc.nabtoMainSetup.id));
+        NABTO_LOG_FATAL(("%s is not a valid device id, only \"a\" to \"z\", \"0\" to \"9\", hyphen (\"-\") and period (\".\") are allowed in a device id.", nmc.nabtoMainSetup.id));
         return false;
     }
 
@@ -365,7 +364,7 @@ void unabto_notify_ip_changed(uint32_t ip) {
 static bool checkValidDeviceId(const char* id) {
     while(*id)
     {
-        if(isupper(*id))
+        if(!((*id >= 'a' && *id <= 'z') || (*id >= '0' && *id <= '9') || *id == '-' || *id == '.')) 
         {
             NABTO_LOG_TRACE(("%c is not a valid device name character", *id));
             return false;
