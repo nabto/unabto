@@ -82,7 +82,7 @@ static bool validate_string(char delim, char *string)
 }
 
 unabto_provision_status_t unabto_provision_http_get(const char* url, uint16_t* http_status, char** response) {
-    return unabto_provision_http_invoke_curl(url, http_status, response, NULL, NULL);
+    return unabto_provision_http_invoke_curl(url, http_status, response, NULL);
 }
 
 
