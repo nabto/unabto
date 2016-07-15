@@ -4,7 +4,7 @@
 #ifndef _UNABTO_PLATFORM_TYPES_H_
 #define _UNABTO_PLATFORM_TYPES_H_
 
-#if (defined(WIN32) && _MSC_VER < 1600) || defined(WINCE)
+#if (defined(WIN32) && _MSC_VER < 1800) || defined(WINCE)
 typedef __int64     int64_t;
 typedef int         int32_t;
 typedef short int   int16_t;
