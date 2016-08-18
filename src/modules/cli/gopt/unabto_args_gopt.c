@@ -51,6 +51,7 @@ static void help(const char* errmsg, const char *progname)
     printf("    -V: print version and exit\n");
     printf("    -C: print configuration (unabto_config.h) and exit\n");
     printf("    -S: print size (in bytes) of memory usage and exit\n");
+    printf("    -U: override the default html device driver url\n");
 
 #if NABTO_ENABLE_PROVISIONING
     unabto_provision_gopt_help(progname);

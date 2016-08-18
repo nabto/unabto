@@ -591,7 +591,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
         uint8_t* decryptedDataStart;
         uint16_t decryptedDataLength;
         if (!unabto_connection_verify_and_decrypt_connect_packet(hdr, &decryptedDataStart, &decryptedDataLength)) {
-            NABTO_LOG_TRACE(("Failed to read crypto payload in U_CONNECT"));
+            NABTO_LOG_ERROR(("Failed to read crypto payload in U_CONNECT"));
         } else {
             unabto_crypto_reinit_d(&con->cryptoctx, nmc.nabtoMainSetup.cryptoSuite, decryptedDataStart, decryptedDataLength);
         }
