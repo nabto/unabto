@@ -879,7 +879,12 @@ void statistics_time_event(nabto_connect* con) {
 
 void nabto_time_event_connection(void)
 {
-    if (nabtoIsStampPassed(&connection_timeout_cache_stamp)) {
+    // If the timeout is cached and the timeout is not passed then we
+    // should not revisit the connection structure.
+    bool nothingToDo = connection_timeout_cache_cached && !nabtoIsStampPassed(&connection_timeout_cache_stamp);
+    if (nothingToDo) {
+        return;
+    } else {
         nabto_connect* con;
         connection_timeout_cache_cached = false;
         
