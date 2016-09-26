@@ -203,10 +203,10 @@ bool verification_check(verification_t* verif, const uint8_t* buf, const uint8_t
 
     while (ptr < end && *ptr == NP_PAYLOAD_VERIFY_GSP_FILLERBYTE) ++ptr;
     while (ptr < end) sum = (sum << 8) + *ptr++;
-//    NABTO_DEBUG("Verification from GSP: " << std::hex << verif->sum << ' ' << sum << std::dec
-//        << '\n' << nabto::BufPH(buf, end - buf));
-    if (verif->sum == sum) return true;
-    NABTO_LOG_ERROR(("Verification failed"));
+    if (verif->sum == sum) {
+        return true;
+    }
+    NABTO_LOG_ERROR(("Verification failed verif->sum %" PRIu32 " != sum %" PRIu32, verif->sum, sum));
     return false;
 }
 
