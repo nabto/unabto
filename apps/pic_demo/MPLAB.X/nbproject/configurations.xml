@@ -8,6 +8,37 @@
       <itemPath>../linker/pic18f97j60.lkr</itemPath>
     </logicalFolder>
     <logicalFolder name="f1" displayName="src" projectFiles="true">
+      <logicalFolder name="f1" displayName="3rdparty" projectFiles="true">
+        <logicalFolder name="f1" displayName="libtomcrypt" projectFiles="true">
+          <itemPath>../../../3rdparty/libtomcrypt/src/ciphers/aes/aes.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/modes/cbc/cbc_decrypt.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/modes/cbc/cbc_done.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/modes/cbc/cbc_encrypt.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/modes/cbc/cbc_start.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/hashes/sha2/sha256.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/hashes/helper/hash_memory.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/mac/hmac/hmac_done.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/mac/hmac/hmac_init.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/mac/hmac/hmac_process.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/misc/crypt/crypt_argchk.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/misc/crypt/crypt_cipher_descriptor.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/misc/crypt/crypt_cipher_is_valid.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/misc/crypt/crypt_find_cipher.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/misc/crypt/crypt_find_hash.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/misc/crypt/crypt_find_prng.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/misc/crypt/crypt_hash_descriptor.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/misc/crypt/crypt_hash_is_valid.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/misc/crypt/crypt_prng_descriptor.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/misc/crypt/crypt_prng_is_valid.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/misc/crypt/crypt_register_cipher.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/misc/crypt/crypt_register_hash.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/misc/crypt/crypt_register_prng.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/prngs/fortuna.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/prngs/rng_get_bytes.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/prngs/rng_make_prng.c</itemPath>
+          <itemPath>../../../3rdparty/libtomcrypt/src/misc/zeromem.c</itemPath>
+        </logicalFolder>
+      </logicalFolder>
       <logicalFolder name="Configs" displayName="Configs" projectFiles="true">
         <itemPath>../src/Configs/HWP PICDN2_ETH97.h</itemPath>
         <itemPath>../src/Configs/TCPIP ETH97.h</itemPath>
@@ -91,6 +122,11 @@
       </logicalFolder>
       <logicalFolder name="src" displayName="unabto" projectFiles="true">
         <logicalFolder name="f2" displayName="modules" projectFiles="true">
+          <logicalFolder name="f4" displayName="crypto" projectFiles="true">
+            <logicalFolder name="f1" displayName="libtomcrypt" projectFiles="true">
+              <itemPath>../../../src/modules/crypto/libtomcrypt/unabto_libtomcrypt.c</itemPath>
+            </logicalFolder>
+          </logicalFolder>
           <logicalFolder name="f1" displayName="network" projectFiles="true">
             <logicalFolder name="f1" displayName="microchip" projectFiles="true">
               <itemPath>../../../src/modules/network/microchip/unabto_microchip_arp.c</itemPath>
@@ -174,6 +210,8 @@
           <itemPath>../../../src/unabto/unabto_buffers.h</itemPath>
           <itemPath>../../../src/unabto/unabto_extended_rendezvous.c</itemPath>
           <itemPath>../../../src/unabto/unabto_extended_rendezvous.h</itemPath>
+          <itemPath>../../../src/unabto/unabto_aes128_sha256.c</itemPath>
+          <itemPath>../../../src/unabto/unabto_prf.c</itemPath>
         </logicalFolder>
       </logicalFolder>
       <itemPath>../src/HardwareProfile.h</itemPath>
@@ -192,6 +230,14 @@
   <sourceRootList>
     <Elem>../../../src/platforms</Elem>
     <Elem>../../../src/unabto</Elem>
+    <Elem>../../../src/modules/crypto/libtomcrypt</Elem>
+    <Elem>../../../3rdparty/libtomcrypt/src/ciphers/aes</Elem>
+    <Elem>../../../3rdparty/libtomcrypt/src/modes/cbc</Elem>
+    <Elem>../../../3rdparty/libtomcrypt/src/hashes/sha2</Elem>
+    <Elem>../../../3rdparty/libtomcrypt/src/hashes/helper</Elem>
+    <Elem>../../../3rdparty/libtomcrypt/src/mac/hmac</Elem>
+    <Elem>../../../3rdparty/libtomcrypt/src/prngs</Elem>
+    <Elem>../../../3rdparty/libtomcrypt/src/misc</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -211,8 +257,11 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <archiverTool>
+        </archiverTool>
         <loading>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <parseOnProdLoad>false</parseOnProdLoad>
           <alternateLoadableFile></alternateLoadableFile>
         </loading>
       </compileType>
@@ -650,19 +699,36 @@
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="false"/>
         <property key="memories.configurationmemory" value="false"/>
+        <property key="memories.configurationmemory2" value="true"/>
+        <property key="memories.dataflash" value="true"/>
         <property key="memories.eeprom" value="true"/>
         <property key="memories.flashdata" value="true"/>
         <property key="memories.id" value="true"/>
+        <property key="memories.instruction.ram" value="true"/>
+        <property key="memories.instruction.ram.end"
+                  value="${memories.instruction.ram.end.value}"/>
+        <property key="memories.instruction.ram.start"
+                  value="${memories.instruction.ram.start.value}"/>
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.end" value="0x1fff7"/>
+        <property key="memories.programmemory.partition2" value="true"/>
+        <property key="memories.programmemory.partition2.end"
+                  value="${memories.programmemory.partition2.end.value}"/>
+        <property key="memories.programmemory.partition2.start"
+                  value="${memories.programmemory.partition2.start.value}"/>
         <property key="memories.programmemory.start" value="0x0"/>
         <property key="poweroptions.powerenable" value="false"/>
+        <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
+        <property key="programoptions.preservedataflash" value="false"/>
         <property key="programoptions.preserveeeprom" value="false"/>
         <property key="programoptions.preserveprogramrange" value="false"/>
         <property key="programoptions.preserveprogramrange.end" value="0x1fff7"/>
         <property key="programoptions.preserveprogramrange.start" value="0x0"/>
         <property key="programoptions.preserveuserid" value="false"/>
+        <property key="programoptions.programcalmem" value="false"/>
+        <property key="programoptions.programuserotp" value="false"/>
+        <property key="programoptions.testmodeentrymethod" value="VDDFirst"/>
         <property key="programoptions.usehighvoltageonmclr" value="false"/>
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.25"/>
@@ -684,8 +750,11 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <archiverTool>
+        </archiverTool>
         <loading>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <parseOnProdLoad>false</parseOnProdLoad>
           <alternateLoadableFile></alternateLoadableFile>
         </loading>
       </compileType>
@@ -1103,19 +1172,36 @@
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="false"/>
         <property key="memories.configurationmemory" value="false"/>
+        <property key="memories.configurationmemory2" value="true"/>
+        <property key="memories.dataflash" value="true"/>
         <property key="memories.eeprom" value="true"/>
         <property key="memories.flashdata" value="true"/>
         <property key="memories.id" value="true"/>
+        <property key="memories.instruction.ram" value="true"/>
+        <property key="memories.instruction.ram.end"
+                  value="${memories.instruction.ram.end.value}"/>
+        <property key="memories.instruction.ram.start"
+                  value="${memories.instruction.ram.start.value}"/>
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.end" value="0x1fff7"/>
+        <property key="memories.programmemory.partition2" value="true"/>
+        <property key="memories.programmemory.partition2.end"
+                  value="${memories.programmemory.partition2.end.value}"/>
+        <property key="memories.programmemory.partition2.start"
+                  value="${memories.programmemory.partition2.start.value}"/>
         <property key="memories.programmemory.start" value="0x0"/>
         <property key="poweroptions.powerenable" value="false"/>
+        <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
+        <property key="programoptions.preservedataflash" value="false"/>
         <property key="programoptions.preserveeeprom" value="false"/>
         <property key="programoptions.preserveprogramrange" value="false"/>
         <property key="programoptions.preserveprogramrange.end" value="0x1fff7"/>
         <property key="programoptions.preserveprogramrange.start" value="0x0"/>
         <property key="programoptions.preserveuserid" value="false"/>
+        <property key="programoptions.programcalmem" value="false"/>
+        <property key="programoptions.programuserotp" value="false"/>
+        <property key="programoptions.testmodeentrymethod" value="VDDFirst"/>
         <property key="programoptions.usehighvoltageonmclr" value="false"/>
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.25"/>
@@ -1129,7 +1215,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>SKDEPIC32PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>1.10</languageToolchainVersion>
+        <languageToolchainVersion>1.11</languageToolchainVersion>
         <platform>2</platform>
       </toolsSet>
       <compileType>
@@ -1137,8 +1223,11 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <archiverTool>
+        </archiverTool>
         <loading>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <parseOnProdLoad>false</parseOnProdLoad>
           <alternateLoadableFile></alternateLoadableFile>
         </loading>
       </compileType>
@@ -1156,6 +1245,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1170,6 +1261,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1184,6 +1277,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1198,6 +1293,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1212,6 +1309,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1226,6 +1325,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1240,6 +1341,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1254,6 +1357,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1268,6 +1373,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1282,6 +1389,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1296,6 +1405,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1310,6 +1421,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1324,6 +1437,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1338,6 +1453,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1352,6 +1469,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1366,6 +1485,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1380,6 +1501,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1394,6 +1517,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1408,6 +1533,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1422,6 +1549,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1436,6 +1565,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1450,6 +1581,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1464,6 +1597,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1476,6 +1611,8 @@
       <item path="../linker/pic18f67j60.lkr" ex="true" overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1488,6 +1625,8 @@
       <item path="../linker/pic18f97j60.lkr" ex="true" overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1500,6 +1639,8 @@
       <item path="../src/Extra/OLED.h" ex="true" overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1512,6 +1653,8 @@
       <item path="../src/Extra/OSDOLED.c" ex="true" overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1524,6 +1667,8 @@
       <item path="../src/FreeRTOSConfig.h" ex="true" overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1536,6 +1681,8 @@
       <item path="../src/main_freertos.c" ex="true" overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1547,14 +1694,16 @@
       </item>
       <C32>
         <property key="additional-warnings" value="false"/>
+        <property key="addresss-attribute-use" value="false"/>
         <property key="enable-app-io" value="false"/>
         <property key="enable-omit-frame-pointer" value="false"/>
         <property key="enable-symbols" value="true"/>
         <property key="enable-unroll-loops" value="false"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="../src;../../../src;../../../external/Microchip/Include;../../../src/platforms/pic32"/>
+                  value="../src;../../../src;../../../external/Microchip/Include;../../../src/platforms/pic32;../../../3rdparty/libtomcrypt/src/headers"/>
         <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="optimization-level" value=""/>
@@ -1562,12 +1711,17 @@
         <property key="post-instruction-scheduling" value="default"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_PIC32_ETH_SK_ETH795;NABTO_DEVICE=NABTO_DEVICE_PIC32"/>
+                  value="CFG_INCLUDE_PIC32_ETH_SK_ETH795;NABTO_DEVICE=NABTO_DEVICE_PIC32;CRYPTO_DEMO"/>
         <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="toplevel-reordering" value=""/>
         <property key="use-cci" value="false"/>
+        <property key="use-iar" value="false"/>
         <property key="use-indirect-calls" value="false"/>
       </C32>
+      <C32-AR>
+        <property key="additional-options-chop-files" value="false"/>
+      </C32-AR>
       <C32-AS>
         <property key="assembler-symbols" value=""/>
         <property key="enable-symbols" value="true"/>
@@ -1576,6 +1730,8 @@
         <property key="extra-include-directories-for-assembler" value=""/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="false-conditionals" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-micro-compressed-code" value="false"/>
         <property key="keep-locals" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="list-source" value="false"/>
@@ -1587,21 +1743,38 @@
         <property key="warning-level" value=""/>
       </C32-AS>
       <C32-LD>
+        <property key="additional-options-use-response-files" value="false"/>
+        <property key="allocate-dinit" value="false"/>
+        <property key="code-dinit" value="false"/>
+        <property key="ebase-addr" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="exclude-floating-point-library" value="false"/>
         <property key="exclude-standard-libraries" value="false"/>
         <property key="extra-lib-directories" value=""/>
+        <property key="fill-flash-options-addr" value=""/>
+        <property key="fill-flash-options-const" value=""/>
+        <property key="fill-flash-options-how" value="0"/>
+        <property key="fill-flash-options-inc-const" value="1"/>
+        <property key="fill-flash-options-increment" value=""/>
+        <property key="fill-flash-options-seq" value=""/>
+        <property key="fill-flash-options-what" value="0"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
+        <property key="generate-micro-compressed-code" value="false"/>
         <property key="heap-size" value="16000"/>
         <property key="input-libraries" value=""/>
+        <property key="kseg-length" value=""/>
+        <property key="kseg-origin" value=""/>
         <property key="linker-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="no-startup-files" value="false"/>
+        <property key="oXC32ld-extra-opts" value=""/>
         <property key="optimization-level" value=""/>
         <property key="preprocessor-macros" value=""/>
         <property key="remove-unused-sections" value="false"/>
         <property key="report-memory-usage" value="false"/>
+        <property key="serial-length" value=""/>
+        <property key="serial-origin" value=""/>
         <property key="stack-size" value="2048"/>
         <property key="symbol-stripping" value=""/>
         <property key="trace-symbols" value=""/>
@@ -1609,6 +1782,7 @@
       </C32-LD>
       <C32CPP>
         <property key="additional-warnings" value="false"/>
+        <property key="addresss-attribute-use" value="false"/>
         <property key="check-new" value="false"/>
         <property key="eh-specs" value="true"/>
         <property key="enable-app-io" value="false"/>
@@ -1619,8 +1793,8 @@
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories" value=""/>
         <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="false"/>
-        <property key="keep-inline" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
@@ -1629,11 +1803,18 @@
         <property key="preprocessor-macros" value=""/>
         <property key="rtti" value="true"/>
         <property key="strict-ansi" value="false"/>
+        <property key="toplevel-reordering" value=""/>
         <property key="use-cci" value="false"/>
+        <property key="use-iar" value="false"/>
         <property key="use-indirect-calls" value="false"/>
       </C32CPP>
       <C32Global>
+        <property key="common-include-directories" value=""/>
+        <property key="gp-relative-option" value=""/>
         <property key="legacy-libc" value="false"/>
+        <property key="relaxed-math" value="false"/>
+        <property key="save-temps" value="false"/>
+        <property key="wpo-lto" value="false"/>
       </C32Global>
       <SKDEPIC32PlatformTool>
         <property key="whatToProgram" value="all"/>
@@ -1647,7 +1828,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>SKDEPIC32PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>1.10</languageToolchainVersion>
+        <languageToolchainVersion>1.42</languageToolchainVersion>
         <platform>2</platform>
       </toolsSet>
       <compileType>
@@ -1655,8 +1836,11 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <archiverTool>
+        </archiverTool>
         <loading>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <parseOnProdLoad>false</parseOnProdLoad>
           <alternateLoadableFile></alternateLoadableFile>
         </loading>
       </compileType>
@@ -1674,6 +1858,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1688,6 +1874,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1702,6 +1890,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1716,6 +1906,8 @@
             overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1728,6 +1920,8 @@
       <item path="../linker/pic18f67j60.lkr" ex="true" overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1740,6 +1934,8 @@
       <item path="../linker/pic18f97j60.lkr" ex="true" overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1752,6 +1948,8 @@
       <item path="../src/Extra/OLED.h" ex="true" overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1764,6 +1962,8 @@
       <item path="../src/Extra/OSDOLED.c" ex="true" overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1776,6 +1976,8 @@
       <item path="../src/main.c" ex="true" overriding="false">
         <C32>
         </C32>
+        <C32-AR>
+        </C32-AR>
         <C32-AS>
         </C32-AS>
         <C32-LD>
@@ -1787,6 +1989,7 @@
       </item>
       <C32>
         <property key="additional-warnings" value="false"/>
+        <property key="addresss-attribute-use" value="false"/>
         <property key="enable-app-io" value="false"/>
         <property key="enable-omit-frame-pointer" value="false"/>
         <property key="enable-symbols" value="true"/>
@@ -1795,6 +1998,7 @@
         <property key="extra-include-directories"
                   value="../src;../../../src;../../../external/Microchip/Include;../../../external/FreeRTOS/Source/include;../../../external/FreeRTOS/Source/portable/MPLAB/PIC32MX;../../../src/platforms/pic32"/>
         <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="optimization-level" value=""/>
@@ -1805,9 +2009,14 @@
                   value="CFG_INCLUDE_PIC32_ETH_SK_ETH795;NABTO_DEVICE=NABTO_DEVICE_PIC32"/>
         <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="toplevel-reordering" value=""/>
         <property key="use-cci" value="false"/>
+        <property key="use-iar" value="false"/>
         <property key="use-indirect-calls" value="false"/>
       </C32>
+      <C32-AR>
+        <property key="additional-options-chop-files" value="false"/>
+      </C32-AR>
       <C32-AS>
         <property key="assembler-symbols" value=""/>
         <property key="enable-symbols" value="true"/>
@@ -1816,6 +2025,8 @@
         <property key="extra-include-directories-for-assembler" value=""/>
         <property key="extra-include-directories-for-preprocessor" value="../src"/>
         <property key="false-conditionals" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-micro-compressed-code" value="false"/>
         <property key="keep-locals" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="list-source" value="false"/>
@@ -1827,21 +2038,38 @@
         <property key="warning-level" value=""/>
       </C32-AS>
       <C32-LD>
+        <property key="additional-options-use-response-files" value="false"/>
+        <property key="allocate-dinit" value="false"/>
+        <property key="code-dinit" value="false"/>
+        <property key="ebase-addr" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="exclude-floating-point-library" value="false"/>
         <property key="exclude-standard-libraries" value="false"/>
         <property key="extra-lib-directories" value=""/>
+        <property key="fill-flash-options-addr" value=""/>
+        <property key="fill-flash-options-const" value=""/>
+        <property key="fill-flash-options-how" value="0"/>
+        <property key="fill-flash-options-inc-const" value="1"/>
+        <property key="fill-flash-options-increment" value=""/>
+        <property key="fill-flash-options-seq" value=""/>
+        <property key="fill-flash-options-what" value="0"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
+        <property key="generate-micro-compressed-code" value="false"/>
         <property key="heap-size" value="16000"/>
         <property key="input-libraries" value=""/>
+        <property key="kseg-length" value=""/>
+        <property key="kseg-origin" value=""/>
         <property key="linker-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="no-startup-files" value="false"/>
+        <property key="oXC32ld-extra-opts" value=""/>
         <property key="optimization-level" value=""/>
         <property key="preprocessor-macros" value=""/>
         <property key="remove-unused-sections" value="false"/>
         <property key="report-memory-usage" value="false"/>
+        <property key="serial-length" value=""/>
+        <property key="serial-origin" value=""/>
         <property key="stack-size" value="2048"/>
         <property key="symbol-stripping" value=""/>
         <property key="trace-symbols" value=""/>
@@ -1849,6 +2077,7 @@
       </C32-LD>
       <C32CPP>
         <property key="additional-warnings" value="false"/>
+        <property key="addresss-attribute-use" value="false"/>
         <property key="check-new" value="false"/>
         <property key="eh-specs" value="true"/>
         <property key="enable-app-io" value="false"/>
@@ -1859,8 +2088,8 @@
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories" value=""/>
         <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="false"/>
-        <property key="keep-inline" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
@@ -1869,11 +2098,18 @@
         <property key="preprocessor-macros" value=""/>
         <property key="rtti" value="true"/>
         <property key="strict-ansi" value="false"/>
+        <property key="toplevel-reordering" value=""/>
         <property key="use-cci" value="false"/>
+        <property key="use-iar" value="false"/>
         <property key="use-indirect-calls" value="false"/>
       </C32CPP>
       <C32Global>
+        <property key="common-include-directories" value=""/>
+        <property key="gp-relative-option" value=""/>
         <property key="legacy-libc" value="false"/>
+        <property key="relaxed-math" value="false"/>
+        <property key="save-temps" value="false"/>
+        <property key="wpo-lto" value="false"/>
       </C32Global>
       <SKDEPIC32PlatformTool>
         <property key="whatToProgram" value="all"/>

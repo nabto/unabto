@@ -16,7 +16,12 @@
 #define BAUD_RATE       (115200ul)
 
 // Define the constant part of the server id
-text server_id = ".sdk.u.nabto.net";
+text server_id = ".starterkit.u.nabto.net";
+
+#if NABTO_ENABLE_UCRYPTO
+uint8_t cryptoKey[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+#endif
 
 // Set your MAC-address
 const uint32_t low_mac_addr = 37226;
@@ -149,6 +154,13 @@ int main(void)
     sprintf(id, "%"PRIu32"%"PRItext, low_mac_addr, server_id);
     nms->id = (const char*) id;
 
+#if NABTO_ENABLE_UCRYPTO
+    nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
+    nms->secureAttach = 1;
+    nms->secureData = 1;
+    memcpy(&nms->presharedKey, cryptoKey, PRE_SHARED_KEY_SIZE);
+#endif
+    
     // Initialize nabto
     if (!unabto_init()) return;
 
