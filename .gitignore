@@ -1,0 +1,8 @@
+apps/pic_demo/MPLAB.X/nbproject/private/
+apps/pic_demo/MPLAB.X/dist/pic32_ethernet_starter_kit/
+apps/pic_demo/MPLAB.X/dist
+apps/pic_demo/MPLAB.X/build
+apps/pic_demo/MPLAB.X/nbproject/*.mk
+apps/pic_demo/MPLAB.X/nbproject/*.bash
+
+external/Microchip/

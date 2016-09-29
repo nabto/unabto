@@ -39,6 +39,8 @@
 // or
 //#include "modules/timers/freertos/unabto_time_freertos.h
 
+#define NABTO_FATAL_EXIT do { SoftReset(); } while (0)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
