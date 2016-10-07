@@ -26,14 +26,6 @@ int main(int argc, char* argv[])
     // Set nabto to default values
 
     nabto_main_setup* nms = unabto_init_context();
-    
-#ifdef __arm__
-    // Disable the default mmc0 led trigger on Raspberry Pi
-    system("echo none | sudo tee /sys/class/leds/led0/trigger");
-#endif
-
-    // Optionally set alternative url to html device driver
-    //nms->url = "https://dl.dropbox.com/u/15998645/html_dd_demo.zip";
 
     // Overwrite default values with command line args
     if (!check_args(argc, argv, nms)) {
@@ -49,8 +41,8 @@ int main(int argc, char* argv[])
     }
 
     nabto_stamp_t attachExpireStamp;
-    // 60 seconds
-    nabtoSetFutureStamp(&attachExpireStamp, 1000*60);
+    // 20 seconds
+    nabtoSetFutureStamp(&attachExpireStamp, 1000*20);
         
     // The main loop gives nabto a tick from time to time.
     // Everything else is taken care of behind the scenes.
