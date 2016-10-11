@@ -6,3 +6,7 @@ apps/pic_demo/MPLAB.X/nbproject/*.mk
 apps/pic_demo/MPLAB.X/nbproject/*.bash
 
 external/Microchip/
+
+*~
+
+#*#
