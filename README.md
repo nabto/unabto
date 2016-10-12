@@ -20,7 +20,7 @@ The `src` directory contains the uNabto framework source code and device specifi
 
 `external` is where you put all uNabto externals.
 
-### Demos
+### Example applications and demos
 
 The `apps` directory contains uNabto examples for different platforms (e.g. Windows, Unix, Microchip, Arduino, etc.).
 
