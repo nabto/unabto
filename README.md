@@ -6,7 +6,11 @@ uNabto (pronounced 'micro nabto') is an open source C framework supplied by Nabt
 
 ### Documentation
 
-The Nabto documentation is located at http://nabto.com/documentation, where the basics of the Nabto platform is explained. This is a good place to start!
+A general introduction to the Nabto platform can be found on [www.nabto.com](https://www.nabto.com). More detailed documentation and tutorials are available on [developer.nabto.com](https://developer.nabto.com). Also see our blog [blog.nabto.com](https://blog.nabto.com) with examples and projects.
+
+The document [TEN036 "Security in Nabto Solutions"](https://www.nabto.com/downloads/docs/TEN036%20Security%20in%20Nabto%20Solutions.pdf) is mandatory read when considering Nabto for use in production solutions.
+
+The TESTING.md document in this directory describes how integrators may test their uNabto SDK based applications and what their responsibilities are.
 
 ### Source code
 
