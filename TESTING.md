@@ -286,6 +286,11 @@ device's firewall must allow outbound UDP traffic.
 
 ```17:05:13:198 unabto_connection.c(654) (0.3948617921.0) UDP Fallback through the GSP```
 
+The test can be simplified by forcing relay connections instead of
+manipulating firewalls by setting `disableDirectConnection=1` in the
+`nabto_config.ini` file. This is somewhat artificial as the handshake
+is simplified, but exercises most of the code as above without the
+likely hassle of configuring the firewall.
 
 ### Testing relay connections (client non-HTTP relay)
 
@@ -320,5 +325,3 @@ integrator must additionally thoroughly test and verify this crucial
 application specific functionality. For instance, this means verifying
 the vendor specific username/password database is implemented
 correctly.
-
-
