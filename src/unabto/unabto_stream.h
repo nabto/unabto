@@ -131,7 +131,7 @@ void unabto_stream_event(unabto_stream* stream, unabto_stream_event_type event);
 /**************** READ/WRITE *******************************/
 
 /**
- * Read received data.
+ * Read received data and acknowledge.
  * @param stream  the stream
  * @param buf     pointer to a buffer to receive the data
  * @param count   number of bytes in the buffer
@@ -199,7 +199,8 @@ bool unabto_stream_ack(unabto_stream* stream, const uint8_t* buf, size_t used, u
 
 
 /**
- * Write data to an open stream.
+ * Write data to an open stream. Does not block, returns number of
+ * bytes immediately accepted (sent or queued).
  * @param stream  the stream
  * @param buf     the buffer
  * @param size    the size of the buffer
