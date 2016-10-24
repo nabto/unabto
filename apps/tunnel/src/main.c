@@ -202,7 +202,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("  -d, --device_name           Specify name of this device.\n");
         printf("  -H, --tunnel_default_host   Set default host name for tunnel (%s).\n", DEFAULT_HOST);
         printf("  -P, --tunnel_default_port   Set default port for tunnel (%u).\n", DEFAULT_PORT);
-        printf("  -s, --use_encryption        Encrypt communication (use CRYPTO).\n");
+        printf("  -s, --use_encryption        Encrypt communication.\n");
         printf("  -k, --encryption_key        Specify encryption key.\n");
         printf("  -p, --localport             Specify port for local connections.\n");
         printf("  -A, --controller            Specify controller address\n");
