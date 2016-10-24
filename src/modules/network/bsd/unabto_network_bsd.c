@@ -184,6 +184,7 @@ ssize_t nabto_read(nabto_socket_t sock,
                    uint16_t*      port)
 {
     struct sockaddr_in sa;
+    nabto_endpoint ep;
     socklen_t addrlen = sizeof(sa);
 
     ssize_t recvLength = recvfrom(sock, buf, len, 0, (struct sockaddr*)&sa, &addrlen);
@@ -195,7 +196,6 @@ ssize_t nabto_read(nabto_socket_t sock,
     *addr = ntohl(sa.sin_addr.s_addr);
     *port = ntohs(sa.sin_port);
 
-    nabto_endpoint ep;
     ep.addr = *addr;
     ep.port = *port;
     NABTO_NOT_USED(ep);

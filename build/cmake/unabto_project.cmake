@@ -113,7 +113,9 @@ endif()
 
 
 #detect epoll
-CHECK_INCLUDE_FILES("sys/epoll.h" UNABTO_HAVE_EPOLL)
+if (NOT UNABTO_DISABLE_EPOLL)
+  CHECK_INCLUDE_FILES("sys/epoll.h" UNABTO_HAVE_EPOLL)
+endif()
 
 
 if (UNABTO_RANDOM_MODULE MATCHES dummy)
