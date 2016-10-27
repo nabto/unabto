@@ -386,6 +386,19 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
     if (gopt(options, DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS)) {
         nms->enableExtendedRendezvousMultipleSockets = false;
+    } else {
+#if NABTO_ENABLE_DYNAMIC_MEMORY
+        int desiredFds = NABTO_EXTENDED_RENDEZVOUS_MAX_SOCKETS + nms->connectionsSize + nms->streamMaxStreams + 50/*arbitrary number*/;
+#else
+        int desiredFds = NABTO_EXTENDED_RENDEZVOUS_MAX_SOCKETS + NABTO_CONNECTIONS_SIZE + NABTO_STREAM_MAX_STREAMS + 50/*arbitrary number*/;
+#endif
+        int actualFds = check_ulimit_files(desiredFds);
+        if (actualFds == -1) {
+
+        } else if (actualFds < desiredFds) {
+            NABTO_LOG_ERROR(("Disabling extended rendezvous with multiple sockets since the platform cannot give the required number of file descriptors"));
+            nms->enableExtendedRendezvousMultipleSockets = false;
+        }
     }
 #endif
 

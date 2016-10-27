@@ -5,4 +5,10 @@
 
 bool platform_checks();
 
+/**
+ * return number of filedescriptors which can be made.
+ * return -1 if the feature is not supported.
+ */ 
+int check_ulimit_files(int desired);
+
 #endif
