@@ -252,6 +252,9 @@ void uart_forward(tunnel* tunnel) {
     while(true) {
         if (tunnel->uartReadState == FS_READ) {
             ssize_t readen = read(tunnel->fd, tunnel->staticMemory->uartReadBuffer, NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE);
+            if (readen == 0) {
+                break;
+            }
             /* if (readen == 0) { */
             /*     // eof */
             /*     NABTO_LOG_TRACE(("uart eof")); */
