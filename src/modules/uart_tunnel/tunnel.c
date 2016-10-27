@@ -39,7 +39,6 @@
 typedef struct tunnel_static_memory {
     uint8_t command[MAX_COMMAND_LENGTH];
     char deviceName[MAX_DEVICE_NAME_LENGTH];
-    uint8_t uartReadBuffer[NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE];
 } tunnel_static_memory;
 
 NABTO_THREAD_LOCAL_STORAGE tunnel* tunnels = 0;
@@ -259,24 +258,35 @@ void close_uart_reader(tunnel* tunnel) {
  */
 void uart_forward(tunnel* tunnel) {
     while(true) {
-        if (tunnel->uartReadState == FS_READ) {
-            ssize_t readen = read(tunnel->fd, tunnel->staticMemory->uartReadBuffer, NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE);
+        unabto_stream_hint hint;
+        size_t canWriteToStreamBytes;
+
+        if (tunnel->uartReadState == FS_CLOSING) {
+            break;
+        }
+        
+        canWriteToStreamBytes = unabto_stream_can_write(tunnel->stream, &hint);
+        if (hint != UNABTO_STREAM_HINT_OK) {
+            close_uart_reader(tunnel);
+            break;
+        }
+        if (canWriteToStreamBytes == 0) {
+            tunnel->uartReadState = FS_WRITE;
+            break;
+        } else {
+            tunnel->uartReadState = FS_READ;
+        }
+        {
+            size_t readen;
+            uint8_t readBuffer[NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE];
+            size_t maxRead = MIN(NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE, canWriteToStreamBytes);
+
+            readen = read(tunnel->fd, readBuffer, maxRead);
             if (readen == 0) {
+                // no data available
                 break;
             }
-            /* if (readen == 0) { */
-            /*     // eof */
-            /*     NABTO_LOG_TRACE(("uart eof")); */
-            /*     close_uart_reader(tunnel); */
-            /*     break; */
-            /* } */
-
-            if (readen > 0) {
-                tunnel->uartReadBufferSize = readen;
-                tunnel->uartReadBufferSent = 0;
-                tunnel->uartReadState = FS_WRITE;
-            }
-
+            
             if (readen < 0) {
                 if (errno == EAGAIN || errno == EWOULDBLOCK) {
                     break;
@@ -285,29 +295,24 @@ void uart_forward(tunnel* tunnel) {
                     break;
                 }
             }
-        }
-
-        if (tunnel->uartReadState == FS_WRITE) {
-            unabto_stream_hint hint;
-            size_t written = unabto_stream_write(tunnel->stream, tunnel->staticMemory->uartReadBuffer+tunnel->uartReadBufferSent, tunnel->uartReadBufferSize - tunnel->uartReadBufferSent, &hint);
-            if (hint != UNABTO_STREAM_HINT_OK) {
-                NABTO_LOG_TRACE(("Can't write to stream"));
-                close_uart_reader(tunnel);
-                break;
-            } else {
-                if (written > 0) {
-                    tunnel->uartReadBufferSent += written;
-                    if (tunnel->uartReadBufferSize == tunnel->uartReadBufferSent) {
-                        tunnel->uartReadState = FS_READ;
-                    }
-                } else {
+            
+            if (readen > 0) {
+                unabto_stream_hint hint;
+                size_t written = unabto_stream_write(tunnel->stream, readBuffer, readen, &hint);
+                // the earlier call to unabto_stream_can_write
+                // ensures we can write all the bytes to the
+                // stream in one write
+                if (hint != UNABTO_STREAM_HINT_OK) {
+                    NABTO_LOG_TRACE(("Can't write to stream"));
+                    close_uart_reader(tunnel);
                     break;
                 }
+                
+                if (written != readen) {
+                    // Invalid state
+                    NABTO_LOG_ERROR(("Impossible state!"));
+                }
             }
-        }
-
-        if (tunnel->uartReadState == FS_CLOSING) {
-            break;
         }
     }
 }

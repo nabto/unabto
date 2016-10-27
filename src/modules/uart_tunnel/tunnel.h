@@ -39,8 +39,6 @@ typedef struct tunnel {
     int fd;
     forwardState uartReadState;
     forwardState unabtoReadState;
-    int uartReadBufferSize;
-    int uartReadBufferSent;
     int tunnelId;
     struct tunnel_static_memory* staticMemory;
 } tunnel;
