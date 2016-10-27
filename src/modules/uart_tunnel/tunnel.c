@@ -252,12 +252,12 @@ void uart_forward(tunnel* tunnel) {
     while(true) {
         if (tunnel->uartReadState == FS_READ) {
             ssize_t readen = read(tunnel->fd, tunnel->staticMemory->uartReadBuffer, NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE);
-            if (readen == 0) {
-                // eof
-                NABTO_LOG_TRACE(("uart eof"));
-                close_uart_reader(tunnel);
-                break;
-            }
+            /* if (readen == 0) { */
+            /*     // eof */
+            /*     NABTO_LOG_TRACE(("uart eof")); */
+            /*     close_uart_reader(tunnel); */
+            /*     break; */
+            /* } */
 
             if (readen > 0) {
                 tunnel->uartReadBufferSize = readen;
@@ -373,15 +373,15 @@ bool open_uart(tunnel* tunnel) {
     }
 
     memset(&tios, 0, sizeof(tios));
-	tios.c_iflag = IGNBRK | IGNCR;
-	tios.c_iflag |= ((tcflag_t) INPCK);
-	tios.c_oflag &= ~OPOST;
-	tios.c_lflag &= ~ICANON;
-	cfmakeraw(&tios); // :...
-	tios.c_cc[VMIN] = 0;
-	tios.c_cc[VTIME] = 0;
-	tios.c_cflag = CLOCAL | CREAD;
-
+    tios.c_iflag = IGNBRK | IGNCR;
+    tios.c_iflag |= ((tcflag_t) INPCK);
+    tios.c_oflag &= ~OPOST;
+    tios.c_lflag &= ~ICANON;
+    cfmakeraw(&tios); // :...
+    tios.c_cc[VMIN] = 0;
+    tios.c_cc[VTIME] = 0;
+    tios.c_cflag = CLOCAL | CREAD;
+        
     
     /* switch(parity) */
     /* { */
