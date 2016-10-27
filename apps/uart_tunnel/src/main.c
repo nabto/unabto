@@ -14,7 +14,6 @@
 #include <modules/uart_tunnel/tunnel.h>
 #include <modules/uart_tunnel/tunnel_select.h>
 #include <modules/uart_tunnel/tunnel_epoll.h>
-#include "tunnel_application_requests.h"
 #include <unabto/unabto_app.h>
 
 #include <unabto/unabto_common_main.h>
@@ -27,8 +26,6 @@
 #include <unabto/unabto_stream.h>
 
 #include <modules/network/epoll/unabto_epoll.h>
-
-#include "platform_checks.h"
 
 #ifdef WINCE
 #define HANDLE_SINGALS 0
