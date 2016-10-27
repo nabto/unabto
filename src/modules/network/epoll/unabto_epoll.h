@@ -11,6 +11,7 @@ extern NABTO_THREAD_LOCAL_STORAGE int unabto_epoll_fd;
 #define UNABTO_EPOLL_TYPE_UDP 1
 #define UNABTO_EPOLL_TYPE_TCP_FALLBACK 2
 #define UNABTO_EPOLL_TYPE_TCP_TUNNEL 3
+#define UNABTO_EPOLL_TYPE_UART_TUNNEL 3
 
 typedef struct {
     int epollEventType;
