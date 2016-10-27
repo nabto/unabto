@@ -56,6 +56,8 @@ void unabto_forward(tunnel* tunnel);
 
 void tunnel_event_socket(int socket);
 bool parse_command(tunnel* tunnel);
+bool tunnel_send_init_message(tunnel* tunnel, const char* msg);
+
 
 char* tunnel_get_default_device_name() {
     return "/dev/tty42";
@@ -105,6 +107,8 @@ void unabto_stream_event(unabto_stream* stream, unabto_stream_event_type event) 
     tunnel_event(state, TUNNEL_EVENT_SOURCE_UNABTO);
 }
 
+
+
 void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
 
     NABTO_LOG_TRACE(("Tunnel event on tunnel %i", tunnel));
@@ -149,17 +153,22 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
 
     if (tunnel->state == TS_PARSE_COMMAND) {
         if (parse_command(tunnel)) {
-            tunnel->state = TS_OPEN_UART;
-            NABTO_LOG_INFO(("Tunnel(%i) connecting to %s", tunnel->tunnelId, tunnel->staticMemory->deviceName));
+            if (open_uart(tunnel)) {
+                tunnel->state = TS_OPEN_UART;
+                NABTO_LOG_INFO(("Tunnel(%i) connecting to %s", tunnel->tunnelId, tunnel->staticMemory->deviceName));
+                tunnel_send_init_message(tunnel, "+\n");
+            } else {
+                tunnel_send_init_message(tunnel, "-cannot open uart\n");
+                tunnel->state = TS_CLOSING;
+            }
         } else {
             NABTO_LOG_ERROR(("Tunnel(%i) Could not parse tunnel command %s", tunnel->tunnelId, tunnel->staticMemory->command));
+            tunnel_send_init_message(tunnel, "-cannot parse command\n");
             tunnel->state = TS_CLOSING;
-            
         }
     }
 
     if (tunnel->state == TS_OPEN_UART) {
-        // TODO make async
         if (!open_uart(tunnel)) {
             tunnel->state = TS_CLOSING;
         }
@@ -372,7 +381,8 @@ bool open_uart(tunnel* tunnel) {
     
     tunnel->fd = open(tunnel->staticMemory->deviceName, O_RDWR | O_NOCTTY | O_NONBLOCK);
     if (tunnel->fd == -1) {
-        NABTO_LOG_FATAL(("cannot open uart"));
+        NABTO_LOG_ERROR(("cannot open uart %s", tunnel->staticMemory->deviceName));
+        return false;
     }
 
     memset(&tios, 0, sizeof(tios));
@@ -499,7 +509,8 @@ bool open_uart(tunnel* tunnel) {
     
     if (-1 == tcsetattr(tunnel->fd, TCSANOW, &tios))
 	{
-		NABTO_LOG_FATAL(("Unable to configure UART '%s'. error: %s", tunnel->staticMemory->deviceName, strerror(errno)));
+		NABTO_LOG_ERROR(("Unable to configure UART '%s'. error: %s", tunnel->staticMemory->deviceName, strerror(errno)));
+        return false;
 	}
     
 #if NABTO_ENABLE_EPOLL
@@ -527,4 +538,22 @@ void reset_tunnel_struct(tunnel* t) {
 #endif
 }
 
+/**
+ * utility function for either sending +ok\n or -error message\n in
+ * case of either success or failure.  see spec in
+ * https://www.rfc-editor.org/rfc/rfc1078.txt instead of CRLF only LF
+ * is used.
+ */
+bool tunnel_send_init_message(tunnel* tunnel, const char* msg)
+{
+    unabto_stream_hint hint;
+    size_t written;
+    size_t writeLength = strlen(msg);
+    written = unabto_stream_write(tunnel->stream, (uint8_t*)msg, writeLength, &hint);
+    if (written != writeLength) {
+        NABTO_LOG_ERROR(("we should at a minimum be able to send this simple message, we will probably just goive up..."));
+        return false;
+    }
+    return true;
+}
 
