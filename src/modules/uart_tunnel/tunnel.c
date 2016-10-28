@@ -327,7 +327,7 @@ void uart_forward(tunnel* tunnel) {
                 
                 if (written != readen) {
                     // Invalid state
-                    NABTO_LOG_ERROR(("Impossible state! wanted to write %i, wrote %i", readen, written));
+                    NABTO_LOG_ERROR(("Impossible state! wanted to write %i, wrote %i, unabto_said it could write %i bytes", readen, written, canWriteToStreamBytes));
                 }
             }
         }
