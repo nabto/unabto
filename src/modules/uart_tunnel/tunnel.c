@@ -59,6 +59,8 @@ void tunnel_event_socket(int socket);
 bool parse_command(tunnel* tunnel);
 bool tunnel_send_init_message(tunnel* tunnel, const char* msg);
 
+void steal_uart_port(tunnel* tunnel);
+
 
 void uart_tunnel_set_default_device(const char* device) {
     defaultUartDevice = device;
@@ -159,8 +161,10 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
 
     if (tunnel->state == TS_PARSE_COMMAND) {
         if (parse_command(tunnel)) {
+            steal_uart_port(tunnel);
             if (open_uart(tunnel)) {
-                tunnel->state = TS_OPEN_UART;
+                tunnel->state = TS_FORWARD;
+
                 NABTO_LOG_INFO(("Tunnel(%i) connecting to %s", tunnel->tunnelId, tunnel->staticMemory->deviceName));
                 tunnel_send_init_message(tunnel, "+\n");
             } else {
@@ -173,14 +177,6 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
             tunnel->state = TS_CLOSING;
         }
     }
-
-    if (tunnel->state == TS_OPEN_UART) {
-        if (!open_uart(tunnel)) {
-            tunnel->state = TS_CLOSING;
-        }
-    }
-
-    
 
     if (tunnel->state == TS_FORWARD) {
         if (tunnel->uartReadState == FS_CLOSING && tunnel->unabtoReadState == FS_CLOSING) {
@@ -580,3 +576,24 @@ bool tunnel_send_init_message(tunnel* tunnel, const char* msg)
     return true;
 }
 
+
+// We have got a new stream, if there was another one using this uart
+// port disconnect that user such that this tunnel can use the port
+void steal_uart_port(tunnel* tun) {
+    int i;
+    for(i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS; i++) {
+        // we should not look at ourselves
+        if (&tunnels[i] != tun) {
+            tunnel* t = &tunnels[i];
+            if (t->state == TS_FORWARD &&
+                (strcmp(tun->staticMemory->deviceName, t->staticMemory->deviceName) == 0))
+            {
+                // close the other tunnels
+                NABTO_LOG_INFO(("tunnel %i is stealing the serial port %s from tunnel %i", tun->tunnelId, tun->staticMemory->deviceName, t->tunnelId));
+                close_uart_reader(t);
+                close_stream_reader(t);
+                t->state = TS_CLOSING;
+            }
+        }
+    }
+}
