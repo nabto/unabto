@@ -218,6 +218,7 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
 
             if (tunnel->fd != -1) {
                 close(tunnel->fd);
+                tunnel->fd = -1;
             }
             unabto_stream_release(tunnel->stream);
             reset_tunnel_struct(tunnel);
@@ -339,6 +340,7 @@ void close_stream_reader(tunnel* tunnel) {
     NABTO_LOG_INFO(("closing fd %i", tunnel->fd));
     if (tunnel->fd != -1) {
         close(tunnel->fd);
+        tunnel->fd = -1;
     }
 }
 
