@@ -294,7 +294,7 @@ void uart_forward(tunnel* tunnel) {
             tunnel->uartReadState = FS_READ;
         }
         {
-            size_t readen;
+            int readen;
             uint8_t readBuffer[NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE];
             size_t maxRead = MIN(NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE, canWriteToStreamBytes);
 
