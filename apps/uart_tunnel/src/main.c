@@ -118,7 +118,6 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x13s[] = "k";     const char* x13l[] = { "encryption_key", 0 };
     const char x14s[] = "p";     const char* x14l[] = { "localport", 0 };
     const char x18s[] = "x";     const char* x18l[] = { "nice_exit", 0};
-    const char x19s[] = "";      const char* x19l[] = { "allow_all_ports", 0};
     const char x21s[] = "l";     const char* x21l[] = { "nabtolog", 0 };
     const char x22s[] = "A";     const char* x22l[] = { "controller", 0 };
     const char x23s[] = "";      const char* x23l[] = { "disable_tcp_fb", 0 };
@@ -193,7 +192,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("  -p, --localport             Specify port for local connections.\n");
         printf("  -A, --controller            Specify controller address\n");
         printf("      --controller_port       sets the controller port number.\n");
-        printf("      --default_uart_device   Sets default uart device\n");
+        printf("      --uart_device           Sets the uart device\n");
         printf("  -x, --nice_exit             Close the tunnels nicely when pressing Ctrl+C.\n");
 #if NABTO_ENABLE_TCP_FALLBACK
         printf("      --disable_tcp_fb        Disable tcp fallback.\n");
@@ -291,7 +290,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     if(gopt_arg(options, UART_DEVICE_OPTION, &uartDevice)) {
         uart_tunnel_set_default_device(uartDevice);
     } else {
-        NABTO_LOG_FATAL(("missing uart device"));
+        NABTO_LOG_FATAL(("Missing uart device option."));
     }
     
 #if NABTO_ENABLE_TCP_FALLBACK
