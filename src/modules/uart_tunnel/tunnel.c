@@ -193,10 +193,11 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
 
 
     if (tunnel->state == TS_CLOSING) {
-        NABTO_LOG_TRACE(("TS_CLOSING"));
         const uint8_t* buf;
         unabto_stream_hint hint;
         size_t readen;
+
+        NABTO_LOG_TRACE(("TS_CLOSING"));
 
         do {
             readen = unabto_stream_read(tunnel->stream, &buf, &hint);
