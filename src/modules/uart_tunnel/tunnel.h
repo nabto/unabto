@@ -35,7 +35,6 @@ typedef struct tunnel {
     unabto_stream* stream;
     tunnelStates state;
     int commandLength;
-    int port;
     int fd;
     forwardState uartReadState;
     forwardState unabtoReadState;
@@ -45,11 +44,10 @@ typedef struct tunnel {
 
 extern NABTO_THREAD_LOCAL_STORAGE tunnel* tunnels;
 
-void tunnel_set_default_host(const char* host);
-void tunnel_set_default_port(int port);
+void uart_tunnel_set_default_device(const char* device);
 
-const char* tunnel_get_default_host();
-int tunnel_get_default_port();
+
+const char* uart_tunnel_get_default_device();
 
 bool init_tunnel_module();
 void deinit_tunnel_module();
