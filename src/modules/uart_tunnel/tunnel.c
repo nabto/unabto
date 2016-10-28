@@ -214,8 +214,10 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
                             tunnel->tunnelId,
                             info.sentPackets, info.sentBytes, info.sentResentPackets,
                             info.receivedPackets, info.receivedBytes, info.receivedResentPackets, info.reorderedOrLostPackets));
-            
-            close(tunnel->fd);
+
+            if (tunnel->fd != -1) {
+                close(tunnel->fd);
+            }
             unabto_stream_release(tunnel->stream);
             reset_tunnel_struct(tunnel);
         }
@@ -334,7 +336,9 @@ void uart_forward(tunnel* tunnel) {
 void close_stream_reader(tunnel* tunnel) {
     tunnel->unabtoReadState = FS_CLOSING;
     NABTO_LOG_INFO(("closing fd %i", tunnel->fd));
-    close(tunnel->fd);
+    if (tunnel->fd != -1) {
+        close(tunnel->fd);
+    }
 }
 
 /**
