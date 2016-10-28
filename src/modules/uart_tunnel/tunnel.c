@@ -46,6 +46,8 @@ NABTO_THREAD_LOCAL_STORAGE tunnel_static_memory* tunnels_static_memory = 0;
 
 static int tunnelCounter = 0;
 
+static const char* defaultUartDevice = 0;
+
 void tunnel_event(tunnel* state, tunnel_event_source event_source);
 
 bool open_uart(tunnel* tunnel);
@@ -58,8 +60,13 @@ bool parse_command(tunnel* tunnel);
 bool tunnel_send_init_message(tunnel* tunnel, const char* msg);
 
 
-char* tunnel_get_default_device_name() {
-    return "/dev/tty42";
+void uart_tunnel_set_default_device(const char* device) {
+    defaultUartDevice = device;
+}
+
+
+const char* uart_tunnel_get_default_device() {
+    return defaultUartDevice;
 }
 
 bool init_tunnel_module()
@@ -219,30 +226,41 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
     }
 }
 
-#define DEVICE_NAME_KW_TXT "dev="
+#define UART_COMMAND "uart"
+//#define DEVICE_NAME_KW_TXT "dev="
 
 bool parse_command(tunnel* tunnel) {
     
     char* s;
 
-    if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, DEVICE_NAME_KW_TXT)))
-    {
-        char *sp;
-        int length;
-        s += strlen(DEVICE_NAME_KW_TXT);
-        sp = strchr(s, ' ');
-        
-        if (sp != NULL) {
-            length = sp-s;
-        } else {
-            length = strlen(s);
-        }
-        
-        strncpy(tunnel->staticMemory->deviceName, s, MIN(length, MAX_COMMAND_LENGTH-1));
-    } else {
-        strncpy(tunnel->staticMemory->deviceName, tunnel_get_default_device_name(), MAX_DEVICE_NAME_LENGTH);
+    if (strlen(tunnel->staticMemory->command) < strlen(UART_COMMAND)) {
+        // uart command are too small to contain the uart string.
+        return false;
     }
     
+    if (0 != memcmp(tunnel->staticMemory->command, UART_COMMAND, strlen(UART_COMMAND))) {
+        // the string has to start with uart
+        return false;
+    }
+
+    // other arguments are disabled for now.
+    /* if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, DEVICE_NAME_KW_TXT))) */
+    /* { */
+    /*     char *sp; */
+    /*     int length; */
+    /*     s += strlen(DEVICE_NAME_KW_TXT); */
+    /*     sp = strchr(s, ' '); */
+        
+    /*     if (sp != NULL) { */
+    /*         length = sp-s; */
+    /*     } else { */
+    /*         length = strlen(s); */
+    /*     } */
+        
+    /*     strncpy(tunnel->staticMemory->deviceName, s, MIN(length, MAX_COMMAND_LENGTH-1)); */
+    /* } else { */
+
+    strncpy(tunnel->staticMemory->deviceName, uart_tunnel_get_default_device(), MAX_DEVICE_NAME_LENGTH);
     return true;
 }
 
