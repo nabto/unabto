@@ -63,11 +63,11 @@ void tunnel_loop_select() {
 
         for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS; i++) {
             if (tunnels[i].state != TS_IDLE) {
-                if (tunnels[i].state == TS_FORWARD && tunnels[i].uartReadState == FS_READ) {
+                if (tunnels[i].state == TS_FORWARD && tunnels[i].uartReadState == FS_READ && tunnels[i].fd != -1) {
                     FD_SET(tunnels[i].fd, &read_fds);
                     max_read_fd = MAX(max_read_fd, tunnels[i].fd);
                 }
-                if ((tunnels[i].state == TS_FORWARD && tunnels[i].unabtoReadState == FS_WRITE)) {
+                if ((tunnels[i].state == TS_FORWARD && tunnels[i].unabtoReadState == FS_WRITE && tunnels[i].fd != -1)) {
                     FD_SET(tunnels[i].fd, &write_fds);
                     max_write_fd = MAX(max_write_fd, tunnels[i].fd);
                 }
