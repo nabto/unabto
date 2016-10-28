@@ -8,8 +8,6 @@ typedef enum {
     TS_IDLE,
     TS_READ_COMMAND,
     TS_PARSE_COMMAND,
-    TS_OPEN_UART,
-    TS_OPENING_SOCKET,
     TS_FORWARD,
     TS_CLOSING
 } tunnelStates;
