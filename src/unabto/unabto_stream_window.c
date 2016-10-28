@@ -393,10 +393,15 @@ size_t nabto_stream_tcb_write(struct nabto_stream_s * stream, const uint8_t* buf
 
 size_t nabto_stream_tcb_can_write(struct nabto_stream_s * stream) {
     struct nabto_stream_tcb * tcb = &stream->u.tcb;
-    if (tcb->cCtrl.sentNotAcked > tcb->cCtrl.cwnd) {
+
+    // same check as the while uses in send.
+    if ((tcb->xmitSeq < (tcb->xmitFirst + tcb->cfg.xmitWinSize)) &&
+        is_in_cwnd(tcb,0,true))
+    {
+        return tcb->cfg.xmitPacketSize;
+    } else {
         return 0;
     }
-    return (((int)tcb->cCtrl.cwnd - tcb->cCtrl.sentNotAcked) * tcb->cfg.xmitPacketSize);
 }
 
 /******************************************************************************/
