@@ -331,7 +331,7 @@ static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, ui
 {
     uint8_t* ptr;
     uint8_t* buf = nabtoCommunicationBuffer;
-
+    
     ptr = insert_header(buf, 0, con->spnsi, U_CONNECT, false, seq, 0, 0);
     ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_EP, 0, 6);
     WRITE_U32(ptr, dest->addr); ptr += 4;
@@ -698,7 +698,7 @@ void nabto_rendezvous_stop(nabto_connect* con) {
     nabto_rendezvous_connect_state* rcs = &con->rendezvousConnectState;
     
     if (rcs->state == RS_CONNECTING) {
-        NABTO_LOG_INFO(("Ports opened: %i", rcs->portsOpened));
+        NABTO_LOG_INFO(("Extended rendezvous ports opened: %i, 0 is perfectly fine.", rcs->portsOpened));
         rcs->state = RS_DONE;
     }
 }
@@ -858,7 +858,7 @@ void rendezvous_time_event(nabto_connect* con)
 
         if(nabtoIsStampPassed(&rcs->timeout)) {
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
-            NABTO_LOG_INFO(("Rendezvous timeout. Sockets opened %i", rcs->socketsOpened));
+            NABTO_LOG_INFO(("Rendezvous timeout. Extended rendezvous sockets opened %i, 0 is perfectly fine", rcs->socketsOpened));
 #endif
             nabto_rendezvous_stop(con);
         }
