@@ -446,7 +446,12 @@ bool send_to_basestation(uint8_t* buffer, size_t buflen, nabto_endpoint* peer) {
     }
 #endif
 
-    return (nabto_write(nmc.socketGSP, buffer, buflen, peer->addr, peer->port) > 0);
+    if (peer->addr != 0 && peer->port != 0) {
+        return (nabto_write(nmc.socketGSP, buffer, buflen, peer->addr, peer->port) > 0);
+    } else {
+        return false;
+    }
+    
 }
 
 #endif
