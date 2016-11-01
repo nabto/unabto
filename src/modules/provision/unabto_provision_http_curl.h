@@ -12,6 +12,12 @@
 
 typedef void (*curl_option_callback_func)(CURL *curl, void* userData);
 
+typedef struct unabto_curl_options_callback {
+    curl_option_callback_func func;
+    void* data;
+    struct unabto_curl_options_callback* next;
+} unabto_curl_options_callback ;
+
 /**
  * Invoke curl. Caller can set callback to modify options passed to curl.
  * @returns UPS_OK if http request was successfully invoked and http server returned status 200. Caller must free response.
@@ -20,7 +26,7 @@ typedef void (*curl_option_callback_func)(CURL *curl, void* userData);
  * @returns UPS_HTTP_CONNECTION_REFUSED if http server rejected TCP connection
  * @returns UPS_HTTP_OTHER if interaction with http server failed for reasons not otherwise described
  */
-unabto_provision_status_t unabto_provision_http_invoke_curl(const char* url, uint16_t* http_status, char** response, curl_option_callback_func options_cb, void* options_data);
+unabto_provision_status_t unabto_provision_http_invoke_curl(const char* url, uint16_t* http_status, char** response, unabto_curl_options_callback* options_cb);
 
 /**
  * Post data using curl.

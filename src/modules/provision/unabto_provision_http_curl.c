@@ -45,7 +45,7 @@ void unabto_curl_header_cb(CURL *curl, void* userData) {
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, data->headers);
 }
 
-unabto_provision_status_t unabto_provision_http_invoke_curl(const char* url, uint16_t* http_status, char** response, curl_option_callback_func options_cb, void* options_data)
+unabto_provision_status_t unabto_provision_http_invoke_curl(const char* url, uint16_t* http_status, char** response, unabto_curl_options_callback* options_cb)
 {
     NABTO_LOG_TRACE(("Invoking %s", url));
 
@@ -72,9 +72,13 @@ unabto_provision_status_t unabto_provision_http_invoke_curl(const char* url, uin
     curl_easy_setopt(curl, CURLOPT_CAINFO, unabto_provision_http_get_cert_path());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_writer_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&chunk);
-    if (options_cb) {
-        options_cb(curl, options_data);
+
+    unabto_curl_options_callback* cb = options_cb;
+    while (cb) {
+        cb->func(curl, cb->data);
+        cb = cb->next;
     }
+
     CURLcode res = curl_easy_perform(curl);
     unabto_provision_status_t status = UPS_OK;
 
@@ -119,12 +123,18 @@ unabto_provision_status_t unabto_provision_http_post_curl(const char* url, const
     postStruct.headers = NULL;
     if (strlen(headers) > 0) {
         postStruct.extra_options_cb = unabto_curl_header_cb;    
-        postStruct.headers = curl_slist_append(postStruct.headers, "Content-Type: application/json");
+        postStruct.headers = curl_slist_append(postStruct.headers, headers);
     } else {
         postStruct.extra_options_cb = NULL;    
     }
     char* response;
-    unabto_provision_status_t status = unabto_provision_http_invoke_curl(url, http_status, &response, unabto_curl_post_cb, &postStruct);
+
+    struct unabto_curl_options_callback cb;
+    cb.func = unabto_curl_post_cb;
+    cb.data = &postStruct;
+    cb.next = NULL;
+    
+    unabto_provision_status_t status = unabto_provision_http_invoke_curl(url, http_status, &response, &cb);
     curl_slist_free_all(postStruct.headers);
     if (status == UPS_OK || status == UPS_HTTP_COMPLETE_NOT_200) {
         unabto_provision_http_extract_body(body, response);

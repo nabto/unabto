@@ -62,10 +62,10 @@ void unabto_provision_gopt_help(const char* progname) {
     printf("    --%s=<token>: Authorization token for the provisioning service\n", UNABTO_PROVISION_GOPT_NAME_USER_TOKEN);
     printf("    --%s=<file_path>: File to store id and key\n", UNABTO_PROVISION_GOPT_NAME_FILE);
     printf("Provisoning examples:\n");
-    printf("    %s -P --%s=customer-b.provision.nabto.com --%s=0e:a1:c3:ed:eb:3f   # service issues id and key for mac\n", progname, UNABTO_PROVISION_GOPT_NAME_HOST, UNABTO_PROVISION_GOPT_NAME_ID_INPUT);
-    printf("    %s -P --%s=customer-c.provision.nabto.com   # service issues id and key\n", progname, UNABTO_PROVISION_GOPT_NAME_HOST);
-    printf("    %s -P --%s=customer-d.provision.nabto.com --%s=E5A4-0C1E-99ED-F01A   # service issues id and key, checks one-time token\n", progname, UNABTO_PROVISION_GOPT_NAME_HOST, UNABTO_PROVISION_GOPT_NAME_USER_TOKEN);
-    printf("    %s -P   # use results from earlier provisioning \n", progname);
+    printf("    %s -P --%s=/home/user/.nabto/prov.txt --%s=customer-b.provision.nabto.com --%s=0e:a1:c3:ed:eb:3f   # service issues id and key for mac\n", progname, UNABTO_PROVISION_GOPT_NAME_FILE, UNABTO_PROVISION_GOPT_NAME_HOST, UNABTO_PROVISION_GOPT_NAME_ID_INPUT);
+    printf("    %s -P --%s=/home/user/.nabto/prov.txt --%s=customer-c.provision.nabto.com   # service issues id and key\n", progname, UNABTO_PROVISION_GOPT_NAME_FILE, UNABTO_PROVISION_GOPT_NAME_HOST);
+    printf("    %s -P --%s=/home/user/.nabto/prov.txt --%s=customer-d.provision.nabto.com --%s=E5A4-0C1E-99ED-F01A   # service issues id and key, checks one-time token\n", progname, UNABTO_PROVISION_GOPT_NAME_FILE, UNABTO_PROVISION_GOPT_NAME_HOST, UNABTO_PROVISION_GOPT_NAME_USER_TOKEN);
+    printf("    %s -P --%s=/home/user/.nabto/prov.txt  # use results from earlier provisioning \n", progname, UNABTO_PROVISION_GOPT_NAME_FILE);
 }
 
 bool unabto_provision_gopt_apply(nabto_main_setup* nms, const char* progname, void* options) {
