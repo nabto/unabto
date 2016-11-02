@@ -400,7 +400,9 @@ set(unabto_server_common_src_test
   ${UNABTO_SERVER_TEST_DIR}/unabto/util/unabto_buffer_test.c
   ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_crypto_test.c
   ${UNABTO_SERVER_TEST_DIR}/modules/util/unabto_base32_test.c
+  ${UNABTO_SERVER_TEST_DIR}/modules/util/read_hex_test.c
   ${UNABTO_SERVER_SRC_DIR}/modules/util/unabto_base32.c
+  ${UNABTO_SERVER_SRC_DIR}/modules/util/read_hex.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_crypto.c
   ${unabto_module_random_dummy}
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_prf.c

@@ -10,4 +10,6 @@ add_subdirectory(apps/tunnel)
 add_subdirectory(apps/stream_echo)
 add_subdirectory(test/attach_test)
 
-
+if (UNABTO_ENABLE_TESTS)
+  add_subdirectory(test/unittest)
+endif()
