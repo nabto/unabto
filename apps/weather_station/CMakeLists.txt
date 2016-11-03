@@ -9,6 +9,7 @@ CHECK_INCLUDE_FILES(curl/curl.h HAVE_CURL_H)
 set(src
   ${unabto_src}
   ${unabto_module_cli_gopt_src}
+  ${unabto_module_util_src}
   ${unabto_server_weather_station}
 )
 
@@ -25,7 +26,6 @@ include_directories(
 if (HAVE_CURL_H)
   add_definitions(-DNABTO_ENABLE_PROVISIONING=1)
   list(APPEND src ${unabto_module_provision_src})
-  list(APPEND src ${unabto_module_util_src})
   list(APPEND unabto_link_libraries ${unabto_module_provision_libraries})
 endif()
 

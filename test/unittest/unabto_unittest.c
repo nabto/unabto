@@ -6,12 +6,27 @@
 nabto_main_context nmc;
 
 int main() {
-    bool ret;
+    bool ret = true;
+    bool r;
     NABTO_LOG_INFO(("Running the uNabto test suites"));
-
-    ret = unabto_test_all();
-
-    ret &= read_hex_test();
     
-    exit(ret?0:1);
+    r = unabto_test_all();
+    if (!r) {
+        NABTO_LOG_ERROR(("Test all failed"));
+        ret = false;
+    }
+
+    r = read_hex_test();
+    if (!r) {
+        NABTO_LOG_ERROR(("Test of hex function failed"));
+        ret = false;
+    }
+
+    if (ret) {
+        NABTO_LOG_INFO(("All tests passed"));
+        exit(0);
+    } else {
+        NABTO_LOG_INFO(("Some tests failed"));
+        exit(1);
+    }
 }

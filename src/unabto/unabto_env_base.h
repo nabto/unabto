@@ -13,7 +13,12 @@
 
 #include <stddef.h>
 
+/**
+ * Make it possible to compile the source without an unabto_config.h
+ */
+#ifndef NABTO_NO_CONFIG
 #include <unabto_config.h>                   // user supplied config file, defaults are provided below
+#endif
 #include <unabto/unabto_include_platform.h>  // device detection (if not set by user) and device dependant includes
 #include <unabto/unabto_config_defaults.h>   // default configuration values
 #include <unabto/unabto_config_derived.h>    // calculation of constants based on the configuration values
