@@ -25,6 +25,7 @@ include_directories(
 if (HAVE_CURL_H)
   add_definitions(-DNABTO_ENABLE_PROVISIONING=1)
   list(APPEND src ${unabto_module_provision_src})
+  list(APPEND src ${unabto_module_util_src})
   list(APPEND unabto_link_libraries ${unabto_module_provision_libraries})
 endif()
 

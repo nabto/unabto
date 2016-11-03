@@ -13,6 +13,8 @@
 #include "unabto_provision_http.h"
 #include "unabto_provision_file.h"
 
+#include <modules/util/read_hex.h>
+
 bool unabto_provision_new(nabto_main_setup* nms, provision_context_t* context) {
     // fail early (prior to invoking service) if filesystem trouble
     if (!unabto_provision_test_create_file(context->file_)) {
@@ -51,10 +53,10 @@ bool unabto_provision_set_key(nabto_main_setup *nms, char *key)
         return false;
     }
 
-    // Read the pre shared key as a hexadecimal string.
-    for (i = 0; i < pskLen/2 && i < 16; i++) {
-        sscanf(key+(2*i), "%02hhx", &nms->presharedKey[i]);
+    if (!unabto_read_psk_from_hex(key, nms->presharedKey, 16)) {
+        return false;
     }
+
     nms->secureAttach= true;
     nms->secureData = true;
     nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;

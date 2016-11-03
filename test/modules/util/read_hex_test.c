@@ -22,7 +22,7 @@ bool read_hex_test(void)
 bool hex_test(const char* string, uint8_t* expected, size_t expectedLength)
 {
     uint8_t buffer[MAX_BUFFER_LENGTH];
-    if (expectedLength == read_hex(string, strlen(string), buffer, MAX_BUFFER_LENGTH)) {
+    if (expectedLength == unabto_read_hex(string, strlen(string), buffer, MAX_BUFFER_LENGTH)) {
         if (memcmp(expected,buffer, expectedLength) == 0) {
             return true;
         } else {

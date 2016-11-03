@@ -8,6 +8,7 @@
 #include "unabto/unabto_env_base.h"
 #include "modules/cli/unabto_args.h"
 #include "modules/diagnostics/unabto_diag.h"
+#include <modules/util/read_hex.h>
 #if NABTO_ENABLE_PROVISIONING
 #include "modules/provision/unabto_provision_gopt.h"
 #endif
@@ -213,11 +214,8 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
     }
 
     if ( gopt_arg( options, 'k', &preSharedKey)) {
-        size_t i;
-        size_t pskLen = strlen(preSharedKey);
-        // read the pre shared key as a hexadecimal string.
-        for (i = 0; i < pskLen/2 && i < 16; i++) {
-            sscanf(preSharedKey+(2*i), "%02hhx", &nms->presharedKey[i]);
+        if (!unabto_read_psk_from_hex(preSharedKey, nms->presharedKey, 16)) {
+            return false;
         }
     }
 

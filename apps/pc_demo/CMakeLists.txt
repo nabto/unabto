@@ -6,6 +6,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/../../build/cmake/unabto_project.cmake)
 set(src
   ${unabto_src}
   ${unabto_module_cli_gopt_src}
+  ${unabto_module_util_src}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/unabto_main.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/unabto_application.c
 )

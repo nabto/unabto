@@ -67,21 +67,15 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    uint8_t key[16];
-    memset(key, 0, 16);
-    size_t i;
-    size_t pskLen = strlen(preSharedKey);
-    // read the pre shared key as a hexadecimal string.
-    for (i = 0; i < pskLen/2 && i < 16; i++) {
-        sscanf(preSharedKey+(2*i), "%02hhx", &key[i]);
+    if (!unabto_read_psk_from_hex(preSharedKey, nms->preSharedKey, 16)) {
+        syslog(LOG_CRIT, "Could not parse parameter sharedkey\n");
+        exit(1);
     }
-
+    
     nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
     nms->secureAttach = true;
     nms->secureData = true;
     
-    memcpy(nms->presharedKey, key,16);
-
     param_free(preSharedKey);
 
     tunnel_loop_epoll();

@@ -23,6 +23,7 @@
 
 #include <modules/cli/gopt/gopt.h>
 #include <modules/diagnostics/unabto_diag.h>
+#include <modules/util/read_hex.h>
 
 #include <unabto/unabto_stream.h>
 
@@ -291,14 +292,10 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         uint8_t key[16];
         memset(key, 0, 16);
         if ( gopt_arg( options, 'k', &preSharedKey)) {
-            size_t i;
-            size_t pskLen = strlen(preSharedKey);
-            // read the pre shared key as a hexadecimal string.
-            for (i = 0; i < pskLen/2 && i < 16; i++) {
-                sscanf(preSharedKey+(2*i), "%02hhx", &key[i]);
+            if (!unabto_read_psk_from_hex(preSharedKey, nms->presharedKey ,16)) {
+                NABTO_LOG_FATAL(("Cannot read psk"));
             }
         }
-        memcpy(nms->presharedKey,key,16);
         nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
         nms->secureAttach = true;
         nms->secureData = true;

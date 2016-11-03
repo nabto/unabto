@@ -328,6 +328,11 @@ set(unabto_module_provision_src
   ${UNABTO_MODULES_SRC_DIR}/provision/unabto_provision_file.c
   ${UNABTO_MODULES_SRC_DIR}/provision/unabto_provision_gopt.c)
 
+# modules/util
+set(unabto_module_util_src
+  ${UNABTO_MODULES_SRC_DIR}/util/read_hex.c
+  )
+
 
 #######################
 # DEMO SOURCE SECTION #

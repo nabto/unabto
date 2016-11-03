@@ -11,6 +11,7 @@
 #ifndef _UNABTO_LOGGING_H_
 #define _UNABTO_LOGGING_H_
 
+#include <unabto/unabto_env_base.h>
 #include <unabto_platform_types.h>
 #include <unabto/unabto_logging_defines.h>
 
