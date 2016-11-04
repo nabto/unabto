@@ -17,4 +17,4 @@ before_script:
 script:
   - mkdir cibuild
   - cd cibuild
-  - cmake .. && make
+  - cmake .. && make -j
