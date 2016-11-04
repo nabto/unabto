@@ -5,10 +5,11 @@ compiler:
 
 addons:
   apt:
+    sources:
+      - george-edison55-precise-backports
     packages:
       - cmake
-    sources:
-      - kalakris-cmake
+      - cmake-data
 
 before_script:
   - cmake --version
