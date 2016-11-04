@@ -39,7 +39,7 @@ if (MSVC)
 endif()
 
 
-add_executable(${PROJECT_NAME} "${src}")
+add_executable(${PROJECT_NAME} ${src})
 
 if (NOT MSVC)
   target_link_libraries(${PROJECT_NAME} pthread rt m)
