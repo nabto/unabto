@@ -1,0 +1,441 @@
+#if defined(_MSC_VER)
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+#endif
+
+#if defined(WIN32) || defined(WINCE)
+#include <winsock2.h>
+#include <windows.h>
+#endif
+
+#define NABTO_TICK 5
+
+#include <modules/uart_tunnel/tunnel.h>
+#include <modules/uart_tunnel/tunnel_select.h>
+#include <modules/uart_tunnel/tunnel_epoll.h>
+#include <unabto/unabto_app.h>
+
+#include <unabto/unabto_common_main.h>
+#include <unabto/unabto_attach.h>
+#include <unabto_version.h>
+
+#include <modules/cli/gopt/gopt.h>
+#include <modules/diagnostics/unabto_diag.h>
+
+#include <unabto/unabto_stream.h>
+
+#include <modules/network/epoll/unabto_epoll.h>
+
+#ifdef WINCE
+#define HANDLE_SINGALS 0
+#else
+#define HANDLE_SIGNALS 1
+#endif
+
+#ifndef WINCE
+#include <errno.h>
+#endif
+
+#if HANDLE_SIGNALS
+#include <signal.h>
+#endif
+
+#if defined(_MSC_VER)
+#define strdup(s) _strdup(s)
+#endif
+
+static bool check_acl = false;
+
+static uint16_t* ports = NULL;
+static size_t ports_length = 0;
+static char** hosts = NULL;
+static size_t hosts_length = 0;
+static bool allow_all_ports = false;
+static bool nice_exit = false;
+#if HANDLE_SIGNALS && defined(WIN32)
+static HANDLE signal_event = NULL;
+#endif
+
+#if USE_TEST_WEBSERVER
+static bool testWebserver = false;
+const char* testWebserverPortStr;
+#endif
+
+#if NABTO_ENABLE_EPOLL
+static bool useSelectBased = false;
+#endif
+
+enum {
+    UART_DEVICE_OPTION = 1,
+    DISABLE_TCP_FALLBACK_OPTION,
+    CONTROLLER_PORT_OPTION,
+    SELECT_BASED_OPTION,
+    TUNNELS_OPTION,
+    STREAM_WINDOW_SIZE_OPTION,
+    CONNECTIONS_SIZE_OPTION,
+    DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
+};
+
+#if HANDLE_SIGNALS
+void handle_signal(int signum) {
+    if (signum == SIGTERM) {
+        // Terminate application with exit,
+        // This makes libprofiler extra happy
+        NABTO_LOG_INFO(("Exit in signal handler: SIGTERM"));
+        exit(1);
+    }
+    if (signum == SIGINT) {
+        // Terminate application with exit,
+        // This makes libprofiler extra happy
+        if (nice_exit) {
+            NABTO_LOG_INFO(("Exit in signal handler: SIGINT."));
+            NABTO_LOG_INFO(("Cleanup nicely (since --nice_exit was specified)"));
+            NABTO_LOG_INFO(("Cleanup done. Exiting"));
+            exit(1);
+        }
+        NABTO_LOG_INFO(("Exit in signal handler: SIGINT. No --nice_exit argument -> no cleanup"));
+        exit(1);
+    }
+#ifdef WIN32
+    SetEvent(signal_event);
+#endif
+}
+#endif
+
+static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
+
+    const char *tunnel_port_str;
+
+    const char x1s[] = "h";      const char* x1l[] = { "help", 0 };
+    const char x2s[] = "V";      const char* x2l[] = { "version", 0 };
+    const char x3s[] = "C";      const char* x3l[] = { "config", 0 };
+    const char x4s[] = "S";      const char* x4l[] = { "size", 0 };
+    const char x9s[] = "d";      const char* x9l[] = { "device_name", 0 };
+    const char x10s[] = "H";     const char* x10l[] = { "tunnel_default_host", 0 }; // only used together with the tunnel.
+    const char x11s[] = "P";     const char* x11l[] = { "tunnel_default_port", 0 };
+    const char x12s[] = "s";     const char* x12l[] = { "use_encryption", 0 };
+    const char x13s[] = "k";     const char* x13l[] = { "encryption_key", 0 };
+    const char x14s[] = "p";     const char* x14l[] = { "localport", 0 };
+    const char x18s[] = "x";     const char* x18l[] = { "nice_exit", 0};
+    const char x21s[] = "l";     const char* x21l[] = { "nabtolog", 0 };
+    const char x22s[] = "A";     const char* x22l[] = { "controller", 0 };
+    const char x23s[] = "";      const char* x23l[] = { "disable_tcp_fb", 0 };
+    const char x24s[] = "";      const char* x24l[] = { "controller_port", 0 };
+#if NABTO_ENABLE_EPOLL
+    const char x25s[] = "";      const char* x25l[] = { "select_based", 0 };
+#endif
+
+    const char x26s[] = "";      const char* x26l[] = { "tunnels", 0 };
+    const char x27s[] = "";      const char* x27l[] = { "stream_window_size",0 };
+    const char x28s[] = "";      const char* x28l[] = { "connections", 0 };
+    const char x29s[] = "";      const char* x29l[] = { "disable_extended_rendezvous_multiple_sockets", 0 };
+// uart options
+    const char x30s[] = "";      const char* x30l[] = { "uart_device", 0 }; 
+
+    const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
+        { 'h', GOPT_NOARG,   x1s, x1l },
+        { 'V', GOPT_NOARG,   x2s, x2l },
+        { 'C', GOPT_NOARG,   x3s, x3l },
+        { 'S', GOPT_NOARG,   x4s, x4l },
+        { 'd', GOPT_ARG,     x9s, x9l },
+        { 'H', GOPT_ARG,     x10s, x10l },
+        { 'P', GOPT_ARG,     x11s, x11l },
+        { 's', GOPT_NOARG,   x12s, x12l },
+        { 'k', GOPT_ARG,     x13s, x13l },
+        { 'p', GOPT_ARG,     x14s, x14l },
+        { 'x', GOPT_NOARG, x18s, x18l },
+        { 'l', GOPT_REPEAT|GOPT_ARG,  x21s, x21l },
+        { 'A', GOPT_ARG, x22s, x22l },
+        { DISABLE_TCP_FALLBACK_OPTION, GOPT_NOARG, x23s, x23l },
+        { CONTROLLER_PORT_OPTION, GOPT_ARG, x24s, x24l },
+#if NABTO_ENABLE_EPOLL
+        { SELECT_BASED_OPTION, GOPT_NOARG, x25s, x25l },
+#endif
+#if NABTO_ENABLE_DYNAMIC_MEMORY
+        { TUNNELS_OPTION, GOPT_ARG, x26s, x26l },
+        { STREAM_WINDOW_SIZE_OPTION, GOPT_ARG, x27s, x27l },
+        { CONNECTIONS_SIZE_OPTION, GOPT_ARG, x28s, x28l },
+#endif
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
+        { DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS, GOPT_NOARG, x29s, x29l },
+#endif
+        { UART_DEVICE_OPTION, GOPT_ARG, x30s, x30l },
+        { 0,0,0,0 }
+    };
+
+    void *options = gopt_sort( & argc, (const char**)argv, opts);
+
+    const char * h;
+    int p;
+    const char* localPortStr;
+    const char* optionString;
+    const char* basestationAddress;
+    const char* controllerPort;
+    const char* tunnelsOption;
+    const char* streamWindowSizeOption;
+    const char* connectionsOption;
+    const char* uartDevice;
+    uint32_t addr;
+
+
+    if (gopt(options, 'h')) {
+        printf("Usage: unabto_tunnel [options] -d devicename\n");
+        printf("  -h, --help                  Print this help.\n");
+        printf("  -V, --version               Print version.\n");
+        printf("  -C, --config                Print configuration (unabto_config.h).\n");
+        printf("  -S, --size                  Print size (in bytes) of memory usage.\n");
+        printf("  -l, --nabtolog              Speficy log level such as *.trace.\n");
+        printf("  -d, --device_name           Specify name of this device.\n");
+        printf("  -s, --use_encryption        Encrypt communication.\n");
+        printf("  -k, --encryption_key        Specify encryption key.\n");
+        printf("  -p, --localport             Specify port for local connections.\n");
+        printf("  -A, --controller            Specify controller address\n");
+        printf("      --controller_port       sets the controller port number.\n");
+        printf("      --uart_device           Sets the uart device\n");
+        printf("  -x, --nice_exit             Close the tunnels nicely when pressing Ctrl+C.\n");
+#if NABTO_ENABLE_TCP_FALLBACK
+        printf("      --disable_tcp_fb        Disable tcp fallback.\n");
+#endif
+#if NABTO_ENABLE_EPOLL
+        printf("      --select_based          Use select instead of epoll.\n");
+#endif
+#if NABTO_ENABLE_DYNAMIC_MEMORY
+        printf("      --tunnels               Specify how many concurrent tcp streams should be possible.\n");
+        printf("      --stream_window_size    Specify the stream window size, the larger the value the more memory the aplication will use, but higher throughput will be possible.\n");
+        printf("      --connections           Specify the maximum number of allowed concurrent connections.\n");
+#endif
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
+        printf("      --disable_extended_rendezvous_multiple_sockets     Disable multiple sockets in extended rendezvous.\n");
+#endif
+        exit(0);
+    }
+
+    if (gopt(options, 'V')) {
+        printf("%d.%d\n", RELEASE_MAJOR, RELEASE_MINOR);
+        exit(0);
+    }
+
+    if (gopt(options, 'C')) {
+        unabto_printf_unabto_config(stdout, "unabto_tunnel");
+        exit(0);
+    }
+
+    if (gopt(options, 'S')) {
+        unabto_printf_memory_sizes(stdout, "unabto_tunnel");
+        exit(0);
+    }
+    
+    { 
+        size_t optionsLength = gopt(options, 'l');
+        int i;
+        if (optionsLength > 0) {
+            for (i = 0; i < optionsLength; i++) {
+                optionString = gopt_arg_i(options, 'l', i);
+                if (!unabto_log_system_enable_stdout_pattern(optionString)) {
+                    NABTO_LOG_FATAL(("Logstring %s is not a valid logsetting", optionString));
+                }
+            }
+        } else {
+            unabto_log_system_enable_stdout_pattern("*.info");
+        }
+        
+    } 
+    
+
+    if (!gopt_arg( options, 'd', &nms->id)) {
+        NABTO_LOG_FATAL(("Specify a serverId with -d. Try -h for help."));
+    }
+
+    if( gopt_arg( options, 'p', &localPortStr) ){
+        int localPort = atoi(localPortStr);
+        nms->localPort = localPort;
+    }
+
+
+    if (gopt(options, 's')) {
+        const char* preSharedKey;
+        uint8_t key[16];
+        memset(key, 0, 16);
+        if ( gopt_arg( options, 'k', &preSharedKey)) {
+            size_t i;
+            size_t pskLen = strlen(preSharedKey);
+            // read the pre shared key as a hexadecimal string.
+            for (i = 0; i < pskLen/2 && i < 16; i++) {
+                sscanf(preSharedKey+(2*i), "%02hhx", &key[i]);
+            }
+        }
+        memcpy(nms->presharedKey,key,16);
+        nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
+        nms->secureAttach = true;
+        nms->secureData = true;
+    }
+
+    if (gopt(options, 'a')) {
+        check_acl = true;
+    }
+
+    if( gopt_arg( options, 'A', & basestationAddress ) ){
+        addr = inet_addr(basestationAddress);
+        if (addr == INADDR_NONE) {
+            NABTO_LOG_FATAL(("Invalid basestation address"));
+        }
+        nms->controllerArg.addr = htonl(addr);
+    }
+
+    if (gopt(options, 'x')) {
+        nice_exit = true;
+    }
+
+    if(gopt_arg(options, UART_DEVICE_OPTION, &uartDevice)) {
+        uart_tunnel_set_default_device(uartDevice);
+    } else {
+        NABTO_LOG_FATAL(("Missing uart device option."));
+    }
+    
+#if NABTO_ENABLE_TCP_FALLBACK
+    if (gopt(options, DISABLE_TCP_FALLBACK_OPTION)) {
+        nms->enableTcpFallback = false;
+    }
+#endif
+
+    if (gopt_arg(options, CONTROLLER_PORT_OPTION, &controllerPort)) {
+        nms->controllerArg.port = atoi(controllerPort);
+    }
+
+#if NABTO_ENABLE_EPOLL
+    if (gopt(options, SELECT_BASED_OPTION)) {
+        useSelectBased = true;
+    }
+#endif
+
+#if NABTO_ENABLE_DYNAMIC_MEMORY
+    if (gopt_arg(options, TUNNELS_OPTION, &tunnelsOption)) {
+        nms->streamMaxStreams = atoi(tunnelsOption);
+    }
+
+    if (gopt_arg(options, STREAM_WINDOW_SIZE_OPTION, &streamWindowSizeOption)) {
+        uint16_t windowSize = atoi(streamWindowSizeOption);
+        nms->streamReceiveWindowSize = windowSize;
+        nms->streamSendWindowSize = windowSize;
+    }
+
+    if (gopt_arg(options, CONNECTIONS_SIZE_OPTION, &connectionsOption)) {
+        nms->connectionsSize = atoi(connectionsOption);
+    }
+#endif
+
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
+    if (gopt(options, DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS)) {
+        nms->enableExtendedRendezvousMultipleSockets = false;
+    }
+#endif
+
+    return true;
+}
+
+int main(int argc, char** argv)
+{
+#if USE_TEST_WEBSERVER
+#ifdef WIN32
+    HANDLE testWebserverThread;
+#else
+    pthread_t testWebserverThread;
+#endif
+#endif
+
+    nabto_main_setup* nms = unabto_init_context();
+    
+#if NABTO_ENABLE_EPOLL
+    unabto_epoll_init();
+#endif
+
+    if (!tunnel_parse_args(argc, argv, nms)) {
+        NABTO_LOG_FATAL(("failed to parse commandline args"));
+    }
+
+#if USE_TEST_WEBSERVER
+    if (testWebserver) {
+#ifdef WIN32
+        testWebserverThread = CreateThread(NULL, 0, test_webserver, (void*)testWebserverPortStr, NULL, NULL);
+#else
+        pthread_create(&testWebserverThread, NULL, test_webserver, (void*)testWebserverPortStr);
+#endif
+    }
+#endif
+
+#if HANDLE_SIGNALS
+#ifdef WIN32
+    signal_event = CreateEvent(NULL, FALSE, FALSE, NULL);
+#endif
+    signal(SIGTERM, handle_signal);
+    signal(SIGINT, handle_signal);
+#endif
+
+#if NABTO_ENABLE_EPOLL
+    if (useSelectBased) {
+        tunnel_loop_select();
+    } else {
+        tunnel_loop_epoll();
+    }
+#else
+    tunnel_loop_select();
+#endif
+    return 0;
+}
+
+bool tunnel_allow_connection(const char* host, int port) {
+    size_t i;
+    
+    bool allow;
+    bool portFound = false;
+    bool hostFound = false;
+    
+    if (!check_acl) {
+        return true;
+    }
+    
+    if (allow_all_ports) {
+        portFound = true;
+    } else {
+        for (i = 0; i < ports_length; i++) {
+            if (ports[i] == port) {
+                portFound = true;
+            }
+        }
+    }
+    
+    for(i = 0; i < hosts_length; i++) {
+        if (strcmp(host, hosts[i]) == 0) {
+            hostFound = true;
+        }
+    }
+    
+    allow = hostFound && portFound;
+    
+    if (!allow) {
+        NABTO_LOG_INFO(("Current acl has disallowed access to %s:%i", host, port));
+    }
+
+    return allow;
+}
+
+#if !USE_STUN_CLIENT
+
+application_event_result application_event(application_request* request, buffer_read_t* readBuffer, buffer_write_t* writeBuffer)
+{
+    return AER_REQ_INV_QUERY_ID;
+}
+
+bool application_poll_query(application_request** applicationRequest) {
+    return false;
+}
+
+application_event_result application_poll(application_request* applicationRequest, buffer_read_t* readBuffer, buffer_write_t* writeBuffer) {
+    return AER_REQ_SYSTEM_ERROR;
+}
+
+void application_poll_drop(application_request* applicationRequest) {
+}
+
+#endif
