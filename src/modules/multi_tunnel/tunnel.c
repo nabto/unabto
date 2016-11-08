@@ -71,6 +71,9 @@ void unabto_forward_tcp(tunnel* tunnel);
 bool add_socket(int sock);
 void remove_socket(int sock);
 
+/* ECHO tunnel specific functions */
+void echo_forward(tunnel* tunnel);
+
 
 bool init_tunnel_module()
 {
@@ -111,6 +114,7 @@ void unabto_stream_accept(unabto_stream* stream) {
 
 void unabto_stream_event(unabto_stream* stream, unabto_stream_event_type event) {
     tunnel* state;
+    NABTO_LOG_INFO(("Unabto_stream_event: %i",event));
     NABTO_LOG_TRACE(("Stream %i, %i", unabto_stream_index(stream), event));
     state = &tunnels[unabto_stream_index(stream)];
     tunnel_event(state, TUNNEL_EVENT_SOURCE_UNABTO);
@@ -194,7 +198,8 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
 		}
 		
 	    } else if  (tunnel->tunnelType == TUNNEL_TYPE_ECHO){
-		// ECHO
+		tunnel_send_init_message(tunnel, "+\n");
+		tunnel->state = TS_FORWARD;
 	    } else{
 		NABTO_LOG_ERROR(("Tunnel(%i), Event in TS_PARSE_COMMAND state with Tunnel type unrecognized. source %i, unabtoReadState %i, stream index %i.", tunnel->tunnelId, event_source,tunnel->unabtoReadState, unabto_stream_index(tunnel->stream)));
 		tunnel->state = TS_CLOSING;
@@ -234,7 +239,7 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
 		tcp_forward(tunnel);
 		unabto_forward_tcp(tunnel);
 	    } else if  (tunnel->tunnelType == TUNNEL_TYPE_ECHO){
-		// ECHO
+		echo_forward(tunnel);
 	    } else{
 		NABTO_LOG_ERROR(("Tunnel(%i), Event in TS_FORWARD state with Tunnel type unrecognized. source %i, unabtoReadState %i, stream index %i.", tunnel->tunnelId, event_source,tunnel->unabtoReadState, unabto_stream_index(tunnel->stream)));
 		tunnel->state = TS_CLOSING;
@@ -297,11 +302,11 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
 
 bool parse_command(tunnel* tunnel) {
     
-    if (0 == strcmp(tunnel->staticMemory->command, UART_COMMAND)){
+    if (0 == memcmp(tunnel->staticMemory->command, UART_COMMAND,strlen(UART_COMMAND))){
 	strncpy(tunnel->staticMemory->stmu.uart_sm.deviceName, uart_tunnel_get_default_device(), MAX_DEVICE_NAME_LENGTH);
 	tunnel->tunnelType = TUNNEL_TYPE_UART;
 	return true;	
-    } else if (0 == strcmp(tunnel->staticMemory->command, TCP_COMMAND)){
+    } else if (0 == memcmp(tunnel->staticMemory->command, TCP_COMMAND,strlen(TCP_COMMAND))){
 	char* s;
 
 	if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, PORT_KW_TXT)))
@@ -334,9 +339,10 @@ bool parse_command(tunnel* tunnel) {
 	}
 	tunnel->tunnelType = TUNNEL_TYPE_TCP;
 	return true;
-    } else if (0 == strcmp(tunnel->staticMemory->command, ECHO_COMMAND)){
+    } else if (0 == memcmp(tunnel->staticMemory->command, ECHO_COMMAND,strlen(ECHO_COMMAND))){
 	tunnel->tunnelType = TUNNEL_TYPE_ECHO;
     } else {
+	NABTO_LOG_INFO(("Failed to parse command: %s",tunnel->staticMemory->command));
 	return false;
     }
 	
@@ -361,6 +367,35 @@ void close_tcp_reader(tunnel* tunnel) {
     unabto_stream_close(tunnel->stream);
     tunnel->extReadState = FS_CLOSING;
 }
+
+/**
+ * Echo unabto back to unabto
+ */
+void echo_forward(tunnel* tunnel){
+ 
+    const uint8_t* buf;
+    unabto_stream_hint hint;
+    size_t readLength = unabto_stream_read(tunnel->stream, &buf, &hint);
+
+    if (readLength > 0) {
+	size_t writeLength = unabto_stream_write(tunnel->stream, buf, readLength, &hint);
+	if (writeLength > 0) {
+	    if (!unabto_stream_ack(tunnel->stream, buf, writeLength, &hint)) {
+		tunnel->state = TS_CLOSING;
+	    }
+	} else {
+	    if (hint != UNABTO_STREAM_HINT_OK) {
+		tunnel->state = TS_CLOSING;
+	    }
+	}
+    } else {
+	if (hint !=  UNABTO_STREAM_HINT_OK) {
+	    tunnel->state = TS_CLOSING;
+	}
+    }
+
+}
+
 
 /**
  * read from uart, write to unabto
@@ -774,6 +809,7 @@ bool open_uart(tunnel* tunnel) {
         struct epoll_event ev;
         ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
         ev.data.ptr = tunnel;
+	tunnel->epollEventType = UNABTO_EPOLL_TYPE_UART_TUNNEL;
         epoll_ctl(unabto_epoll_fd, EPOLL_CTL_ADD, tunnel->tunnel_type_vars.uart.fd, &ev);
     }
 #endif
@@ -908,6 +944,7 @@ bool open_socket(tunnel* tunnel) {
         struct epoll_event ev;
         ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
         ev.data.ptr = tunnel;
+	tunnel->epollEventType = UNABTO_EPOLL_TYPE_TCP_TUNNEL;
         epoll_ctl(unabto_epoll_fd, EPOLL_CTL_ADD, tunnel->tunnel_type_vars.tcp.sock, &ev);
     }
 #endif
