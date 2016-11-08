@@ -15,6 +15,7 @@
 #define MAX_HOST_LENGTH 128
 
 #define INVALID_SOCKET -1
+typedef socklen_t optlen;
 typedef int tunnelSocket;
 
 typedef enum {
@@ -26,6 +27,12 @@ typedef enum {
     TS_FORWARD,
     TS_CLOSING
 } tunnelStates;
+
+typedef enum {
+    TUNNEL_TYPE_TCP,
+    TUNNEL_TYPE_UART,
+    TUNNEL_TYPE_ECHO
+} tunnel_type;
 
 typedef enum {
     FS_READ,
@@ -42,35 +49,34 @@ typedef enum {
 } tunnel_event_source;
 
 typedef struct uart_tunnel_static_memory {
-    uint8_t command[MAX_COMMAND_LENGTH];
     char deviceName[MAX_DEVICE_NAME_LENGTH];
 } uart_tunnel_static_memory;
 
 typedef struct tcp_tunnel_static_memory {
-    uint8_t command[MAX_COMMAND_LENGTH];
     char host[MAX_HOST_LENGTH];
     uint8_t tcpReadBuffer[NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE];
 } tcp_tunnel_static_memory;
 //~ struct tcp_tunnel_static_memory;
 //~ struct uart_tunnel_static_memory;
 
-union tunnel_static_memory{
+union tunnel_static_memory_union{
     struct tcp_tunnel_static_memory tcp_sm;
     struct uart_tunnel_static_memory uart_sm;
 };
 
+typedef struct tunnel_static_memory{
+    uint8_t command[MAX_COMMAND_LENGTH];
+    union tunnel_static_memory_union stmu;
+} tunnel_static_memory;
+
 
 typedef struct uart_vars{
     int fd;
-    forwardState uartReadState;
-    forwardState unabtoReadState;
 } uart_vars;
 
 typedef struct tcp_vars{
     int port;
     tunnelSocket sock;
-    forwardState tcpReadState;
-    forwardState unabtoReadState;
     int tcpReadBufferSize;
     int tcpReadBufferSent;
 } tcp_vars;
@@ -88,14 +94,17 @@ typedef struct tunnel {
     unabto_stream* stream;
     tunnelStates state;
     int commandLength;
+    forwardState extReadState;
+    forwardState unabtoReadState;
     union {
         uart_vars uart;
         tcp_vars tcp;
         echo_vars echo;
     } tunnel_type_vars;
     
+    tunnel_type tunnelType;
     int tunnelId;
-    union tunnel_static_memory* staticMemory;
+    tunnel_static_memory* staticMemory;
 } tunnel;
 
 extern NABTO_THREAD_LOCAL_STORAGE tunnel* tunnels;
@@ -105,6 +114,7 @@ bool init_tunnel_module();
 void deinit_tunnel_module();
 
 void reset_tunnel_struct(tunnel* t);
+void reset_unknown_tunnel_struct(tunnel* t);
 
 void tunnel_event(tunnel* state, tunnel_event_source event_source);
 
