@@ -7,7 +7,7 @@
 
 
 #define UART_COMMAND "uart"
-#define TCP_COMMAND "tcp"
+#define TCP_COMMAND "tunnel"
 #define ECHO_COMMAND "echo"
 
 #define MAX_COMMAND_LENGTH 512

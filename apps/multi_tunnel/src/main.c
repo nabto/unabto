@@ -27,6 +27,8 @@
 
 #include <modules/network/epoll/unabto_epoll.h>
 
+#include "platform_checks.h"
+
 #ifdef WINCE
 #define HANDLE_SINGALS 0
 #else
@@ -68,6 +70,9 @@ static bool useSelectBased = false;
 
 enum {
     UART_DEVICE_OPTION = 1,
+    ALLOW_PORT_OPTION,
+    ALLOW_HOST_OPTION,
+    ALLOW_ALL_PORTS_OPTION,
     DISABLE_TCP_FALLBACK_OPTION,
     CONTROLLER_PORT_OPTION,
     SELECT_BASED_OPTION,
@@ -76,6 +81,7 @@ enum {
     CONNECTIONS_SIZE_OPTION,
     DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
 };
+
 
 #if HANDLE_SIGNALS
 void handle_signal(int signum) {
@@ -117,7 +123,11 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x12s[] = "s";     const char* x12l[] = { "use_encryption", 0 };
     const char x13s[] = "k";     const char* x13l[] = { "encryption_key", 0 };
     const char x14s[] = "p";     const char* x14l[] = { "localport", 0 };
+    const char x15s[] = "a";     const char* x15l[] = { "check_acl", 0 };
+    const char x16s[] = "";      const char* x16l[] = { "allow_port", 0};
+    const char x17s[] = "";      const char* x17l[] = { "allow_host", 0};
     const char x18s[] = "x";     const char* x18l[] = { "nice_exit", 0};
+    const char x19s[] = "";      const char* x19l[] = { "allow_all_ports", 0};
     const char x21s[] = "l";     const char* x21l[] = { "nabtolog", 0 };
     const char x22s[] = "A";     const char* x22l[] = { "controller", 0 };
     const char x23s[] = "";      const char* x23l[] = { "disable_tcp_fb", 0 };
@@ -144,7 +154,11 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         { 's', GOPT_NOARG,   x12s, x12l },
         { 'k', GOPT_ARG,     x13s, x13l },
         { 'p', GOPT_ARG,     x14s, x14l },
+        { 'a', GOPT_NOARG,   x15s, x15l },
+        { ALLOW_PORT_OPTION, GOPT_REPEAT|GOPT_ARG, x16s, x16l },
+        { ALLOW_HOST_OPTION, GOPT_REPEAT|GOPT_ARG, x17s, x17l },
         { 'x', GOPT_NOARG, x18s, x18l },
+        { ALLOW_ALL_PORTS_OPTION, GOPT_NOARG, x19s, x19l },
         { 'l', GOPT_REPEAT|GOPT_ARG,  x21s, x21l },
         { 'A', GOPT_ARG, x22s, x22l },
         { DISABLE_TCP_FALLBACK_OPTION, GOPT_NOARG, x23s, x23l },
@@ -187,11 +201,17 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("  -S, --size                  Print size (in bytes) of memory usage.\n");
         printf("  -l, --nabtolog              Speficy log level such as *.trace.\n");
         printf("  -d, --device_name           Specify name of this device.\n");
+        printf("  -H, --tunnel_default_host   Set default host name for tunnel (%s).\n", DEFAULT_HOST);
+        printf("  -P, --tunnel_default_port   Set default port for tunnel (%u).\n", DEFAULT_PORT);
         printf("  -s, --use_encryption        Encrypt communication.\n");
         printf("  -k, --encryption_key        Specify encryption key.\n");
         printf("  -p, --localport             Specify port for local connections.\n");
         printf("  -A, --controller            Specify controller address\n");
         printf("      --controller_port       sets the controller port number.\n");
+        printf("  -a, --check_acl             Perform ACL check when establishing connection.\n");
+        printf("      --allow_all_ports       Allow connections to all port numbers.\n");
+        printf("      --allow_port            Ports that are allowed. Requires -a.\n");
+        printf("      --allow_host            Hostnames that are allowed. Requires -a.\n");
         printf("      --uart_device           Sets the uart device\n");
         printf("  -x, --nice_exit             Close the tunnels nicely when pressing Ctrl+C.\n");
 #if NABTO_ENABLE_TCP_FALLBACK
@@ -247,6 +267,18 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         NABTO_LOG_FATAL(("Specify a serverId with -d. Try -h for help."));
     }
 
+    if(gopt_arg(options, 'H', &h)) {
+        tunnel_set_default_host(h);
+    }
+
+    if (gopt_arg(options, 'P', &tunnel_port_str)) {
+        if(1 != sscanf(tunnel_port_str, "%d", &p)) {
+            NABTO_LOG_TRACE(("Reading of port parameter failed."));
+        } else {
+            tunnel_set_default_port(p);
+        }
+    }
+     
     if( gopt_arg( options, 'p', &localPortStr) ){
         int localPort = atoi(localPortStr);
         nms->localPort = localPort;
@@ -286,11 +318,36 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     if (gopt(options, 'x')) {
         nice_exit = true;
     }
+    
+    ports_length = gopt(options, ALLOW_PORT_OPTION);
+    if (ports_length > 0) {
+        size_t i;
+        ports = (uint16_t*) malloc(ports_length*sizeof(uint16_t));
+        memset(ports,0,ports_length*sizeof(uint16_t));
+        for (i = 0; i < ports_length; i++) {
+            const char* opt = gopt_arg_i(options, ALLOW_PORT_OPTION, i);
+            ports[i] = atoi(opt);
+        }
+    }
+    
+    hosts_length = gopt(options, ALLOW_HOST_OPTION);
+    if (hosts_length > 0) {
+        size_t i;
+        hosts = (char**) malloc(hosts_length*sizeof(char*));
+        for (i = 0; i < hosts_length; i++) {
+            const char* opt = gopt_arg_i(options, ALLOW_HOST_OPTION, i);
+            hosts[i] = strdup(opt);
+        }
+    }
+
+    if (gopt(options, ALLOW_ALL_PORTS_OPTION)) {
+        allow_all_ports = true;
+    }
 
     if(gopt_arg(options, UART_DEVICE_OPTION, &uartDevice)) {
         uart_tunnel_set_default_device(uartDevice);
     } else {
-        NABTO_LOG_FATAL(("Missing uart device option."));
+        NABTO_LOG_TRACE(("Missing uart device option."));
     }
     
 #if NABTO_ENABLE_TCP_FALLBACK
@@ -345,7 +402,9 @@ int main(int argc, char** argv)
 #endif
 
     nabto_main_setup* nms = unabto_init_context();
-    
+
+    platform_checks();
+        
 #if NABTO_ENABLE_EPOLL
     unabto_epoll_init();
 #endif

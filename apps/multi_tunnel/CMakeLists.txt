@@ -31,7 +31,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../src/modules/multi_tunnel ${CM
 source_group(tunnel\\src FILES ${unabto_tunnel_src})
 
 set(tunnel_src
-# ${unabto_server_unabto_tunneling_src}/platform_checks.c
+  ${unabto_server_unabto_multi_tunneling_src}/platform_checks.c
   )
 
 if (NOT WIN32)
