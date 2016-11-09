@@ -108,12 +108,6 @@ typedef struct tunnel {
 
 void close_reader(tunnel* tunnel);
 void echo_forward(tunnel* tunnel);
-void uart_forward(tunnel* tunnel);
-void tcp_forward(tunnel* tunnel);
-void unabto_forward_uart(tunnel* tunnel);
-void unabto_forward_tcp(tunnel* tunnel);
-bool opening_socket(tunnel* tunnel);
-bool open_socket(tunnel* tunnel);
 
 
 
