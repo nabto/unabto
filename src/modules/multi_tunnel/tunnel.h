@@ -28,7 +28,6 @@ void uart_tunnel_set_default_device(const char* device);
 const char* uart_tunnel_get_default_device();
 
 
-
 /* TCP tunnel specific functions */
 bool tunnel_allow_connection(const char* host, int port);
 

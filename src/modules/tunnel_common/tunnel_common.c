@@ -32,20 +32,20 @@ void echo_forward(tunnel* tunnel){
     size_t readLength = unabto_stream_read(tunnel->stream, &buf, &hint);
 
     if (readLength > 0) {
-	size_t writeLength = unabto_stream_write(tunnel->stream, buf, readLength, &hint);
-	if (writeLength > 0) {
-	    if (!unabto_stream_ack(tunnel->stream, buf, writeLength, &hint)) {
-		tunnel->state = TS_CLOSING;
-	    }
-	} else {
-	    if (hint != UNABTO_STREAM_HINT_OK) {
-		tunnel->state = TS_CLOSING;
-	    }
-	}
+    size_t writeLength = unabto_stream_write(tunnel->stream, buf, readLength, &hint);
+    if (writeLength > 0) {
+        if (!unabto_stream_ack(tunnel->stream, buf, writeLength, &hint)) {
+        tunnel->state = TS_CLOSING;
+        }
     } else {
-	if (hint !=  UNABTO_STREAM_HINT_OK) {
-	    tunnel->state = TS_CLOSING;
-	}
+        if (hint != UNABTO_STREAM_HINT_OK) {
+        tunnel->state = TS_CLOSING;
+        }
+    }
+    } else {
+    if (hint !=  UNABTO_STREAM_HINT_OK) {
+        tunnel->state = TS_CLOSING;
+    }
     }
 
 }
