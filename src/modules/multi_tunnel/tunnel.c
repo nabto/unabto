@@ -55,9 +55,8 @@ void ts_closing(tunnel* tunnel, tunnel_event_source event_source);
 
 /* Uart tunnel specific functions */
 
-bool open_uart(tunnel* tunnel);
-bool tunnel_send_init_message(tunnel* tunnel, const char* msg);
 void steal_uart_port(tunnel* tunnel);
+
 void uart_tunnel_set_default_device(const char* device) {
     defaultUartDevice = device;
 }
@@ -378,158 +377,6 @@ void close_stream_reader(tunnel* tunnel) {
 
 
 
-bool open_uart(tunnel* tunnel) {
-    struct termios tios;
-    
-    tunnel->tunnel_type_vars.uart.fd = open(tunnel->staticMemory->stmu.uart_sm.deviceName, O_RDWR | O_NOCTTY | O_NONBLOCK);
-    if (tunnel->tunnel_type_vars.uart.fd == -1) {
-        NABTO_LOG_ERROR(("cannot open uart %s", tunnel->staticMemory->stmu.uart_sm.deviceName));
-        return false;
-    }
-
-    memset(&tios, 0, sizeof(tios));
-    tios.c_iflag = IGNBRK | IGNCR;
-    tios.c_iflag |= ((tcflag_t) INPCK);
-    tios.c_oflag &= ~OPOST;
-    tios.c_lflag &= ~ICANON;
-    cfmakeraw(&tios); // :...
-    tios.c_cc[VMIN] = 0;
-    tios.c_cc[VTIME] = 0;
-    tios.c_cflag = CLOCAL | CREAD;
-        
-    
-    /* switch(parity) */
-    /* { */
-	/* 	case UART_PARITY_NONE: */
-	/* 		break; */
-			
-	/* 	case UART_PARITY_EVEN: */
-	/* 		tios.c_cflag |= ((tcflag_t) PARENB); */
-	/* 		break; */
-			
-	/* 	case UART_PARITY_ODD: */
-	/* 		tios.c_cflag |= ((tcflag_t) PARENB | PARODD); */
-	/* 		break; */
-			
-	/* 	// case UART_PARITY_MARK: */
-	/* 		// tios.c_cflag |= ((tcflag_t) PARENB | CMSPAR | PARODD); */
-	/* 		// break; */
-			
-	/* 	// case UART_PARITY_SPACE: */
-	/* 		// tios.c_cflag |= ((tcflag_t) PARENB | CMSPAR); */
-	/* 		// break; */
-
-	/* 	default: */
-	/* 		NABTO_LOG_FATAL(("Invalid number of databits for UART!")); */
-    /* } */
-
-    /* switch(stopbits) */
-    /* { */
-	/* 	case UART_STOPBITS_ONE: */
-	/* 		break; */
-
-	/* 	case UART_STOPBITS_TWO: */
-	/* 		tios.c_cflag |= ((tcflag_t) CSTOPB); */
-	/* 		break; */
-
-	/* 	default: */
-	/* 		NABTO_LOG_FATAL(("Invalid number of stopbits for UART!")); */
-    /* } */
-	
-	/* switch(databits) */
-	/* { */
-	/* 	case 5: */
-	/* 		tios.c_cflag |= ((tcflag_t) CS5); */
-	/* 		break; */
-	/* 	case 6: */
-	/* 		tios.c_cflag |= ((tcflag_t) CS6); */
-	/* 		break; */
-	/* 	case 7: */
-	/* 		tios.c_cflag |= ((tcflag_t) CS7); */
-	/* 		break; */
-	/* 	case 8: */
-	/* 		tios.c_cflag |= ((tcflag_t) CS8); */
-	/* 		break; */
-	/* 	default: */
-	/* 		NABTO_LOG_FATAL(("Invalid number of databits specified for UART '%s'.", _name)); */
-	/* 		return; */
-	/* } */
-    
-    /* switch(baudrate) */
-	/* { */
-	/* 	case 300: */
-	/* 		cfsetispeed(&tios, B300); */
-	/* 		cfsetospeed(&tios, B300); */
-	/* 	case 600: */
-	/* 		cfsetispeed(&tios, B600); */
-	/* 		cfsetospeed(&tios, B600); */
-	/* 	case 1200: */
-	/* 		cfsetispeed(&tios, B1200); */
-	/* 		cfsetospeed(&tios, B1200); */
-	/* 	case 2400: */
-	/* 		cfsetispeed(&tios, B2400); */
-	/* 		cfsetospeed(&tios, B2400); */
-	/* 		break; */
-	/* 	case 4800: */
-	/* 		cfsetispeed(&tios, B4800); */
-	/* 		cfsetospeed(&tios, B4800); */
-	/* 		break; */
-	/* 	case 9600: */
-	/* 		cfsetispeed(&tios, B9600); */
-	/* 		cfsetospeed(&tios, B9600); */
-	/* 		break; */
-	/* 	case 19200: */
-	/* 		cfsetispeed(&tios, B19200); */
-	/* 		cfsetospeed(&tios, B19200); */
-	/* 		break; */
-	/* 	case 38400: */
-	/* 		cfsetispeed(&tios, B38400); */
-	/* 		cfsetospeed(&tios, B38400); */
-	/* 		break; */
-	/* 	case 57600: */
-	/* 		cfsetispeed(&tios, B57600); */
-	/* 		cfsetospeed(&tios, B57600); */
-	/* 		break; */
-	/* 	case 115200: */
-	/* 		cfsetispeed(&tios, B115200); */
-	/* 		cfsetospeed(&tios, B115200); */
-	/* 		break; */
-	/* 	default: */
-	/* 		NABTO_LOG_FATAL(("Invalid baudrate specified for UART '%s'.", _name)); */
-	/* 		return; */
-	/* } */
-
-    // defautlt settings for now
-    
-    tios.c_cflag |= ((tcflag_t) CS8);
-    if (-1 == cfsetispeed(&tios, B115200)) {
-        NABTO_LOG_ERROR(("unable to set baudrate"));
-    }
-    if (-1 == cfsetospeed(&tios, B115200)) {
-        NABTO_LOG_ERROR(("unable to set baudrate"));
-    }
-    
-    if (-1 == tcsetattr(tunnel->tunnel_type_vars.uart.fd, TCSANOW, &tios))
-	{
-		NABTO_LOG_ERROR(("Unable to configure UART '%s'. error: %s", tunnel->staticMemory->stmu.uart_sm.deviceName, strerror(errno)));
-        return false;
-	}
-    
-#if NABTO_ENABLE_EPOLL
-    {
-        struct epoll_event ev;
-        ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
-        ev.data.ptr = tunnel;
-	tunnel->epollEventType = UNABTO_EPOLL_TYPE_UART_TUNNEL;
-        epoll_ctl(unabto_epoll_fd, EPOLL_CTL_ADD, tunnel->tunnel_type_vars.uart.fd, &ev);
-    }
-#endif
-
-    
-    tunnel->state = TS_FORWARD;
-    return true;
-}
-
 
 
 void reset_tunnel_struct(tunnel* t) {
@@ -560,24 +407,6 @@ void reset_unknown_tunnel_struct(tunnel* t) {
     memset(t, 0, sizeof(struct tunnel));
     t->staticMemory = &tunnels_static_memory[offset];
     memset(t->staticMemory, 0, sizeof(tunnel_static_memory));
-}
-/**
- * utility function for either sending +ok\n or -error message\n in
- * case of either success or failure.  see spec in
- * https://www.rfc-editor.org/rfc/rfc1078.txt instead of CRLF only LF
- * is used.
- */
-bool tunnel_send_init_message(tunnel* tunnel, const char* msg)
-{
-    unabto_stream_hint hint;
-    size_t written;
-    size_t writeLength = strlen(msg);
-    written = unabto_stream_write(tunnel->stream, (uint8_t*)msg, writeLength, &hint);
-    if (written != writeLength) {
-        NABTO_LOG_ERROR(("we should at a minimum be able to send this simple message, we will probably just goive up..."));
-        return false;
-    }
-    return true;
 }
 
 

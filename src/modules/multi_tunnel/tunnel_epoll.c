@@ -74,7 +74,7 @@ void tunnel_loop_epoll() {
             //~ NABTO_LOG_INFO(("Generating tunnel event with epollEventType: %i",handler->epollEventType));
             if (handler->epollEventType == UNABTO_EPOLL_TYPE_UART_TUNNEL) {
                 tunnel* tunnelPtr = (tunnel*)handler;
-                NABTO_LOG_INFO(("Generating tunnel event with UART"));
+                //~ NABTO_LOG_INFO(("Generating tunnel event with UART"));
                 tunnelPtr->tunnelType = TUNNEL_TYPE_UART;
                 if (tunnelPtr->tunnel_type_vars.uart.fd != -1) {
                     tunnel_event(tunnelPtr, TUNNEL_EVENT_SOURCE_UART_READ);
@@ -84,7 +84,7 @@ void tunnel_loop_epoll() {
                 }
             } else if (handler->epollEventType == UNABTO_EPOLL_TYPE_TCP_TUNNEL) {
                 tunnel* tunnelPtr = (tunnel*)handler;
-                NABTO_LOG_INFO(("Generating tunnel event with TCP"));
+                //~ NABTO_LOG_INFO(("Generating tunnel event with TCP"));
                 tunnelPtr->tunnelType = TUNNEL_TYPE_TCP;
                 if (tunnelPtr->tunnel_type_vars.tcp.sock != INVALID_SOCKET) {
                     tunnel_event(tunnelPtr, TUNNEL_EVENT_SOURCE_TCP_READ);
