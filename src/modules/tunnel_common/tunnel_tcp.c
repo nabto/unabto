@@ -103,8 +103,8 @@ bool opening_socket(tunnel* tunnel) {
             tunnel->state = TS_FORWARD;
         } else {
 #if defined(WINSOCK)
-	    NABTO_LOG_ERROR(("Error opening socket %s", WSAGetLastError())); 
-#else	  
+        NABTO_LOG_ERROR(("Error opening socket %s", WSAGetLastError())); 
+#else      
             NABTO_LOG_ERROR(("Error opening socket %s", strerror(err)));
 #endif
             return false;
@@ -140,7 +140,7 @@ bool open_socket(tunnel* tunnel) {
         struct epoll_event ev;
         ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
         ev.data.ptr = tunnel;
-	tunnel->epollEventType = UNABTO_EPOLL_TYPE_TCP_TUNNEL;
+    tunnel->epollEventType = UNABTO_EPOLL_TYPE_TCP_TUNNEL;
         epoll_ctl(unabto_epoll_fd, EPOLL_CTL_ADD, tunnel->tunnel_type_vars.tcp.sock, &ev);
     }
 #endif

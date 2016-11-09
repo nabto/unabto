@@ -189,7 +189,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char* tunnelsOption;
     const char* streamWindowSizeOption;
     const char* connectionsOption;
-    const char* uartDevice;
+    const char* uartDevice = 0;
     uint32_t addr;
 
 
@@ -348,6 +348,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         uart_tunnel_set_default_device(uartDevice);
     } else {
         NABTO_LOG_TRACE(("Missing uart device option."));
+        uartDevice = 0;
     }
     
 #if NABTO_ENABLE_TCP_FALLBACK

@@ -24,7 +24,6 @@
 #include <sys/epoll.h>
 #endif
 
-
 #ifdef __MACH__
 #define MSG_NOSIGNAL 0
 #endif
@@ -86,7 +85,7 @@ bool init_tunnel_module()
     }
 
     for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS; i++) {
-        reset_tunnel_struct(&tunnels[i]);
+        reset_unknown_tunnel_struct(&tunnels[i]);
     }
 
     return true;
@@ -124,11 +123,11 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
     NABTO_LOG_TRACE(("Tunnel event on tunnel %i", tunnel));
     
     if (tunnel->state == TS_IDLE) {
-	ts_idle(tunnel, event_source);
+        ts_idle(tunnel, event_source);
         return;
     }
     if (tunnel->state == TS_READ_COMMAND) {
-	ts_read_command(tunnel);
+        ts_read_command(tunnel);
     }
     if (tunnel->state == TS_PARSE_COMMAND) {
         ts_parse_command(tunnel, event_source);
@@ -145,26 +144,26 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
         }
     }
     if (tunnel->state == TS_FORWARD) {
-	ts_forward_command(tunnel, event_source);
+        ts_forward_command(tunnel, event_source);
     }
     if (tunnel->extReadState == FS_CLOSING && tunnel->unabtoReadState == FS_CLOSING) {
         tunnel->state = TS_CLOSING;
     }
     if (tunnel->state == TS_CLOSING) {
-	ts_closing(tunnel, event_source);
+        ts_closing(tunnel, event_source);
     }
 }
 
 
 void ts_idle(tunnel* tunnel, tunnel_event_source event_source){
     if (tunnel->tunnelType == TUNNEL_TYPE_UART){
-	NABTO_LOG_ERROR(("Tunnel(%i), Event on tunnel which should not be in IDLE state. source %i, uartReadState %i, unabtoReadState %i, stream index %i, fd %i", tunnel->tunnelId, event_source, tunnel->extReadState, tunnel->unabtoReadState, unabto_stream_index(tunnel->stream), tunnel->tunnel_type_vars.uart.fd));
+        NABTO_LOG_ERROR(("Tunnel(%i), Event on tunnel which should not be in IDLE state. source %i, uartReadState %i, unabtoReadState %i, stream index %i, fd %i", tunnel->tunnelId, event_source, tunnel->extReadState, tunnel->unabtoReadState, unabto_stream_index(tunnel->stream), tunnel->tunnel_type_vars.uart.fd));
     } else if (tunnel->tunnelType == TUNNEL_TYPE_TCP){
-	NABTO_LOG_ERROR(("Tunnel(%i), Event on tunnel which should not be in IDLE state. source %i, tcpReadState %i, unabtoReadState %i, stream index %i, socket %i", tunnel->tunnelId, event_source, tunnel->extReadState, tunnel->unabtoReadState, unabto_stream_index(tunnel->stream), tunnel->tunnel_type_vars.tcp.sock));
+        NABTO_LOG_ERROR(("Tunnel(%i), Event on tunnel which should not be in IDLE state. source %i, tcpReadState %i, unabtoReadState %i, stream index %i, socket %i", tunnel->tunnelId, event_source, tunnel->extReadState, tunnel->unabtoReadState, unabto_stream_index(tunnel->stream), tunnel->tunnel_type_vars.tcp.sock));
     } else if (tunnel->tunnelType == TUNNEL_TYPE_ECHO){
-	// ECHO
+        // ECHO
     } else {
-	NABTO_LOG_ERROR(("Tunnel(%i), Event on tunnel which should not be in IDLE state. source %i, unabtoReadState %i, stream index %i, Tunnel type unrecognized.", tunnel->tunnelId, event_source,tunnel->unabtoReadState, unabto_stream_index(tunnel->stream)));
+        NABTO_LOG_ERROR(("Tunnel(%i), Event on tunnel which should not be in IDLE state. source %i, unabtoReadState %i, stream index %i, Tunnel type unrecognized.", tunnel->tunnelId, event_source,tunnel->unabtoReadState, unabto_stream_index(tunnel->stream)));
     }
 }
 void ts_read_command(tunnel* tunnel){
@@ -172,86 +171,85 @@ void ts_read_command(tunnel* tunnel){
     unabto_stream_hint hint;
     size_t readen = unabto_stream_read(tunnel->stream, &buf, &hint);
     if (hint != UNABTO_STREAM_HINT_OK) {
-	NABTO_LOG_TRACE(("Releasing stream in state TS_READ_COMMAND"));
-	tunnel->state = TS_CLOSING;
+        NABTO_LOG_TRACE(("Releasing stream in state TS_READ_COMMAND"));
+        tunnel->state = TS_CLOSING;
     } else {
-	if (readen > 0) {
-	    size_t i;
-	    for (i = 0; i < readen; i++) {
-		if (buf[i] == '\n') {
-		    tunnel->state = TS_PARSE_COMMAND;
-		} else {
-		    tunnel->staticMemory->command[tunnel->commandLength] = buf[i];
-		    tunnel->commandLength++;
-		}
-		
-		if (tunnel->commandLength > MAX_COMMAND_LENGTH) {
-		    NABTO_LOG_ERROR(("Tunnel command too long"));
-		    tunnel->state = TS_CLOSING;
-		}
-	    }
-	    
-	    unabto_stream_ack(tunnel->stream, buf, i, &hint);
+        if (readen > 0) {
+            size_t i;
+            for (i = 0; i < readen; i++) {
+                if (buf[i] == '\n') {
+                    tunnel->state = TS_PARSE_COMMAND;
+                } else {
+                    tunnel->staticMemory->command[tunnel->commandLength] = buf[i];
+                    tunnel->commandLength++;
+                }
+            
+                if (tunnel->commandLength > MAX_COMMAND_LENGTH) {
+                    NABTO_LOG_ERROR(("Tunnel command too long"));
+                    tunnel->state = TS_CLOSING;
+                }
+            }
+        
+            unabto_stream_ack(tunnel->stream, buf, i, &hint);
 
-	    if (hint != UNABTO_STREAM_HINT_OK) {
-		NABTO_LOG_ERROR(("Failed to ack on stream."));
-		tunnel->state = TS_CLOSING;
-	    }
-	}
+            if (hint != UNABTO_STREAM_HINT_OK) {
+                NABTO_LOG_ERROR(("Failed to ack on stream."));
+                tunnel->state = TS_CLOSING;
+            }
+        }
     }
 }
 void ts_parse_command(tunnel* tunnel, tunnel_event_source event_source){
     if (parse_command(tunnel)) {
-	if (tunnel->tunnelType == TUNNEL_TYPE_UART){
-	    steal_uart_port(tunnel);
-	    if (open_uart(tunnel)) {
-		tunnel->state = TS_FORWARD;
-
-		NABTO_LOG_INFO(("Tunnel(%i) connecting with UART to %s", tunnel->tunnelId, tunnel->staticMemory->stmu.uart_sm.deviceName));
-		tunnel_send_init_message(tunnel, "+\n");
-	    } else {
-		tunnel_send_init_message(tunnel, "-cannot open uart\n");
-		tunnel->state = TS_CLOSING;
-	    }
-	} else if (tunnel->tunnelType == TUNNEL_TYPE_TCP){
-	    if (tunnel_allow_connection(tunnel->staticMemory->stmu.tcp_sm.host, tunnel->tunnel_type_vars.tcp.port)) {
-		tunnel->state = TS_OPEN_SOCKET;
-		NABTO_LOG_INFO(("Tunnel(%i) connecting with TCP to %s:%i", tunnel->tunnelId, tunnel->staticMemory->stmu.tcp_sm.host, tunnel->tunnel_type_vars.tcp.port));
-	    } else {
-		NABTO_LOG_ERROR(("Tunnel(%i) not allowed to connect to %s:%i", tunnel->tunnelId, tunnel->staticMemory->stmu.tcp_sm.host, tunnel->tunnel_type_vars.tcp.port));
-		tunnel->state = TS_CLOSING;
-	    }
-	    
-	} else if  (tunnel->tunnelType == TUNNEL_TYPE_ECHO){
-	    tunnel_send_init_message(tunnel, "+\n");
-	    tunnel->state = TS_FORWARD;
-	} else{
-	    NABTO_LOG_ERROR(("Tunnel(%i), Event in TS_PARSE_COMMAND state with Tunnel type unrecognized. source %i, unabtoReadState %i, stream index %i.", tunnel->tunnelId, event_source,tunnel->unabtoReadState, unabto_stream_index(tunnel->stream)));
-	    tunnel->state = TS_CLOSING;
-	}		
+        if (tunnel->tunnelType == TUNNEL_TYPE_UART){
+            steal_uart_port(tunnel);
+            if (open_uart(tunnel)) {
+                tunnel->state = TS_FORWARD;
+                NABTO_LOG_INFO(("Tunnel(%i) connecting with UART to %s", tunnel->tunnelId, tunnel->staticMemory->stmu.uart_sm.deviceName));
+                tunnel_send_init_message(tunnel, "+\n");
+            } else {
+                tunnel_send_init_message(tunnel, "-cannot open uart\n");
+                tunnel->state = TS_CLOSING;
+            }
+        } else if (tunnel->tunnelType == TUNNEL_TYPE_TCP){
+            if (tunnel_allow_connection(tunnel->staticMemory->stmu.tcp_sm.host, tunnel->tunnel_type_vars.tcp.port)) {
+                tunnel->state = TS_OPEN_SOCKET;
+                NABTO_LOG_INFO(("Tunnel(%i) connecting with TCP to %s:%i", tunnel->tunnelId, tunnel->staticMemory->stmu.tcp_sm.host, tunnel->tunnel_type_vars.tcp.port));
+            } else {
+                NABTO_LOG_ERROR(("Tunnel(%i) not allowed to connect to %s:%i", tunnel->tunnelId, tunnel->staticMemory->stmu.tcp_sm.host, tunnel->tunnel_type_vars.tcp.port));
+                tunnel->state = TS_CLOSING;
+            }
+            
+        } else if  (tunnel->tunnelType == TUNNEL_TYPE_ECHO){
+            tunnel_send_init_message(tunnel, "+\n");
+            tunnel->state = TS_FORWARD;
+        } else{
+            NABTO_LOG_ERROR(("Tunnel(%i), Event in TS_PARSE_COMMAND state with Tunnel type unrecognized. source %i, unabtoReadState %i, stream index %i.", tunnel->tunnelId, event_source,tunnel->unabtoReadState, unabto_stream_index(tunnel->stream)));
+            tunnel->state = TS_CLOSING;
+        }        
     } else {
-	NABTO_LOG_ERROR(("Tunnel(%i) Could not parse tunnel command %s", tunnel->tunnelId, tunnel->staticMemory->command));
-	tunnel_send_init_message(tunnel, "-cannot parse command\n");
-	tunnel->state = TS_CLOSING;
+        NABTO_LOG_ERROR(("Tunnel(%i) Could not parse tunnel command %s", tunnel->tunnelId, tunnel->staticMemory->command));
+        tunnel_send_init_message(tunnel, "-cannot parse command\n");
+        tunnel->state = TS_CLOSING;
     }
     
 }
 void ts_forward_command(tunnel* tunnel, tunnel_event_source event_source){
     if (tunnel->extReadState == FS_CLOSING && tunnel->unabtoReadState == FS_CLOSING) {
-	tunnel->state = TS_CLOSING;
+        tunnel->state = TS_CLOSING;
     } else {
-	if (tunnel->tunnelType == TUNNEL_TYPE_UART){
-	    uart_forward(tunnel);
-	    unabto_forward_uart(tunnel);
-	} else if (tunnel->tunnelType == TUNNEL_TYPE_TCP){
-	    tcp_forward(tunnel);
-	    unabto_forward_tcp(tunnel);
-	} else if  (tunnel->tunnelType == TUNNEL_TYPE_ECHO){
-	    echo_forward(tunnel);
-	} else{
-	    NABTO_LOG_ERROR(("Tunnel(%i), Event in TS_FORWARD state with Tunnel type unrecognized. source %i, unabtoReadState %i, stream index %i.", tunnel->tunnelId, event_source,tunnel->unabtoReadState, unabto_stream_index(tunnel->stream)));
-	    tunnel->state = TS_CLOSING;
-	}
+        if (tunnel->tunnelType == TUNNEL_TYPE_UART){
+            uart_forward(tunnel);
+            unabto_forward_uart(tunnel);
+        } else if (tunnel->tunnelType == TUNNEL_TYPE_TCP){
+            tcp_forward(tunnel);
+            unabto_forward_tcp(tunnel);
+        } else if  (tunnel->tunnelType == TUNNEL_TYPE_ECHO){
+            echo_forward(tunnel);
+        } else{
+            NABTO_LOG_ERROR(("Tunnel(%i), Event in TS_FORWARD state with Tunnel type unrecognized. source %i, unabtoReadState %i, stream index %i.", tunnel->tunnelId, event_source,tunnel->unabtoReadState, unabto_stream_index(tunnel->stream)));
+            tunnel->state = TS_CLOSING;
+        }
     }
 }
 void ts_closing(tunnel* tunnel, tunnel_event_source event_source){
@@ -262,38 +260,38 @@ void ts_closing(tunnel* tunnel, tunnel_event_source event_source){
     NABTO_LOG_TRACE(("TS_CLOSING"));
 
     do {
-	readen = unabto_stream_read(tunnel->stream, &buf, &hint);
-	if (readen > 0) {
-	    unabto_stream_ack(tunnel->stream, buf, readen, &hint);
-	}
+        readen = unabto_stream_read(tunnel->stream, &buf, &hint);
+        if (readen > 0) {
+            unabto_stream_ack(tunnel->stream, buf, readen, &hint);
+        }
     } while (readen > 0);
 
     if (unabto_stream_close(tunnel->stream)) {
-	unabto_stream_stats info;
-	unabto_stream_get_stats(tunnel->stream, &info);
+        unabto_stream_stats info;
+        unabto_stream_get_stats(tunnel->stream, &info);
 
-	NABTO_LOG_TRACE(("Closed tunnel successfully"));
-	NABTO_LOG_INFO(("Tunnel(%i) closed, sentPackets: %u, sentBytes %u, sentResentPackets %u, receivedPackets %u, receivedBytes %u, receivedResentPackets %u, reorderedOrLostPackets %u", 
-			tunnel->tunnelId,
-			info.sentPackets, info.sentBytes, info.sentResentPackets,
-			info.receivedPackets, info.receivedBytes, info.receivedResentPackets, info.reorderedOrLostPackets));
+        NABTO_LOG_TRACE(("Closed tunnel successfully"));
+        NABTO_LOG_INFO(("Tunnel(%i) closed, sentPackets: %u, sentBytes %u, sentResentPackets %u, receivedPackets %u, receivedBytes %u, receivedResentPackets %u, reorderedOrLostPackets %u", 
+                        tunnel->tunnelId,
+                        info.sentPackets, info.sentBytes, info.sentResentPackets,
+                        info.receivedPackets, info.receivedBytes, info.receivedResentPackets, info.reorderedOrLostPackets));
 
-	if (tunnel->tunnelType == TUNNEL_TYPE_UART){
-	    if (tunnel->tunnel_type_vars.uart.fd != -1) {
-		close(tunnel->tunnel_type_vars.uart.fd);
-		tunnel->tunnel_type_vars.uart.fd = -1;
-	    }
-	} else if (tunnel->tunnelType == TUNNEL_TYPE_TCP){
-	    close(tunnel->tunnel_type_vars.tcp.sock);
-	} else if  (tunnel->tunnelType == TUNNEL_TYPE_ECHO){
-	    // ECHO
-	} else{
-	    NABTO_LOG_ERROR(("Tunnel(%i), Event in TS_CLOSING state with Tunnel type unrecognized. source %i, unabtoReadState %i, stream index %i.", tunnel->tunnelId, event_source,tunnel->unabtoReadState, unabto_stream_index(tunnel->stream)));
-	    tunnel->state = TS_CLOSING;
-	}
+        if (tunnel->tunnelType == TUNNEL_TYPE_UART){
+            if (tunnel->tunnel_type_vars.uart.fd != -1) {
+                close(tunnel->tunnel_type_vars.uart.fd);
+                tunnel->tunnel_type_vars.uart.fd = -1;
+            }
+        } else if (tunnel->tunnelType == TUNNEL_TYPE_TCP){
+            close(tunnel->tunnel_type_vars.tcp.sock);
+        } else if  (tunnel->tunnelType == TUNNEL_TYPE_ECHO){
+            // ECHO
+        } else{
+            NABTO_LOG_ERROR(("Tunnel(%i), Event in TS_CLOSING state with Tunnel type unrecognized. source %i, unabtoReadState %i, stream index %i.", tunnel->tunnelId, event_source,tunnel->unabtoReadState, unabto_stream_index(tunnel->stream)));
+            tunnel->state = TS_CLOSING;
+        }
 
-	unabto_stream_release(tunnel->stream);
-	reset_tunnel_struct(tunnel);
+        unabto_stream_release(tunnel->stream);
+        reset_tunnel_struct(tunnel);
     }
 }
 
@@ -303,54 +301,57 @@ void ts_closing(tunnel* tunnel, tunnel_event_source event_source){
 bool parse_command(tunnel* tunnel) {
     
     if (0 == memcmp(tunnel->staticMemory->command, UART_COMMAND,strlen(UART_COMMAND))){
-	strncpy(tunnel->staticMemory->stmu.uart_sm.deviceName, uart_tunnel_get_default_device(), MAX_DEVICE_NAME_LENGTH);
-	tunnel->tunnelType = TUNNEL_TYPE_UART;
-	return true;	
+        if(uart_tunnel_get_default_device() == 0){
+            NABTO_LOG_FATAL(("No UART device was specified."));
+        }
+        strncpy(tunnel->staticMemory->stmu.uart_sm.deviceName, uart_tunnel_get_default_device(), MAX_DEVICE_NAME_LENGTH);
+        tunnel->tunnelType = TUNNEL_TYPE_UART;
+        return true;    
     } else if (0 == memcmp(tunnel->staticMemory->command, TCP_COMMAND,strlen(TCP_COMMAND))){
-	char* s;
+        char* s;
 
-	if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, PORT_KW_TXT)))
-	{
-	    s += strlen(PORT_KW_TXT);
-	    if (1 != sscanf(s, "%d", &tunnel->tunnel_type_vars.tcp.port)) {
-		NABTO_LOG_ERROR(("failed to read port number"));
-		return false;
-	    }
-	} else {
-	    tunnel->tunnel_type_vars.tcp.port = tunnel_get_default_port();
-	}
-	
-	if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, HOST_KW_TXT)))
-	{
-	    char *sp;
-	    int length;
-	    s += strlen(HOST_KW_TXT);
-	    sp = strchr(s, ' ');
-	    
-	    if (sp != NULL) {
-		length = sp-s;
-	    } else {
-		length = strlen(s);
-	    }
-	    
-	    strncpy(tunnel->staticMemory->stmu.tcp_sm.host, s, MIN(length, MAX_COMMAND_LENGTH-1));
-	} else {
-	    strncpy(tunnel->staticMemory->stmu.tcp_sm.host, tunnel_get_default_host(), MAX_HOST_LENGTH);
-	}
-	tunnel->tunnelType = TUNNEL_TYPE_TCP;
-	return true;
+        if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, PORT_KW_TXT)))
+        {
+            s += strlen(PORT_KW_TXT);
+            if (1 != sscanf(s, "%d", &tunnel->tunnel_type_vars.tcp.port)) {
+                NABTO_LOG_ERROR(("failed to read port number"));
+                return false;
+            }
+        } else {
+            tunnel->tunnel_type_vars.tcp.port = tunnel_get_default_port();
+        }
+    
+        if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, HOST_KW_TXT)))
+        {
+            char *sp;
+            int length;
+            s += strlen(HOST_KW_TXT);
+            sp = strchr(s, ' ');
+        
+            if (sp != NULL) {
+                length = sp-s;
+            } else {
+                length = strlen(s);
+            }
+        
+            strncpy(tunnel->staticMemory->stmu.tcp_sm.host, s, MIN(length, MAX_COMMAND_LENGTH-1));
+        } else {
+            strncpy(tunnel->staticMemory->stmu.tcp_sm.host, tunnel_get_default_host(), MAX_HOST_LENGTH);
+        }
+        tunnel->tunnelType = TUNNEL_TYPE_TCP;
+        return true;
     } else if (0 == memcmp(tunnel->staticMemory->command, ECHO_COMMAND,strlen(ECHO_COMMAND))){
-	tunnel->tunnelType = TUNNEL_TYPE_ECHO;
+        tunnel->tunnelType = TUNNEL_TYPE_ECHO;
     } else {
-	NABTO_LOG_INFO(("Failed to parse command: %s",tunnel->staticMemory->command));
-	return false;
+        NABTO_LOG_INFO(("Failed to parse command: %s",tunnel->staticMemory->command));
+        return false;
     }
-	
+    
     //~ if (0 != strcmp(tunnel->staticMemory->uart_sm.command, UART_COMMAND)
-	//~ && 0 != strcmp(tunnel->staticMemory->uart_sm.command, TCP_COMMAND)
-	//~ && 0 != strcmp(tunnel->staticMemory->uart_sm.command, ECHO_COMMAND)) {
-        //~ // the string has to start with uart, tcp, or echo
-        //~ return false;
+    //~ && 0 != strcmp(tunnel->staticMemory->uart_sm.command, TCP_COMMAND)
+    //~ && 0 != strcmp(tunnel->staticMemory->uart_sm.command, ECHO_COMMAND)) {
+    //~ // the string has to start with uart, tcp, or echo
+    //~ return false;
     //~ }
 
 
@@ -362,16 +363,16 @@ void close_stream_reader(tunnel* tunnel) {
     tunnel->unabtoReadState = FS_CLOSING;
     
     if(tunnel->tunnelType == TUNNEL_TYPE_UART){
-	NABTO_LOG_INFO(("closing fd %i", tunnel->tunnel_type_vars.uart.fd));
-	if (tunnel->tunnel_type_vars.uart.fd != -1) {
-	    close(tunnel->tunnel_type_vars.uart.fd);
-	    tunnel->tunnel_type_vars.uart.fd = -1;
-	}
+        NABTO_LOG_INFO(("closing fd %i", tunnel->tunnel_type_vars.uart.fd));
+        if (tunnel->tunnel_type_vars.uart.fd != -1) {
+            close(tunnel->tunnel_type_vars.uart.fd);
+            tunnel->tunnel_type_vars.uart.fd = -1;
+        }
     } else if (tunnel->tunnelType == TUNNEL_TYPE_TCP){
-	NABTO_LOG_INFO(("closing socket %i", tunnel->tunnel_type_vars.tcp.sock));
-	shutdown(tunnel->tunnel_type_vars.tcp.sock, SHUT_WR);
+        NABTO_LOG_INFO(("closing socket %i", tunnel->tunnel_type_vars.tcp.sock));
+        shutdown(tunnel->tunnel_type_vars.tcp.sock, SHUT_WR);
     } else {
-	//ECHO
+        //ECHO
     }
 }
 
@@ -388,17 +389,17 @@ void reset_tunnel_struct(tunnel* t) {
     
     
     if(typeTmp == TUNNEL_TYPE_UART){
-	t->tunnel_type_vars.uart.fd = -1;
+        t->tunnel_type_vars.uart.fd = -1;
 #if NABTO_ENABLE_EPOLL
-	t->epollEventType = UNABTO_EPOLL_TYPE_UART_TUNNEL;
+        t->epollEventType = UNABTO_EPOLL_TYPE_UART_TUNNEL;
 #endif
     } else if (typeTmp == TUNNEL_TYPE_TCP){
-	t->tunnel_type_vars.tcp.sock = INVALID_SOCKET;
+        t->tunnel_type_vars.tcp.sock = INVALID_SOCKET;
 #if NABTO_ENABLE_EPOLL
-	t->epollEventType = UNABTO_EPOLL_TYPE_TCP_TUNNEL;
+        t->epollEventType = UNABTO_EPOLL_TYPE_TCP_TUNNEL;
 #endif
     } else {
-	// ECHO TUNNEL
+        // ECHO TUNNEL
     }
 }
 
