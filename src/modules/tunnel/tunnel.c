@@ -38,12 +38,6 @@
 #define MAX_COMMAND_LENGTH 512
 #define MAX_HOST_LENGTH 128
 
-typedef struct tunnel_static_memory {
-    uint8_t command[MAX_COMMAND_LENGTH];
-    char host[MAX_HOST_LENGTH];
-    uint8_t tcpReadBuffer[NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE];
-} tunnel_static_memory;
-
 NABTO_THREAD_LOCAL_STORAGE tunnel* tunnels = 0;
 NABTO_THREAD_LOCAL_STORAGE tunnel_static_memory* tunnels_static_memory = 0;
 
@@ -53,16 +47,8 @@ void tunnel_event(tunnel* state, tunnel_event_source event_source);
 
 bool open_socket(tunnel* tunnel);
 
-void tcp_forward(tunnel* tunnel);
-void unabto_forward(tunnel* tunnel);
-
-bool add_socket(int sock);
-
-void remove_socket(int sock);
-
 void tunnel_event_socket(int socket);
 bool parse_command(tunnel* tunnel);
-bool opening_socket(tunnel* tunnel);
 
 
 bool init_tunnel_module()
@@ -113,7 +99,7 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
 
     NABTO_LOG_TRACE(("Tunnel event on tunnel %i", tunnel));
     if (tunnel->state == TS_IDLE) {
-        NABTO_LOG_ERROR(("Tunnel(%i), Event on tunnel which should not be in IDLE state. source %i, tcpReadState %i, unabtoReadState %i, stream index %i, socket %i", tunnel->tunnelId, event_source, tunnel->tcpReadState, tunnel->unabtoReadState, unabto_stream_index(tunnel->stream), tunnel->sock));
+        NABTO_LOG_ERROR(("Tunnel(%i), Event on tunnel which should not be in IDLE state. source %i, tcpReadState %i, unabtoReadState %i, stream index %i, socket %i", tunnel->tunnelId, event_source, tunnel->extReadState, tunnel->unabtoReadState, unabto_stream_index(tunnel->stream), tunnel->tunnel_type_vars.tcp.sock));
         return;
     }
 
@@ -153,11 +139,11 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
 
     if (tunnel->state == TS_PARSE_COMMAND) {
         if (parse_command(tunnel)) {
-            if (tunnel_allow_connection(tunnel->staticMemory->host, tunnel->port)) {
+            if (tunnel_allow_connection(tunnel->staticMemory->stmu.tcp_sm.host, tunnel->tunnel_type_vars.tcp.port)) {
                 tunnel->state = TS_OPEN_SOCKET;
-                NABTO_LOG_INFO(("Tunnel(%i) connecting to %s:%i", tunnel->tunnelId, tunnel->staticMemory->host, tunnel->port));
+                NABTO_LOG_INFO(("Tunnel(%i) connecting to %s:%i", tunnel->tunnelId, tunnel->staticMemory->stmu.tcp_sm.host, tunnel->tunnel_type_vars.tcp.port));
             } else {
-                NABTO_LOG_ERROR(("Tunnel(%i) not allowed to connect to %s:%i", tunnel->tunnelId, tunnel->staticMemory->host, tunnel->port));
+                NABTO_LOG_ERROR(("Tunnel(%i) not allowed to connect to %s:%i", tunnel->tunnelId, tunnel->staticMemory->stmu.tcp_sm.host, tunnel->tunnel_type_vars.tcp.port));
                 tunnel->state = TS_CLOSING;
             }
         } else {
@@ -183,15 +169,15 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
     
 
     if (tunnel->state == TS_FORWARD) {
-        if (tunnel->tcpReadState == FS_CLOSING && tunnel->unabtoReadState == FS_CLOSING) {
+        if (tunnel->extReadState == FS_CLOSING && tunnel->unabtoReadState == FS_CLOSING) {
             tunnel->state = TS_CLOSING;
         } else {
             tcp_forward(tunnel);
-            unabto_forward(tunnel);
+            unabto_forward_tcp(tunnel);
         }
     }
 
-    if (tunnel->tcpReadState == FS_CLOSING && tunnel->unabtoReadState == FS_CLOSING) {
+    if (tunnel->extReadState == FS_CLOSING && tunnel->unabtoReadState == FS_CLOSING) {
         tunnel->state = TS_CLOSING;
     }
 
@@ -219,7 +205,7 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
                             info.sentPackets, info.sentBytes, info.sentResentPackets,
                             info.receivedPackets, info.receivedBytes, info.receivedResentPackets, info.reorderedOrLostPackets));
 
-            close(tunnel->sock);
+            close(tunnel->tunnel_type_vars.tcp.sock);
             unabto_stream_release(tunnel->stream);
             reset_tunnel_struct(tunnel);
         }
@@ -236,12 +222,12 @@ bool parse_command(tunnel* tunnel) {
     if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, PORT_KW_TXT)))
     {
         s += strlen(PORT_KW_TXT);
-        if (1 != sscanf(s, "%d", &tunnel->port)) {
+        if (1 != sscanf(s, "%d", &tunnel->tunnel_type_vars.tcp.port)) {
             NABTO_LOG_ERROR(("failed to read port number"));
             return false;
         }
     } else {
-        tunnel->port = tunnel_get_default_port();
+        tunnel->tunnel_type_vars.tcp.port = tunnel_get_default_port();
     }
     
     if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, HOST_KW_TXT)))
@@ -257,254 +243,27 @@ bool parse_command(tunnel* tunnel) {
             length = strlen(s);
         }
         
-        strncpy(tunnel->staticMemory->host, s, MIN(length, MAX_COMMAND_LENGTH-1));
+        strncpy(tunnel->staticMemory->stmu.tcp_sm.host, s, MIN(length, MAX_COMMAND_LENGTH-1));
     } else {
-        strncpy(tunnel->staticMemory->host, tunnel_get_default_host(), MAX_HOST_LENGTH);
+        strncpy(tunnel->staticMemory->stmu.tcp_sm.host, tunnel_get_default_host(), MAX_HOST_LENGTH);
     }
     
     return true;
 }
 
-
-void close_tcp_reader(tunnel* tunnel) {
-    unabto_stream_close(tunnel->stream);
-    tunnel->tcpReadState = FS_CLOSING;
-}
-
-/**
- * read from tcp, write to unabto
- */
-void tcp_forward(tunnel* tunnel) {
-    while(true) {
-        if (tunnel->tcpReadState == FS_READ) {
-            ssize_t readen = recv(tunnel->sock, tunnel->staticMemory->tcpReadBuffer, NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE, 0);
-            if (readen == 0) {
-                // eof
-                close_tcp_reader(tunnel);
-                break;
-            }
-
-            if (readen > 0) {
-                tunnel->tcpReadBufferSize = readen;
-                tunnel->tcpReadBufferSent = 0;
-                tunnel->tcpReadState = FS_WRITE;
-            }
-
-            if (readen < 0) {
-#if defined(WINSOCK)
-                if (WSAGetLastError() == WSAEWOULDBLOCK) {
-                    break;
-#else
-                if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                    break;
-#endif
-                } else {
-                    close_tcp_reader(tunnel);
-                    break;
-                }
-            }
-        }
-
-        if (tunnel->tcpReadState == FS_WRITE) {
-            unabto_stream_hint hint;
-            size_t written = unabto_stream_write(tunnel->stream, tunnel->staticMemory->tcpReadBuffer+tunnel->tcpReadBufferSent, tunnel->tcpReadBufferSize - tunnel->tcpReadBufferSent, &hint);
-            if (hint != UNABTO_STREAM_HINT_OK) {
-                NABTO_LOG_TRACE(("Can't write to stream"));
-                close_tcp_reader(tunnel);
-                break;
-            } else {
-                if (written > 0) {
-                    tunnel->tcpReadBufferSent += written;
-                    if (tunnel->tcpReadBufferSize == tunnel->tcpReadBufferSent) {
-                        tunnel->tcpReadState = FS_READ;
-                    }
-                } else {
-                    break;
-                }
-            }
-        }
-
-        if (tunnel->tcpReadState == FS_CLOSING) {
-            break;
-        }
-    }
-}
 
 void close_stream_reader(tunnel* tunnel) {
     tunnel->unabtoReadState = FS_CLOSING;
-    shutdown(tunnel->sock, SHUT_WR);
+    shutdown(tunnel->tunnel_type_vars.tcp.sock, SHUT_WR);
 }
 
-/**
- * read from unabto, write to tcp
- */
-void unabto_forward(tunnel* tunnel) {
-    if (tunnel->unabtoReadState == FS_WRITE) {
-        tunnel->unabtoReadState = FS_READ;
-    }
-    while(true) {
-        if (tunnel->unabtoReadState == FS_READ) {
-            const uint8_t* buf;
-            unabto_stream_hint hint;
-            size_t readen = unabto_stream_read(tunnel->stream, &buf, &hint);
-            if (hint != UNABTO_STREAM_HINT_OK) {
-                close_stream_reader(tunnel);
-                break;
-            } else {
-                if (readen == 0) {
-                    break;
-                } else {
-                    ssize_t written;
-                    NABTO_LOG_TRACE(("Write to tcp stream %i", readen));
-                    written = send(tunnel->sock, buf, readen, MSG_NOSIGNAL);
-
-                    if (written > 0) {
-                        NABTO_LOG_TRACE(("Wrote to tcp stream %i", written));
-                        unabto_stream_ack(tunnel->stream, buf, written, &hint);
-                        if (hint != UNABTO_STREAM_HINT_OK) {
-                            close_stream_reader(tunnel);
-                            break;
-                        }
-                    } else if (written == 0) {
-                        tunnel->unabtoReadState = FS_WRITE;
-                        break;
-                    } else { // -1
-#if defined(WINSOCK)
-                        NABTO_LOG_TRACE(("Wrote to tcp stream %i, status %d", written, WSAGetLastError()));
-#else
-                        NABTO_LOG_TRACE(("Wrote to tcp stream %i, status %s", written, strerror(errno)));
-#endif
-
-#if defined(WINSOCK)
-                        if (WSAGetLastError() == WSAEWOULDBLOCK) {
-                            tunnel->unabtoReadState = FS_WRITE;
-                            break;
-#else
-                        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                            tunnel->unabtoReadState = FS_WRITE;
-                            break;
-#endif
-                        } else {
-                            close_stream_reader(tunnel);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (tunnel->unabtoReadState == FS_WRITE) {
-            break;
-        }
-
-        if (tunnel->unabtoReadState == FS_CLOSING) {
-            break;
-        }
-    }
-}
-
-bool opening_socket(tunnel* tunnel) {
-    char err;
-    optlen len;
-    int status;
-    len = sizeof(err);
-    status = getsockopt(tunnel->sock, SOL_SOCKET, SO_ERROR, &err, &len);
-    if (status != 0) {
-#if defined(WINSOCK)
-        NABTO_LOG_ERROR(("Error opening socket %d", WSAGetLastError()));
-#else
-        NABTO_LOG_ERROR(("Error opening socket %s", strerror(errno)));
-#endif
-        return false;
-    } else {
-        if (err == 0) {
-            tunnel->state = TS_FORWARD;
-        } else {
-#if defined(WINSOCK)
-	    NABTO_LOG_ERROR(("Error opening socket %s", WSAGetLastError())); 
-#else	  
-            NABTO_LOG_ERROR(("Error opening socket %s", strerror(err)));
-#endif
-            return false;
-        }
-    }
-    return true;
-}
-
-bool open_socket(tunnel* tunnel) {
-    struct sockaddr_in sin;
-    if (-1 == (tunnel->sock = socket(AF_INET, SOCK_STREAM, 0))) {
-        NABTO_LOG_ERROR(("Failed to create socket"));
-        return false;
-    }
-
-// On windows we make a blocking accept since a nonblocking accept fails.
-#ifndef WINSOCK
-    {
-        int flags = fcntl(tunnel->sock, F_GETFL, 0);
-        if (flags < 0) return false;
-        flags = (flags|O_NONBLOCK);
-        if (fcntl(tunnel->sock, F_SETFL, flags) != 0) {
-            NABTO_LOG_FATAL(("Cannot set unblocking mode"));
-            return false;
-        }
-    }
-#endif
-
-#if NABTO_ENABLE_EPOLL
-    {
-        struct epoll_event ev;
-        ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
-        ev.data.ptr = tunnel;
-        epoll_ctl(unabto_epoll_fd, EPOLL_CTL_ADD, tunnel->sock, &ev);
-    }
-#endif
-    
-    memset(&sin, 0, sizeof (struct sockaddr_in));
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = inet_addr(tunnel->staticMemory->host);
-    sin.sin_port = htons(tunnel->port);
-    if (-1 == connect(tunnel->sock, (struct sockaddr*) &sin, sizeof (struct sockaddr_in))) {
-#if defined(WINSOCK)
-        int err = WSAGetLastError();
-        if (err == WSAEINPROGRESS || err == WSAEWOULDBLOCK) {
-            tunnel->state = TS_OPENING_SOCKET;
-        } else {
-            NABTO_LOG_ERROR(("connect failed: %d", WSAGetLastError()));
-            return false;
-        }
-#else
-        int err = errno;
-        if (err == EINPROGRESS || err == EWOULDBLOCK) {
-            tunnel->state = TS_OPENING_SOCKET;
-        } else {
-            NABTO_LOG_ERROR(("connect failed: %s", strerror(err)));
-            return false;
-        }
-#endif
-    } else {
-        tunnel->state = TS_FORWARD;
-    }
-
-#ifdef WINSOCK
-    {
-        unsigned long flags = 1;
-        if (ioctlsocket(tunnel->sock, FIONBIO, &flags) != 0) {
-            NABTO_LOG_ERROR(("Cannot set unblocking mode"));        
-            return false;
-        }
-    }
-#endif
-
-    return true;
-}
 
 void reset_tunnel_struct(tunnel* t) {
     ptrdiff_t offset = t - tunnels;
     memset(t, 0, sizeof(struct tunnel));
     t->staticMemory = &tunnels_static_memory[offset];
     memset(t->staticMemory, 0, sizeof(tunnel_static_memory));
-    t->sock = INVALID_SOCKET;
+    t->tunnel_type_vars.tcp.sock = INVALID_SOCKET;
 #if NABTO_ENABLE_EPOLL
     t->epollEventType = UNABTO_EPOLL_TYPE_TCP_TUNNEL;
 #endif

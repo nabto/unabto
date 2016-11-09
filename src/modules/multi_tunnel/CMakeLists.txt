@@ -27,6 +27,7 @@ list(APPEND unabto_src
   ${unabto_module_log_dynamic_src}
   ${unabto_module_log_syslog_src}
   ${unabto_module_tcp_fallback_src}
+  ${unabto_module_tunnel_common_src}
 )
 
 add_definitions(${unabto_definitions})
