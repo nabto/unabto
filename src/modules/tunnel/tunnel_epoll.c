@@ -74,10 +74,10 @@ void tunnel_loop_epoll() {
 #endif
             if (handler->epollEventType == UNABTO_EPOLL_TYPE_TCP_TUNNEL) {
                 tunnel* tunnelPtr = (tunnel*)handler;
-                if (tunnelPtr->sock != INVALID_SOCKET) {
+                if (tunnelPtr->tunnel_type_vars.tcp.sock != INVALID_SOCKET) {
                     tunnel_event(tunnelPtr, TUNNEL_EVENT_SOURCE_TCP_READ);
                 }
-                if (tunnelPtr->sock != INVALID_SOCKET) {
+                if (tunnelPtr->tunnel_type_vars.tcp.sock != INVALID_SOCKET) {
                     tunnel_event(tunnelPtr, TUNNEL_EVENT_SOURCE_TCP_WRITE);
                 }
             }

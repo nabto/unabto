@@ -3,67 +3,13 @@
 
 #include <unabto_platform_types.h>
 #include <unabto/unabto_stream.h>
+#include <modules/tunnel_common/tunnel_common.h>
 
 #if defined(WIN32) || defined(WINCE)
 // use winsock
 #define WINSOCK 1
 #endif
 
-
-#if defined(WINSOCK)
-#define SHUT_WR SD_BOTH
-#define MSG_NOSIGNAL 0
-#define _SCL_SECURE_NO_WARNINGS
-typedef SOCKET tunnelSocket;
-#define close closesocket
-typedef int optlen;
-#else
-typedef int tunnelSocket;
-typedef socklen_t optlen;
-#define INVALID_SOCKET -1
-#endif
-
-
-typedef enum {
-    TS_IDLE,
-    TS_READ_COMMAND,
-    TS_PARSE_COMMAND,
-    TS_OPEN_SOCKET,
-    TS_OPENING_SOCKET,
-    TS_FORWARD,
-    TS_CLOSING
-} tunnelStates;
-
-typedef enum {
-    FS_READ,
-    FS_WRITE,
-    FS_CLOSING
-} forwardState;
-
-typedef enum {
-    TUNNEL_EVENT_SOURCE_TCP_WRITE,
-    TUNNEL_EVENT_SOURCE_TCP_READ,
-    TUNNEL_EVENT_SOURCE_UNABTO
-} tunnel_event_source;
-
-struct tunnel_static_memory;
-
-typedef struct tunnel {
-#if NABTO_ENABLE_EPOLL
-    int epollEventType;
-#endif
-    unabto_stream* stream;
-    tunnelStates state;
-    int commandLength;
-    int port;
-    tunnelSocket sock;
-    forwardState tcpReadState;
-    forwardState unabtoReadState;
-    int tcpReadBufferSize;
-    int tcpReadBufferSent;
-    int tunnelId;
-    struct tunnel_static_memory* staticMemory;
-} tunnel;
 
 extern NABTO_THREAD_LOCAL_STORAGE tunnel* tunnels;
 
@@ -87,5 +33,6 @@ void deinit_tunnel_module();
 void reset_tunnel_struct(tunnel* t);
 
 void tunnel_event(tunnel* state, tunnel_event_source event_source);
+void close_stream_reader(tunnel* tunnel);
 
 #endif // _TUNNEL_H_
