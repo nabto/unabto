@@ -995,11 +995,12 @@ uint8_t* insert_connect_stats_payload(uint8_t* ptr, uint8_t* end, nabto_connect*
     ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_CONNECT_STATS, 0, 2);
 
     switch (get_connection_type(con)) {
-    case NCT_LOCAL:              connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_LOCAL; break;
-    case NCT_CONNECTING:         connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_CONNECTING; break;
-    case NCT_REMOTE_RELAY:       connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_UDP_RELAY; break;
-    case NCT_REMOTE_RELAY_MICRO: connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_TCP_RELAY; break;
-    case NCT_REMOTE_P2P:         connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_P2P; break;
+     case NCT_LOCAL:              connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_LOCAL; break;
+     case NCT_CONNECTING:         connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_CONNECTING; break;
+     case NCT_REMOTE_RELAY:       connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_UDP_RELAY; break;
+     case NCT_REMOTE_RELAY_MICRO: connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_TCP_RELAY; break;
+     case NCT_REMOTE_P2P:         connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_P2P; break;
+     default:                     connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_CONNECTING; break;
     }
 
     WRITE_FORWARD_U8(ptr, NP_PAYLOAD_CONNECT_STATS_VERSION);
