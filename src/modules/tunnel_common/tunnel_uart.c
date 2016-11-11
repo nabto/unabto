@@ -58,7 +58,7 @@ bool open_uart(tunnel* tunnel) {
         struct epoll_event ev;
         ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
         ev.data.ptr = tunnel;
-    tunnel->epollEventType = UNABTO_EPOLL_TYPE_UART_TUNNEL;
+        tunnel->epollEventType = UNABTO_EPOLL_TYPE_UART_TUNNEL;
         epoll_ctl(unabto_epoll_fd, EPOLL_CTL_ADD, tunnel->tunnel_type_vars.uart.fd, &ev);
     }
 #endif
