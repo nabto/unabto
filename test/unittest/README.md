@@ -1,5 +1,6 @@
 ## unit test
 
-This is a cross platform unittest the intent is to test code both in
-modules and in the unabto core. The intent is not to be a platform
-integration test for the major large platforms.
+The unittest is a place to put test of code. The intent is that it
+should be a platform independent test. To simplify the test
+application it currently only runs on linux, mac.
+
