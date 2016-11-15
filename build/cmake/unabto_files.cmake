@@ -311,6 +311,16 @@ set(unabto_module_tcp_fallback_src
   ${UNABTO_MODULES_SRC_DIR}/tcp_fallback/tcp_fallback_select.h)
 source_group(modules\\tcp_fallback FILES ${unabto_module_tcp_fallback_src})
 
+# modules/tunnel_common
+set(unabto_module_tunnel_common_src
+  ${UNABTO_MODULES_SRC_DIR}/tunnel_common/tunnel_common.c
+  ${UNABTO_MODULES_SRC_DIR}/tunnel_common/tunnel_common.h
+  ${UNABTO_MODULES_SRC_DIR}/tunnel_common/tunnel_uart.c
+  ${UNABTO_MODULES_SRC_DIR}/tunnel_common/tunnel_uart.h
+  ${UNABTO_MODULES_SRC_DIR}/tunnel_common/tunnel_tcp.c
+  ${UNABTO_MODULES_SRC_DIR}/tunnel_common/tunnel_tcp.h)
+source_group(modules\\tunnel_common FILES ${unabto_module_tunnel_common_src})
+
 
 # modules/timers
 set(unabto_module_timers_unix_src

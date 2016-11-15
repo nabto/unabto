@@ -16,7 +16,6 @@
 #define MAX_EPOLL_EVENTS 10
 
 void tunnel_loop_epoll() {
-
     struct epoll_event events[MAX_EPOLL_EVENTS];
     int timeout;
     nabto_stamp_t ne;
@@ -72,8 +71,21 @@ void tunnel_loop_epoll() {
                 }
             }
 #endif
-            if (handler->epollEventType == UNABTO_EPOLL_TYPE_TCP_TUNNEL) {
+            //~ NABTO_LOG_INFO(("Generating tunnel event with epollEventType: %i",handler->epollEventType));
+            if (handler->epollEventType == UNABTO_EPOLL_TYPE_UART_TUNNEL) {
                 tunnel* tunnelPtr = (tunnel*)handler;
+                //~ NABTO_LOG_INFO(("Generating tunnel event with UART"));
+                tunnelPtr->tunnelType = TUNNEL_TYPE_UART;
+                if (tunnelPtr->tunnel_type_vars.uart.fd != -1) {
+                    tunnel_event(tunnelPtr, TUNNEL_EVENT_SOURCE_UART_READ);
+                }
+                if (tunnelPtr->tunnel_type_vars.uart.fd != -1) {
+                    tunnel_event(tunnelPtr, TUNNEL_EVENT_SOURCE_UART_WRITE);
+                }
+            } else if (handler->epollEventType == UNABTO_EPOLL_TYPE_TCP_TUNNEL) {
+                tunnel* tunnelPtr = (tunnel*)handler;
+                //~ NABTO_LOG_INFO(("Generating tunnel event with TCP"));
+                tunnelPtr->tunnelType = TUNNEL_TYPE_TCP;
                 if (tunnelPtr->tunnel_type_vars.tcp.sock != INVALID_SOCKET) {
                     tunnel_event(tunnelPtr, TUNNEL_EVENT_SOURCE_TCP_READ);
                 }
