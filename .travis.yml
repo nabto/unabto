@@ -1,9 +1,9 @@
 language: c
 
 env:
-  - STD=c89
-  - STD=c99
-  - STD=c11
+  - CFLAGS=c89
+  - CFLAGS=c99
+  - CFLAGS=c11
 
 compiler:
   - gcc
@@ -22,4 +22,4 @@ before_script:
 script:
   - mkdir cibuild
   - cd cibuild
-  - CFLAGS="-std=$STD" cmake .. && make -verbose=1 -j
+  - cmake .. && make -verbose=1 -j
