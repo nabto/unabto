@@ -1,7 +1,7 @@
 language: c
 
 compiler:
-  - gcc
+  - clang -std=c89
 
 addons:
   apt:
