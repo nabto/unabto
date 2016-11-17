@@ -403,6 +403,7 @@ enum np_payload_type_e {
 #define NP_PAYLOAD_NOTIFY_ERROR_BUSY_MICRO        0x8009  ///< The Micro Server is busy
 #define NP_PAYLOAD_NOTIFY_ERROR_MICRO_REQ_ERR     0x800A  ///< The Micro Server can't give response to dialogue request
 #define NP_PAYLOAD_NOTIFY_ERROR_MICRO_REATTACHING 0x800B  ///< The Micro Server is re-attaching
+#define NP_PAYLOAD_NOTIFY_ERROR_SELF_SIGNED       0x800C  ///< The CP certificate is self signed and not accepted by the gsp.
 
 /* Notification codes for NP_PACKET_HDR_TYPE_U_ATTACH responses */
 #define NP_PAYLOAD_NOTIFY_ATTACH_OK          0x00000001l  ///< The device is attached.
