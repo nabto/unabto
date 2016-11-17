@@ -3,6 +3,7 @@ language: c
 env:
   - STD=c89
   - STD=c99
+  - STD=c11
 
 compiler:
   - gcc
