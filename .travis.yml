@@ -1,6 +1,9 @@
 language: c
 
-
+env:
+  - CFLAGS="-std=c89"
+  - CFLAGS="-std=c99"
+  - CFLAGS="-std=c11"
 
 compiler:
   - clang
