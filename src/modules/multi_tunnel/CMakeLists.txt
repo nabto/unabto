@@ -30,7 +30,7 @@ list(APPEND unabto_src
   ${unabto_module_tunnel_common_src}
 )
 
-if (WIN32)
+if (NOT WIN32)
   list(APPEND unabto_src
 	${unabto_module_tunnel_uart_src}
   )
