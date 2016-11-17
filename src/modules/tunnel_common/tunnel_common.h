@@ -1,9 +1,13 @@
 #ifndef _TUNNEL_COMMON_H_
 #define _TUNNEL_COMMON_H_
 
+// Defining MSG_NOSIGNAL 
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
+
 #ifdef WIN32
 #define SHUT_WR SD_BOTH
-#define MSG_NOSIGNAL 0
 #define _SCL_SECURE_NO_WARNINGS
 typedef SOCKET tunnelSocket;
 #define close closesocket
