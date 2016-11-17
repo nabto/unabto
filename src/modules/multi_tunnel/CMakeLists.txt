@@ -30,6 +30,12 @@ list(APPEND unabto_src
   ${unabto_module_tunnel_common_src}
 )
 
+if (WIN32)
+  list(APPEND unabto_src
+	${unabto_module_tunnel_uart_src}
+  )
+endif()
+
 add_definitions(${unabto_definitions})
 
 include_directories(

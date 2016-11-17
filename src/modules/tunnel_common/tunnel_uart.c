@@ -1,4 +1,4 @@
-#ifndef WIN32
+//#ifndef WIN32
 #include <unabto/unabto_stream.h>
 #include <unabto/unabto_memory.h>
 #include <errno.h>
@@ -209,4 +209,4 @@ bool tunnel_send_init_message(tunnel* tunnel, const char* msg)
     }
     return true;
 }
-#endif
+//#endif
