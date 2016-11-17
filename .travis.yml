@@ -22,4 +22,4 @@ before_script:
 script:
   - mkdir cibuild
   - cd cibuild
-  - CFLAGS="-std=$STD" cmake .. && make -j
+  - CFLAGS="-std=$STD" cmake .. && make -verbose=1 -j
