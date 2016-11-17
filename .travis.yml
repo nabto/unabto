@@ -6,7 +6,7 @@ env:
   - CFLAGS="-std=c11"
 
 compiler:
-  - gcc
+  - clang
 
 addons:
   apt:
