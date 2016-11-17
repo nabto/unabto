@@ -55,7 +55,7 @@ void tcp_forward(tunnel* tunnel) {
                 close_reader(tunnel);
                 break;
             } else if (readen < 0) {
-#if defined(WINSOCK)
+#ifdef WIN32 // defined(WINSOCK)
                 if (WSAGetLastError() == WSAEWOULDBLOCK) {
                     break;
 #else
@@ -92,7 +92,7 @@ bool opening_socket(tunnel* tunnel) {
     len = sizeof(err);
     status = getsockopt(tunnel->tunnel_type_vars.tcp.sock, SOL_SOCKET, SO_ERROR, &err, &len);
     if (status != 0) {
-#if defined(WINSOCK)
+#ifdef WIN32 // defined(WINSOCK)
         NABTO_LOG_ERROR(("Error opening socket %d", WSAGetLastError()));
 #else
         NABTO_LOG_ERROR(("Error opening socket %s", strerror(errno)));
@@ -102,7 +102,7 @@ bool opening_socket(tunnel* tunnel) {
         if (err == 0) {
             tunnel->state = TS_FORWARD;
         } else {
-#if defined(WINSOCK)
+#ifdef WIN32 // defined(WINSOCK)
             NABTO_LOG_ERROR(("Error opening socket %s", WSAGetLastError())); 
 #else      
             NABTO_LOG_ERROR(("Error opening socket %s", strerror(err)));
@@ -123,7 +123,7 @@ bool open_socket(tunnel* tunnel) {
     }
 
 // On windows we make a blocking accept since a nonblocking accept fails.
-#ifndef WINSOCK
+#ifndef WIN32 //def WINSOCK
     {
         int flags = fcntl(tunnel->tunnel_type_vars.tcp.sock, F_GETFL, 0);
         if (flags < 0) return false;
@@ -150,7 +150,7 @@ bool open_socket(tunnel* tunnel) {
     sin.sin_addr.s_addr = inet_addr(tunnel->staticMemory->stmu.tcp_sm.host);
     sin.sin_port = htons(tunnel->tunnel_type_vars.tcp.port);
     if (-1 == connect(tunnel->tunnel_type_vars.tcp.sock, (struct sockaddr*) &sin, sizeof (struct sockaddr_in))) {
-#if defined(WINSOCK)
+#ifdef WIN32 // defined(WINSOCK)
         int err = WSAGetLastError();
         if (err == WSAEINPROGRESS || err == WSAEWOULDBLOCK) {
             tunnel->state = TS_OPENING_SOCKET;
@@ -171,7 +171,7 @@ bool open_socket(tunnel* tunnel) {
         tunnel->state = TS_FORWARD;
     }
 
-#ifdef WINSOCK
+#ifdef WIN32 //def WINSOCK
     {
         unsigned long flags = 1;
         if (ioctlsocket(tunnel->tunnel_type_vars.tcp.sock, FIONBIO, &flags) != 0) {
@@ -218,13 +218,13 @@ void unabto_forward_tcp(tunnel* tunnel) {
                         tunnel->unabtoReadState = FS_WRITE;
                         break;
                     } else { // -1
-#if defined(WINSOCK)
+#ifdef WIN32 // defined(WINSOCK)
                         NABTO_LOG_TRACE(("Wrote to tcp stream %i, status %d", written, WSAGetLastError()));
 #else
                         NABTO_LOG_TRACE(("Wrote to tcp stream %i, status %s", written, strerror(errno)));
 #endif
 
-#if defined(WINSOCK)
+#ifdef WIN32 // defined(WINSOCK)
                         if (WSAGetLastError() == WSAEWOULDBLOCK) {
                             tunnel->unabtoReadState = FS_WRITE;
                             break;

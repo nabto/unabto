@@ -1,7 +1,7 @@
 #ifndef _TUNNEL_COMMON_H_
 #define _TUNNEL_COMMON_H_
 
-#if defined(WINSOCK)
+#ifdef WIN32
 #define SHUT_WR SD_BOTH
 #define MSG_NOSIGNAL 0
 #define _SCL_SECURE_NO_WARNINGS
@@ -78,10 +78,6 @@ typedef struct tcp_vars{
     tunnelSocket sock;
 } tcp_vars;
 
-typedef struct echo_vars{
-    // TODO: define echo variables
-    
-} echo_vars;
 
 
 typedef struct tunnel {
@@ -96,7 +92,6 @@ typedef struct tunnel {
     union {
         uart_vars uart;
         tcp_vars tcp;
-        echo_vars echo;
     } tunnel_type_vars;
     
     tunnel_type tunnelType;

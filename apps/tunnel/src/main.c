@@ -250,7 +250,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     
     { 
         size_t optionsLength = gopt(options, 'l');
-        int i;
+        size_t i;
         if (optionsLength > 0) {
             for (i = 0; i < optionsLength; i++) {
                 optionString = gopt_arg_i(options, 'l', i);
