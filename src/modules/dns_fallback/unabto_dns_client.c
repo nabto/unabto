@@ -28,7 +28,7 @@ void unabto_dns_print_header(unabto_dns_header* header) {
     NABTO_LOG_INFO(("identification %" PRIu16, header->identification));
     NABTO_LOG_INFO(("flags %" PRIu16, header->flags));
     if (header->flags & FLAG_RESPONSE_CODE_MASK) {
-        NABTO_LOG_INFO(("flags indicates error %" PRIu16, header->flags & FLAG_RESPONSE_CODE_MASK));
+        NABTO_LOG_INFO(("flags indicates error %" PRIu16, (uint16_t)(header->flags & FLAG_RESPONSE_CODE_MASK)));
     }
 
     NABTO_LOG_INFO(("questionCount %" PRIu16, header->questionCount));
