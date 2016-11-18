@@ -114,10 +114,6 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
     const char x18s[] = "P";     const char* x18l[] = { "provision", 0 };
     const char x19s[] = "";      const char* x19l[] = { "enablednsfallback", 0 };
 
-    #define FOO_XXX "size"
-
-//    const char* x19l[] = { "enablednsfallback", 0 };
-    
     const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
         { 'h', 0,           x0s, x0l },
         { 'a', GOPT_ARG,    x1s, x1l },
