@@ -153,6 +153,7 @@ enum np_payload_type_e {
     NP_PAYLOAD_TYPE_SYSLOG_CONFIG    = 0x48, /* 'H' Syslog Configuration  */
     NP_PAYLOAD_TYPE_GWWS             = 0x49, /* 'I' websocket gateway payload */
     NP_PAYLOAD_TYPE_SYSTEM_INFO      = 0x4A, /* 'J' system info payload type */
+    NP_PAYLOAD_TYPE_FINGERPRINT      = 0x4B, /* 'K' fingerprint of certificate payload */
 };
 
 /* Payload header flags */
@@ -188,7 +189,7 @@ enum np_payload_type_e {
 *      +-----+-----+----------------------------------------------------------+
 *      |  +4 |  +0 |  Type, one of NP_PAYLOAD_CP_ID_TYPE_*                    |
 *      +-----+-----+----------------------------------------------------------+
-*      |  +5 |  +1 |  sp id as a string, non null terminated                  |
+*      |  +5 |  +1 |  cp id as a string, non null terminated                  |
 *      +-----+-----+----------------------------------------------------------+
 * The serverpeer ID follows right after the Type field. The total number of
 * bytes in the ID are (payload Length - NP_PAYLOAD_SP_ID_BYTELENGTH) bytes.
@@ -196,10 +197,25 @@ enum np_payload_type_e {
 
 #define NP_PAYLOAD_CP_ID_BYTELENGTH          5  ///< size of a CP_ID payload without id
 
-/* Type of serverpeer ID */
-#define NP_PAYLOAD_CP_ID_TYPE_MAIL 0x01
-#define NP_PAYLOAD_CP_ID_TYPE_URL  0x02
+/* Type of clientpeer ID */
+#define NP_PAYLOAD_CP_ID_TYPE_MAIL                0x01
+#define NP_PAYLOAD_CP_ID_TYPE_URL                 0x02
 
+/*****************************************************************************/
+/* FINGERPRINT payload
+ * The fingerprint payload data has the following layout:
+ *      +-----+----------------------------------------------------------------+
+ *      |  +0 |  Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)              |
+ *      +-----+-----+----------------------------------------------------------+
+ *      |  +1 |  +0 |  fingerprint type.                                       |
+ *      +-----+-----+----------------------------------------------------------+
+ *      |  +5 |  +1 |  fingerprint as a sequence of bytes.                     |
+ *      +-----+-----+----------------------------------------------------------+
+ * The serverpeer ID follows right after the Type field. The total number of
+ * bytes in the ID are (payload Length - NP_PAYLOAD_SP_ID_BYTELENGTH) bytes.
+ */
+
+#define NP_PAYLOAD_FINGERPRINT_TYPE_SHA256_TRUNCATED        0x01
 
 
 /*****************************************************************************/
@@ -369,7 +385,7 @@ enum np_payload_type_e {
 #define NP_PAYLOAD_CAPA_BIT_CAP_PROXY    7  ///< peer has to communicate through a http proxy
 #define NP_PAYLOAD_CAPA_BIT_CAP_ASYNC    8  ///< peer is able to treat async application requests (unabto)
 #define NP_PAYLOAD_CAPA_BIT_CAP_FB_TCP_U 9  ///< peer is able to use FB (unencrypted handshake)
-#define NP_PAYLOAD_CAPA_BIT_CAP_CLIENT_U 10 ///< client is able to use unencrypted handshake
+#define NP_PAYLOAD_CAPA_BIT_CAP_CLIENT_U 10 ///< client is able to use unencrypted fallback handshake
 
 
 /*****************************************************************************/
