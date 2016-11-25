@@ -342,6 +342,7 @@ uint8_t* insert_piggy_payload(uint8_t* ptr, uint8_t* end, uint8_t* piggyData, ui
 
 bool unabto_payload_read_ipx(struct unabto_payload_packet* payload, struct unabto_payload_ipx* ipx)
 {
+    const uint8_t* ptr = payload->dataBegin;
     if (payload->type != NP_PAYLOAD_TYPE_IPX) {
         return false;
     }
@@ -352,8 +353,6 @@ bool unabto_payload_read_ipx(struct unabto_payload_packet* payload, struct unabt
 
     ipx->haveSpNsi = false;
     ipx->haveFullNsi = false;
-    
-    const uint8_t* ptr = payload->dataBegin;
 
     READ_FORWARD_U32(ipx->privateIpAddress, ptr);
     READ_FORWARD_U16(ipx->privateIpPort, ptr);

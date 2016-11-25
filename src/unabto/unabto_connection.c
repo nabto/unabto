@@ -569,8 +569,8 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
     {
         struct unabto_payload_packet gwPayload;
         if (unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_GW, &gwPayload) && ipxData.haveFullNsi) {
-            NABTO_LOG_TRACE(("The connect contains a gateway payload."));
             struct unabto_payload_gw gw;
+            NABTO_LOG_TRACE(("The connect contains a gateway payload."));
             if (unabto_payload_read_gw(&gwPayload, &gw)) {
                 if (gw.gwIdLength != 20) {
                     NABTO_LOG_ERROR(("Gw id should be 20 bytes long."));
