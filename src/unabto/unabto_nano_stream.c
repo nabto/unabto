@@ -268,7 +268,7 @@ enum {
 void handle_nano_stream_packet(nabto_connect* con, nabto_packet_header* hdr,
                                uint8_t* start, uint16_t dlen,
                                uint8_t* payloadsStart, uint8_t* payloadsEnd,
-                               void* ) {
+                               void* userData) {
     
     // read the window payload
     struct nabto_win_info win;
@@ -277,6 +277,8 @@ void handle_nano_stream_packet(nabto_connect* con, nabto_packet_header* hdr,
     bool ackEqXmitSeq, seqEqRecvNext;
     struct unabto_payload_packet payloadWindow;
 
+    NABTO_NOT_USED(userData);
+    
     if(!unabto_find_payload(payloadsStart, payloadsEnd, NP_PAYLOAD_TYPE_WINDOW, &payloadWindow)) {
         NABTO_LOG_ERROR(("Stream packet without window information"));
         return;
