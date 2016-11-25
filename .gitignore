@@ -5,9 +5,13 @@ apps/pic_demo/MPLAB.X/build
 apps/pic_demo/MPLAB.X/nbproject/*.mk
 apps/pic_demo/MPLAB.X/nbproject/*.bash
 
+apps/axis/armv6*
+apps/axis/mipsisa32*
+apps/axis/crisv32*
+
 external/Microchip/
 
 *~
 
-#*#
+*#*#
 TAGS

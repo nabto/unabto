@@ -34,6 +34,49 @@ typedef struct {
     uint16_t hlen;      /**< header length */
 } nabto_packet_header;
 
+// Payload decoded from a packet
+struct unabto_payload_packet {
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    const uint8_t* dataBegin;
+    const uint8_t* dataEnd;
+};
+
+/**
+ * ipx structure from a packet
+ */
+struct unabto_payload_ipx {
+    uint32_t privateIpAddress;
+    uint16_t privateIpPort;
+    uint32_t globalIpAddress;
+    uint16_t globalIpPort;
+    uint8_t  flags;
+    uint32_t spNsi;
+    uint8_t  coNsi[8];
+    uint32_t cpNsi;
+    bool     haveSpNsi;
+    bool     haveFullNsi;
+};
+
+/**
+ * typed buffer from a packet this does not own the data.
+ */
+struct unabto_payload_typed_buffer {
+    uint8_t        type;
+    const uint8_t* dataBegin;
+    const uint8_t* dataEnd;
+    size_t         dataLength;
+};
+
+struct unabto_payload_gw {
+    uint32_t       ipAddress;
+    uint16_t       port;
+    uint32_t       nsi;
+    size_t         gwIdLength;
+    const uint8_t* gwId;
+};
+
 /** Packet and payload size and offset declarations. */
 enum {
     SIZE_HEADER         = NP_PACKET_HDR_MIN_BYTELENGTH, ///< the size of the fixed size header
@@ -148,6 +191,16 @@ uint16_t nabto_rd_header(const uint8_t* buf, const uint8_t* end, nabto_packet_he
 uint16_t nabto_rd_payload(const uint8_t* buf, const uint8_t* end, uint8_t* type);
 
 /**
+ * read a single payload from the packet. return the pointer to where
+ * the next payload begins. On error return NULL.
+ * @param begin the beginning of the buffer
+ * @param end the end of the buffer
+ * @param payload the payload to return to the caller
+ * @return pointer to where the read payload stops.
+ */
+const uint8_t* unabto_read_payload(const uint8_t* begin, const uint8_t* end, struct unabto_payload_packet* payload);
+
+/**
  * Find a payload type
  * @param buf   The start of the block of payloads. 
  * @param end   the end of the input
@@ -157,6 +210,18 @@ uint16_t nabto_rd_payload(const uint8_t* buf, const uint8_t* end, uint8_t* type)
  * @return true if a payload with the given type was found.
  */
 bool find_payload(uint8_t* buf, uint8_t* end, uint8_t type, uint8_t** payloadStart, uint16_t* payloadLength);
+
+
+/**
+ * Find a payload in a packet and return the payload structure for it.
+ * @param begin    beginning of payloads
+ * @param end      end of payloads.
+ * @param type     payload type to look for
+ * @param payload  the payload to fill with information
+ * @return true iff the payload was found and
+ */
+bool unabto_find_payload(const uint8_t* buf, const uint8_t* end, uint8_t type, struct unabto_payload_packet* payload);
+
 
 /**
  * Write the packet header (excl the length field)
@@ -240,6 +305,21 @@ uint8_t* insert_sp_id_payload(uint8_t* ptr, uint8_t* end);
 uint8_t* insert_stats_payload(uint8_t* ptr, uint8_t* end, uint8_t stats_event_type);
 uint8_t* insert_notify_payload(uint8_t* buf, uint8_t* end, uint32_t notifyValue);
 uint8_t* insert_piggy_payload(uint8_t* ptr, uint8_t* end, uint8_t* piggyData, uint16_t piggySize);
+
+/**
+ * read ipx payload, return true iff it succeedes
+ */
+bool unabto_payload_read_ipx(struct unabto_payload_packet* payload, struct unabto_payload_ipx* ipx);
+
+/**
+ * read typed buffer, return true iff it succeedes
+ */
+bool unabto_payload_read_typed_buffer(struct unabto_payload_packet* payload, struct unabto_payload_typed_buffer* buffer);
+
+/**
+ * read gw info from a gw payload
+ */
+bool unabto_payload_read_gw(struct unabto_payload_packet* payload, struct unabto_payload_gw* gw);
 
 #ifdef __cplusplus
 } //extern "C"

@@ -22,6 +22,18 @@
  * with #ifndef's
  */
 
+#ifndef READ
+
+/**
+ * Read data from a buffer and copy it to the destination
+ * @param dst the destination
+ * @param src the source
+ * @param size number of bytes to copy
+ * @return
+ */
+#define READ(dst, src, size) do { size_t i; for(i = 0; i<size; i++) { dst[i] = src[i]; } } while (0)
+#endif
+
 #ifndef READ_U8
 /**
  * Read an unsigned 1-byte integer.
@@ -113,6 +125,7 @@
 #endif
 
 // Macros for performing sequential read/write operations on a buffer.
+#define READ_FORWARD(dst, pointer, size) do { READ(dst, pointer, size); pointer += size; } while(0)
 #define READ_FORWARD_U8(value, pointer) do { READ_U8(value, pointer); pointer += 1; } while(0)
 #define READ_FORWARD_U16(value, pointer) do { READ_U16(value, pointer); pointer += 2; } while(0)
 #define READ_FORWARD_U32(value, pointer) do { READ_U32(value, pointer); pointer += 4; } while(0)

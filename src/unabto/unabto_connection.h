@@ -203,7 +203,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
  * @param  nsi The NSI for the new connection.
  * @return Null if the connection is not created.
  */
-nabto_connect* nabto_init_connection_real(uint32_t nsi);
+nabto_connect* nabto_get_new_connection(uint32_t nsi);
 
 /**
  * Handle the connect event

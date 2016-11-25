@@ -1,5 +1,5 @@
 #include "unabto_payload_test.h"
-#include <unabto/unabto_payload.h>
+#include <unabto/unabto_packet_util.h>
 #include <unabto/unabto_util.h>
 
 int test_read_payload(void)

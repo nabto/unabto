@@ -368,7 +368,7 @@ static void send_rendezvous(nabto_connect* con, uint16_t seq, nabto_endpoint* de
     send_rendezvous_socket(nmc.socketGSP, con, seq, dest, myAddress);
 }
 
-nabto_connect* nabto_init_connection_real(uint32_t nsi)
+nabto_connect* nabto_get_new_connection(uint32_t nsi)
 {
     nabto_connect* con;
     con  = nabto_find_connection(nsi);
@@ -443,34 +443,32 @@ bool unabto_connection_verify_and_decrypt_connect_packet(nabto_packet_header* hd
 
 nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, uint32_t* ec, bool isLocal)
 {
-    uint8_t  type;
-    uint8_t  flags;   /* NP_PAYLOAD_IPX_FLAG_* */
     nabto_connect* con;
 
+    const uint8_t* begin = nabtoCommunicationBuffer + hdr->hlen;
     const uint8_t* end = nabtoCommunicationBuffer + hdr->len;
-    uint8_t* ptr = nabtoCommunicationBuffer + hdr->hlen;
-    uint16_t res;
-    uint16_t ipxPayloadLength;
-    
-    ipxPayloadLength = nabto_rd_payload(ptr, end, &type); ptr += SIZE_PAYLOAD_HEADER;
-    
-    *nsi = 0;
-    *ec  = 0;
 
-    if ((ipxPayloadLength != IPX_PAYLOAD_LENGTH_WITHOUT_NSI) && 
-        (ipxPayloadLength != IPX_PAYLOAD_LENGTH_WITH_NSI) && 
-        (ipxPayloadLength != IPX_PAYLOAD_LENGTH_FULL_NSI)) {
-        NABTO_LOG_TRACE(("Illegal payload size in U_CONNECT request from GSP: %" PRIu16 " %" PRIu8, ipxPayloadLength, type));
-        return 0;
-    }
-    if (type != NP_PAYLOAD_TYPE_IPX) {
-        NABTO_LOG_TRACE(("Illegal payload type in U_CONNECT request from GSP: %" PRIu16 " %" PRIu8, ipxPayloadLength, type));
-        return 0;
-    }
+    struct unabto_payload_ipx ipxData;
+    {
+        struct unabto_payload_packet ipxPayload;   
+        if (!unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_IPX, &ipxPayload)) {
+            NABTO_LOG_ERROR(("Missing ipx payload in connect"));
+            return 0;
+        }
+        
+        *nsi = 0;
+        *ec  = 0;
+        
     
-    if (ipxPayloadLength == IPX_PAYLOAD_LENGTH_WITH_NSI || 
-        ipxPayloadLength == IPX_PAYLOAD_LENGTH_FULL_NSI) {
-        READ_U32(*nsi, ptr + 13);
+
+        if (!unabto_payload_read_ipx(&ipxPayload, &ipxData)) {
+            NABTO_LOG_ERROR(("Cannot parse ipx payload"));
+            return 0;
+        }
+    }
+
+    if (ipxData.haveSpNsi) {
+        *nsi = ipxData.spNsi;
         NABTO_LOG_TRACE(("IPX payload with NSI (SPNSI=%" PRIu32 ")", *nsi));
     } else {
         *nsi = fresh_nsi();
@@ -488,7 +486,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
         return 0;
     }
 
-    con = nabto_init_connection_real(*nsi);
+    con = nabto_get_new_connection(*nsi);
 
     if (con == 0) {
         if (nabto_find_connection(*nsi)) {
@@ -504,52 +502,52 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
     }
 
     NABTO_LOG_DEBUG((PRInsi " U_CONNECT: Connecting using record %i", MAKE_NSI_PRINTABLE(0, *nsi, 0), nabto_connection_index(con)));
-    READ_U32(con->cp.privateEndpoint.addr, ptr +  0);
-    READ_U16(con->cp.privateEndpoint.port, ptr +  4);
-    READ_U32(con->cp.globalEndpoint.addr, ptr +  6);
-    READ_U16(con->cp.globalEndpoint.port, ptr + 10);
-    READ_U8(flags,                ptr + 12); /* the final word (4 bytes) has been read already (nsi) */
-    con->noRendezvous = (flags & NP_PAYLOAD_IPX_FLAG_NO_RENDEZVOUS) ? 1 : 0;
+
+    con->cp.privateEndpoint.addr = ipxData.privateIpAddress;
+    con->cp.privateEndpoint.port = ipxData.privateIpPort;
+    con->cp.globalEndpoint.addr = ipxData.globalIpAddress;
+    con->cp.globalEndpoint.port = ipxData.globalIpPort;
+    
+    con->noRendezvous = (ipxData.flags & NP_PAYLOAD_IPX_FLAG_NO_RENDEZVOUS) ? 1 : 0;
     con->cpEqual      = EP_EQUAL(con->cp.privateEndpoint, con->cp.globalEndpoint);
-    con->cpAsync      = (flags & NP_PAYLOAD_IPX_FLAG_CP_ASYNC) ? 1 : 0;
-    con->clientNatType      = (flags & NP_PAYLOAD_IPX_NAT_MASK);
+    con->cpAsync      = (ipxData.flags & NP_PAYLOAD_IPX_FLAG_CP_ASYNC) ? 1 : 0;
+    con->clientNatType      = (ipxData.flags & NP_PAYLOAD_IPX_NAT_MASK);
     con->isLocal      = isLocal;
     NABTO_LOG_INFO((PRInsi " U_CONNECT: cp.private: " PRIep " cp.global: " PRIep ", noRdv=%" PRIu8 ", cpeq=%" PRIu8 ", asy=%" PRIu8 ", NATType: %" PRIu8 , MAKE_NSI_PRINTABLE(0, *nsi, 0), MAKE_EP_PRINTABLE(con->cp.privateEndpoint), MAKE_EP_PRINTABLE(con->cp.globalEndpoint), con->noRendezvous, con->cpEqual, con->cpAsync, con->clientNatType));
 
 #if NABTO_ENABLE_TCP_FALLBACK
-    if (ipxPayloadLength == IPX_PAYLOAD_LENGTH_FULL_NSI) {
-        memcpy(con->consi, ptr+17, 8);
+    if (ipxData.haveFullNsi) {
+        memcpy(con->consi, ipxData.coNsi, 8);
         con->nsico = con->consi;
-        READ_U32(con->cpnsi, ptr+25);
+        con->cpnsi = ipxData.cpNsi;
     }
 #endif
 
-    ptr += ipxPayloadLength;  //IPX_PAYLOAD_LENGTH_WITHOUT_NSI or IPX_PAYLOAD_LENGTH_WITH_NSI
-        
-    con->clientId[0]  = 0;
-    res = nabto_rd_payload(ptr, end, &type);
-    if (type == NP_PAYLOAD_TYPE_CP_ID) {
-        uint8_t idType;
-        ptr += SIZE_PAYLOAD_HEADER;
-        if (res > 0) {
-            READ_U8(idType, ptr); ++ptr; --res;
-            if (idType == 1) { // 1 == EMAIL
-                size_t sz = res;
-                if (sz >= sizeof(con->clientId)) {
-                    if (sizeof(con->clientId) > 1) {
-                        NABTO_LOG_WARN(("Client ID truncated"));
+    {
+        struct unabto_payload_packet cpIdPayload;
+        if (unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_CP_ID, &cpIdPayload)) {
+            con->clientId[0] = 0;
+
+            struct unabto_payload_typed_buffer cpId;
+            if (unabto_payload_read_typed_buffer(&cpIdPayload, &cpId)) {
+                if (cpId.type == 1) { // 1 == EMAIL
+                    size_t sz = cpId.dataLength;
+                    if (sz >= sizeof(con->clientId)) {
+                        if (sizeof(con->clientId) > 1) {
+                            NABTO_LOG_WARN(("Client ID truncated"));
+                        }
+                        sz = sizeof(con->clientId) - 1;
                     }
-                    sz = sizeof(con->clientId) - 1;
+                    if (sz) {
+                        memcpy(con->clientId, (const void*) cpId.dataBegin, sz);
+                    }
+                    con->clientId[sz] = 0;
                 }
-                if (sz) {
-                    memcpy(con->clientId, (const void*) ptr, sz);
-                }
-                con->clientId[sz] = 0;
             }
+            NABTO_LOG_TRACE(("Connection opened from '%s' (to %s)", con->clientId, nmc.nabtoMainSetup.id));
         }
-        NABTO_LOG_TRACE(("Connection opened from '%s' (to %s)", con->clientId, nmc.nabtoMainSetup.id));
-        ptr += res;
     }
+    
 #if NABTO_ENABLE_CONNECTION_ESTABLISHMENT_ACL_CHECK
     if (!allow_client_access(con)) {
         *ec = NOTIFY_ERROR_CP_ACCESS;
@@ -559,28 +557,20 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
 
 #if NABTO_ENABLE_TCP_FALLBACK
     {
-        uint8_t* gatewayPtr = ptr;
-        res = nabto_rd_payload(ptr, end, &type);
-        if (type == NP_PAYLOAD_TYPE_GW && ipxPayloadLength == IPX_PAYLOAD_LENGTH_FULL_NSI) {
-            uint8_t* gatewayEndPtr;
-            size_t idLength;
+        struct unabto_payload_packet gwPayload;
+        if (unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_GW, &gwPayload) && ipxData.haveFullNsi) {
             NABTO_LOG_TRACE(("The connect contains a gateway payload."));
-            ptr += res + SIZE_PAYLOAD_HEADER;
-            gatewayPtr += SIZE_PAYLOAD_HEADER;
-            gatewayEndPtr = ptr;
-
-            READ_U32(con->fallbackHost.addr, gatewayPtr); gatewayPtr+=4;
-            READ_U16(con->fallbackHost.port, gatewayPtr); gatewayPtr+=2;
-            // skip the nsi
-            gatewayPtr+=4;
-        
-            idLength = gatewayEndPtr-gatewayPtr;
-            if (idLength != 20) {
-                NABTO_LOG_FATAL(("The id length should be 20 bytes. bytes=%" PRIsize, idLength));
-                // todo
-            } 
-            memcpy(con->gatewayId, gatewayPtr, 20);
-            con->hasTcpFallbackCapabilities = true;
+            struct unabto_payload_gw gw;
+            if (unabto_payload_read_gw(&gwPayload, &gw)) {
+                if (gw.gwIdLength != 20) {
+                    NABTO_LOG_ERROR(("Gw id should be 20 bytes long."));
+                } else {
+                    con->fallbackHost.addr = gw.ipAddress;
+                    con->fallbackHost.port = gw.port;
+                    memcpy(con->gatewayId, gw.gwId, 20);
+                    con->hasTcpFallbackCapabilities = true;
+                }
+            }
         }
     }
 #endif

@@ -95,8 +95,6 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_stream_window.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_tcp_fallback.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_util.h
-  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_payload.h
-  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_payload.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/util/unabto_buffer.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/util/unabto_queue.h
   )

@@ -103,6 +103,33 @@ uint16_t nabto_rd_payload(const uint8_t* buf, const uint8_t* end, uint8_t* type)
     return len - SIZE_PAYLOAD_HEADER;
 }
 
+const uint8_t* unabto_read_payload(const uint8_t* begin, const uint8_t* end, struct unabto_payload_packet* payload)
+{
+    ptrdiff_t bufferLength = end - begin;
+    const uint8_t* ptr = begin;
+    if (bufferLength == 0) {
+        // end reached expected
+        return NULL;
+    }
+    if (bufferLength < SIZE_PAYLOAD_HEADER) {
+        NABTO_LOG_ERROR(("unexpected end of payloads"));
+        return NULL;
+    }
+    READ_FORWARD_U8(payload->type, ptr);
+    READ_FORWARD_U8(payload->flags, ptr);
+    READ_FORWARD_U16(payload->length, ptr);
+
+    // check that the payload length is not greater than the buffer.
+    if (payload->length > bufferLength) {
+        return NULL;
+    }
+
+    payload->dataBegin = ptr;
+    payload->dataEnd = begin + payload->length;
+    return payload->dataEnd;
+}
+
+
 bool find_payload(uint8_t* start, uint8_t* end, uint8_t type, uint8_t** payloadStart, uint16_t* payloadLength) {
     uint8_t payloadType;
     uint16_t length;
@@ -118,6 +145,21 @@ bool find_payload(uint8_t* start, uint8_t* end, uint8_t type, uint8_t** payloadS
             }
         }
     } while (length > 0);
+    return false;
+}
+
+bool unabto_find_payload(const uint8_t* begin, const uint8_t* end, uint8_t type, struct unabto_payload_packet* payload)
+{
+    const uint8_t* next = begin;
+    do {
+        next = unabto_read_payload(next, end, payload);
+        if (next == NULL) {
+            return false;
+        }
+        if (payload->type == type) {
+            return true;
+        }
+    } while(next != NULL);
     return false;
 }
 
@@ -143,7 +185,7 @@ uint8_t* insert_header(uint8_t* buf, uint32_t cpnsi, uint32_t spnsi, uint8_t typ
     WRITE_U8(buf,            0);   buf += 1; /* reserved            */
     WRITE_U8(buf,        flags);   buf += 1; /* flags               */
     WRITE_U16(buf,         seq);   buf += 2; /* seq                 */
-  /*WRITE_U16(buf,         len);*/ buf += 2; /*   length to be patched later */
+    /*WRITE_U16(buf,         len);*/ buf += 2; /*   length to be patched later */
 
     /* Write controller nsi to the packet header (optional) */
     if (nsico) {
@@ -201,11 +243,11 @@ uint8_t* insert_capabilities(uint8_t* buf, bool cap_encr_off) {
 
     /* Build capabilities for this device */
     mask = PEER_CAP_MICRO |
-           PEER_CAP_TAG |
-           PEER_CAP_ASYNC |
-           PEER_CAP_FB_TCP_U |
-           PEER_CAP_UDP |
-           PEER_CAP_ENCR_OFF;
+        PEER_CAP_TAG |
+        PEER_CAP_ASYNC |
+        PEER_CAP_FB_TCP_U |
+        PEER_CAP_UDP |
+        PEER_CAP_ENCR_OFF;
     bits = PEER_CAP_MICRO | PEER_CAP_TAG | PEER_CAP_UDP;
 #if NABTO_MICRO_CAP_ASYNC
     bits |= PEER_CAP_ASYNC;
@@ -316,6 +358,67 @@ uint8_t* insert_piggy_payload(uint8_t* ptr, uint8_t* end, uint8_t* piggyData, ui
     return ptr;
 }
 
+bool unabto_payload_read_ipx(struct unabto_payload_packet* payload, struct unabto_payload_ipx* ipx)
+{
+    if (payload->type != NP_PAYLOAD_TYPE_IPX) {
+        return false;
+    }
 
+    if (payload->length < NP_PAYLOAD_IPX_BYTELENGTH) {
+        return false;
+    }
+
+    ipx->haveSpNsi = false;
+    ipx->haveFullNsi = false;
+    
+    const uint8_t* ptr = payload->dataBegin;
+
+    READ_FORWARD_U32(ipx->privateIpAddress, ptr);
+    READ_FORWARD_U16(ipx->privateIpPort, ptr);
+    READ_FORWARD_U32(ipx->globalIpAddress, ptr);
+    READ_FORWARD_U16(ipx->globalIpPort, ptr);
+    READ_FORWARD_U8(ipx->flags, ptr);
+
+    if (payload->length >=  NP_PAYLOAD_IPX_NSI_BYTELENGTH) {
+        READ_FORWARD_U32(ipx->spNsi, ptr);
+        ipx->haveSpNsi = true;
+    }
+
+    if (payload->length >= NP_PAYLOAD_IPX_FULL_NSI_BYTELENGTH) {
+        READ_FORWARD(ipx->coNsi, ptr, 8);
+        READ_FORWARD_U32(ipx->cpNsi, ptr);
+        ipx->haveFullNsi = true;
+    }
+    return true;
+}
+
+bool unabto_payload_read_typed_buffer(struct unabto_payload_packet* payload, struct unabto_payload_typed_buffer* buffer)
+{
+    const uint8_t* ptr = payload->dataBegin;
+    if (payload->length < NP_PAYLOAD_HDR_BYTELENGTH + 1) {
+        return false;
+    }
+    READ_FORWARD_U8(buffer->type, ptr);
+    buffer->dataBegin = ptr;
+    buffer->dataEnd = payload->dataEnd;
+    buffer->dataLength = payload->length - (NP_PAYLOAD_HDR_BYTELENGTH + 1);
+    return true;
+}
+
+bool unabto_payload_read_gw(struct unabto_payload_packet* payload, struct unabto_payload_gw* gw)
+{
+    const uint8_t* ptr = payload->dataBegin;
+    if (payload->length < NP_PAYLOAD_GW_MIN_BYTELENGTH) {
+        return false;
+    }
+
+    READ_FORWARD_U32(gw->ipAddress, ptr);
+    READ_FORWARD_U16(gw->port, ptr);
+    READ_FORWARD_U32(gw->nsi, ptr);
+    gw->gwIdLength = payload->length - NP_PAYLOAD_GW_MIN_BYTELENGTH;
+    gw->gwId = ptr;
+    
+    return true;
+}
 
 #endif
