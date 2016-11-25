@@ -1,6 +1,11 @@
 language: c
 
+env:
+  - CFLAGS="-std=gnu89"
+  - CFLAGS="-std=gnu99"
+
 compiler:
+  - clang
   - gcc
 
 addons:
@@ -17,4 +22,4 @@ before_script:
 script:
   - mkdir cibuild
   - cd cibuild
-  - cmake .. && make -j
+  - cmake .. && make -j VERBOSE=1
