@@ -268,20 +268,16 @@ enum {
 void handle_nano_stream_packet(nabto_connect* con, nabto_packet_header* hdr,
                                uint8_t* start, uint16_t dlen,
                                uint8_t* payloadsStart, uint8_t* payloadsEnd,
-                               void* userData) {
+                               void* ) {
     
     // read the window payload
-    
-    uint8_t* payloadWindowStart;
-    uint16_t payloadWindowLength;
     struct nabto_win_info win;
     unabto_stream*         stream;
     struct nano_stream_state* tcb;
     bool ackEqXmitSeq, seqEqRecvNext;
+    struct unabto_payload_packet payloadWindow;
 
-    NABTO_NOT_USED(userData);
-
-    if(!find_payload(payloadsStart, payloadsEnd, NP_PAYLOAD_TYPE_WINDOW, &payloadWindowStart, &payloadWindowLength)) {
+    if(!unabto_find_payload(payloadsStart, payloadsEnd, NP_PAYLOAD_TYPE_WINDOW, &payloadWindow)) {
         NABTO_LOG_ERROR(("Stream packet without window information"));
         return;
     }
@@ -300,8 +296,8 @@ void handle_nano_stream_packet(nabto_connect* con, nabto_packet_header* hdr,
 
     stream->stats.receivedPackets++;
  
-    if (!nano_stream_read_win(payloadWindowStart + SIZE_PAYLOAD_HEADER, payloadWindowLength, &win, stream, dlen)) {
-        NABTO_LOG_DEBUG(("ReadWin failure %" PRIu16, payloadWindowLength));
+    if (!nano_stream_read_win(payloadWindow.dataBegin, payloadWindow.dataLength, &win, stream, dlen)) {
+        NABTO_LOG_DEBUG(("ReadWin failure %" PRIu16, payloadWindow.dataLength));
         return;
     }
 

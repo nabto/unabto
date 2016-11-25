@@ -126,26 +126,8 @@ const uint8_t* unabto_read_payload(const uint8_t* begin, const uint8_t* end, str
 
     payload->dataBegin = ptr;
     payload->dataEnd = begin + payload->length;
+    payload->dataLength = payload->length - SIZE_PAYLOAD_HEADER;
     return payload->dataEnd;
-}
-
-
-bool find_payload(uint8_t* start, uint8_t* end, uint8_t type, uint8_t** payloadStart, uint16_t* payloadLength) {
-    uint8_t payloadType;
-    uint16_t length;
-    do {
-        length = nabto_rd_payload(start, end, &payloadType);
-        if (length > 0) {
-            if (payloadType == type) {
-                *payloadLength = length;
-                *payloadStart = start;
-                return true;
-            } else {
-                start += length+NP_PAYLOAD_HDR_BYTELENGTH;
-            }
-        }
-    } while (length > 0);
-    return false;
 }
 
 bool unabto_find_payload(const uint8_t* begin, const uint8_t* end, uint8_t type, struct unabto_payload_packet* payload)
@@ -420,5 +402,31 @@ bool unabto_payload_read_gw(struct unabto_payload_packet* payload, struct unabto
     
     return true;
 }
+
+bool unabto_payload_read_ep(struct unabto_payload_packet* payload, struct unabto_payload_ep* ep)
+{
+    const uint8_t* ptr = payload->dataBegin;
+    if (payload->length < NP_PAYLOAD_EP_BYTELENGTH) {
+        return false;
+    }
+
+    READ_FORWARD_U32(ep->address, ptr);
+    READ_FORWARD_U16(ep->port, ptr);
+    return true;
+}
+
+bool unabto_payload_read_crypto(struct unabto_payload_packet* payload, struct unabto_payload_crypto* crypto)
+{
+    const uint8_t* ptr = payload->dataBegin;
+    if (payload->length < NP_PAYLOAD_CRYPTO_BYTELENGTH) {
+        return false;
+    }
+    READ_FORWARD_U16(crypto->code, ptr);
+    crypto->dataBegin = ptr;
+    crypto->dataEnd = payload->dataEnd;
+    crypto->dataLength = payload->length - NP_PAYLOAD_CRYPTO_BYTELENGTH;
+    return true;
+}
+
 
 #endif

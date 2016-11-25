@@ -48,31 +48,29 @@ void handle_stream_packet(nabto_connect* con, nabto_packet_header* hdr,
                           void* userData) {
     
     // read the window and sack payloads
-    
-    uint8_t* payloadWindowStart;
-    uint16_t payloadWindowLength;
-
-    uint8_t* streamPayloadSack;
-    uint16_t streamPayloadSackLength;
+    struct unabto_payload_packet window;
 
     uint8_t* sackStart = 0;
     uint16_t sackLength = 0;
          
     NABTO_NOT_USED(userData);
 
-    if(!find_payload(payloadsStart, payloadsEnd, NP_PAYLOAD_TYPE_WINDOW, &payloadWindowStart, &payloadWindowLength)) {
-        payloadWindowStart = 0;
-        payloadWindowLength = 0;
+    if(!unabto_find_payload(payloadsStart, payloadsEnd, NP_PAYLOAD_TYPE_WINDOW, &window)) {
+        NABTO_LOG_ERROR(("Stream %i, Packet has no WINDOW payload!", hdr->tag));
+        return;
     }
-    
-    if (find_payload(payloadsStart, payloadsEnd, NP_PAYLOAD_TYPE_SACK, &streamPayloadSack, &streamPayloadSackLength)) {
-        sackStart = streamPayloadSack + SIZE_PAYLOAD_HEADER;
-        sackLength = streamPayloadSackLength;
+
+    {
+        struct unabto_payload_packet sack;
+        if (unabto_find_payload(payloadsStart, payloadsEnd, NP_PAYLOAD_TYPE_SACK, &sack)) {
+            sackStart = (uint8_t*)sack.dataBegin;
+            sackLength = sack.dataLength;
+        }
     }
 
     NABTO_LOG_DEBUG(("(.%i.) STREAM EVENT, dlen: %i", hdr->nsi_sp, dlen));
     nabtoSetFutureStamp(&con->stamp, con->timeOut);
-    nabto_stream_event(con, hdr, payloadWindowStart, start, dlen, sackStart, sackLength);
+    nabto_stream_event(con, hdr, (uint8_t*)(window.dataBegin - SIZE_PAYLOAD_HEADER), start, dlen, sackStart, sackLength);
 }
 
 void nabto_stream_event(nabto_connect*       con,

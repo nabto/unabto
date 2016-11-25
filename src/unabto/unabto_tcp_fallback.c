@@ -69,11 +69,10 @@ bool nabto_fallback_connect_u_event(uint16_t packetLength, nabto_packet_header* 
     nabto_connect* con;
     uint8_t* startOfPayloads;
     uint8_t* endOfPayloads;
-    uint8_t* noncePayloadStart;
-    uint16_t noncePayloadLength;
+    struct unabto_payload_packet nonce;
     uint8_t type;
     uint8_t flags;
-    uint8_t* ptr;
+    const uint8_t* ptr;
     bool isReliable;
     bool hasKeepAlive;
 
@@ -86,17 +85,17 @@ bool nabto_fallback_connect_u_event(uint16_t packetLength, nabto_packet_header* 
     startOfPayloads = nabtoCommunicationBuffer + hdr->hlen;
     endOfPayloads = nabtoCommunicationBuffer + packetLength;
 
-    if (!find_payload(startOfPayloads, endOfPayloads, NP_PAYLOAD_TYPE_NONCE, &noncePayloadStart, &noncePayloadLength)) {
+    if (!unabto_find_payload(startOfPayloads, endOfPayloads, NP_PAYLOAD_TYPE_NONCE, &nonce)) {
         NABTO_LOG_ERROR((PRI_tcp_fb "No nonce payload in GW_CONN_U packet.", TCP_FB_ARGS(con)));
         return false;
     }
 
-    if (noncePayloadLength < 2) {
+    if (nonce.dataLength < 2) {
         NABTO_LOG_ERROR((PRI_tcp_fb "The payload received is too small to contain both flags and type.", TCP_FB_ARGS(con)));
         return false;
     }
 
-    ptr = noncePayloadStart + NP_PAYLOAD_HDR_BYTELENGTH;
+    ptr = nonce.dataBegin;
 
     READ_U8(type, ptr);  ptr++;
     READ_U8(flags, ptr); ptr++;

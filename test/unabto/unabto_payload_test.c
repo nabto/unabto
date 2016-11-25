@@ -11,7 +11,7 @@ int test_read_payload(void)
     WRITE_FORWARD_U16(ptr, 6);
     WRITE_FORWARD_U16(ptr, 42);
     struct unabto_payload_packet payload;
-    uint8_t* result = unabto_read_payload(buffer, buffer+42, &payload);
+    const uint8_t* result = unabto_read_payload(buffer, buffer+42, &payload);
 
     if (result == NULL) {
         return false;

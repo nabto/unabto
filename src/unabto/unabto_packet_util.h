@@ -41,6 +41,7 @@ struct unabto_payload_packet {
     uint16_t length;
     const uint8_t* dataBegin;
     const uint8_t* dataEnd;
+    size_t   dataLength;
 };
 
 /**
@@ -75,6 +76,18 @@ struct unabto_payload_gw {
     uint32_t       nsi;
     size_t         gwIdLength;
     const uint8_t* gwId;
+};
+
+struct unabto_payload_ep {
+    uint32_t  address;
+    uint16_t  port;
+};
+
+struct unabto_payload_crypto {
+    uint16_t code;
+    const uint8_t* dataBegin;
+    const uint8_t* dataEnd;
+    size_t dataLength;
 };
 
 /** Packet and payload size and offset declarations. */
@@ -201,18 +214,6 @@ uint16_t nabto_rd_payload(const uint8_t* buf, const uint8_t* end, uint8_t* type)
 const uint8_t* unabto_read_payload(const uint8_t* begin, const uint8_t* end, struct unabto_payload_packet* payload);
 
 /**
- * Find a payload type
- * @param buf   The start of the block of payloads. 
- * @param end   the end of the input
- * @param type  the payload type to find.
- * @param payloadStart   the start of the found payload INCLUDING THE HEADER BYTES
- * @param payloadLength  the length of the found payload MINUS THE PAYLOAD_HDR_BYTELENGTH.
- * @return true if a payload with the given type was found.
- */
-bool find_payload(uint8_t* buf, uint8_t* end, uint8_t type, uint8_t** payloadStart, uint16_t* payloadLength);
-
-
-/**
  * Find a payload in a packet and return the payload structure for it.
  * @param begin    beginning of payloads
  * @param end      end of payloads.
@@ -307,19 +308,13 @@ uint8_t* insert_notify_payload(uint8_t* buf, uint8_t* end, uint32_t notifyValue)
 uint8_t* insert_piggy_payload(uint8_t* ptr, uint8_t* end, uint8_t* piggyData, uint16_t piggySize);
 
 /**
- * read ipx payload, return true iff it succeedes
+ * read a payload, return true iff it succeedes
  */
 bool unabto_payload_read_ipx(struct unabto_payload_packet* payload, struct unabto_payload_ipx* ipx);
-
-/**
- * read typed buffer, return true iff it succeedes
- */
 bool unabto_payload_read_typed_buffer(struct unabto_payload_packet* payload, struct unabto_payload_typed_buffer* buffer);
-
-/**
- * read gw info from a gw payload
- */
 bool unabto_payload_read_gw(struct unabto_payload_packet* payload, struct unabto_payload_gw* gw);
+bool unabto_payload_read_ep(struct unabto_payload_packet* payload, struct unabto_payload_ep* ep);
+bool unabto_payload_read_crypto(struct unabto_payload_packet* payload, struct unabto_payload_crypto* crypto);
 
 #ifdef __cplusplus
 } //extern "C"

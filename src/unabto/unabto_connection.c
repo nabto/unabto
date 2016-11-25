@@ -223,15 +223,21 @@ bool nabto_connect_event(message_event* event, nabto_packet_header* hdr)
      * If the first payload is an endpoint it's a rendezvous event.
      * If the request is a request for a new connection the first payload will be an IPX payload.
      */
-    uint8_t type = 0;
+    const uint8_t* begin = nabtoCommunicationBuffer+hdr->hlen;
+    const uint8_t* end = nabtoCommunicationBuffer + hdr->len;
+    struct unabto_payload_packet payload;
+    const uint8_t* next = unabto_read_payload(begin, end, &payload);
 
-    nabto_rd_payload(nabtoCommunicationBuffer+hdr->hlen, nabtoCommunicationBuffer + hdr->len, &type);
+    if (next == NULL) {
+        NABTO_LOG_ERROR(("Missing payload in connect packet"));
+        return false;
+    }
 
-    if (type == NP_PAYLOAD_TYPE_EP) {
+    if (payload.type == NP_PAYLOAD_TYPE_EP) {
         return rendezvous_event(event, hdr);
     } 
     
-    if (type == NP_PAYLOAD_TYPE_IPX) {
+    if (payload.type == NP_PAYLOAD_TYPE_IPX) {
         return connect_event(event, hdr);
     }
     
@@ -415,19 +421,24 @@ static uint16_t fresh_nsi(void) {
 
 #if NABTO_ENABLE_UCRYPTO
 bool unabto_connection_verify_and_decrypt_connect_packet(nabto_packet_header* hdr, uint8_t** decryptedDataStart, uint16_t* decryptedDataLength) {
-    uint8_t* ptr = nabtoCommunicationBuffer + hdr->hlen;
+    uint8_t* begin = nabtoCommunicationBuffer + hdr->hlen;
     uint8_t* end = nabtoCommunicationBuffer + hdr->len;
 
-    uint8_t* cryptoBegin;
-    uint16_t cryptoLength;
+    struct unabto_payload_crypto crypto;
 
-    if (!find_payload(ptr,end, NP_PAYLOAD_TYPE_CRYPTO, &cryptoBegin, &cryptoLength)) {
-        NABTO_LOG_TRACE(("########    U_CONNECT without Crypto payload from"));
-        return false;
+    {
+        struct unabto_payload_packet payload;
+        if (!unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_CRYPTO, &payload)) {
+            NABTO_LOG_TRACE(("########    U_CONNECT without Crypto payload from"));
+            return false;
+        }
+        if (!unabto_payload_read_crypto(&payload, &crypto)) {
+            NABTO_LOG_TRACE(("cannot read crypto payload"));
+            return false;
+        }
     }
-    cryptoBegin += NP_PAYLOAD_HDR_BYTELENGTH;
 
-    if (!unabto_crypto_verify_and_decrypt(hdr, nmc.context.cryptoConnect, cryptoBegin, cryptoLength, decryptedDataStart, decryptedDataLength)) 
+    if (!unabto_crypto_verify_and_decrypt(hdr, nmc.context.cryptoConnect, (uint8_t*)crypto.dataBegin, crypto.dataLength, decryptedDataStart, decryptedDataLength)) 
     {
         NABTO_LOG_TRACE(("U_CONNECT verify or decryption failed"));
         return false;
@@ -526,9 +537,8 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
     {
         struct unabto_payload_packet cpIdPayload;
         if (unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_CP_ID, &cpIdPayload)) {
-            con->clientId[0] = 0;
-
             struct unabto_payload_typed_buffer cpId;
+            con->clientId[0] = 0;
             if (unabto_payload_read_typed_buffer(&cpIdPayload, &cpId)) {
                 if (cpId.type == 1) { // 1 == EMAIL
                     size_t sz = cpId.dataLength;
@@ -591,7 +601,6 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
         NABTO_LOG_TRACE(("########    U_CONNECT without crypto payload"));
         unabto_crypto_reinit_d(&con->cryptoctx, CRYPT_W_NULL_DATA, 0, 0);
     }
-
 
     con->timeOut = CONNECTION_TIMEOUT;
     unabto_connection_set_future_stamp(&con->stamp, 20000); /* give much extra time during initialisation */
@@ -726,35 +735,42 @@ void nabto_rendezvous_start(nabto_connect* con)
 
 bool rendezvous_event(message_event* event, nabto_packet_header* hdr)
 {
+    uint8_t*          begin = nabtoCommunicationBuffer + hdr->hlen;
     uint8_t*          end = nabtoCommunicationBuffer + hdr->len;
-    uint16_t          res = hdr->hlen;
 
-    uint8_t*          ptr;
-    uint8_t           type;
     nabto_endpoint  epUD;
     nabto_connect*  con   = 0;
     nabto_endpoint  src;
     uint32_t        interval = 5000;
+    struct unabto_payload_packet payload;
 
     src = event->udpMessage.peer;
     NABTO_LOG_TRACE((PRInsi " Received from " PRIep " seq=%" PRIu16, MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), MAKE_EP_PRINTABLE(src), hdr->seq));
 
-    ptr = nabtoCommunicationBuffer + res;
-    res = nabto_rd_payload(ptr, end, &type); ptr += SIZE_PAYLOAD_HEADER;
-    if (res != 6 || type != NP_PAYLOAD_TYPE_EP) {
+    if (!unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_EP, &payload)) {
         NABTO_LOG_TRACE(("Can't read first EP"));
         return false;
     }
-    READ_U32(epUD.addr, ptr); ptr += 4;
-    READ_U16(epUD.port, ptr); ptr += 2;
-    res = nabto_rd_payload(ptr, end, &type); ptr += SIZE_PAYLOAD_HEADER;
-    if (res == 6 && type == NP_PAYLOAD_TYPE_EP) {
+
+    {
+        struct unabto_payload_ep ep;
+        if (!unabto_payload_read_ep(&payload, &ep)) {
+            NABTO_LOG_TRACE(("Can't read first ep payload"));
+            return false;
+        }
+        epUD.addr = ep.address;
+        epUD.port = ep.port;
+    }
+
+    // try to read the second ep payload.
+    if (unabto_find_payload(payload.dataEnd, end, NP_PAYLOAD_TYPE_EP, &payload)) {
         // The second EP is not neccessary since we read the destination ep from the udp packet.
-        
-        ptr += 6;
-        res = nabto_rd_payload(ptr, end, &type); ptr += SIZE_PAYLOAD_HEADER;
-        if (res == 4 && type == NP_PAYLOAD_TYPE_NONCE) {
-            READ_U32(interval, ptr);
+    }
+
+    // read nonce with an interval
+    if (unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_NONCE, &payload)) {
+        if (payload.dataLength == 4) {
+            READ_U32(interval, payload.dataBegin);
             NABTO_LOG_TRACE((PRInsi " Read interval from packet: %" PRIu32, MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), interval));
             if (interval == 0) {
                 NABTO_LOG_WARN(("Interval was 0, setting to 5000"));

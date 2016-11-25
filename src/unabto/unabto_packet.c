@@ -77,15 +77,13 @@ unabto_packet_data_handler_entry* unabto_packet_find_handler(uint16_t tag) {
 
 void nabto_packet_event(message_event* event, nabto_packet_header* hdr)
 {
-    uint16_t                   code;
     uint8_t*                   firstPayload;
     uint16_t                   vlen;
     nabto_connect*             con;
     uint8_t*                   start;
     uint16_t                   expectedCode;
     uint16_t                   ilen = hdr->len;
-    uint8_t*                   cryptoPayload;
-    uint16_t                   cryptoPayloadLength;
+    struct unabto_payload_packet cryptoPayload;
     uint16_t                   dlen;
     unabto_packet_data_handler_entry* handler;
 
@@ -117,28 +115,32 @@ void nabto_packet_event(message_event* event, nabto_packet_header* hdr)
 
     firstPayload = nabtoCommunicationBuffer + hdr->hlen;
 
-    if (!find_payload(firstPayload,nabtoCommunicationBuffer +ilen, NP_PAYLOAD_TYPE_CRYPTO, &cryptoPayload, &cryptoPayloadLength)) {
+    if (!unabto_find_payload(firstPayload,nabtoCommunicationBuffer +ilen, NP_PAYLOAD_TYPE_CRYPTO, &cryptoPayload)) {
         NABTO_LOG_ERROR(("Packet without crypto payload"));
         return;
     }
 
-    // We have found  a crypto payload verify the integrity and decrypt the data.
+    {
+        struct unabto_payload_crypto crypto;
+        if (!unabto_payload_read_crypto(&cryptoPayload, &crypto)) {
+            NABTO_LOG_ERROR(("cannot read crypto payload."));
+            return;
+        }
 
-    READ_U16(code, cryptoPayload + OFS_CODE);
-    if (!unabto_verify_integrity(&con->cryptoctx, code, nabtoCommunicationBuffer, ilen, &vlen)) {
-        NABTO_LOG_TRACE((PRInsi " Failing integrity check", MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0)));
-        return;
-    }
+        if (!unabto_verify_integrity(&con->cryptoctx, crypto.code, nabtoCommunicationBuffer, ilen, &vlen)) {
+            NABTO_LOG_TRACE((PRInsi " Failing integrity check", MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0)));
+            return;
+        }
 
-    if (cryptoPayloadLength < SIZE_CODE + vlen) {
-        NABTO_LOG_TRACE((PRInsi " Message too short for decryption: %i, %i", MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), cryptoPayloadLength, vlen));
-        return;
-    }
-
-    start = cryptoPayload + OFS_DATA;
-    if (!unabto_decrypt(&con->cryptoctx, start, cryptoPayloadLength - SIZE_CODE - vlen, &dlen)) {
-        NABTO_LOG_TRACE((PRInsi " Error decrypting message: %i, %i", MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), cryptoPayloadLength, vlen));
-        return;
+        if (crypto.dataLength < vlen) {
+            NABTO_LOG_TRACE((PRInsi " Message too short for decryption: %i, %i", MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), crypto.dataLength, vlen));
+            return;
+        }
+        start = (uint8_t*)crypto.dataBegin;
+        if (!unabto_decrypt(&con->cryptoctx, start, crypto.dataLength - vlen, &dlen)) {
+            NABTO_LOG_TRACE((PRInsi " Error decrypting message: %i, %i", MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), crypto.dataLength, vlen));
+            return;
+        }
     }
     
     /* The packet is verified to come from the one we are
