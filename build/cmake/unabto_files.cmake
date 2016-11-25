@@ -95,6 +95,8 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_stream_window.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_tcp_fallback.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_util.h
+  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_payload.h
+  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_payload.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/util/unabto_buffer.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/util/unabto_queue.h
   )
@@ -416,9 +418,11 @@ set(unabto_server_common_src_test
   ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_aes128_sha256_test.c
   ${UNABTO_SERVER_TEST_DIR}/unabto/util/unabto_util_test.c
   ${UNABTO_SERVER_TEST_DIR}/unabto/util/unabto_buffer_test.c
+  ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_payload_test.c
   ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_crypto_test.c
   ${UNABTO_SERVER_TEST_DIR}/modules/util/unabto_base32_test.c
   ${UNABTO_SERVER_TEST_DIR}/modules/util/read_hex_test.c
+  
   ${UNABTO_SERVER_SRC_DIR}/modules/util/unabto_base32.c
   ${UNABTO_SERVER_SRC_DIR}/modules/util/read_hex.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_crypto.c

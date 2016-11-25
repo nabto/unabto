@@ -2,6 +2,7 @@
 #include <unabto/unabto_test.h>
 
 #include <modules/util/read_hex_test.h>
+#include <unabto/unabto_payload_test.h>
 
 nabto_main_context nmc;
 
@@ -19,6 +20,12 @@ int main() {
     r = read_hex_test();
     if (!r) {
         NABTO_LOG_ERROR(("Test of hex function failed"));
+        ret = false;
+    }
+
+    r = test_read_payload();
+    if (!r) {
+        NABTO_LOG_ERROR(("test read payload failed"));
         ret = false;
     }
 
