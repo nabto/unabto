@@ -445,16 +445,21 @@ bool nabto_invite_event(nabto_packet_header* hdr)
     if (hdr->nsi_sp != 0 || hdr->flags != 1 ) {
         NABTO_LOG_TRACE(("Illegal header in U_INVITE response (2/0/1): (%i, %i, %i)", hdr->nsi_cp, hdr->nsi_sp, (int)hdr->flags));
     } else {
-        uint8_t type;
-        uint8_t* ptr = nabtoCommunicationBuffer + hdr->hlen;
-        size_t res = nabto_rd_payload(ptr, nabtoCommunicationBuffer + hdr->len, &type); ptr += SIZE_PAYLOAD_HEADER;
-        if (res != (NP_PAYLOAD_IPX_BYTELENGTH - NP_PAYLOAD_HDR_BYTELENGTH) || type != NP_PAYLOAD_TYPE_IPX) {
-            NABTO_LOG_TRACE(("Illegal payload in U_INVITE response from BS(13/%i): %i/%i", NP_PAYLOAD_TYPE_IPX, (int) res, (int) type));
+        struct unabto_payload_packet payload;
+        uint8_t* begin = nabtoCommunicationBuffer + hdr->hlen;
+        uint8_t* end = nabtoCommunicationBuffer + hdr->len;
+
+        if (!unabto_find_payload(begin,end, NP_PAYLOAD_TYPE_IPX, &payload)) {
+            NABTO_LOG_TRACE(("Missing IPX payload in U_INVITE response from BS"));
         } else {
-            READ_U32(nmc.context.gsp.addr,        ptr); ptr += 4;
-            READ_U16(nmc.context.gsp.port,        ptr); ptr += 2;
-            READ_U32(nmc.context.globalAddress.addr, ptr); ptr += 4;
-            READ_U16(nmc.context.globalAddress.port, ptr);
+            struct unabto_payload_ipx ipx;
+            if (!unabto_payload_read_ipx(&payload, &ipx)) {
+                NABTO_LOG_TRACE(("Cannot read ipx payload from packet"));
+            }
+            nmc.context.gsp.addr = ipx.privateIpAddress;
+            nmc.context.gsp.port = ipx.privateIpPort;
+            nmc.context.globalAddress.addr = ipx.globalIpAddress;
+            nmc.context.globalAddress.port = ipx.globalIpPort;
             NABTO_LOG_TRACE(("Using GSP at " PRIep, MAKE_EP_PRINTABLE(nmc.context.gsp)));
             /* the next packet is not sent to the sender of this packet (BS),
              * therefore the state change is the only action - the time_event
