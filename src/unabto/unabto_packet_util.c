@@ -230,8 +230,9 @@ uint8_t* insert_capabilities(uint8_t* buf, bool cap_encr_off) {
         PEER_CAP_ASYNC |
         PEER_CAP_FB_TCP_U |
         PEER_CAP_UDP |
-        PEER_CAP_ENCR_OFF;
-    bits = PEER_CAP_MICRO | PEER_CAP_TAG | PEER_CAP_UDP;
+        PEER_CAP_ENCR_OFF |
+        PEER_CAP_FP;
+    bits = PEER_CAP_MICRO | PEER_CAP_TAG | PEER_CAP_UDP | PEER_CAP_FP;
 #if NABTO_MICRO_CAP_ASYNC
     bits |= PEER_CAP_ASYNC;
 #endif

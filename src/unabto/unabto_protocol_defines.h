@@ -153,7 +153,7 @@ enum np_payload_type_e {
     NP_PAYLOAD_TYPE_SYSLOG_CONFIG    = 0x48, /* 'H' Syslog Configuration  */
     NP_PAYLOAD_TYPE_GWWS             = 0x49, /* 'I' websocket gateway payload */
     NP_PAYLOAD_TYPE_SYSTEM_INFO      = 0x4A, /* 'J' system info payload type */
-    NP_PAYLOAD_TYPE_FINGERPRINT      = 0x4B, /* 'K' fingerprint of certificate payload */
+    NP_PAYLOAD_TYPE_FP               = 0x4B, /* 'K' fingerprint of certificate payload */
 };
 
 /* Payload header flags */
@@ -215,7 +215,7 @@ enum np_payload_type_e {
  * bytes in the ID are (payload Length - NP_PAYLOAD_SP_ID_BYTELENGTH) bytes.
  */
 
-#define NP_PAYLOAD_FINGERPRINT_TYPE_SHA256_TRUNCATED        0x01
+#define NP_PAYLOAD_FP_TYPE_SHA256_TRUNCATED        0x01
 
 
 /*****************************************************************************/
@@ -386,7 +386,7 @@ enum np_payload_type_e {
 #define NP_PAYLOAD_CAPA_BIT_CAP_ASYNC       8  ///< peer is able to treat async application requests (unabto)
 #define NP_PAYLOAD_CAPA_BIT_CAP_FB_TCP_U    9  ///< peer is able to use FB (unencrypted handshake)
 #define NP_PAYLOAD_CAPA_BIT_CAP_CLIENT_U    10 ///< client is able to use unencrypted fallback handshake
-#define NP_PAYLOAD_CAPA_BIT_CAP_FINGERPRINT 11 ///< Peer is able understand fignerprints in the connect
+#define NP_PAYLOAD_CAPA_BIT_CAP_FP          11 ///< Peer is able understand fignerprints in the connect
 
 
 /*****************************************************************************/
