@@ -375,17 +375,18 @@ enum np_payload_type_e {
 #define NP_PAYLOAD_CAPA_TYPE_NONE        0
 
 /* Bit numbers of bits in Mask and Flags fields */
-#define NP_PAYLOAD_CAPA_BIT_CAP_DIR      0  ///< peer is able to use Direct Connection
-#define NP_PAYLOAD_CAPA_BIT_CAP_FB_TCP   1  ///< peer is able to use FB
-#define NP_PAYLOAD_CAPA_BIT_CAP_ENCR_OFF 2  ///< the micro device is running unencrypted
-#define NP_PAYLOAD_CAPA_BIT_CAP_MICRO    3  ///< the device is a micro device
-#define NP_PAYLOAD_CAPA_BIT_CAP_UDP      4  ///< peer is able to use direct UDP
-#define NP_PAYLOAD_CAPA_BIT_CAP_TAG      5  ///< peer is able to handle packet tags
-#define NP_PAYLOAD_CAPA_BIT_CAP_FRCTRL   6  ///< peer is able to handle Framing Control messages
-#define NP_PAYLOAD_CAPA_BIT_CAP_PROXY    7  ///< peer has to communicate through a http proxy
-#define NP_PAYLOAD_CAPA_BIT_CAP_ASYNC    8  ///< peer is able to treat async application requests (unabto)
-#define NP_PAYLOAD_CAPA_BIT_CAP_FB_TCP_U 9  ///< peer is able to use FB (unencrypted handshake)
-#define NP_PAYLOAD_CAPA_BIT_CAP_CLIENT_U 10 ///< client is able to use unencrypted fallback handshake
+#define NP_PAYLOAD_CAPA_BIT_CAP_DIR         0  ///< peer is able to use Direct Connection
+#define NP_PAYLOAD_CAPA_BIT_CAP_FB_TCP      1  ///< peer is able to use FB
+#define NP_PAYLOAD_CAPA_BIT_CAP_ENCR_OFF    2  ///< the micro device is running unencrypted
+#define NP_PAYLOAD_CAPA_BIT_CAP_MICRO       3  ///< the device is a micro device
+#define NP_PAYLOAD_CAPA_BIT_CAP_UDP         4  ///< peer is able to use direct UDP
+#define NP_PAYLOAD_CAPA_BIT_CAP_TAG         5  ///< peer is able to handle packet tags
+#define NP_PAYLOAD_CAPA_BIT_CAP_FRCTRL      6  ///< peer is able to handle Framing Control messages
+#define NP_PAYLOAD_CAPA_BIT_CAP_PROXY       7  ///< peer has to communicate through a http proxy
+#define NP_PAYLOAD_CAPA_BIT_CAP_ASYNC       8  ///< peer is able to treat async application requests (unabto)
+#define NP_PAYLOAD_CAPA_BIT_CAP_FB_TCP_U    9  ///< peer is able to use FB (unencrypted handshake)
+#define NP_PAYLOAD_CAPA_BIT_CAP_CLIENT_U    10 ///< client is able to use unencrypted fallback handshake
+#define NP_PAYLOAD_CAPA_BIT_CAP_FINGERPRINT 11 ///< Peer is able understand fignerprints in the connect
 
 
 /*****************************************************************************/
