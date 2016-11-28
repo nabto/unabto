@@ -34,14 +34,21 @@ typedef struct {
     uint16_t hlen;      /**< header length */
 } nabto_packet_header;
 
-// Payload decoded from a packet
+/**
+ * Payload decoded from a packet
+ * A payload have the following structure
+ * | type(uint8_t) | flags(uint8_t) | length(uint16_t) | data(uint8_t[]) |
+ * The payload header consist of type, flags and length.
+ */
+
 struct unabto_payload_packet {
-    uint8_t  type;
-    uint8_t  flags;
-    uint16_t length;
-    const uint8_t* dataBegin;
-    const uint8_t* dataEnd;
-    size_t   dataLength;
+    uint8_t  type; // Payload type
+    uint8_t  flags; // Payload flags
+    uint16_t length; // Length of the payload including the header
+    const uint8_t* begin; // Start of the payload including the header
+    const uint8_t* dataBegin; // Start of the data in the payload
+    const uint8_t* dataEnd; // End of both the data and the payload
+    size_t   dataLength; // Length of the data in the payload aka. the length - lengthof(header)
 };
 
 /**

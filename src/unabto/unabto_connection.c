@@ -438,7 +438,7 @@ bool unabto_connection_verify_and_decrypt_connect_packet(nabto_packet_header* hd
         }
     }
 
-    if (!unabto_crypto_verify_and_decrypt(hdr, nmc.context.cryptoConnect, (uint8_t*)crypto.dataBegin, crypto.dataLength, decryptedDataStart, decryptedDataLength)) 
+    if (!unabto_crypto_verify_and_decrypt(hdr, nmc.context.cryptoConnect, &crypto, decryptedDataStart, decryptedDataLength)) 
     {
         NABTO_LOG_TRACE(("U_CONNECT verify or decryption failed"));
         return false;

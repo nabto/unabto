@@ -115,6 +115,7 @@ const uint8_t* unabto_read_payload(const uint8_t* begin, const uint8_t* end, str
         NABTO_LOG_ERROR(("unexpected end of payloads"));
         return NULL;
     }
+    payload->begin = begin;
     READ_FORWARD_U8(payload->type, ptr);
     READ_FORWARD_U8(payload->flags, ptr);
     READ_FORWARD_U16(payload->length, ptr);

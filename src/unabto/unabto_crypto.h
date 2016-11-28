@@ -173,8 +173,7 @@ bool unabto_decrypt(nabto_crypto_context* cryptoContext, uint8_t* ptr, uint16_t 
  */
 bool unabto_crypto_verify_and_decrypt(nabto_packet_header* hdr,
                                       nabto_crypto_context* cryptoContext,
-                                      uint8_t* cryptoPayloadStart,
-                                      uint16_t cryptoPayloadLength,
+                                      struct unabto_payload_crypto* crypto,
                                       uint8_t** decryptedDataBegin,
                                       uint16_t* decryptedDataLength);
 

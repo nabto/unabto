@@ -524,35 +524,26 @@ bool unabto_insert_integrity(nabto_crypto_context* cryptoContext, uint8_t* start
 
 bool unabto_crypto_verify_and_decrypt(nabto_packet_header* hdr,
                                       nabto_crypto_context* cryptoContext,
-                                      uint8_t* cryptoPayloadStart,
-                                      uint16_t cryptoPayloadLength,
+                                      struct unabto_payload_crypto* crypto,
                                       uint8_t** decryptedDataBegin,
                                       uint16_t* decryptedDataLength)
 {
-    uint8_t* ptr = cryptoPayloadStart;
-    uint16_t code;
     uint16_t verifSize;
     uint16_t dlen;
-    uint8_t* cryptoPayloadEnd = cryptoPayloadStart + cryptoPayloadLength;
     
-    if (cryptoPayloadLength < 2) {
-        return false;
-    }
-
-    READ_U16(code, ptr); ptr += 2;
-    
-    if (!unabto_verify_integrity(cryptoContext, code, nabtoCommunicationBuffer, hdr->len, &verifSize)) {
+    if (!unabto_verify_integrity(cryptoContext, crypto->code, nabtoCommunicationBuffer, hdr->len, &verifSize)) {
         NABTO_LOG_TRACE(("Could not verify integrity in packet type %i", hdr->type));
         return false;
     }
 
-    if (!unabto_decrypt(cryptoContext, ptr, ((cryptoPayloadEnd - ptr) - verifSize), &dlen)) {
+    
+    if (!unabto_decrypt(cryptoContext, (uint8_t*)crypto->dataBegin, ((crypto->dataEnd - crypto->dataBegin) - verifSize), &dlen)) {
         NABTO_LOG_TRACE(("Decryption fail in packet type %i", hdr->type));
         return false;
     }
     
     *decryptedDataLength = dlen;
-    *decryptedDataBegin = ptr;
+    *decryptedDataBegin = (uint8_t*)crypto->dataBegin;
     return true;
 }
 
