@@ -469,8 +469,6 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
         
         *nsi = 0;
         *ec  = 0;
-        
-    
 
         if (!unabto_payload_read_ipx(&ipxPayload, &ipxData)) {
             NABTO_LOG_ERROR(("Cannot parse ipx payload"));
@@ -584,7 +582,17 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
         }
     }
 #endif
-
+    {
+        struct unabto_payload_packet fingerprintPayload;
+        
+        if (unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_FP, &fingerprintPayload)) {
+            struct unabto_payload_typed_buffer fingerprint;
+            if (unabto_payload_read_typed_buffer(&fingerprintPayload, &fingerprint)) {
+                // ew have a fingerprint payload.
+                NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_TRACE, ("Fingerprint"), fingerprint.dataBegin, fingerprint.dataLength);
+            }
+        }
+    }
 
 #if NABTO_ENABLE_UCRYPTO
     if (nmc.context.nonceSize == NONCE_SIZE) {
