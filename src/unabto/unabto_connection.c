@@ -589,7 +589,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
             struct unabto_payload_typed_buffer fingerprint;
             if (unabto_payload_read_typed_buffer(&fingerprintPayload, &fingerprint)) {
                 // ew have a fingerprint payload.
-                NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_TRACE, ("Fingerprint"), fingerprint.dataBegin, fingerprint.dataLength);
+                NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_BUFFERS, ("Fingerprint"), fingerprint.dataBegin, fingerprint.dataLength);
             }
         }
     }
