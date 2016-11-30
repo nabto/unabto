@@ -820,7 +820,8 @@ enum np_payload_system_info_nat64_e {
 #define NP_PAYLOAD_DESCR_TYPE_VERSION        1  ///< version number of the micro device
 #define NP_PAYLOAD_DESCR_TYPE_URL            2  ///< location of html device driver
 #define NP_PAYLOAD_DESCR_TYPE_ATTACH_PORT    3  ///< deprecated - may still be in use in old code
-#define NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN     4  ///< deprecated - may still be in use in old code
+#define NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN     4  ///< send if the device supports local connections
+#define NP_PAYLOAD_DESCR_TYPE_FP             5  ///< send if the device support fingerprints
 
 
 /*****************************************************************************/

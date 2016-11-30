@@ -588,7 +588,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
         if (unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_FP, &fingerprintPayload)) {
             struct unabto_payload_typed_buffer fingerprint;
             if (unabto_payload_read_typed_buffer(&fingerprintPayload, &fingerprint)) {
-                // ew have a fingerprint payload.
+                // we have a fingerprint payload.
                 NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_BUFFERS, ("Fingerprint"), fingerprint.dataBegin, fingerprint.dataLength);
             }
         }
@@ -606,7 +606,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
     } else
 #endif
     {
-        NABTO_LOG_TRACE(("########    U_CONNECT without crypto payload"));
+        NABTO_LOG_TRACE(("########    U_CONNECT without crypto payload, this is expected for local connections"));
         unabto_crypto_reinit_d(&con->cryptoctx, CRYPT_W_NULL_DATA, 0, 0);
     }
 

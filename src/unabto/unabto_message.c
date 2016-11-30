@@ -171,13 +171,14 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
         
         // cheating a bit using the utility meant for typed strings - same structure
         ptr += add_typed_string(ptr, end, 1 /*identifies a micro device */, nmc.nabtoMainSetup.id);
-        ptr += add_typed_string(ptr, end, 1 /*VERSION*/, nmc.nabtoMainSetup.version);
-        ptr += add_typed_string(ptr, end, 2 /*URL*/, nmc.nabtoMainSetup.url);
+        ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_VERSION, nmc.nabtoMainSetup.version);
+        ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_URL, nmc.nabtoMainSetup.url);
 #if NABTO_ENABLE_LOCAL_CONNECTION
         {
             // Send this capability if the device handles local connections.
-            char capMicro[2] = {'1', 0};
-            ptr += add_typed_string(ptr, end, 4 /*LOCAL_CONNECTION*/, capMicro);
+            char capOk[2] = {'1', 0};
+            ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN, capOk);
+            ptr += add_typed_string(ptr,end, NP_PAYLOAD_DESCR_TYPE_FP, capOk);
         }
 #endif
         olen = (uint16_t)(ptr - buf); // HSIZE is added again before returning
