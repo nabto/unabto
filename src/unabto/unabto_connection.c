@@ -588,8 +588,16 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
         if (unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_FP, &fingerprintPayload)) {
             struct unabto_payload_typed_buffer fingerprint;
             if (unabto_payload_read_typed_buffer(&fingerprintPayload, &fingerprint)) {
-                // we have a fingerprint payload.
-                NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_BUFFERS, ("Fingerprint"), fingerprint.dataBegin, fingerprint.dataLength);
+                if (fingerprint.type == NP_PAYLOAD_FP_TYPE_SHA256_TRUNCATED) {
+                    if (fingerprint.dataLength  ==  NP_TRUNCATED_SHA256_LENGTH_BYTES) {
+                        con->hasFingerprint = true;
+                        memcpy(con->fingerprint, fingerprint.dataBegin, NP_TRUNCATED_SHA256_LENGTH_BYTES);
+                    } else {
+                        NABTO_LOG_ERROR(("fingerprint has the wrong length %"PRIsize, fingerprint.dataLength));
+                    }
+                } else {
+                    NABTO_LOG_TRACE(("cannot read fignerprint type: %"PRIu8, fingerprint.type));
+                }
             }
         }
     }

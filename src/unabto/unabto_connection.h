@@ -119,6 +119,8 @@ struct nabto_connect_s {
     connectionStats           stats;        /**< connection stats                         */
     bool                      sendConnectStatistics;
     bool                      sendConnectionEndedStatistics;
+    bool                      hasFingerprint;
+    uint8_t                   fingerprint[NP_TRUNCATED_SHA256_LENGTH_BYTES]; // client fingerprint
 
 
 

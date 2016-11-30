@@ -216,6 +216,7 @@ enum np_payload_type_e {
  */
 
 #define NP_PAYLOAD_FP_TYPE_SHA256_TRUNCATED        0x01
+#define NP_TRUNCATED_SHA256_LENGTH_BYTES           16
 
 
 /*****************************************************************************/
