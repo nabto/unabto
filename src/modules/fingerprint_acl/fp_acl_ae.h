@@ -13,6 +13,9 @@ enum fp_acl_response_status {
 
 void fp_acl_ae_init(struct fp_acl_db* db);
 
+bool fp_acl_is_request_allowed(application_request* request, uint32_t requiredPermissions);
+bool fp_acl_is_pair_allowed(application_request* request);
+
 // request getUser.json?fingerprint=<hex>
 // response status, userName, fingerprint, permissions
 application_event_result fp_acl_ae_get_user(application_request* request,

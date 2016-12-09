@@ -8,8 +8,8 @@ bool fp_acl_mem_test() {
     memset(&user, 0, sizeof(struct fp_acl_user));
     memset(user.fp, 42, 16);
     const char* name = "foobar";
-    memcpy(user.un, name, strlen(name)+1);
-    user.perm = 0x42424242;
+    memcpy(user.name, name, strlen(name)+1);
+    user.permissions = 0x42424242;
 
     fp_mem_save_user(&user);
     

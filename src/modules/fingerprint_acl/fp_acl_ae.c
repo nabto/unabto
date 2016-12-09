@@ -3,6 +3,8 @@
 
 #include <unabto/unabto_util.h>
 
+#define FP_ACL_GET_USER_PERMISSIONS FP_ACL_PERMISSION_NONE
+
 struct fp_acl_db aclDb;
 
 void fp_acl_ae_init(struct fp_acl_db* db)
@@ -64,9 +66,9 @@ bool get_user(application_request* request, struct fp_acl_user* user)
 application_event_result write_user(buffer_write_t* write_buffer, uint8_t status, struct fp_acl_user* user)
 {
     if (unabto_query_write_uint8(write_buffer, status) &&
-        write_string(write_buffer, user->un) &&
+        write_string(write_buffer, user->name) &&
         write_fingerprint(write_buffer, user->fp) &&
-        unabto_query_write_uint32(write_buffer, user->perm))
+        unabto_query_write_uint32(write_buffer, user->permissions))
     {
         return AER_REQ_RESPONSE_READY;
     } else {
@@ -92,13 +94,9 @@ application_event_result fp_acl_ae_get_user(application_request* request,
                                             buffer_read_t* read_buffer,
                                             buffer_write_t* write_buffer)
 {
-    // all users with an acl entry can list users
-    struct fp_acl_user requestUser;
-    if (!get_user(request, &requestUser)) {
+    if (!fp_acl_is_request_allowed(request, FP_ACL_GET_USER_PERMISSIONS)) {
         return AER_REQ_NO_ACCESS;
     }
-
-    // check acl
     
     fingerprint fp;
     if (!read_fingerprint(read_buffer, fp)) {
@@ -119,10 +117,15 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
                                                     buffer_read_t* read_buffer,
                                                     buffer_write_t* write_buffer)
 {
-
-    // require that you have a fingerprint to get paired
-    if (! (request->connection && request->connection->hasFingerprint)) {
+    
+    if (!fp_acl_is_pair_allowed(request)) {
         return AER_REQ_NO_ACCESS;
+    }
+    
+    struct fp_acl_user user;
+        
+    if (!read_string_null_terminated(read_buffer, user.name, USERNAME_MAX_LENGTH)) {
+        return AER_REQ_TOO_SMALL;
     }
     
     struct fp_acl_settings aclSettings;
@@ -130,18 +133,8 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
         return AER_REQ_SYSTEM_ERROR;
     }
 
-    if (!aclSettings.openForPairing) {
-        return AER_REQ_NO_ACCESS;
-    }
-    
-    struct fp_acl_user user;
-        
-    if (!read_string_null_terminated(read_buffer, user.un, USERNAME_MAX_LENGTH)) {
-        return AER_REQ_TOO_SMALL;
-    }
-    
     memcpy(user.fp, request->connection->fingerprint, FP_LENGTH);
-    user.perm = aclSettings.defaultPairingPermissions;
+    user.permissions = aclSettings.defaultPermissions;
 
     fp_acl_db_status status = aclDb.save(&user);
 
@@ -150,4 +143,38 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
     } else {
         return write_empty_user(write_buffer, FP_ACL_STATUS_USER_DB_FULL);
     } 
+}
+
+bool fp_acl_is_request_allowed(application_request* request, uint32_t requiredPermissions)
+{
+    if (! (request->connection && request->connection->hasFingerprint)) {
+        return false;
+    }
+    
+    struct fp_acl_user user;
+    void* it = aclDb.find(request->connection->fingerprint);
+    if (aclDb.load(it, &user) != FP_ACL_DB_OK) {
+        return false;
+    }
+
+    return fp_acl_check_user_permissions(&user, request->isLocal, requiredPermissions);
+}
+
+bool fp_acl_is_pair_allowed(application_request* request)
+{
+    if (! (request->connection && request->connection->hasFingerprint)) {
+        return false;
+    }
+
+    struct fp_acl_settings aclSettings;
+    if (!aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
+        return AER_REQ_SYSTEM_ERROR;
+    }
+    
+    if (request->connection->isLocal) {
+        if (fp_acl_check_system_permissions(&aclSettings, FP_ACL_SYSTEM_PERMISSION_PAIRING)) {
+            return true;
+        }
+    }
+    return false;
 }

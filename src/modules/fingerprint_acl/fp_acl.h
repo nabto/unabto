@@ -6,18 +6,34 @@
 #define FP_LENGTH 16
 #define USERNAME_MAX_LENGTH 64
 
+
+// ACL permissions they are used on a per connection basis
+#define FP_ACL_PERMISSION_NONE                                      0x00000000ul
+#define FP_ACL_PERMISSION_ALL                                       0xfffffffful
+#define FP_ACL_PERMISSION_LOCAL_ACCESS                              0x80000000ul
+#define FP_ACL_PERMISSION_REMOTE_ACCESS                             0x40000000ul
+#define FP_ACL_PERMISSION_ACCESS_CONTROL                            0x20000000ul
+
+// SYSTEM permissions they are used to tell what the system can do
+#define FP_ACL_SYSTEM_PERMISSION_NONE                               0x00000000ul
+#define FP_ACL_SYSTEM_PERMISSION_ALL                                0x00000000ul
+#define FP_ACL_SYSTEM_PERMISSION_LOCAL_ACCESS                       0x80000000ul
+#define FP_ACL_SYSTEM_PERMISSION_REMOTE_ACCESS                      0x40000000ul
+#define FP_ACL_SYSTEM_PERMISSION_PAIRING                            0x20000000ul
+
+
 typedef uint8_t fingerprint[FP_LENGTH];
 typedef char username[USERNAME_MAX_LENGTH];
 
 struct fp_acl_user {
     fingerprint fp;
-    username un;
-    uint32_t perm;
+    username name;
+    uint32_t permissions;
 };
 
 struct fp_acl_settings {
-    bool openForPairing;
-    uint32_t defaultPairingPermissions;
+    uint32_t systemPermissions;   ///< permission bits controlling the system
+    uint32_t defaultPermissions;  ///< default permissions for new users
 };
 
 typedef enum {
@@ -40,8 +56,11 @@ struct fp_acl_db {
     fp_acl_db_status (*save_settings)(struct fp_acl_settings* settings);
 };
 
+// helper functions
+bool fp_acl_check_system_permissions(struct fp_acl_settings* settings, uint32_t requiredPermissions);
+bool fp_acl_check_user_permissions(struct fp_acl_user* user, bool isLocal, uint32_t requiredPermissions);
 
-void fp_acl_initialize(struct fp_acl_db* db);
+
 /* fp_acl_status fp_acl_get_user(fingerprint* fp, struct fp_acl_user* user); */
 
 /* fp_acl_status fp_acl_set_local_pairing_mode(bool enabled); */
