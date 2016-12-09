@@ -21,3 +21,14 @@ bool fp_acl_check_user_permissions(struct fp_acl_user* user, bool isLocal, uint3
     }
     return false;
 }
+
+void fp_acl_user_add_permissions(struct fp_acl_user* user, uint32_t permissions)
+{
+    user->permissions |= permissions;
+}
+    
+void fp_acl_user_remove_permissions(struct fp_acl_user* user, uint32_t permissions)
+{
+    // subtract bitmask from bitmask
+    user->permissions &= ~permissions;
+}

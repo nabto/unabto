@@ -6,7 +6,7 @@ bool fp_acl_ae_test() {
     req.connection = NULL;
     buffer_read_t read_buffer;
     buffer_write_t write_buffer;
-    fp_acl_ae_get_user(&req,
+    fp_acl_ae_user_get(&req,
                        &read_buffer,
                        &write_buffer);
     return true;

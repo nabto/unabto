@@ -16,7 +16,7 @@
 
 // SYSTEM permissions they are used to tell what the system can do
 #define FP_ACL_SYSTEM_PERMISSION_NONE                               0x00000000ul
-#define FP_ACL_SYSTEM_PERMISSION_ALL                                0x00000000ul
+#define FP_ACL_SYSTEM_PERMISSION_ALL                                0xfffffffful
 #define FP_ACL_SYSTEM_PERMISSION_LOCAL_ACCESS                       0x80000000ul
 #define FP_ACL_SYSTEM_PERMISSION_REMOTE_ACCESS                      0x40000000ul
 #define FP_ACL_SYSTEM_PERMISSION_PAIRING                            0x20000000ul
@@ -59,6 +59,9 @@ struct fp_acl_db {
 // helper functions
 bool fp_acl_check_system_permissions(struct fp_acl_settings* settings, uint32_t requiredPermissions);
 bool fp_acl_check_user_permissions(struct fp_acl_user* user, bool isLocal, uint32_t requiredPermissions);
+
+void fp_acl_user_add_permissions(struct fp_acl_user* user, uint32_t permissions);
+void fp_acl_user_remove_permissions(struct fp_acl_user* user, uint32_t permissions);
 
 
 /* fp_acl_status fp_acl_get_user(fingerprint* fp, struct fp_acl_user* user); */
