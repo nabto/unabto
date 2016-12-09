@@ -214,6 +214,7 @@ void nabto_message_local_legacy_application_event(uint16_t ilen, nabto_endpoint*
 
     READ_U32(appreq.queryId, ptr);
     appreq.clientId = NULL; // the local legacy protocol does not support client ids.
+    appreq.connection = NULL;
     appreq.isLegacy = true;
     appreq.isLocal = true;
 

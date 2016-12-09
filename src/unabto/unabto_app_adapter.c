@@ -778,10 +778,10 @@ bool framework_event_poll(uint8_t* buf, uint16_t buflen, uint16_t* olen, struct 
 /* Handle event the first time - application request is initialized.
  * Common function for SYNC and ASYNC model. */
 application_event_result framework_first_event(application_request       *req,
-                                                 buffer_read_t               *r_b,
-                                                 buffer_write_t              *w_b,
-                                                 nabto_connect*             con,
-                                                 const nabto_packet_header* hdr)
+                                               buffer_read_t             *r_b,
+                                               buffer_write_t            *w_b,
+                                               nabto_connect             *con,
+                                               const nabto_packet_header *hdr)
 {
     application_event_result res;
     uint32_t                 query_id;
@@ -796,6 +796,7 @@ application_event_result framework_first_event(application_request       *req,
     /* Initialize application request info */
     req->isLocal = con->isLocal;
     req->isLegacy = false;
+    req->connection = con;
     if (con && hdr) {
         req->clientId = (const char *) con->clientId;
     } else {

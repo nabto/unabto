@@ -55,11 +55,12 @@ bool allow_client_access(nabto_connect* connection);
 
 /** Identifies the request including the caller */
 typedef struct {
-    uint32_t    queryId;   ///< The query id.
-    const char* clientId;  ///< Null terminated client acl credentials
-    bool        isLocal;   ///< True if the request came from a local connection
-    bool        isLegacy;  ///< True if the request came from a legacy connection
-                           ///< Meaning no support for all connection related features.
+    uint32_t       queryId;    ///< The query id.
+    const char*    clientId;   ///< Null terminated client acl credentials
+    nabto_connect* connection; ///< The Connection the query is on 
+    bool           isLocal;    ///< True if the request came from a local connection
+    bool           isLegacy;   ///< True if the request came from a legacy connection
+                               ///< Meaning no support for all connection related features.
 } application_request;
 
 
