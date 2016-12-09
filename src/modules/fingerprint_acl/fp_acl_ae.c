@@ -127,6 +127,36 @@ application_event_result fp_acl_ae_user_me(application_request* request,
     return write_user(write_buffer, FP_ACL_STATUS_OK, &user);    
 }
 
+application_event_result fp_acl_ae_user_remove(application_request* request,
+                                               buffer_read_t* read_buffer,
+                                               buffer_write_t* write_buffer)
+{
+    if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ACCESS_CONTROL)) {
+        return AER_REQ_NO_ACCESS;
+    }
+
+    fingerprint fp;
+    if (!read_fingerprint(read_buffer, fp)) {
+        return AER_REQ_TOO_SMALL;
+    }
+
+    void* it = aclDb.find(fp);
+    struct fp_acl_user user;
+    uint8_t status = FP_ACL_STATUS_OK;
+    if (it != 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
+        status = FP_ACL_STATUS_NO_SUCH_USER;
+    } else {
+        if (aclDb.remove(it) != FP_ACL_DB_OK) {
+            status = FP_ACL_STATUS_REMOVE_FAILED;
+        }
+    }
+    if (!unabto_query_write_uint8(write_buffer, status)) {
+        return AER_REQ_TOO_LARGE;
+    }
+    return AER_REQ_RESPONSE_READY;
+}
+
+
 application_event_result fp_acl_ae_user_set_name(application_request* request,
                                                  buffer_read_t* read_buffer,
                                                  buffer_write_t* write_buffer)
