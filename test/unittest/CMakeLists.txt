@@ -28,6 +28,7 @@ set(src
   ${unabto_module_unix_dns_src}
   ${unabto_module_application_event_dummy_src}
   ${unabto_module_crypto_generic_src}
+  ${unabto_module_fingerprint_acl_src}
   
   ${src_dir}/unabto_unittest.c)
 
