@@ -146,6 +146,11 @@ QUERY_INT_WRITE_FUNCTION_DEF(u, 32)
 
 
 
+size_t unabto_query_write_free_bytes(unabto_query_response * queryResponse)
+{
+    return UNABTO_ABUFFER_GET_UNUSED(queryResponse);
+}
+
 bool unabto_query_write_uint8_list(unabto_query_response * queryResponse, uint8_t *list, uint16_t listLength)
 {
     if (NULL == queryResponse || (NULL == list && listLength > 0) || UNABTO_ABUFFER_GET_UNUSED(queryResponse) < sizeof(uint16_t) + listLength)

@@ -87,6 +87,87 @@ application_event_result write_empty_user(buffer_write_t* write_buffer, uint8_t 
     }
 }
 
+// getUsers.json?count=nn&start=nn
+// if count is 0 fill as many as possible into the response.
+// if start is 0 start from the beginning
+// if more users exists than returned set next to != 0.
+application_event_result fp_acl_ae_users_get(application_request* request,
+                                             buffer_read_t* read_buffer,
+                                             buffer_write_t* write_buffer)
+{
+    if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_NONE)) {
+        return AER_REQ_NO_ACCESS;
+    }
+
+    uint8_t count;
+    uint32_t start;
+
+    if (!unabto_query_read_uint8(read_buffer, &count) &&
+        unabto_query_read_uint32(read_buffer, &start))
+    {
+        return AER_REQ_TOO_SMALL;
+    }
+
+    if (count == 0) {
+        count = 255;
+    }
+    
+    size_t aclResponseSize = 66 + 18 + 4 + 4;
+    
+    void* it = aclDb.first();
+
+    uint32_t offset = 0;
+    // move pointer forward
+    while (it != NULL && offset < start) {
+        it = aclDb.next(it);
+        offset++;
+    } 
+
+    {
+        unabto_list_ctx listCtx;
+        uint16_t elements = 0;
+        if (!unabto_query_write_list_start(write_buffer, &listCtx)) {
+            return AER_REQ_TOO_LARGE;
+        }
+        
+        while (it != NULL &&
+               elements < count &&
+               unabto_query_write_free_bytes(write_buffer) > aclResponseSize)
+        {
+            struct fp_acl_user user;
+            if (aclDb.load(it, &user) != FP_ACL_DB_OK) {
+                return AER_REQ_SYSTEM_ERROR;
+            }
+            if (!write_string(write_buffer, user.name) &&
+                write_fingerprint(write_buffer, user.fp) &&
+                unabto_query_write_uint32(write_buffer, user.permissions))
+            {
+                return AER_REQ_TOO_SMALL;
+            }
+            elements++;
+            offset++;
+            it = aclDb.next(it);
+        }
+
+        if (!unabto_query_write_list_end(write_buffer, &listCtx, elements)) {
+            return AER_REQ_SYSTEM_ERROR;
+        }
+
+        if (it == NULL) {
+            offset = 0;
+        }
+        if (!unabto_query_write_uint32(write_buffer, offset)) {
+            return AER_REQ_TOO_LARGE;
+        }
+    }
+    
+    return AER_REQ_RESPONSE_READY;
+    
+}
+
+
+
+
 // getUser.json?fingerprint=<hex>
 application_event_result fp_acl_ae_user_get(application_request* request,
                                             buffer_read_t* read_buffer,
