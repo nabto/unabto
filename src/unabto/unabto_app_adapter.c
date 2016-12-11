@@ -23,12 +23,12 @@
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
 /// The data included in a naf_handle
 struct naf_handle_s {
-    application_request applicationRequest;           ///< the request part seen by the application
-    nabto_packet_header header;                       ///< the request packet header
-    nabto_connect*      connection;                   ///< the connection
-    uint32_t            spnsi;                        ///< the connection consistency id
-    unabto_buffer            applicationRequestBuffer;     ///< pointer to application request
-    unabto_query_request       readBuffer;                   ///< read access to r_buf
+    application_request  applicationRequest;           ///< the request part seen by the application
+    nabto_packet_header  header;                       ///< the request packet header
+    nabto_connect*       connection;                   ///< the connection
+    uint32_t             spnsi;                        ///< the connection consistency id
+    unabto_buffer        applicationRequestBuffer;     ///< pointer to application request
+    unabto_query_request readBuffer;                   ///< read access to r_buf
 };
 
 //struct queue_entry_s;
@@ -729,10 +729,10 @@ application_event_result framework_event(naf_handle             handle,
                                          nabto_packet_header* hdr)
 {
     application_request      req;
-    unabto_buffer                 w_buf;
-    unabto_query_response           w_b;
-    unabto_buffer                 r_buf;
-    unabto_query_request            r_b;
+    unabto_buffer            w_buf;
+    unabto_query_response    w_b;
+    unabto_buffer            r_buf;
+    unabto_query_request     r_b;
     application_event_result ret;
 
     /* framework_event_query always returns a zero handle in SYNC mode */
@@ -837,12 +837,12 @@ application_event_result framework_poll_event(struct naf_handle_s *handle,
                                               uint16_t             size,
                                               uint16_t            *olen)
 {
-    unabto_buffer                   w_buf;
-    unabto_query_response             w_b;
+    unabto_buffer              w_buf;
+    unabto_query_response      w_b;
     uint16_t                   expected_len;
     uint8_t                   *ptr;
     uint32_t                   query_id;
-    application_event_result res;
+    application_event_result   res;
     uint16_t                   dlen;
 
     expected_len = handle->header.hlen + OFS_DATA;
