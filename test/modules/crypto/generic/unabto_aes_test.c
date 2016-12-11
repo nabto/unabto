@@ -4,7 +4,7 @@
 #include "modules/crypto/generic/unabto_aes.h"
 #include "unabto/unabto_external_environment.h"
 
-bool aes128_test(const uint8_t key[16], const uint8_t plaintext[16],
+bool aes128_test(const uint8_t key[16], uint8_t plaintext[16],
                  const uint8_t result[16]) {
   
     uint32_t block[4];
@@ -22,7 +22,9 @@ bool aes128_test(const uint8_t key[16], const uint8_t plaintext[16],
     AES_encrypt(&ctx, block);
 
     for (i = 0; i < 4; i++) {
-        WRITE_U32(plaintext+(i*sizeof(uint32_t)), block[i]);
+        uint32_t input = block[i];
+        uint8_t* output = plaintext+(i*sizeof(uint32_t));
+        WRITE_U32(output, input);
     }
     
     return (memcmp((const uint8_t*)plaintext, result, 16) == 0);
@@ -32,7 +34,7 @@ bool aes_test() {
     const uint8_t key[] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 
                             0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };
 
-    const uint8_t plaintext[] = {
+    uint8_t plaintext[] = {
         0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96, 
         0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17, 0x2a };
 
