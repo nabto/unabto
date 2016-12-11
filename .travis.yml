@@ -23,3 +23,4 @@ script:
   - mkdir cibuild
   - cd cibuild
   - cmake .. && make -j VERBOSE=1
+  - ./test/unittest/unabto_unittest
