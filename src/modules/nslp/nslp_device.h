@@ -30,7 +30,7 @@ typedef struct
 //} nslp_status;
 
 extern void notification(uint16_t id, const void* data);
-extern nslp_query_status begin_nslp_query(nslp_query* query, buffer_read_t* request);
+extern nslp_query_status begin_nslp_query(nslp_query* query, unabto_query_request* request);
 extern nslp_query_status end_nslp_query(nslp_query* query, void** responseData, uint16_t* responseDataLength);
 extern void drop_nslp_query(nslp_query* query);
 

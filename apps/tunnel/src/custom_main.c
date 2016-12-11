@@ -28,7 +28,7 @@ bool tunnel_allow_connection(const char* host, int port) {
     return true;
 }
 
-application_event_result application_event(application_request* request, buffer_read_t* readBuffer, buffer_write_t* writeBuffer)
+application_event_result application_event(application_request* request, unabto_query_request* readBuffer, unabto_query_response* writeBuffer)
 {
     return AER_REQ_INV_QUERY_ID;
 }
@@ -37,7 +37,7 @@ bool application_poll_query(application_request** applicationRequest) {
     return false;
 }
 
-application_event_result application_poll(application_request* applicationRequest, buffer_read_t* readBuffer, buffer_write_t* writeBuffer) {
+application_event_result application_poll(application_request* applicationRequest, unabto_query_request* readBuffer, unabto_query_response* writeBuffer) {
     return AER_REQ_INV_QUERY_ID;
 }
 

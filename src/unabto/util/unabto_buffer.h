@@ -17,6 +17,7 @@
 #include <unabto/unabto_buffers.h>
 #include <unabto/unabto_query_rw.h>
 #include <unabto/util/unabto_queue.h>
+#include <unabto/unabto_buffers.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -128,24 +129,18 @@ bool buffer_read_raw_nc(buffer_read_t* read_buf, buffer_t* buf);
  * Reset a a readable buffer to read from start
  * @param read_buf  the buffer to reset.
  */
+
+/** Deprecated
+ * initialize read buffer
+ */
+void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
+
 #define buffer_read_reset(buffer) unabto_abuffer_reset(buffer)
 
 
 /*******************************************************************************/
 /* Prototypes for unabto and optionally application query read buffer handling */
 /*******************************************************************************/
-
-/** Deprecated - use unabto_query_read_init
- * Initialize a readable buffer
- * @param read_buf      the handle for the read buffer.
- * @param buffer        the base buffer to use
- * @param input_length  the used length for the input.
- * @return              true if properly initialised, false if input_length exceeds the size of buffer
- */
-/*
-#define buffer_read_init(read_buf, buffer, input_length) unabto_query_read_init(read_buf, unabto_buffer_get_data(buffer), unabto_buffer_get_size(buffer))
-*/
-#define buffer_read_init(read_buf, buffer, input_length) unabto_query_read_init(read_buf, buffer)
 
 /** Deprecated - use unabto_abuffer_get_size ...
  * Get the number of available bytes in the read buffer.
@@ -246,7 +241,7 @@ bool buffer_read_raw_nc(buffer_read_t* read_buf, buffer_t* buf);
 /*
 #define buffer_write_init(b_w, buf) unabto_query_write_init(b_w, unabto_buffer_get_data(buf), unabto_buffer_get_size(buf))
 */
-#define buffer_write_init(b_w, buf) unabto_query_write_init(b_w, buf)
+#define buffer_write_init(b_w, buf) unabto_query_response_init(b_w, buf)
 
 
 /**

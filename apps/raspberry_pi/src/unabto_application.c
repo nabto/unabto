@@ -19,7 +19,7 @@ static uint8_t theLight = 0;
  * Afterwards a user defined message can be sent back to the
  * requesting browser.
  ****************************************************************/
-application_event_result demo_application(application_request* request, buffer_read_t* read_buffer, buffer_write_t* write_buffer) {
+application_event_result demo_application(application_request* request, unabto_query_request* read_buffer, unabto_query_response* write_buffer) {
     switch(request->queryId) {
         case 1: {
             //  <query name="light_write.json" description="Turn light on and off" id="1">
@@ -37,11 +37,11 @@ application_event_result demo_application(application_request* request, buffer_r
             uint8_t light_state;
 
             // Read parameters in request
-            if (!buffer_read_uint8(read_buffer, &light_id)) {
+            if (!unabto_query_read_uint8(read_buffer, &light_id)) {
                 NABTO_LOG_ERROR(("Can't read light_id, the buffer is too small"));
                 return AER_REQ_TOO_SMALL;
             }
-            if (!buffer_read_uint8(read_buffer, &light_on)) {
+            if (!unabto_query_read_uint8(read_buffer, &light_on)) {
                 NABTO_LOG_ERROR(("Can't read light_state, the buffer is too small"));
                 return AER_REQ_TOO_SMALL;
             }
@@ -50,7 +50,7 @@ application_event_result demo_application(application_request* request, buffer_r
             light_state = setLight(light_id, light_on);
 
             // Write back led state
-            if (!buffer_write_uint8(write_buffer, light_state)) {
+            if (!unabto_query_write_uint8(write_buffer, light_state)) {
                 return AER_REQ_RSP_TOO_LARGE;
             }
 
@@ -70,13 +70,13 @@ application_event_result demo_application(application_request* request, buffer_r
             uint8_t light_state;
 
             // Read parameters in request
-            if (!buffer_read_uint8(read_buffer, &light_id)) return AER_REQ_TOO_SMALL;
+            if (!unabto_query_read_uint8(read_buffer, &light_id)) return AER_REQ_TOO_SMALL;
 
             // Read light state
             light_state = readLight(light_id);
 
             // Write back led state
-            if (!buffer_write_uint8(write_buffer, light_state)) return AER_REQ_RSP_TOO_LARGE;
+            if (!unabto_query_write_uint8(write_buffer, light_state)) return AER_REQ_RSP_TOO_LARGE;
 
             return AER_REQ_RESPONSE_READY;
         }
@@ -115,7 +115,7 @@ uint8_t readLight(uint8_t id) {
 // Holds one saved request
 static application_request* saved_app_req = 0;
 
-application_event_result application_event(application_request* request, buffer_read_t* r_b, buffer_write_t* w_b)
+application_event_result application_event(application_request* request, uanbto_query_request* r_b, unabto_query_response* w_b)
 {
     if (request->queryId == 1 || request->queryId == 2 || request->queryId == 3) {
         NABTO_LOG_INFO(("Application event: Respond immediately"));
@@ -155,7 +155,7 @@ bool application_poll_query(application_request** appreq)
 }
 
 // Retrieve the response from a queued request
-application_event_result application_poll(application_request* request, buffer_read_t* r_b, buffer_write_t* w_b)
+application_event_result application_poll(application_request* request, unabto_query_request* r_b, unabto_query_response* w_b)
 {
     application_event_result res;
 
@@ -183,7 +183,7 @@ void application_poll_drop(application_request* request)
 
 #else
 
-application_event_result application_event(application_request* request, buffer_read_t* r_b, buffer_write_t* w_b)
+application_event_result application_event(application_request* request, unabto_query_request* r_b, unabto_query_response* w_b)
 {
     return demo_application(request, r_b, w_b);
 }

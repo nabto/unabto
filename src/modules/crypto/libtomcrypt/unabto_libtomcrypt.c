@@ -3,7 +3,6 @@
  */
 #include <unabto/unabto_aes_cbc.h>
 #include <unabto/unabto_hmac_sha256.h>
-#include <unabto/util/unabto_buffer.h>
 #include "tomcrypt.h"
 
 bool aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t input_len) {
@@ -55,8 +54,8 @@ bool aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t input_len) 
     return false;
 }
 
-void unabto_hmac_sha256_buffers(const buffer_t keys[], uint8_t keysSize,
-                                const buffer_t messages[], uint8_t messagesSize,
+void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keysSize,
+                                const unabto_buffer messages[], uint8_t messagesSize,
                                 uint8_t *mac, uint16_t macSize) 
 {
 

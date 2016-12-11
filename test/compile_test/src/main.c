@@ -139,7 +139,7 @@ bool allow_client_access(nabto_connect* con)
 #endif
 
 #if NABTO_ENABLE_EVENTCHANNEL
-buffer_t* get_event_buffer2(size_t maxSize)
+unabto_buffer* get_event_buffer2(size_t maxSize)
 {
     return NULL;
 }
@@ -181,7 +181,7 @@ void setTimeFromGSP(uint32_t stamp)
     NABTO_NOT_USED(stamp);
 }
 
-application_event_result application_event(application_request* applicationRequest, buffer_read_t* readBuffer, buffer_write_t* writeBuffer) {
+application_event_result application_event(application_request* applicationRequest, uanbto_query_request* readBuffer, unabto_query_response* writeBuffer) {
     return AER_REQ_NO_QUERY_ID;
 }
 
@@ -190,7 +190,7 @@ bool application_poll_query(application_request** applicationRequest) {
     return false;
 }
 
-application_event_result application_poll(application_request* applicationRequest, buffer_read_t* readBuffer, buffer_write_t* writeBuffer) {
+application_event_result application_poll(application_request* applicationRequest, unabto_query_request* readBuffer, unabto_query_response* writeBuffer) {
     return AER_REQ_SYSTEM_ERROR;
 }
 

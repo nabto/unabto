@@ -327,7 +327,7 @@ static bool access_control_check(bool isConnection, bool isLocal, const char* cl
 
 // </editor-fold>
 
-application_event_result acl_application_event(application_request* request, buffer_read_t* readBuffer, buffer_write_t* writeBuffer)
+application_event_result acl_application_event(application_request* request, unabto_query_request* readBuffer, unabto_query_response* writeBuffer)
 {
   switch(request->queryId)
   {
@@ -346,7 +346,7 @@ application_event_result acl_application_event(application_request* request, buf
         return AER_REQ_NO_ACCESS;
       }
 
-      if(buffer_read_uint8(readBuffer, &startingIndex) == false || buffer_read_uint8(readBuffer, &maximumNumberOfUsers) == false)
+      if(unabto_query_read_uint8(readBuffer, &startingIndex) == false || unabto_query_read_uint8(readBuffer, &maximumNumberOfUsers) == false)
       {
         return AER_REQ_TOO_SMALL;
       }
@@ -368,7 +368,7 @@ application_event_result acl_application_event(application_request* request, buf
       // limit the number of users to send to 1) no more than requested by the client, 2) no more than the device is capable of sending (due to comm. buffer size)
       numberOfUsersToSend = MIN3(numberOfUsersToSend, maximumNumberOfUsers, MAXIMUM_NUMBER_OF_ACL_USERS_PER_REQUEST);
 
-      if(buffer_write_uint16(writeBuffer, numberOfUsersToSend) == false)
+      if(unabto_query_write_uint16(writeBuffer, numberOfUsersToSend) == false)
       {
         return AER_REQ_RSP_TOO_LARGE;
       }
@@ -379,7 +379,7 @@ application_event_result acl_application_event(application_request* request, buf
 
         if(numberOfUsersFound >= startingIndex)
         {
-          if(buffer_write_raw_from_array(writeBuffer, (uint8_t*) user->name, strlen(user->name)) == false || buffer_write_uint32(writeBuffer, user->permissions) == false)
+          if(unabto_query_write_uint8_list(writeBuffer, (uint8_t*) user->name, strlen(user->name)) == false || unabto_query_write_uint32(writeBuffer, user->permissions) == false)
           {
             return AER_REQ_RSP_TOO_LARGE;
           }
@@ -390,7 +390,7 @@ application_event_result acl_application_event(application_request* request, buf
         numberOfUsersFound++;
       }
 
-      if(buffer_write_uint8(writeBuffer, totalNumberOfUsers) == false)
+      if(unabto_query_write_uint8(writeBuffer, totalNumberOfUsers) == false)
       {
         return AER_REQ_RSP_TOO_LARGE;
       }
@@ -400,7 +400,7 @@ application_event_result acl_application_event(application_request* request, buf
 
     case QUERY_ACCESS_CONTROL_ADD_USER:
     {
-      buffer_t nameBuffer;
+      unabto_buffer nameBuffer;
       acl_user* aclUser = (acl_user*) nabtoGeneralPurposeBuffer;
 
       if(acl_is_request_allowed(request, ACL_PERMISSION_ACCESS_CONTROL) == false)
@@ -409,7 +409,7 @@ application_event_result acl_application_event(application_request* request, buf
       }
 
       // read request parameters
-      if(buffer_read_raw_nc(readBuffer, &nameBuffer) == false || buffer_read_uint32(readBuffer, &aclUser->permissions) == false)
+      if(unabto_query_read_uint8_list_to_buffer_nc(readBuffer, &nameBuffer) == false || unabto_query_read_uint32(readBuffer, &aclUser->permissions) == false)
       {
         return AER_REQ_TOO_SMALL;
       }
@@ -443,14 +443,14 @@ application_event_result acl_application_event(application_request* request, buf
 
     case QUERY_ACCESS_CONTROL_REMOVE_USER:
     {
-      buffer_t nameBuffer;
+      unabto_buffer nameBuffer;
 
       if(acl_is_request_allowed(request, ACL_PERMISSION_ACCESS_CONTROL) == false)
       {
         return AER_REQ_NO_ACCESS;
       }
 
-      if(buffer_read_raw_nc(readBuffer, &nameBuffer) == false)
+      if(unabto_query_read_uint8_list_to_buffer_nc(readBuffer, &nameBuffer) == false)
       {
         return AER_REQ_TOO_SMALL;
       }
@@ -487,7 +487,7 @@ application_event_result acl_application_event(application_request* request, buf
         return AER_REQ_SYSTEM_ERROR;
       }
 
-      if(buffer_write_uint8(writeBuffer, value) == false)
+      if(unabto_query_write_uint8(writeBuffer, value) == false)
       {
         return AER_REQ_RSP_TOO_LARGE;
       }
@@ -504,7 +504,7 @@ application_event_result acl_application_event(application_request* request, buf
         return AER_REQ_NO_ACCESS;
       }
 
-      if(buffer_read_uint8(readBuffer, &value) == false)
+      if(unabto_query_read_uint8(readBuffer, &value) == false)
       {
         return AER_REQ_TOO_SMALL;
       }
@@ -535,7 +535,7 @@ application_event_result acl_application_event(application_request* request, buf
         return AER_REQ_SYSTEM_ERROR;
       }
 
-      if(buffer_write_uint32(writeBuffer, value) == false)
+      if(uanbto_query_write_uint32(writeBuffer, value) == false)
       {
         return AER_REQ_RSP_TOO_LARGE;
       }
@@ -552,7 +552,7 @@ application_event_result acl_application_event(application_request* request, buf
         return AER_REQ_NO_ACCESS;
       }
 
-      if(buffer_read_uint32(readBuffer, &value) == false)
+      if(unabto_query_read_uint32(readBuffer, &value) == false)
       {
         return AER_REQ_TOO_SMALL;
       }
@@ -583,7 +583,7 @@ application_event_result acl_application_event(application_request* request, buf
         return AER_REQ_SYSTEM_ERROR;
       }
 
-      if(buffer_write_uint32(writeBuffer, value) == false)
+      if(unabto_query_write_uint32(writeBuffer, value) == false)
       {
         return AER_REQ_RSP_TOO_LARGE;
       }
@@ -600,7 +600,7 @@ application_event_result acl_application_event(application_request* request, buf
         return AER_REQ_NO_ACCESS;
       }
 
-      if(buffer_read_uint32(readBuffer, &value) == false)
+      if(unabto_query_read_uint32(readBuffer, &value) == false)
       {
         return AER_REQ_TOO_SMALL;
       }

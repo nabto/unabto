@@ -42,11 +42,11 @@ bool test_nabto_crypto_create_key_material() {
     
     uint8_t keyData[96];
     
-    buffer_t nonces[1];
-    buffer_t seeds[1];
+    unabto_buffer nonces[1];
+    unabto_buffer seeds[1];
 
-    buffer_init(nonces, nonce, 64);
-    buffer_init(seeds, seed, 64);
+    unabto_buffer_init(nonces, nonce, 64);
+    unabto_buffer_init(seeds, seed, 64);
 
     nabto_crypto_create_key_material(nonces, 1, seeds, 1, keyData, 96);
 

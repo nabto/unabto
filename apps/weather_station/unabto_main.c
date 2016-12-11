@@ -12,7 +12,6 @@
 #endif
 #include "unabto/unabto_common_main.h"
 #include "unabto/unabto_logging.h"
-#include "unabto/util/unabto_buffer.h"
 #include "unabto/unabto_environment.h"
 #include "modules/cli/unabto_args.h"
 #include "unabto_version.h"

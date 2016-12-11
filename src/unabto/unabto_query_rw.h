@@ -91,6 +91,10 @@ bool unabto_query_read_int8(unabto_query_request* queryRequest, int8_t *resultVa
  */
 bool unabto_query_read_uint8_list(unabto_query_request* queryRequest, uint8_t **list, uint16_t *listLength);
 
+/**
+ * read uint8 list into unabto_buffer without copying the data
+ */
+bool unabto_query_read_uint8_list_to_buffer_nc(unabto_query_request* queryRequest, unabto_buffer* buffer);
 
 /**
  * read the number of list elements
@@ -100,6 +104,15 @@ bool unabto_query_read_uint8_list(unabto_query_request* queryRequest, uint8_t **
  */
 bool unabto_query_read_list_length(unabto_query_request* queryRequest, uint16_t *elementCount);
 
+/**
+ * get the size of the request
+ */
+uint16_t unabto_query_request_size(unabto_query_request* queryRequest);
+
+/**
+ * reset the request query read state to the start again
+ */
+void unabto_query_request_reset(unabto_query_request* queryRequest);
 
 /***************************************************/
 /* Prototypes for query response parameter writing */
@@ -187,21 +200,21 @@ bool unabto_query_write_list_end(unabto_query_response* queryResponse, unabto_li
 
 
 
-/********************************************************************************
- ******** The following functions are primarily for internal usage - TBM ********
- ********************************************************************************/
+/**
+ * Initialize a query request
+ */
+void unabto_query_request_init(unabto_query_request* queryRequest, unabto_buffer* buffer);
 
-#define unabto_query_read_init(queryRequest, buffer) unabto_abuffer_init(queryRequest, buffer)
-
-
-#define unabto_query_write_init(queryResponse, buffer) unabto_abuffer_init(queryResponse, buffer)
-
-/*
-bool unabto_query_read_init(unabto_query_request* queryRequest, uint8_t *data, uint16_t dataSize);
+/**
+ * Initialize a query response
+ */
+void unabto_query_response_init(unabto_query_response* queryResponse, unabto_buffer* buffer);
 
 
-bool unabto_query_write_init(unabto_query_response* queryResponse, uint8_t *data, uint16_t dataSize);
-*/
+/**
+ * Ask how many bytes have been used in the response
+ */
+uint16_t unabto_query_response_used(unabto_query_response* queryResponse);
 
 /* hackers entry */
 #define unabto_query_get_read_head(queryResponse) unabto_abuffer_get_head(queryResponse)

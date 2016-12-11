@@ -19,8 +19,8 @@ static uint8_t block_pad[SHA256_BLOCK_LENGTH];
 
 //void print_sha256_ctx(sha256_ctx* ctx);
 
-void unabto_hmac_sha256_buffers(const buffer_t keys[], uint8_t keys_size,
-                                const buffer_t messages[], uint8_t messages_size,
+void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keys_size,
+                                const unabto_buffer messages[], uint8_t messages_size,
                                 uint8_t *mac, uint16_t mac_size)
 {
     uint16_t fill = 0;

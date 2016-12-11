@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-application_event_result application_event(application_request* request, buffer_read_t* read_buffer, buffer_write_t* write_buffer) {
+application_event_result application_event(application_request* request, unabto_query_request* read_buffer, unabto_query_response* write_buffer) {
     return AER_REQ_INV_QUERY_ID;
 }
 void nabto_yield(int msec)

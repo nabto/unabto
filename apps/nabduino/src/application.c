@@ -20,7 +20,7 @@ enum
   QUERY_GET_SYSTEM_INFORMATION = 1000
 };
 
-application_event_result application_event(application_request* request, buffer_read_t* readBuffer, buffer_write_t* writeBuffer)
+application_event_result application_event(application_request* request, unabto_query_request* readBuffer, unabto_query_response* writeBuffer)
 {
   NABTO_LOG_TRACE(("app req. local=%i legacy=%i", (int) request->isLocal, (int) request->isLegacy));
 
@@ -36,7 +36,7 @@ application_event_result application_event(application_request* request, buffer_
       //    </response>
       //  </query>
 
-      if(!buffer_write_uint8(writeBuffer, buttonRead()))
+      if(!unabto_query_write_uint8(writeBuffer, buttonRead()))
       {
         return AER_REQ_RSP_TOO_LARGE;
       }
@@ -58,7 +58,7 @@ application_event_result application_event(application_request* request, buffer_
       uint8_t led_ids;
       uint8_t led_status;
 
-      if(!buffer_read_uint8(readBuffer, &led_ids)) // not actually used as the Nabduino only has one LED
+      if(!unabto_query_read_uint8(readBuffer, &led_ids)) // not actually used as the Nabduino only has one LED
       {
         return AER_REQ_TOO_SMALL;
       }
@@ -68,7 +68,7 @@ application_event_result application_event(application_request* request, buffer_
       ledWrite(led_status);
 
       // status
-      if(!buffer_write_uint8(writeBuffer, led_status))
+      if(!unabto_query_write_uint8(writeBuffer, led_status))
       {
         return AER_REQ_RSP_TOO_LARGE;
       }
@@ -102,7 +102,7 @@ application_event_result application_event(application_request* request, buffer_
       uint8_t io_index;
       uint8_t io_out;
 
-      if(!buffer_read_uint8(readBuffer, &io_index) || !buffer_read_uint8(readBuffer, &io_out))
+      if(!uanbto_query_read_uint8(readBuffer, &io_index) || !unabto_query_read_uint8(readBuffer, &io_out))
       {
         return AER_REQ_TOO_SMALL;
       }
@@ -140,7 +140,7 @@ application_event_result application_event(application_request* request, buffer_
       }
 
       // status
-      if(!buffer_write_uint8(writeBuffer, io_out))
+      if(!unabto_query_write_uint8(writeBuffer, io_out))
       {
         return AER_REQ_RSP_TOO_LARGE;
       }
@@ -158,7 +158,7 @@ application_event_result application_event(application_request* request, buffer_
       //    </response>
       //  </query>
 
-      if(!buffer_write_uint32(writeBuffer, (uint32_t) temperatureRead()))
+      if(!unabto_query_write_uint32(writeBuffer, (uint32_t) temperatureRead()))
       {
         return AER_REQ_RSP_TOO_LARGE;
       }
@@ -181,7 +181,7 @@ application_event_result application_event(application_request* request, buffer_
       uint32_t analog_ch;
 
       // read analog channel number
-      if(!buffer_read_uint8(readBuffer, &ch_index))
+      if(!unabto_query_read_uint8(readBuffer, &ch_index))
       {
         return AER_REQ_TOO_SMALL;
       }
@@ -198,7 +198,7 @@ application_event_result application_event(application_request* request, buffer_
       analog_ch /= 256;
 
       // write analog channel value
-      if(!buffer_write_uint32(writeBuffer, analog_ch))
+      if(!unabto_query_write_uint32(writeBuffer, analog_ch))
       {
         return AER_REQ_RSP_TOO_LARGE;
       }
@@ -222,7 +222,7 @@ application_event_result application_event(application_request* request, buffer_
       uint8_t pwm_val;
       uint8_t pwm_status;
 
-      if(!buffer_read_uint8(readBuffer, &pwm_pin) || !buffer_read_uint8(readBuffer, &pwm_val))
+      if(!unabto_query_read_uint8(readBuffer, &pwm_pin) || !unabto_query_read_uint8(readBuffer, &pwm_val))
       {
         return AER_REQ_TOO_SMALL;
       }
@@ -231,7 +231,7 @@ application_event_result application_event(application_request* request, buffer_
       analogWrite(pwm_pin, pwm_val);
       pwm_status = true; // always pretend it succeeded (the Arduino API does not return a value from the analogWrite() function).
 
-      if(!buffer_write_uint8(writeBuffer, pwm_status))
+      if(!unabto_query_write_uint8(writeBuffer, pwm_status))
       {
         return AER_REQ_RSP_TOO_LARGE;
       }
@@ -254,7 +254,7 @@ application_event_result application_event(application_request* request, buffer_
       uint32_t analog_ch;
 
       // read analog channel number
-      if(!buffer_read_uint8(readBuffer, &ch_index))
+      if(!unabto_query_read_uint8(readBuffer, &ch_index))
       {
         return AER_REQ_TOO_SMALL;
       }
@@ -262,7 +262,7 @@ application_event_result application_event(application_request* request, buffer_
       analog_ch = analogRead(ch_index);
 
       // write analog channel value
-      if(!buffer_write_uint32(writeBuffer, analog_ch))
+      if(!unabto_query_write_uint32(writeBuffer, analog_ch))
       {
         return AER_REQ_RSP_TOO_LARGE;
       }
@@ -301,7 +301,7 @@ application_event_result application_event(application_request* request, buffer_
         value /= 256;
 
         // write analog channel value
-        if(!buffer_write_uint16(writeBuffer, (uint16_t) value))
+        if(!unabto_query_write_uint16(writeBuffer, (uint16_t) value))
         {
           return AER_REQ_RSP_TOO_LARGE;
         }
@@ -320,20 +320,20 @@ application_event_result application_event(application_request* request, buffer_
       //    </response>
       //  </query>
 
-      uint8_t* lengthOffset = buffer_write_head(writeBuffer);
+      uint8_t* lengthOffset = unabto_query_write_head(writeBuffer);
 
-      if(!buffer_write_uint16(writeBuffer, 0))
+      if(!unabto_query_write_uint16(writeBuffer, 0))
       {
         return AER_REQ_RSP_TOO_LARGE; // write dummy length
       }
 
       // write version information
-      if(!buffer_write_uint16(writeBuffer, INFORMATION_FIRMWARE_VERSION) || !buffer_write_uint32(writeBuffer, RELEASE_MAJOR) || !buffer_write_uint32(writeBuffer, RELEASE_MINOR))
+      if(!unabto_query_write_uint16(writeBuffer, INFORMATION_FIRMWARE_VERSION) || !unabto_query_write_uint32(writeBuffer, RELEASE_MAJOR) || !unabto_query_write_uint32(writeBuffer, RELEASE_MINOR))
       {
         return AER_REQ_RSP_TOO_LARGE;
       }
 
-      WRITE_U16(lengthOffset, buffer_write_head(writeBuffer) - lengthOffset - 2); // insert actual length
+      WRITE_U16(lengthOffset, unabto_query_write_head(writeBuffer) - lengthOffset - 2); // insert actual length
 
       return AER_REQ_RESPONSE_READY;
     }

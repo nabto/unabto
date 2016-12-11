@@ -18,14 +18,14 @@
  * as described in rfc4306
  * @return number of bytes written to data
  */
-static uint16_t prfhelper(const buffer_t keys[], uint8_t keys_size,
-                 const buffer_t seeds[], uint8_t seeds_size,
+static uint16_t prfhelper(const unabto_buffer keys[], uint8_t keys_size,
+                 const unabto_buffer seeds[], uint8_t seeds_size,
                  const uint8_t* lastprf, uint16_t lastprflen,
                  uint8_t octet,
                  uint8_t* data, uint16_t datalen);
 
-bool prfplus_sha256(const buffer_t keys[],  uint8_t keys_size,
-                    const buffer_t seeds[], uint8_t seeds_size,
+bool prfplus_sha256(const unabto_buffer keys[],  uint8_t keys_size,
+                    const unabto_buffer seeds[], uint8_t seeds_size,
                     uint8_t* data, uint16_t dataLength) {
     uint8_t counter = 1;
     uint16_t  written;
@@ -63,20 +63,20 @@ bool prfplus_sha256(const buffer_t keys[],  uint8_t keys_size,
     return true;    
 }
 
-uint16_t prfhelper(const buffer_t keys[], uint8_t keys_size,
-                 const buffer_t seeds[], uint8_t seeds_size,
+uint16_t prfhelper(const unabto_buffer keys[], uint8_t keys_size,
+                 const unabto_buffer seeds[], uint8_t seeds_size,
                  const uint8_t* prfoutput, uint16_t prfoutputlen,
                  uint8_t octet,
                  uint8_t* data, uint16_t datalen) {
-    buffer_t seedMark[4];
-    buffer_t octetBuffer;
-    buffer_t* ptr = seedMark;
+    unabto_buffer seedMark[4];
+    unabto_buffer octetBuffer;
+    unabto_buffer* ptr = seedMark;
     uint8_t  i;
     uint16_t  realDataLen;
 
     UNABTO_ASSERT(seeds_size <= 2);
 
-    buffer_init(ptr, (uint8_t*)prfoutput, prfoutputlen);
+    unabto_buffer_init(ptr, (uint8_t*)prfoutput, prfoutputlen);
     ptr++;
 
     for (i = 0; i < seeds_size; i++) {
@@ -84,7 +84,7 @@ uint16_t prfhelper(const buffer_t keys[], uint8_t keys_size,
         ptr++;
     }
     
-    buffer_init(&octetBuffer, &octet, 1);
+    unabto_buffer_init(&octetBuffer, &octet, 1);
     
     *ptr = octetBuffer;
     ptr++;
