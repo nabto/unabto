@@ -82,7 +82,15 @@ void unabto_hmac_sha256_buffers(const buffer_t keys[], uint8_t keys_size,
     }
 
     uint8_t hash[EVP_MAX_MD_SIZE];
-    HMAC_CTX* ctx = HMAC_CTX_new();
+
+    HMAC_CTX* ctx;
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    HMAC_CTX ctxData;
+    ctx = &ctxData;
+    HMAC_CTX_init(ctx);
+#else
+    ctx = HMAC_CTX_new();
+#endif
     if (ctx == NULL) {
         NABTO_LOG_ERROR(("cannot allocate hmac ctx"));
     }
@@ -103,5 +111,9 @@ void unabto_hmac_sha256_buffers(const buffer_t keys[], uint8_t keys_size,
     }
 
     memcpy(mac, hash, MIN(mac_size, hash_size));
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    HMAC_CTX_cleanup(ctx);
+#else
     HMAC_CTX_free(ctx);
+#endif
 }
