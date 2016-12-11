@@ -6,7 +6,7 @@ bool unabto_buffer_test(void) {
 
     char * raw_test_string = "asjdhc#21?(!?(92814skzjbcasa";
     uint8_t data[7 + 2 + strlen(raw_test_string)];
-    buffer_t buf, raw_string_buf;
+    unabto_buffer buf, raw_string_buf;
     buffer_write_t w_buf;
     buffer_read_t r_buf;
 
@@ -29,7 +29,7 @@ bool unabto_buffer_test(void) {
         return false;
     }
     
-    buffer_read_init(&r_buf, &buf, buffer_write_used(w_buf));
+    buffer_read_init(&r_buf, &buf);
     
     memset(raw_string_data, 0, sizeof(raw_string_data) + 1);
     buffer_init(&raw_string_buf, raw_string_data, sizeof(raw_string_data));

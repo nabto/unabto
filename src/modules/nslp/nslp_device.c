@@ -80,8 +80,8 @@ void handle_command(uint8_t* packet, uint16_t packetLength)
           uint8_t* p = packet;
           uint32_t flags;
           uint16_t readBufferLength;
-          buffer_t readBufferStore;
-          buffer_read_t readBuffer;
+          unabto_buffer readBufferStore;
+          unabto_qury_request readBuffer;
           nslp_query_status status;
 
           memset(query, 0, sizeof(nslp_query));
@@ -107,7 +107,7 @@ void handle_command(uint8_t* packet, uint16_t packetLength)
 
           readBufferLength = packetLength - (p - packet);
           buffer_init(&readBufferStore, p, readBufferLength);
-          buffer_read_init(&readBuffer, &readBufferStore, readBufferLength);
+          unabto_query_request_init(&readBuffer, &readBufferStore);
 
           query->state = NSLP_QUERY_STATE_ACTIVE;
 

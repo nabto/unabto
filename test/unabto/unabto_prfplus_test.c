@@ -55,10 +55,10 @@ static uint8_t res[96];
 
 bool unabto_prfplus_test() {
     bool ret;
-    buffer_t keys[1];
-    buffer_t seeds[1];
-    buffer_init(keys, (uint8_t*)key, 32);
-    buffer_init(seeds, (uint8_t*)seed, 64);
+    unabto_buffer keys[1];
+    unabto_buffer seeds[1];
+    unabto_buffer_init(keys, (uint8_t*)key, 32);
+    unabto_buffer_init(seeds, (uint8_t*)seed, 64);
     
     prfplus_sha256(keys, 1, seeds, 1, res, 96);
     ret = (

@@ -3,7 +3,6 @@
  */
 #include <unabto/unabto_aes_cbc.h>
 #include <unabto/unabto_hmac_sha256.h>
-#include <unabto/util/unabto_buffer.h>
 #include <unabto/unabto_util.h>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
@@ -54,8 +53,8 @@ bool aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t input_len)
     return true;
 }
 
-void unabto_hmac_sha256_buffers(const buffer_t keys[], uint8_t keys_size,
-                                const buffer_t messages[], uint8_t messages_size,
+void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keys_size,
+                                const unabto_buffer messages[], uint8_t messages_size,
                                 uint8_t *mac, uint16_t mac_size) {
     uint16_t key_size = 0;
     uint8_t i;

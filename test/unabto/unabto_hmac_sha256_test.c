@@ -137,8 +137,8 @@ bool hmac_sha256_test(void)
         unabto_buffer ks[1];
         unabto_buffer ms[1];
 
-        buffer_init(ks, (uint8_t*)keys[i], keys_len[i]);
-        buffer_init(ms, (uint8_t*)messages[i], msg_len);
+        unabto_buffer_init(ks, (uint8_t*)keys[i], keys_len[i]);
+        unabto_buffer_init(ms, (uint8_t*)messages[i], msg_len);
 
         unabto_hmac_sha256_buffers(ks,1, 
                                    ms, 1,

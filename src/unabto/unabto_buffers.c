@@ -6,8 +6,8 @@
  * unabto_buffer & unabto_abuffer
  */
 
+#include "unabto_buffers.h"
 #include <string.h>
-#include "unabto/util/unabto_buffer.h"
 
 /********************** unabto_buffer ************************/  
 
