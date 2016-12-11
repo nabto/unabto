@@ -42,16 +42,20 @@ void make_ack_window(struct nabto_win_info* window, uint32_t ack, uint32_t seq) 
     window->seq = seq;
 }
 
+x_buffer x_buffers2[NABTO_STREAM_SEND_WINDOW_SIZE];
+r_buffer r_buffers2[NABTO_STREAM_RECEIVE_WINDOW_SIZE];
+
 void resetStream(struct nabto_stream_s* stream)
 {
     memset(stream, 0, sizeof(struct nabto_stream_s));
-    x_buffer x_buffers[NABTO_STREAM_SEND_WINDOW_SIZE];
-    r_buffer r_buffers[NABTO_STREAM_RECEIVE_WINDOW_SIZE];
+    memset(x_buffers2, 0, sizeof(x_buffers2));
+    memset(r_buffers2, 0, sizeof(r_buffers2));
     stream_initial_config(stream);
     stream_init_static_config(stream);
     stream->u.tcb.cfg.xmitWinSize = NABTO_STREAM_SEND_WINDOW_SIZE;
-    stream->u.tcb.xmit = x_buffers;
-    stream->u.tcb.recv = r_buffers;
+    stream->u.tcb.xmitFirst = 0;
+    stream->u.tcb.xmit = x_buffers2;
+    stream->u.tcb.recv = r_buffers2;
 }
 
 bool test_state_machine(void) {
