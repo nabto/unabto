@@ -1,8 +1,8 @@
 #include <modules/fingerprint_acl/fp_acl_memory.h>
 
-
 bool fp_acl_mem_test() {
-    fp_mem_init();
+    struct fp_acl_db db;
+    fp_mem_init(&db);
 
     struct fp_acl_user user;
     memset(&user, 0, sizeof(struct fp_acl_user));
