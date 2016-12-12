@@ -124,8 +124,9 @@ application_event_result fp_acl_ae_users_get(application_request* request,
     if (count == 0) {
         count = 255;
     }
-    
-    size_t aclResponseSize = 66 + 18 + 4 + 4;
+
+    // rough max extimate of the size of an encoded user.
+    size_t aclResponseSize = 2 + FP_ACL_USERNAME_MAX_LENGTH + 2 + FP_ACL_FP_LENGTH + 4 + 4;
     
     void* it = aclDb.first();
 
