@@ -3,6 +3,7 @@ language: c
 env:
   - CFLAGS="-std=gnu89"
   - CFLAGS="-std=gnu99"
+  - CFLAGS="-g"
 
 compiler:
   - clang
