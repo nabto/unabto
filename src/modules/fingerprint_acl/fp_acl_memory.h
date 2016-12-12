@@ -9,7 +9,7 @@
  * In memory fingerprint acl database
  */
 
-void fp_mem_init();
+void fp_mem_init(struct fp_acl_db* db);
 
 // iterator to iterate through all the users
 
