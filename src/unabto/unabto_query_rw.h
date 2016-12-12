@@ -194,7 +194,6 @@ typedef void *unabto_list_ctx; /* ... */
  */
 bool unabto_query_write_list_start(unabto_query_response* queryResponse, unabto_list_ctx *listCtx);
 
-
 /**
  * Finalizes a list 
  * @param queryResponse     the query response buffer
@@ -204,7 +203,6 @@ bool unabto_query_write_list_start(unabto_query_response* queryResponse, unabto_
  */
 bool unabto_query_write_list_end(unabto_query_response* queryResponse, unabto_list_ctx *listCtx, uint16_t elementCount);
 
-<<<<<<< HEAD
 /********************************************************************************
  ******** The following functions are primarily for internal usage - TBM ********
  ********************************************************************************/

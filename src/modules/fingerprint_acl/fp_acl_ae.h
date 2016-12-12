@@ -22,45 +22,45 @@ bool fp_acl_is_pair_allowed(application_request* request);
 // request getUsers.json?count=nn&start=nn
 // response list of users, next
 application_event_result fp_acl_ae_users_get(application_request* request,
-                                             buffer_read_t* read_buffer,
-                                             buffer_write_t* write_buffer);
+                                             unabto_query_request* read_buffer,
+                                             unabto_query_response* write_buffer);
 
 
 // request getUser.json?fingerprint=<hex>
 // response status, userName, fingerprint, permissions
 application_event_result fp_acl_ae_user_get(application_request* request,
-                                            buffer_read_t* read_buffer,
-                                            buffer_write_t* write_buffer);
+                                            unabto_query_request* read_buffer,
+                                            unabto_query_response* write_buffer);
 
 // request getMe.json
 // response status, userName, fingerprint, permissions
 application_event_result fp_acl_ae_user_me(application_request* request,
-                                           buffer_read_t* read_buffer,
-                                           buffer_write_t* write_buffer);
+                                           unabto_query_request* read_buffer,
+                                           unabto_query_response* write_buffer);
 
 // request removeUser.json?fingerprint=<hex>
 // response status
 application_event_result fp_acl_ae_user_remove(application_request* request,
-                                               buffer_read_t* read_buffer,
-                                               buffer_write_t* write_buffer);
+                                               unabto_query_request* read_buffer,
+                                               unabto_query_response* write_buffer);
 
 // request pairWithDevice.json?userName=<string>
 // response status, userName, fingerprint, permissions
 application_event_result fp_acl_ae_pair_with_device(application_request* request,
-                                                    buffer_read_t* read_buffer,
-                                                    buffer_write_t* write_buffer);
+                                                    unabto_query_request* read_buffer,
+                                                    unabto_query_response* write_buffer);
 
 application_event_result fp_acl_ae_user_set_name(application_request* request,
-                                                 buffer_read_t* read_buffer,
-                                                 buffer_write_t* write_buffer);
+                                                 unabto_query_request* read_buffer,
+                                                 unabto_query_response* write_buffer);
 
 application_event_result fp_acl_ae_user_add_permissions(application_request* request,
-                                                        buffer_read_t* read_buffer,
-                                                        buffer_write_t* write_buffer);
+                                                        unabto_query_request* read_buffer,
+                                                        unabto_query_response* write_buffer);
 
 application_event_result fp_acl_ae_user_remove_permissions(application_request* request,
-                                                           buffer_read_t* read_buffer,
-                                                           buffer_write_t* write_buffer);
+                                                           unabto_query_request* read_buffer,
+                                                           unabto_query_response* write_buffer);
 
 
 #endif

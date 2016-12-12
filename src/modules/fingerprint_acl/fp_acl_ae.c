@@ -10,7 +10,7 @@ void fp_acl_ae_init(struct fp_acl_db* db)
     aclDb = *db;
 }
 
-bool read_fingerprint(buffer_read_t* read_buffer, fingerprint fp)
+bool read_fingerprint(unabto_query_request* read_buffer, fingerprint fp)
 {
     uint8_t* list;
     uint16_t length;
@@ -26,7 +26,7 @@ bool read_fingerprint(buffer_read_t* read_buffer, fingerprint fp)
 }
 
 // copy a string to out ensure it's null terminated.
-bool read_string_null_terminated(buffer_read_t* read_buffer, char* out, size_t outlen)
+bool read_string_null_terminated(unabto_query_request* read_buffer, char* out, size_t outlen)
 {
     uint8_t* list;
     uint16_t length;
@@ -40,12 +40,12 @@ bool read_string_null_terminated(buffer_read_t* read_buffer, char* out, size_t o
     return true;
 }
 
-bool write_fingerprint(buffer_write_t* write_buffer, fingerprint fp)
+bool write_fingerprint(unabto_query_response* write_buffer, fingerprint fp)
 {
     return unabto_query_write_uint8_list(write_buffer, fp, sizeof(fingerprint));
 }
 
-bool write_string(buffer_write_t* write_buffer, const char* string)
+bool write_string(unabto_query_response* write_buffer, const char* string)
 {
     return unabto_query_write_uint8_list(write_buffer, (uint8_t*)string, strlen(string));
 }
@@ -61,7 +61,7 @@ bool get_user(application_request* request, struct fp_acl_user* user)
     return false;
 }
 
-application_event_result write_user(buffer_write_t* write_buffer, uint8_t status, struct fp_acl_user* user)
+application_event_result write_user(unabto_query_response* write_buffer, uint8_t status, struct fp_acl_user* user)
 {
     if (unabto_query_write_uint8(write_buffer, status) &&
         write_string(write_buffer, user->name) &&
@@ -74,7 +74,7 @@ application_event_result write_user(buffer_write_t* write_buffer, uint8_t status
     } 
 }
 
-application_event_result write_empty_user(buffer_write_t* write_buffer, uint8_t status)
+application_event_result write_empty_user(unabto_query_response* write_buffer, uint8_t status)
 {
     if (unabto_query_write_uint8(write_buffer, status) &&
         write_string(write_buffer, "") &&
@@ -92,8 +92,8 @@ application_event_result write_empty_user(buffer_write_t* write_buffer, uint8_t 
 // if start is 0 start from the beginning
 // if more users exists than returned set next to != 0.
 application_event_result fp_acl_ae_users_get(application_request* request,
-                                             buffer_read_t* read_buffer,
-                                             buffer_write_t* write_buffer)
+                                             unabto_query_request* read_buffer,
+                                             unabto_query_response* write_buffer)
 {
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_NONE)) {
         return AER_REQ_NO_ACCESS;
@@ -102,8 +102,8 @@ application_event_result fp_acl_ae_users_get(application_request* request,
     uint8_t count;
     uint32_t start;
 
-    if (!unabto_query_read_uint8(read_buffer, &count) &&
-        unabto_query_read_uint32(read_buffer, &start))
+    if (! (unabto_query_read_uint8(read_buffer, &count) &&
+           unabto_query_read_uint32(read_buffer, &start)))
     {
         return AER_REQ_TOO_SMALL;
     }
@@ -132,7 +132,7 @@ application_event_result fp_acl_ae_users_get(application_request* request,
         
         while (it != NULL &&
                elements < count &&
-               unabto_query_write_free_bytes(write_buffer) > aclResponseSize)
+               (unabto_query_write_free_bytes(write_buffer) > aclResponseSize))
         {
             struct fp_acl_user user;
             if (aclDb.load(it, &user) != FP_ACL_DB_OK) {
@@ -170,8 +170,8 @@ application_event_result fp_acl_ae_users_get(application_request* request,
 
 // getUser.json?fingerprint=<hex>
 application_event_result fp_acl_ae_user_get(application_request* request,
-                                            buffer_read_t* read_buffer,
-                                            buffer_write_t* write_buffer)
+                                            unabto_query_request* read_buffer,
+                                            unabto_query_response* write_buffer)
 {
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_NONE)) {
         return AER_REQ_NO_ACCESS;
@@ -184,7 +184,7 @@ application_event_result fp_acl_ae_user_get(application_request* request,
 
     void* it = aclDb.find(fp);
     struct fp_acl_user user;
-    if (it != 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
+    if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return write_empty_user(write_buffer, FP_ACL_STATUS_NO_SUCH_USER);
     }
 
@@ -192,8 +192,8 @@ application_event_result fp_acl_ae_user_get(application_request* request,
 }
 
 application_event_result fp_acl_ae_user_me(application_request* request,
-                                           buffer_read_t* read_buffer,
-                                           buffer_write_t* write_buffer)
+                                           unabto_query_request* read_buffer,
+                                           unabto_query_response* write_buffer)
 {
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_NONE)) {
         return AER_REQ_NO_ACCESS;
@@ -209,8 +209,8 @@ application_event_result fp_acl_ae_user_me(application_request* request,
 }
 
 application_event_result fp_acl_ae_user_remove(application_request* request,
-                                               buffer_read_t* read_buffer,
-                                               buffer_write_t* write_buffer)
+                                               unabto_query_request* read_buffer,
+                                               unabto_query_response* write_buffer)
 {
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ACCESS_CONTROL)) {
         return AER_REQ_NO_ACCESS;
@@ -239,8 +239,8 @@ application_event_result fp_acl_ae_user_remove(application_request* request,
 
 
 application_event_result fp_acl_ae_user_set_name(application_request* request,
-                                                 buffer_read_t* read_buffer,
-                                                 buffer_write_t* write_buffer)
+                                                 unabto_query_request* read_buffer,
+                                                 unabto_query_response* write_buffer)
 {
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ACCESS_CONTROL)) {
         return AER_REQ_NO_ACCESS;
@@ -275,8 +275,8 @@ application_event_result fp_acl_ae_user_set_name(application_request* request,
 }
 
 application_event_result fp_acl_ae_user_alter_permissions(application_request* request,
-                                                          buffer_read_t* read_buffer,
-                                                          buffer_write_t* write_buffer,
+                                                          unabto_query_request* read_buffer,
+                                                          unabto_query_response* write_buffer,
                                                           void (*alterPermissionsFunction)(struct fp_acl_user* user, uint32_t permissions))
 {
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ACCESS_CONTROL)) {
@@ -318,15 +318,15 @@ application_event_result fp_acl_ae_user_alter_permissions(application_request* r
 
 
 application_event_result fp_acl_ae_user_add_permissions(application_request* request,
-                                                        buffer_read_t* read_buffer,
-                                                        buffer_write_t* write_buffer)
+                                                        unabto_query_request* read_buffer,
+                                                        unabto_query_response* write_buffer)
 {
     return fp_acl_ae_user_alter_permissions(request, read_buffer, write_buffer, &fp_acl_user_add_permissions);
 }
 
 application_event_result fp_acl_ae_user_remove_permissions(application_request* request,
-                                                           buffer_read_t* read_buffer,
-                                                           buffer_write_t* write_buffer)
+                                                           unabto_query_request* read_buffer,
+                                                           unabto_query_response* write_buffer)
 {
     return fp_acl_ae_user_alter_permissions(request, read_buffer, write_buffer, &fp_acl_user_remove_permissions);
 }
@@ -335,8 +335,8 @@ application_event_result fp_acl_ae_user_remove_permissions(application_request* 
 // pairing functions
 //pairWithDevice.json?userName=<string>
 application_event_result fp_acl_ae_pair_with_device(application_request* request,
-                                                    buffer_read_t* read_buffer,
-                                                    buffer_write_t* write_buffer)
+                                                    unabto_query_request* read_buffer,
+                                                    unabto_query_response* write_buffer)
 {
     
     if (!fp_acl_is_pair_allowed(request)) {
