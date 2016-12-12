@@ -62,6 +62,7 @@ bool fp_acl_check_user_permissions(struct fp_acl_user* user, bool isLocal, uint3
 
 void fp_acl_user_add_permissions(struct fp_acl_user* user, uint32_t permissions);
 void fp_acl_user_remove_permissions(struct fp_acl_user* user, uint32_t permissions);
+void fp_acl_user_set_permissions(struct fp_acl_user* user, uint32_t permissions);
 
 
 /* fp_acl_status fp_acl_get_user(fingerprint* fp, struct fp_acl_user* user); */

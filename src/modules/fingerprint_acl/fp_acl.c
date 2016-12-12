@@ -32,3 +32,8 @@ void fp_acl_user_remove_permissions(struct fp_acl_user* user, uint32_t permissio
     // subtract bitmask from bitmask
     user->permissions &= ~permissions;
 }
+
+void fp_acl_user_set_permissions(struct fp_acl_user* user, uint32_t permissions)
+{
+    user->permissions = permissions;
+}

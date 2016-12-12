@@ -482,6 +482,126 @@ bool fp_acl_test_remove_permissions()
     
 }
 
+bool fp_acl_test_system_get_acl_settings()
+{
+    init_users();
+    application_request req;
+    nabto_connect connection;
+    init_request(&req, &connection);
+
+    uint8_t buffer[256];
+    memset(buffer,0, 256);
+    unabto_buffer inout;
+    unabto_buffer_init(&inout, buffer, 256);
+
+    unabto_query_request queryRequest;
+    unabto_query_response queryResponse;
+
+    unabto_query_request_init(&queryRequest, &inout);
+    unabto_query_response_init(&queryResponse, &inout);
+
+    application_event_result res = fp_acl_ae_system_get_acl_settings(&req,
+                                                                     &queryRequest,
+                                                                     &queryResponse);
+    if (res != AER_REQ_RESPONSE_READY) {
+        NABTO_LOG_ERROR(("expected response to be ready it was %i", res));
+        return false;
+    }
+
+    {
+        // test the output
+        unabto_query_request testOutput;
+        unabto_query_request_init(&testOutput, &inout);
+        uint8_t status;
+        uint32_t systemPermissions;
+        uint32_t defaultPermissions;
+        unabto_query_read_uint8(&testOutput, &status);
+        if (status != 0) {
+            NABTO_LOG_ERROR(("expected to return 0 it was, %i", status));
+            return false;
+        }
+
+        
+        
+        unabto_query_read_uint32(&testOutput, &systemPermissions);
+        unabto_query_read_uint32(&testOutput, &defaultPermissions);
+
+        if (systemPermissions != 0xfffffffful) {
+            return false;
+        }
+
+        if (defaultPermissions != 0xfffffffful) {
+            return false;
+        }
+    }
+
+    return true;
+    
+}
+
+bool fp_acl_test_system_set_acl_settings()
+{
+    init_users();
+    application_request req;
+    nabto_connect connection;
+    init_request(&req, &connection);
+
+    uint8_t buffer[256];
+    memset(buffer,0, 256);
+    unabto_buffer inout;
+    unabto_buffer_init(&inout, buffer, 256);
+
+    {
+        unabto_query_response writer;
+        unabto_query_response_init(&writer, &inout);
+        unabto_query_write_uint32(&writer, 0x00000000ul);
+        unabto_query_write_uint32(&writer, 0x00000000ul);
+    }
+    
+    unabto_query_request queryRequest;
+    unabto_query_response queryResponse;
+
+    unabto_query_request_init(&queryRequest, &inout);
+    unabto_query_response_init(&queryResponse, &inout);
+
+    application_event_result res = fp_acl_ae_system_set_acl_settings(&req,
+                                                                     &queryRequest,
+                                                                     &queryResponse);
+    if (res != AER_REQ_RESPONSE_READY) {
+        NABTO_LOG_ERROR(("expected response to be ready it was %i", res));
+        return false;
+    }
+
+    {
+        // test the output
+        unabto_query_request testOutput;
+        unabto_query_request_init(&testOutput, &inout);
+        uint8_t status;
+        uint32_t systemPermissions;
+        uint32_t defaultPermissions;
+        unabto_query_read_uint8(&testOutput, &status);
+        if (status != 0) {
+            NABTO_LOG_ERROR(("expected to return 0 it was, %i", status));
+            return false;
+        }
+
+        
+        
+        unabto_query_read_uint32(&testOutput, &systemPermissions);
+        unabto_query_read_uint32(&testOutput, &defaultPermissions);
+
+        if (systemPermissions != 0x00000000ul) {
+            return false;
+        }
+
+        if (defaultPermissions != 0x00000000ul) {
+            return false;
+        }
+    }
+
+    return true;
+    
+}
 
 bool fp_acl_ae_test()
 {
@@ -495,6 +615,8 @@ bool fp_acl_ae_test()
         fp_acl_test_pair_me() &&
         fp_acl_test_set_name() &&
         fp_acl_test_add_permissions() &&
-        fp_acl_test_remove_permissions();
+        fp_acl_test_remove_permissions() &&
+        fp_acl_test_system_get_acl_settings() &&
+        fp_acl_test_system_set_acl_settings();
 }
 

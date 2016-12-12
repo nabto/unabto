@@ -69,4 +69,24 @@ application_event_result fp_acl_ae_user_remove_permissions(application_request* 
                                                            unabto_query_response* write_buffer);
 
 
+// request setPermissions.json?fingerprint=<hex>&permissions=<mask>
+// response status, fingerprint, username, permissions
+application_event_result fp_acl_ae_user_set_permissions(application_request* request,
+                                                           unabto_query_request* read_buffer,
+                                                           unabto_query_response* write_buffer);
+
+
+// request getAclSettings.json?
+// response status, systemPermissions, defaultUserPermissions
+application_event_result fp_acl_ae_system_get_acl_settings(application_request* request,
+                                                           unabto_query_request* read_buffer,
+                                                           unabto_query_response* write_buffer);
+
+
+// request getAclSettings.json?systemPermisions<uint32_t>&defaultUserPermissions=<uint32_t>
+// response status, systemPermissions, defaultUserPermissions
+application_event_result fp_acl_ae_system_set_acl_settings(application_request* request,
+                                                           unabto_query_request* read_buffer,
+                                                           unabto_query_response* write_buffer);
+
 #endif

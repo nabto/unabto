@@ -87,6 +87,19 @@ application_event_result write_empty_user(unabto_query_response* write_buffer, u
     }
 }
 
+application_event_result write_settings(unabto_query_response* response, struct fp_acl_settings* settings)
+{
+    if (unabto_query_write_uint8(response, FP_ACL_STATUS_OK) &&
+        unabto_query_write_uint32(response, settings->systemPermissions) &&
+        unabto_query_write_uint32(response, settings->defaultPermissions))
+    {
+        return AER_REQ_RESPONSE_READY;
+    } else {
+        return AER_REQ_TOO_LARGE;
+    }
+    
+}
+
 // getUsers.json?count=nn&start=nn
 // if count is 0 fill as many as possible into the response.
 // if start is 0 start from the beginning
@@ -331,6 +344,13 @@ application_event_result fp_acl_ae_user_remove_permissions(application_request* 
     return fp_acl_ae_user_alter_permissions(request, read_buffer, write_buffer, &fp_acl_user_remove_permissions);
 }
 
+application_event_result fp_acl_ae_user_set_permissions(application_request* request,
+                                                           unabto_query_request* read_buffer,
+                                                           unabto_query_response* write_buffer)
+{
+    return fp_acl_ae_user_alter_permissions(request, read_buffer, write_buffer, &fp_acl_user_set_permissions);
+}
+
 
 // pairing functions
 //pairWithDevice.json?userName=<string>
@@ -367,7 +387,49 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
 }
 
 
+application_event_result fp_acl_ae_system_get_acl_settings(application_request* request,
+                                                           unabto_query_request* read_buffer,
+                                                           unabto_query_response* write_buffer)
+{
+    if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ACCESS_CONTROL)) {
+        return AER_REQ_NO_ACCESS;
+    }
 
+    struct fp_acl_settings aclSettings;
+    if (aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
+        return AER_REQ_SYSTEM_ERROR;
+    }
+
+    return write_settings(write_buffer, &aclSettings);
+}
+
+
+application_event_result fp_acl_ae_system_set_acl_settings(application_request* request,
+                                                           unabto_query_request* read_buffer,
+                                                           unabto_query_response* write_buffer)
+{
+    if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ACCESS_CONTROL)) {
+        return AER_REQ_NO_ACCESS;
+    }
+
+    struct fp_acl_settings aclSettings;
+    
+    if (! (unabto_query_read_uint32(read_buffer, &aclSettings.systemPermissions) &&
+           unabto_query_read_uint32(read_buffer, &aclSettings.defaultPermissions)))
+    {
+        return AER_REQ_TOO_SMALL;
+    }
+
+    if (aclDb.save_settings(&aclSettings) != FP_ACL_DB_OK) {
+        return AER_REQ_SYSTEM_ERROR;
+    }
+    
+    if (aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
+        return AER_REQ_SYSTEM_ERROR;
+    }
+
+    return write_settings(write_buffer, &aclSettings);
+}
 
 
 // Helper function
