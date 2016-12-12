@@ -87,7 +87,7 @@ bool fp_acl_test_list_users()
 
 
 
-bool fp_acl_ae_user_get_test() {
+bool fp_acl_test_get_user() {
     application_request req;
     nabto_connect connection;
     init_connection(&connection);
@@ -139,11 +139,54 @@ bool fp_acl_ae_user_get_test() {
     return true;
 }
 
+bool fp_acl_test_get_me() {
+    application_request req;
+    nabto_connect connection;
+    init_connection(&connection);
+    req.connection = &connection;
+
+    uint8_t buffer[256];
+    memset(buffer,0, 256);
+    unabto_buffer inout;
+    unabto_buffer_init(&inout, buffer, 256);
+
+    unabto_query_request queryRequest;
+    unabto_query_response queryResponse;
+
+    unabto_query_request_init(&queryRequest, &inout);
+    unabto_query_response_init(&queryResponse, &inout);
+
+    application_event_result res = fp_acl_ae_user_me(&req,
+                                                      &queryRequest,
+                                                      &queryResponse);
+    if (res != AER_REQ_RESPONSE_READY) {
+        NABTO_LOG_ERROR(("expected response to be ready"));
+        return false;
+    }
+
+    {
+        // test the output
+        unabto_query_request testOutput;
+        unabto_query_request_init(&testOutput, &inout);
+        uint8_t status;
+        unabto_query_read_uint8(&testOutput, &status);
+        if (status != 0) {
+            NABTO_LOG_ERROR(("expected to return 0 it was, %i", status));
+            return false;
+        }
+    }
+
+    return true;
+}
+
 
 bool fp_acl_ae_test()
 {
     init_users();
 
-    return fp_acl_ae_user_get_test() && fp_acl_test_list_users();
+    return
+        fp_acl_test_get_user() &&
+        fp_acl_test_list_users() &&
+        fp_acl_test_get_me();
 }
 

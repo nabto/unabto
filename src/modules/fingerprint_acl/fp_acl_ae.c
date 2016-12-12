@@ -201,7 +201,7 @@ application_event_result fp_acl_ae_user_me(application_request* request,
 
     void* it = aclDb.find(request->connection->fingerprint);
     struct fp_acl_user user;
-    if (it != 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
+    if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return write_empty_user(write_buffer, FP_ACL_STATUS_NO_SUCH_USER);
     }
 
@@ -224,7 +224,7 @@ application_event_result fp_acl_ae_user_remove(application_request* request,
     void* it = aclDb.find(fp);
     struct fp_acl_user user;
     uint8_t status = FP_ACL_STATUS_OK;
-    if (it != 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
+    if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         status = FP_ACL_STATUS_NO_SUCH_USER;
     } else {
         if (aclDb.remove(it) != FP_ACL_DB_OK) {
@@ -253,7 +253,7 @@ application_event_result fp_acl_ae_user_set_name(application_request* request,
 
     void* it = aclDb.find(fp);
     struct fp_acl_user user;
-    if (it != 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
+    if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return write_empty_user(write_buffer, FP_ACL_STATUS_NO_SUCH_USER);
     }
         
@@ -267,7 +267,7 @@ application_event_result fp_acl_ae_user_set_name(application_request* request,
     }
     // reload user
     it = aclDb.find(fp);
-    if (it != 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
+    if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return write_empty_user(write_buffer, FP_ACL_STATUS_NO_SUCH_USER);
     }
 
@@ -295,7 +295,7 @@ application_event_result fp_acl_ae_user_alter_permissions(application_request* r
 
     void* it = aclDb.find(fp);
     struct fp_acl_user user;
-    if (it != 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
+    if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return write_empty_user(write_buffer, FP_ACL_STATUS_NO_SUCH_USER);
     }
 
@@ -309,7 +309,7 @@ application_event_result fp_acl_ae_user_alter_permissions(application_request* r
 
     // reload user
     it = aclDb.find(fp);
-    if (it != 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
+    if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return write_empty_user(write_buffer, FP_ACL_STATUS_NO_SUCH_USER);
     }
 
@@ -379,7 +379,7 @@ bool fp_acl_is_request_allowed(application_request* request, uint32_t requiredPe
     
     struct fp_acl_user user;
     void* it = aclDb.find(request->connection->fingerprint);
-    if (aclDb.load(it, &user) != FP_ACL_DB_OK) {
+    if (it == NULL || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return false;
     }
 
