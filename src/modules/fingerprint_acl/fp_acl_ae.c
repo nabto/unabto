@@ -64,8 +64,8 @@ bool get_user(application_request* request, struct fp_acl_user* user)
 application_event_result write_user(unabto_query_response* write_buffer, uint8_t status, struct fp_acl_user* user)
 {
     if (unabto_query_write_uint8(write_buffer, status) &&
-        write_string(write_buffer, user->name) &&
         write_fingerprint(write_buffer, user->fp) &&
+        write_string(write_buffer, user->name) &&
         unabto_query_write_uint32(write_buffer, user->permissions))
     {
         return AER_REQ_RESPONSE_READY;
@@ -138,9 +138,9 @@ application_event_result fp_acl_ae_users_get(application_request* request,
             if (aclDb.load(it, &user) != FP_ACL_DB_OK) {
                 return AER_REQ_SYSTEM_ERROR;
             }
-            if (!write_string(write_buffer, user.name) &&
-                write_fingerprint(write_buffer, user.fp) &&
-                unabto_query_write_uint32(write_buffer, user.permissions))
+            if (! (write_fingerprint(write_buffer, user.fp) &&
+                   write_string(write_buffer, user.name) &&
+                   unabto_query_write_uint32(write_buffer, user.permissions)))
             {
                 return AER_REQ_TOO_SMALL;
             }

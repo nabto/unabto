@@ -27,13 +27,13 @@ application_event_result fp_acl_ae_users_get(application_request* request,
 
 
 // request getUser.json?fingerprint=<hex>
-// response status, userName, fingerprint, permissions
+// response status, fingerprint, username, permissions
 application_event_result fp_acl_ae_user_get(application_request* request,
                                             unabto_query_request* read_buffer,
                                             unabto_query_response* write_buffer);
 
 // request getMe.json
-// response status, userName, fingerprint, permissions
+// response status, fingerprint, username, permissions
 application_event_result fp_acl_ae_user_me(application_request* request,
                                            unabto_query_request* read_buffer,
                                            unabto_query_response* write_buffer);
@@ -45,19 +45,25 @@ application_event_result fp_acl_ae_user_remove(application_request* request,
                                                unabto_query_response* write_buffer);
 
 // request pairWithDevice.json?userName=<string>
-// response status, userName, fingerprint, permissions
+// response status, fingerprint, username, permissions
 application_event_result fp_acl_ae_pair_with_device(application_request* request,
                                                     unabto_query_request* read_buffer,
                                                     unabto_query_response* write_buffer);
 
+// request setUserName.json?fingerprint=<hex>
+// response status, fingerprint, username, permissions
 application_event_result fp_acl_ae_user_set_name(application_request* request,
                                                  unabto_query_request* read_buffer,
                                                  unabto_query_response* write_buffer);
 
+// request addPermissions.json?fingerprint=<hex>&permissions=<mask>
+// response status, fingerprint, username, permissions
 application_event_result fp_acl_ae_user_add_permissions(application_request* request,
                                                         unabto_query_request* read_buffer,
                                                         unabto_query_response* write_buffer);
 
+// request removePermissions.json?fingerprint=<hex>&permissions=<mask>
+// response status, fingerprint, username, permissions
 application_event_result fp_acl_ae_user_remove_permissions(application_request* request,
                                                            unabto_query_request* read_buffer,
                                                            unabto_query_response* write_buffer);
