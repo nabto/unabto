@@ -796,6 +796,7 @@ application_event_result framework_first_event(application_request       *req,
     /* Initialize application request info */
     req->isLocal = con->isLocal;
     req->isLegacy = false;
+    req->connection = con;
     if (con && hdr) {
         req->clientId = (const char *) con->clientId;
     } else {

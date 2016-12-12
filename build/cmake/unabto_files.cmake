@@ -346,6 +346,12 @@ set(unabto_module_util_src
   ${UNABTO_MODULES_SRC_DIR}/util/read_hex.c
   )
 
+# modules/fingerprint_acl
+set(unabto_module_fingerprint_acl_src
+  ${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl_memory.c
+  ${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl_ae.c
+  ${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl.c
+  )
 
 #######################
 # DEMO SOURCE SECTION #
@@ -420,6 +426,8 @@ set(unabto_server_common_src_test
   ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_crypto_test.c
   ${UNABTO_SERVER_TEST_DIR}/modules/util/unabto_base32_test.c
   ${UNABTO_SERVER_TEST_DIR}/modules/util/read_hex_test.c
+  ${UNABTO_SERVER_TEST_DIR}/modules/fingerprint_acl/fp_acl_mem_test.c
+  ${UNABTO_SERVER_TEST_DIR}/modules/fingerprint_acl/fp_acl_ae_test.c
   
   ${UNABTO_SERVER_SRC_DIR}/modules/util/unabto_base32.c
   ${UNABTO_SERVER_SRC_DIR}/modules/util/read_hex.c

@@ -176,6 +176,12 @@ bool unabto_query_write_int32(unabto_query_response *queryResponse, int32_t valu
  */
 bool unabto_query_write_uint8_list(unabto_query_response * queryResponse, uint8_t *list, uint16_t listLength);
 
+/**
+ * return the number of bytes still available for writing in the buffer
+ * @param queryResponse  the query response buffer
+ * @return the number of bytes available for writing 0 if the buffer is full
+ */
+size_t unabto_query_write_free_bytes(unabto_query_response * queryResponse);
 
 typedef void *unabto_list_ctx; /* ... */
 
@@ -188,7 +194,6 @@ typedef void *unabto_list_ctx; /* ... */
  */
 bool unabto_query_write_list_start(unabto_query_response* queryResponse, unabto_list_ctx *listCtx);
 
-
 /**
  * Finalizes a list 
  * @param queryResponse     the query response buffer
@@ -198,7 +203,14 @@ bool unabto_query_write_list_start(unabto_query_response* queryResponse, unabto_
  */
 bool unabto_query_write_list_end(unabto_query_response* queryResponse, unabto_list_ctx *listCtx, uint16_t elementCount);
 
+/********************************************************************************
+ ******** The following functions are primarily for internal usage - TBM ********
+ ********************************************************************************/
 
+#define unabto_query_read_init(queryRequest, buffer) unabto_abuffer_init(queryRequest, buffer)
+
+
+#define unabto_query_write_init(queryResponse, buffer) unabto_abuffer_init(queryResponse, buffer)
 
 /**
  * Initialize a query request
