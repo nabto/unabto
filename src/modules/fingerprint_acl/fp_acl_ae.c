@@ -350,7 +350,7 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
     }
     
     struct fp_acl_settings aclSettings;
-    if (!aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
+    if (aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
         return AER_REQ_SYSTEM_ERROR;
     }
 
@@ -393,8 +393,8 @@ bool fp_acl_is_pair_allowed(application_request* request)
     }
 
     struct fp_acl_settings aclSettings;
-    if (!aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
-        return AER_REQ_SYSTEM_ERROR;
+    if (aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
+        return false;
     }
     
     if (request->connection->isLocal) {

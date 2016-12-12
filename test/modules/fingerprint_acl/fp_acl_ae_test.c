@@ -8,6 +8,13 @@ bool init_users()
     fp_mem_init(&db);
     fp_acl_ae_init(&db);
 
+    struct fp_acl_settings settings;
+
+    settings.systemPermissions = FP_ACL_SYSTEM_PERMISSION_ALL;
+    settings.defaultPermissions = FP_ACL_PERMISSION_ALL;
+
+    db.save_settings(&settings);
+
     {
         struct fp_acl_user user;
         memset(&user, 0, sizeof(struct fp_acl_user));
@@ -32,17 +39,23 @@ bool init_users()
 
 void init_connection(nabto_connect* connection) {
     memset(connection, 0, sizeof(nabto_connect));
-    connection->isLocal = false;
+    connection->isLocal = true;
     connection->hasFingerprint = true;
     memset(connection->fingerprint, 42, FP_LENGTH);
+}
+
+void init_request(application_request* request, nabto_connect* connection)
+{
+    init_connection(connection);
+    request->connection = connection;
+    request->isLocal = connection->isLocal;
 }
 
 bool fp_acl_test_list_users()
 {
     application_request request;
     nabto_connect connection;
-    init_connection(&connection);
-    request.connection = &connection;
+    init_request(&request, &connection);
 
     uint8_t input[42];
     uint8_t output[256];
@@ -90,8 +103,7 @@ bool fp_acl_test_list_users()
 bool fp_acl_test_get_user() {
     application_request req;
     nabto_connect connection;
-    init_connection(&connection);
-    req.connection = &connection;
+    init_request(&req, &connection);
 
     uint8_t input[42];
     uint8_t output[256];
@@ -142,8 +154,7 @@ bool fp_acl_test_get_user() {
 bool fp_acl_test_get_me() {
     application_request req;
     nabto_connect connection;
-    init_connection(&connection);
-    req.connection = &connection;
+    init_request(&req, &connection);
 
     uint8_t buffer[256];
     memset(buffer,0, 256);
@@ -179,6 +190,104 @@ bool fp_acl_test_get_me() {
     return true;
 }
 
+bool fp_acl_test_user_remove() {
+    application_request req;
+    nabto_connect connection;
+    init_request(&req, &connection);
+
+    uint8_t buffer[256];
+    memset(buffer,0, 256);
+    unabto_buffer inout;
+    unabto_buffer_init(&inout, buffer, 256);
+
+    {
+        uint8_t fp[16];
+        memset(fp, 42, 16);
+        // write test data to input
+        unabto_query_response writer;
+        unabto_query_response_init(&writer, &inout);
+        unabto_query_write_uint8_list(&writer, fp, 16);
+    }
+    
+
+    unabto_query_request queryRequest;
+    unabto_query_response queryResponse;
+
+    unabto_query_request_init(&queryRequest, &inout);
+    unabto_query_response_init(&queryResponse, &inout);
+
+    application_event_result res = fp_acl_ae_user_remove(&req,
+                                                         &queryRequest,
+                                                         &queryResponse);
+    if (res != AER_REQ_RESPONSE_READY) {
+        NABTO_LOG_ERROR(("expected response to be ready"));
+        return false;
+    }
+
+    {
+        // test the output
+        unabto_query_request testOutput;
+        unabto_query_request_init(&testOutput, &inout);
+        uint8_t status;
+        unabto_query_read_uint8(&testOutput, &status);
+        if (status != 0) {
+            NABTO_LOG_ERROR(("expected to return 0 it was, %i", status));
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool fp_acl_test_pair_me() {
+
+    application_request req;
+    nabto_connect connection;
+    init_request(&req, &connection);
+    memset(connection.fingerprint, 41, 16);
+
+    uint8_t buffer[256];
+    memset(buffer,0, 256);
+    unabto_buffer inout;
+    unabto_buffer_init(&inout, buffer, 256);
+    {
+        const char* name = "newuser";
+        // write test data to input
+        unabto_query_response writer;
+        unabto_query_response_init(&writer, &inout);
+        unabto_query_write_uint8_list(&writer, (uint8_t*)name, strlen(name));
+    }
+    
+
+    unabto_query_request queryRequest;
+    unabto_query_response queryResponse;
+
+    unabto_query_request_init(&queryRequest, &inout);
+    unabto_query_response_init(&queryResponse, &inout);
+
+    application_event_result res = fp_acl_ae_pair_with_device(&req,
+                                                              &queryRequest,
+                                                              &queryResponse);
+    if (res != AER_REQ_RESPONSE_READY) {
+        NABTO_LOG_ERROR(("expected response to be ready it was %i", res));
+        return false;
+    }
+
+    {
+        // test the output
+        unabto_query_request testOutput;
+        unabto_query_request_init(&testOutput, &inout);
+        uint8_t status;
+        unabto_query_read_uint8(&testOutput, &status);
+        if (status != 0) {
+            NABTO_LOG_ERROR(("expected to return 0 it was, %i", status));
+            return false;
+        }
+    }
+
+    return true;
+    
+}
 
 bool fp_acl_ae_test()
 {
@@ -187,6 +296,8 @@ bool fp_acl_ae_test()
     return
         fp_acl_test_get_user() &&
         fp_acl_test_list_users() &&
-        fp_acl_test_get_me();
+        fp_acl_test_get_me() &&
+        fp_acl_test_user_remove() &&
+        fp_acl_test_pair_me();
 }
 
