@@ -24,8 +24,8 @@ bool init_users()
         user.permissions = FP_ACL_PERMISSION_ALL;
         db.save(&user);
     }
-
-    for (int i = 0; i < 5; i++) {
+    int i;
+    for (i = 0; i < 5; i++) {
         struct fp_acl_user user;
         memset(&user, 0, sizeof(struct fp_acl_user));
         memset(user.fp, 128+i, 16);
