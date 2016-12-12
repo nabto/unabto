@@ -53,6 +53,7 @@ void init_request(application_request* request, nabto_connect* connection)
 
 bool fp_acl_test_list_users()
 {
+    init_users();
     application_request request;
     nabto_connect connection;
     init_request(&request, &connection);
@@ -100,7 +101,9 @@ bool fp_acl_test_list_users()
 
 
 
-bool fp_acl_test_get_user() {
+bool fp_acl_test_get_user()
+{
+    init_users();
     application_request req;
     nabto_connect connection;
     init_request(&req, &connection);
@@ -151,7 +154,9 @@ bool fp_acl_test_get_user() {
     return true;
 }
 
-bool fp_acl_test_get_me() {
+bool fp_acl_test_get_me()
+{
+    init_users();
     application_request req;
     nabto_connect connection;
     init_request(&req, &connection);
@@ -190,7 +195,9 @@ bool fp_acl_test_get_me() {
     return true;
 }
 
-bool fp_acl_test_user_remove() {
+bool fp_acl_test_user_remove()
+{
+    init_users();
     application_request req;
     nabto_connect connection;
     init_request(&req, &connection);
@@ -239,8 +246,9 @@ bool fp_acl_test_user_remove() {
     return true;
 }
 
-bool fp_acl_test_pair_me() {
-
+bool fp_acl_test_pair_me()
+{
+    init_users();
     application_request req;
     nabto_connect connection;
     init_request(&req, &connection);
@@ -289,6 +297,192 @@ bool fp_acl_test_pair_me() {
     
 }
 
+bool fp_acl_test_set_name()
+{
+    init_users();
+    application_request req;
+    nabto_connect connection;
+    init_request(&req, &connection);
+
+    uint8_t buffer[256];
+    memset(buffer,0, 256);
+    unabto_buffer inout;
+    unabto_buffer_init(&inout, buffer, 256);
+
+    {
+        uint8_t fp[16];
+        memset(fp, 128+1, 16);
+        
+        const char* name = "newuser";
+        // write test data to input
+        unabto_query_response writer;
+        unabto_query_response_init(&writer, &inout);
+        unabto_query_write_uint8_list(&writer, fp, 16);
+        unabto_query_write_uint8_list(&writer, (uint8_t*)name, strlen(name));
+    }
+    
+
+    unabto_query_request queryRequest;
+    unabto_query_response queryResponse;
+
+    unabto_query_request_init(&queryRequest, &inout);
+    unabto_query_response_init(&queryResponse, &inout);
+
+    application_event_result res = fp_acl_ae_user_set_name(&req,
+                                                           &queryRequest,
+                                                           &queryResponse);
+    if (res != AER_REQ_RESPONSE_READY) {
+        NABTO_LOG_ERROR(("expected response to be ready it was %i", res));
+        return false;
+    }
+
+    {
+        // test the output
+        unabto_query_request testOutput;
+        unabto_query_request_init(&testOutput, &inout);
+        uint8_t status;
+        unabto_query_read_uint8(&testOutput, &status);
+        if (status != 0) {
+            NABTO_LOG_ERROR(("expected to return 0 it was, %i", status));
+            return false;
+        }
+    }
+
+    return true;
+    
+}
+
+bool fp_acl_test_add_permissions()
+{
+    init_users();
+    application_request req;
+    nabto_connect connection;
+    init_request(&req, &connection);
+
+    uint8_t buffer[256];
+    memset(buffer,0, 256);
+    unabto_buffer inout;
+    unabto_buffer_init(&inout, buffer, 256);
+
+    {
+        uint8_t fp[16];
+        memset(fp, 128+1, 16);
+
+        unabto_query_response writer;
+        unabto_query_response_init(&writer, &inout);
+        unabto_query_write_uint8_list(&writer, fp, 16);
+        unabto_query_write_uint32(&writer, 0xfffffffful);
+    }
+    
+
+    unabto_query_request queryRequest;
+    unabto_query_response queryResponse;
+
+    unabto_query_request_init(&queryRequest, &inout);
+    unabto_query_response_init(&queryResponse, &inout);
+
+    application_event_result res = fp_acl_ae_user_add_permissions(&req,
+                                                                  &queryRequest,
+                                                                  &queryResponse);
+    if (res != AER_REQ_RESPONSE_READY) {
+        NABTO_LOG_ERROR(("expected response to be ready it was %i", res));
+        return false;
+    }
+
+    {
+        // test the output
+        unabto_query_request testOutput;
+        unabto_query_request_init(&testOutput, &inout);
+        uint8_t status;
+        uint8_t* buffer;
+        uint16_t bufferLength;
+        unabto_query_read_uint8(&testOutput, &status);
+        if (status != 0) {
+            NABTO_LOG_ERROR(("expected to return 0 it was, %i", status));
+            return false;
+        }
+
+        unabto_query_read_uint8_list(&testOutput, &buffer, &bufferLength);
+        unabto_query_read_uint8_list(&testOutput, &buffer, &bufferLength);
+        uint32_t permissions;
+        unabto_query_read_uint32(&testOutput, &permissions);
+        if (permissions != 0xfffffffful) {
+            NABTO_LOG_ERROR(("failed to set permissions"));
+            return false;
+        }
+        
+    }
+
+    return true;
+    
+}
+
+bool fp_acl_test_remove_permissions()
+{
+    init_users();
+    application_request req;
+    nabto_connect connection;
+    init_request(&req, &connection);
+
+    uint8_t buffer[256];
+    memset(buffer,0, 256);
+    unabto_buffer inout;
+    unabto_buffer_init(&inout, buffer, 256);
+
+    {
+        uint8_t fp[16];
+        memset(fp, 128+1, 16);
+
+        unabto_query_response writer;
+        unabto_query_response_init(&writer, &inout);
+        unabto_query_write_uint8_list(&writer, fp, 16);
+        unabto_query_write_uint32(&writer, 0xfffffffful);
+    }
+    
+
+    unabto_query_request queryRequest;
+    unabto_query_response queryResponse;
+
+    unabto_query_request_init(&queryRequest, &inout);
+    unabto_query_response_init(&queryResponse, &inout);
+
+    application_event_result res = fp_acl_ae_user_remove_permissions(&req,
+                                                                     &queryRequest,
+                                                                     &queryResponse);
+    if (res != AER_REQ_RESPONSE_READY) {
+        NABTO_LOG_ERROR(("expected response to be ready it was %i", res));
+        return false;
+    }
+
+    {
+        // test the output
+        unabto_query_request testOutput;
+        unabto_query_request_init(&testOutput, &inout);
+        uint8_t status;
+        uint8_t* buffer;
+        uint16_t bufferLength;
+        unabto_query_read_uint8(&testOutput, &status);
+        if (status != 0) {
+            NABTO_LOG_ERROR(("expected to return 0 it was, %i", status));
+            return false;
+        }
+
+        unabto_query_read_uint8_list(&testOutput, &buffer, &bufferLength);
+        unabto_query_read_uint8_list(&testOutput, &buffer, &bufferLength);
+        uint32_t permissions;
+        unabto_query_read_uint32(&testOutput, &permissions);
+        if (permissions != 0x00000000ul) {
+            NABTO_LOG_ERROR(("failed to remove permissions"));
+            return false;
+        }
+        
+    }
+
+    return true;
+    
+}
+
+
 bool fp_acl_ae_test()
 {
     init_users();
@@ -298,6 +492,9 @@ bool fp_acl_ae_test()
         fp_acl_test_list_users() &&
         fp_acl_test_get_me() &&
         fp_acl_test_user_remove() &&
-        fp_acl_test_pair_me();
+        fp_acl_test_pair_me() &&
+        fp_acl_test_set_name() &&
+        fp_acl_test_add_permissions() &&
+        fp_acl_test_remove_permissions();
 }
 
