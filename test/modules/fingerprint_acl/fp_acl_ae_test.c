@@ -41,7 +41,7 @@ void init_connection(nabto_connect* connection) {
     memset(connection, 0, sizeof(nabto_connect));
     connection->isLocal = true;
     connection->hasFingerprint = true;
-    memset(connection->fingerprint, 42, FP_LENGTH);
+    memset(connection->fingerprint, 42, FP_ACL_FP_LENGTH);
 }
 
 void init_request(application_request* request, nabto_connect* connection)

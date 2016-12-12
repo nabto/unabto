@@ -3,8 +3,8 @@
 
 #include <unabto_platform_types.h>
 
-#define FP_LENGTH 16
-#define USERNAME_MAX_LENGTH 64
+#define FP_ACL_FP_LENGTH 16
+#define FP_ACL_USERNAME_MAX_LENGTH 64
 
 
 // ACL permissions they are used on a per connection basis
@@ -22,8 +22,8 @@
 #define FP_ACL_SYSTEM_PERMISSION_PAIRING                            0x20000000ul
 
 
-typedef uint8_t fingerprint[FP_LENGTH];
-typedef char username[USERNAME_MAX_LENGTH];
+typedef uint8_t fingerprint[FP_ACL_FP_LENGTH];
+typedef char username[FP_ACL_USERNAME_MAX_LENGTH];
 
 struct fp_acl_user {
     fingerprint fp;
@@ -63,22 +63,5 @@ bool fp_acl_check_user_permissions(struct fp_acl_user* user, bool isLocal, uint3
 void fp_acl_user_add_permissions(struct fp_acl_user* user, uint32_t permissions);
 void fp_acl_user_remove_permissions(struct fp_acl_user* user, uint32_t permissions);
 void fp_acl_user_set_permissions(struct fp_acl_user* user, uint32_t permissions);
-
-
-/* fp_acl_status fp_acl_get_user(fingerprint* fp, struct fp_acl_user* user); */
-
-/* fp_acl_status fp_acl_set_local_pairing_mode(bool enabled); */
-/* fp_acl_status fp_acl_get_local_pairing_mode(bool* enabled); */
-/* fp_acl_status fp_acl_set_local_pairing_permissions(uint32_t permissions); */
-/* fp_acl_status fp_acl_get_local_pairing_permissions(uint32_t* permissions); */
-/* // get the next user if fingerprint is empty then return the first user. */
-/* fp_acl_status fp_acl_get_next_user(fingerprint* start, struct fp_acl_user* users); */
-/* fp_acl_status fp_acl_remove_user(fingerprint* fp); */
-/* // TODO */
-/* fp_acl_status fp_acl_pair_with_device(fingerprint* fp, const char* name); */
-
-/* fp_acl_status fp_acl_add_permissions(fingerprint* fp, uint32_t permissions); */
-/* fp_acl_status fp_acl_remove_permissions(fingerprint* fp, uint32_t permissions); */
-/* fp_acl_status fp_acl_set_user_name(fingerprint* fp, const char* name); */
 
 #endif

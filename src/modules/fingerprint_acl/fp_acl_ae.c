@@ -270,7 +270,7 @@ application_event_result fp_acl_ae_user_set_name(application_request* request,
         return write_empty_user(write_buffer, FP_ACL_STATUS_NO_SUCH_USER);
     }
         
-    if (!read_string_null_terminated(read_buffer, user.name, USERNAME_MAX_LENGTH)) {
+    if (!read_string_null_terminated(read_buffer, user.name, FP_ACL_USERNAME_MAX_LENGTH)) {
         return AER_REQ_TOO_SMALL;
     }
     
@@ -365,7 +365,7 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
     
     struct fp_acl_user user;
         
-    if (!read_string_null_terminated(read_buffer, user.name, USERNAME_MAX_LENGTH)) {
+    if (!read_string_null_terminated(read_buffer, user.name, FP_ACL_USERNAME_MAX_LENGTH)) {
         return AER_REQ_TOO_SMALL;
     }
     
@@ -374,7 +374,7 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
         return AER_REQ_SYSTEM_ERROR;
     }
 
-    memcpy(user.fp, request->connection->fingerprint, FP_LENGTH);
+    memcpy(user.fp, request->connection->fingerprint, FP_ACL_FP_LENGTH);
     user.permissions = aclSettings.defaultPermissions;
 
     fp_acl_db_status status = aclDb.save(&user);
