@@ -136,7 +136,7 @@ static PT_THREAD(PtAppNabtoOnExit(struct pt *Pt, const RosMailType* Mail))
 }
 
 // Application event notification call back from unabto
-application_event_result application_event(application_request* req, buffer_read_t* r_b, buffer_write_t* w_b) 
+application_event_result application_event(application_request* req, uanbto_query_request* r_b, unabto_query_response* w_b)
 {
   RSASSERTSTATIC((int)REQ_RESPONSE_READY   == (int)AER_REQ_RESPONSE_READY);
   RSASSERTSTATIC((int)REQ_NOT_READY        == (int)AER_REQ_NOT_READY);
@@ -175,24 +175,24 @@ rsbool AppNabtoRead(void *ReadBufferPtr, rsuint32 Length, rsuint8 *DataPtr)
 
   while(Length-- && result == TRUE)
   {
-    result = buffer_read_uint8((buffer_read_t*)ReadBufferPtr, DataPtr++);
+    result = unabto_query_read_uint8((unabto_query_request*)ReadBufferPtr, DataPtr++);
   }
   return result;
 }
 
 rsbool AppNabtoReadUint8(void *ReadBufferPtr, rsuint8 *DataPtr)
 {
-  return buffer_read_uint8((buffer_read_t*)ReadBufferPtr, DataPtr);
+  return unabto_query_read_uint8((unabto_query_request*)ReadBufferPtr, DataPtr);
 }
 
 rsbool AppNabtoReadUint16(void *ReadBufferPtr, rsuint16 *DataPtr)
 {
-  return buffer_read_uint16((buffer_read_t*)ReadBufferPtr, DataPtr);
+  return unabto_query_read_uint16((unabto_query_request*)ReadBufferPtr, DataPtr);
 }
 
 rsbool AppNabtoReadUint32(void *ReadBufferPtr, rsuint32 *DataPtr)
 {
-  return buffer_read_uint32((buffer_read_t*)ReadBufferPtr, DataPtr);
+  return unabto_query_read_uint32((unabto_query_request*)ReadBufferPtr, DataPtr);
 }
 
 
@@ -202,22 +202,22 @@ rsbool AppNabtoWrite(void *WriteBufferPtr, rsuint32 Length, rsuint8 *DataPtr)
 
   while(Length-- && result == TRUE)
   {
-    result = buffer_write_uint8((buffer_write_t*)WriteBufferPtr, *DataPtr++);
+    result = unabto_query_write_uint8((unabto_query_response*)WriteBufferPtr, *DataPtr++);
   }
   return result;
 }
 
 rsbool AppNabtoWriteUint8(void *WriteBufferPtr, rsuint8 Data)
 {
-  return buffer_write_uint8((buffer_write_t*)WriteBufferPtr, Data);
+  return unabto_query_write_uint8((unabto_query_response*)WriteBufferPtr, Data);
 }
 
 rsbool AppNabtoWriteUint16(void *WriteBufferPtr, rsuint16 Data)
 {
-  return buffer_write_uint16((buffer_write_t*)WriteBufferPtr, Data);
+  return unabto_query_write_uint16((unabto_query_response*)WriteBufferPtr, Data);
 }
 
 rsbool AppNabtoWriteUint32(void *WriteBufferPtr, rsuint32 Data)
 {
-  return buffer_write_uint32((buffer_write_t*)WriteBufferPtr, Data);
+  return unabto_query_write_uint32((unabto_query_response*)WriteBufferPtr, Data);
 }

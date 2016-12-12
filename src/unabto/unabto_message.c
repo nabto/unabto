@@ -19,7 +19,6 @@
 #include "unabto_util.h"
 #include "unabto_logging.h"
 #include "unabto_debug_packet.h"
-#include "util/unabto_buffer.h"
 #include "unabto_memory.h"
 #include "unabto_external_environment.h"
 #include <unabto/unabto_tcp_fallback.h>
@@ -194,10 +193,10 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
 
 #if NABTO_ENABLE_LOCAL_ACCESS_LEGACY_PROTOCOL
 void nabto_message_local_legacy_application_event(uint16_t ilen, nabto_endpoint* peer) {
-    buffer_read_t br;
-    buffer_write_t bw;
-    buffer_t brb;
-    buffer_t bwb;
+    unabto_query_request br;
+    unabto_query_response bw;
+    unabto_buffer brb;
+    unabto_buffer bwb;
 
     application_request appreq;
     uint8_t* buf = nabtoCommunicationBuffer;
@@ -218,16 +217,16 @@ void nabto_message_local_legacy_application_event(uint16_t ilen, nabto_endpoint*
     appreq.isLegacy = true;
     appreq.isLocal = true;
 
-    buffer_init(&brb, ptr + 4, ilen - LEGACY_HEADER_SIZE - 4);
-    buffer_read_init(&br, &brb, ilen - LEGACY_HEADER_SIZE - 4);
+    unabto_buffer_init(&brb, ptr + 4, ilen - LEGACY_HEADER_SIZE - 4);
+    unabto_query_request_init(&br, &brb);
 
-    buffer_init(&bwb, ptr, nabtoCommunicationBufferSize - LEGACY_HEADER_SIZE);
-    buffer_write_init(&bw, &bwb);
+    unabto_buffer_init(&bwb, ptr, nabtoCommunicationBufferSize - LEGACY_HEADER_SIZE);
+    unabto_query_response_init(&bw, &bwb);
 
     if (application_event(&appreq, &br, &bw) != AER_REQ_RESPONSE_READY) {
         header |= ERR;
     }
-    olen = LEGACY_HEADER_SIZE + buffer_write_used(&bw);
+    olen = LEGACY_HEADER_SIZE + unabto_query_response_used(&bw);
     header |= RSP;
     WRITE_U32(buf, header);
 

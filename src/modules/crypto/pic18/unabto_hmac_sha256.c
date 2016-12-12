@@ -16,7 +16,7 @@ static uint8_t blockPad[SHA256_BLOCK_LENGTH];
 static uint8_t keyTemp[SHA256_BLOCK_LENGTH];
 static uint8_t digestTemp[SHA256_DIGEST_LENGTH];
 
-void unabto_hmac_sha256_buffers(const buffer_t keys[], uint8_t keysSize, const buffer_t messages[], uint8_t messagesSize, uint8_t *mac, uint16_t macSize) {
+void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keysSize, const unabto_buffer messages[], uint8_t messagesSize, uint8_t *mac, uint16_t macSize) {
     uint8_t fill = 0;
     uint8_t num;
     uint8_t i;

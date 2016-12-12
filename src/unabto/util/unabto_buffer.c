@@ -11,9 +11,10 @@
 #endif
 #endif
 
-#include <unabto/util/unabto_queue.h>
 #include <unabto/util/unabto_buffer.h>
+#include <unabto/util/unabto_queue.h>
 #include <unabto/unabto_util.h>
+#include <unabto/unabto_buffers.h>
 
 #include <string.h>
 
@@ -108,4 +109,10 @@ bool buffer_write_raw_from_queue(buffer_write_t* w_buf, queue_t* q) {
     unabto_query_write_list_end(w_buf, &listCtx, count);
 
     return true;
+}
+
+void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf)
+{
+    read_buf->buffer = buf;
+    read_buf->position = 0;
 }

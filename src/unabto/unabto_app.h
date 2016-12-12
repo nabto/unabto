@@ -22,9 +22,9 @@
 #define _UNABTO_APP_H_
 
 #include <unabto/unabto_env_base.h>
-#include <unabto/util/unabto_buffer.h>
 #include <unabto/unabto_protocol_exceptions.h>
 #include <unabto/unabto_connection.h>
+#include <unabto/unabto_query_rw.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -100,7 +100,7 @@ typedef enum {
  * The read and write buffer may use a shared buffer so you have to
  * read the input before writing to the output.
  */
-application_event_result application_event(application_request* applicationRequest, buffer_read_t* readBuffer, buffer_write_t* writeBuffer);
+application_event_result application_event(application_request* applicationRequest, unabto_query_request* readBuffer, unabto_query_response* writeBuffer);
 
 
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
@@ -124,7 +124,7 @@ bool application_poll_query(application_request** applicationRequest);
  *
  * The application must release/delete its internal ressouce holding the requested request.
  */
-application_event_result application_poll(application_request* applicationRequest, buffer_read_t* readBuffer, buffer_write_t* writeBuffer);
+application_event_result application_poll(application_request* applicationRequest, unabto_query_request* readBuffer, unabto_query_response* writeBuffer);
 
 /**
  * Drop the queued request - the framework has discarded it.
@@ -144,7 +144,7 @@ void application_poll_drop(application_request* applicationRequest);
  *
  * Find example in projects/consulo/src/consulo_application.c
  */
-buffer_t* get_event_buffer2(size_t maximumSize);
+unabto_buffer* get_event_buffer2(size_t maximumSize);
 #endif
 
 #ifdef __cplusplus

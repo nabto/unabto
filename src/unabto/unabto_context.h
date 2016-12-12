@@ -12,7 +12,6 @@
 #define _UNABTO_CONTEXT_H_
 
 #include <unabto/unabto_env_base.h>
-#include <unabto/util/unabto_buffer.h>
 #include <unabto/unabto_crypto.h>
 #include <unabto/unabto_external_environment.h>
 
@@ -68,7 +67,7 @@ typedef struct nabto_context_s {
     nabto_endpoint        gsp;                     /**< the GSP endpoint                */
     nabto_endpoint        globalAddress;           /**< our global IP address           */
 
-    buffer_t*             piggyBuffer;             /**< Buffer to store piggyback data
+    unabto_buffer*        piggyBuffer;             /**< Buffer to store piggyback data
                                                              if a resend is required.        */
     uint16_t              piggyOldHeaderSequence;  /**< The old hdr seq number to
                                                              determine if the message should

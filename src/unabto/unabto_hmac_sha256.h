@@ -5,7 +5,7 @@
 #define _HMAC_SHA256_H_
 
 #include <unabto/unabto_env_base.h>
-#include <unabto/util/unabto_buffer.h>
+#include <unabto/unabto_buffers.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,8 +19,8 @@ enum {
 /**
  * this one takes an array of keys and buffers
  */
-void unabto_hmac_sha256_buffers(const buffer_t keys[], uint8_t keysSize,
-                                const buffer_t messages[], uint8_t messagesSize,
+void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keysSize,
+                                const unabto_buffer messages[], uint8_t messagesSize,
                                 uint8_t* mac, uint16_t macSize);
 
 

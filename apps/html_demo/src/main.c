@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
     unabto_close();
 }
 
-application_event_result application_event(application_request* appreq, buffer_read_t* r_b, buffer_write_t* w_b) {
+application_event_result application_event(application_request* appreq, unabto_query_request* r_b, unabto_query_response* w_b) {
     switch (appreq->queryId) {
         // readExample.json
         case 1: {

@@ -59,7 +59,7 @@ bool acl_is_stream_allowed(unabto_stream* streamHandle, uint32_t requiredPermiss
 #define acl_is_stream_allowed(streamHandle, requiredPermissions) (false)
 #endif
 
-application_event_result acl_application_event(application_request* request, buffer_read_t* readBuffer, buffer_write_t* writeBuffer);
+application_event_result acl_application_event(application_request* request, unabto_query_request* readBuffer, unabto_query_response* writeBuffer);
 
 #else
 

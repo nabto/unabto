@@ -23,12 +23,12 @@
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
 /// The data included in a naf_handle
 struct naf_handle_s {
-    application_request applicationRequest;           ///< the request part seen by the application
-    nabto_packet_header header;                       ///< the request packet header
-    nabto_connect*      connection;                   ///< the connection
-    uint32_t            spnsi;                        ///< the connection consistency id
-    buffer_t            applicationRequestBuffer;     ///< pointer to application request
-    buffer_read_t       readBuffer;                   ///< read access to r_buf
+    application_request  applicationRequest;           ///< the request part seen by the application
+    nabto_packet_header  header;                       ///< the request packet header
+    nabto_connect*       connection;                   ///< the connection
+    uint32_t             spnsi;                        ///< the connection consistency id
+    unabto_buffer        applicationRequestBuffer;     ///< pointer to application request
+    unabto_query_request readBuffer;                   ///< read access to r_buf
 };
 
 //struct queue_entry_s;
@@ -66,8 +66,8 @@ static queue_entry* find_any_request_in_queue(void);
  * request. In that case w_b will contain the response.
  * If this function fails all buffers are unmodified. */
 static application_event_result framework_first_event(application_request*       req,
-                                                      buffer_read_t*             r_b,
-                                                      buffer_write_t*            w_b,
+                                                      unabto_query_request*             r_b,
+                                                      unabto_query_response*            w_b,
                                                       nabto_connect*             con,
                                                       const nabto_packet_header* hdr);
 
@@ -83,8 +83,8 @@ static application_event_result framework_first_event(application_request*      
  * All other return values are error codes. In that case all buffers
  * are unmodified. */
 static application_event_result framework_try_event(queue_entry                *entry,
-                                                    buffer_read_t              *r_b,
-                                                    buffer_write_t             *w_b,
+                                                    unabto_query_request              *r_b,
+                                                    unabto_query_response             *w_b,
                                                     nabto_connect*             con,
                                                     const nabto_packet_header* hdr);
 #endif
@@ -519,8 +519,8 @@ application_event_result framework_event(naf_handle           handle,
                                          nabto_packet_header* hdr)
 {
     queue_entry*             entry;
-    buffer_t                 w_buf;
-    buffer_write_t           w_b;
+    unabto_buffer                 w_buf;
+    unabto_query_response           w_b;
     application_event_result ret;
 
     /* Find the entry containing the handle */
@@ -545,12 +545,12 @@ application_event_result framework_event(naf_handle           handle,
     }
 
     /* Set up a write buffer to write into iobuf. */
-    buffer_init(&w_buf, iobuf, size);
-    buffer_write_init(&w_b, &w_buf);
+    unabto_buffer_init(&w_buf, iobuf, size);
+    unabto_query_response_init(&w_b, &w_buf);
 
     /* Set up a read buffer that reads from local space or iobuf. */
-    buffer_init(&entry->data.applicationRequestBuffer, iobuf, ilen);
-    buffer_read_init(&entry->data.readBuffer, &entry->data.applicationRequestBuffer, ilen);
+    unabto_buffer_init(&entry->data.applicationRequestBuffer, iobuf, ilen);
+    unabto_query_request_init(&entry->data.readBuffer, &entry->data.applicationRequestBuffer);
 
     ret = framework_try_event(entry, &entry->data.readBuffer, &w_b, con, hdr);
 
@@ -567,14 +567,14 @@ application_event_result framework_event(naf_handle           handle,
 
         default:
             // pass the result to caller as an exception
-            buffer_write_reset(&w_b);
-            buffer_write_uint32(&w_b, ret);
+            unabto_query_response_init(&w_b, &w_buf); // reset the response
+            unabto_query_write_uint32(&w_b, ret);
             hdr->flags |= NP_PACKET_HDR_FLAG_EXCEPTION; // caller copies flags to send buffer!
             NABTO_LOG_TRACE(("Inserting EXCEPTION %i in buffer: %" PRItext, ret, result_s(ret)));
             break;
     }
 
-    *olen = (uint16_t) buffer_write_used(&w_b);
+    *olen = unabto_query_response_used(&w_b);
 
     LOG_APPREQ_LEAVE("framework_event", ret, handle);
     LOG_APPREQ_QUEUE();
@@ -729,10 +729,10 @@ application_event_result framework_event(naf_handle             handle,
                                          nabto_packet_header* hdr)
 {
     application_request      req;
-    buffer_t                 w_buf;
-    buffer_write_t           w_b;
-    buffer_t                 r_buf;
-    buffer_read_t            r_b;
+    unabto_buffer            w_buf;
+    unabto_query_response    w_b;
+    unabto_buffer            r_buf;
+    unabto_query_request     r_b;
     application_event_result ret;
 
     /* framework_event_query always returns a zero handle in SYNC mode */
@@ -740,22 +740,22 @@ application_event_result framework_event(naf_handle             handle,
 
     // When trying to respond immediately, the position to write the response is exactly
     // the same as the position of the request (we use the same buffer, i.e. iobuf).
-    buffer_init(&w_buf, iobuf, size);
-    buffer_write_init(&w_b, &w_buf);
+    unabto_buffer_init(&w_buf, iobuf, size);
+    unabto_query_response_init(&w_b, &w_buf);
 
-    buffer_init(&r_buf, iobuf, ilen);
-    buffer_read_init(&r_b, &r_buf, ilen);
+    unabto_buffer_init(&r_buf, iobuf, ilen);
+    unabto_query_request_init(&r_b, &r_buf);
 
     ret = framework_first_event(&req, &r_b, &w_b, con, hdr);
 
     if (ret != AER_REQ_RESPONSE_READY) {
         // pass the result to caller as an exception packet
-        buffer_write_reset(&w_b);
-        buffer_write_uint32(&w_b, ret);
+        unabto_query_response_init(&w_b, &w_buf); // reset the response
+        unabto_query_write_uint32(&w_b, ret);
         hdr->flags |= NP_PACKET_HDR_FLAG_EXCEPTION; // caller copies flags to send buffer!
         NABTO_LOG_TRACE(("Inserting EXCEPTION %i in buffer: %" PRItext, ret, result_s(ret)));
     }
-    *olen = buffer_write_used(&w_b);
+    *olen = unabto_query_response_used(&w_b);
 
     NABTO_LOG_TRACE(("APPREQ framework_event: returns %" PRItext, result_s(ret)));
     return ret;
@@ -778,18 +778,18 @@ bool framework_event_poll(uint8_t* buf, uint16_t buflen, uint16_t* olen, struct 
 /* Handle event the first time - application request is initialized.
  * Common function for SYNC and ASYNC model. */
 application_event_result framework_first_event(application_request       *req,
-                                               buffer_read_t             *r_b,
-                                               buffer_write_t            *w_b,
+                                               unabto_query_request      *r_b,
+                                               unabto_query_response     *w_b,
                                                nabto_connect             *con,
                                                const nabto_packet_header *hdr)
 {
     application_event_result res;
     uint32_t                 query_id;
 
-    if (buffer_read_available(r_b) > NABTO_REQUEST_MAX_SIZE) {
+    if (unabto_query_request_size(r_b) > NABTO_REQUEST_MAX_SIZE) {
         return AER_REQ_TOO_LARGE;
     }
-    if (!buffer_read_uint32(r_b, &query_id)) {
+    if (!unabto_query_read_uint32(r_b, &query_id)) {
         return AER_REQ_NO_QUERY_ID;
     }
 
@@ -814,8 +814,8 @@ application_event_result framework_first_event(application_request       *req,
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
 /* Handle event the first time - application request is initialized. */
 application_event_result framework_try_event(queue_entry                *entry,
-                                             buffer_read_t              *r_b,
-                                             buffer_write_t             *w_b,
+                                             unabto_query_request       *r_b,
+                                             unabto_query_response             *w_b,
                                              nabto_connect*             con,
                                              const nabto_packet_header* hdr)
 {
@@ -838,12 +838,12 @@ application_event_result framework_poll_event(struct naf_handle_s *handle,
                                               uint16_t             size,
                                               uint16_t            *olen)
 {
-    buffer_t                   w_buf;
-    buffer_write_t             w_b;
+    unabto_buffer              w_buf;
+    unabto_query_response      w_b;
     uint16_t                   expected_len;
     uint8_t                   *ptr;
     uint32_t                   query_id;
-    application_event_result res;
+    application_event_result   res;
     uint16_t                   dlen;
 
     expected_len = handle->header.hlen + OFS_DATA;
@@ -867,13 +867,13 @@ application_event_result framework_poll_event(struct naf_handle_s *handle,
     }
 
     /* Set up a write buffer to write into buf (after crypto payload header). */
-    buffer_init(&w_buf, buf + expected_len, (int)(size - expected_len));
-    buffer_write_init(&w_b, &w_buf);
+    unabto_buffer_init(&w_buf, buf + expected_len, (int)(size - expected_len));
+    unabto_query_response_init(&w_b, &w_buf);
 
     /* Start reading input buffer from start again. */
-    buffer_read_reset(&handle->readBuffer);
+    unabto_query_request_reset(&handle->readBuffer);
     /* Skip query id. */
-    if (!buffer_read_uint32(&handle->readBuffer, &query_id)) {
+    if (!unabto_query_read_uint32(&handle->readBuffer, &query_id)) {
         return AER_REQ_NO_QUERY_ID;
     }
 
@@ -890,7 +890,7 @@ application_event_result framework_poll_event(struct naf_handle_s *handle,
 
     dlen = unabto_crypto_max_data(&handle->connection->cryptoctx, (uint16_t)(size - expected_len));
 
-    if (!unabto_encrypt(&handle->connection->cryptoctx, ptr, buffer_write_used(&w_b), ptr, dlen, &dlen)) {
+    if (!unabto_encrypt(&handle->connection->cryptoctx, ptr, unabto_query_response_used(&w_b), ptr, dlen, &dlen)) {
         NABTO_LOG_TRACE((PRInsi" Encryption failure", MAKE_NSI_PRINTABLE(0, handle->header.nsi_sp, 0)));
         return AER_REQ_SYSTEM_ERROR;
     }
@@ -981,16 +981,16 @@ uint8_t* reconstruct_header(uint8_t* buf, const nabto_packet_header * hdr)
 }
 
 /* Write error code to exception packet. */
-bool framework_write_exception(application_event_result   code,
-                               const nabto_packet_header *hdr,
-                               uint8_t                     *buf,
-                               uint16_t                     size,
-                               uint16_t                    *olen)
+bool framework_write_exception(application_event_result    code,
+                               const nabto_packet_header  *hdr,
+                               uint8_t                    *buf,
+                               uint16_t                    size,
+                               uint16_t                   *olen)
 {
-    buffer_t       w_buf;
-    buffer_write_t w_b;
-    uint16_t       expected_len;
-    uint8_t       *ptr;
+    unabto_buffer          w_buf;
+    unabto_query_response  w_b;
+    uint16_t               expected_len;
+    uint8_t                *ptr;
 
     expected_len = hdr->hlen + OFS_DATA;
     if (size <= expected_len) {
@@ -1007,17 +1007,17 @@ bool framework_write_exception(application_event_result   code,
     }
 
     /* Set up a write buffer to write into buf (after crypto payload header). */
-    buffer_init(&w_buf, buf + expected_len, (int)(size - expected_len));
-    buffer_write_init(&w_b, &w_buf);
+    unabto_buffer_init(&w_buf, buf + expected_len, (int)(size - expected_len));
+    unabto_query_response_init(&w_b, &w_buf);
 
-    if (!buffer_write_uint32(&w_b, code)) {
+    if (!unabto_query_write_uint32(&w_b, code)) {
         return false;
     }
 
     add_flags(buf, NP_PACKET_HDR_FLAG_EXCEPTION);
     NABTO_LOG_TRACE(("Inserting EXCEPTION %i in buffer: %" PRItext, code, result_s(code)));
 
-    *olen = (uint16_t) (expected_len + buffer_write_used(&w_b));
+    *olen = (uint16_t) (expected_len + unabto_query_response_used(&w_b));
     return true;
 }
 

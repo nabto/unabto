@@ -30,12 +30,12 @@
 enum fake_queue_state { dummy = 0 };
 struct fake_queue_event {
     /* struct naf_handle_s */
-    application_request applicationRequest;           ///< the request part seen by the application
-    nabto_packet_header header;                       ///< the request packet header
-    nabto_connect*      connection;                   ///< the connection
-    uint32_t            spnsi;                        ///< the connection consistency id
-    buffer_t            applicationRequestBuffer;     ///< pointer to application request
-    buffer_read_t       readBuffer;                   ///< read access to r_buf
+    application_request  applicationRequest;           ///< the request part seen by the application
+    nabto_packet_header  header;                       ///< the request packet header
+    nabto_connect*       connection;                   ///< the connection
+    uint32_t             spnsi;                        ///< the connection consistency id
+    unabto_buffer        applicationRequestBuffer;     ///< pointer to application request
+    unabto_query_request readBuffer;                   ///< read access to r_buf
     /* END of struct naf_handle_s */
     enum fake_queue_state state;
 };

@@ -19,11 +19,11 @@ bool truncated_hmac_sha256_verify_integrity(
 {
     uint8_t hmac[TRUNCATED_HMAC_SHA256_LENGTH];
 
-    buffer_t keys[1];
-    buffer_t messages[1];
+    unabto_buffer keys[1];
+    unabto_buffer messages[1];
 
-    buffer_init(keys, (uint8_t*)key, keyLength);
-    buffer_init(messages, (uint8_t*)buf, bufLength);
+    unabto_buffer_init(keys, (uint8_t*)key, keyLength);
+    unabto_buffer_init(messages, (uint8_t*)buf, bufLength);
 
 
     unabto_hmac_sha256_buffers(keys, 1,

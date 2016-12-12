@@ -66,6 +66,11 @@ bool unabto_query_read_uint8_list(unabto_query_request* queryRequest, uint8_t **
     return true;
 }
 
+bool unabto_query_read_uint8_list_to_buffer_nc(unabto_query_request* queryRequest, unabto_buffer* buffer)
+{
+    return unabto_query_read_uint8_list(queryRequest, &buffer->data, &buffer->size);
+}
+
 
 bool unabto_query_read_list_length(unabto_query_request* queryRequest, uint16_t *listLength)
 {
@@ -81,7 +86,17 @@ bool unabto_query_read_list_length(unabto_query_request* queryRequest, uint16_t 
 }
 
 
- 
+
+uint16_t unabto_query_request_size(unabto_query_request* queryRequest)
+{
+    return queryRequest->buffer->size;
+}
+
+void unabto_query_request_reset(unabto_query_request* queryRequest)
+{
+    unabto_abuffer_reset(queryRequest);
+}
+
  
 /*****************************************************
  ************** Query write functions ****************
@@ -190,6 +205,21 @@ bool unabto_query_write_list_end(unabto_query_response* queryResponse, unabto_li
     }
     WRITE_U16(*listCtx, elementCount); 
     return true;
+}
+
+void unabto_query_request_init(unabto_query_request* queryRequest, unabto_buffer* buffer)
+{
+    unabto_abuffer_init(queryRequest, buffer);
+}
+
+void unabto_query_response_init(unabto_query_response* queryResponse, unabto_buffer* buffer)
+{
+    unabto_abuffer_init(queryResponse, buffer);
+}
+
+uint16_t unabto_query_response_used(unabto_query_response* queryResponse)
+{
+    return unabto_abuffer_get_used(queryResponse);
 }
 
 /*

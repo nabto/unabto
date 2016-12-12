@@ -3,6 +3,6 @@
 
 #include "unabto/unabto_app.h"
 
-application_event_result weather_station_application(application_request* request, buffer_read_t* read_buffer, buffer_write_t* write_buffer);
+application_event_result weather_station_application(application_request* request, unabto_query_request* read_buffer, unabto_query_response* write_buffer);
 
 #endif

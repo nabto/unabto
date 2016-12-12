@@ -2,9 +2,10 @@
 #include <unabto/unabto_app.h>
 #include <unabto/unabto_util.h>
 #include <unabto/unabto_logging.h>
+#include <unabto/util/unabto_buffer.h>
 
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
-#include <unabto/util/unabto_buffer.h>
+
 #endif
 
 #include <stdio.h>
@@ -68,7 +69,7 @@ uint32_t getHumiditySimulated() {
 /******************************************************************************/
 /******************************************************************************/
 
-application_event_result weather_station_application(application_request* request, buffer_read_t* read_buffer, buffer_write_t* write_buffer)
+application_event_result weather_station_application(application_request* request, unabto_query_request* read_buffer, unabto_query_response* write_buffer)
 {
     switch (request->queryId) {
     case 1:
@@ -87,10 +88,10 @@ application_event_result weather_station_application(application_request* reques
             int32_t temp;
             uint32_t ix;
             // read 4 bytes from the input buffer
-            if (!buffer_read_uint32(read_buffer, &ix)) return AER_REQ_TOO_SMALL; 
+            if (!unabto_query_read_uint32(read_buffer, &ix)) return AER_REQ_TOO_SMALL;
             // write 4 bytes to the output buffer
             temp = getTemperature(ix);
-            if (!buffer_write_uint32(write_buffer, temp)) return AER_REQ_RSP_TOO_LARGE; 
+            if (!unabto_query_write_uint32(write_buffer, temp)) return AER_REQ_RSP_TOO_LARGE;
             return AER_REQ_RESPONSE_READY;
         }
         
@@ -104,7 +105,7 @@ application_event_result weather_station_application(application_request* reques
          *   </response>
          * </query>
          */
-        if (!buffer_write_uint32(write_buffer, getWindSpeed())) return AER_REQ_RSP_TOO_LARGE;
+        if (!unabto_query_write_uint32(write_buffer, getWindSpeed())) return AER_REQ_RSP_TOO_LARGE;
         return AER_REQ_RESPONSE_READY;
 
     case 3:
@@ -119,9 +120,9 @@ application_event_result weather_station_application(application_request* reques
          *  </response>
          * </query>
          */
-        if (buffer_write_uint32(write_buffer, getTemperatureSimulated()) &&
-            buffer_write_uint32(write_buffer, getWindSpeedSimulated()) &&
-            buffer_write_uint32(write_buffer, getHumiditySimulated())) {
+        if (unabto_query_write_uint32(write_buffer, getTemperatureSimulated()) &&
+            unabto_query_write_uint32(write_buffer, getWindSpeedSimulated()) &&
+            unabto_query_write_uint32(write_buffer, getHumiditySimulated())) {
             return AER_REQ_RESPONSE_READY;
         } else {
             return AER_REQ_RSP_TOO_LARGE;
@@ -142,7 +143,7 @@ application_event_result weather_station_application(application_request* reques
 /******************************************************************************/
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC == 0
 
-application_event_result application_event(application_request* request, buffer_read_t* r_b, buffer_write_t* w_b)
+application_event_result application_event(application_request* request, unabto_query_request* r_b, unabto_query_response* w_b)
 {
     return weather_station_application(request, r_b, w_b);
 }
@@ -165,13 +166,13 @@ static application_request* saved_app_req = 0;
 
 
 struct {
-    buffer_t      buf;
-    buffer_read_t r_b;
+    unabto_buffer        buf;
+    unabto_query_request r_b;
     uint8_t       data[NABTO_REQUEST_MAX_SIZE];
 } saved_params;
 
 
-application_event_result application_event(application_request* request, buffer_read_t* r_b, buffer_write_t* w_b)
+application_event_result application_event(application_request* request, unabto_query_request* r_b, unabto_query_response* w_b)
 {
     // As an example - and for testing:
     // This implementation replies immediately to every second request whereas
@@ -194,16 +195,16 @@ application_event_result application_event(application_request* request, buffer_
         // IMPORTANT: w_b cannot be used when saving the request for later completion!
         //            the buffer designated by w_b may be overridden by the caller.
         {
-            size_t sz = buffer_read_available(r_b);
+            size_t sz = unabto_query_request_size(r_b);
             if (sz > sizeof(saved_params.data)) {
                 return AER_REQ_TOO_LARGE;
             } else {
                 // saves raw bytes from buffer (including already read data) into same type of data-holder,
-                // because weather_station_application() neads a buffer_read_t* parameter
+                // because weather_station_application() neads a unabto_query_request* parameter
                 // more realistic example would read/interpret parameters and copy to own structure.
                 memcpy(saved_params.data, r_b->buffer->data, sz);
                 buffer_init(&saved_params.buf, saved_params.data, (int)sz);
-                buffer_read_init(&saved_params.r_b, &saved_params.buf, sz);
+                unabto_query_request_init(&saved_params.r_b, &saved_params.buf);
                 saved_params.r_b.position = r_b->position; // skip already read data
             }
         }
@@ -227,7 +228,7 @@ bool application_poll_query(application_request** appreq)
     return false;
 }
 
-application_event_result application_poll(application_request* request, buffer_read_t* r_b, buffer_write_t* w_b)
+application_event_result application_poll(application_request* request, unabto_query_request* r_b, unabto_query_response* w_b)
 {
     application_event_result res = AER_REQ_SYSTEM_ERROR;
     if (saved_app_req == 0) {
@@ -257,10 +258,10 @@ enum {
     BODYLENGTH = 8
 };
 
-buffer_t* get_event_buffer2(size_t maximumLength)
+unabto_buffer* get_event_buffer2(size_t maximumLength)
 {
     static uint8_t eventBufferData[NABTO_EVENT_CHANNEL_MAX_SIZE];
-    static buffer_t eventBuffer;
+    static unabto_buffer eventBuffer;
     
     if(lastTemperature_ == 0)
     {

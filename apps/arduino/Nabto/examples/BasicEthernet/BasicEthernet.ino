@@ -92,7 +92,7 @@ uint8_t readLed(char led_id) {
  * Afterwards a user defined message can be sent back to the
  * requesting browser.
  ****************************************************************/
-application_event_result application_event(application_request* request, buffer_read_t* read_buffer, buffer_write_t* write_buffer) {
+application_event_result application_event(application_request* request, unabto_query_request* read_buffer, unabto_query_response* write_buffer) {
   switch(request->queryId) {
   case 1: 
     {
@@ -111,14 +111,14 @@ application_event_result application_event(application_request* request, buffer_
       uint8_t light_state;
 
       // Read parameters in request
-      if (!buffer_read_uint8(read_buffer, &light_id)) return AER_REQ_TOO_SMALL;
-      if (!buffer_read_uint8(read_buffer, &light_on)) return AER_REQ_TOO_SMALL;
+      if (!unabto_query_read_uint8(read_buffer, &light_id)) return AER_REQ_TOO_SMALL;
+      if (!unabto_query_read_uint8(read_buffer, &light_on)) return AER_REQ_TOO_SMALL;
 
       // Set light according to request
       light_state = setLed(light_id, light_on);
 
       // Write back led state
-      if (!buffer_write_uint8(write_buffer, light_state)) return AER_REQ_RSP_TOO_LARGE;
+      if (!unabto_query_write_uint8(write_buffer, light_state)) return AER_REQ_RSP_TOO_LARGE;
 
       return AER_REQ_RESPONSE_READY;
     }
@@ -137,13 +137,13 @@ application_event_result application_event(application_request* request, buffer_
       uint8_t light_state;
 
       // Read parameters in request
-      if (!buffer_read_uint8(read_buffer, &light_id)) return AER_REQ_TOO_SMALL;
+      if (!unabto_query_read_uint8(read_buffer, &light_id)) return AER_REQ_TOO_SMALL;
 
       // Read light state
       light_state = readLed(light_id);
 
       // Write back led state
-      if (!buffer_write_uint8(write_buffer, light_state)) return AER_REQ_RSP_TOO_LARGE;
+      if (!unabto_query_write_uint8(write_buffer, light_state)) return AER_REQ_RSP_TOO_LARGE;
 
       return AER_REQ_RESPONSE_READY;
       

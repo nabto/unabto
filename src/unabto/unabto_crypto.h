@@ -12,7 +12,7 @@
 
 #include <unabto/unabto_env_base.h>
 #include <unabto/unabto_packet_util.h>
-#include <unabto/util/unabto_buffer.h>
+#include <unabto/unabto_buffers.h>
 
 #if NABTO_ENABLE_CONNECTIONS
 
@@ -62,8 +62,8 @@ typedef struct {
  * @param data          the data
  * @param dataLength    the length of the data
  */
-void nabto_crypto_create_key_material(const buffer_t nonces[], uint8_t nonces_size,
-                                      const buffer_t seeds[],  uint8_t seeds_size,
+void nabto_crypto_create_key_material(const unabto_buffer nonces[], uint8_t nonces_size,
+                                      const unabto_buffer seeds[],  uint8_t seeds_size,
                                       uint8_t* data, uint16_t dataLength);
 
 /**

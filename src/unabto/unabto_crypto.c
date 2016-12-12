@@ -43,11 +43,11 @@ static void nabto_crypto_reset_a(nabto_crypto_context* cryptoContext)
     switch(nmc.nabtoMainSetup.cryptoSuite) {
     case CRYPT_W_AES_CBC_HMAC_SHA256: {
 #if NABTO_ENABLE_UCRYPTO
-        buffer_t nonces[1];
-        buffer_t seeds[1];
+        unabto_buffer nonces[1];
+        unabto_buffer seeds[1];
         
-        buffer_init(&nonces[0], (uint8_t*)nmc.nabtoMainSetup.id, (uint16_t)strlen(nmc.nabtoMainSetup.id));
-        buffer_init(&seeds[0], nmc.nabtoMainSetup.presharedKey, PRE_SHARED_KEY_SIZE);
+        unabto_buffer_init(&nonces[0], (uint8_t*)nmc.nabtoMainSetup.id, (uint16_t)strlen(nmc.nabtoMainSetup.id));
+        unabto_buffer_init(&seeds[0], nmc.nabtoMainSetup.presharedKey, PRE_SHARED_KEY_SIZE);
 
         nabto_crypto_create_key_material(nonces, 1,
                                          seeds, 1,
@@ -84,14 +84,14 @@ static void nabto_crypto_reset_c(nabto_crypto_context* cryptoContext, const uint
 #if NABTO_ENABLE_UCRYPTO
     switch(nmc.nabtoMainSetup.cryptoSuite) {
     case CRYPT_W_AES_CBC_HMAC_SHA256: {
-        buffer_t nonces[2];
-        buffer_t seeds[2];
+        unabto_buffer nonces[2];
+        unabto_buffer seeds[2];
 
-        buffer_init(&nonces[0], (uint8_t*)nonceGSP, NONCE_SIZE);
-        buffer_init(&nonces[1], (uint8_t*)nmc.context.nonceMicro, NONCE_SIZE);
+        unabto_buffer_init(&nonces[0], (uint8_t*)nonceGSP, NONCE_SIZE);
+        unabto_buffer_init(&nonces[1], (uint8_t*)nmc.context.nonceMicro, NONCE_SIZE);
         
-        buffer_init(&seeds[0], (uint8_t*)seedGSP, SEED_SIZE);
-        buffer_init(&seeds[1], (uint8_t*)seedUD, SEED_SIZE);
+        unabto_buffer_init(&seeds[0], (uint8_t*)seedGSP, SEED_SIZE);
+        unabto_buffer_init(&seeds[1], (uint8_t*)seedUD, SEED_SIZE);
 
         nabto_crypto_create_key_material(
             nonces, 2,
@@ -150,17 +150,17 @@ static void nabto_crypto_reset_d(nabto_crypto_context* cryptoContext, uint16_t c
 
 #if NABTO_ENABLE_UCRYPTO
 
-void nabto_crypto_create_key_material(const buffer_t nonces[], uint8_t nonces_size,
-                                      const buffer_t seeds[],  uint8_t seeds_size,
+void nabto_crypto_create_key_material(const unabto_buffer nonces[], uint8_t nonces_size,
+                                      const unabto_buffer seeds[],  uint8_t seeds_size,
                                       uint8_t* keyData, uint16_t keyDataLength)
 {
     uint16_t skeyseed_len = 32;
     uint8_t skeyseed[32];
-    buffer_t skeyseeds[1];
+    unabto_buffer skeyseeds[1];
 
     prf_sha256(nonces, nonces_size, seeds, seeds_size, skeyseed, skeyseed_len);
     
-    buffer_init(skeyseeds, skeyseed, skeyseed_len);
+    unabto_buffer_init(skeyseeds, skeyseed, skeyseed_len);
 
     prfplus_sha256(skeyseeds, 1, nonces, nonces_size, keyData, keyDataLength);
 }
@@ -491,11 +491,11 @@ bool unabto_insert_integrity(nabto_crypto_context* cryptoContext, uint8_t* start
         if (plen < 16) {
             NABTO_LOG_ERROR(("no room for hmac"));
         } else {
-            buffer_t keys[1];
-            buffer_t messages[1];
+            unabto_buffer keys[1];
+            unabto_buffer messages[1];
             
-            buffer_init(keys, cryptoContext->ourhmackey, HMAC_KEY_LENGTH);
-            buffer_init(messages, start, plen-16);
+            unabto_buffer_init(keys, cryptoContext->ourhmackey, HMAC_KEY_LENGTH);
+            unabto_buffer_init(messages, start, plen-16);
 
             unabto_hmac_sha256_buffers(keys, 1,
                                        messages, 1,
