@@ -10,7 +10,7 @@ void fp_acl_ae_init(struct fp_acl_db* db)
     aclDb = *db;
 }
 
-bool read_fingerprint(unabto_query_request* read_buffer, fingerprint fp)
+static bool read_fingerprint(unabto_query_request* read_buffer, fingerprint fp)
 {
     uint8_t* list;
     uint16_t length;
@@ -26,7 +26,7 @@ bool read_fingerprint(unabto_query_request* read_buffer, fingerprint fp)
 }
 
 // copy a string to out ensure it's null terminated.
-bool read_string_null_terminated(unabto_query_request* read_buffer, char* out, size_t outlen)
+static bool read_string_null_terminated(unabto_query_request* read_buffer, char* out, size_t outlen)
 {
     uint8_t* list;
     uint16_t length;
@@ -40,12 +40,12 @@ bool read_string_null_terminated(unabto_query_request* read_buffer, char* out, s
     return true;
 }
 
-bool write_fingerprint(unabto_query_response* write_buffer, fingerprint fp)
+static bool write_fingerprint(unabto_query_response* write_buffer, fingerprint fp)
 {
     return unabto_query_write_uint8_list(write_buffer, fp, sizeof(fingerprint));
 }
 
-bool write_string(unabto_query_response* write_buffer, const char* string)
+static bool write_string(unabto_query_response* write_buffer, const char* string)
 {
     return unabto_query_write_uint8_list(write_buffer, (uint8_t*)string, strlen(string));
 }
