@@ -5,7 +5,7 @@
 struct fp_acl_db db;
 bool init_users()
 {
-    fp_mem_init(&db);
+    fp_mem_init(&db, NULL);
     fp_acl_ae_init(&db);
 
     struct fp_acl_settings settings;
