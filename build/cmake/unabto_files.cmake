@@ -349,6 +349,7 @@ set(unabto_module_util_src
 # modules/fingerprint_acl
 set(unabto_module_fingerprint_acl_src
   ${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl_memory.c
+  ${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl_file.c
   ${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl_ae.c
   ${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl.c
   )

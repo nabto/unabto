@@ -39,6 +39,8 @@ struct fp_acl_settings {
 typedef enum {
     FP_ACL_DB_OK,
     FP_ACL_DB_FULL,
+    FP_ACL_DB_SAVE_FAILED,
+    FP_ACL_DB_LOAD_FAILED,
     FP_ACL_DB_FAILED
 } fp_acl_db_status;
 
@@ -51,6 +53,8 @@ struct fp_acl_db {
     fp_acl_db_status (*load)(void* it, struct fp_acl_user* user);
     // remove user
     fp_acl_db_status (*remove)(void* it);
+    // remove all users in db
+    fp_acl_db_status (*clear)();
 
     fp_acl_db_status (*load_settings)(struct fp_acl_settings* settings);
     fp_acl_db_status (*save_settings)(struct fp_acl_settings* settings);
