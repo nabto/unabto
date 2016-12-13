@@ -85,15 +85,27 @@ The device has atleast one user in it's user database and
 ## How to use this module.
 
 Include the source into your project.
-  * Add the functions in the file fp_acl_ae.h to your application_event handler.
-  * For each call in your other application_event handler call
+  * Add the functions in the file ```fp_acl_ae.h``` to your ```application_event``` handler.
+  * For each call in your other ```application_event``` handler call
     ```fp_acl_is_request_allowed``` to check that the request is
     allowed.
   * before calling the acl functions be sure to call ```fp_acl_ae_init``` to initialize the acl module.
 
+
+## User database
+
+It is designed such that it should be easy to crate new user database data
+backend. The acl module only depends on the ```struct fp_acl_db```
+interface. Currently there one implementation of that interface in
+```fp_acl_memory.h``` which is a memory backed user database with
+optional persistence. Currently ```fp_acl_file.h``` implements a file
+persistence layer for the memory backed user database.
+
 ## How to test this module.
 
-This module is automatic tested with the test code en test/modules/fingerprint_acl
+This module is automatic tested with the test code en
+test/modules/fingerprint_acl this test code is part of the unabto
+unittest.
 
 ## Test Level
 

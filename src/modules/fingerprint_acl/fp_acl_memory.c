@@ -33,8 +33,13 @@ struct fp_acl_user* fp_mem_find_free_slot()
     return NULL;
 }
 
-fp_acl_db_status fp_mem_init(struct fp_acl_db* db, struct fp_mem_persistence* p)
+fp_acl_db_status fp_mem_init(struct fp_acl_db* db,
+                             struct fp_acl_settings* defaultSettings,
+                             struct fp_mem_persistence* p)
 {
+    if (db == NULL || defaultSettings == NULL) {
+        return FP_ACL_DB_FAILED;
+    }
     if (p != NULL) {
         persistence = *p;
     } else {
@@ -43,6 +48,7 @@ fp_acl_db_status fp_mem_init(struct fp_acl_db* db, struct fp_mem_persistence* p)
     }
     
     memset(&state, 0, sizeof(struct fp_mem_state));
+    state.settings = *defaultSettings;
 
     db->first = &fp_mem_get_first_user;
     db->next = &fp_mem_next;

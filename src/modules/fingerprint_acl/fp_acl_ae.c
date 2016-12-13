@@ -378,6 +378,11 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
     memcpy(user.fp, request->connection->fingerprint, FP_ACL_FP_LENGTH);
     user.permissions = aclSettings.defaultPermissions;
 
+    if (aclDb.first() == NULL) {
+        // this is the first user make her admin!
+        user.permissions |= FP_ACL_PERMISSION_ADMIN;
+    }
+
     fp_acl_db_status status = aclDb.save(&user);
 
     if (status == FP_ACL_DB_OK) {
@@ -487,6 +492,7 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
     if (connection->isLocal) {
         requiredSystemPermissions |= FP_ACL_SYSTEM_PERMISSION_LOCAL_ACCESS;
         if (!user) {
+            // if no user exists require that we are in pairing mode.
             requiredSystemPermissions |= FP_ACL_SYSTEM_PERMISSION_PAIRING;
         }
     } else {

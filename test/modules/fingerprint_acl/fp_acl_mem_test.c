@@ -46,9 +46,12 @@ bool fp_acl_mem_test_db(struct fp_acl_db* db) {
 }
 
 bool fp_acl_mem_test() {
+    struct fp_acl_settings defaultSettings;
+    defaultSettings.systemPermissions = FP_ACL_SYSTEM_PERMISSION_ALL;
+    defaultSettings.defaultPermissions = FP_ACL_PERMISSION_ALL;
     {
         struct fp_acl_db db;
-        fp_mem_init(&db, NULL);
+        fp_mem_init(&db, &defaultSettings, NULL);
         if (!fp_acl_mem_test_db(&db)) {
             NABTO_LOG_ERROR(("memory backed acl test failed"));
             return false;
@@ -64,7 +67,7 @@ bool fp_acl_mem_test() {
             return false;
         }
         
-        if (fp_mem_init(&db, &p) != FP_ACL_DB_OK) {
+        if (fp_mem_init(&db, &defaultSettings, &p) != FP_ACL_DB_OK) {
             return false;
         }
         if (!fp_acl_mem_test_db(&db)) {
@@ -81,7 +84,7 @@ bool fp_acl_mem_test() {
             return false;
         }
         
-        if (fp_mem_init(&db, &p) != FP_ACL_DB_OK) {
+        if (fp_mem_init(&db, &defaultSettings, &p) != FP_ACL_DB_OK) {
             return false;
         }
 
@@ -110,7 +113,7 @@ bool fp_acl_mem_test() {
             NABTO_LOG_ERROR(("cannot load acl fole"));
             return false;
         }
-        if (fp_mem_init(&db, &p) != FP_ACL_DB_OK) {
+        if (fp_mem_init(&db, &defaultSettings, &p) != FP_ACL_DB_OK) {
             
             return false;
         }
