@@ -5,7 +5,10 @@
 struct fp_acl_db db;
 bool init_users()
 {
-    fp_mem_init(&db, NULL);
+    struct fp_acl_settings defaultSettings;
+    defaultSettings.systemPermissions = FP_ACL_SYSTEM_PERMISSION_ALL;
+    defaultSettings.defaultPermissions = FP_ACL_PERMISSION_ALL;
+    fp_mem_init(&db, &defaultSettings, NULL);
     fp_acl_ae_init(&db);
 
     struct fp_acl_settings settings;

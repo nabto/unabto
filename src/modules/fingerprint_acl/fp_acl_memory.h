@@ -23,8 +23,11 @@ struct fp_mem_persistence {
 
 /**
  * constructor if persistence is NULL it will not be persisted.
+ * defaultSettings is required and will take effect if the user database is empty.
  */
-fp_acl_db_status fp_mem_init(struct fp_acl_db* db, struct fp_mem_persistence* persistence);
+fp_acl_db_status fp_mem_init(struct fp_acl_db* db,
+                             struct fp_acl_settings* defaultSettings,
+                             struct fp_mem_persistence* persistence);
 
 // iterator to iterate through all the users
 

@@ -7,12 +7,13 @@ static char* tempFilename = NULL;
 
 fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl)
 {
-    memset(acl, 0, sizeof(struct fp_mem_state));
     FILE* aclFile = fopen(filename, "rb+");
     if (aclFile == NULL) {
         // there no saved acl file, consider it as a completely normal bootstrap scenario
         return FP_ACL_DB_OK;
     }
+
+    memset(acl, 0, sizeof(struct fp_mem_state));
 
     uint8_t buffer[128];
 

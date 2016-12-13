@@ -226,7 +226,7 @@ application_event_result fp_acl_ae_user_remove(application_request* request,
                                                unabto_query_request* read_buffer,
                                                unabto_query_response* write_buffer)
 {
-    if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ACCESS_CONTROL)) {
+    if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ADMIN)) {
         return AER_REQ_NO_ACCESS;
     }
 
@@ -256,7 +256,7 @@ application_event_result fp_acl_ae_user_set_name(application_request* request,
                                                  unabto_query_request* read_buffer,
                                                  unabto_query_response* write_buffer)
 {
-    if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ACCESS_CONTROL)) {
+    if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ADMIN)) {
         return AER_REQ_NO_ACCESS;
     }
 
@@ -293,7 +293,7 @@ application_event_result fp_acl_ae_user_alter_permissions(application_request* r
                                                           unabto_query_response* write_buffer,
                                                           void (*alterPermissionsFunction)(struct fp_acl_user* user, uint32_t permissions))
 {
-    if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ACCESS_CONTROL)) {
+    if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ADMIN)) {
         return AER_REQ_NO_ACCESS;
     }
 
@@ -378,6 +378,11 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
     memcpy(user.fp, request->connection->fingerprint, FP_ACL_FP_LENGTH);
     user.permissions = aclSettings.defaultPermissions;
 
+    if (aclDb.first() == NULL) {
+        // this is the first user make her admin!
+        user.permissions |= FP_ACL_PERMISSION_ADMIN;
+    }
+
     fp_acl_db_status status = aclDb.save(&user);
 
     if (status == FP_ACL_DB_OK) {
@@ -392,7 +397,7 @@ application_event_result fp_acl_ae_system_get_acl_settings(application_request* 
                                                            unabto_query_request* read_buffer,
                                                            unabto_query_response* write_buffer)
 {
-    if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ACCESS_CONTROL)) {
+    if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ADMIN)) {
         return AER_REQ_NO_ACCESS;
     }
 
@@ -409,7 +414,7 @@ application_event_result fp_acl_ae_system_set_acl_settings(application_request* 
                                                            unabto_query_request* read_buffer,
                                                            unabto_query_response* write_buffer)
 {
-    if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ACCESS_CONTROL)) {
+    if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ADMIN)) {
         return AER_REQ_NO_ACCESS;
     }
 
@@ -467,3 +472,50 @@ bool fp_acl_is_pair_allowed(application_request* request)
     }
     return false;
 }
+
+bool fp_acl_is_connection_allowed(nabto_connect* connection)
+{
+    if (! (connection && connection->hasFingerprint)) {
+        return false;
+    }
+
+    struct fp_acl_settings aclSettings;
+    if (aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
+        return false;
+    }
+
+    void* user = aclDb.find(connection->fingerprint);
+
+    uint32_t requiredSystemPermissions = FP_ACL_SYSTEM_PERMISSION_NONE;
+    uint32_t requiredUserPermissions = FP_ACL_PERMISSION_NONE;
+    
+    if (connection->isLocal) {
+        requiredSystemPermissions |= FP_ACL_SYSTEM_PERMISSION_LOCAL_ACCESS;
+        if (!user) {
+            // if no user exists require that we are in pairing mode.
+            requiredSystemPermissions |= FP_ACL_SYSTEM_PERMISSION_PAIRING;
+        }
+    } else {
+        requiredSystemPermissions |= FP_ACL_SYSTEM_PERMISSION_REMOTE_ACCESS;
+        if (!user) {
+            return false;
+        }
+    }
+
+    if (!fp_acl_check_system_permissions(&aclSettings, requiredSystemPermissions)) {
+        return false;
+    }
+
+    if (user) {
+        struct fp_acl_user u;
+        if (aclDb.load(user, &u) != FP_ACL_DB_OK) {
+            return false;
+        }
+        return fp_acl_check_user_permissions(&u, connection->isLocal, requiredUserPermissions);
+    }
+    return true;
+}
+
+    
+
+    

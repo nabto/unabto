@@ -7,12 +7,17 @@
 #define FP_ACL_USERNAME_MAX_LENGTH 64
 
 
-// ACL permissions they are used on a per connection basis
+// ACL permissions they are used on a per connection basis bit in the
+// bits for general usage.
+#define FP_ACL_PERMISSION_MASK_GENERAL                              0xffff0000ul
+// bits for custom application specific usage.
+#define FP_ACL_PERMISSION_MASK_CUSTOM                               0x0000fffful
+
 #define FP_ACL_PERMISSION_NONE                                      0x00000000ul
 #define FP_ACL_PERMISSION_ALL                                       0xfffffffful
 #define FP_ACL_PERMISSION_LOCAL_ACCESS                              0x80000000ul
 #define FP_ACL_PERMISSION_REMOTE_ACCESS                             0x40000000ul
-#define FP_ACL_PERMISSION_ACCESS_CONTROL                            0x20000000ul
+#define FP_ACL_PERMISSION_ADMIN                                     0x20000000ul
 
 // SYSTEM permissions they are used to tell what the system can do
 #define FP_ACL_SYSTEM_PERMISSION_NONE                               0x00000000ul
@@ -20,7 +25,6 @@
 #define FP_ACL_SYSTEM_PERMISSION_LOCAL_ACCESS                       0x80000000ul
 #define FP_ACL_SYSTEM_PERMISSION_REMOTE_ACCESS                      0x40000000ul
 #define FP_ACL_SYSTEM_PERMISSION_PAIRING                            0x20000000ul
-
 
 typedef uint8_t fingerprint[FP_ACL_FP_LENGTH];
 typedef char username[FP_ACL_USERNAME_MAX_LENGTH];
@@ -43,6 +47,7 @@ typedef enum {
     FP_ACL_DB_LOAD_FAILED,
     FP_ACL_DB_FAILED
 } fp_acl_db_status;
+
 
 struct fp_acl_db {
     void* (*first)();

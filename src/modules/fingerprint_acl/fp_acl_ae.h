@@ -13,11 +13,28 @@ enum fp_acl_response_status {
     FP_ACL_STATUS_REMOVE_FAILED = 4
 };
 
+/**
+ * Initialize the fingerprint acl module.
+ */
 void fp_acl_ae_init(struct fp_acl_db* db);
 
+/**
+ * call this function as part of every application request to check
+ * that sufficient permissions is present for the application request.
+ */
 bool fp_acl_is_request_allowed(application_request* request, uint32_t requiredPermissions);
+
+/**
+ * call this function to see if the given application
+ * requets/connection is allowed to pair with the device.
+ */
 bool fp_acl_is_pair_allowed(application_request* request);
 
+/**
+ * This function should be called from the allow_client_access(...)
+ * function. This will reject connections early in the connect phase.
+ */
+bool fp_acl_is_connection_allowed(nabto_connect* connection);
 
 // request getUsers.json?count=nn&start=nn
 // response list of users, next
