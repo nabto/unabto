@@ -22,7 +22,6 @@ void tunnel_loop_epoll() {
     nabto_stamp_t ne;
     nabto_stamp_t now;
     int nfds;
-    int i;
 
     if (!unabto_init()) {
         NABTO_LOG_FATAL(("Failed to initialize unabto"));

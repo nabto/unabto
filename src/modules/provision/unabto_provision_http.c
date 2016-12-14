@@ -72,15 +72,6 @@ static bool write_provision_json_doc(char* buffer, size_t len, provision_context
     }
 }
 
-static bool validate_string(char delim, char *string)
-{
-    size_t i, count = 0;
-    for (i = 0; i < strlen(string); i++) {
-        count += (string[i] == delim);
-    }
-    return count == 1 && string[i-1] != delim && string[0] != delim;
-}
-
 unabto_provision_status_t unabto_provision_http_get(const char* url, uint16_t* http_status, char** response) {
     return unabto_provision_http_invoke_curl(url, http_status, response, NULL);
 }

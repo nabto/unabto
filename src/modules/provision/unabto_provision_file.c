@@ -74,13 +74,12 @@ bool unabto_provision_test_create_file(const char* path)
         NABTO_LOG_ERROR(("Could not open provisioning file '%s' for writing", path));
         return false;
     }
-    bool ok = fprintf(fp, "") == 0;
+    bool ok = fprintf(fp, "%s", "") == 0;
     return (fclose(fp) == 0) && ok;
 }
 
 bool unabto_provision_write_file(const char* path, nabto_main_setup* nms)
 {
-    char *ch;
     char text[128] = {0};
     size_t i = 0;
     size_t len = 0;

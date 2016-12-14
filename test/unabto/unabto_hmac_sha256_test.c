@@ -7,6 +7,7 @@
 #include "unabto/unabto_hmac_sha256_test.h"
 #include "unabto/unabto_hmac_sha256.h"
 #include "modules/crypto/generic/unabto_sha256.h"
+#include "modules/crypto/generic/unabto_sha256_test.h"
 
 bool test(const __ROM char *vector, unsigned char *digest,
           unsigned int digest_size)

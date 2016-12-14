@@ -10,12 +10,11 @@ void unabto_dns_fallback_data_get_response(unabto_dns_fallback_session* session,
     if (session->state == UDFS_OPEN) {
         uint32_t host;
         uint16_t port;
-        uint16_t moreData;
         uint8_t* data;
         uint16_t dataLength;
         READ_FORWARD_U32(host, begin);
         READ_FORWARD_U16(port, begin);
-        READ_FORWARD_U16(moreData, begin);
+        begin += 2; //READ_FORWARD_U16(moreData, begin);
         data = begin;
         dataLength = header->length - 13;
         if (header->status == UDF_STATUS_OK && dataLength > 0) {

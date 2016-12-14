@@ -70,7 +70,6 @@ bool nabto_fallback_connect_u_event(uint16_t packetLength, nabto_packet_header* 
     uint8_t* startOfPayloads;
     uint8_t* endOfPayloads;
     struct unabto_payload_packet nonce;
-    uint8_t type;
     uint8_t flags;
     const uint8_t* ptr;
     bool isReliable;
@@ -97,7 +96,7 @@ bool nabto_fallback_connect_u_event(uint16_t packetLength, nabto_packet_header* 
 
     ptr = nonce.dataBegin;
 
-    READ_U8(type, ptr);  ptr++;
+    /*READ_U8(type, ptr);*/  ptr++;
     READ_U8(flags, ptr); ptr++;
 
     isReliable   = (flags & NP_GW_CONN_U_FLAG_RELIABLE) != 0;

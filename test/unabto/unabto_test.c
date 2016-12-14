@@ -11,6 +11,7 @@
 #include "unabto_hmac_sha256_test.h"
 #include "unabto_aes_cbc_test.h"
 #include "unabto_prfplus_test.h"
+#include "unabto_crypto_test.h"
 #include "unabto_aes128_sha256_test.h"
 #include "util/unabto_util_test.h"
 #include "util/unabto_buffer_test.h"

@@ -26,8 +26,6 @@ bool handle_debug_packet(message_event* event, nabto_packet_header* header) {
     uint8_t* buf = nabtoCommunicationBuffer;
     uint8_t* end = nabtoCommunicationBuffer+nabtoCommunicationBufferSize;
     struct unabto_payload_crypto crypto;
-    uint8_t* cryptoStart;
-    uint16_t cryptoLength;
 
     buf += header->hlen;
 

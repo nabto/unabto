@@ -5,7 +5,7 @@
 #include "unabto_sha256_test.h"
 #include "modules/crypto/generic/unabto_sha256.h"
 
-void unabto_sha256(const uint8_t* message, size_t message_len, uint8_t[SHA256_DIGEST_LENGTH]);
+void unabto_sha256(const uint8_t* message, size_t message_len, unsigned char* digest);
 
 void unabto_sha256(const uint8_t* message, size_t len, unsigned char *digest)
 {

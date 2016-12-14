@@ -18,8 +18,6 @@
 #include <unistd.h>
 
 void tunnel_loop_select() {
-    int i;
-    
     if (!unabto_init()) {
         NABTO_LOG_FATAL(("Failed to initialize unabto"));
     }
