@@ -45,7 +45,6 @@ bool unabto_provision_new(nabto_main_setup* nms, provision_context_t* context) {
 
 bool unabto_provision_set_key(nabto_main_setup *nms, char *key)
 {
-    size_t i;
     size_t pskLen = strlen(key);
 
     if (!key || pskLen != PRE_SHARED_KEY_SIZE * 2) {

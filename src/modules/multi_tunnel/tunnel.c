@@ -342,6 +342,7 @@ bool parse_command(tunnel* tunnel) {
         return true;
     } else if (0 == memcmp(tunnel->staticMemory->command, ECHO_COMMAND,strlen(ECHO_COMMAND))){
         tunnel->tunnelType = TUNNEL_TYPE_ECHO;
+        return true;
     } else {
         NABTO_LOG_INFO(("Failed to parse command: %s",tunnel->staticMemory->command));
         return false;
@@ -354,6 +355,7 @@ bool parse_command(tunnel* tunnel) {
     //~ return false;
     //~ }
 
+    return false;
 
 }
 

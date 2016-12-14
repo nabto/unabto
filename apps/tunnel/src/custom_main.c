@@ -22,6 +22,7 @@ int main() {
     
     // Loop forever.
     tunnel_loop_select();
+    return 0;
 }
 
 bool tunnel_allow_connection(const char* host, int port) {
