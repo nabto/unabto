@@ -197,6 +197,9 @@ void unabto_tcp_fallback_read_packet(nabto_connect* con) {
     unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
     while(true) {
         if (fbConn->recvBufferLength < 16) {
+            if (fbConn->socket == INVALID_SOCKET) {
+                NABTO_LOG_ERROR(("reading from invalid socket"));
+            }
             int status = recv(fbConn->socket, fbConn->recvBuffer + fbConn->recvBufferLength, 16-fbConn->recvBufferLength, 0);
             int err = errno;
             if (status < 0) {
@@ -258,13 +261,45 @@ void unabto_tcp_fallback_read_packet(nabto_connect* con) {
 }
 
 
+static bool unabto_tcp_fallback_create_socket(unabto_tcp_fallback_connection* fbConn, nabto_connect* con)
+{
+    fbConn->socket = socket(AF_INET, SOCK_STREAM, 0);
+#if NABTO_ENABLE_EPOLL
+    if (fbConn->socket >= 0) {
+        struct epoll_event ev;
+        ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
+        ev.data.ptr = con;
+        epoll_ctl(unabto_epoll_fd, EPOLL_CTL_ADD, fbConn->socket, &ev);
+    }
+#endif
+    return (fbConn->socket >= 0);
+}
+
+static void unabto_tcp_fallback_close_socket(unabto_tcp_fallback_connection* fbConn)
+{
+    if (fbConn->socket == INVALID_SOCKET) {
+        NABTO_LOG_ERROR(("trying to close invalid socket"));
+    } else {
+#if NABTO_ENABLE_EPOLL
+        {
+            struct epoll_event ev;
+            memset(&ev, 0, sizeof(struct epoll_event));
+            epoll_ctl(unabto_epoll_fd, EPOLL_CTL_DEL, fbConn->socket, &ev);
+        }
+#endif
+        closesocket(fbConn->socket);
+        fbConn->socket = INVALID_SOCKET;
+    }
+}
+
+
+
 bool unabto_tcp_fallback_connect(nabto_connect* con) {
     unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
     int status;
     int flags;
 
-    fbConn->socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (fbConn->socket < 0) {
+    if (!unabto_tcp_fallback_create_socket(fbConn, con)) {
         NABTO_LOG_ERROR((PRI_tcp_fb "Could not create socket for tcp fallback.", TCP_FB_ARGS(con)));
         return false;
     }
@@ -274,28 +309,17 @@ bool unabto_tcp_fallback_connect(nabto_connect* con) {
         NABTO_LOG_ERROR(("Could not set socket option TCP_NODELAY"));
     }
 
-
-
-
 #ifndef WIN32
     flags = fcntl(fbConn->socket, F_GETFL, 0);
     if (flags < 0) {
         NABTO_LOG_ERROR((PRI_tcp_fb "fcntl fail", TCP_FB_ARGS(con)));
-        if (fbConn->socket == -1) {
-            NABTO_LOG_ERROR(("trying to close invalid socket"));
-        }
-        closesocket(fbConn->socket);
-        fbConn->socket = INVALID_SOCKET;
+        unabto_tcp_fallback_close_socket(fbConn);
         con->tcpFallbackConnectionState = UTFS_CLOSED;
         return false;
     }
     if (fcntl(fbConn->socket, F_SETFL, flags | O_NONBLOCK) < 0) {
         NABTO_LOG_ERROR((PRI_tcp_fb "fcntl fail", TCP_FB_ARGS(con)));
-        if (fbConn->socket == -1) {
-            NABTO_LOG_ERROR(("trying to close invalid socket"));
-        }
-        closesocket(fbConn->socket);
-        fbConn->socket = INVALID_SOCKET;
+        unabto_tcp_fallback_close_socket(fbConn);
         con->tcpFallbackConnectionState = UTFS_CLOSED;
         return false;
     }
@@ -356,11 +380,7 @@ bool unabto_tcp_fallback_connect(nabto_connect* con) {
             con->tcpFallbackConnectionState = UTFS_CONNECTING;
         } else {
             NABTO_LOG_ERROR((PRI_tcp_fb "Could not connect to fallback tcp endpoint. %s", TCP_FB_ARGS(con), strerror(errno)));
-            if (fbConn->socket == -1) {
-                NABTO_LOG_ERROR(("trying to close invalid socket"));
-            }
-            closesocket(fbConn->socket);
-            fbConn->socket = INVALID_SOCKET;
+            unabto_tcp_fallback_close_socket(fbConn);
             con->tcpFallbackConnectionState = UTFS_CLOSED;    
             return false;
         }
@@ -370,11 +390,7 @@ bool unabto_tcp_fallback_connect(nabto_connect* con) {
     flags = 1;
     if (ioctlsocket(fbConn->socket, FIONBIO, &flags) != 0) {
         NABTO_LOG_ERROR((PRI_tcp_fb "ioctlsocket fail", TCP_FB_ARGS(con)));
-        if (fbConn->socket == -1) {
-            NABTO_LOG_ERROR(("trying to close invalid socket"));
-        }
-        closesocket(fbConn->socket);
-        fbConn->socket = INVALID_SOCKET;
+        unabto_tcp_fallback_close_socket(fbConn);
         con->tcpFallbackConnectionState = UTFS_CLOSED;
         return false;
     }
@@ -391,11 +407,7 @@ bool unabto_tcp_fallback_handle_connect(nabto_connect* con) {
     unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
     len = sizeof(err);
     if (getsockopt(fbConn->socket, SOL_SOCKET, SO_ERROR, &err, &len) != 0) {
-        if (fbConn->socket == -1) {
-            NABTO_LOG_ERROR(("trying to close invalid socket"));
-        }
-        closesocket(fbConn->socket);
-        fbConn->socket = INVALID_SOCKET;
+        unabto_tcp_fallback_close_socket(fbConn);
         con->tcpFallbackConnectionState = UTFS_CLOSED;
         return true;
     } else {
@@ -403,11 +415,7 @@ bool unabto_tcp_fallback_handle_connect(nabto_connect* con) {
             con->tcpFallbackConnectionState = UTFS_CONNECTED;
             return true;
         } else {
-            if (fbConn->socket == -1) {
-                NABTO_LOG_ERROR(("trying to close invalid socket"));
-            }
-            closesocket(fbConn->socket);
-            fbConn->socket = INVALID_SOCKET;
+            unabto_tcp_fallback_close_socket(fbConn);
             con->tcpFallbackConnectionState = UTFS_CLOSED;
             return true;
         }
@@ -416,14 +424,10 @@ bool unabto_tcp_fallback_handle_connect(nabto_connect* con) {
     return false;
 }
 
-
 void close_tcp_socket(nabto_connect* con) {
     unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
-    if (fbConn->socket == -1) {
-        NABTO_LOG_ERROR(("trying to close invalid socket"));
-    }
-    closesocket(fbConn->socket);
-    fbConn->socket = INVALID_SOCKET;
+    unabto_tcp_fallback_close_socket(fbConn);
+
     con->tcpFallbackConnectionState = UTFS_CLOSED;
     unabto_tcp_fallback_socket_closed(con);
 }
