@@ -164,7 +164,9 @@ void nabto_release_connection(nabto_connect* con)
         nabto_rendezvous_end(con);
         
 #if NABTO_ENABLE_TCP_FALLBACK
-        unabto_tcp_fallback_close(con);
+        if (con->hasTcpFallbackCapabilities) {
+            unabto_tcp_fallback_close(con);
+        }
 #endif
         con->state = CS_IDLE;
         nabto_crypto_release(&con->cryptoctx);
@@ -655,7 +657,9 @@ init_error:
 void nabto_connection_end_connecting(nabto_connect* con, message_event* event) {
     if (event->type == MT_UDP) {
 #if NABTO_ENABLE_TCP_FALLBACK
-        unabto_tcp_fallback_close(con);
+        if (con->hasTcpFallbackCapabilities) {
+            unabto_tcp_fallback_close(con);
+        }
 #endif
         con->state = CS_CONNECTED;
         con->type = NCT_REMOTE_P2P;
@@ -915,7 +919,9 @@ void nabto_time_event_connection(void)
                 rendezvous_time_event(con);
                 statistics_time_event(con);
 #if NABTO_ENABLE_TCP_FALLBACK
-                unabto_tcp_fallback_time_event(con);
+                if (con->hasTcpFallbackCapabilities) {
+                    unabto_tcp_fallback_time_event(con);
+                }
 #endif
                 
                 if (nabto_connection_has_keep_alive(con) && nabtoIsStampPassed(&con->stamp)) {
