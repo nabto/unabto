@@ -603,7 +603,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
     }
 
 #if NABTO_ENABLE_UCRYPTO
-    if (nmc.context.nonceSize == NONCE_SIZE) {
+    if (nmc.context.nonceSize == NONCE_SIZE && !isLocal) {
         uint8_t* decryptedDataStart;
         uint16_t decryptedDataLength;
         if (!unabto_connection_verify_and_decrypt_connect_packet(hdr, &decryptedDataStart, &decryptedDataLength)) {
