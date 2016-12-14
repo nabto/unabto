@@ -280,14 +280,20 @@ bool unabto_tcp_fallback_connect(nabto_connect* con) {
 #ifndef WIN32
     flags = fcntl(fbConn->socket, F_GETFL, 0);
     if (flags < 0) {
-        NABTO_LOG_ERROR((PRI_tcp_fb "fcntl fail", TCP_FB_ARGS(con))); 
+        NABTO_LOG_ERROR((PRI_tcp_fb "fcntl fail", TCP_FB_ARGS(con)));
+        if (fbConn->socket == -1) {
+            NABTO_LOG_ERROR(("trying to close invalid socket"));
+        }
         closesocket(fbConn->socket);
         fbConn->socket = INVALID_SOCKET;
         con->tcpFallbackConnectionState = UTFS_CLOSED;
         return false;
     }
     if (fcntl(fbConn->socket, F_SETFL, flags | O_NONBLOCK) < 0) {
-        NABTO_LOG_ERROR((PRI_tcp_fb "fcntl fail", TCP_FB_ARGS(con)));        
+        NABTO_LOG_ERROR((PRI_tcp_fb "fcntl fail", TCP_FB_ARGS(con)));
+        if (fbConn->socket == -1) {
+            NABTO_LOG_ERROR(("trying to close invalid socket"));
+        }
         closesocket(fbConn->socket);
         fbConn->socket = INVALID_SOCKET;
         con->tcpFallbackConnectionState = UTFS_CLOSED;
@@ -350,6 +356,9 @@ bool unabto_tcp_fallback_connect(nabto_connect* con) {
             con->tcpFallbackConnectionState = UTFS_CONNECTING;
         } else {
             NABTO_LOG_ERROR((PRI_tcp_fb "Could not connect to fallback tcp endpoint. %s", TCP_FB_ARGS(con), strerror(errno)));
+            if (fbConn->socket == -1) {
+                NABTO_LOG_ERROR(("trying to close invalid socket"));
+            }
             closesocket(fbConn->socket);
             fbConn->socket = INVALID_SOCKET;
             con->tcpFallbackConnectionState = UTFS_CLOSED;    
@@ -360,7 +369,10 @@ bool unabto_tcp_fallback_connect(nabto_connect* con) {
 #ifdef WIN32
     flags = 1;
     if (ioctlsocket(fbConn->socket, FIONBIO, &flags) != 0) {
-        NABTO_LOG_ERROR((PRI_tcp_fb "ioctlsocket fail", TCP_FB_ARGS(con)));        
+        NABTO_LOG_ERROR((PRI_tcp_fb "ioctlsocket fail", TCP_FB_ARGS(con)));
+        if (fbConn->socket == -1) {
+            NABTO_LOG_ERROR(("trying to close invalid socket"));
+        }
         closesocket(fbConn->socket);
         fbConn->socket = INVALID_SOCKET;
         con->tcpFallbackConnectionState = UTFS_CLOSED;
@@ -379,6 +391,9 @@ bool unabto_tcp_fallback_handle_connect(nabto_connect* con) {
     unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
     len = sizeof(err);
     if (getsockopt(fbConn->socket, SOL_SOCKET, SO_ERROR, &err, &len) != 0) {
+        if (fbConn->socket == -1) {
+            NABTO_LOG_ERROR(("trying to close invalid socket"));
+        }
         closesocket(fbConn->socket);
         fbConn->socket = INVALID_SOCKET;
         con->tcpFallbackConnectionState = UTFS_CLOSED;
@@ -388,6 +403,9 @@ bool unabto_tcp_fallback_handle_connect(nabto_connect* con) {
             con->tcpFallbackConnectionState = UTFS_CONNECTED;
             return true;
         } else {
+            if (fbConn->socket == -1) {
+                NABTO_LOG_ERROR(("trying to close invalid socket"));
+            }
             closesocket(fbConn->socket);
             fbConn->socket = INVALID_SOCKET;
             con->tcpFallbackConnectionState = UTFS_CLOSED;
@@ -401,6 +419,9 @@ bool unabto_tcp_fallback_handle_connect(nabto_connect* con) {
 
 void close_tcp_socket(nabto_connect* con) {
     unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
+    if (fbConn->socket == -1) {
+        NABTO_LOG_ERROR(("trying to close invalid socket"));
+    }
     closesocket(fbConn->socket);
     fbConn->socket = INVALID_SOCKET;
     con->tcpFallbackConnectionState = UTFS_CLOSED;
