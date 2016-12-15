@@ -7,7 +7,7 @@
 #include <modules/tcp_fallback/tcp_fallback_select.h>
 #include <unabto/unabto_common_main.h>
 #include <unabto/unabto_stream.h>
-#include "tunnel.h"
+#include "unabto_tunnel.h"
 
 #include <sys/epoll.h>
 
@@ -53,33 +53,12 @@ void tunnel_loop_epoll() {
             unabto_epoll_event_handler* handler = (unabto_epoll_event_handler*)events[i].data.ptr;
 
             if (handler->epollEventType == UNABTO_EPOLL_TYPE_UDP) {
-                unabto_epoll_event_handler_udp* udpHandler = (unabto_epoll_event_handler_udp*)handler;
-                bool status;
-                do {
-                    status = unabto_read_socket(udpHandler->fd);
-                } while (status);
+                unabto_network_epoll_read(&events[i]);
             }
 #if NABTO_ENABLE_TCP_FALLBACK
-            if (handler->epollEventType == UNABTO_EPOLL_TYPE_TCP_FALLBACK) {
-
-                nabto_connect* con = (nabto_connect*)handler;
-                if (events[i].events & EPOLLIN) {
-                    unabto_tcp_fallback_read_ready(con);
-                }
-                if (events[i].events & EPOLLOUT) {
-                    unabto_tcp_fallback_write_ready(con);
-                }
-            }
+            unabto_tcp_fallback_epoll_event(&events[i]);
 #endif
-            if (handler->epollEventType == UNABTO_EPOLL_TYPE_TCP_TUNNEL) {
-                tunnel* tunnelPtr = (tunnel*)handler;
-                if (tunnelPtr->tunnel_type_vars.tcp.sock != INVALID_SOCKET) {
-                    tunnel_event(tunnelPtr, TUNNEL_EVENT_SOURCE_TCP_READ);
-                }
-                if (tunnelPtr->tunnel_type_vars.tcp.sock != INVALID_SOCKET) {
-                    tunnel_event(tunnelPtr, TUNNEL_EVENT_SOURCE_TCP_WRITE);
-                }
-            }
+            unabto_tunnel_epoll_event(&events[i]);
         }
 
         unabto_time_event();

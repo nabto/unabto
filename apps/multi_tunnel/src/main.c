@@ -9,11 +9,9 @@
 #include <windows.h>
 #endif
 
-#define NABTO_TICK 5
-
-#include <modules/multi_tunnel/tunnel.h>
-#include <modules/multi_tunnel/tunnel_select.h>
-#include <modules/multi_tunnel/tunnel_epoll.h>
+#include <modules/tunnel/unabto_tunnel.h>
+#include <modules/tunnel/unabto_tunnel_select.h>
+#include <modules/tunnel/unabto_tunnel_epoll.h>
 #include <unabto/unabto_app.h>
 
 #include <unabto/unabto_common_main.h>
@@ -57,11 +55,6 @@ static bool allow_all_ports = false;
 static bool nice_exit = false;
 #if HANDLE_SIGNALS && defined(WIN32)
 static HANDLE signal_event = NULL;
-#endif
-
-#if USE_TEST_WEBSERVER
-static bool testWebserver = false;
-const char* testWebserverPortStr;
 #endif
 
 #if NABTO_ENABLE_EPOLL
@@ -201,8 +194,8 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("  -S, --size                  Print size (in bytes) of memory usage.\n");
         printf("  -l, --nabtolog              Speficy log level such as *.trace.\n");
         printf("  -d, --device_name           Specify name of this device.\n");
-        printf("  -H, --tunnel_default_host   Set default host name for tunnel (%s).\n", DEFAULT_HOST);
-        printf("  -P, --tunnel_default_port   Set default port for tunnel (%u).\n", DEFAULT_PORT);
+        printf("  -H, --tunnel_default_host   Set default host name for tunnel (%s).\n", UNABTO_TUNNEL_TCP_DEFAULT_HOST);
+        printf("  -P, --tunnel_default_port   Set default port for tunnel (%u).\n", UNABTO_TUNNEL_TCP_DEFAULT_PORT);
         printf("  -s, --use_encryption        Encrypt communication.\n");
         printf("  -k, --encryption_key        Specify encryption key.\n");
         printf("  -p, --localport             Specify port for local connections.\n");
@@ -268,14 +261,14 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     }
 
     if(gopt_arg(options, 'H', &h)) {
-        tunnel_set_default_host(h);
+        unabto_tunnel_tcp_set_default_host(h);
     }
 
     if (gopt_arg(options, 'P', &tunnel_port_str)) {
         if(1 != sscanf(tunnel_port_str, "%d", &p)) {
             NABTO_LOG_TRACE(("Reading of port parameter failed."));
         } else {
-            tunnel_set_default_port(p);
+            unabto_tunnel_tcp_set_default_port(p);
         }
     }
      
@@ -394,14 +387,6 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 
 int main(int argc, char** argv)
 {
-#if USE_TEST_WEBSERVER
-#ifdef WIN32
-    HANDLE testWebserverThread;
-#else
-    pthread_t testWebserverThread;
-#endif
-#endif
-
     nabto_main_setup* nms = unabto_init_context();
 
     platform_checks();
@@ -413,16 +398,6 @@ int main(int argc, char** argv)
     if (!tunnel_parse_args(argc, argv, nms)) {
         NABTO_LOG_FATAL(("failed to parse commandline args"));
     }
-
-#if USE_TEST_WEBSERVER
-    if (testWebserver) {
-#ifdef WIN32
-        testWebserverThread = CreateThread(NULL, 0, test_webserver, (void*)testWebserverPortStr, NULL, NULL);
-#else
-        pthread_create(&testWebserverThread, NULL, test_webserver, (void*)testWebserverPortStr);
-#endif
-    }
-#endif
 
 #if HANDLE_SIGNALS
 #ifdef WIN32
@@ -480,8 +455,6 @@ bool tunnel_allow_connection(const char* host, int port) {
     return allow;
 }
 
-#if !USE_STUN_CLIENT
-
 application_event_result application_event(application_request* request, unabto_query_request* readBuffer, unabto_query_response* writeBuffer)
 {
     return AER_REQ_INV_QUERY_ID;
@@ -497,5 +470,3 @@ application_event_result application_poll(application_request* applicationReques
 
 void application_poll_drop(application_request* applicationRequest) {
 }
-
-#endif

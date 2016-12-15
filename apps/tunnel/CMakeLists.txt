@@ -5,8 +5,6 @@ set(UNABTO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 
 option(USE_LIB_PROFILER "Link executables with libprofiler.so" OFF)
 option(LOG_ALL "Print all unabto log statements" OFF)
-option(USE_STUN_CLIENT "Enable a stun client in the unabto server" OFF)
-option(USE_TEST_WEBSERVER "Enable a mongoose test webserver" OFF)
 
 include(${UNABTO_ROOT}/build/cmake/unabto_project.cmake)
 
@@ -27,42 +25,15 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   )
 
+set(ENABLE_TUNNEL_TCP 1)
+
 # build the tunnelling library with the unabto_config.h defined in this project.
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../src/modules/tunnel ${CMAKE_CURRENT_BINARY_DIR}/tunnel_library)
-
-
-source_group(tunnel\\src FILES ${unabto_tunnel_src})
 
 set(tunnel_src
   ${unabto_server_unabto_tunneling_src}/platform_checks.c
   ${unabto_module_util_src}
   )
-
-if (USE_TEST_WEBSERVER)
-  list(APPEND tunnel_src
-	${unabto_server_unabto_tunneling_src}/mongoose/mongoose.c
-	${unabto_server_unabto_tunneling_src}/test_webserver.c
-	)
-  
-  add_definitions(-DUSE_TEST_WEBSERVER=1)
-endif()
-
-
-if (NOT WIN32 AND USE_STUN_CLIENT)
-  add_definitions(-DUSE_STUN_CLIENT)
-  list(APPEND tunnel_src
-    ${UNABTO_MODULES_SRC_DIR}/mt/unabto_cond.c
-    ${UNABTO_MODULES_SRC_DIR}/mt/unabto_thread.c
-    ${UNABTO_MODULES_SRC_DIR}/mt/unabto_mutex.c
-    ${unabto_server_unabto_tunneling_src}/tunnel_application_requests.c
-    ${unabto_server_unabto_tunneling_src}/stun/stun.cxx
-    ${unabto_server_unabto_tunneling_src}/stun/udp.cxx
-    ${unabto_server_unabto_tunneling_src}/stun/stuntest.cpp)
-endif()
-
-if (NOT WIN32)
-    SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc -static-libstdc++")
-endif()
 
 add_definitions(${unabto_definitions})
 

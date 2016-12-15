@@ -1,21 +1,17 @@
-#ifndef _TUNNEL_COMMON_H_
-#define _TUNNEL_COMMON_H_
+#ifndef _UNABTO_TUNNEL_COMMON_H_
+#define _UNABTO_TUNNEL_COMMON_H_
 
-// Defining MSG_NOSIGNAL 
-#ifndef MSG_NOSIGNAL
-#define MSG_NOSIGNAL 0
-#endif
+#include <unabto_platform_types.h>
+#include <unabto/unabto_stream.h>
 
 #ifdef WIN32
-#define SHUT_WR SD_BOTH
-#define _SCL_SECURE_NO_WARNINGS
 typedef SOCKET tunnelSocket;
-#define close closesocket
-typedef int optlen;
 #else
 typedef int tunnelSocket;
-typedef socklen_t optlen;
-#define INVALID_SOCKET -1
+#endif
+
+#if NABTO_ENABLE_EPOLL
+#include <sys/epoll.h>
 #endif
 
 
@@ -27,6 +23,7 @@ typedef enum {
     TS_IDLE,
     TS_READ_COMMAND,
     TS_PARSE_COMMAND,
+    TS_FAILED_COMMAND, // failed to read/parse command, close connect attempt.
     TS_OPEN_SOCKET,
     TS_OPENING_SOCKET,
     TS_FORWARD,
@@ -72,7 +69,6 @@ typedef struct tunnel_static_memory{
     union tunnel_static_memory_union stmu;
 } tunnel_static_memory;
 
-
 typedef struct uart_vars{
     int fd;
 } uart_vars;
@@ -86,6 +82,7 @@ typedef struct tcp_vars{
 
 typedef struct tunnel {
 #if NABTO_ENABLE_EPOLL
+    // it's important that this is the first member
     int epollEventType;
 #endif
     unabto_stream* stream;
@@ -103,12 +100,28 @@ typedef struct tunnel {
     tunnel_static_memory* staticMemory;
 } tunnel;
 
+void unabto_tunnel_reset_tunnel_struct(tunnel* t);
+bool unabto_tunnel_init_tunnels();
+void unabto_tunnel_deinit_tunnels();
+void unabto_tunnel_stream_accept(unabto_stream* stream);
+tunnel* unabto_tunnel_get_tunnel(unabto_stream* stream);
+
+void unabto_tunnel_event(tunnel* tunnel, tunnel_event_source event_source);
+void unabto_tunnel_idle(tunnel* tunnel, tunnel_event_source tunnel_event);
+void unabto_tunnel_read_command(tunnel* tunnel, tunnel_event_source tunnel_event);
+void unabto_tunnel_parse_command(tunnel* tunnel, tunnel_event_source tunnel_event);
+void unabto_tunnel_failed_command(tunnel* tunnel, tunnel_event_source tunnel_event);
+
+void unabto_tunnel_event_dispatch(tunnel* tunnel, tunnel_event_source event_source);
+
+void unabto_tunnel_select_add_to_fd_set(fd_set* readFds, int* maxReadFd, fd_set* writeFds, int* maxWriteFd);
+void unabto_tunnel_select_handle(fd_set* readFds, fd_set* writeFds);
+bool tunnel_send_init_message(tunnel* tunnel, const char* msg);
 
 
-void close_reader(tunnel* tunnel);
-void echo_forward(tunnel* tunnel);
+#if NABTO_ENABLE_EPOLL
+void unabto_tunnel_epoll_event(struct epoll_event* event);
+#endif
 
 
-
-
-#endif // _TUNNEL_COMMON_H_
+#endif // _UNABTO_TUNNEL_COMMON_H_

@@ -3,8 +3,8 @@
 #include <unabto/unabto_app.h>
 #include <modules/network/epoll/unabto_epoll.h>
 
-#include <modules/tunnel/tunnel.h>
-#include <modules/tunnel/tunnel_epoll.h>
+#include <modules/tunnel/unabto_tunnel.h>
+#include <modules/tunnel/unabto_tunnel_epoll.h>
 
 #include "param.h"
 #include <unistd.h>

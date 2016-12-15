@@ -7,8 +7,8 @@
 #include <modules/tcp_fallback/tcp_fallback_select.h>
 #include <unabto/unabto_util.h>
 
-#include "tunnel_select.h"
-#include "tunnel.h"
+#include "unabto_tunnel_select.h"
+#include "unabto_tunnel.h"
 
 #if defined(WIN32) || defined(WINCE)
 // use winsock
@@ -39,7 +39,6 @@ void tunnel_loop_select() {
         nabto_stamp_t nextEvent;
         nabto_stamp_t now;
         int timeout;
-        int i;
         fd_set read_fds;
         fd_set write_fds;
         int max_read_fd = 0;
@@ -64,19 +63,8 @@ void tunnel_loop_select() {
         unabto_tcp_fallback_select_add_to_write_fd_set(&write_fds, &max_write_fd);
 #endif
 
-        for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS; i++) {
-            if (tunnels[i].state != TS_IDLE) {
-                if (tunnels[i].state == TS_FORWARD && tunnels[i].extReadState == FS_READ) {
-                    FD_SET(tunnels[i].tunnel_type_vars.tcp.sock, &read_fds);
-                    max_read_fd = MAX(max_read_fd, tunnels[i].tunnel_type_vars.tcp.sock);
-                }
-                if ((tunnels[i].state == TS_FORWARD && tunnels[i].unabtoReadState == FS_WRITE) ||
-                    tunnels[i].state == TS_OPENING_SOCKET) {
-                    FD_SET(tunnels[i].tunnel_type_vars.tcp.sock, &write_fds);
-                    max_write_fd = MAX(max_write_fd, tunnels[i].tunnel_type_vars.tcp.sock);
-                }
-            }
-        }
+        unabto_tunnel_select_add_to_fd_set(&read_fds, &max_read_fd, &write_fds, &max_write_fd);
+
         timeout_val.tv_sec = (timeout/1000);
         timeout_val.tv_usec = ((timeout)%1000)*1000;
 
@@ -109,14 +97,8 @@ void tunnel_loop_select() {
             unabto_tcp_fallback_select_read_sockets(&read_fds);
 #endif
             unabto_network_select_read_sockets(&read_fds);
-            for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS; i++) {
-                if (tunnels[i].tunnel_type_vars.tcp.sock != INVALID_SOCKET && FD_ISSET(tunnels[i].tunnel_type_vars.tcp.sock, &read_fds)) {
-                    tunnel_event(&tunnels[i], TUNNEL_EVENT_SOURCE_TCP_READ);
-                }
-                if (tunnels[i].tunnel_type_vars.tcp.sock != INVALID_SOCKET && FD_ISSET(tunnels[i].tunnel_type_vars.tcp.sock, &write_fds)) {
-                    tunnel_event(&tunnels[i], TUNNEL_EVENT_SOURCE_TCP_WRITE);
-                }
-            }
+
+            unabto_tunnel_select_handle(&read_fds, &write_fds);
         }
         unabto_time_event();
     }

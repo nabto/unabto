@@ -171,6 +171,19 @@ void unabto_tcp_fallback_write_ready(nabto_connect* con) {
     }
 }
 
+void unabto_tcp_fallback_epoll_event(struct epoll_event* event)
+{
+    nabto_connect* con = (nabto_connect*)event->data.ptr;
+    if (con->epollEventType == UNABTO_EPOLL_TYPE_TCP_FALLBACK) {
+        if (event->events & EPOLLIN) {
+            unabto_tcp_fallback_read_ready(con);
+        }
+        if (event->events & EPOLLOUT) {
+            unabto_tcp_fallback_write_ready(con);
+        }
+    }
+}
+
 bool unabto_tcp_fallback_init(nabto_connect* con) {
     unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
     memset(fbConn, 0, sizeof(unabto_tcp_fallback_connection));
