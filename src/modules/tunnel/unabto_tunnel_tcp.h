@@ -1,6 +1,6 @@
 #ifndef _TUNNEL_TCP_H_
 #define _TUNNEL_TCP_H_
-#include <modules/tunnel_common/unabto_tunnel_common.h>
+#include <modules/tunnel/unabto_tunnel_common.h>
 
 #ifdef WIN32
 #else

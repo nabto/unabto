@@ -5,10 +5,10 @@
 #include <fcntl.h>
 #include <modules/network/epoll/unabto_epoll.h>
 
-#include <modules/tunnel_common/unabto_tunnel_common.h>
-#include <modules/tunnel_common/unabto_tunnel_tcp.h>
-#include <modules/tunnel_common/unabto_tunnel_uart.h>
-#include <modules/tunnel_common/unabto_tunnel_echo.h>
+#include <modules/tunnel/unabto_tunnel_common.h>
+#include <modules/tunnel/unabto_tunnel_tcp.h>
+#include <modules/tunnel/unabto_tunnel_uart.h>
+#include <modules/tunnel/unabto_tunnel_echo.h>
 
 
 #if NABTO_ENABLE_EPOLL

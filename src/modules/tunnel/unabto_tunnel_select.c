@@ -7,8 +7,8 @@
 #include <modules/tcp_fallback/tcp_fallback_select.h>
 #include <unabto/unabto_util.h>
 
-#include "tunnel_select.h"
-#include "tunnel.h"
+#include "unabto_tunnel_select.h"
+#include "unabto_tunnel.h"
 
 #if defined(WIN32) || defined(WINCE)
 // use winsock

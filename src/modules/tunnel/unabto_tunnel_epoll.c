@@ -7,7 +7,7 @@
 #include <modules/tcp_fallback/tcp_fallback_select.h>
 #include <unabto/unabto_common_main.h>
 #include <unabto/unabto_stream.h>
-#include "tunnel.h"
+#include "unabto_tunnel.h"
 
 #include <sys/epoll.h>
 

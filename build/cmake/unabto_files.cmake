@@ -311,26 +311,41 @@ set(unabto_module_tcp_fallback_src
   ${UNABTO_MODULES_SRC_DIR}/tcp_fallback/tcp_fallback_select.h)
 source_group(modules\\tcp_fallback FILES ${unabto_module_tcp_fallback_src})
 
-# modules/tunnel_common
-set(unabto_module_tunnel_common_src
-  ${UNABTO_MODULES_SRC_DIR}/tunnel_common/unabto_tunnel_common.c
-  ${UNABTO_MODULES_SRC_DIR}/tunnel_common/unabto_tunnel_common.h)
-source_group(modules\\tunnel_common FILES ${unabto_module_tunnel_common_src})
+# modules/tunnel
+set(unabto_module_tunnel_src
+  ${UNABTO_MODULES_SRC_DIR}/tunnel/unabto_tunnel.c
+  ${UNABTO_MODULES_SRC_DIR}/tunnel/unabto_tunnel.h
+  ${UNABTO_MODULES_SRC_DIR}/tunnel/unabto_tunnel_common.c
+  ${UNABTO_MODULES_SRC_DIR}/tunnel/unabto_tunnel_common.h)
+source_group(modules\\tunnel FILES ${unabto_module_tunnel_src})
+
+set(unabto_module_tunnel_epoll_src
+  ${UNABTO_MODULES_SRC_DIR}/tunnel/unabto_tunnel_epoll.c
+  ${UNABTO_MODULES_SRC_DIR}/tunnel/unabto_tunnel_epoll.h)
+
+set(unabto_module_tunnel_select_src
+  ${UNABTO_MODULES_SRC_DIR}/tunnel/unabto_tunnel_select.c
+  ${UNABTO_MODULES_SRC_DIR}/tunnel/unabto_tunnel_select.h)
 
 set(unabto_module_tunnel_echo_src
-  ${UNABTO_MODULES_SRC_DIR}/tunnel_common/unabto_tunnel_echo.c
-  ${UNABTO_MODULES_SRC_DIR}/tunnel_common/unabto_tunnel_echo.h)
-source_group(modules\\tunnel_echo FILES ${unabto_module_tunnel_echo_src})
+  ${UNABTO_MODULES_SRC_DIR}/tunnel/unabto_tunnel_echo.c
+  ${UNABTO_MODULES_SRC_DIR}/tunnel/unabto_tunnel_echo.h)
 
 set(unabto_module_tunnel_tcp_src
-  ${UNABTO_MODULES_SRC_DIR}/tunnel_common/unabto_tunnel_tcp.c
-  ${UNABTO_MODULES_SRC_DIR}/tunnel_common/unabto_tunnel_tcp.h)
-source_group(modules\\tunnel_tcp FILES ${unabto_module_tunnel_tcp_src})
+  ${UNABTO_MODULES_SRC_DIR}/tunnel/unabto_tunnel_tcp.c
+  ${UNABTO_MODULES_SRC_DIR}/tunnel/unabto_tunnel_tcp.h)
 
 set(unabto_module_tunnel_uart_src
-  ${UNABTO_MODULES_SRC_DIR}/tunnel_common/unabto_tunnel_uart.c
-  ${UNABTO_MODULES_SRC_DIR}/tunnel_common/unabto_tunnel_uart.h)
-source_group(modules\\tunnel_common FILES ${unabto_module_tunnel_uart_src})
+  ${UNABTO_MODULES_SRC_DIR}/tunnel/unabto_tunnel_uart.c
+  ${UNABTO_MODULES_SRC_DIR}/tunnel/unabto_tunnel_uart.h)
+
+source_group(modules\\tunnel FILES
+  ${unabto_module_tunnel_src}
+  ${unabto_module_tunnel_tcp_src}
+  ${unabto_module_tunnel_echo_src}
+  ${unabto_module_tunnel_uart_src}
+  ${unabto_module_tunnel_epoll_src}
+  ${unabto_module_tunnel_select_src})
 
 # modules/timers
 set(unabto_module_timers_unix_src

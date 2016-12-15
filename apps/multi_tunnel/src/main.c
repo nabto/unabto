@@ -9,9 +9,9 @@
 #include <windows.h>
 #endif
 
-#include <modules/tunnel/tunnel.h>
-#include <modules/tunnel/tunnel_select.h>
-#include <modules/tunnel/tunnel_epoll.h>
+#include <modules/tunnel/unabto_tunnel.h>
+#include <modules/tunnel/unabto_tunnel_select.h>
+#include <modules/tunnel/unabto_tunnel_epoll.h>
 #include <unabto/unabto_app.h>
 
 #include <unabto/unabto_common_main.h>

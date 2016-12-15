@@ -1,5 +1,5 @@
 #include <unabto/unabto_stream.h>
-#include "tunnel.h"
+#include "unabto_tunnel.h"
 
 bool init_tunnel_module()
 {

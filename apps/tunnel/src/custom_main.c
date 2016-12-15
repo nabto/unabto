@@ -1,8 +1,8 @@
 #include <unabto_platform_types.h>
 #include <unabto/unabto_common_main.h>
 #include <unabto/unabto_app.h>
-#include <modules/tunnel/tunnel.h>
-#include <modules/tunnel/tunnel_select.h>
+#include <modules/tunnel/unabto_tunnel.h>
+#include <modules/tunnel/unabto_tunnel_select.h>
 
 /**
  * This is a simple example of a custom tunnel implementation.

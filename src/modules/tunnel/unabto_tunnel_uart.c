@@ -7,8 +7,8 @@
 
 #include <termios.h>
 
-#include <modules/tunnel_common/unabto_tunnel_common.h>
-#include <modules/tunnel_common/unabto_tunnel_uart.h>
+#include <modules/tunnel/unabto_tunnel_common.h>
+#include <modules/tunnel/unabto_tunnel_uart.h>
 
 #if NABTO_ENABLE_EPOLL
 #include <sys/epoll.h>

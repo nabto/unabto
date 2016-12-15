@@ -1,7 +1,7 @@
 //#ifndef WIN32
 #ifndef _TUNNEL_UART_H_
 #define _TUNNEL_UART_H_
-#include <modules/tunnel_common/unabto_tunnel_common.h>
+#include <modules/tunnel/unabto_tunnel_common.h>
 
 /* Uart tunnel specific functions */
 void uart_tunnel_set_default_device(const char* device);
