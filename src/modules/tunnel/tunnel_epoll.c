@@ -62,6 +62,7 @@ void tunnel_loop_epoll() {
 #if NABTO_ENABLE_TCP_FALLBACK
             unabto_tcp_fallback_epoll_event(&events[i]);
 #endif
+            unabto_tunnel_epoll_event(&events[i]);
             if (handler->epollEventType == UNABTO_EPOLL_TYPE_TCP_TUNNEL) {
                 tunnel* tunnelPtr = (tunnel*)handler;
                 if (tunnelPtr->tunnel_type_vars.tcp.sock != INVALID_SOCKET) {

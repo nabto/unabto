@@ -315,6 +315,8 @@ source_group(modules\\tcp_fallback FILES ${unabto_module_tcp_fallback_src})
 set(unabto_module_tunnel_common_src
   ${UNABTO_MODULES_SRC_DIR}/tunnel_common/tunnel_common.c
   ${UNABTO_MODULES_SRC_DIR}/tunnel_common/tunnel_common.h
+  ${UNABTO_MODULES_SRC_DIR}/tunnel_common/unabto_tunnel_echo.c
+  ${UNABTO_MODULES_SRC_DIR}/tunnel_common/unabto_tunnel_echo.h
   ${UNABTO_MODULES_SRC_DIR}/tunnel_common/tunnel_tcp.c
   ${UNABTO_MODULES_SRC_DIR}/tunnel_common/tunnel_tcp.h)
 source_group(modules\\tunnel_common FILES ${unabto_module_tunnel_common_src})

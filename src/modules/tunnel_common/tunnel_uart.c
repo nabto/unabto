@@ -17,8 +17,17 @@
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
-extern void close_stream_reader(tunnel* tunnel);
+static const char* defaultUartDevice = 0;
 
+void uart_tunnel_set_default_device(const char* device) {
+    defaultUartDevice = device;
+}
+const char* uart_tunnel_get_default_device() {
+    return defaultUartDevice;
+}
+
+static void unabto_tunnel_uart_closing(tunnel* tunnel, tunnel_event_source event_source);
+    
 bool open_uart(tunnel* tunnel) {
     struct termios tios;
     
@@ -62,10 +71,61 @@ bool open_uart(tunnel* tunnel) {
         epoll_ctl(unabto_epoll_fd, EPOLL_CTL_ADD, tunnel->tunnel_type_vars.uart.fd, &ev);
     }
 #endif
-
     
     tunnel->state = TS_FORWARD;
     return true;
+}
+
+void unabto_tunnel_uart_event(tunnel* tunnel, tunnel_event_source event_source)
+{
+    if (tunnel->state == TS_FORWARD) {
+        if (tunnel->extReadState == FS_CLOSING && tunnel->unabtoReadState == FS_CLOSING) {
+            tunnel->state = TS_CLOSING;
+        } else {
+            uart_forward(tunnel);
+            unabto_forward_uart(tunnel);
+        }
+    }
+    
+    if (tunnel->state == TS_CLOSING) {
+        unabto_tunnel_uart_closing(tunnel, event_source);
+    }
+}
+
+
+void unabto_tunnel_uart_closing(tunnel* tunnel, tunnel_event_source event_source)
+{
+    const uint8_t* buf;
+    unabto_stream_hint hint;
+    size_t readen;
+
+    NABTO_LOG_TRACE(("TS_CLOSING"));
+
+    do {
+        readen = unabto_stream_read(tunnel->stream, &buf, &hint);
+        if (readen > 0) {
+            unabto_stream_ack(tunnel->stream, buf, readen, &hint);
+        }
+    } while (readen > 0);
+
+    if (unabto_stream_close(tunnel->stream)) {
+        unabto_stream_stats info;
+        unabto_stream_get_stats(tunnel->stream, &info);
+
+        NABTO_LOG_TRACE(("Closed tunnel successfully"));
+        NABTO_LOG_INFO(("Tunnel(%i) closed, sentPackets: %u, sentBytes %u, sentResentPackets %u, receivedPackets %u, receivedBytes %u, receivedResentPackets %u, reorderedOrLostPackets %u", 
+                        tunnel->tunnelId,
+                        info.sentPackets, info.sentBytes, info.sentResentPackets,
+                        info.receivedPackets, info.receivedBytes, info.receivedResentPackets, info.reorderedOrLostPackets));
+
+        if (tunnel->tunnel_type_vars.uart.fd != -1) {
+            close(tunnel->tunnel_type_vars.uart.fd);
+            tunnel->tunnel_type_vars.uart.fd = -1;
+        }
+
+        unabto_stream_release(tunnel->stream);
+        unabto_tunnel_reset_tunnel_struct(tunnel);
+    }
 }
 
 /**
@@ -146,7 +206,7 @@ void unabto_forward_uart(tunnel* tunnel) {
             unabto_stream_hint hint;
             size_t readen = unabto_stream_read(tunnel->stream, &buf, &hint);
             if (hint != UNABTO_STREAM_HINT_OK) {
-                close_stream_reader(tunnel);
+                unabto_tunnel_uart_close_stream_reader(tunnel);
                 break;
             } else {
                 if (readen == 0) {
@@ -160,7 +220,7 @@ void unabto_forward_uart(tunnel* tunnel) {
                         NABTO_LOG_TRACE(("Wrote to tcp stream %i", written));
                         unabto_stream_ack(tunnel->stream, buf, written, &hint);
                         if (hint != UNABTO_STREAM_HINT_OK) {
-                            close_stream_reader(tunnel);
+                            unabto_tunnel_uart_close_stream_reader(tunnel);
                             break;
                         }
                     } else if (written == 0) {
@@ -173,7 +233,7 @@ void unabto_forward_uart(tunnel* tunnel) {
                             tunnel->unabtoReadState = FS_WRITE;
                             break;
                         } else {
-                            close_stream_reader(tunnel);
+                            unabto_tunnel_uart_close_stream_reader(tunnel);
                             break;
                         }
                     }
@@ -191,24 +251,55 @@ void unabto_forward_uart(tunnel* tunnel) {
     }
 }
 
-/**
- * utility function for either sending +ok\n or -error message\n in
- * case of either success or failure.  see spec in
- * https://www.rfc-editor.org/rfc/rfc1078.txt instead of CRLF only LF
- * is used.
- */
-bool tunnel_send_init_message(tunnel* tunnel, const char* msg)
+void unabto_tunnel_uart_parse_command(tunnel* t, tunnel_event_source event_source, tunnel* tunnels, size_t tunnelsLength)
 {
-    unabto_stream_hint hint;
-    size_t written;
-    size_t writeLength = strlen(msg);
-    written = unabto_stream_write(tunnel->stream, (uint8_t*)msg, writeLength, &hint);
-    if (written != writeLength) {
-        NABTO_LOG_ERROR(("we should at a minimum be able to send this simple message, we will probably just goive up..."));
-        return false;
+    if(uart_tunnel_get_default_device() == 0){
+        NABTO_LOG_ERROR(("No UART device was specified."));
+        tunnel_send_init_message(t, "-no uart device specified\n");
+        t->state = TS_FAILED_COMMAND;
+        return;
     }
-    return true;
+    strncpy(t->staticMemory->stmu.uart_sm.deviceName, uart_tunnel_get_default_device(), MAX_DEVICE_NAME_LENGTH);
+    t->tunnelType = TUNNEL_TYPE_UART;
+    
+    unabto_tunnel_uart_steal_port(t, tunnels, tunnelsLength);
+    if (open_uart(t)) {
+        t->state = TS_FORWARD;
+        NABTO_LOG_INFO(("Tunnel(%i) connecting with UART to %s", t->tunnelId, t->staticMemory->stmu.uart_sm.deviceName));
+        tunnel_send_init_message(t, "+\n");
+    } else {
+        tunnel_send_init_message(t, "-cannot open uart\n");
+        t->state = TS_CLOSING;
+    }
 }
 
+// We have got a new stream, if there was another one using this uart
+// port disconnect that user such that this tunnel can use the port
+void unabto_tunnel_uart_steal_port(tunnel* tun, tunnel* tunnels, size_t tunnelsLength) {
+    size_t i;
+    for(i = 0; i < tunnelsLength; i++) {
+        // we should not look at ourselves
+        if (&tunnels[i] != tun) {
+            tunnel* t = &tunnels[i];
+            if (t->state == TS_FORWARD &&
+                (strcmp(tun->staticMemory->stmu.uart_sm.deviceName, t->staticMemory->stmu.uart_sm.deviceName) == 0))
+            {
+                // close the other tunnels
+                NABTO_LOG_INFO(("tunnel %i is stealing the serial port %s from tunnel %i", tun->tunnelId, tun->staticMemory->stmu.uart_sm.deviceName, t->tunnelId));
+                close_reader(t);
+                unabto_tunnel_uart_close_stream_reader(t);
+                t->state = TS_CLOSING;
+            }
+        }
+    }
+}
 
-
+void unabto_tunnel_uart_close_stream_reader(tunnel* tunnel)
+{
+    tunnel->unabtoReadState = FS_CLOSING;
+    NABTO_LOG_INFO(("closing fd %i", tunnel->tunnel_type_vars.uart.fd));
+    if (tunnel->tunnel_type_vars.uart.fd != -1) {
+        close(tunnel->tunnel_type_vars.uart.fd);
+        tunnel->tunnel_type_vars.uart.fd = -1;
+    }
+}

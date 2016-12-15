@@ -1,12 +1,27 @@
 #ifndef _TUNNEL_TCP_H_
 #define _TUNNEL_TCP_H_
 #include <modules/tunnel_common/tunnel_common.h>
+
+#ifdef WIN32
+#else
+#define INVALID_SOCKET -1
+#endif
+
+/**
+ * return false to disallow connections to the specified host:port
+ */
+bool tunnel_allow_connection(const char* host, int port);
+
 void tcp_forward(tunnel* tunnel);
 void unabto_forward_tcp(tunnel* tunnel);
 bool opening_socket(tunnel* tunnel);
 bool open_socket(tunnel* tunnel);
 
-bool unabto_tunnel_tcp_parse_command(tunnel* tunnel);
+void unabto_tunnel_tcp_init(tunnel* tunnel);
+
+void unabto_tunnel_tcp_parse_command(tunnel* tunnel, tunnel_event_source event_source);
+
+void unabto_tunnel_tcp_event(tunnel* tunnel, tunnel_event_source event_source);
 
 void unabto_tunnel_tcp_set_default_host(const char* host);
 void unabto_tunnel_tcp_set_default_port(uint16_t port);
