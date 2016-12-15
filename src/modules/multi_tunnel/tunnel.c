@@ -308,38 +308,7 @@ bool parse_command(tunnel* tunnel) {
         tunnel->tunnelType = TUNNEL_TYPE_UART;
         return true;    
     } else if (0 == memcmp(tunnel->staticMemory->command, TCP_COMMAND,strlen(TCP_COMMAND))){
-        char* s;
-
-        if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, PORT_KW_TXT)))
-        {
-            s += strlen(PORT_KW_TXT);
-            if (1 != sscanf(s, "%d", &tunnel->tunnel_type_vars.tcp.port)) {
-                NABTO_LOG_ERROR(("failed to read port number"));
-                return false;
-            }
-        } else {
-            tunnel->tunnel_type_vars.tcp.port = tunnel_get_default_port();
-        }
-    
-        if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, HOST_KW_TXT)))
-        {
-            char *sp;
-            int length;
-            s += strlen(HOST_KW_TXT);
-            sp = strchr(s, ' ');
-        
-            if (sp != NULL) {
-                length = sp-s;
-            } else {
-                length = strlen(s);
-            }
-        
-            strncpy(tunnel->staticMemory->stmu.tcp_sm.host, s, MIN(length, MAX_COMMAND_LENGTH-1));
-        } else {
-            strncpy(tunnel->staticMemory->stmu.tcp_sm.host, tunnel_get_default_host(), MAX_HOST_LENGTH);
-        }
-        tunnel->tunnelType = TUNNEL_TYPE_TCP;
-        return true;
+        return unabto_tunnel_tcp_parse_command(tunnel);
     } else if (0 == memcmp(tunnel->staticMemory->command, ECHO_COMMAND,strlen(ECHO_COMMAND))){
         tunnel->tunnelType = TUNNEL_TYPE_ECHO;
         return true;
@@ -347,13 +316,6 @@ bool parse_command(tunnel* tunnel) {
         NABTO_LOG_INFO(("Failed to parse command: %s",tunnel->staticMemory->command));
         return false;
     }
-    
-    //~ if (0 != strcmp(tunnel->staticMemory->uart_sm.command, UART_COMMAND)
-    //~ && 0 != strcmp(tunnel->staticMemory->uart_sm.command, TCP_COMMAND)
-    //~ && 0 != strcmp(tunnel->staticMemory->uart_sm.command, ECHO_COMMAND)) {
-    //~ // the string has to start with uart, tcp, or echo
-    //~ return false;
-    //~ }
 
     return false;
 
@@ -432,25 +394,4 @@ void steal_uart_port(tunnel* tun) {
             }
         }
     }
-}
-
- 
-const char* tunnel_host = DEFAULT_HOST;
-int tunnel_port = DEFAULT_PORT;
-
-
-void tunnel_set_default_host(const char* host) {
-    tunnel_host = host;
-}
-
-void tunnel_set_default_port(int port) {
-    tunnel_port = port;
-}
-
-const char* tunnel_get_default_host() {
-    return tunnel_host;
-}
-
-int tunnel_get_default_port() {
-    return tunnel_port;
 }

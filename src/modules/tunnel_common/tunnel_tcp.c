@@ -15,6 +15,9 @@
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
+static const char* tunnel_host = UNABTO_TUNNEL_TCP_DEFAULT_HOST;
+static uint16_t tunnel_port = UNABTO_TUNNEL_TCP_DEFAULT_PORT;
+
 
 extern void close_stream_reader(tunnel* tunnel);
 
@@ -228,15 +231,16 @@ void unabto_forward_tcp(tunnel* tunnel) {
                         if (WSAGetLastError() == WSAEWOULDBLOCK) {
                             tunnel->unabtoReadState = FS_WRITE;
                             break;
+                        }
 #else
                         if (errno == EAGAIN || errno == EWOULDBLOCK) {
                             tunnel->unabtoReadState = FS_WRITE;
                             break;
-#endif
-                        } else {
-                            close_stream_reader(tunnel);
-                            break;
                         }
+#endif
+                        close_stream_reader(tunnel);
+                        break;
+                        
                     }
                 }
             }
@@ -250,4 +254,59 @@ void unabto_forward_tcp(tunnel* tunnel) {
             break;
         }
     }
+}
+
+#define PORT_KW_TXT "port="
+#define HOST_KW_TXT "host="
+
+bool unabto_tunnel_tcp_parse_command(tunnel* tunnel)
+{
+    char* s;
+
+    if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, PORT_KW_TXT)))
+    {
+        s += strlen(PORT_KW_TXT);
+        if (1 != sscanf(s, "%d", &tunnel->tunnel_type_vars.tcp.port)) {
+            NABTO_LOG_ERROR(("failed to read port number"));
+            return false;
+        }
+    } else {
+        tunnel->tunnel_type_vars.tcp.port = unabto_tunnel_tcp_get_default_port();
+    }
+    
+    if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, HOST_KW_TXT)))
+    {
+        char *sp;
+        int length;
+        s += strlen(HOST_KW_TXT);
+        sp = strchr(s, ' ');
+        
+        if (sp != NULL) {
+            length = sp-s;
+        } else {
+            length = strlen(s);
+        }
+        
+        strncpy(tunnel->staticMemory->stmu.tcp_sm.host, s, MIN(length, MAX_COMMAND_LENGTH-1));
+    } else {
+        strncpy(tunnel->staticMemory->stmu.tcp_sm.host, unabto_tunnel_tcp_get_default_host(), MAX_HOST_LENGTH);
+    }
+    tunnel->tunnelType = TUNNEL_TYPE_TCP;
+    return true;
+}
+
+void unabto_tunnel_tcp_set_default_host(const char* host) {
+    tunnel_host = host;
+}
+
+void unabto_tunnel_tcp_set_default_port(uint16_t port) {
+    tunnel_port = port;
+}
+
+const char* unabto_tunnel_tcp_get_default_host() {
+    return tunnel_host;
+}
+
+uint16_t unabto_tunnel_tcp_get_default_port() {
+    return tunnel_port;
 }

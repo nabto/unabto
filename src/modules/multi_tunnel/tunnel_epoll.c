@@ -48,7 +48,7 @@ void tunnel_loop_epoll() {
         unabto_time_update_stamp();
         
         for (i = 0; i < nfds; i++) {
-            
+            struct epoll_event* event = &events[i];
             unabto_epoll_event_handler* handler = (unabto_epoll_event_handler*)events[i].data.ptr;
 
             if (handler->epollEventType == UNABTO_EPOLL_TYPE_UDP) {
@@ -59,16 +59,7 @@ void tunnel_loop_epoll() {
                 } while (status);
             }
 #if NABTO_ENABLE_TCP_FALLBACK
-            if (handler->epollEventType == UNABTO_EPOLL_TYPE_TCP_FALLBACK) {
-
-                nabto_connect* con = (nabto_connect*)handler;
-                if (events[i].events & EPOLLIN) {
-                    unabto_tcp_fallback_read_ready(con);
-                }
-                if (events[i].events & EPOLLOUT) {
-                    unabto_tcp_fallback_write_ready(con);
-                }
-            }
+            unabto_tcp_fallback_epoll_event(event);
 #endif
             //~ NABTO_LOG_INFO(("Generating tunnel event with epollEventType: %i",handler->epollEventType));
             if (handler->epollEventType == UNABTO_EPOLL_TYPE_UART_TUNNEL) {

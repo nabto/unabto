@@ -34,6 +34,10 @@ void unabto_tcp_fallback_select_add_to_write_fd_set(fd_set* writeFds, int* maxWr
 void unabto_tcp_fallback_select_read_sockets(fd_set* readFds);
 void unabto_tcp_fallback_select_write_sockets(fd_set* writeFds);
 
+#if NABTO_ENABLE_EPOLL
+void unabto_tcp_fallback_epoll_event(struct epoll_event* event);
+#endif
+
 struct nabto_connect_s;
 
 void unabto_tcp_fallback_read_ready(struct nabto_connect_s* con);

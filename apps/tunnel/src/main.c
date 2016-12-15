@@ -270,14 +270,14 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     }
 
     if(gopt_arg(options, 'H', &h)) {
-        tunnel_set_default_host(h);
+        unabto_tunnel_tcp_set_default_host(h);
     }
 
     if (gopt_arg(options, 'P', &tunnel_port_str)) {
         if(1 != sscanf(tunnel_port_str, "%d", &p)) {
             NABTO_LOG_FATAL(("Reading of port parameter failed."));
         } else {
-            tunnel_set_default_port(p);
+            unabto_tunnel_tcp_set_default_port(p);
         }
     }
      

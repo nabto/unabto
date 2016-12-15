@@ -34,4 +34,9 @@ void unabto_epoll_init();
 #define NABTO_ENABLE_EPOLL 0
 #endif
 
+#if NABTO_ENABLE_EPOLL
+#include <sys/epoll.h>
+#endif
+
+
 #endif

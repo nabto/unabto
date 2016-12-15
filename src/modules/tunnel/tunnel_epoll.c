@@ -60,16 +60,7 @@ void tunnel_loop_epoll() {
                 } while (status);
             }
 #if NABTO_ENABLE_TCP_FALLBACK
-            if (handler->epollEventType == UNABTO_EPOLL_TYPE_TCP_FALLBACK) {
-
-                nabto_connect* con = (nabto_connect*)handler;
-                if (events[i].events & EPOLLIN) {
-                    unabto_tcp_fallback_read_ready(con);
-                }
-                if (events[i].events & EPOLLOUT) {
-                    unabto_tcp_fallback_write_ready(con);
-                }
-            }
+            unabto_tcp_fallback_epoll_event(&events[i]);
 #endif
             if (handler->epollEventType == UNABTO_EPOLL_TYPE_TCP_TUNNEL) {
                 tunnel* tunnelPtr = (tunnel*)handler;

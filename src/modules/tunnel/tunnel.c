@@ -212,43 +212,16 @@ void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
     }
 }
 
-#define PORT_KW_TXT "port="
-#define HOST_KW_TXT "host="
+#define TUNNEL_TXT "tunnel"
 
 bool parse_command(tunnel* tunnel) {
-    
-    char* s;
-
-    if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, PORT_KW_TXT)))
-    {
-        s += strlen(PORT_KW_TXT);
-        if (1 != sscanf(s, "%d", &tunnel->tunnel_type_vars.tcp.port)) {
-            NABTO_LOG_ERROR(("failed to read port number"));
-            return false;
-        }
-    } else {
-        tunnel->tunnel_type_vars.tcp.port = tunnel_get_default_port();
+    if (tunnel->commandLength < strlen(TUNNEL_TXT)) {
+        return false;
     }
-    
-    if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, HOST_KW_TXT)))
-    {
-        char *sp;
-        int length;
-        s += strlen(HOST_KW_TXT);
-        sp = strchr(s, ' ');
-        
-        if (sp != NULL) {
-            length = sp-s;
-        } else {
-            length = strlen(s);
-        }
-        
-        strncpy(tunnel->staticMemory->stmu.tcp_sm.host, s, MIN(length, MAX_COMMAND_LENGTH-1));
-    } else {
-        strncpy(tunnel->staticMemory->stmu.tcp_sm.host, tunnel_get_default_host(), MAX_HOST_LENGTH);
+    if (strcmp((const char*)tunnel->staticMemory->command, "tunnel") == 0) {
+        return unabto_tunnel_tcp_parse_command(tunnel);
     }
-    
-    return true;
+    return false;
 }
 
 
