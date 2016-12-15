@@ -11,9 +11,10 @@
 
 #define NABTO_TICK 5
 
-#include <modules/multi_tunnel/tunnel.h>
-#include <modules/multi_tunnel/tunnel_select.h>
-#include <modules/multi_tunnel/tunnel_epoll.h>
+#include <modules/tunnel/tunnel.h>
+#include <modules/tunnel/tunnel_select.h>
+#include <modules/tunnel/tunnel_epoll.h>
+#include <modules/tunnel_common/unabto_tunnel_uart.h>
 #include <unabto/unabto_app.h>
 
 #include <unabto/unabto_common_main.h>
