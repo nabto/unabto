@@ -208,7 +208,7 @@ void unabto_tunnel_event_dispatch(tunnel* tunnel, tunnel_event_source tunnel_eve
 {
 #if NABTO_ENABLE_TUNNEL_UART
     if (tunnel->tunnelType == TUNNEL_TYPE_UART) {
-        unabto_tunnel_echo_event(tunnel, tunnel_event);
+        unabto_tunnel_uart_event(tunnel, tunnel_event);
     }
 #endif
 

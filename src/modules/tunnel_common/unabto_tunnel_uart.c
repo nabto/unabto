@@ -87,6 +87,10 @@ void unabto_tunnel_uart_event(tunnel* tunnel, tunnel_event_source event_source)
             unabto_forward_uart(tunnel);
         }
     }
+
+    if (tunnel->extReadState == FS_CLOSING && tunnel->unabtoReadState == FS_CLOSING) {
+        tunnel->state = TS_CLOSING;
+    }
     
     if (tunnel->state == TS_CLOSING) {
         unabto_tunnel_uart_closing(tunnel, event_source);
