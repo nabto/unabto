@@ -3,8 +3,8 @@
 
 #include <unabto_platform_types.h>
 #include <unabto/unabto_stream.h>
-#include <modules/tunnel_common/tunnel_common.h>
-#include <modules/tunnel_common/tunnel_tcp.h>
+#include <modules/tunnel_common/unabto_tunnel_common.h>
+#include <modules/tunnel_common/unabto_tunnel_tcp.h>
 
 #if defined(WIN32) || defined(WINCE)
 // use winsock

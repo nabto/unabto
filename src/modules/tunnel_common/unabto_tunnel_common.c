@@ -5,9 +5,10 @@
 #include <fcntl.h>
 #include <modules/network/epoll/unabto_epoll.h>
 
-#include <modules/tunnel_common/tunnel_common.h>
-#include <modules/tunnel_common/tunnel_tcp.h>
-#include <modules/tunnel_common/tunnel_uart.h>
+#include <modules/tunnel_common/unabto_tunnel_common.h>
+#include <modules/tunnel_common/unabto_tunnel_tcp.h>
+#include <modules/tunnel_common/unabto_tunnel_uart.h>
+#include <modules/tunnel_common/unabto_tunnel_echo.h>
 
 
 #if NABTO_ENABLE_EPOLL
@@ -124,7 +125,7 @@ void unabto_tunnel_parse_command(tunnel* tunnel, tunnel_event_source tunnel_even
 {
 #if NABTO_ENABLE_TUNNEL_UART
     if (strncmp((const char*)tunnel->staticMemory->command, UART_TXT, strlen(UART_TXT)) == 0) {
-        return unabto_tunnel_uart_parse_command(tunnel, tunnel_event);
+        return unabto_tunnel_uart_parse_command(tunnel, tunnel_event, tunnels, NABTO_MEMORY_STREAM_MAX_STREAMS);
     }
 #endif
 

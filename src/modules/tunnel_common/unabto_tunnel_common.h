@@ -1,5 +1,5 @@
-#ifndef _TUNNEL_COMMON_H_
-#define _TUNNEL_COMMON_H_
+#ifndef _UNABTO_TUNNEL_COMMON_H_
+#define _UNABTO_TUNNEL_COMMON_H_
 
 #include <unabto_platform_types.h>
 #include <unabto/unabto_stream.h>
@@ -125,4 +125,4 @@ void unabto_tunnel_epoll_event(struct epoll_event* event);
 #endif
 
 
-#endif // _TUNNEL_COMMON_H_
+#endif // _UNABTO_TUNNEL_COMMON_H_

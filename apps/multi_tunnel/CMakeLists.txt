@@ -24,8 +24,13 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   )
 
+SET(ENABLE_TUNNEL_TCP 1)
+SET(ENABLE_TUNNEL_UART 1)
+SET(ENABLE_TUNNEL_ECHO 1)
+SET(TUNNEL_LIBRARY_NAME unabto_multi_tunnel_library)
+
 # build the tunnelling library with the unabto_config.h defined in this project.
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../src/modules/multi_tunnel ${CMAKE_CURRENT_BINARY_DIR}/multi_tunnel_library)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../src/modules/tunnel ${CMAKE_CURRENT_BINARY_DIR}/multi_tunnel_library)
 
 
 source_group(tunnel\\src FILES ${unabto_tunnel_src})
