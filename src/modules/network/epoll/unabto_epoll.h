@@ -36,6 +36,8 @@ void unabto_epoll_init();
 
 #if NABTO_ENABLE_EPOLL
 #include <sys/epoll.h>
+
+void unabto_network_epoll_read(struct epoll_event* event);
 #endif
 
 

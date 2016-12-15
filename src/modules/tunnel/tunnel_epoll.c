@@ -53,11 +53,7 @@ void tunnel_loop_epoll() {
             unabto_epoll_event_handler* handler = (unabto_epoll_event_handler*)events[i].data.ptr;
 
             if (handler->epollEventType == UNABTO_EPOLL_TYPE_UDP) {
-                unabto_epoll_event_handler_udp* udpHandler = (unabto_epoll_event_handler_udp*)handler;
-                bool status;
-                do {
-                    status = unabto_read_socket(udpHandler->fd);
-                } while (status);
+                unabto_network_epoll_read(&events[i]);
             }
 #if NABTO_ENABLE_TCP_FALLBACK
             unabto_tcp_fallback_epoll_event(&events[i]);

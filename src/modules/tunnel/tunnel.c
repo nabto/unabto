@@ -1,14 +1,4 @@
 #include <unabto/unabto_stream.h>
-#include <unabto/unabto_app.h>
-#include <unabto/unabto_memory.h>
-#include <unabto/unabto_common_main.h>
-#include <unabto/unabto_main_contexts.h>
-#include <unabto/unabto_external_environment.h>
-#include <modules/network/epoll/unabto_epoll.h>
-#include <modules/tcp_fallback/tcp_fallback_select.h>
-
-#include <string.h>
-
 #include "tunnel.h"
 
 bool init_tunnel_module()

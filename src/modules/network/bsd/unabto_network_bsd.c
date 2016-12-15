@@ -322,6 +322,19 @@ void unabto_network_poll_read_sockets(struct pollfd* begin, struct pollfd* end)
     }
 }
 
+#if NABTO_ENABLE_EPOLL
+void unabto_network_epoll_read(struct epoll_event* event)
+{
+    unabto_epoll_event_handler_udp* udpHandler = (unabto_epoll_event_handler_udp*)event->data.ptr;
+    if (udpHandler->epollEventType == UNABTO_EPOLL_TYPE_UDP) {
+        bool status;
+        do {
+            status = unabto_read_socket(udpHandler->fd);
+        } while (status);
+    }
+}
+#endif
+
 bool nabto_get_local_ip(uint32_t* ip) {
     struct sockaddr_in si_me, si_other;
     int s;
