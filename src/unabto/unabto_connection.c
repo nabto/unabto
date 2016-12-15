@@ -557,13 +557,6 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
             NABTO_LOG_TRACE(("Connection opened from '%s' (to %s)", con->clientId, nmc.nabtoMainSetup.id));
         }
     }
-    
-#if NABTO_ENABLE_CONNECTION_ESTABLISHMENT_ACL_CHECK
-    if (!allow_client_access(con)) {
-        *ec = NOTIFY_ERROR_CP_ACCESS;
-        goto init_error;
-    }
-#endif
 
 #if NABTO_ENABLE_TCP_FALLBACK
     {
@@ -586,7 +579,6 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
 #endif
     {
         struct unabto_payload_packet fingerprintPayload;
-        
         if (unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_FP, &fingerprintPayload)) {
             struct unabto_payload_typed_buffer fingerprint;
             if (unabto_payload_read_typed_buffer(&fingerprintPayload, &fingerprint)) {
@@ -624,8 +616,16 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
     unabto_connection_set_future_stamp(&con->stamp, 20000); /* give much extra time during initialisation */
 
     if (!verify_connection_encryption(con)) {
-        goto init_crypto_error;
+        *ec = NOTIFY_ERROR_ENCR_MISMATCH;
+        goto init_error;
     }
+
+#if NABTO_ENABLE_CONNECTION_ESTABLISHMENT_ACL_CHECK
+    if (!allow_client_access(con)) {
+        *ec = NOTIFY_ERROR_CP_ACCESS;
+        goto init_error;
+    }
+#endif
 
     if (con->cpEqual) {
         NABTO_LOG_DEBUG((PRInsi " U_CONNECT: addr:" PRIep " rendezvous:%" PRIu8, MAKE_NSI_PRINTABLE(0, *nsi, 0), MAKE_EP_PRINTABLE(con->cp.privateEndpoint), !con->noRendezvous));
@@ -637,14 +637,8 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
 
     return con;
 
-init_crypto_error:
-    *ec = NOTIFY_ERROR_ENCR_MISMATCH;
-
-#if NABTO_ENABLE_CONNECTION_ESTABLISHMENT_ACL_CHECK
 init_error:
     nabto_release_connection(con);
-#endif
-
     return 0;
 }
 
