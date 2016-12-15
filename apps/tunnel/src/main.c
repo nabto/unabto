@@ -122,7 +122,6 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x17s[] = "";      const char* x17l[] = { "allow_host", 0};
     const char x18s[] = "x";     const char* x18l[] = { "nice_exit", 0};
     const char x19s[] = "";      const char* x19l[] = { "allow_all_ports", 0};
-    const char x20s[] = "";      const char* x20l[] = { "test_webserver", 0};
     const char x21s[] = "l";     const char* x21l[] = { "nabtolog", 0 };
     const char x22s[] = "A";     const char* x22l[] = { "controller", 0 };
     const char x23s[] = "";      const char* x23l[] = { "disable_tcp_fb", 0 };
