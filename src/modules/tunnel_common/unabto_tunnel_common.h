@@ -100,8 +100,6 @@ typedef struct tunnel {
     tunnel_static_memory* staticMemory;
 } tunnel;
 
-void close_reader(tunnel* tunnel);
-
 void unabto_tunnel_reset_tunnel_struct(tunnel* t);
 bool unabto_tunnel_init_tunnels();
 void unabto_tunnel_deinit_tunnels();

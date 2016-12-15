@@ -66,11 +66,7 @@ tunnel* unabto_tunnel_get_tunnel(unabto_stream* stream)
     return t;
 }
 
-void close_reader(tunnel* tunnel) {
-    NABTO_LOG_TRACE(("close reader"));
-    unabto_stream_close(tunnel->stream);
-    tunnel->extReadState = FS_CLOSING;
-}
+
 
 void unabto_tunnel_read_command(tunnel* tunnel, tunnel_event_source event_source)
 {

@@ -32,6 +32,7 @@ static uint16_t tunnel_port = UNABTO_TUNNEL_TCP_DEFAULT_PORT;
 
 
 void unabto_tunnel_tcp_close_stream_reader(tunnel* tunnel);
+void unabto_tunnel_tcp_close_tcp_reader(tunnel* tunnel);
 void unabto_tunnel_tcp_closing(tunnel* tunnel, tunnel_event_source event_source);
 
 
@@ -89,6 +90,14 @@ void unabto_tunnel_tcp_closing(tunnel* tunnel, tunnel_event_source event_source)
                         tunnel->tunnelId,
                         info.sentPackets, info.sentBytes, info.sentResentPackets,
                         info.receivedPackets, info.receivedBytes, info.receivedResentPackets, info.reorderedOrLostPackets));
+
+#if NABTO_ENABLE_EPOLL
+        {
+            struct epoll_event ev;
+            memset(&ev, 0, sizeof(struct epoll_event));
+            epoll_ctl(unabto_epoll_fd, EPOLL_CTL_DEL, tunnel->tunnel_type_vars.tcp.sock, &ev);
+        }
+#endif
         
         close(tunnel->tunnel_type_vars.tcp.sock);
         unabto_stream_release(tunnel->stream);
@@ -110,7 +119,7 @@ void tcp_forward(tunnel* tunnel) {
 
         canWriteToStreamBytes = unabto_stream_can_write(tunnel->stream, &hint);
         if (hint != UNABTO_STREAM_HINT_OK) {
-            close_reader(tunnel);
+            unabto_tunnel_tcp_close_tcp_reader(tunnel);
             break;
         }
         if (canWriteToStreamBytes == 0) {
@@ -127,7 +136,7 @@ void tcp_forward(tunnel* tunnel) {
             readen = recv(tunnel->tunnel_type_vars.tcp.sock, readBuffer, maxRead, 0);
             if (readen == 0) {
                 // eof
-                close_reader(tunnel);
+                unabto_tunnel_tcp_close_tcp_reader(tunnel);
                 break;
             } else if (readen < 0) {
 #ifdef WIN32 // defined(WINSOCK)
@@ -138,7 +147,7 @@ void tcp_forward(tunnel* tunnel) {
                     break;
 #endif
                 } else {
-                    close_reader(tunnel);
+                    unabto_tunnel_tcp_close_tcp_reader(tunnel);
                     break;
                 }
             } else if (readen > 0) {
@@ -147,7 +156,7 @@ void tcp_forward(tunnel* tunnel) {
                 size_t written = unabto_stream_write(tunnel->stream, readBuffer, readen, &hint);
                 if (hint != UNABTO_STREAM_HINT_OK) {
                     NABTO_LOG_TRACE(("Can't write to stream"));
-                    close_reader(tunnel);
+                    unabto_tunnel_tcp_close_tcp_reader(tunnel);
                     break;
                 }
                 
@@ -395,4 +404,11 @@ void unabto_tunnel_tcp_close_stream_reader(tunnel* tunnel) {
     NABTO_LOG_INFO(("closing socket %i", tunnel->tunnel_type_vars.tcp.sock));
     tunnel->unabtoReadState = FS_CLOSING;
     shutdown(tunnel->tunnel_type_vars.tcp.sock, SHUT_WR);
+}
+
+// no more data will come from the tcp connection to the stream
+void unabto_tunnel_tcp_close_tcp_reader(tunnel* tunnel) {
+    NABTO_LOG_TRACE(("close reader"));
+    unabto_stream_close(tunnel->stream);
+    tunnel->extReadState = FS_CLOSING;
 }
