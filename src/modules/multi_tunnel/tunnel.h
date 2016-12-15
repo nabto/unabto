@@ -9,12 +9,6 @@
 #include <modules/tunnel_common/tunnel_uart.h>
 #include <modules/tunnel_common/unabto_tunnel_echo.h>
 
-#define UART_COMMAND "uart"
-#define TCP_COMMAND "tunnel"
-#define ECHO_COMMAND "echo"
-
-extern NABTO_THREAD_LOCAL_STORAGE tunnel* tunnels;
-
 /* Shared functions */
 bool init_tunnel_module();
 void deinit_tunnel_module();

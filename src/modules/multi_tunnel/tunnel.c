@@ -11,16 +11,6 @@
 
 #include "tunnel.h"
 
-// use a bsd api
-#include <fcntl.h>
-#include <sys/types.h>
-#include <errno.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <termios.h>
-#include <stdio.h>
-
-/* Shared functions */
 bool init_tunnel_module()
 {
     return unabto_tunnel_init_tunnels();
@@ -37,14 +27,10 @@ void unabto_stream_accept(unabto_stream* stream)
 }
 
 void unabto_stream_event(unabto_stream* stream, unabto_stream_event_type event) {
-    tunnel* state;
-    //~ NABTO_LOG_INFO(("Unabto_stream_event: %i",event));
+     tunnel* t = unabto_tunnel_get_tunnel(stream);
     NABTO_LOG_TRACE(("Stream %i, %i", unabto_stream_index(stream), event));
-    state = &tunnels[unabto_stream_index(stream)];
-    tunnel_event(state, TUNNEL_EVENT_SOURCE_UNABTO);
+    tunnel_event(t, TUNNEL_EVENT_SOURCE_UNABTO);
 }
-
-
 
 void tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
     //~ NABTO_LOG_INFO(("tunnel event with event_source: %i, tunnel state: %i",event_source,tunnel->state));

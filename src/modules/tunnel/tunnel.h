@@ -11,11 +11,6 @@
 #define WINSOCK 1
 #endif
 
-/**
- * return false to disallow connections to the specified host:port
- */
-bool tunnel_allow_connection(const char* host, int port);
-
 bool init_tunnel_module();
 void deinit_tunnel_module();
 
