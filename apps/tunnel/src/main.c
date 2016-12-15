@@ -14,7 +14,6 @@
 #include <modules/tunnel/tunnel.h>
 #include <modules/tunnel/tunnel_select.h>
 #include <modules/tunnel/tunnel_epoll.h>
-#include "tunnel_application_requests.h"
 #include <unabto/unabto_app.h>
 
 #include <unabto/unabto_common_main.h>
@@ -29,7 +28,6 @@
 
 #include <modules/network/epoll/unabto_epoll.h>
 
-#include "test_webserver.h"
 #include "platform_checks.h"
 
 #ifdef WINCE
@@ -62,11 +60,6 @@ static bool nice_exit = false;
 static HANDLE signal_event = NULL;
 #endif
 
-#if USE_TEST_WEBSERVER
-static bool testWebserver = false;
-const char* testWebserverPortStr;
-#endif
-
 #if NABTO_ENABLE_EPOLL
 static bool useSelectBased = false;
 #endif
@@ -75,7 +68,6 @@ enum {
     ALLOW_PORT_OPTION = 1,
     ALLOW_HOST_OPTION,
     ALLOW_ALL_PORTS_OPTION,
-    TEST_WEBSERVER_OPTION,
     DISABLE_TCP_FALLBACK_OPTION,
     CONTROLLER_PORT_OPTION,
     SELECT_BASED_OPTION,
@@ -160,7 +152,6 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         { ALLOW_HOST_OPTION, GOPT_REPEAT|GOPT_ARG, x17s, x17l },
         { 'x', GOPT_NOARG, x18s, x18l },
         { ALLOW_ALL_PORTS_OPTION, GOPT_NOARG, x19s, x19l },
-        { TEST_WEBSERVER_OPTION, GOPT_ARG, x20s, x20l },
         { 'l', GOPT_REPEAT|GOPT_ARG,  x21s, x21l },
         { 'A', GOPT_ARG, x22s, x22l },
         { DISABLE_TCP_FALLBACK_OPTION, GOPT_NOARG, x23s, x23l },
@@ -213,9 +204,6 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("      --allow_port            Ports that are allowed. Requires -a.\n");
         printf("      --allow_host            Hostnames that are allowed. Requires -a.\n");
         printf("  -x, --nice_exit             Close the tunnels nicely when pressing Ctrl+C.\n");
-#if USE_TEST_WEBSERVER
-        printf("      --test_webserver        Specify port of test webserver and enable it.\n");
-#endif
 #if NABTO_ENABLE_TCP_FALLBACK
         printf("      --disable_tcp_fb        Disable tcp fallback.\n");
 #endif
@@ -342,12 +330,6 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         allow_all_ports = true;
     }
 
-#if USE_TEST_WEBSERVER
-    if (gopt_arg(options, TEST_WEBSERVER_OPTION, &testWebserverPortStr)) {
-        testWebserver = true;
-    }
-#endif
-
 #if NABTO_ENABLE_TCP_FALLBACK
     if (gopt(options, DISABLE_TCP_FALLBACK_OPTION)) {
         nms->enableTcpFallback = false;
@@ -404,14 +386,6 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 
 int main(int argc, char** argv)
 {
-#if USE_TEST_WEBSERVER
-#ifdef WIN32
-    HANDLE testWebserverThread;
-#else
-    pthread_t testWebserverThread;
-#endif
-#endif
-
     nabto_main_setup* nms = unabto_init_context();
 
     platform_checks();
@@ -423,16 +397,6 @@ int main(int argc, char** argv)
     if (!tunnel_parse_args(argc, argv, nms)) {
         NABTO_LOG_FATAL(("failed to parse commandline args"));
     }
-
-#if USE_TEST_WEBSERVER
-    if (testWebserver) {
-#ifdef WIN32
-        testWebserverThread = CreateThread(NULL, 0, test_webserver, (void*)testWebserverPortStr, NULL, NULL);
-#else
-        pthread_create(&testWebserverThread, NULL, test_webserver, (void*)testWebserverPortStr);
-#endif
-    }
-#endif
 
 #if HANDLE_SIGNALS
 #ifdef WIN32
@@ -490,8 +454,6 @@ bool tunnel_allow_connection(const char* host, int port) {
     return allow;
 }
 
-#if !USE_STUN_CLIENT
-
 application_event_result application_event(application_request* request, unabto_query_request* readBuffer, unabto_query_response* writeBuffer)
 {
     return AER_REQ_INV_QUERY_ID;
@@ -507,5 +469,3 @@ application_event_result application_poll(application_request* applicationReques
 
 void application_poll_drop(application_request* applicationRequest) {
 }
-
-#endif

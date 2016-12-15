@@ -34,10 +34,6 @@ set(tunnel_src
   ${unabto_server_unabto_multi_tunneling_src}/platform_checks.c
   )
 
-if (NOT WIN32)
-    SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc")
-endif()
-
 add_definitions(${unabto_definitions})
 
 if (UNABTO_HAVE_EPOLL)

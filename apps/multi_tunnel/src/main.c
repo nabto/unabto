@@ -59,11 +59,6 @@ static bool nice_exit = false;
 static HANDLE signal_event = NULL;
 #endif
 
-#if USE_TEST_WEBSERVER
-static bool testWebserver = false;
-const char* testWebserverPortStr;
-#endif
-
 #if NABTO_ENABLE_EPOLL
 static bool useSelectBased = false;
 #endif
@@ -394,14 +389,6 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 
 int main(int argc, char** argv)
 {
-#if USE_TEST_WEBSERVER
-#ifdef WIN32
-    HANDLE testWebserverThread;
-#else
-    pthread_t testWebserverThread;
-#endif
-#endif
-
     nabto_main_setup* nms = unabto_init_context();
 
     platform_checks();
@@ -413,16 +400,6 @@ int main(int argc, char** argv)
     if (!tunnel_parse_args(argc, argv, nms)) {
         NABTO_LOG_FATAL(("failed to parse commandline args"));
     }
-
-#if USE_TEST_WEBSERVER
-    if (testWebserver) {
-#ifdef WIN32
-        testWebserverThread = CreateThread(NULL, 0, test_webserver, (void*)testWebserverPortStr, NULL, NULL);
-#else
-        pthread_create(&testWebserverThread, NULL, test_webserver, (void*)testWebserverPortStr);
-#endif
-    }
-#endif
 
 #if HANDLE_SIGNALS
 #ifdef WIN32
@@ -480,8 +457,6 @@ bool tunnel_allow_connection(const char* host, int port) {
     return allow;
 }
 
-#if !USE_STUN_CLIENT
-
 application_event_result application_event(application_request* request, unabto_query_request* readBuffer, unabto_query_response* writeBuffer)
 {
     return AER_REQ_INV_QUERY_ID;
@@ -497,5 +472,3 @@ application_event_result application_poll(application_request* applicationReques
 
 void application_poll_drop(application_request* applicationRequest) {
 }
-
-#endif
