@@ -19,15 +19,6 @@ extern NABTO_THREAD_LOCAL_STORAGE tunnel* tunnels;
  */
 bool tunnel_allow_connection(const char* host, int port);
 
-#define DEFAULT_PORT 22
-#define DEFAULT_HOST "127.0.0.1"
-
-void tunnel_set_default_host(const char* host);
-void tunnel_set_default_port(int port);
-
-const char* tunnel_get_default_host();
-int tunnel_get_default_port();
-
 bool init_tunnel_module();
 void deinit_tunnel_module();
 

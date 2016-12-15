@@ -241,24 +241,3 @@ void reset_tunnel_struct(tunnel* t) {
     t->epollEventType = UNABTO_EPOLL_TYPE_TCP_TUNNEL;
 #endif
 }
-
- 
-const char* tunnel_host = DEFAULT_HOST;
-int tunnel_port = DEFAULT_PORT;
-
-
-void tunnel_set_default_host(const char* host) {
-    tunnel_host = host;
-}
-
-void tunnel_set_default_port(int port) {
-    tunnel_port = port;
-}
-
-const char* tunnel_get_default_host() {
-    return tunnel_host;
-}
-
-int tunnel_get_default_port() {
-    return tunnel_port;
-}
