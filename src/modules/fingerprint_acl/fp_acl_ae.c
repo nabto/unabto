@@ -516,6 +516,16 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
     return true;
 }
 
-    
+bool fp_acl_is_user_owner(application_request* request) {
+    if (! (request->connection && request->connection->hasFingerprint)) {
+        return false;
+    }
 
-    
+    void* it = aclDb.find(request->connection->fingerprint);
+    struct fp_acl_user user;
+    if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
+        return false;
+    }
+
+    return (user.permissions & FP_ACL_PERMISSION_ADMIN) == FP_ACL_PERMISSION_ADMIN;
+}

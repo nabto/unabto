@@ -31,6 +31,12 @@ bool fp_acl_is_request_allowed(application_request* request, uint32_t requiredPe
 bool fp_acl_is_pair_allowed(application_request* request);
 
 /**
+ * call this function to see if the client is owner of the
+ * device.
+ */
+bool fp_acl_is_user_owner(application_request* request);
+
+/**
  * This function should be called from the allow_client_access(...)
  * function. This will reject connections early in the connect phase.
  */
