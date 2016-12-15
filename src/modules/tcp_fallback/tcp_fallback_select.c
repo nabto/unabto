@@ -45,7 +45,7 @@ static NABTO_THREAD_LOCAL_STORAGE unabto_tcp_fallback_connection fbConns[NABTO_M
 #endif
 
 bool unabto_tcp_fallback_handle_connect(nabto_connect* con);
-void unabto_tcp_fallback_read_packet(nabto_connect* con);
+void unabto_tcp_fallback_read_packets(nabto_connect* con);
 bool unabto_tcp_fallback_handle_write(nabto_connect* con);
 
 void close_tcp_socket(nabto_connect* con);
@@ -108,7 +108,7 @@ void unabto_tcp_fallback_read_ready(nabto_connect* con) {
         unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
         if (st > UTFS_IDLE && st < UTFS_CLOSED && fbConn->socket != INVALID_SOCKET) {
             // this calls reads until something blocks.
-            unabto_tcp_fallback_read_packet(con);
+            unabto_tcp_fallback_read_packets(con);
         }
     }
 }
@@ -124,7 +124,7 @@ void unabto_tcp_fallback_select_read_sockets(fd_set* readFds) {
             unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
             if (st > UTFS_IDLE && st < UTFS_CLOSED && fbConn->socket != INVALID_SOCKET) {
                 if (FD_ISSET(fbConn->socket, readFds)) {
-                    unabto_tcp_fallback_read_packet(con);
+                    unabto_tcp_fallback_read_packets(con);
                 }
             }
         }
@@ -171,6 +171,7 @@ void unabto_tcp_fallback_write_ready(nabto_connect* con) {
     }
 }
 
+#if NABTO_ENABLE_EPOLL
 void unabto_tcp_fallback_epoll_event(struct epoll_event* event)
 {
     nabto_connect* con = (nabto_connect*)event->data.ptr;
@@ -183,6 +184,7 @@ void unabto_tcp_fallback_epoll_event(struct epoll_event* event)
         }
     }
 }
+#endif
 
 bool unabto_tcp_fallback_init(nabto_connect* con) {
     unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
@@ -206,7 +208,7 @@ bool unabto_tcp_fallback_close(nabto_connect* con) {
     return true;
 }
 
-void unabto_tcp_fallback_read_packet(nabto_connect* con) {
+void unabto_tcp_fallback_read_packets(nabto_connect* con) {
     unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
     while(true) {
         if (fbConn->recvBufferLength < 16) {
@@ -363,15 +365,6 @@ bool unabto_tcp_fallback_connect(nabto_connect* con) {
     }
 #endif
     
-#endif
-
-#if NABTO_ENABLE_EPOLL
-    {
-        struct epoll_event ev;
-        ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
-        ev.data.ptr = con;
-        epoll_ctl(unabto_epoll_fd, EPOLL_CTL_ADD, fbConn->socket, &ev);
-    }
 #endif
 
     memset(&fbConn->fbHost,0,sizeof(struct sockaddr_in));
