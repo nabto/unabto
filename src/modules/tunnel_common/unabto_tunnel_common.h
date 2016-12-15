@@ -106,12 +106,13 @@ void unabto_tunnel_deinit_tunnels();
 void unabto_tunnel_stream_accept(unabto_stream* stream);
 tunnel* unabto_tunnel_get_tunnel(unabto_stream* stream);
 
+void unabto_tunnel_event(tunnel* tunnel, tunnel_event_source event_source);
 void unabto_tunnel_idle(tunnel* tunnel, tunnel_event_source tunnel_event);
 void unabto_tunnel_read_command(tunnel* tunnel, tunnel_event_source tunnel_event);
 void unabto_tunnel_parse_command(tunnel* tunnel, tunnel_event_source tunnel_event);
 void unabto_tunnel_failed_command(tunnel* tunnel, tunnel_event_source tunnel_event);
 
-void unabto_tunnel_event(tunnel* tunnel, tunnel_event_source event_source);
+void unabto_tunnel_event_dispatch(tunnel* tunnel, tunnel_event_source event_source);
 
 void unabto_tunnel_select_add_to_fd_set(fd_set* readFds, int* maxReadFd, fd_set* writeFds, int* maxWriteFd);
 void unabto_tunnel_select_handle(fd_set* readFds, fd_set* writeFds);

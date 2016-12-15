@@ -93,6 +93,21 @@ void unabto_tunnel_uart_event(tunnel* tunnel, tunnel_event_source event_source)
     }
 }
 
+void unabto_tunnel_uart_close_uart_port(tunnel* tunnel)
+{
+    if (tunnel->tunnel_type_vars.uart.fd != -1) {
+#if NABTO_ENABLE_EPOLL
+        {
+            struct epoll_event ev;
+            memset(&ev, 0, sizeof(struct epoll_event));
+            epoll_ctl(unabto_epoll_fd, EPOLL_CTL_DEL, tunnel->tunnel_type_vars.uart.fd, &ev);
+        }
+#endif
+        close(tunnel->tunnel_type_vars.uart.fd);
+        tunnel->tunnel_type_vars.uart.fd = -1;
+    }
+}
+
 
 void unabto_tunnel_uart_closing(tunnel* tunnel, tunnel_event_source event_source)
 {
@@ -118,12 +133,7 @@ void unabto_tunnel_uart_closing(tunnel* tunnel, tunnel_event_source event_source
                         tunnel->tunnelId,
                         info.sentPackets, info.sentBytes, info.sentResentPackets,
                         info.receivedPackets, info.receivedBytes, info.receivedResentPackets, info.reorderedOrLostPackets));
-
-        if (tunnel->tunnel_type_vars.uart.fd != -1) {
-            close(tunnel->tunnel_type_vars.uart.fd);
-            tunnel->tunnel_type_vars.uart.fd = -1;
-        }
-
+        unabto_tunnel_uart_close_uart_port(tunnel);
         unabto_stream_release(tunnel->stream);
         unabto_tunnel_reset_tunnel_struct(tunnel);
     }
@@ -300,10 +310,7 @@ void unabto_tunnel_uart_close_stream_reader(tunnel* tunnel)
 {
     tunnel->unabtoReadState = FS_CLOSING;
     NABTO_LOG_INFO(("closing fd %i", tunnel->tunnel_type_vars.uart.fd));
-    if (tunnel->tunnel_type_vars.uart.fd != -1) {
-        close(tunnel->tunnel_type_vars.uart.fd);
-        tunnel->tunnel_type_vars.uart.fd = -1;
-    }
+    unabto_tunnel_uart_close_uart_port(tunnel);
 }
 
 // no more data will come from the uart to the stream

@@ -68,6 +68,32 @@ tunnel* unabto_tunnel_get_tunnel(unabto_stream* stream)
 
 
 
+void unabto_tunnel_event(tunnel* tunnel, tunnel_event_source event_source)
+{
+    
+    NABTO_LOG_TRACE(("Tunnel event on tunnel %i, source %i", tunnel->tunnelId, event_source));
+    if (tunnel->state == TS_IDLE) {
+        unabto_tunnel_idle(tunnel, event_source);
+        return;
+    }
+
+    if (tunnel->state == TS_READ_COMMAND) {
+        unabto_tunnel_read_command(tunnel, event_source);
+    }
+
+    if (tunnel->state == TS_PARSE_COMMAND) {
+        unabto_tunnel_parse_command(tunnel, event_source);
+    }
+
+    if (tunnel->state == TS_FAILED_COMMAND) {
+        unabto_tunnel_failed_command(tunnel, event_source);
+    }
+    
+    if (tunnel->state >= TS_PARSE_COMMAND) {
+        unabto_tunnel_event_dispatch(tunnel, event_source);
+    }
+}
+
 void unabto_tunnel_read_command(tunnel* tunnel, tunnel_event_source event_source)
 {
     if (tunnel->state != TS_READ_COMMAND) {
@@ -178,7 +204,7 @@ void unabto_tunnel_idle(tunnel* tunnel, tunnel_event_source event_source)
 }
 
 
-void unabto_tunnel_event(tunnel* tunnel, tunnel_event_source tunnel_event)
+void unabto_tunnel_event_dispatch(tunnel* tunnel, tunnel_event_source tunnel_event)
 {
 #if NABTO_ENABLE_TUNNEL_UART
     if (tunnel->tunnelType == TUNNEL_TYPE_UART) {
