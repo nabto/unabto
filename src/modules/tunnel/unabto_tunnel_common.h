@@ -90,14 +90,14 @@ typedef struct tunnel {
     int commandLength;
     forwardState extReadState;
     forwardState unabtoReadState;
+    int tunnelId;
+    tunnel_static_memory* staticMemory;
+
+    tunnel_type tunnelType;
     union {
         uart_vars uart;
         tcp_vars tcp;
     } tunnel_type_vars;
-    
-    tunnel_type tunnelType;
-    int tunnelId;
-    tunnel_static_memory* staticMemory;
 } tunnel;
 
 void unabto_tunnel_reset_tunnel_struct(tunnel* t);

@@ -27,7 +27,7 @@ const char* uart_tunnel_get_default_device() {
 }
 
 static void unabto_tunnel_uart_closing(tunnel* tunnel, tunnel_event_source event_source);
-static void unabto_tunnel_uart_close_uart_reader(tunnel* tunnel);
+static void unabto_tunnel_uart_close(tunnel* tunnel);
     
 bool open_uart(tunnel* tunnel) {
     struct termios tios;
@@ -157,7 +157,7 @@ void uart_forward(tunnel* tunnel) {
         
         canWriteToStreamBytes = unabto_stream_can_write(tunnel->stream, &hint);
         if (hint != UNABTO_STREAM_HINT_OK) {
-            unabto_tunnel_uart_close_uart_reader(tunnel);
+            unabto_tunnel_uart_close(tunnel);
             break;
         }
         if (canWriteToStreamBytes == 0) {
@@ -181,7 +181,7 @@ void uart_forward(tunnel* tunnel) {
                 if (errno == EAGAIN || errno == EWOULDBLOCK) {
                     break;
                 } else {
-                    unabto_tunnel_uart_close_uart_reader(tunnel);
+                    unabto_tunnel_uart_close(tunnel);
                     break;
                 }
             }
@@ -194,7 +194,7 @@ void uart_forward(tunnel* tunnel) {
                 // stream in one write
                 if (hint != UNABTO_STREAM_HINT_OK) {
                     NABTO_LOG_TRACE(("Can't write to stream"));
-                    unabto_tunnel_uart_close_uart_reader(tunnel);
+                    unabto_tunnel_uart_close(tunnel);
                     break;
                 }
                 
@@ -221,7 +221,7 @@ void unabto_forward_uart(tunnel* tunnel) {
             unabto_stream_hint hint;
             size_t readen = unabto_stream_read(tunnel->stream, &buf, &hint);
             if (hint != UNABTO_STREAM_HINT_OK) {
-                unabto_tunnel_uart_close_stream_reader(tunnel);
+                unabto_tunnel_uart_close(tunnel);
                 break;
             } else {
                 if (readen == 0) {
@@ -235,7 +235,7 @@ void unabto_forward_uart(tunnel* tunnel) {
                         NABTO_LOG_TRACE(("Wrote to tcp stream %i", written));
                         unabto_stream_ack(tunnel->stream, buf, written, &hint);
                         if (hint != UNABTO_STREAM_HINT_OK) {
-                            unabto_tunnel_uart_close_stream_reader(tunnel);
+                            unabto_tunnel_uart_close(tunnel);
                             break;
                         }
                     } else if (written == 0) {
@@ -248,7 +248,7 @@ void unabto_forward_uart(tunnel* tunnel) {
                             tunnel->unabtoReadState = FS_WRITE;
                             break;
                         } else {
-                            unabto_tunnel_uart_close_stream_reader(tunnel);
+                            unabto_tunnel_uart_close(tunnel);
                             break;
                         }
                     }
@@ -301,8 +301,7 @@ void unabto_tunnel_uart_steal_port(tunnel* tun, tunnel* tunnels, size_t tunnelsL
             {
                 // close the other tunnels
                 NABTO_LOG_INFO(("tunnel %i is stealing the serial port %s from tunnel %i", tun->tunnelId, tun->staticMemory->stmu.uart_sm.deviceName, t->tunnelId));
-                unabto_tunnel_uart_close_uart_reader(t);
-                unabto_tunnel_uart_close_stream_reader(t);
+                unabto_tunnel_uart_close(t);
                 t->state = TS_CLOSING;
             }
         }
@@ -310,16 +309,13 @@ void unabto_tunnel_uart_steal_port(tunnel* tun, tunnel* tunnels, size_t tunnelsL
 }
 
 // no more data will come from the stream to the uart
-void unabto_tunnel_uart_close_stream_reader(tunnel* tunnel)
+void unabto_tunnel_uart_close(tunnel* tunnel)
 {
+    NABTO_LOG_INFO(("closing uart tunnel %i fd %i", tunnel->tunnelId, tunnel->tunnel_type_vars.uart.fd));
     tunnel->unabtoReadState = FS_CLOSING;
-    NABTO_LOG_INFO(("closing fd %i", tunnel->tunnel_type_vars.uart.fd));
+    tunnel->extReadState = FS_CLOSING;
+
     unabto_tunnel_uart_close_uart_port(tunnel);
+    unabto_stream_close(tunnel->stream);
 }
 
-// no more data will come from the uart to the stream
-void unabto_tunnel_uart_close_uart_reader(tunnel* tunnel) {
-    NABTO_LOG_TRACE(("close reader"));
-    unabto_stream_close(tunnel->stream);
-    tunnel->extReadState = FS_CLOSING;
-}
