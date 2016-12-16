@@ -491,10 +491,6 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
     
     if (connection->isLocal) {
         requiredSystemPermissions |= FP_ACL_SYSTEM_PERMISSION_LOCAL_ACCESS;
-        if (!user) {
-            // if no user exists require that we are in pairing mode.
-            requiredSystemPermissions |= FP_ACL_SYSTEM_PERMISSION_PAIRING;
-        }
     } else {
         requiredSystemPermissions |= FP_ACL_SYSTEM_PERMISSION_REMOTE_ACCESS;
         if (!user) {
