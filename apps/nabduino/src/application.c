@@ -1,5 +1,6 @@
 #include <unabto/unabto.h>
 #include <unabto/unabto_app.h>
+#include <unabto/unabto_query_rw.h>
 #include "hal.h"
 #include "application.h"
 
