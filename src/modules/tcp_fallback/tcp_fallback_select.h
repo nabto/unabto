@@ -4,6 +4,7 @@
 #include <unabto_platform_types.h>
 
 #include <modules/network/epoll/unabto_epoll.h>
+#include <modules/network/select/unabto_select.h>
 
 #ifdef WIN32
 #include <winsock2.h>

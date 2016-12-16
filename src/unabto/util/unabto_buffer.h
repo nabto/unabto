@@ -313,7 +313,7 @@ bool buffer_write_str_pgm(buffer_write_t *buffer, text str);
  * Append a buffer from program space to the buffer,
  * The length is prefixed as a uint16
  */
-bool buffer_write_raw_pgm(buffer_write_t* w_buf, const __ROM uint8_t* src, uint16_t len);
+bool buffer_write_raw_pgm(buffer_write_t* w_buf, __ROM uint8_t* src, uint16_t len);
 
 #define buffer_write_text(buffer, string) buffer_write_str_pgm(buffer, string)
 

@@ -1,12 +1,15 @@
 language: c
 
-env:
-  - CFLAGS="-std=gnu89"
-  - CFLAGS="-std=gnu99"
-
-compiler:
-  - clang
-  - gcc
+matrix:
+  include:
+    - compiler: gcc
+      env: CFLAGS="-std=gnu99"
+    - compiler: gcc
+      env: CFLAGS="-std=gnu99"
+    - compiler: clang
+      env: CFLAGS="-std=gnu99"
+    - compiler: clang
+      env: CFLAGS="-ansi -Wno-endif-labels -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE -Wno-comment"
 
 addons:
   apt:

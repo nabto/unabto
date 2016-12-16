@@ -16,7 +16,7 @@ void unabto_sha256(const uint8_t* message, size_t len, unsigned char *digest)
     unabto_sha256_final(&ctx, digest);
 }
 
-bool sha2_test_test(const __ROM char *vector, unsigned char *digest,
+bool sha2_test_test(const char *vector, unsigned char *digest,
           unsigned int digest_size)
 {
     char output[2 * SHA256_DIGEST_SIZE + 1];
@@ -46,11 +46,11 @@ bool sha2_test_test(const __ROM char *vector, unsigned char *digest,
     return true;
 }
 
-static const __ROM char vector1[] = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
-static const __ROM char vector2[] = "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1";
-static const __ROM char vector3[] = "cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0";
-static const __ROM char vector4[] = "7595af82ae2fa59cd9bf3b4405d31c69b98de71fed5945fd777d8ab3b393a85f";
-static const __ROM char vector5[] = "45ad4b37c6e2fc0a2cfcc1b5da524132ec707615c2cae1dbbc43c97aa521db81";
+static const char vector1[] = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
+static const char vector2[] = "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1";
+static const char vector3[] = "cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0";
+static const char vector4[] = "7595af82ae2fa59cd9bf3b4405d31c69b98de71fed5945fd777d8ab3b393a85f";
+static const char vector5[] = "45ad4b37c6e2fc0a2cfcc1b5da524132ec707615c2cae1dbbc43c97aa521db81";
            
 static const char message5[] = {
         0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,

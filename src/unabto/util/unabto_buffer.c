@@ -63,7 +63,7 @@ void buffer_read_reset(buffer_read_t* buffer) {
 
 #if UNABTO_PLATFORM_PIC18
 
-bool buffer_write_raw_pgm(buffer_write_t* w_buf, const __ROM uint8_t* src, uint16_t len) 
+bool buffer_write_raw_pgm(buffer_write_t* w_buf, __ROM uint8_t* src, uint16_t len) 
 {
     if (NULL == w_buf ||  unabto_query_get_write_unused(w_buf) < len + sizeof(uint16_t))
     {

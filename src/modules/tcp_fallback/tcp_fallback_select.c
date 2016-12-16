@@ -212,11 +212,13 @@ void unabto_tcp_fallback_read_packets(nabto_connect* con) {
     unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
     while(true) {
         if (fbConn->recvBufferLength < 16) {
+            int status;
+            int err;
             if (fbConn->socket == INVALID_SOCKET) {
                 NABTO_LOG_ERROR(("reading from invalid socket"));
             }
-            int status = recv(fbConn->socket, fbConn->recvBuffer + fbConn->recvBufferLength, 16-fbConn->recvBufferLength, 0);
-            int err = errno;
+            status = recv(fbConn->socket, fbConn->recvBuffer + fbConn->recvBufferLength, 16-fbConn->recvBufferLength, 0);
+            err = errno;
             if (status < 0) {
                 if ((err == EAGAIN) || err == EWOULDBLOCK) {
                     return;
