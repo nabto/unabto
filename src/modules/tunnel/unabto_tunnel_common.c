@@ -96,12 +96,13 @@ void unabto_tunnel_event(tunnel* tunnel, tunnel_event_source event_source)
 
 void unabto_tunnel_read_command(tunnel* tunnel, tunnel_event_source event_source)
 {
+    const uint8_t* buf;
+    unabto_stream_hint hint;
+    size_t readen;
     if (tunnel->state != TS_READ_COMMAND) {
         return;
     }
-    const uint8_t* buf;
-    unabto_stream_hint hint;
-    size_t readen = unabto_stream_read(tunnel->stream, &buf, &hint);
+    readen = unabto_stream_read(tunnel->stream, &buf, &hint);
     if (hint != UNABTO_STREAM_HINT_OK) {
         tunnel->state = TS_CLOSING;
     } else {
