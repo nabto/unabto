@@ -3,6 +3,7 @@
 
 #include <unabto_platform_types.h>
 #include <unabto/unabto_stream.h>
+#include <modules/network/select/unabto_select.h>
 
 #ifdef WIN32
 typedef SOCKET tunnelSocket;

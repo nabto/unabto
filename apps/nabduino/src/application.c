@@ -1,4 +1,5 @@
 #include <unabto/unabto.h>
+#include <unabto/unabto_app.h>
 #include "hal.h"
 #include "application.h"
 

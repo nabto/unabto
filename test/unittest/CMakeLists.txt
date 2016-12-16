@@ -32,7 +32,6 @@ set(src
   
   ${src_dir}/unabto_unittest.c)
 
-add_definitions(-Wall)
 add_definitions("-DNABTO_ENABLE_TEST_CODE")
 
 if (MSVC)

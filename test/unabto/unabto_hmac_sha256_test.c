@@ -9,7 +9,7 @@
 #include "modules/crypto/generic/unabto_sha256.h"
 #include "modules/crypto/generic/unabto_sha256_test.h"
 
-bool test(const __ROM char *vector, unsigned char *digest,
+bool test(const char *vector, unsigned char *digest,
           unsigned int digest_size)
 {
     char output[2 * UNABTO_SHA256_DIGEST_LENGTH + 1];
@@ -34,13 +34,13 @@ bool test(const __ROM char *vector, unsigned char *digest,
 }
 
     /* HMAC-SHA-256 */
-static const __ROM char vector1[] = "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7";
-static const __ROM char vector2[] = "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843";
-static const __ROM char vector3[] = "773ea91e36800e46854db8ebd09181a72959098b3ef8c122d9635514ced565fe";
-static const __ROM char vector4[] = "82558a389a443c0ea4cc819899f2083a85f0faa3e578f8077a2e3ff46729665b";
-static const __ROM char vector5[] = "a3b6167473100ee06e0c796c2955552b";
-static const __ROM char vector6[] = "60e431591ee0b67f0d8a26aacbf5b77f8e0bc6213728c5140546040f0ee37f54";
-static const __ROM char vector7[] = "9b09ffa71b942fcb27635fbcd5b0e944bfdc63644f0713938a7f51535c3a35e2";
+static const char vector1[] = "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7";
+static const char vector2[] = "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843";
+static const char vector3[] = "773ea91e36800e46854db8ebd09181a72959098b3ef8c122d9635514ced565fe";
+static const char vector4[] = "82558a389a443c0ea4cc819899f2083a85f0faa3e578f8077a2e3ff46729665b";
+static const char vector5[] = "a3b6167473100ee06e0c796c2955552b";
+static const char vector6[] = "60e431591ee0b67f0d8a26aacbf5b77f8e0bc6213728c5140546040f0ee37f54";
+static const char vector7[] = "9b09ffa71b942fcb27635fbcd5b0e944bfdc63644f0713938a7f51535c3a35e2";
 
 static const unsigned char key0[20] = { 0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,
                                                 0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b};
@@ -66,8 +66,6 @@ static const unsigned char key5[132] = {0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,
                                         0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,
                                         0xaa, 0x00};
  
-//static const __ROM unsigned char key6[131] = key5;
-
 
 static const unsigned char message3[51] = {0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,
                                   0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,0xdd,
@@ -91,9 +89,9 @@ const unsigned char* messages[] = {
     message1, message2, message3, message4, message5,message6,message7
 };
 
-const __ROM char* vectors[] = {
-        vector1, vector2, vector3, vector4, vector5, vector6, vector7
-    };
+const char* vectors[] = {
+    vector1, vector2, vector3, vector4, vector5, vector6, vector7
+};
 
 bool hmac_sha256_test(void)
 {
