@@ -239,7 +239,7 @@ bool verify_connection_encryption(nabto_connect* con);
  */
 nabto_connection_type get_connection_type(nabto_connect* con);
 
-uint16_t unabto_count_active_connections();
+uint16_t unabto_count_active_connections(void);
     
 bool nabto_write_con(nabto_connect* con, uint8_t* buf, size_t len);
 

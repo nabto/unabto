@@ -104,7 +104,7 @@ application_event_result application_event(application_request* request, unabto_
       uint8_t io_index;
       uint8_t io_out;
 
-      if(!uanbto_query_read_uint8(readBuffer, &io_index) || !unabto_query_read_uint8(readBuffer, &io_out))
+      if(!unabto_query_read_uint8(readBuffer, &io_index) || !unabto_query_read_uint8(readBuffer, &io_out))
       {
         return AER_REQ_TOO_SMALL;
       }
@@ -322,11 +322,10 @@ application_event_result application_event(application_request* request, unabto_
       //    </response>
       //  </query>
 
-      uint8_t* lengthOffset = unabto_query_write_head(writeBuffer);
-
-      if(!unabto_query_write_uint16(writeBuffer, 0))
+      unabto_list_ctx listCtx;
+      if (!unabto_query_write_list_start(writeBuffer, &listCtx)) 
       {
-        return AER_REQ_RSP_TOO_LARGE; // write dummy length
+        return AER_REQ_RSP_TOO_LARGE;
       }
 
       // write version information
@@ -335,7 +334,9 @@ application_event_result application_event(application_request* request, unabto_
         return AER_REQ_RSP_TOO_LARGE;
       }
 
-      WRITE_U16(lengthOffset, unabto_query_write_head(writeBuffer) - lengthOffset - 2); // insert actual length
+      if (!unabto_query_write_list_end(writeBuffer, &listCtx, 2+4+4)) {
+          return AER_REQ_RSP_TOO_LARGE;
+      }
 
       return AER_REQ_RESPONSE_READY;
     }

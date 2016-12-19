@@ -16,7 +16,7 @@
 #define NABTO_ENABLE_LOCAL_ACCESS_LEGACY_PROTOCOL                   0
 #define NABTO_REQUEST_MAX_SIZE                                      32
 #define NABTO_RESPONSE_MAX_SIZE                                     32
-#define NABTO_CONNECTIONS_SIZE                                      4 // maximum number of simultaneous connections.
+#define NABTO_CONNECTIONS_SIZE                                      3 // maximum number of simultaneous connections.
 #define NABTO_SET_TIME_FROM_ALIVE                                   0 // if set to 1 an event will be generated periodically telling the current time.
 #define NABTO_ENABLE_EVENTCHANNEL                                   0
 #define NABTO_ENABLE_STREAM                                         0
