@@ -515,7 +515,8 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
     return true;
 }
 
-bool fp_acl_is_user_owner(application_request* request) {
+bool fp_acl_is_user_owner(application_request* request)
+{
     if (! (request->connection && request->connection->hasFingerprint)) {
         return false;
     }
@@ -527,4 +528,16 @@ bool fp_acl_is_user_owner(application_request* request) {
     }
 
     return (user.permissions & FP_ACL_PERMISSION_ADMIN) == FP_ACL_PERMISSION_ADMIN;
+}
+
+bool fp_acl_is_user_paired(application_request* request)
+{
+    if (! (request->connection && request->connection->hasFingerprint)) {
+        return false;
+    }
+    void* it = aclDb.find(request->connection->fingerprint);
+    if (it != NULL) {
+        return true;
+    }
+    return false;
 }
