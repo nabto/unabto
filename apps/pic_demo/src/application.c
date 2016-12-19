@@ -17,7 +17,7 @@ uint8_t readLed(uint8_t led_id);
  * Afterwards a user defined message can be sent back to the
  * requesting browser.
  ****************************************************************/
-application_event_result application_event(application_request* request, unabto_quer_request* read_buffer, unabto_query_response* write_buffer) {
+application_event_result application_event(application_request* request, unabto_query_request* read_buffer, unabto_query_response* write_buffer) {
     switch(request->queryId) {
         case 1: {
             //  <query name="light_write.json" description="Turn light on and off" id="1">
