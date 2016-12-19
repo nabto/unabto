@@ -91,7 +91,7 @@ application_event_result write_settings(unabto_query_response* response, struct 
 {
     if (unabto_query_write_uint8(response, FP_ACL_STATUS_OK) &&
         unabto_query_write_uint32(response, settings->systemPermissions) &&
-        unabto_query_write_uint32(response, settings->defaultPermissions))
+        unabto_query_write_uint32(response, settings->defaultUserPermissions))
     {
         return AER_REQ_RESPONSE_READY;
     } else {
@@ -374,13 +374,13 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
     if (aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
         return AER_REQ_SYSTEM_ERROR;
     }
-
+    
     memcpy(user.fp, request->connection->fingerprint, FP_ACL_FP_LENGTH);
-    user.permissions = aclSettings.defaultPermissions;
 
     if (aclDb.first() == NULL) {
-        // this is the first user make her admin!
-        user.permissions |= FP_ACL_PERMISSION_ADMIN;
+        user.permissions = aclSettings.firstUserPermissions;
+    } else {
+        user.permissions = aclSettings.defaultUserPermissions;
     }
 
     fp_acl_db_status status = aclDb.save(&user);
@@ -419,9 +419,12 @@ application_event_result fp_acl_ae_system_set_acl_settings(application_request* 
     }
 
     struct fp_acl_settings aclSettings;
+    if (aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
+        return AER_REQ_SYSTEM_ERROR;
+    }
     
     if (! (unabto_query_read_uint32(read_buffer, &aclSettings.systemPermissions) &&
-           unabto_query_read_uint32(read_buffer, &aclSettings.defaultPermissions)))
+           unabto_query_read_uint32(read_buffer, &aclSettings.defaultUserPermissions)))
     {
         return AER_REQ_TOO_SMALL;
     }

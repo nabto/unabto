@@ -3,21 +3,27 @@
 #include <modules/fingerprint_acl/fp_acl_memory.h>
 
 struct fp_acl_db db;
-bool init_users()
+
+#define DEFAULT_USER_PERMISSIONS (FP_ACL_PERMISSION_LOCAL_ACCESS | FP_ACL_PERMISSION_REMOTE_ACCESS)
+#define FIRST_USER_PERMISSIONS (FP_ACL_PERMISSION_ALL)
+#define SYSTEM_PERMISSIONS (FP_ACL_SYSTEM_PERMISSION_ALL)
+
+bool init_empty_users()
 {
     struct fp_acl_settings defaultSettings;
-    defaultSettings.systemPermissions = FP_ACL_SYSTEM_PERMISSION_ALL;
-    defaultSettings.defaultPermissions = FP_ACL_PERMISSION_ALL;
+    defaultSettings.systemPermissions = SYSTEM_PERMISSIONS;
+    defaultSettings.defaultUserPermissions = DEFAULT_USER_PERMISSIONS;
+    defaultSettings.firstUserPermissions = FIRST_USER_PERMISSIONS;
     fp_mem_init(&db, &defaultSettings, NULL);
     fp_acl_ae_init(&db);
+    return true;
+}
 
-    struct fp_acl_settings settings;
-
-    settings.systemPermissions = FP_ACL_SYSTEM_PERMISSION_ALL;
-    settings.defaultPermissions = FP_ACL_PERMISSION_ALL;
-
-    db.save_settings(&settings);
-
+bool init_users()
+{
+    if (!init_empty_users()) {
+        return false;
+    }
     {
         struct fp_acl_user user;
         memset(&user, 0, sizeof(struct fp_acl_user));
@@ -39,6 +45,8 @@ bool init_users()
     }
     return true;
 }
+
+
 
 void init_connection(nabto_connect* connection) {
     memset(connection, 0, sizeof(nabto_connect));
@@ -249,26 +257,23 @@ bool fp_acl_test_user_remove()
     return true;
 }
 
-bool fp_acl_test_pair_me()
+bool fp_acl_pair(fingerprint fp, const char* name, struct fp_acl_user* result)
 {
-    init_users();
     application_request req;
     nabto_connect connection;
     init_request(&req, &connection);
-    memset(connection.fingerprint, 41, 16);
+    memcpy(connection.fingerprint, fp, 16);
 
     uint8_t buffer[256];
     memset(buffer,0, 256);
     unabto_buffer inout;
     unabto_buffer_init(&inout, buffer, 256);
     {
-        const char* name = "newuser";
         // write test data to input
         unabto_query_response writer;
         unabto_query_response_init(&writer, &inout);
         unabto_query_write_uint8_list(&writer, (uint8_t*)name, strlen(name));
     }
-    
 
     unabto_query_request queryRequest;
     unabto_query_response queryResponse;
@@ -294,10 +299,71 @@ bool fp_acl_test_pair_me()
             NABTO_LOG_ERROR(("expected to return 0 it was, %i", status));
             return false;
         }
+        uint8_t* list;
+        uint16_t length;
+        if (!unabto_query_read_uint8_list(&testOutput, &list, &length)) {
+            return false;
+        }
+        if (length != sizeof(fingerprint)) {
+            return false;
+        }
+        memcpy(result->fp, list, sizeof(fingerprint));
+
+        // read name
+        if (!unabto_query_read_uint8_list(&testOutput, &list, &length)) {
+            return false;
+        }
+        memcpy(result->name, list, length);
+
+        if (!unabto_query_read_uint32(&testOutput, &result->permissions)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool fp_acl_test_pair()
+{
+    init_empty_users();
+
+    struct fp_acl_user firstUser;
+    struct fp_acl_user secondUser;
+    
+    {
+        // pair user 1
+        fingerprint fp;
+        memset(fp, 41, 16);
+        
+        if (!fp_acl_pair(fp, "first", &firstUser)) {
+            return false;
+        }
     }
 
-    return true;
+    {
+        // pair second user
+        fingerprint fp;
+        memset(fp, 40, 16);
+        
+        if (!fp_acl_pair(fp, "second", &secondUser)) {
+            return false;
+        }
+    }
+
+    if ( (firstUser.permissions != FP_ACL_PERMISSION_ALL) ||
+         (strcmp(firstUser.name, "first") != 0) ||
+         (firstUser.fp[0] != 41))
+    {
+        return false;
+    }
+
+    if ( (secondUser.permissions != (FP_ACL_PERMISSION_LOCAL_ACCESS | FP_ACL_PERMISSION_REMOTE_ACCESS)) ||
+         (strcmp(secondUser.name, "second") != 0) ||
+         (secondUser.fp[0] != 40))
+    {
+        return false;
+    }
     
+    return true;
 }
 
 bool fp_acl_test_set_name()
@@ -517,7 +583,7 @@ bool fp_acl_test_system_get_acl_settings()
         unabto_query_request_init(&testOutput, &inout);
         uint8_t status;
         uint32_t systemPermissions;
-        uint32_t defaultPermissions;
+        uint32_t defaultUserPermissions;
         unabto_query_read_uint8(&testOutput, &status);
         if (status != 0) {
             NABTO_LOG_ERROR(("expected to return 0 it was, %i", status));
@@ -527,13 +593,13 @@ bool fp_acl_test_system_get_acl_settings()
         
         
         unabto_query_read_uint32(&testOutput, &systemPermissions);
-        unabto_query_read_uint32(&testOutput, &defaultPermissions);
+        unabto_query_read_uint32(&testOutput, &defaultUserPermissions);
 
-        if (systemPermissions != 0xfffffffful) {
+        if (systemPermissions != SYSTEM_PERMISSIONS) {
             return false;
         }
 
-        if (defaultPermissions != 0xfffffffful) {
+        if (defaultUserPermissions != DEFAULT_USER_PERMISSIONS) {
             return false;
         }
     }
@@ -581,7 +647,7 @@ bool fp_acl_test_system_set_acl_settings()
         unabto_query_request_init(&testOutput, &inout);
         uint8_t status;
         uint32_t systemPermissions;
-        uint32_t defaultPermissions;
+        uint32_t defaultUserPermissions;
         unabto_query_read_uint8(&testOutput, &status);
         if (status != 0) {
             NABTO_LOG_ERROR(("expected to return 0 it was, %i", status));
@@ -591,13 +657,13 @@ bool fp_acl_test_system_set_acl_settings()
         
         
         unabto_query_read_uint32(&testOutput, &systemPermissions);
-        unabto_query_read_uint32(&testOutput, &defaultPermissions);
+        unabto_query_read_uint32(&testOutput, &defaultUserPermissions);
 
         if (systemPermissions != 0x00000000ul) {
             return false;
         }
 
-        if (defaultPermissions != 0x00000000ul) {
+        if (defaultUserPermissions != 0x00000000ul) {
             return false;
         }
     }
@@ -615,7 +681,7 @@ bool fp_acl_ae_test()
         fp_acl_test_list_users() &&
         fp_acl_test_get_me() &&
         fp_acl_test_user_remove() &&
-        fp_acl_test_pair_me() &&
+        fp_acl_test_pair() &&
         fp_acl_test_set_name() &&
         fp_acl_test_add_permissions() &&
         fp_acl_test_remove_permissions() &&

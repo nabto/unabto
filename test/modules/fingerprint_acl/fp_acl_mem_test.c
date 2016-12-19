@@ -48,7 +48,7 @@ bool fp_acl_mem_test_db(struct fp_acl_db* db) {
 bool fp_acl_mem_test() {
     struct fp_acl_settings defaultSettings;
     defaultSettings.systemPermissions = FP_ACL_SYSTEM_PERMISSION_ALL;
-    defaultSettings.defaultPermissions = FP_ACL_PERMISSION_ALL;
+    defaultSettings.defaultUserPermissions = FP_ACL_PERMISSION_ALL;
     {
         struct fp_acl_db db;
         fp_mem_init(&db, &defaultSettings, NULL);

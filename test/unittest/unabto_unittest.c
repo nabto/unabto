@@ -35,7 +35,7 @@ int main() {
 
     r = fp_acl_mem_test();
     if (!r) {
-        NABTO_LOG_ERROR(("test of acl failed"));
+        NABTO_LOG_ERROR(("test of acl memory state failed"));
         ret = false;
     }
 

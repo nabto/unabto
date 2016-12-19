@@ -36,8 +36,9 @@ struct fp_acl_user {
 };
 
 struct fp_acl_settings {
-    uint32_t systemPermissions;   ///< permission bits controlling the system
-    uint32_t defaultPermissions;  ///< default permissions for new users
+    uint32_t systemPermissions;      ///< permission bits controlling the system
+    uint32_t defaultUserPermissions; ///< default permissions for new users
+    uint32_t firstUserPermissions;   ///< permissions to give the first user of the system
 };
 
 typedef enum {

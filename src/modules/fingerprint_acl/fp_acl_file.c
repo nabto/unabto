@@ -25,32 +25,24 @@ fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl)
 
     uint32_t version;
     READ_U32(version, buffer);
-    if (version != 1) {
+    if (version != FP_ACL_FILE_VERSION) {
         return FP_ACL_DB_LOAD_FAILED;
     }
 
-    // load system permissions
-    readen = fread(buffer, 4, 1, aclFile);
+    // load system settings
+    readen = fread(buffer, 16, 1, aclFile);
     if (readen != 1) {
         return FP_ACL_DB_LOAD_FAILED;
     }
 
-    READ_U32(acl->settings.systemPermissions, buffer);
+    uint8_t* ptr = buffer;
 
-    // load system default permissions
-    readen = fread(buffer, 4, 1, aclFile);
-    if (readen != 1) {
-        return FP_ACL_DB_LOAD_FAILED;
-    }
-    READ_U32(acl->settings.defaultPermissions, buffer);
-
-    // load number of users
     uint32_t numUsers;
-    readen = fread(buffer, 4, 1, aclFile);
-    if (readen != 1) {
-        return FP_ACL_DB_LOAD_FAILED;
-    }
-    READ_U32(numUsers, buffer);
+    
+    READ_FORWARD_U32(acl->settings.systemPermissions, ptr);
+    READ_FORWARD_U32(acl->settings.defaultUserPermissions, ptr);
+    READ_FORWARD_U32(acl->settings.firstUserPermissions, ptr);
+    READ_FORWARD_U32(numUsers, ptr);
 
     uint32_t i;
     enum {
@@ -84,10 +76,11 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
 
     WRITE_FORWARD_U32(ptr, FP_ACL_FILE_VERSION);
     WRITE_FORWARD_U32(ptr, acl->settings.systemPermissions);
-    WRITE_FORWARD_U32(ptr, acl->settings.defaultPermissions);
+    WRITE_FORWARD_U32(ptr, acl->settings.defaultUserPermissions);
+    WRITE_FORWARD_U32(ptr, acl->settings.firstUserPermissions);
     WRITE_FORWARD_U32(ptr, users);
 
-    size_t written = fwrite(buffer, 16, 1, aclFile);
+    size_t written = fwrite(buffer, 20, 1, aclFile);
     if (written != 1) {
         return FP_ACL_DB_SAVE_FAILED;
     }

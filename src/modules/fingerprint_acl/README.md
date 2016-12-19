@@ -11,12 +11,16 @@ The data model consists of system settings and user settings.
 
 On the system level there are 32bits which describes the access
 permissions of the overall system. Further there are a uint32_t which
-descibes the default permissions new users should get.
+descibes the default permissions new users should get and 32 bits
+which defines what permissions the first user of the system should
+get. In most cases the first user which pairs with the device should
+get more access than the next users.
 
 ```
 struct fp_acl_settings {
-    uint32_t systemPermissions;   ///< permission bits controlling the system
-    uint32_t defaultPermissions;  ///< default permissions for new users
+    uint32_t systemPermissions;       ///< permission bits controlling the system
+    uint32_t defaultUserPermissions;  ///< default permissions for new users
+	uint32_t firstUserPermissions;    ///< permissions for the first user
 };
 ```
 
@@ -53,7 +57,7 @@ user database is completely empty.
 1. Client connects locally. Connection access is granted since device is unpaired.
 2. Client calls getPublicInfo.json to find out if you are paired with the device.
 3. Client goes into pairing mode and calls pairWithDevice.json.
-4. Client is granted owner permissions to the device
+4. Client is granted owner permissions to the device { controlled by firstUserPermissions}
 
 
 # paired device local pairing access
@@ -63,7 +67,7 @@ The device has atleast one user in it's user database and
 1. Client connects locally. Connection access is granted since the connection is local. (Controlled by systemPermissions)
 2. Client calls getPublicInfo.json to find out that it is not paired.
 3. Client goes into pairing mode and calls pairWithDevice.json
-4. Client is granted guest permissions since the device already have an owner. (controlled by defaultPermissions)
+4. Client is granted guest permissions since the device already have an owner. (controlled by defaultUserPermissions)
 
 # access device you are paired with
 

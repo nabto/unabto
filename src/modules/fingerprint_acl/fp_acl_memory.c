@@ -66,7 +66,14 @@ fp_acl_db_status fp_mem_init(struct fp_acl_db* db,
 
 void* fp_mem_get_first_user()
 {
-    return (void*)state.users;
+    int i;
+    for (i = 0; i < FP_MEM_ACL_ENTRIES; i++) {
+        struct fp_acl_user* ix = &state.users[i];
+        if (!fp_mem_is_slot_free(ix)) {
+            return (void*)ix;
+        }
+    }
+    return NULL;
 }
 
 void* fp_mem_next(void* current)

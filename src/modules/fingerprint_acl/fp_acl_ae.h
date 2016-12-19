@@ -3,6 +3,7 @@
 
 #include "fp_acl.h"
 
+#include <unabto/unabto_env_base.h>
 #include <unabto/unabto_app.h>
 
 enum fp_acl_response_status {
