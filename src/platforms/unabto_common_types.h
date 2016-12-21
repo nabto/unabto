@@ -186,5 +186,14 @@ typedef __ROM char* text;
 #define PRIep         PRIip ":%" PRIu16
 #endif
 
+#ifndef MAKE_FP_PRINTABLE
+#define MAKE_FP_PRINTABLE(fp) fp[0],fp[1],fp[2],fp[3]
+#endif
+
+#ifndef PRIfp
+#define PRIfp         "%x:%x:%x:%x..."
+#endif
+
+
 
 #endif
