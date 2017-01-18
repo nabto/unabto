@@ -6,13 +6,13 @@ bool test_if_lo_exists();
 
 bool platform_checks() {
     bool result = true;
-#ifndef WIN32
+#if !defined(WIN32) && !defined(MOXA)
     result &= test_if_lo_exists();
 #endif
     return result;
 }
 
-#ifndef WIN32
+#if !defined(WIN32) && !defined(MOXA)
 
 #include <sys/types.h>
 #include <ifaddrs.h>
