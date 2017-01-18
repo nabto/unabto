@@ -4,5 +4,6 @@
 #include <unabto_platform_types.h>
 
 bool platform_checks();
+int check_ulimit_files(int desired);
 
 #endif
