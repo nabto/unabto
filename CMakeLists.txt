@@ -13,7 +13,7 @@ endif()
 add_subdirectory(apps/stream_echo)
 add_subdirectory(test/attach_test)
 
-if (NOT MSVC)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   if (UNABTO_ENABLE_TESTS)
 	add_subdirectory(test/unittest)
   endif()
