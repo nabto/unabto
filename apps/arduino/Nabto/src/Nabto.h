@@ -44,7 +44,7 @@ class NabtoClass
     void tick();
  private:
     nabto_main_context nmc;
-	uint32_t* ip;
+    uint32_t* ip;
 };
 
 /**

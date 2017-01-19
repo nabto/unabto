@@ -17,10 +17,10 @@
 
 #define NABTO_ENABLE_REMOTE_CONNECTION              1
 #define NABTO_ENABLE_LOCAL_CONNECTION               1
-	 
+
 #define NABTO_APPLICATION_EVENT_MODEL_ASYNC         0
 
 #define NABTO_SDK                                   1
-#define USING_PIFACE								0
+#define USING_PIFACE                                0
 
 #endif

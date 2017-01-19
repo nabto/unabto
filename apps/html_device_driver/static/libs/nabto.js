@@ -6,14 +6,13 @@
 
 "use strict";
 
-(function (root, factory) {
+(function(root, factory) {
   if (typeof define === "function" && define.amd) {
-    define(["jquery"], function ($) {
+    define(["jquery"], function($) {
       factory($, root);
       return root.jNabto;
     });
-  }
-  else {
+  } else {
     factory($, root);
   }
 }(window, function($, root) {
@@ -42,8 +41,7 @@
     });
   }
 
-  root.jNabto = (function($)
-  {
+  root.jNabto = (function($) {
     var nabtoInfo = {},
       initialized = false,
       regInfos = 0,
@@ -96,8 +94,7 @@
           };
           window.external.notify(JSON.stringify(message));
         };
-      }
-      catch (e) {}
+      } catch (e) {}
     }
 
     function initAJAXQueue() {
@@ -149,7 +146,7 @@
       // Clear queue
       $.ajaxQueue.clear = function() {
         var n = ajaxQueue.queue().length;
-        ajaxQueue.queue().splice(1, n-1);
+        ajaxQueue.queue().splice(1, n - 1);
       };
 
       // Get size of queue
@@ -221,7 +218,7 @@
       options.debug && console.log(nabtoInfo);
 
       if (nabtoInfo.client_major && nabtoInfo.client_minor) {
-        appendInfo("Client v. "+nabtoInfo.client_major+"."+nabtoInfo.client_minor);
+        appendInfo("Client v. " + nabtoInfo.client_major + "." + nabtoInfo.client_minor);
       }
       if (nabtoInfo.html_dd) {
         appendInfo("HTML v. " + nabtoInfo.html_dd);
@@ -258,8 +255,7 @@
 
           if (data.totalNumberOfInfos > regInfos) {
             getGatewayInfo(regInfos);
-          }
-          else {
+          } else {
             options.debug && console.log("Nabto JavaScript initialized");
             options.startup(nabtoInfo);
             showInfo();
@@ -309,43 +305,43 @@
           id: "2"
         };
         window.external.notify(JSON.stringify(message));
-      }
-      else {
+      } else {
         $("body").append('<img id="history-link" src="//self/' + hostString + '" style="display: none;"/>');
       }
     }
 
     function init(opt) {
-      if (initialized) { return true; }
+      if (initialized) {
+        return true;
+      }
       initialized = true;
 
       $.extend(options, opt);
 
-			// Navigate to root if refreshing from subpage
+      // Navigate to root if refreshing from subpage
       if (options.subpageRedirect && window.location.href.indexOf("#") !== -1) {
         window.location.href = "/";
       }
 
-			// Populate device name div
-			var $name = $(".device-id");
-			if ($name) {
-				$name.text(location.host);
-			}
+      // Populate device name div
+      var $name = $(".device-id");
+      if ($name) {
+        $name.text(location.host);
+      }
 
-			// Initialize AJAX queue
+      // Initialize AJAX queue
       if (options.queueRequests || options.usingNativeNotify) {
         initAJAXQueue();
-      }
-      else {
+      } else {
         $.ajaxQueue = $.ajax;
       }
 
-			// Load external scripts
+      // Load external scripts
       if (options.loadScripts) {
         loadScripts();
       }
 
-			// Read device info
+      // Read device info
       if (options.readInfo) {
         regInfos = 0;
         getNabtoInfo();

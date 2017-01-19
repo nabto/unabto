@@ -1,8 +1,8 @@
 #ifndef _TCPIPCONFIG_H_
 #define _TCPIPCONFIG_H_
 
-#define STACK_USE_ICMP_SERVER			// Ping query and response capability
-#define STACK_USE_DHCP_CLIENT			// Dynamic Host Configuration Protocol client for obtaining IP address and o
+#define STACK_USE_ICMP_SERVER            // Ping query and response capability
+#define STACK_USE_DHCP_CLIENT            // Dynamic Host Configuration Protocol client for obtaining IP address and o
 #define STACK_USE_DNS
 #define STACK_USE_UDP
 
@@ -21,15 +21,15 @@
 #define MY_DEFAULT_GATE_BYTE3           (1ul)
 #define MY_DEFAULT_GATE_BYTE4           (1ul)
 
-#define MY_DEFAULT_PRIMARY_DNS_BYTE1	(169ul)
-#define MY_DEFAULT_PRIMARY_DNS_BYTE2	(254ul)
-#define MY_DEFAULT_PRIMARY_DNS_BYTE3	(1ul)
-#define MY_DEFAULT_PRIMARY_DNS_BYTE4	(1ul)
+#define MY_DEFAULT_PRIMARY_DNS_BYTE1    (169ul)
+#define MY_DEFAULT_PRIMARY_DNS_BYTE2    (254ul)
+#define MY_DEFAULT_PRIMARY_DNS_BYTE3    (1ul)
+#define MY_DEFAULT_PRIMARY_DNS_BYTE4    (1ul)
 
-#define MY_DEFAULT_SECONDARY_DNS_BYTE1	(0ul)
-#define MY_DEFAULT_SECONDARY_DNS_BYTE2	(0ul)
-#define MY_DEFAULT_SECONDARY_DNS_BYTE3	(0ul)
-#define MY_DEFAULT_SECONDARY_DNS_BYTE4	(0ul)
+#define MY_DEFAULT_SECONDARY_DNS_BYTE1  (0ul)
+#define MY_DEFAULT_SECONDARY_DNS_BYTE2  (0ul)
+#define MY_DEFAULT_SECONDARY_DNS_BYTE3  (0ul)
+#define MY_DEFAULT_SECONDARY_DNS_BYTE4  (0ul)
 
 #define MAX_HTTP_CONNECTIONS            1 // Microchips TCP/IP stack requires this define even tough HTTP is not used.
 

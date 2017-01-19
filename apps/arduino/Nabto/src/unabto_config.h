@@ -10,7 +10,7 @@
  * The default value will be used if a specific setting is not set here.
  */
 
-#define UNABTO_PLATFORM_ARDUINO			1
+#define UNABTO_PLATFORM_ARDUINO         1
 
 #define NABTO_ENABLE_STREAM             0
 #define NABTO_CONNECTIONS_SIZE          4
@@ -22,7 +22,7 @@
 #define NABTO_ENABLE_LOCAL_CONNECTION             1
 #define NABTO_ENABLE_LOCAL_ACCESS_LEGACY_PROTOCOL 1
 
-#define NABTO_ENABLE_DHCP				1
-#define NABTO_ENABLE_DNS				1
+#define NABTO_ENABLE_DHCP               1
+#define NABTO_ENABLE_DNS                1
 
 #endif

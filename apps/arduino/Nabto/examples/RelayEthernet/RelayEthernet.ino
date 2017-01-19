@@ -134,15 +134,15 @@ application_event_result application_event(application_request* request, unabto_
   switch(request->queryId) {
   case 1: 
     {
-	//  <query name="relay_write.json" description="Turn relay on and off" id="1">
-	//	<request>
-	//		<parameter name="relay_id" type="uint8"/>
-	//		<parameter name="relay_on" type="uint8"/>
-	//	</request>
-	//	<response>
-	//		<parameter name="relay_state" type="uint8"/>
-	//	</response>
-	//  </query>
+    //  <query name="relay_write.json" description="Turn relay on and off" id="1">
+    //    <request>
+    //      <parameter name="relay_id" type="uint8"/>
+    //      <parameter name="relay_on" type="uint8"/>
+    //    </request>
+    //    <response>
+    //      <parameter name="relay_state" type="uint8"/>
+    //    </response>
+    //  </query>
 
       uint8_t relay_id;
       uint8_t relay_on;
@@ -162,14 +162,14 @@ application_event_result application_event(application_request* request, unabto_
     }
   case 2: 
     {
-	// <query name="relay_read.json" description="Read relay status" id="2">
-	//	<request>
-	//		<parameter name="relay_id" type="uint8"/>
-	//	</request>
-	//	<response>
-	//		<parameter name="relay_state" type="uint8"/>
-	//	</response>
-	//  </query>
+    // <query name="relay_read.json" description="Read relay status" id="2">
+    //    <request>
+    //      <parameter name="relay_id" type="uint8"/>
+    //    </request>
+    //    <response>
+    //      <parameter name="relay_state" type="uint8"/>
+    //    </response>
+    //  </query>
 
 
       uint8_t relay_id;

@@ -6,9 +6,8 @@
  */
 
 #ifndef TUNNELS_H
-#define	TUNNELS_H
+#define TUNNELS_H
     
 
 
-#endif	/* TUNNELS_H */
-
+#endif  /* TUNNELS_H */

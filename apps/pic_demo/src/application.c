@@ -24,7 +24,7 @@ application_event_result application_event(application_request* request, unabto_
             //    <request>
             //      <parameter name="light_id" type="uint8"/>
             //      <parameter name="light_on" type="uint8"/>
-            //	  </request>
+            //    </request>
             //    <response>
             //      <parameter name="light_state" type="uint8"/>
             //    </response>
@@ -50,7 +50,7 @@ application_event_result application_event(application_request* request, unabto_
             //  <query name="light_read.json" description="Read light status" id="2">
             //    <request>
             //      <parameter name="light_id" type="uint8"/>
-            //	  </request>
+            //    </request>
             //    <response>
             //      <parameter name="light_state" type="uint8"/>
             //    </response>

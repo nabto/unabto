@@ -55,10 +55,10 @@ int main(int argc, char* argv[])
         NABTO_LOG_FATAL(("Failed at nabto_main_init"));
     }
 
-	localEp.addr=nms->ipAddress;
-	localEp.port=nms->localPort;
-	
-	if (nms->ipAddress != INADDR_ANY) NABTO_LOG_INFO(("Own IP address: " PRIep, MAKE_EP_PRINTABLE(localEp)));
+    localEp.addr=nms->ipAddress;
+    localEp.port=nms->localPort;
+    
+    if (nms->ipAddress != INADDR_ANY) NABTO_LOG_INFO(("Own IP address: " PRIep, MAKE_EP_PRINTABLE(localEp)));
     else NABTO_LOG_INFO(("Own IP address, local IP is set to INADDR_ANY: " PRIep, MAKE_EP_PRINTABLE(localEp)));
 
     while (true) {
@@ -84,5 +84,5 @@ int main(int argc, char* argv[])
     }
 
     unabto_close();
-	return 0;
+    return 0;
 }

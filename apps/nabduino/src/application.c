@@ -51,7 +51,7 @@ application_event_result application_event(application_request* request, unabto_
       //  <query name="led" description="LED" id="2">
       //    <request>
       //      <parameter name="led_ids" type="uint8"/>
-      //	  </request>
+      //    </request>
       //    <response>
       //      <parameter name="led_status" type="uint8"/>
       //    </response>
@@ -83,7 +83,7 @@ application_event_result application_event(application_request* request, unabto_
       //  <query name="digital_io" description="Digital I/O" id="3">
       //    <request>
       //      <parameter name="io_index" type="uint8"/>
-      //	    <parameter name="io_out" type="uint8"/>
+      //      <parameter name="io_out" type="uint8"/>
       //    </request>
       //    <response>
       //      <parameter name="io_status" type="uint8"/>
@@ -172,7 +172,7 @@ application_event_result application_event(application_request* request, unabto_
     {
       //  <query name="analog" description="Analog inputs" id="6">
       //    <request>
-      //	    <parameter name="ch_index" type="uint8"/>
+      //      <parameter name="ch_index" type="uint8"/>
       //    </request>
       //    <response>
       //      <parameter name="analog_ch" type="uint32"/>
@@ -212,8 +212,8 @@ application_event_result application_event(application_request* request, unabto_
     {
       //  <query name="pwm" description="PWM Set" id="7">
       //    <request>
-      //	    <parameter name="pwm_pin" type="uint8"/>
-      //	    <parameter name="pwm_val" type="uint8"/>
+      //      <parameter name="pwm_pin" type="uint8"/>
+      //      <parameter name="pwm_val" type="uint8"/>
       //    </request>
       //    <response>
       //      <parameter name="pwm_status" type="uint8"/>
@@ -245,7 +245,7 @@ application_event_result application_event(application_request* request, unabto_
     {
       //  <query name="analog_raw" description="Raw analog inputs" id="8">
       //    <request>
-      //	    <parameter name="ch_index" type="uint8"/>
+      //      <parameter name="ch_index" type="uint8"/>
       //    </request>
       //    <response>
       //      <parameter name="analog_ch" type="uint32"/>

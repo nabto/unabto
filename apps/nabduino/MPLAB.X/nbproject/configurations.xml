@@ -153,8 +153,8 @@
         <itemPath>../../../src/unabto/unabto_buffers.h</itemPath>
         <itemPath>../../../src/unabto/unabto_query_rw.c</itemPath>
         <itemPath>../../../src/unabto/unabto_query_rw.h</itemPath>
-		<itemPath>../../../src/unabto/unabto_extended_rendezvous.c</itemPath>
-		<itemPath>../../../src/unabto/unabto_extended_rendezvous.h</itemPath>
+        <itemPath>../../../src/unabto/unabto_extended_rendezvous.c</itemPath>
+        <itemPath>../../../src/unabto/unabto_extended_rendezvous.h</itemPath>
       </logicalFolder>
       <itemPath>../src/application.c</itemPath>
       <itemPath>../src/application.h</itemPath>

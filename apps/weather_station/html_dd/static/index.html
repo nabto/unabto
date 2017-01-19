@@ -1,54 +1,53 @@
 <!DOCTYPE html>
-<html> 
-<head> 
-	<title>Nabto Weather Station</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1"/>
-	<meta charset="utf-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-  <link rel="stylesheet" href="libs/jquery.mobile-1.4.2.min.css"/>
-  <link rel="stylesheet" href="libs/style.css"/>
-  <script src="libs/jquery-1.11.0.min.js"></script>
-  <script src="libs/defaults.js"></script>
-  <script src="libs/jquery.mobile-1.4.2.min.js"></script>
-  <script src="libs/nabto.js"></script>
-  <!-- Custom Application -->
-  <script src="js/app.js"></script>
-</head>
-
-<body>
-<div data-role="page" id="frontpage">
-	<div data-role="header">
-    <a data-role="button" id="discover-button" href="//self/discover" data-icon="home" data-iconpos="notext" rel="external">Discover</a>
-		<h1>Nabto Weather Station</h1>
-	</div>
-  <div data-role="content">
-  	<ul data-role="listview" data-inset="true" data-divider-theme="a">
-  	<li data-role="list-divider">
-  		<h2>Wind Speed</h2>
-  	</li>
-  	<li>
-  		<input type="button" id="wind_update" data-icon="refresh" value="Read wind speed"/>
-  	</li>
-  	</ul>
-  	<ul data-role="listview" data-inset="true" data-divider-theme="a">
-  	<li data-role="list-divider">
-  		<h2>House Temperature</h2>
-  	</li>
-  	<li>
-  		<div data-role="fieldcontain">
-  			<fieldset data-role="controlgroup" id="temp_sensor" data-mini="true" data-type="horizontal" data-role="fieldcontain">
-  				<legend>Sensor ID:</legend>
-  				<label><input type="radio" name="button_id" id="sensor_0" checked="checked"/>0</label>
-  				<label><input type="radio" name="button_id" id="sensor_1"/>1</label>
-  				<label><input type="radio" name="button_id" id="sensor_2"/>2</label>
-  				<label><input type="radio" name="button_id" id="sensor_3"/>3</label>
-  				<label><input type="radio" name="button_id" id="sensor_4"/>4</label>
-  			</fieldset>
-  		</div>
-  		<input type="button" id="temp_update" data-icon="refresh" value="Read temperature"/>	
-  	</li>
-  	</ul>
-  </div>
-</div>
-</body>
+<html>
+  <head>
+    <title>Nabto Weather Station</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <link rel="stylesheet" href="libs/jquery.mobile-1.4.2.min.css"/>
+    <link rel="stylesheet" href="libs/style.css"/>
+    <script src="libs/jquery-1.11.0.min.js"></script>
+    <script src="libs/defaults.js"></script>
+    <script src="libs/jquery.mobile-1.4.2.min.js"></script>
+    <script src="libs/nabto.js"></script>
+    <!-- Custom Application -->
+    <script src="js/app.js"></script>
+  </head>
+  <body>
+    <div data-role="page" id="frontpage">
+      <div data-role="header">
+        <a data-role="button" id="discover-button" href="//self/discover" data-icon="home" data-iconpos="notext" rel="external">Discover</a>
+        <h1>Nabto Weather Station</h1>
+      </div>
+      <div data-role="content">
+        <ul data-role="listview" data-inset="true" data-divider-theme="a">
+          <li data-role="list-divider">
+            <h2>Wind Speed</h2>
+          </li>
+          <li>
+            <input type="button" id="wind_update" data-icon="refresh" value="Read wind speed"/>
+          </li>
+        </ul>
+        <ul data-role="listview" data-inset="true" data-divider-theme="a">
+          <li data-role="list-divider">
+            <h2>House Temperature</h2>
+          </li>
+          <li>
+            <div data-role="fieldcontain">
+              <fieldset data-role="controlgroup" id="temp_sensor" data-mini="true" data-type="horizontal" data-role="fieldcontain">
+                <legend>Sensor ID:</legend>
+                <label><input type="radio" name="button_id" id="sensor_0" checked="checked"/>0</label>
+                <label><input type="radio" name="button_id" id="sensor_1"/>1</label>
+                <label><input type="radio" name="button_id" id="sensor_2"/>2</label>
+                <label><input type="radio" name="button_id" id="sensor_3"/>3</label>
+                <label><input type="radio" name="button_id" id="sensor_4"/>4</label>
+              </fieldset>
+            </div>
+            <input type="button" id="temp_update" data-icon="refresh" value="Read temperature"/>    
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>
 </html>

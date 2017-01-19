@@ -7,7 +7,7 @@ BUILDDIR=`pwd`
 AXIS_BUILDTYPE=$1
 
 if [ $VERSION_MINOR != "" ]; then
-	sed -ie 's/APPMINORVERSION.*/APPMINORVERSION=\"$VERSION_MINOR\"/g' $DIR/package.conf
+    sed -ie 's/APPMINORVERSION.*/APPMINORVERSION=\"$VERSION_MINOR\"/g' $DIR/package.conf
 fi
 
 cd /opt/axis/emb-app-sdk_1_4
