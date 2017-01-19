@@ -995,7 +995,7 @@ bool nabto_write_con(nabto_connect* con, uint8_t* buf, size_t len) {
 #if NABTO_ENABLE_DNS_FALLBACK
     if (nmc.nabtoMainSetup.enableDnsFallback) {
         if (EP_EQUAL(con->peer, nmc.context.gsp) && con->socket == nmc.socketGSP && nmc.context.useDnsFallback) {
-            return (unabto_dns_fallback_send_to(buf, len, con->peer.addr, con->peer.port) > 0);
+            return (unabto_dns_fallback_send_to(buf, (uint16_t)len, con->peer.addr, con->peer.port) > 0);
         }
     }
 #endif

@@ -12,7 +12,7 @@ void deinit_tunnel_module()
 }
 
 void unabto_stream_accept(unabto_stream* stream) {
-    return unabto_tunnel_stream_accept(stream);
+    unabto_tunnel_stream_accept(stream);
 }
 
 void unabto_stream_event(unabto_stream* stream, unabto_stream_event_type event) {

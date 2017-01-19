@@ -48,7 +48,7 @@ struct unabto_payload_packet {
     const uint8_t* begin; // Start of the payload including the header
     const uint8_t* dataBegin; // Start of the data in the payload
     const uint8_t* dataEnd; // End of both the data and the payload
-    size_t   dataLength; // Length of the data in the payload aka. the length - lengthof(header)
+    uint16_t   dataLength; // Length of the data in the payload aka. the length - lengthof(header)
 };
 
 /**
@@ -74,14 +74,14 @@ struct unabto_payload_typed_buffer {
     uint8_t        type;
     const uint8_t* dataBegin;
     const uint8_t* dataEnd;
-    size_t         dataLength;
+    uint16_t       dataLength;
 };
 
 struct unabto_payload_gw {
     uint32_t       ipAddress;
     uint16_t       port;
     uint32_t       nsi;
-    size_t         gwIdLength;
+    uint16_t       gwIdLength;
     const uint8_t* gwId;
 };
 
@@ -91,10 +91,10 @@ struct unabto_payload_ep {
 };
 
 struct unabto_payload_crypto {
-    uint16_t code;
+    uint16_t       code;
     const uint8_t* dataBegin;
     const uint8_t* dataEnd;
-    size_t dataLength;
+    uint16_t       dataLength;
 };
 
 /** Packet and payload size and offset declarations. */

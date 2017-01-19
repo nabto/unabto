@@ -196,7 +196,7 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
     }
 
     if( gopt_arg( options, 'b', &bufferSizeStr) ){
-        nms->bufsize = (size_t)atoi(bufferSizeStr);
+        nms->bufsize = (uint16_t)atoi(bufferSizeStr);
     }
 
     if( gopt_arg( options, 'A', & basestationAddress ) ){

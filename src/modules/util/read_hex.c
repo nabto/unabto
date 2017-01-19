@@ -33,7 +33,7 @@ bool convert_from_hex(char c, uint8_t* byte)
 
 bool unabto_read_hex(const char* string, size_t stringLength, uint8_t* buffer, size_t bufferLength, size_t* outLength)
 {
-    int i = 0;
+    size_t i = 0;
     *outLength = 0;
     for (i = 0; i < stringLength/2 && i < bufferLength; i++) {
         uint8_t b1, b2;

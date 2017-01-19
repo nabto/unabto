@@ -186,12 +186,12 @@ void unabto_dns_fallback_packet(unabto_dns_fallback_session* session, uint8_t* b
             NABTO_LOG_TRACE(("TXT record %.*s", (int)(newEnd-buffer), buffer));
 
             if (session->state == UDFS_RESOLVE_DOMAIN) {
-                if (rdataLength-1 > strlen("dnsfb=")) {
+                if (rdataLength-1 > (uint16_t)strlen("dnsfb=")) {
                     unabto_dns_fallback_handle_dnsfb(session, buffer + strlen("dnsfb="), newEnd);
                 }
             }
             
-            if (rdataLength-1 > strlen("NabtoAns=")) {
+            if (rdataLength-1 > (uint16_t)strlen("NabtoAns=")) {
                 if (memcmp(buffer, "NabtoAns=", strlen("NabtoAns=")) == 0) {
                     unabto_dns_fallback_handle_base32_payload(session, &dnsHeader, buffer + strlen("NabtoAns="), newEnd);
                 }

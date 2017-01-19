@@ -265,7 +265,7 @@ static uint16_t nabto_read_events(nabto_socket_t* sockets, uint16_t maxSockets, 
     
     nfds = select(max_fd+1, &read_fds, NULL, NULL, &timeout_val);
     if (nfds < 0) {
-        NABTO_LOG_ERROR(("Select failed %s", WSAGetLastError()));
+        NABTO_LOG_ERROR(("Select failed %i", WSAGetLastError()));
     }
     if (nfds > 0) {
 #if NABTO_ENABLE_LOCAL_ACCESS
