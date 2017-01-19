@@ -203,7 +203,7 @@ application_event_result application_event(application_request* request, unabto_
                 // because weather_station_application() neads a unabto_query_request* parameter
                 // more realistic example would read/interpret parameters and copy to own structure.
                 memcpy(saved_params.data, r_b->buffer->data, sz);
-                buffer_init(&saved_params.buf, saved_params.data, (int)sz);
+                buffer_init(&saved_params.buf, saved_params.data, (uint16_t)sz);
                 unabto_query_request_init(&saved_params.r_b, &saved_params.buf);
                 saved_params.r_b.position = r_b->position; // skip already read data
             }
@@ -280,7 +280,7 @@ unabto_buffer* get_event_buffer2(size_t maximumLength)
         sprintf((char*)body, "%d", lastTemperature_);
         
         // limit number of bytes to what uNabto indicates it can handle
-        if((BODYLENGTH + OVERHEAD) > maximumLength)
+        if((size_t)(BODYLENGTH + OVERHEAD) > maximumLength)
         {
             return NULL;
         }

@@ -154,7 +154,8 @@ void unabto_tunnel_parse_command(tunnel* tunnel, tunnel_event_source tunnel_even
 
 #if NABTO_ENABLE_TUNNEL_TCP
     if (strncmp((const char*)tunnel->staticMemory->command, TUNNEL_TXT, strlen(TUNNEL_TXT)) == 0) {
-        return unabto_tunnel_tcp_parse_command(tunnel, tunnel_event);
+        unabto_tunnel_tcp_parse_command(tunnel, tunnel_event);
+		return;
     }
 #endif
 
@@ -249,12 +250,12 @@ void unabto_tunnel_select_add_to_fd_set(fd_set* readFds, int* maxReadFd, fd_set*
             if (tunnels[i].tunnelType == TUNNEL_TYPE_TCP){
                 if (tunnels[i].state == TS_FORWARD && tunnels[i].extReadState == FS_READ) {
                     FD_SET(tunnels[i].tunnel_type_vars.tcp.sock, readFds);
-                    *maxReadFd = MAX(*maxReadFd, tunnels[i].tunnel_type_vars.tcp.sock);
+                    *maxReadFd = MAX(*maxReadFd, (int)(tunnels[i].tunnel_type_vars.tcp.sock));
                 }
                 if ((tunnels[i].state == TS_FORWARD && tunnels[i].unabtoReadState == FS_WRITE) ||
                     tunnels[i].state == TS_OPENING_SOCKET) {
                     FD_SET(tunnels[i].tunnel_type_vars.tcp.sock, writeFds);
-                    *maxWriteFd = MAX(*maxWriteFd, tunnels[i].tunnel_type_vars.tcp.sock);
+                    *maxWriteFd = MAX(*maxWriteFd, (int)(tunnels[i].tunnel_type_vars.tcp.sock));
                 }                    
             }
 #endif

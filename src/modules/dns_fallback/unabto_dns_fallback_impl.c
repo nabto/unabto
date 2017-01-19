@@ -20,7 +20,7 @@ bool unabto_dns_fallback_close()
     return true;
 }
 
-size_t unabto_dns_fallback_recv_socket(uint8_t* buffer, size_t bufferLength) {
+uint16_t unabto_dns_fallback_recv_socket(uint8_t* buffer, uint16_t bufferLength) {
     uint32_t addr;
     uint16_t port;
     size_t ilen;
@@ -28,13 +28,13 @@ size_t unabto_dns_fallback_recv_socket(uint8_t* buffer, size_t bufferLength) {
     for (i = 0; i < DNS_CLIENT_SOCKETS; i++) {
         ilen = nabto_read(session.dnsClient.sockets[i], buffer, bufferLength, &addr, &port);
         if (ilen > 0) {
-            return ilen;
+            return (uint16_t)ilen;
         }
     }
     return 0;
 }
 
-void unabto_dns_fallback_handle_packet(uint8_t* buffer, size_t bufferLength)
+void unabto_dns_fallback_handle_packet(uint8_t* buffer, uint16_t bufferLength)
 {
     unabto_dns_fallback_packet(&session, buffer, bufferLength);
 }
@@ -82,7 +82,7 @@ bool unabto_dns_fallback_close_socket()
     }
     return true;
 }
-size_t unabto_dns_fallback_send_to(uint8_t* buf, size_t bufSize, uint32_t addr, uint16_t port)
+uint16_t unabto_dns_fallback_send_to(uint8_t* buf, uint16_t bufSize, uint32_t addr, uint16_t port)
 {
     nabto_endpoint ep;
     ep.addr = addr;
@@ -91,7 +91,7 @@ size_t unabto_dns_fallback_send_to(uint8_t* buf, size_t bufSize, uint32_t addr, 
     return bufSize;
 }
 
-size_t unabto_dns_fallback_recv_from(uint8_t* buf, size_t bufferSize, uint32_t* addr, uint16_t* port)
+uint16_t unabto_dns_fallback_recv_from(uint8_t* buf, uint16_t bufferSize, uint32_t* addr, uint16_t* port)
 {
     nabto_endpoint ep;
     uint16_t l;

@@ -322,7 +322,7 @@ bool unabto_read_socket(nabto_socket_t socket) {
 #if NABTO_ENABLE_DNS_FALLBACK
 bool unabto_read_dns_fallback() {
     {
-        size_t ilen = unabto_dns_fallback_recv_socket(nabtoCommunicationBuffer, nabtoCommunicationBufferSize);
+        uint16_t ilen = unabto_dns_fallback_recv_socket(nabtoCommunicationBuffer, nabtoCommunicationBufferSize);
         if (ilen > 0) {
             unabto_dns_fallback_handle_packet(nabtoCommunicationBuffer, ilen);
         }

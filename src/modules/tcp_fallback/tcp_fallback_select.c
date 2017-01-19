@@ -78,7 +78,7 @@ void unabto_tcp_fallback_select_add_to_read_fd_set(fd_set* readFds, int* maxRead
             unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
             if (st > UTFS_CONNECTING && st < UTFS_CLOSED && fbConn->socket != INVALID_SOCKET) {
                 FD_SET(fbConn->socket, readFds);
-                *maxReadFd = MAX(*maxReadFd ,fbConn->socket);
+                *maxReadFd = MAX(*maxReadFd ,(int)(fbConn->socket));
             }
         }
     }
@@ -95,7 +95,7 @@ void unabto_tcp_fallback_select_add_to_write_fd_set(fd_set* writeFds, int* maxWr
             if (st > UTFS_IDLE && st < UTFS_CLOSED) {
                 if ((st == UTFS_CONNECTING || fbConn->sendBufferLength > 0) && fbConn->socket != INVALID_SOCKET) {
                     FD_SET(fbConn->socket, writeFds);
-                    *maxWriteFd = MAX(*maxWriteFd ,fbConn->socket);
+                    *maxWriteFd = MAX(*maxWriteFd ,(int)(fbConn->socket));
                 }
             }
         }
@@ -115,7 +115,7 @@ void unabto_tcp_fallback_read_ready(nabto_connect* con) {
 
 
 void unabto_tcp_fallback_select_read_sockets(fd_set* readFds) {
-    int i;
+    uint16_t i;
     for (i = 0; i < NABTO_MEMORY_CONNECTIONS_SIZE; i++) {
         nabto_connect* con = &connections[i];
 
@@ -268,7 +268,7 @@ void unabto_tcp_fallback_read_packets(nabto_connect* con) {
                 
                 NABTO_LOG_TRACE((PRI_tcp_fb "Received fallback packet length %" PRIsize, TCP_FB_ARGS(con), fbConn->recvBufferLength));
                 
-                nabto_message_event(&event, fbConn->recvBufferLength);
+                nabto_message_event(&event, (uint16_t)(fbConn->recvBufferLength));
                 NABTO_LOG_TRACE((PRI_tcp_fb "fallback packet done\n==================================================", TCP_FB_ARGS(con)));
                 
                 fbConn->recvBufferLength = 0;

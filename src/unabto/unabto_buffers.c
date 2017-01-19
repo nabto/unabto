@@ -166,7 +166,7 @@ bool unabto_abuffer_add_data(unabto_abuffer* aBuffer, const uint8_t *data, uint1
 
 bool unabto_abuffer_add_str(unabto_abuffer* aBuffer, const char *str)
 {
-    return unabto_abuffer_add_data(aBuffer, (uint8_t*)str, strlen(str));
+    return unabto_abuffer_add_data(aBuffer, (uint8_t*)str, (uint16_t)strlen(str));
 }
 
 

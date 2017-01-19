@@ -34,10 +34,10 @@ void unabto_dns_fallback_data_get_response(unabto_dns_fallback_session* session,
 bool unabto_dns_fallback_data_send_get_request(unabto_dns_fallback_session* session)
 {
     uint8_t* ptr = requestBuffer;
-    size_t requestLength;
+    uint16_t requestLength;
     uint8_t* buffer = nabtoCommunicationBuffer;
     uint8_t* end = buffer + nabtoCommunicationBufferSize;
-    size_t packetLength;
+    uint16_t packetLength;
     
     WRITE_FORWARD_U8(ptr, UDF_TYPE_GET);
     WRITE_FORWARD_U16(ptr, 9);
@@ -109,11 +109,11 @@ void unabto_dns_fallback_data_send_chunk_response(unabto_dns_fallback_session* s
 bool unabto_dns_fallback_data_send_packet_chunk_request(unabto_dns_fallback_session* session, uint8_t* start, uint16_t dataStart, uint16_t length, uint16_t chunkId)
 {
     uint8_t* ptr = requestBuffer;
-    size_t requestLength;
+    uint16_t requestLength;
     uint8_t* buffer;
     uint8_t* end;
     uint16_t id;
-    size_t packetLength;
+    uint16_t packetLength;
     
     WRITE_FORWARD_U8(ptr, UDF_TYPE_SEND_CHUNK);
     WRITE_FORWARD_U16(ptr, length+13);
@@ -126,7 +126,7 @@ bool unabto_dns_fallback_data_send_packet_chunk_request(unabto_dns_fallback_sess
     memcpy(ptr, start, length);
     ptr += length;
 
-    requestLength = ptr - requestBuffer;
+    requestLength = (uint16_t)(ptr - requestBuffer);
     
     buffer = requestEncoded;
     end = buffer + ENCODED_BUFFER_SIZE;
@@ -145,11 +145,11 @@ bool unabto_dns_fallback_data_send_packet_chunk_request(unabto_dns_fallback_sess
 void unabto_dns_fallback_data_send_packet(unabto_dns_fallback_session* session, uint8_t* buffer, uint16_t bufferLength, nabto_endpoint* ep)
 {
     uint16_t chunks = (bufferLength+(CHUNK_SIZE-1))/CHUNK_SIZE;
-    size_t packetOffset = 0;
+    uint16_t packetOffset = 0;
     uint16_t chunkId = 0;
     unabto_dns_fallback_data_send_packet_start_request(session, chunks, ep, bufferLength);
     while(bufferLength > 0) {
-        size_t chunkLength = MIN(bufferLength, CHUNK_SIZE);
+        uint16_t chunkLength = MIN(bufferLength, CHUNK_SIZE);
 
         unabto_dns_fallback_data_send_packet_chunk_request(session, buffer, packetOffset, chunkLength, chunkId);
         buffer += chunkLength;

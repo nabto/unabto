@@ -235,6 +235,8 @@ if (WIN32)
     list(APPEND unabto_link_libraries Ws2_32)
   endif()
   list(APPEND unabto_definitions -DWIN32_LEAN_AND_MEAN)
+  list(APPEND unabto_definitions -D_CRT_SECURE_NO_WARNINGS)
+  list(APPEND unabto_definitions -D_WINSOCK_DEPRECATED_NO_WARNINGS)
 endif()
 
 if (APPLE OR IOS)

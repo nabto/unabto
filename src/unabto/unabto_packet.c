@@ -137,7 +137,7 @@ void nabto_packet_event(message_event* event, nabto_packet_header* hdr)
             return;
         }
         start = (uint8_t*)crypto.dataBegin;
-        if (!unabto_decrypt(&con->cryptoctx, start, crypto.dataLength - vlen, &dlen)) {
+        if (!unabto_decrypt(&con->cryptoctx, start, (uint16_t)crypto.dataLength - vlen, &dlen)) {
             NABTO_LOG_TRACE((PRInsi " Error decrypting message: %i, %i", MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), crypto.dataLength, vlen));
             return;
         }
@@ -444,7 +444,7 @@ bool send_and_encrypt_packet(nabto_endpoint* peer, nabto_crypto_context* cryptoC
 bool send_to_basestation(uint8_t* buffer, size_t buflen, nabto_endpoint* peer) {
 #if NABTO_ENABLE_DNS_FALLBACK
     if (nmc.context.useDnsFallback) {
-        return (unabto_dns_fallback_send_to(buffer, buflen, peer->addr, peer->port) > 0);
+        return (unabto_dns_fallback_send_to(buffer, (uint16_t)buflen, peer->addr, peer->port) > 0);
     }
 #endif
 

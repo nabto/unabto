@@ -401,7 +401,7 @@ static size_t mk_gsp_alive_rsp(uint16_t seq, size_t piggySize, uint8_t* piggyDat
         return 0;
     }
     if (piggySize) {
-        ptr = insert_piggy_payload(ptr, end, piggyData, piggySize);
+        ptr = insert_piggy_payload(ptr, end, piggyData, (uint16_t)piggySize);
         if (ptr == NULL) {
             NABTO_LOG_ERROR(("Communication buffer too small for piggy!"));
             return 0;

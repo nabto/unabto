@@ -61,8 +61,8 @@ bool unabto_dns_fallback_probe_timeout_test_request(unabto_dns_fallback_session*
     uint8_t* ptr = requestBuffer;
     uint8_t* buffer = nabtoCommunicationBuffer;
     uint8_t* end = buffer + nabtoCommunicationBufferSize;
-    size_t requestLength = ptr - requestBuffer;
-    size_t packetLength;
+    uint16_t requestLength = ptr - requestBuffer;
+    uint16_t packetLength;
     
     WRITE_FORWARD_U8(ptr, UDF_TYPE_TIMEOUT_TEST);
     WRITE_FORWARD_U16(ptr, 9);
