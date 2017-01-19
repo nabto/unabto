@@ -25,9 +25,9 @@ typedef unsigned char bool;
 typedef int ssize_t;
 
 typedef uint32_t nabto_socket_t;
-		/**
-		 * Defined as in netinet/in.h
-		 */
+        /**
+         * Defined as in netinet/in.h
+         */
 #define INADDR_NONE 0xffffffffu
 #define NABTO_INVALID_SOCKET RTCS_SOCKET_ERROR
 

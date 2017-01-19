@@ -107,8 +107,8 @@
  */
 #define WRITE_U32(dst, u32) do {                \
     uint8_t* dst8 = (uint8_t*)(dst);            \
-    dst8[0] = (uint8_t)(((uint32_t)(u32) >> 24) & 0xff);	\
-    dst8[1] = (uint8_t)(((uint32_t)(u32) >> 16) & 0xff);	\
+    dst8[0] = (uint8_t)(((uint32_t)(u32) >> 24) & 0xff);  \
+    dst8[1] = (uint8_t)(((uint32_t)(u32) >> 16) & 0xff);  \
     dst8[2] = (uint8_t)(((uint32_t)(u32) >>  8) & 0xff);  \
     dst8[3] = (uint8_t)( (uint32_t)(u32)        & 0xff);  \
 } while (0);     

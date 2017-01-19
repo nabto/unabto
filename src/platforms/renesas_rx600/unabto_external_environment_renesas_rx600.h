@@ -20,11 +20,11 @@ void app_dispatcher();
 
 typedef struct  uip_udp_appstate_t
 {
-	union {
-		int unabto;
-		int resolv;
-	};
-	void (*callBack)(void);
+    union {
+        int unabto;
+        int resolv;
+    };
+    void (*callBack)(void);
 } uip_udp_appstate_t;
 
 

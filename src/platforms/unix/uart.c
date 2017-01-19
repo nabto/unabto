@@ -46,122 +46,122 @@ void uart_initialize(uint8_t channel, void* name, uint32_t baudrate, uint8_t dat
         NABTO_LOG_FATAL(("Unable to open UART '%s'!", _name));
     }
 
-	memset(&tios, 0, sizeof(tios));
-	tios.c_iflag = IGNBRK | IGNCR;
-	tios.c_iflag |= ((tcflag_t) INPCK);
-	tios.c_oflag &= ~OPOST;
-	tios.c_lflag &= ~ICANON;
-	cfmakeraw(&tios); // :...
-	tios.c_cc[VMIN] = 0;
-	tios.c_cc[VTIME] = 0;
-	tios.c_cflag = CLOCAL | CREAD;
-	
+    memset(&tios, 0, sizeof(tios));
+    tios.c_iflag = IGNBRK | IGNCR;
+    tios.c_iflag |= ((tcflag_t) INPCK);
+    tios.c_oflag &= ~OPOST;
+    tios.c_lflag &= ~ICANON;
+    cfmakeraw(&tios); // :...
+    tios.c_cc[VMIN] = 0;
+    tios.c_cc[VTIME] = 0;
+    tios.c_cflag = CLOCAL | CREAD;
+
     switch(parity)
     {
-		case UART_PARITY_NONE:
-			break;
-			
-		case UART_PARITY_EVEN:
-			tios.c_cflag |= ((tcflag_t) PARENB);
-			break;
-			
-		case UART_PARITY_ODD:
-			tios.c_cflag |= ((tcflag_t) PARENB | PARODD);
-			break;
-			
-		// case UART_PARITY_MARK:
-			// tios.c_cflag |= ((tcflag_t) PARENB | CMSPAR | PARODD);
-			// break;
-			
-		// case UART_PARITY_SPACE:
-			// tios.c_cflag |= ((tcflag_t) PARENB | CMSPAR);
-			// break;
+        case UART_PARITY_NONE:
+            break;
+            
+        case UART_PARITY_EVEN:
+            tios.c_cflag |= ((tcflag_t) PARENB);
+            break;
+            
+        case UART_PARITY_ODD:
+            tios.c_cflag |= ((tcflag_t) PARENB | PARODD);
+            break;
+            
+        // case UART_PARITY_MARK:
+            // tios.c_cflag |= ((tcflag_t) PARENB | CMSPAR | PARODD);
+            // break;
+            
+        // case UART_PARITY_SPACE:
+            // tios.c_cflag |= ((tcflag_t) PARENB | CMSPAR);
+            // break;
 
-		default:
-			NABTO_LOG_FATAL(("Invalid number of databits for UART!"));
+        default:
+            NABTO_LOG_FATAL(("Invalid number of databits for UART!"));
     }
 
     switch(stopbits)
     {
-		case UART_STOPBITS_ONE:
-			break;
+        case UART_STOPBITS_ONE:
+            break;
 
-		case UART_STOPBITS_TWO:
-			tios.c_cflag |= ((tcflag_t) CSTOPB);
-			break;
+        case UART_STOPBITS_TWO:
+            tios.c_cflag |= ((tcflag_t) CSTOPB);
+            break;
 
-		default:
-			NABTO_LOG_FATAL(("Invalid number of stopbits for UART!"));
+        default:
+            NABTO_LOG_FATAL(("Invalid number of stopbits for UART!"));
     }
-	
-	switch(databits)
-	{
-		case 5:
-			tios.c_cflag |= ((tcflag_t) CS5);
-			break;
-		case 6:
-			tios.c_cflag |= ((tcflag_t) CS6);
-			break;
-		case 7:
-			tios.c_cflag |= ((tcflag_t) CS7);
-			break;
-		case 8:
-			tios.c_cflag |= ((tcflag_t) CS8);
-			break;
-		default:
-			NABTO_LOG_FATAL(("Invalid number of databits specified for UART '%s'.", _name));
-			return;
-	}
-	
-	switch(baudrate)
-	{
-		case 300:
-			cfsetispeed(&tios, B300);
-			cfsetospeed(&tios, B300);
-		case 600:
-			cfsetispeed(&tios, B600);
-			cfsetospeed(&tios, B600);
-		case 1200:
-			cfsetispeed(&tios, B1200);
-			cfsetospeed(&tios, B1200);
-		case 2400:
-			cfsetispeed(&tios, B2400);
-			cfsetospeed(&tios, B2400);
-			break;
-		case 4800:
-			cfsetispeed(&tios, B4800);
-			cfsetospeed(&tios, B4800);
-			break;
-		case 9600:
-			cfsetispeed(&tios, B9600);
-			cfsetospeed(&tios, B9600);
-			break;
-		case 19200:
-			cfsetispeed(&tios, B19200);
-			cfsetospeed(&tios, B19200);
-			break;
-		case 38400:
-			cfsetispeed(&tios, B38400);
-			cfsetospeed(&tios, B38400);
-			break;
-		case 57600:
-			cfsetispeed(&tios, B57600);
-			cfsetospeed(&tios, B57600);
-			break;
-		case 115200:
-			cfsetispeed(&tios, B115200);
-			cfsetospeed(&tios, B115200);
-			break;
-		default:
-			NABTO_LOG_FATAL(("Invalid baudrate specified for UART '%s'.", _name));
-			return;
-	}
-	
-	if (-1 == tcsetattr(uartChannel->fileDescriptor, TCSANOW, &tios))
-	{
-		NABTO_LOG_FATAL(("Unable to configure UART '%s'.", _name));
-	}
-	
+
+    switch(databits)
+    {
+        case 5:
+            tios.c_cflag |= ((tcflag_t) CS5);
+            break;
+        case 6:
+            tios.c_cflag |= ((tcflag_t) CS6);
+            break;
+        case 7:
+            tios.c_cflag |= ((tcflag_t) CS7);
+            break;
+        case 8:
+            tios.c_cflag |= ((tcflag_t) CS8);
+            break;
+        default:
+            NABTO_LOG_FATAL(("Invalid number of databits specified for UART '%s'.", _name));
+            return;
+    }
+
+    switch(baudrate)
+    {
+        case 300:
+            cfsetispeed(&tios, B300);
+            cfsetospeed(&tios, B300);
+        case 600:
+            cfsetispeed(&tios, B600);
+            cfsetospeed(&tios, B600);
+        case 1200:
+            cfsetispeed(&tios, B1200);
+            cfsetospeed(&tios, B1200);
+        case 2400:
+            cfsetispeed(&tios, B2400);
+            cfsetospeed(&tios, B2400);
+            break;
+        case 4800:
+            cfsetispeed(&tios, B4800);
+            cfsetospeed(&tios, B4800);
+            break;
+        case 9600:
+            cfsetispeed(&tios, B9600);
+            cfsetospeed(&tios, B9600);
+            break;
+        case 19200:
+            cfsetispeed(&tios, B19200);
+            cfsetospeed(&tios, B19200);
+            break;
+        case 38400:
+            cfsetispeed(&tios, B38400);
+            cfsetospeed(&tios, B38400);
+            break;
+        case 57600:
+            cfsetispeed(&tios, B57600);
+            cfsetospeed(&tios, B57600);
+            break;
+        case 115200:
+            cfsetispeed(&tios, B115200);
+            cfsetospeed(&tios, B115200);
+            break;
+        default:
+            NABTO_LOG_FATAL(("Invalid baudrate specified for UART '%s'.", _name));
+            return;
+    }
+
+    if (-1 == tcsetattr(uartChannel->fileDescriptor, TCSANOW, &tios))
+    {
+        NABTO_LOG_FATAL(("Unable to configure UART '%s'.", _name));
+    }
+
     NABTO_LOG_TRACE(("UART '%s' opened with handle %i.", _name, uartChannel->fileDescriptor));
 }
 
@@ -331,7 +331,7 @@ void uart_flush_transmitter(uint8_t channel)
 
     uartChannel = &channels[channel];
 
-	tcdrain(uartChannel->fileDescriptor);
+    tcdrain(uartChannel->fileDescriptor);
 }
 
 static bool low_level_read_from_uart(uart_channel* uartChannel)
@@ -354,21 +354,21 @@ static bool low_level_read_from_uart(uart_channel* uartChannel)
 
     if(bytesRead > 0)
     {
-		uint16_t length = MIN(queue_free(&uartChannel->receiveQueue), bytesRead);
-		queue_enqueue_array(&uartChannel->receiveQueue, buffer, length);
-		
-		if(length != bytesRead)
-		{
-			NABTO_LOG_TRACE(("UART buffer overflow!"));
-		}
+        uint16_t length = MIN(queue_free(&uartChannel->receiveQueue), bytesRead);
+        queue_enqueue_array(&uartChannel->receiveQueue, buffer, length);
+
+        if(length != bytesRead)
+        {
+            NABTO_LOG_TRACE(("UART buffer overflow!"));
+        }
         // for(i = 0; i < bytesRead; i++)
         // {
             // queue_enqueue(&uartChannel->receiveQueue, buffer[i]);
         // }
-		return true;
+        return true;
     }
-	else
-	{
-		return false;
-	}
+    else
+    {
+        return false;
+    }
 }

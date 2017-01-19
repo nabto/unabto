@@ -248,11 +248,11 @@ list_remove(list_t list, void *item)
   for(l = *list; l != NULL; l = l->next) {
     if(l == item) {
       if(r == NULL) {
-	/* First on list */
-	*list = l->next;
+        /* First on list */
+        *list = l->next;
       } else {
-	/* Not first on list */
-	r->next = l->next;
+        /* Not first on list */
+        r->next = l->next;
       }
       l->next = NULL;
       return;

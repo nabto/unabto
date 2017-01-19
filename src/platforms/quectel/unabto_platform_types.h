@@ -4,7 +4,7 @@
 #ifndef _UNABTO_PLATFORM_TYPES_H_
 #define _UNABTO_PLATFORM_TYPES_H_
 
-#define NABTO_INVALID_SOCKET	NULL
+#define NABTO_INVALID_SOCKET    NULL
 #define nabtoMsec2Stamp
 
 typedef u8 uint8_t;

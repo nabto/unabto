@@ -976,8 +976,8 @@ uint16_t unabto_count_active_connections()
 
     for (con = connections; con < connections + NABTO_MEMORY_CONNECTIONS_SIZE; ++con) {
         if (con->state != CS_IDLE) {
-	    activeConnections++;
-	}
+            activeConnections++;
+        }
     }
     return activeConnections;
 }

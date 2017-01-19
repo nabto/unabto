@@ -62,7 +62,7 @@ void spi_transfer_buffer(uint8_t* buffer, uint16_t length)
   {
     SPDR = *buffer;
 
-	while (!(SPSR & _BV(SPIF)));
+    while (!(SPSR & _BV(SPIF)));
 
     *buffer = SPDR;
 

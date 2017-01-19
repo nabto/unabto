@@ -2,8 +2,8 @@
  * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
  */
 /*
- * FILE:	sha2.h
- * AUTHOR:	Aaron D. Gifford - http://www.aarongifford.com/
+ * FILE:    sha2.h
+ * AUTHOR:  Aaron D. Gifford - http://www.aarongifford.com/
  * 
  * Copyright (c) 2000-2001, Aaron D. Gifford
  * All rights reserved.

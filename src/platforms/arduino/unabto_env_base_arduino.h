@@ -20,8 +20,8 @@ typedef int ssize_t;
  * Socket related definitions
  */
 
-#define 	htons(s)   ((s<<8) | (s>>8))
-#define 	htonl(l)   ((l<<24) | ((l&0x00FF0000l)>>8) | ((l&0x0000FF00l)<<8) | (l>>24))
+#define     htons(s)   ((s<<8) | (s>>8))
+#define     htonl(l)   ((l<<24) | ((l&0x00FF0000l)>>8) | ((l&0x0000FF00l)<<8) | (l>>24))
 #define     ntohl htonl
 #define     ntohs htons
 

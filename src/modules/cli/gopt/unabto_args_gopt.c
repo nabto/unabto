@@ -188,11 +188,11 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
             gopt_free(options);
             return false;
         }
-		nms->ipAddress = htonl(addr);
+        nms->ipAddress = htonl(addr);
     } 
 
     if( gopt_arg( options, 'p', &localPortStr) ){
-		nms->localPort = atoi(localPortStr);
+        nms->localPort = atoi(localPortStr);
     }
 
     if( gopt_arg( options, 'b', &bufferSizeStr) ){

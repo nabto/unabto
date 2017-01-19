@@ -178,7 +178,7 @@ bool unabto_debug_syslog_config(bool enableSyslog, uint8_t facility,  uint32_t i
     nabto_endpoint ep;
     ep.addr = ip; ep.port = port;
 
-	NABTO_LOG_INFO(("Enabling syslog " PRIep " %.*s expire %" PRIu32 " enabled %i", MAKE_EP_PRINTABLE(ep), configStrLength, configStr, expire, enableSyslog));
+    NABTO_LOG_INFO(("Enabling syslog " PRIep " %.*s expire %" PRIu32 " enabled %i", MAKE_EP_PRINTABLE(ep), configStrLength, configStr, expire, enableSyslog));
     
     if (enableSyslog) {
         ret = unabto_log_system_enable_syslog_pattern((const char*)configStr, configStrLength, ip, port, expire);

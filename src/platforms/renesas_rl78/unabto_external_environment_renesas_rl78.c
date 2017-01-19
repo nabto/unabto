@@ -222,7 +222,7 @@ nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr)
 {
 /* To use or not to use DNS response, that is the question */
 #if 1
-  uint32_t c_ip = 0xC3F99F9F; 	// static remote ip: 195.249.159.159
+  uint32_t c_ip = 0xC3F99F9F;  // static remote ip: 195.249.159.159
   *v4addr = c_ip;
   return NABTO_DNS_OK;
 #else
@@ -233,9 +233,9 @@ nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr)
     int temp_ip[4];
     sscanf(s_ip, _F8_ "." _F8_ "." _F8_ "." _F8_, &temp_ip[0], &temp_ip[1], &temp_ip[2], &temp_ip[3]);
     uint32_t ip = (uint32_t)temp_ip[0] << 24 |
-	          (uint32_t)temp_ip[1] << 16 |
-	          (uint32_t)temp_ip[2] << 8  |
-	          (uint32_t)temp_ip[3];
+                  (uint32_t)temp_ip[1] << 16 |
+                  (uint32_t)temp_ip[2] << 8  |
+                  (uint32_t)temp_ip[3];
     *v4addr = ip;
     return NABTO_DNS_OK;
   }

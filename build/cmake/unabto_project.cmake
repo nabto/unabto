@@ -105,9 +105,9 @@ endif()
 
 if (NOT UNABTO_DNS_MODULE)
   if (WIN32)
-	set(UNABTO_DNS_MODULE win32)
+    set(UNABTO_DNS_MODULE win32)
   else()
-	set(UNABTO_DNS_MODULE unix)
+    set(UNABTO_DNS_MODULE unix)
   endif()
 endif()
 
@@ -192,13 +192,13 @@ if(${CMAKE_SYSTEM} MATCHES Linux)
   CHECK_LIBRARY_EXISTS(pthread pthread_create "" HAVE_PHTREAD_LIB)
 
   list(APPEND unabto_include_directories
-	${unabto_platform_unix_include_directories}
+    ${unabto_platform_unix_include_directories}
     )
 
   list(APPEND unabto_src
-	${unabto_platform_unix_src}
-	${unabto_module_log_unix_src}
-	${unabto_module_timers_unix_src}
+    ${unabto_platform_unix_src}
+    ${unabto_module_log_unix_src}
+    ${unabto_module_timers_unix_src}
     )
   list(APPEND unabto_link_libraries m)
 
@@ -214,20 +214,20 @@ if(${CMAKE_SYSTEM} MATCHES Linux)
   endif()
 
   if (UNABTO_HAVE_EPOLL)
-	list(APPEND unabto_src ${unabto_module_network_epoll_src})
+    list(APPEND unabto_src ${unabto_module_network_epoll_src})
   endif()
   
 endif()
 
 if (WIN32)
   list(APPEND unabto_include_directories
-	${unabto_platform_win32_include_directories}
+    ${unabto_platform_win32_include_directories}
     )
   list(APPEND unabto_src
     ${unabto_core_src}
     ${unabto_module_cli_gopt_src}
-	${unabto_platform_win32_src}
-	${unabto_module_log_win32_src}
+    ${unabto_platform_win32_src}
+    ${unabto_module_log_win32_src}
     )
   if (CMAKE_SYSTEM_NAME MATCHES "WindowsCE")
     list(APPEND unabto_link_libraries Ws2)
@@ -239,14 +239,14 @@ endif()
 
 if (APPLE OR IOS)
   list(APPEND unabto_include_directories
-	${unabto_platform_unix_include_directories}
+    ${unabto_platform_unix_include_directories}
     )
 
   list(APPEND unabto_src
     ${unabto_module_unix_dns_src}
-	${unabto_platform_unix_src}
-	${unabto_module_log_unix_src}
-	${unabto_module_timers_unix_src}
+    ${unabto_platform_unix_src}
+    ${unabto_module_log_unix_src}
+    ${unabto_module_timers_unix_src}
     )
   list(APPEND unabto_link_libraries pthread m)
 endif()

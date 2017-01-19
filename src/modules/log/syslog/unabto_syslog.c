@@ -55,8 +55,8 @@ int syslog_severity_from_severity(uint32_t severity);
 
 bool unabto_syslog_init(const char* deviceId) 
 {
-	uint16_t localPort = 0;
-	bool ok;
+    uint16_t localPort = 0;
+    bool ok;
     disableSyslog = true;
     
     ok = nabto_init_socket(0, &localPort, &syslogSocket);
@@ -77,16 +77,16 @@ static bool unabto_create_syslog_header(char* syslogBuffer, size_t syslogBufferS
 {
     int syslogSeverity = syslog_severity_from_severity(severity);
     uint8_t syslogPriority = (SYSLOG_FACILITY_LOCAL0*8)+syslogSeverity;
-	nabto_main_context* nmc = unabto_get_main_context();
+    nabto_main_context* nmc = unabto_get_main_context();
 
 #ifdef WIN32
 
-	SYSTEMTIME st;
+    SYSTEMTIME st;
     GetSystemTime(&st);
 
-	snprintf(syslogBuffer, syslogBufferSize, "<%u>1 %04u-%02u-%02uT%02u:%02u:%02u.%03uZ %s tunnel - - - ",
-		syslogPriority, st.wYear, st.wMonth, st.wDay, 
-		st.wHour, st.wMinute, st.wSecond, st.wMilliseconds, nmc->nabtoMainSetup.id);
+    snprintf(syslogBuffer, syslogBufferSize, "<%u>1 %04u-%02u-%02uT%02u:%02u:%02u.%03uZ %s tunnel - - - ",
+        syslogPriority, st.wYear, st.wMonth, st.wDay, 
+        st.wHour, st.wMinute, st.wSecond, st.wMilliseconds, nmc->nabtoMainSetup.id);
 #else
     time_t sec;
     unsigned int us;
@@ -110,8 +110,8 @@ static bool unabto_create_syslog_header(char* syslogBuffer, size_t syslogBufferS
 
 void unabto_syslog(uint32_t module, uint32_t severity, const char* file, unsigned int line, uint32_t syslogServer, uint16_t syslogPort, const char* format, va_list ap) 
 {
-	char msg[SYSLOG_MESSAGE_SIZE];
-	size_t used;
+    char msg[SYSLOG_MESSAGE_SIZE];
+    size_t used;
     if (disableSyslog) {
         return;
     }
@@ -137,10 +137,10 @@ void unabto_syslog_buffer(uint32_t module, uint32_t severity, const char* file, 
 {
     size_t used;
     char msg[SYSLOG_MESSAGE_SIZE];
-	size_t i, j;
+    size_t i, j;
     size_t linenums;
     
-	if (disableSyslog) {
+    if (disableSyslog) {
         return;
     }
     

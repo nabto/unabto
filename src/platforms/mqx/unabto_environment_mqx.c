@@ -48,17 +48,17 @@ void nabto_random(uint8_t* buf, size_t len)
 
 static bool initInf( void )
 {
-	#define ENET_IPADDR IPADDR(169,254,3,3)
-	#define ENET_IPMASK IPADDR(255,255,0,0)
-	#define ENET_GATEWAY IPADDR(0,0,0,0)
+    #define ENET_IPADDR IPADDR(169,254,3,3)
+    #define ENET_IPMASK IPADDR(255,255,0,0)
+    #define ENET_GATEWAY IPADDR(0,0,0,0)
     uint32_t           error;
     _enet_address     address;
     IPCFG_IP_ADDRESS_DATA ip_data;
 
-	static bool infInitialized = false;
-	if (infInitialized)
-		return true;
-	
+    static bool infInitialized = false;
+    if (infInitialized)
+        return true;
+    
 #if RTCS_MINIMUM_FOOTPRINT
    /* runtime RTCS configuration for devices with small RAM, for others the default BSP setting is used */
    _RTCSPCB_init = 4;
@@ -71,28 +71,28 @@ static bool initInf( void )
    _RTCS_socket_part_grow = 2;
    _RTCS_socket_part_max  = 20;
 #endif
-	
+    
     error = RTCS_create();
-	if (error != RTCS_OK) 
-		return false;
+    if (error != RTCS_OK) 
+        return false;
 
-	 /* 
-	  * For this demo the mac address is calculated from IP ADDRES 
-	  * Replace this line with proper mac address initialization
-	  */
-	ENET_get_mac_address (ETH_DEVICE, ENET_IPADDR, address);
-	
-	
-	error = ipcfg_init_device (ETH_DEVICE, address);
-	if (error != RTCS_OK) 
-	   return false;
-	
+     /* 
+      * For this demo the mac address is calculated from IP ADDRES 
+      * Replace this line with proper mac address initialization
+      */
+    ENET_get_mac_address (ETH_DEVICE, ENET_IPADDR, address);
+    
+    
+    error = ipcfg_init_device (ETH_DEVICE, address);
+    if (error != RTCS_OK) 
+       return false;
+    
     while(!ipcfg_get_link_active(ETH_DEVICE));
     while (ipcfg_task_poll() == FALSE);
-	
-	ip_data.ip = ENET_IPADDR;
-	ip_data.mask = ENET_IPMASK;
-	ip_data.gateway = ENET_GATEWAY;     
+    
+    ip_data.ip = ENET_IPADDR;
+    ip_data.mask = ENET_IPMASK;
+    ip_data.gateway = ENET_GATEWAY;     
     error = ipcfg_bind_dhcp_wait(ETH_DEVICE, FALSE, &ip_data);
     return (error == IPCFG_ERROR_OK);
 }
@@ -104,7 +104,7 @@ static bool initInf( void )
 
 /******************************************************************************/
 #define INADDR_NONE 0xffffffffu
-	//
+    //
 #define AF_INET         1
 bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket) {
     nabto_socket_t sd = RTCS_SOCKET_ERROR;
@@ -114,7 +114,7 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
         return false;
     } else 
     {
-    	uint32_t optVal = TRUE;
+        uint32_t optVal = TRUE;
         struct sockaddr_in sa;
         memset(&sa, 0, sizeof(sa));
         sa.sin_family = AF_INET;
@@ -131,7 +131,7 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
             struct sockaddr_in sao;
             socklen_t len = sizeof(sao);
             if ( getsockname(*socket, &sao, &len) != -1) {
-            	*localPort = sao.sin_port;
+                *localPort = sao.sin_port;
             } else {
  //               NABTO_LOG_INFO(("error getting local port"));
             }
@@ -179,7 +179,7 @@ ssize_t nabto_read(nabto_socket_t socket,
     sa.sin_family = AF_INET;
     res = recvfrom(socket, buf, (uint32_t)len, 0, &sa, &salen);
     if (res > 0)
-    	*addr = ntohl(sa.sin_addr.s_addr);
+        *addr = ntohl(sa.sin_addr.s_addr);
     if (res >= 0) {
         *addr = sa.sin_addr.s_addr;
         *port = sa.sin_port;
@@ -221,15 +221,15 @@ ssize_t nabto_write(nabto_socket_t socket,
 /******************************************************************************/
 /******************************************************************************/
 void nabto_yield(int timeOut) {
-	ipcfg_task_poll();
-	_time_delay((unsigned long)timeOut);
+    ipcfg_task_poll();
+    _time_delay((unsigned long)timeOut);
 }
 
 nabto_stamp_t nabtoGetStamp( void )
 {
-	TIME_STRUCT time;
-	_time_get_elapsed(&time);
-	return time.MILLISECONDS;
+    TIME_STRUCT time;
+    _time_get_elapsed(&time);
+    return time.MILLISECONDS;
 }
 
 #define MAX_STAMP_DIFF 0x7fffffff;
@@ -256,7 +256,7 @@ nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr)
  
     memset (hostname, 0, sizeof (hostname));
     if (!RTCS_resolve_ip_address( (char*)id, v4addr, hostname, MAX_HOSTNAMESIZE ))
-    	return NABTO_DNS_ERROR;
+        return NABTO_DNS_ERROR;
 
     return NABTO_DNS_OK;
 }

@@ -51,7 +51,7 @@ typedef struct {
  */
 static packet_buffer_t ipacket, opacket;
 
-#define BUF		( ( struct uip_tcpip_hdr * ) &uip_buf[UIP_LLH_LEN] )
+#define BUF     ( ( struct uip_tcpip_hdr * ) &uip_buf[UIP_LLH_LEN] )
 
 void in_out_packet() {
     bool incoming = false;

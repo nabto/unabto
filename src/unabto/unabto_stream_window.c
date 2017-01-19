@@ -421,7 +421,7 @@ size_t nabto_stream_tcb_can_write(struct nabto_stream_s * stream) {
 static bool send_data_packet(struct nabto_stream_s* stream, uint32_t seq, uint8_t* data, uint16_t size, unsigned int retrans, int ix)
 {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
-	struct nabto_stream_sack_data sackData;
+    struct nabto_stream_sack_data sackData;
     
     NABTO_NOT_USED(tcb);
 
@@ -991,7 +991,7 @@ static void handle_data(struct nabto_stream_s* stream,
                 tcb->ackSent = tcb->recvNext-1;
             }
             break;
-	    
+
         case SEQ_EXPECTED:
             /* use ack's from received packet to roll transmit window */
             NABTO_LOG_TRACE(("xmitLastSent %" PRIu32 " xmitFirst %" PRIu32, tcb->xmitLastSent, tcb->xmitFirst));

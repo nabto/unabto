@@ -7,7 +7,7 @@
  */
 
 #ifndef _URRD_H_
-#define	_URRD_H_
+#define _URRD_H_
 
 #include "urrdtool_config.h"
 
@@ -123,7 +123,7 @@ bool urrd_write(uint8_t id, const void* data);
  * @param  id                   the id of the uRRD
  * @param  buf                  buffer to the readed data
  * @param  time_stamp           the time_stamp of the record to read
- * @param  length				size of buffer
+ * @param  length               size of buffer
  * @param  from                 The start timestamp of the data.
  * @param  to                   The end timestamp of the data.
  * @return                      returns number of records read
