@@ -220,8 +220,13 @@ void unabto_tcp_fallback_read_packets(nabto_connect* con) {
             status = recv(fbConn->socket, fbConn->recvBuffer + fbConn->recvBufferLength, 16-fbConn->recvBufferLength, 0);
             err = errno;
             if (status < 0) {
+#ifdef WIN32 // defined(WINSOCK)
+                if (WSAGetLastError() == WSAEWOULDBLOCK) {
+                    return;
+#else
                 if ((err == EAGAIN) || err == EWOULDBLOCK) {
                     return;
+#endif
                 } else {
                     NABTO_LOG_ERROR((PRI_tcp_fb "unabto_tcp_fallback_read_single_packet failed", TCP_FB_ARGS(con)));
                     unabto_tcp_fallback_close(con);
@@ -245,8 +250,13 @@ void unabto_tcp_fallback_read_packets(nabto_connect* con) {
             status = recv(fbConn->socket, fbConn->recvBuffer + fbConn->recvBufferLength, packetLength - fbConn->recvBufferLength, 0);
             err = errno;
             if (status < 0) {
+#ifdef WIN32 // defined(WINSOCK)
+                if (WSAGetLastError() == WSAEWOULDBLOCK) {
+                    return;
+#else
                 if ((err == EAGAIN) || err == EWOULDBLOCK) {
                     return;
+#endif
                 } else {
                     NABTO_LOG_ERROR((PRI_tcp_fb "Tcp read failed", TCP_FB_ARGS(con)));
                     unabto_tcp_fallback_close(con);
@@ -384,8 +394,13 @@ bool unabto_tcp_fallback_connect(nabto_connect* con) {
     } else {
         int err = errno;
         // err is two on windows.
+#if WIN32
+        if (WSAGetLastError() == WSAEINPROGRESS) {
+            con->tcpFallbackConnectionState = UTFS_CONNECTING;
+#else
         if (err == EINPROGRESS) {
             con->tcpFallbackConnectionState = UTFS_CONNECTING;
+#endif
         } else {
             NABTO_LOG_ERROR((PRI_tcp_fb "Could not connect to fallback tcp endpoint. %s", TCP_FB_ARGS(con), strerror(errno)));
             unabto_tcp_fallback_close_socket(fbConn);
@@ -461,8 +476,13 @@ bool unabto_tcp_fallback_handle_write(nabto_connect* con) {
         canMaybeSendMoreData = true;
     } else if (status < 0) {
         int err = errno;
+#if WIN32
+        if (WSAGetLastError() == WSAEWOULDBLOCK) {
+            canMaybeSendMoreData = false;
+#else
         if ((err == EAGAIN) || err == EWOULDBLOCK) {
             canMaybeSendMoreData = false;
+#endif
         } else {
             NABTO_LOG_ERROR((PRI_tcp_fb "Send of tcp packet failed", TCP_FB_ARGS(con)));
             close_tcp_socket(con);
