@@ -22,6 +22,8 @@
 #include <unistd.h>
 #endif
 
+#include <stdio.h>
+
 void tunnel_loop_select() {
     if (!unabto_init()) {
         NABTO_LOG_FATAL(("Failed to initialize unabto"));
@@ -67,6 +69,8 @@ void tunnel_loop_select() {
 
         timeout_val.tv_sec = (timeout/1000);
         timeout_val.tv_usec = ((timeout)%1000)*1000;
+
+        fflush(stdout);
 
         nfds = select(MAX(max_read_fd+1, max_write_fd+1), &read_fds, &write_fds, NULL, &timeout_val);
 

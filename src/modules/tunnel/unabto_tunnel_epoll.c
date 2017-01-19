@@ -12,6 +12,7 @@
 #include <sys/epoll.h>
 
 #include <errno.h>
+#include <stdio.h>
 
 #define MAX_EPOLL_EVENTS 10
 
@@ -44,6 +45,8 @@ void tunnel_loop_epoll() {
         if (timeout < 0) {
             timeout = 0;
         }
+
+        fflush(stdout);
         
         nfds = epoll_wait(unabto_epoll_fd, events, MAX_EPOLL_EVENTS, timeout);
         unabto_time_update_stamp();
