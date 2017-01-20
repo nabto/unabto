@@ -152,9 +152,11 @@ enum np_payload_type_e {
     NP_PAYLOAD_TYPE_ATTACH_STATS     = 0x46, /* 'F' Connection statistics */
     NP_PAYLOAD_TYPE_PING             = 0x47, /* 'G' Ping                  */
     NP_PAYLOAD_TYPE_SYSLOG_CONFIG    = 0x48, /* 'H' Syslog Configuration  */
-    NP_PAYLOAD_TYPE_GWWS             = 0x49, /* 'I' websocket gateway payload */
-    NP_PAYLOAD_TYPE_SYSTEM_INFO      = 0x4A, /* 'J' system info payload type */
+    NP_PAYLOAD_TYPE_GWWS             = 0x49, /* 'I' websocket gateway payload          */
+    NP_PAYLOAD_TYPE_SYSTEM_INFO      = 0x4A, /* 'J' system info payload type           */
     NP_PAYLOAD_TYPE_FP               = 0x4B, /* 'K' fingerprint of certificate payload */
+    NP_PAYLOAD_TYPE_PUSH             = 0x4C, /* 'L' Push notification payload          */
+    NP_PAYLOAD_TYPE_PUSH_DATA        = 0x4D, /* 'M' Push notification data payload     */
 };
 
 /* Payload header flags */
@@ -901,4 +903,37 @@ enum np_payload_system_info_nat64_e {
  */
 #define NP_PAYLOAD_SYSLOG_FLAG_ENABLE              0x01 
 
+
+/******************************************************************************/
+/* Push notification payload */
+/* The Push notification payload has the following layout:
+ *    +-----+-----------------------------------------------------------------+
+ *    |  +0 |  Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)               |
+ *    +-----+-----------------------------------------------------------------+
+ *    |  +4 |  +0 | Sequence number                                           |
+ *    +-----+-----+-----------------------------------------------------------+
+ *    |  +8 |  +4 | Segment number                                            |
+ *    +-----+-----+-----------------------------------------------------------+
+ *    |  +10|  +6 | total number of segments                                  |
+ *    +-----+-----+-----------------------------------------------------------+
+ *    |  +12|  +8 | PNS id                                                    |
+ *    +-----+-----+-----------------------------------------------------------+
+ */
+
+#define NP_PAYLOAD_PUSH_SIZE    14 ///< Size of the push notification payload
+ 
+/******************************************************************************/
+/* Push notification Data payload */
+/* The Push notification Data payload has the following layout:
+ *    +-----+-----------------------------------------------------------------+
+ *    |  +0 |  Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)               |
+ *    +-----+-----------------------------------------------------------------+
+ *    |  +4 |  +0 | type                                                      |
+ *    +-----+-----+-----------------------------------------------------------+
+ *    |  +5 |  +1 | Data                                                      |
+ *    +-----+-----+-----------------------------------------------------------+
+ */
+
+#define NP_PAYLOAD_PUSH_DATA_SIZE_WO_DATA    5 ///< Size of the push notification payload
+ 
 #endif
