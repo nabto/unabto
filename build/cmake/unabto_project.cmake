@@ -237,6 +237,19 @@ if (WIN32)
   list(APPEND unabto_definitions -DWIN32_LEAN_AND_MEAN)
   list(APPEND unabto_definitions -D_CRT_SECURE_NO_WARNINGS)
   list(APPEND unabto_definitions -D_WINSOCK_DEPRECATED_NO_WARNINGS)
+
+  option(MSVC_STATIC_RUNTIME "Build with static runtime libs (/MT)" ON)
+
+  if (MSVC_STATIC_RUNTIME)
+    foreach(flag_var
+        CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
+        CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO)
+      if(${flag_var} MATCHES "/MD")
+        string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
+      endif()
+    endforeach()
+  endif ()
+
 endif()
 
 if (APPLE OR IOS)
