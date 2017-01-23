@@ -49,10 +49,20 @@ void unabto_log_system_log_buffer(uint32_t module, uint32_t severity, const char
 #define MAYBE_STRIP_PARENS_2(x) APPLY(MAYBE_STRIP_PARENS_2_I, x) 
 #define MAYBE_STRIP_PARENS_2_I(...) __VA_ARGS__ 
 
+#ifndef NABTO_LOG_ALL
 #define NABTO_LOG_ALL 1
-#define NABTO_LOG_FATAL(message)                                    do { printf message; printf("\n"); NABTO_FATAL_EXIT; } while(0)
+#endif
 
+#ifndef NABTO_LOG_FATAL
+#define NABTO_LOG_FATAL(message)                                    do { printf message; printf("\n"); NABTO_FATAL_EXIT; } while(0)
+#endif
+
+#ifndef NABTO_LOG_BUFFER
 #define NABTO_LOG_BUFFER(severity, message, buffer, length) unabto_log_system_log_buffer(NABTO_LOG_MODULE_CURRENT, severity, __FILE__, __LINE__, buffer, length, STRIP_PARENS(message))
+#endif
+
+#ifndef NABTO_LOG_BASIC_PRINT
 #define NABTO_LOG_BASIC_PRINT(severity, cmsg) unabto_log_system_log(NABTO_LOG_MODULE_CURRENT, severity, __FILE__, __LINE__, STRIP_PARENS(cmsg)) 
+#endif
 
 #endif
