@@ -4,8 +4,6 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 BUILDDIR=`pwd`
 
-AXIS_BUILDTYPE=$1
-
 if [ "x$VERSION_MINOR" != "x" ]; then
     sed -ie 's/APPMINORVERSION.*/APPMINORVERSION=\"$VERSION_MINOR\"/g' $DIR/package.conf
 fi

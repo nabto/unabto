@@ -3,13 +3,12 @@
 
 #include <syslog.h>
 
-#ifdef WIN32
-#include <winsock2.h>
-#else
 #include <pthread.h>
-#endif
 
-#include <modules/log/dynamic/unabto_dynamic_log.h>
+#define EXPAND_ARGS(...) __VA_ARGS__
+#define NABTO_LOG_BASIC_PRINT(severity, cmsg) syslog(LOG_INFO, EXPAND_ARGS cmsg)
+
+#define NABTO_LOG_ALL 0
 
 #define NABTO_CONNECTIONS_SIZE 5
 #define NABTO_ENABLE_DEVICE_BUSY_AS_FATAL 1
@@ -34,30 +33,5 @@
 #endif
 
 #define NABTO_ENABLE_TCP_FALLBACK 1
-
-/* #define CAT(x, y) CAT_I(x, y)  */
-/* #define CAT_I(x, y) x ## y  */
-
-/* #define APPLY(macro, args) APPLY_I(macro, args)  */
-/* #define APPLY_I(macro, args) macro args  */
-
-/* #define STRIP_PARENS(x) EVAL((STRIP_PARENS_I x), x)  */
-/* #define STRIP_PARENS_I(...) 1,1  */
-
-/* #define EVAL(test, x) EVAL_I(test, x)  */
-/* #define EVAL_I(test, x) MAYBE_STRIP_PARENS(TEST_ARITY test, x)  */
-
-/* #define TEST_ARITY(...) APPLY(TEST_ARITY_I, (__VA_ARGS__, 2, 1))  */
-/* #define TEST_ARITY_I(a,b,c,...) c  */
-
-/* #define MAYBE_STRIP_PARENS(cond, x) MAYBE_STRIP_PARENS_I(cond, x)  */
-/* #define MAYBE_STRIP_PARENS_I(cond, x) CAT(MAYBE_STRIP_PARENS_, cond)(x)  */
-
-/* #define MAYBE_STRIP_PARENS_1(x) x  */
-/* #define MAYBE_STRIP_PARENS_2(x) APPLY(MAYBE_STRIP_PARENS_2_I, x)  */
-/* #define MAYBE_STRIP_PARENS_2_I(...) __VA_ARGS__  */
-
-
-/* #define NABTO_LOG_BASIC_PRINT(severity, cmsg) syslog(LOG_INFO, STRIP_PARENS(cmsg))  */
 
 #endif
