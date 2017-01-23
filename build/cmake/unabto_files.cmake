@@ -34,6 +34,7 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_connection.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_context.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_crypto.c
+  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_push.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_message.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_packet.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_packet_util.c
@@ -66,6 +67,7 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_connection_type.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_context.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_crypto.h
+  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_push.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_debug_packet.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_dns_fallback.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_env_base.h

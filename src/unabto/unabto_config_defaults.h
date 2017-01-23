@@ -384,6 +384,24 @@
 /* end of uNabto crypto configuration */
 /**************************************/
 
+/******************************************/
+/* uNabto push notification configuration */
+/******************************************/
+
+/** Define whether to include push notifications */
+#ifndef NABTO_ENABLE_PUSH
+#define NABTO_ENABLE_PUSH 1
+#endif
+
+/** Define length of push notification queue */
+#ifndef NABTO_PUSH_QUEUE_LENGTH
+#define NABTO_PUSH_QUEUE_LENGTH 16
+#endif
+
+/*************************************************/
+/* end of uNabto push notification configuration */
+/*************************************************/
+
 /*****************/
 /* Debug packets */
 /*****************/
