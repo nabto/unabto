@@ -5,6 +5,7 @@
 
 #include <modules/tunnel/unabto_tunnel.h>
 #include <modules/tunnel/unabto_tunnel_epoll.h>
+#include <modules/util/read_hex.h>
 
 #include "param.h"
 #include <unistd.h>
@@ -67,7 +68,7 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    if (!unabto_read_psk_from_hex(preSharedKey, nms->preSharedKey, 16)) {
+    if (!unabto_read_psk_from_hex(preSharedKey, nms->presharedKey, 16)) {
         syslog(LOG_CRIT, "Could not parse parameter sharedkey\n");
         exit(1);
     }
