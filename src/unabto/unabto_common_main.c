@@ -16,6 +16,7 @@
 #include "unabto_app_adapter.h"
 #include "unabto_stream.h"
 #include "unabto_attach.h"
+#include "unabto_push.h"
 #include "unabto_message.h"
 #include "unabto_logging.h"
 #include "unabto_env_base.h"
@@ -276,6 +277,12 @@ void unabto_time_event(void) {
     
 #if NABTO_ENABLE_REMOTE_ACCESS
     nabto_attach_time_event();
+#endif
+
+#if NABTO_ENABLE_PUSH
+    if(nmc.context.state == NABTO_AS_ATTACHED){
+        nabto_time_event_push();
+    }
 #endif
 
 #if NABTO_ENABLE_DNS_FALLBACK

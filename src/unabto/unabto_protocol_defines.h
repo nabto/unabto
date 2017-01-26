@@ -912,16 +912,20 @@ enum np_payload_system_info_nat64_e {
  *    +-----+-----------------------------------------------------------------+
  *    |  +4 |  +0 | Sequence number                                           |
  *    +-----+-----+-----------------------------------------------------------+
- *    |  +8 |  +4 | Segment number                                            |
+ *    |  +8 |  +4 | PNS id                                                    |
  *    +-----+-----+-----------------------------------------------------------+
- *    |  +10|  +6 | total number of segments                                  |
- *    +-----+-----+-----------------------------------------------------------+
- *    |  +12|  +8 | PNS id                                                    |
+ *    |  +10|  +6 | Flags                                                     |
  *    +-----+-----+-----------------------------------------------------------+
  */
 
-#define NP_PAYLOAD_PUSH_SIZE    14 ///< Size of the push notification payload
- 
+#define NP_PAYLOAD_PUSH_BYTELENGTH    14 ///< Size of the push notification payload
+
+#define NP_PAYLOAD_PUSH_FLAG_SEND                    0x00
+#define NP_PAYLOAD_PUSH_FLAG_ACK                     0x10
+#define NP_PAYLOAD_PUSH_FLAG_FAIL                    0x20
+#define NP_PAYLOAD_PUSH_FLAG_QUOTA_EXCEEDED          0x40
+#define NP_PAYLOAD_PUSH_FLAG_QUOTA_EXCEEDED_REATTACH 0x80
+
 /******************************************************************************/
 /* Push notification Data payload */
 /* The Push notification Data payload has the following layout:

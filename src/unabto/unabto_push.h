@@ -1,25 +1,24 @@
 /*
  * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
  */
-
-
 #ifndef _UNABTO_PUSH_H_
 #define _UNABTO_PUSH_H_
 
-
-//#if NABTO_ENABLE_PUSH
 #include <stdlib.h>
 #include <stdint.h>
 #include "unabto_env_base.h"
+#include "unabto_packet_util.h"
 
+//#include "unabto_config_defaults.h"
+
+#if NABTO_ENABLE_PUSH
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef enum {
-//enum unabto_push_hint{
-UNABTO_PUSH_HINT_OK,
+    UNABTO_PUSH_HINT_OK,
     UNABTO_PUSH_HINT_QUEUE_FULL,
     UNABTO_PUSH_HINT_FAILED,
     UNABTO_PUSH_HINT_QUOTA_EXCEEDED,
@@ -27,9 +26,10 @@ UNABTO_PUSH_HINT_OK,
 } unabto_push_hint;
 
 typedef enum {
-IDLE,
-    WAITING_TO_BE_SENT,
-    AWAITING_ACK
+    UNABTO_PUSH_IDLE,
+    UNABTO_PUSH_WAITING_SEND,
+    UNABTO_PUSH_AWAITING_ACK,
+    UNABTO_PUSH_RETRANS
 }unabto_push_element_state;
 
 typedef struct unabto_push_element{
@@ -37,9 +37,10 @@ typedef struct unabto_push_element{
     uint8_t retrans;
     unabto_push_element_state state;
     nabto_stamp_t stamp;
+    uint16_t pnsId;
 }unabto_push_element;
 
-// Should be defined by the developer before Push is used. Not sure if you want extern or not!
+// Should be defined by the developer before Push is used.
 extern uint16_t* unabto_push_notification_get_data(const uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq);
 extern void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint);
 
@@ -65,14 +66,18 @@ void unabto_push_notification_remove(uint32_t seq);
  * Get the data size available for push notification data
  * @return size The data size available for push notifications
  */
-uint16_t unabto_push_notification_data_size();
+uint16_t unabto_push_notification_data_size(void);
+
+void unabto_push_create_packets(void);
 
 void nabto_time_event_push(void);
+
+bool nabto_push_event(nabto_packet_header* hdr);
 
 #ifdef __cplusplus
 } //extern "C"
 #endif
 
-//#endif // NABTO_ENABLE_PUSH
+#endif // NABTO_ENABLE_PUSH
 
 #endif // _UNABTO_PUSH_H_
