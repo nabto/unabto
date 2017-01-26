@@ -918,7 +918,7 @@ enum np_payload_system_info_nat64_e {
  *    +-----+-----+-----------------------------------------------------------+
  */
 
-#define NP_PAYLOAD_PUSH_BYTELENGTH    14 ///< Size of the push notification payload
+#define NP_PAYLOAD_PUSH_BYTELENGTH    11 ///< Size of the push notification payload
 
 #define NP_PAYLOAD_PUSH_FLAG_SEND                    0x00
 #define NP_PAYLOAD_PUSH_FLAG_ACK                     0x10
@@ -932,12 +932,14 @@ enum np_payload_system_info_nat64_e {
  *    +-----+-----------------------------------------------------------------+
  *    |  +0 |  Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)               |
  *    +-----+-----------------------------------------------------------------+
- *    |  +4 |  +0 | type                                                      |
+ *    |  +4 |  +0 | purpose                                                   |
  *    +-----+-----+-----------------------------------------------------------+
- *    |  +5 |  +1 | Data                                                      |
+ *    |  +5 |  +1 | type                                                      |
+ *    +-----+-----+-----------------------------------------------------------+
+ *    |  +6 |  +2 | Data                                                      |
  *    +-----+-----+-----------------------------------------------------------+
  */
 
-#define NP_PAYLOAD_PUSH_DATA_SIZE_WO_DATA    5 ///< Size of the push notification payload
+#define NP_PAYLOAD_PUSH_DATA_SIZE_WO_DATA    6 ///< Size of the push notification payload
  
 #endif

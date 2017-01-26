@@ -1,19 +1,22 @@
+#define UNABTO_PUSH_CALLBACK_FUNCTIONS
+
 #include "unabto_push_test.h"
 #if NABTO_ENABLE_PUSH
 extern int pushSeqQHead;
 extern void unabto_push_init(void);
-/*
-#ifndef UNABTO_PUSH_CALLBACK_FUNCTIONS
-#define UNABTO_PUSH_CALLBACK_FUNCTIONS 1
-uint16_t* unabto_push_notification_get_data(const uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq){
 
+//#ifndef UNABTO_PUSH_CALLBACK_FUNCTIONS
+//#define UNABTO_PUSH_CALLBACK_FUNCTIONS 1
+uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq){
+    return bufStart;
 }
 
 void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint){
 
 }
-#endif
-*/
+//#endif
+
+
 bool unabto_push_test(void){
 
     unabto_push_init();
@@ -37,7 +40,21 @@ bool unabto_push_test(void){
     if (pushSeqQHead != 5){
         return false;
     }
+    bool r = unabto_push_notification_remove(seq);
+    if (!r){
+        return false;
+    }
+    if (pushSeqQHead != 4){
+        return false;
+    }
+    r = unabto_push_notification_remove(seq-3);
+    if (!r){
+        return false;
+    }
 
+    if (pushSeqQHead != 3){
+        return false;
+    }
     
     return true;
 }
