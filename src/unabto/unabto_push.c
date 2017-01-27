@@ -16,7 +16,7 @@
 #endif
 
 #ifndef UNABTO_PUSH_MIN_SEND_INTERVAL
-#define UNABTO_PUSH_MIN_SEND_INTERVAL 500
+#define UNABTO_PUSH_MIN_SEND_INTERVAL 0
 #endif
 
 #ifndef UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF
@@ -26,6 +26,7 @@
 /* ---------------------------------------------------- *
  * These functions must be implemented by the developer *
  * ---------------------------------------------------- */
+// HOW TO DO THIS?
 // THIS DOESN'T WORK FIX LATER IMPLEMENT IN unabto_push_test.c
 /*
 #ifndef UNABTO_PUSH_CALLBACK_FUNCTIONS
@@ -52,7 +53,8 @@ bool unabto_push_verify_integrity(nabto_packet_header* header);
 bool unabto_push_reattach_needed(void);
 
 // I found no other unabto core functionallities which uses global variables like this
-// how else should context be kept? Added to main context?
+// how else should context be kept? Added to main context? Make new context?
+// HOW TO DO THIS?
 /* ---------------------------------------------------- *
  * Push global state variables                          *
  * ---------------------------------------------------- */
@@ -71,18 +73,13 @@ void unabto_push_init(void){
     nextPushEvent = NULL;
     lastSent = nabtoGetStamp();
     backOffLimit = lastSent;
-    
-    for (size_t i = 0; i<NABTO_PUSH_QUEUE_LENGTH; i++){
+    size_t i;
+    for (i = 0; i<NABTO_PUSH_QUEUE_LENGTH; i++){
         pushSeqQ[i].state = UNABTO_PUSH_IDLE;
     }
 }
 
 unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq){
-    // Called by the developer
-    // Construct a unabto_push_element for the PN
-    // if queue full: return UNABTO_PUSH_HINT_QUEUE_FULL
-    // start asyncronous setup of the packet
-    // return: UNABTO_PUSH_HINT_OK
     if(unabto_push_reattach_needed()){
         return UNABTO_PUSH_HINT_QUOTA_EXCEEDED_REATTACH;
     }
@@ -110,8 +107,8 @@ unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq){
 
 bool unabto_push_notification_remove(uint32_t seq)
 {
-    // remove unabto_push_element from queue
-    for(int i = 0; i<pushSeqQHead; i++){
+    int i;
+    for(i = 0; i<pushSeqQHead; i++){
         if(pushSeqQ[i].seq == seq){
             memmove(&pushSeqQ[i],&pushSeqQ[i+1],pushSeqQHead-i);
             pushSeqQ[pushSeqQHead-1].state = UNABTO_PUSH_IDLE;
@@ -131,18 +128,17 @@ uint16_t unabto_push_notification_data_size()
 
 void nabto_time_event_push(void)
 {
-    // Called every tick by the core
-    // Should check if it is time for next event
-    // if so run it
-    // else return
-
+    NABTO_LOG_INFO(("Push Next event called"));
     nabto_stamp_t now = nabtoGetStamp();
     if (!nextPushEvent){
+        NABTO_LOG_INFO(("No Next event"));
         return;
     }
     if (!nabtoStampLess(&nextPushEvent->stamp,&now)){
+        NABTO_LOG_INFO(("Next event is not ready"));
         return;
     } else {
+        NABTO_LOG_INFO(("Invoking Event"));
         unabto_push_create_and_send_packet(nextPushEvent);
     }
     
@@ -181,14 +177,16 @@ bool nabto_push_event(nabto_packet_header* hdr){
     }
     
     if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_QUOTA_EXCEEDED){
-        for (int i = 0; i<pushSeqQHead; i++){
+        int i;
+        for (i = 0; i<pushSeqQHead; i++){
             nabtoAddStamp(&pushSeqQ[i].stamp,UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF);
         }
         nabtoSetFutureStamp(&backOffLimit,UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF);
     }
     
     if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_QUOTA_EXCEEDED_REATTACH){
-        // handle quota exceeded reattach, need som attach context
+        // handle quota exceeded reattach, need some attach context
+        // HOW TO DO THIS?
         reattachNeeded = true;
         
     }
@@ -204,6 +202,7 @@ bool nabto_push_event(nabto_packet_header* hdr){
 ////////////////////////////
 bool unabto_push_reattach_needed(void){
     // Must check if the device has reattached since QUOTA_EXCEEDED_REATTACH was last received
+    // HOW TO DO THIS?
     reattachNeeded = false;
     return false;
 }
@@ -212,6 +211,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
     uint8_t* buf = nabtoCommunicationBuffer;
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
     // need to get value for arg[1,5,7] cpnsi, seq, and nsico
+    // HOW TO DO THIS?
     uint32_t cpnsi =11;
     uint16_t hdrseq = 11;
     uint8_t* nsico = 0;
@@ -234,6 +234,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
 
     ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
     // IS THERE A DEFINE FOR VERIFICATION DATA LENGHT? as to not use 16
+    // HOW TO DO THIS?
     ptr = unabto_push_notification_get_data(ptr, end-16, elem->seq);
     if(ptr > end-16){
         unabto_push_hint hint = UNABTO_PUSH_HINT_INVALID_DATA_PROVIDED;
@@ -243,7 +244,9 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         return;
     }
     
+    // HOW TO DO THIS?
     // Encrypt and make verification field
+    // This uses plaintext array contained here mkm didn't like that
     /*
     uint16_t len;
     if(!encrypt_packet(nmc.context.cryptoAttach,plaintext,sizeof(plaintext), cryptoPayloadStart,&len)){
@@ -281,7 +284,8 @@ void unabto_push_set_next_event(void){
     } else {
         nextPushEvent = &pushSeqQ[0];
     }
-    for (int i = 0; i<pushSeqQHead; i++){
+    int i;
+    for (i = 0; i<pushSeqQHead; i++){
         if(nabtoStampLess(&pushSeqQ[i].stamp,&nextPushEvent->stamp)){
             nextPushEvent = &pushSeqQ[i];
         }

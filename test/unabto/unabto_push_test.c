@@ -1,5 +1,5 @@
 #define UNABTO_PUSH_CALLBACK_FUNCTIONS
-
+#include <unistd.h>
 #include "unabto_push_test.h"
 #if NABTO_ENABLE_PUSH
 extern int pushSeqQHead;
@@ -37,6 +37,16 @@ bool unabto_push_test(void){
     ret = unabto_send_push_notification(1,&seq);
     ret = unabto_send_push_notification(1,&seq);
     ret = unabto_send_push_notification(1,&seq);
+    nabto_time_event_push();
+    nabto_time_event_push();
+    nabto_time_event_push();
+    nabto_time_event_push();
+    nabto_time_event_push();
+    nabto_time_event_push();
+    nabto_time_event_push();
+    nabto_time_event_push();
+    sleep(4);
+    nabto_time_event_push();
     if (pushSeqQHead != 5){
         return false;
     }
