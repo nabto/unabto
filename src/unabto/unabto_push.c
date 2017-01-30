@@ -220,7 +220,6 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
         unabto_push_notification_callback(elem->seq,&hint);
         unabto_push_notification_remove(elem->seq);
-        unabto_push_set_next_event();
        return;
     }
     
@@ -240,7 +239,6 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         unabto_push_hint hint = UNABTO_PUSH_HINT_INVALID_DATA_PROVIDED;
         unabto_push_notification_callback(elem->seq,&hint);
         unabto_push_notification_remove(elem->seq);
-        unabto_push_set_next_event();
         return;
     }
     
