@@ -6,6 +6,7 @@
 #include "unabto_util.h"
 #include "unabto_memory.h"
 #include "unabto_protocol_defines.h"
+#include "unabto_packet.h"
 
 #define UNABTO_PUSH_DATA_SIZE nabtoCommunicationBufferSize-NP_PACKET_HDR_MIN_BYTELENGTH-NP_PAYLOAD_PUSH_BYTELENGTH-NP_PAYLOAD_CRYPTO_BYTELENGTH-NP_PAYLOAD_VERIFY_BYTELENGTH
 
@@ -182,9 +183,6 @@ void unabto_push_notify_reattach(void){
 void unabto_push_create_and_send_packet(unabto_push_element *elem){
     uint8_t* buf = nabtoCommunicationBuffer;
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
-    uint32_t cpnsi = 0;
-    uint16_t hdrseq = 0;
-    uint8_t* nsico = 0;
 
     if(elem->retrans >= 8){
         unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
@@ -194,10 +192,9 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
     }
     
     bool retrans = elem->retrans;
-    uint8_t* ptr = insert_header(buf, cpnsi, nmc.context.gspnsi, U_PUSH, false, hdrseq, 0, nsico);
+    uint8_t* ptr = insert_header(buf,0, nmc.context.gspnsi, U_PUSH, false, 0, 0, NULL);
     uint8_t* cryptHdrEnd;
     uint8_t* cryptDataStart;
-    uint16_t len;
 
     ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_PUSH, 0, NP_PAYLOAD_PUSH_BYTELENGTH-NP_PAYLOAD_HDR_BYTELENGTH);
     WRITE_U32(ptr, elem->seq); ptr += 4;
@@ -215,10 +212,14 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         unabto_push_notification_remove(elem->seq);
         return;
     }
-    send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoAttach, cryptDataStart, ptr-cryptDataStart, cryptHdrEnd,&len);
-    // set length in crypto header
-    // set length in header
-    // send packet
+    uint16_t* hdrLenField = (uint16_t*)buf+14;
+    *hdrLenField = (uint16_t)(ptr-buf);
+    if(!send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoAttach, cryptDataStart, ptr-cryptDataStart, cryptHdrEnd)){
+        unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
+        unabto_push_notification_callback(elem->seq,&hint);
+        unabto_push_notification_remove(elem->seq);
+       return;
+    }        
 
     pushCtx.lastSent = nabtoGetStamp();
     elem->retrans++;
