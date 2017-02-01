@@ -35,6 +35,7 @@ void unabto_push_callback_mock(uint32_t seq, unabto_push_hint* hint){}
 void unabto_push_create_and_send_packet(unabto_push_element *elem);
 void unabto_push_set_next_event(void);
 bool unabto_push_verify_integrity(nabto_packet_header* header);
+bool unabto_push_seq_exists(uint32_t seq);
 
 /* ---------------------------------------------------- *
  * Push global state variables                          *
@@ -146,6 +147,10 @@ bool nabto_push_event(nabto_packet_header* hdr){
             return false;
         }
     }
+    if(!unabto_push_seq_exists(pushData.sequence)){
+        NABTO_LOG_ERROR(("Push packet with unknown sequence number received"));
+        return false;
+    }
     if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_ACK){
         hint = UNABTO_PUSH_HINT_OK;
     }
@@ -179,6 +184,15 @@ void unabto_push_notify_reattach(void){
 ////////////////////////////
 // Local helper functions //
 ////////////////////////////
+bool unabto_push_seq_exists(uint32_t seq){
+    size_t i;
+    for (i=0; i<pushCtx.pushSeqQHead; i++){
+        if(pushSeqQ[i].seq == seq){
+            return true;
+        }
+    }
+    return false;
+}
 
 void unabto_push_create_and_send_packet(unabto_push_element *elem){
     uint8_t* buf = nabtoCommunicationBuffer;
@@ -214,6 +228,12 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
     }
     uint16_t* hdrLenField = (uint16_t*)buf+14;
     *hdrLenField = (uint16_t)(ptr-buf);
+    if (nmc.context.cryptoAttach == NULL){
+        unabto_push_hint hint = UNABTO_PUSH_HINT_NO_CRYPTO_CONTEXT;
+        unabto_push_notification_callback(elem->seq,&hint);
+        unabto_push_notification_remove(elem->seq);
+       return;
+    }
     if(!send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoAttach, cryptDataStart, ptr-cryptDataStart, cryptHdrEnd)){
         unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
         unabto_push_notification_callback(elem->seq,&hint);
@@ -227,26 +247,6 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
     unabto_push_set_next_event();
 }
 
-    // HOW TO DO THIS?
-    // Encrypt and make verification field
-    // This uses plaintext array contained here mkm didn't like that
-/*    uint16_t len;
-    if(!encrypt_packet(nmc.context.cryptoAttach,plaintext,sizeof(plaintext), cryptoPayloadStart,&len)){
-        unabto_push_notification_callback(elem->seq,UNABTO_PUSH_HINT_ENCRYPTION_FAILED);
-        unabto_push_notification_remove(elem->seq);
-        return;
-    }
-*/  
-
-/*
-    uint8_t tmp[NONCE_SIZE + SEED_SIZE];
-
-    memcpy(tmp, nonceGSP, NONCE_SIZE);
-    nabto_random(tmp + NONCE_SIZE, SEED_SIZE);
-    unabto_crypto_reinit_c(nonceGSP, tmp + NONCE_SIZE, seedGSP);
-
-    send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoAttach, tmp, sizeof(tmp), cryptoPayloadStart);
-*/
 
 void unabto_push_set_next_event(void){
     // Find the lowest stamp in the queue

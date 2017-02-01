@@ -8,17 +8,20 @@ extern void unabto_push_init(void);
 //#ifndef UNABTO_PUSH_CALLBACK_FUNCTIONS
 //#define UNABTO_PUSH_CALLBACK_FUNCTIONS 1
 uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq){
+    NABTO_LOG_INFO(("Getting data"));
     return bufStart;
 }
 
 void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint){
-
+    if(hint == NULL) return;
+    NABTO_LOG_INFO(("Push_notification_callback with seq: %i, hint: %i",seq,*hint));
 }
 //#endif
 
 
 bool unabto_push_test(void){
 
+    NABTO_LOG_INFO(("push test starting"));
     unabto_push_init();
 
     if (pushCtx.pushSeqQHead != 0){
