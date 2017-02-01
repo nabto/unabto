@@ -2,40 +2,24 @@
 #include "unabto_push.h"
 
 #if NABTO_ENABLE_PUSH
-#include "unabto_packet_util.h"
 #include "unabto_main_contexts.h"
 #include "unabto_util.h"
 #include "unabto_memory.h"
 #include "unabto_protocol_defines.h"
 
-// WHAT HEADER LENGHT SHOULD BE USED, IS NSI.co USED HERE?
-#define UNABTO_PUSH_DATA_SIZE nabtoCommunicationBufferSize-NP_PACKET_HDR_MIN_BYTELENGTH-NP_PAYLOAD_PUSH_BYTELENGTH-NP_PAYLOAD_CRYPTO_BYTELENGTH-NP_PAYLOAD_PUSH_DATA_SIZE_WO_DATA-16
-
-#ifndef UNABTO_PUSH_RETRANS_CHECK_INTERVAL
-#define UNABTO_PUSH_RETRANS_CHECK_INTERVAL 500
-#endif
+#define UNABTO_PUSH_DATA_SIZE nabtoCommunicationBufferSize-NP_PACKET_HDR_MIN_BYTELENGTH-NP_PAYLOAD_PUSH_BYTELENGTH-NP_PAYLOAD_CRYPTO_BYTELENGTH-NP_PAYLOAD_VERIFY_BYTELENGTH
 
 #ifndef UNABTO_PUSH_MIN_SEND_INTERVAL
-#define UNABTO_PUSH_MIN_SEND_INTERVAL 0
+#define UNABTO_PUSH_MIN_SEND_INTERVAL 100
 #endif
 
 #ifndef UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF
-#define UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF 60000 //ms (1 minute)
+#define UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF 60000ul //ms (1 minute)
 #endif
 
 /* ---------------------------------------------------- *
  * These functions must be implemented by the developer *
  * ---------------------------------------------------- */
-// HOW TO DO THIS?
-// THIS DOESN'T WORK FIX LATER IMPLEMENT IN unabto_push_test.c
-/*
-#ifndef UNABTO_PUSH_CALLBACK_FUNCTIONS
-#define UNABTO_PUSH_CALLBACK_FUNCTIONS 1
-uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq){return bufStart;}
-void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint){}
-#endif
-*/
-// THIS WORKS BUT SEEMS LIKE AN UGLY SOLUTION
 #ifndef UNABTO_PUSH_CALLBACK_FUNCTIONS
 #define UNABTO_PUSH_CALLBACK_FUNCTIONS
 #define unabto_push_notification_get_data(bufStart,bufEnd,seq) unabto_push_get_data_mock(bufStart,bufEnd, seq)
@@ -50,29 +34,23 @@ void unabto_push_callback_mock(uint32_t seq, unabto_push_hint* hint){}
 void unabto_push_create_and_send_packet(unabto_push_element *elem);
 void unabto_push_set_next_event(void);
 bool unabto_push_verify_integrity(nabto_packet_header* header);
-bool unabto_push_reattach_needed(void);
 
-// I found no other unabto core functionallities which uses global variables like this
-// how else should context be kept? Added to main context? Make new context?
-// HOW TO DO THIS?
 /* ---------------------------------------------------- *
  * Push global state variables                          *
  * ---------------------------------------------------- */
-unabto_push_element pushSeqQ[NABTO_PUSH_QUEUE_LENGTH];
-unabto_push_element* nextPushEvent;
-int pushSeqQHead = 0;
-uint32_t nextSeq = 0;
-nabto_stamp_t lastSent;
-nabto_stamp_t backOffLimit;
-bool reattachNeeded = false;
 
+//NABTO_TREAD_LOCAL_STORAGE unabto_push_element pushSeqQ[NABTO_PUSH_QUEUE_LENGTH];
+unabto_push_element pushSeqQ[NABTO_PUSH_QUEUE_LENGTH];
 /* -------------------------------------------------------*
  * initialization function to be called before using push *
  * -------------------------------------------------------*/
 void unabto_push_init(void){
-    nextPushEvent = NULL;
-    lastSent = nabtoGetStamp();
-    backOffLimit = lastSent;
+    pushCtx.nextPushEvent = NULL;
+    pushCtx.pushSeqQHead = 0;
+    pushCtx.nextSeq = 0;
+    pushCtx.reattachNeeded = false;
+    pushCtx.lastSent = nabtoGetStamp();
+    pushCtx.backOffLimit = pushCtx.lastSent;
     size_t i;
     for (i = 0; i<NABTO_PUSH_QUEUE_LENGTH; i++){
         pushSeqQ[i].state = UNABTO_PUSH_IDLE;
@@ -80,27 +58,27 @@ void unabto_push_init(void){
 }
 
 unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq){
-    if(unabto_push_reattach_needed()){
+    if(pushCtx.reattachNeeded){
         return UNABTO_PUSH_HINT_QUOTA_EXCEEDED_REATTACH;
     }
 
     nabto_stamp_t now = nabtoGetStamp();
-    if (pushSeqQHead >= NABTO_PUSH_QUEUE_LENGTH){
+    if (pushCtx.pushSeqQHead >= NABTO_PUSH_QUEUE_LENGTH){
         return UNABTO_PUSH_HINT_QUEUE_FULL;
     }
-    pushSeqQ[pushSeqQHead].seq = nextSeq;
-    *seq = nextSeq;
-    nextSeq++;
-    pushSeqQ[pushSeqQHead].retrans = 0;
-    pushSeqQ[pushSeqQHead].state = UNABTO_PUSH_WAITING_SEND;
-    if(nabtoStampLess(&now, &backOffLimit)){
-        pushSeqQ[pushSeqQHead].stamp = backOffLimit;
+    pushSeqQ[pushCtx.pushSeqQHead].seq = pushCtx.nextSeq;
+    *seq = pushCtx.nextSeq;
+    pushCtx.nextSeq++;
+    pushSeqQ[pushCtx.pushSeqQHead].retrans = 0;
+    pushSeqQ[pushCtx.pushSeqQHead].state = UNABTO_PUSH_WAITING_SEND;
+    if(nabtoStampLess(&now, &pushCtx.backOffLimit)){
+        pushSeqQ[pushCtx.pushSeqQHead].stamp = pushCtx.backOffLimit;
     } else {
-        pushSeqQ[pushSeqQHead].stamp = now;
+        pushSeqQ[pushCtx.pushSeqQHead].stamp = now;
     }        
-    pushSeqQ[pushSeqQHead].pnsId = pnsId;
+    pushSeqQ[pushCtx.pushSeqQHead].pnsId = pnsId;
 
-    pushSeqQHead++;
+    pushCtx.pushSeqQHead++;
     unabto_push_set_next_event();
     return UNABTO_PUSH_HINT_OK;
 }
@@ -108,11 +86,11 @@ unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq){
 bool unabto_push_notification_remove(uint32_t seq)
 {
     int i;
-    for(i = 0; i<pushSeqQHead; i++){
+    for(i = 0; i<pushCtx.pushSeqQHead; i++){
         if(pushSeqQ[i].seq == seq){
-            memmove(&pushSeqQ[i],&pushSeqQ[i+1],pushSeqQHead-i);
-            pushSeqQ[pushSeqQHead-1].state = UNABTO_PUSH_IDLE;
-            pushSeqQHead--;
+            memmove(&pushSeqQ[i],&pushSeqQ[i+1],pushCtx.pushSeqQHead-i);
+            pushSeqQ[pushCtx.pushSeqQHead-1].state = UNABTO_PUSH_IDLE;
+            pushCtx.pushSeqQHead--;
             unabto_push_set_next_event();
             return true;
         }
@@ -128,18 +106,19 @@ uint16_t unabto_push_notification_data_size()
 
 void nabto_time_event_push(void)
 {
-    NABTO_LOG_INFO(("Push Next event called"));
+    NABTO_LOG_TRACE(("Push Next event called"));
     nabto_stamp_t now = nabtoGetStamp();
-    if (!nextPushEvent){
-        NABTO_LOG_INFO(("No Next event"));
+    if (!pushCtx.nextPushEvent){
+        NABTO_LOG_TRACE(("No Next event"));
         return;
     }
-    if (!nabtoStampLess(&nextPushEvent->stamp,&now)){
-        NABTO_LOG_INFO(("Next event is not ready"));
+    if (!nabtoStampLess(&pushCtx.nextPushEvent->stamp,&now)){
+        NABTO_LOG_TRACE(("Next event is not ready"));
         return;
     } else {
-        NABTO_LOG_INFO(("Invoking Event"));
-        unabto_push_create_and_send_packet(nextPushEvent);
+        NABTO_LOG_TRACE(("Invoking Event"));
+        unabto_push_create_and_send_packet(pushCtx.nextPushEvent);
+        unabto_push_set_next_event();
     }
     
 }
@@ -167,53 +146,44 @@ bool nabto_push_event(nabto_packet_header* hdr){
         }
     }
     if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_ACK){
-        unabto_push_notification_remove(pushData.sequence);
         hint = UNABTO_PUSH_HINT_OK;
     }
 
     if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_FAIL){
-        unabto_push_notification_remove(pushData.sequence);
         hint = UNABTO_PUSH_HINT_FAILED;
     }
     
     if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_QUOTA_EXCEEDED){
         int i;
-        for (i = 0; i<pushSeqQHead; i++){
+        for (i = 0; i<pushCtx.pushSeqQHead; i++){
             nabtoAddStamp(&pushSeqQ[i].stamp,UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF);
         }
-        nabtoSetFutureStamp(&backOffLimit,UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF);
+        nabtoSetFutureStamp(&pushCtx.backOffLimit,UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF);
     }
     
     if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_QUOTA_EXCEEDED_REATTACH){
-        // handle quota exceeded reattach, need some attach context
-        // HOW TO DO THIS?
-        reattachNeeded = true;
-        
+        pushCtx.reattachNeeded = true;
     }
     unabto_push_notification_callback(pushData.sequence, &hint);
+    unabto_push_notification_remove(pushData.sequence);
     
     return true;
 }
 
+void unabto_push_notify_reattach(void){
+    pushCtx.reattachNeeded = false;
+}
 
 
 ////////////////////////////
 // Local helper functions //
 ////////////////////////////
-bool unabto_push_reattach_needed(void){
-    // Must check if the device has reattached since QUOTA_EXCEEDED_REATTACH was last received
-    // HOW TO DO THIS?
-    reattachNeeded = false;
-    return false;
-}
 
 void unabto_push_create_and_send_packet(unabto_push_element *elem){
     uint8_t* buf = nabtoCommunicationBuffer;
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
-    // need to get value for arg[1,5,7] cpnsi, seq, and nsico
-    // HOW TO DO THIS?
-    uint32_t cpnsi =11;
-    uint16_t hdrseq = 11;
+    uint32_t cpnsi = 0;
+    uint16_t hdrseq = 0;
     uint8_t* nsico = 0;
 
     if(elem->retrans >= 8){
@@ -225,43 +195,47 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
     
     bool retrans = elem->retrans;
     uint8_t* ptr = insert_header(buf, cpnsi, nmc.context.gspnsi, U_PUSH, false, hdrseq, 0, nsico);
+    uint8_t* cryptHdrEnd;
+    uint8_t* cryptDataStart;
+    uint16_t len;
 
     ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_PUSH, 0, NP_PAYLOAD_PUSH_BYTELENGTH-NP_PAYLOAD_HDR_BYTELENGTH);
     WRITE_U32(ptr, elem->seq); ptr += 4;
     WRITE_U16(ptr, elem->pnsId); ptr += 2;
     WRITE_U8(ptr, NP_PAYLOAD_PUSH_FLAG_SEND); ptr++;
-
     ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
-    // IS THERE A DEFINE FOR VERIFICATION DATA LENGHT? as to not use 16
-    // HOW TO DO THIS?
-    ptr = unabto_push_notification_get_data(ptr, end-16, elem->seq);
-    if(ptr > end-16){
+    cryptHdrEnd = ptr;
+
+    ptr += 2; // leave room for the crypto code
+    cryptDataStart = ptr;
+    ptr = unabto_push_notification_get_data(ptr, end-NP_PAYLOAD_VERIFY_BYTELENGTH, elem->seq);
+    if(ptr > end-NP_PAYLOAD_VERIFY_BYTELENGTH || ptr < cryptDataStart){
         unabto_push_hint hint = UNABTO_PUSH_HINT_INVALID_DATA_PROVIDED;
         unabto_push_notification_callback(elem->seq,&hint);
         unabto_push_notification_remove(elem->seq);
         return;
     }
-    
+    send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoAttach, cryptDataStart, ptr-cryptDataStart, cryptHdrEnd,&len);
+    // set length in crypto header
+    // set length in header
+    // send packet
+
+    pushCtx.lastSent = nabtoGetStamp();
+    elem->retrans++;
+    nabtoSetFutureStamp(&elem->stamp,(2^elem->retrans)*1000);
+    unabto_push_set_next_event();
+}
+
     // HOW TO DO THIS?
     // Encrypt and make verification field
     // This uses plaintext array contained here mkm didn't like that
-    /*
-    uint16_t len;
+/*    uint16_t len;
     if(!encrypt_packet(nmc.context.cryptoAttach,plaintext,sizeof(plaintext), cryptoPayloadStart,&len)){
         unabto_push_notification_callback(elem->seq,UNABTO_PUSH_HINT_ENCRYPTION_FAILED);
         unabto_push_notification_remove(elem->seq);
         return;
     }
-    */
-    // set length in crypto header
-    // set length in header
-    // send packet
-
-    lastSent = nabtoGetStamp();
-    elem->retrans++;
-    nabtoSetFutureStamp(&elem->stamp,(2^elem->retrans)*1000);
-    unabto_push_set_next_event();
-}
+*/  
 
 /*
     uint8_t tmp[NONCE_SIZE + SEED_SIZE];
@@ -276,20 +250,20 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
 void unabto_push_set_next_event(void){
     // Find the lowest stamp in the queue
     // if no elements in queue set next event = NULL;
-    if (pushSeqQHead == 0){
-        nextPushEvent = NULL;
+    if (pushCtx.pushSeqQHead == 0){
+        pushCtx.nextPushEvent = NULL;
         return;
     } else {
-        nextPushEvent = &pushSeqQ[0];
+        pushCtx.nextPushEvent = &pushSeqQ[0];
     }
     int i;
-    for (i = 0; i<pushSeqQHead; i++){
-        if(nabtoStampLess(&pushSeqQ[i].stamp,&nextPushEvent->stamp)){
-            nextPushEvent = &pushSeqQ[i];
+    for (i = 0; i<pushCtx.pushSeqQHead; i++){
+        if(nabtoStampLess(&pushSeqQ[i].stamp,&pushCtx.nextPushEvent->stamp)){
+            pushCtx.nextPushEvent = &pushSeqQ[i];
         }
     }
-    if (nabtoStampLess(&nextPushEvent->stamp,&lastSent)){
-        nabtoAddStamp(&nextPushEvent->stamp, UNABTO_PUSH_MIN_SEND_INTERVAL);
+    if (nabtoStampLess(&pushCtx.nextPushEvent->stamp,&pushCtx.lastSent)){
+        nabtoAddStamp(&pushCtx.nextPushEvent->stamp, UNABTO_PUSH_MIN_SEND_INTERVAL);
     }
 }
 

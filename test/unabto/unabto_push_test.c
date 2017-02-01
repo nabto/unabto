@@ -21,7 +21,7 @@ bool unabto_push_test(void){
 
     unabto_push_init();
 
-    if (pushSeqQHead != 0){
+    if (pushCtx.pushSeqQHead != 0){
         return false;
     }
 
@@ -30,7 +30,7 @@ bool unabto_push_test(void){
     if (ret != UNABTO_PUSH_HINT_OK){
         return false;
     }
-    if (pushSeqQHead != 1){
+    if (pushCtx.pushSeqQHead != 1){
         return false;
     }
     ret = unabto_send_push_notification(1,&seq);
@@ -47,14 +47,14 @@ bool unabto_push_test(void){
     nabto_time_event_push();
     sleep(4);
     nabto_time_event_push();
-    if (pushSeqQHead != 5){
+    if (pushCtx.pushSeqQHead != 5){
         return false;
     }
     bool r = unabto_push_notification_remove(seq);
     if (!r){
         return false;
     }
-    if (pushSeqQHead != 4){
+    if (pushCtx.pushSeqQHead != 4){
         return false;
     }
     r = unabto_push_notification_remove(seq-3);
@@ -62,7 +62,7 @@ bool unabto_push_test(void){
         return false;
     }
 
-    if (pushSeqQHead != 3){
+    if (pushCtx.pushSeqQHead != 3){
         return false;
     }
     

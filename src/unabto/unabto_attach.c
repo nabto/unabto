@@ -90,15 +90,22 @@ text stName(nabto_state state)
 #define REPORT_STATUS_CALLBACK(state)
 #endif
 
+#if NABTO_ENABLE_PUSH                                                
+#define PUSHNOTIFY if (newState == NABTO_AS_ATTACHED) unabto_push_notify_reattach();
+#else
+#define PUSHNOTIFY 
+#endif                                                              
+
 /**
  * Set a new state, and log the change
  * @param newState  the new state
  */
-#define SET_CTX_STATE(newState)                   \
-    if (nmc.context.state != newState) \
-    {                                        \
+#define SET_CTX_STATE(newState)                       \
+    if (nmc.context.state != newState)                \
+    {                                                 \
         NABTO_STATE_LOG(nmc.context.state, newState); \
-        REPORT_STATUS_CALLBACK(newState);         \
+        REPORT_STATUS_CALLBACK(newState);             \
+        PUSHNOTIFY                                    \
         nmc.context.state = newState;                 \
     }
 

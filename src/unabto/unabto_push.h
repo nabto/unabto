@@ -42,17 +42,16 @@ typedef struct unabto_push_element{
     uint16_t pnsId;
 }unabto_push_element;
 
-//#ifndef UNABTO_PUSH_CALLBACK_FUNCTIONS
-//#define UNABTO_PUSH_CALLBACK_FUNCTIONS
-//#define unabto_push_notification_get_data(bufStart,bufEnd,seq) unabto_push_get_data_mock(bufStart,bufEnd, seq)
-//#define unabto_push_notification_callback(seq,hint) unabto_push_callback_mock(seq, hint)
-//uint8_t* unabto_push_get_data_mock(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq){return bufStart;}
-//void unabto_push_callback_mock(uint32_t seq, unabto_push_hint* hint){}
-//extern uint16_t* unabto_push_notification_get_data(const uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq){}
-//extern void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint){}
-//#endif
+struct{
+    unabto_push_element* nextPushEvent;
+    int pushSeqQHead;
+    uint32_t nextSeq;
+    nabto_stamp_t lastSent;
+    nabto_stamp_t backOffLimit;
+    bool reattachNeeded;
+}pushCtx;
 
-
+    
 /**
  * Initialization of push notifications. Should be called before using push. 
  */
@@ -85,6 +84,8 @@ uint16_t unabto_push_notification_data_size(void);
 void nabto_time_event_push(void);
 
 bool nabto_push_event(nabto_packet_header* hdr);
+
+void unabto_push_notify_reattach(void);
 
 #ifdef __cplusplus
 } //extern "C"
