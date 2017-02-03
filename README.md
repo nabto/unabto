@@ -24,6 +24,32 @@ The `src` directory contains the uNabto framework source code and device specifi
 
 The `apps` directory contains uNabto examples for different platforms (e.g. Windows, Unix, Microchip, Arduino, etc.).
 
+## Building Linux, Windows And MacOS
+
+### General build instructions
+
+```
+clone repository
+mkdir builddir
+cd builddir
+cmake ..
+make
+```
+
+### Windows
+
+Prerequisities:
+  * CMake,
+  * Visual studio E.g. 2015
+
+```
+clone repository
+mkdir builddir
+cd builddir
+cmake -DCMAKE_GENERATOR_TOOLSET=v140_xp ..
+cmake --build .
+```
+
 ## License
 
 Copyright (C) 2008-2016 Nabto - All Rights Reserved.
