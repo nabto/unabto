@@ -20,7 +20,21 @@
 
 /* ---------------------------------------------------- *
  * These functions must be implemented by the developer *
+ * 
  * ---------------------------------------------------- */
+/*
+ * @param bufStart A pointer to the start of the address space available for data
+ * @param bufEnd   A pointer to the end of the address space available for data
+ * @param seq      The sequence number of the push notification for which the data is requested
+ * @return         Pointer to the first empty space of the buffer after data is added
+uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq)
+ */
+/*
+ * @param seq  The sequence number of push notification
+ * @param hint Pointer to a hint showing the status of the push notification
+void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint)
+*/
+
 #ifndef UNABTO_PUSH_CALLBACK_FUNCTIONS
 #define UNABTO_PUSH_CALLBACK_FUNCTIONS
 #define unabto_push_notification_get_data(bufStart,bufEnd,seq) unabto_push_get_data_mock(bufStart,bufEnd, seq)
