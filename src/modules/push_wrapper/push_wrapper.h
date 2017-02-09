@@ -3,7 +3,6 @@
  */
 #ifndef _PUSH_WRAPPER_H_
 #define _PUSH_WRAPPER_H_
-#define UNABTO_PUSH_CALLBACK_FUNCTIONS
 #include "unabto/unabto_push.h"
 
 

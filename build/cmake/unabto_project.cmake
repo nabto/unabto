@@ -117,6 +117,7 @@ if (NOT UNABTO_DISABLE_EPOLL)
   CHECK_INCLUDE_FILES("sys/epoll.h" UNABTO_HAVE_EPOLL)
 endif()
 
+list(APPEND unabto_src ${unabto_push_wrapper_src})
 
 if (UNABTO_RANDOM_MODULE MATCHES dummy)
   list(APPEND unabto_src ${unabto_module_random_dummy_src})

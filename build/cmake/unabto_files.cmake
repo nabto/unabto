@@ -138,6 +138,11 @@ source_group(platforms\\win32 FILES ${unabto_platform_win32_src})
 set(unabto_module_application_event_dummy_src
   ${UNABTO_MODULES_SRC_DIR}/application_event/dummy/application_event_dummy.c)
 
+# modules/push_wrapper
+set (unabto_module_push_wrapper_src
+  ${UNABTO_MODULES_SRC_DIR}/push_wrapper/push_wrapper.c)
+source_group(modules\\push_wrapper FILES ${unabto_module_push_wrapper_src})
+
 # modules/coap
 set (unabto_module_coap_src
   ${UNABTO_MODULES_SRC_DIR}/coap/er-coap-13/er-coap-13-engine.c

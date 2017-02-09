@@ -104,7 +104,9 @@ bool unabto_push_notification_remove(uint32_t seq)
     int i;
     for(i = 0; i<pushCtx.pushSeqQHead; i++){
         if(pushSeqQ[i].seq == seq){
-            memmove(&pushSeqQ[i],&pushSeqQ[i+1],pushCtx.pushSeqQHead-i);
+            if(i<NABTO_PUSH_QUEUE_LENGTH-1){
+                memmove(&pushSeqQ[i],&pushSeqQ[i+1],pushCtx.pushSeqQHead-i);
+            }
             pushSeqQ[pushCtx.pushSeqQHead-1].state = UNABTO_PUSH_IDLE;
             pushCtx.pushSeqQHead--;
             unabto_push_set_next_event();

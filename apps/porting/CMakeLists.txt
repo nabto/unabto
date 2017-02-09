@@ -5,6 +5,7 @@ include(${UNABTO_ROOT}/build/cmake/unabto_files.cmake)
 set(src
   ${unabto_core_src}
   ${unabto_module_crypto_generic_src}
+  ${unabto_module_push_wrapper_src}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/network_adapter.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/dns_adapter.c
