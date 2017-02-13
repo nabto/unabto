@@ -39,8 +39,12 @@ void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint)
 #define UNABTO_PUSH_CALLBACK_FUNCTIONS
 #define unabto_push_notification_get_data(bufStart,bufEnd,seq) unabto_push_get_data_mock(bufStart,bufEnd, seq)
 #define unabto_push_notification_callback(seq,hint) unabto_push_callback_mock(seq, hint)
-uint8_t* unabto_push_get_data_mock(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq){return bufStart;}
-void unabto_push_callback_mock(uint32_t seq, unabto_push_hint* hint){}
+uint8_t* unabto_push_get_data_mock(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq){NABTO_LOG_INFO(("PLEASE DEFINE unabto_push_notification_get_data"));return bufStart;}
+void unabto_push_callback_mock(uint32_t seq, unabto_push_hint* hint){NABTO_LOG_INFO(("PLEASE DEFINE unabto_push_notification_callback"));}
+#else
+extern uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq);
+extern void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint);
+
 #endif
 
 /* ---------------------------------------------------- *
@@ -61,6 +65,7 @@ unabto_push_element pushSeqQ[NABTO_PUSH_QUEUE_LENGTH];
  * initialization function to be called before using push *
  * -------------------------------------------------------*/
 void unabto_push_init(void){
+    NABTO_LOG_INFO(("BACKOFF PERIOD: %d",UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF));
     pushCtx.nextPushEvent = NULL;
     pushCtx.pushSeqQHead = 0;
     pushCtx.nextSeq = 0;
@@ -242,13 +247,27 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         unabto_push_notification_remove(elem->seq);
         return;
     }
-    uint16_t* hdrLenField = (uint16_t*)buf+14;
-    *hdrLenField = (uint16_t)(ptr-buf);
+//    uint16_t* hdrLenField = (uint16_t*)buf+14;
+    uint8_t* hdrLenField = buf+14;
+    WRITE_U16(hdrLenField,(ptr-buf));
+//    *hdrLenField = (uint16_t)(ptr-buf);
+    WRITE_U16(cryptDataStart-4,ptr-cryptDataStart+NP_PAYLOAD_CRYPTO_BYTELENGTH);
     if (nmc.context.cryptoAttach == NULL){
         unabto_push_hint hint = UNABTO_PUSH_HINT_NO_CRYPTO_CONTEXT;
         unabto_push_notification_callback(elem->seq,&hint);
         unabto_push_notification_remove(elem->seq);
        return;
+    }
+    {
+        char str[(ptr-buf+1)*8];
+        int i = 0;
+        int j = 0;
+        for(i=0;i<ptr-buf;i++){
+            j += sprintf(&str[j],"0x%02x, ",buf[i]);
+        }
+        str[j] = '\n';
+        NABTO_LOG_INFO(("Ready to send packet: %s",str));
+        
     }
     if(!send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoAttach, cryptDataStart, ptr-cryptDataStart, cryptHdrEnd)){
         unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;

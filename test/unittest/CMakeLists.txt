@@ -33,6 +33,7 @@ set(src
   ${src_dir}/unabto_unittest.c)
 
 add_definitions("-DNABTO_ENABLE_TEST_CODE")
+add_definitions("-DUNABTO_PUSH_CALLBACK_FUNCTIONS")
 
 if (MSVC)
   add_definitions(-DWIN32_LEAN_AND_MEAN)

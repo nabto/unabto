@@ -1,4 +1,3 @@
-#define UNABTO_PUSH_CALLBACK_FUNCTIONS
 #include <unistd.h>
 #include "unabto_push_test.h"
 #if NABTO_ENABLE_PUSH
@@ -7,12 +6,16 @@ extern void unabto_push_init(void);
 
 //#ifndef UNABTO_PUSH_CALLBACK_FUNCTIONS
 //#define UNABTO_PUSH_CALLBACK_FUNCTIONS 1
+bool getDataCalled = false;
 uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq){
     NABTO_LOG_INFO(("Getting data"));
+    getDataCalled = true;
     return bufStart;
 }
 
+bool callbackCalled = false;
 void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint){
+    callbackCalled = true;
     if(hint == NULL) return;
     NABTO_LOG_INFO(("Push_notification_callback with seq: %i, hint: %i",seq,*hint));
 }
@@ -25,50 +28,46 @@ bool unabto_push_test(void){
     unabto_push_init();
 
     if (pushCtx.pushSeqQHead != 0){
+        NABTO_LOG_INFO(("Queue not initialized to 0 elements"));
         return false;
     }
 
     int seq;
     unabto_push_hint ret = unabto_send_push_notification(1,&seq);
     if (ret != UNABTO_PUSH_HINT_OK){
+        NABTO_LOG_INFO(("send push notification did not return OK"));
         return false;
     }
     if (pushCtx.pushSeqQHead != 1){
+        NABTO_LOG_INFO(("Push notification not in push queue"));
         return false;
     }
     ret = unabto_send_push_notification(1,&seq);
     ret = unabto_send_push_notification(1,&seq);
     ret = unabto_send_push_notification(1,&seq);
     ret = unabto_send_push_notification(1,&seq);
-    nabto_time_event_push();
-    nabto_time_event_push();
-    nabto_time_event_push();
-    nabto_time_event_push();
-    nabto_time_event_push();
-    nabto_time_event_push();
-    nabto_time_event_push();
-    nabto_time_event_push();
-    sleep(4);
-    nabto_time_event_push();
     if (pushCtx.pushSeqQHead != 5){
+        NABTO_LOG_INFO(("Push Queue does not contain 5 elements, it contains: %d",pushCtx.pushSeqQHead));
         return false;
     }
-    bool r = unabto_push_notification_remove(seq);
-    if (!r){
+    nabto_time_event_push();
+    nabto_time_event_push();
+    nabto_time_event_push();
+    nabto_time_event_push();
+    nabto_time_event_push();
+    nabto_time_event_push();
+    nabto_time_event_push();
+    nabto_time_event_push();
+    nabto_time_event_push();
+    if (!getDataCalled) {
+        NABTO_LOG_INFO(("GetData function not called"));
         return false;
     }
-    if (pushCtx.pushSeqQHead != 4){
+    if (!callbackCalled) {
+        NABTO_LOG_INFO(("Callback function not called"));
         return false;
     }
-    r = unabto_push_notification_remove(seq-3);
-    if (!r){
-        return false;
-    }
-
-    if (pushCtx.pushSeqQHead != 3){
-        return false;
-    }
-    
+    NABTO_LOG_INFO(("Push test succeeded"));
     return true;
 }
 #endif //NABTO_ENABLE_PUSH
