@@ -254,7 +254,8 @@ enum np_payload_type_e {
 *      +-----+-----+----------------------------------------------------------+
 *      |  +4 |  +0 |  Crypto code                                             |
 *      +-----+-----+----------------------------------------------------------+
-*      |  +6 |  +2 |  one or more payloads                                    |
+*      |  +6 |  +2 |  One or more payloads or data depending on the crypto    |
+       |     |     |  code                                                    |
 *      +-----+-----+----------------------------------------------------------+
 * After the crypto code one or more payloads will be present. The total number
 * of bytes in the payloads are (payload Length - NP_PAYLOAD_CRYPTO_BYTELENGTH)
@@ -300,6 +301,19 @@ enum np_payload_type_e {
 #define NP_PAYLOAD_CRYPTO_SYMM_AES_CBC        0x2000
 #define NP_PAYLOAD_CRYPTO_CODEMASK_SYM_ALG    0xF000
 #define NP_PAYLOAD_CRYPTO_CODESHIFT_SYM_ALG   12
+
+/* -- Crypto payload flags */
+
+/**
+ * Change the default payload behavior. If the encryption method is
+ * NP_PAYLOAD_CRYPTO_ENCR_SECR then the default behavior is that the
+ * crypto payload does not contain payloads, but raw data. For
+ * NP_PAYLOAD_CRYPTO_ENCR_NONE and NP_PAYLOAD_CRYPTO_ENCR_CERT the
+ * default behavior is that the crypto payloads does contain
+ * payloads. This flag will change the default behavior and make data
+ * in the crypto payload be handled as payloads instead of raw data.
+ */
+#define NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS 0x01
 
 
 /*****************************************************************************/
