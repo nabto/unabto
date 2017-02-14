@@ -236,6 +236,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
     WRITE_U16(ptr, elem->pnsId); ptr += 2;
     WRITE_U8(ptr, NP_PAYLOAD_PUSH_FLAG_SEND); ptr++;
     ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
+    WRITE_U8((ptr-3), NP_PAYLOAD_HDR_FLAG_NONE | NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS);
     cryptHdrEnd = ptr;
 
     ptr += 2; // leave room for the crypto code
@@ -247,10 +248,8 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         unabto_push_notification_remove(elem->seq);
         return;
     }
-//    uint16_t* hdrLenField = (uint16_t*)buf+14;
     uint8_t* hdrLenField = buf+14;
     WRITE_U16(hdrLenField,(ptr-buf));
-//    *hdrLenField = (uint16_t)(ptr-buf);
     WRITE_U16(cryptDataStart-4,ptr-cryptDataStart+NP_PAYLOAD_CRYPTO_BYTELENGTH);
     if (nmc.context.cryptoAttach == NULL){
         unabto_push_hint hint = UNABTO_PUSH_HINT_NO_CRYPTO_CONTEXT;
@@ -258,6 +257,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         unabto_push_notification_remove(elem->seq);
        return;
     }
+    // REMOVE 
     {
         char str[(ptr-buf+1)*8];
         int i = 0;

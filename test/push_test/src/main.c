@@ -115,7 +115,7 @@ void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint){
             NABTO_LOG_INFO(("Callback with hint: QUOTA EXCEEDED REATTACH"));
             break;
         default:
-            NABTO_LOG_INFO(("Callback with unknown hing"));
+            NABTO_LOG_INFO(("Callback with unknown hint"));
     }            
     for(i=0;i<dataHead;i++){
         if(sequences[i] == seq){
