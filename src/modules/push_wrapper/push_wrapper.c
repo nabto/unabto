@@ -6,8 +6,9 @@
 #include <unabto/unabto_protocol_defines.h>
 #include <unabto/unabto_util.h>
 
+#ifndef PUSH_NOTIFICATION_TABLE_SIZE
 #define PUSH_NOTIFICATION_TABLE_SIZE 5
-
+#endif
 uint8_t* dataBuffer[PUSH_NOTIFICATION_TABLE_SIZE];
 uint32_t sequences[PUSH_NOTIFICATION_TABLE_SIZE];
 uint16_t lengths[PUSH_NOTIFICATION_TABLE_SIZE];
@@ -46,7 +47,7 @@ uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* buf
             if(lengths[i]>bufEnd-bufStart){
                 return NULL;
             }
-            memcpy(dataBuffer[i], bufStart,lengths[i]);
+            memcpy( bufStart,dataBuffer[i],lengths[i]);
             return bufStart+lengths[i];
         }
     }

@@ -239,7 +239,6 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
     WRITE_U8((ptr-3), NP_PAYLOAD_HDR_FLAG_NONE | NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS);
     cryptHdrEnd = ptr;
 
-    ptr += 2; // leave room for the crypto code
     cryptDataStart = ptr;
     ptr = unabto_push_notification_get_data(ptr, end-NP_PAYLOAD_VERIFY_BYTELENGTH, elem->seq);
     if(ptr > end-NP_PAYLOAD_VERIFY_BYTELENGTH || ptr < cryptDataStart){
@@ -248,9 +247,6 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         unabto_push_notification_remove(elem->seq);
         return;
     }
-    uint8_t* hdrLenField = buf+14;
-    WRITE_U16(hdrLenField,(ptr-buf));
-    WRITE_U16(cryptDataStart-4,ptr-cryptDataStart+NP_PAYLOAD_CRYPTO_BYTELENGTH);
     if (nmc.context.cryptoAttach == NULL){
         unabto_push_hint hint = UNABTO_PUSH_HINT_NO_CRYPTO_CONTEXT;
         unabto_push_notification_callback(elem->seq,&hint);
@@ -269,7 +265,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         NABTO_LOG_INFO(("Ready to send packet: %s",str));
         
     }
-    if(!send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoAttach, cryptDataStart, ptr-cryptDataStart, cryptHdrEnd)){
+    if(!send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoConnect, cryptDataStart, ptr-cryptDataStart, cryptHdrEnd)){
         unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
         unabto_push_notification_callback(elem->seq,&hint);
         unabto_push_notification_remove(elem->seq);
