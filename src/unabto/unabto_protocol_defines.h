@@ -225,21 +225,28 @@ enum np_payload_type_e {
 /*****************************************************************************/
 /* VERSION payload */
 /* The version payload data has the following layout:
-*      +-----+----------------------------------------------------------------+
-*      |  +0 |  Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)              |
-*      +-----+-----+----------------------------------------------------------+
-*      |  +4 |  +0 |  Type, one of NP_PAYLOAD_VERSION_TYPE_*                  |
-*      +-----+-----+----------------------------------------------------------+
-*      |  +6 |  +2 |  Major version number                                    |
-*      +-----+-----+----------------------------------------------------------+
-*      | +10 |  +6 |  Minor version number                                    |
-*      +-----+-----+----------------------------------------------------------+
-*      | +14 | +10 |  Patch version number (optional)                         |
-*      +-----+----------------------------------------------------------------+
-*      | +18 | +14 |  The rest of the payload is a label string e.g. pre.0    |
-*      |     |     |  (optional) if present patch is also needed.             |
-*      +-----+-----+----------------------------------------------------------+
-*/
+ * 
+ * The payload has been created such that the string in the end of the
+ * payload can contain semver prerelease info and build version info
+ *
+ * The extra infor needs to be formatted as
+ * -prerelease.info.xyz+build.info.xyz both can be omitted then it
+ * will be an empty string.
+ *      +-----+----------------------------------------------------------------+
+ *      |  +0 |  Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)              |
+ *      +-----+-----+----------------------------------------------------------+
+ *      |  +4 |  +0 |  Type, one of NP_PAYLOAD_VERSION_TYPE_*                  |
+ *      +-----+-----+----------------------------------------------------------+
+ *      |  +6 |  +2 |  Major version number                                    |
+ *      +-----+-----+----------------------------------------------------------+
+ *      | +10 |  +6 |  Minor version number                                    |
+ *      +-----+-----+----------------------------------------------------------+
+ *      | +14 | +10 |  Patch version number (optional)                         |
+ *      +-----+----------------------------------------------------------------+
+ *      | +18 | +14 |  The rest of the payload is a label string e.g. pre.0    |
+ *      |     |     |  (optional) if present patch is also needed.             |
+ *      +-----+-----+----------------------------------------------------------+
+ */
 
 #define NP_PAYLOAD_VERSION_BYTELENGTH              14  ///< Minimum size of a VERSION payload
 #define NP_PAYLOAD_VERSION_BYTELENGTH_PATCH        18  ///< Size with patch 
