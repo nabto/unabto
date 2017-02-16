@@ -19,7 +19,11 @@
  * consuming client.
  */
 
-/** Major, minor, patch release number (uint32_t) */
+/** 
+ * Major, minor, patch release number (uint32_t),
+ * Labels are used to distinguish real releases from development, rc
+ * and beta releases. Set this string to "" for a final release.
+ */
 #define RELEASE_MAJOR            3
 #define RELEASE_MINOR            0
 #define RELEASE_PATCH            16
@@ -30,21 +34,26 @@
  */
 #define RELEASE_LABEL "pre.0"
 
-#ifndef PRI_RELEASE_LABEL
-#define PRI_RELEASE_LABEL "%s%s"
+
+/**
+ * use the following helper macros as
+ * printf("Version " PRIversion "\n", MAKE_VERSION_PRINTABLE());
+ */
+#ifndef PRIlabel
+#define PRIlabel "%s%s"
 #endif
 
-#ifndef PRI_RELEASE
-#define PRI_RELEASE "%" PRIu32 ".%" PRIu32 ".%" PRIu32 PRI_RELEASE_LABEL
+#ifndef PRIversion
+#define PRIversion "%" PRIu32 ".%" PRIu32 ".%" PRIu32 PRIlabel
 #endif
 
-#ifndef PRI_RELEASE_LABEL_FORMAT
+#ifndef MAKE_LABEL_PRINTABLE
 // only print a - if the length of the label is not empty
-#define PRI_RELEASE_LABEL_FORMAT (strlen(RELEASE_LABEL) > 0 ? "-" : ""), (strlen(RELEASE_LABEL) > 0 ? RELEASE_LABEL : "")
+#define MAKE_LABEL_PRINTABLE() (strlen(RELEASE_LABEL) > 0 ? "-" : ""), (strlen(RELEASE_LABEL) > 0 ? RELEASE_LABEL : "")
 #endif
 
-#ifndef PRI_RELEASE_FORMAT
-#define PRI_RELEASE_FORMAT (uint32_t)RELEASE_MAJOR, (uint32_t)RELEASE_MINOR, (uint32_t)RELEASE_PATCH, PRI_RELEASE_LABEL_FORMAT
+#ifndef MAKE_VERSION_PRINTABLE
+#define MAKE_VERSION_PRINTABLE() (uint32_t)RELEASE_MAJOR, (uint32_t)RELEASE_MINOR, (uint32_t)RELEASE_PATCH, MAKE_LABEL_PRINTABLE()
 #endif
 
 #endif

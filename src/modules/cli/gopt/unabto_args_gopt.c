@@ -167,7 +167,7 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
     }
     
     if (gopt(options, 'V')) {
-        fprintf(stdout, PRI_RELEASE "\n", PRI_RELEASE_FORMAT);
+        fprintf(stdout, PRIversion "\n", MAKE_VERSION_PRINTABLE());
         return false;
     }
 

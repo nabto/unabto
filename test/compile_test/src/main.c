@@ -93,7 +93,7 @@ static bool test_parse_args(const char * progname, int argc, char* argv[], nabto
     }
     
     if (gopt(options, 'V')) {
-        printf("%s: " PRI_RELEASE "\n", progname, PRI_RELEASE_FORMAT);
+        printf("%s: " PRIversion "\n", progname, MAKE_VERSION_PRINTABLE());
         exit(0);
     }
     

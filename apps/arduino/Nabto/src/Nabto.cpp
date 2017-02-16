@@ -36,7 +36,7 @@ void NabtoClass::begin(uint8_t* mac, char* name)
 
 void NabtoClass::version(char* v)
 {
-  sprintf(v, PRI_RELEASE, PRI_RELEASE_FORMAT);
+  sprintf(v, PRIversion, MAKE_VERSION_PRINTABLE());
 }
 
 void NabtoClass::tick()

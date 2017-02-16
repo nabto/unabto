@@ -225,7 +225,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     }
 
     if (gopt(options, 'V')) {
-        printf("Version: " PRI_RELEASE "\n", PRI_RELEASE_FORMAT);
+        printf("Version: " PRIversion "\n", MAKE_VERSION_PRINTABLE());
         exit(0);
     }
 
