@@ -234,9 +234,16 @@ enum np_payload_type_e {
 *      +-----+-----+----------------------------------------------------------+
 *      | +10 |  +6 |  Minor version number                                    |
 *      +-----+-----+----------------------------------------------------------+
+*      | +14 | +10 |  Patch version number (optional)                         |
+*      +-----+----------------------------------------------------------------+
+*      | +18 | +14 |  The rest of the payload is a label string e.g. pre.0    |
+*      |     |     |  (optional) if present patch is also needed.             |
+*      +-----+-----+----------------------------------------------------------+
 */
 
-#define NP_PAYLOAD_VERSION_BYTELENGTH          14  ///< size of a VERSION payload
+#define NP_PAYLOAD_VERSION_BYTELENGTH              14  ///< Minimum size of a VERSION payload
+#define NP_PAYLOAD_VERSION_BYTELENGTH_PATCH        18  ///< Size with patch 
+
 
 /* Type of version */
 #define NP_PAYLOAD_VERSION_TYPE_UNDEF 0x0000 // The object type is not defined.

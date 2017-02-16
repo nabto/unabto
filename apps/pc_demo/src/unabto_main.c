@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
         return 1;
     }
     NABTO_LOG_INFO(("Identity: '%s'", nms->id));
-    NABTO_LOG_INFO(("Program Release %i.%i", RELEASE_MAJOR, RELEASE_MINOR));
+    NABTO_LOG_INFO(("Program Release " PRI_RELEASE, PRI_RELEASE_FORMAT));
     NABTO_LOG_INFO(("Buffer size: %i", nms->bufsize));
 
     // Initialize nabto

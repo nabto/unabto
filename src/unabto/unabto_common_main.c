@@ -125,7 +125,7 @@ bool unabto_init(void) {
     }
 
     NABTO_LOG_INFO(("Device id: '%s'", nmc.nabtoMainSetup.id));
-    NABTO_LOG_INFO(("Program Release %" PRIu32 ".%" PRIu32, (uint32_t)RELEASE_MAJOR, (uint32_t)RELEASE_MINOR));
+    NABTO_LOG_INFO(("Program Release " PRI_RELEASE, PRI_RELEASE_FORMAT));
     if(nmc.nabtoMainSetup.version)
     {
         NABTO_LOG_INFO(("Version string: '%s'", nmc.nabtoMainSetup.version));
