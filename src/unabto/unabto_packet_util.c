@@ -271,19 +271,21 @@ uint8_t* insert_ipx_payload(uint8_t* ptr, uint8_t* end) {
     return ptr;
 }
 
-uint8_t* insert_version_payload(uint8_t* ptr, uint8_t* end) {
+uint8_t* insert_version_payload(uint8_t* ptr, uint8_t* end)
+{
+    size_t releaseLabelLength = strlen(RELEASE_LABEL);
     UNABTO_ASSERT(ptr <= end);
-    if (end-ptr < NP_PAYLOAD_VERSION_BYTELENGTH) {
+    if (end-ptr < NP_PAYLOAD_VERSION_BYTELENGTH_PATCH + releaseLabelLength) {
         return NULL;
     }
     
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_VERSION, 0, 10);
-
+    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_VERSION, 0, (14+releaseLabelLength));
 
     WRITE_FORWARD_U16(ptr, NP_PAYLOAD_VERSION_TYPE_UD);
     WRITE_FORWARD_U32(ptr, RELEASE_MAJOR);
     WRITE_FORWARD_U32(ptr, RELEASE_MINOR);
-    
+    WRITE_FORWARD_U32(ptr, RELEASE_PATCH);
+    memcpy(ptr, RELEASE_LABEL, releaseLabelLength); ptr += releaseLabelLength;
     return ptr;
 }
 
