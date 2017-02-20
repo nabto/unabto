@@ -26,14 +26,14 @@
  */
 #define UNABTO_VERSION_MAJOR            3
 #define UNABTO_VERSION_MINOR            0
-#define UNABTO_VERSION_PATCH            16
+#define UNABTO_VERSION_PATCH            15
 
 /**
  * Labels are used to distinguish real releases from development, rc
  * and beta releases. Set this string to "" for a final
  * release. Remember to include the first dash.
  */
-#define UNABTO_VERSION_PRERELEASE "-alpha.0"
+#define UNABTO_VERSION_PRERELEASE "-rc.1"
 
 /**
  * Build info is used to distinguish builds, it could for example be
