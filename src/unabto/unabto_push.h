@@ -41,6 +41,7 @@ typedef struct unabto_push_element{
     unabto_push_element_state state;
     nabto_stamp_t stamp;
     uint16_t pnsId;
+    unabto_push_hint hint;
 }unabto_push_element;
 
 struct{

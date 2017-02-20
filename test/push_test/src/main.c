@@ -1,7 +1,6 @@
 /**
  *  Implementation of main for uNabto SDK demo
  */
-//#include "modules/push_wrapper/push_wrapper.h"
 #include "unabto/unabto_env_base.h"
 #include "unabto/unabto_common_main.h"
 #include "unabto/unabto_logging.h"
@@ -53,7 +52,6 @@ void send_push_notification_now(uint16_t pnsid, const char * staticData, size_t 
      */
     lengths[dataHead] = lenSD+lenMsg+2*NP_PAYLOAD_PUSH_DATA_SIZE_WO_DATA; 
     dataBuffer[dataHead] = (uint8_t *)malloc(lengths[dataHead]);
-    NABTO_LOG_INFO(("malloc ptr was: %i",dataBuffer[dataHead]));
     ptr = dataBuffer[dataHead];
     ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_PUSH_DATA, 0,lenSD+2);
     WRITE_U8(ptr, PUSH_DATA_PURPOSE_STATIC); ptr++;
@@ -74,16 +72,15 @@ uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* buf
     int i;
     for(i=0;i<dataHead;i++){
         if(sequences[i] == seq){
-            NABTO_LOG_INFO(("Found sequence at element %i moving %d bytes of data",i,lengths[i]));
             if(lengths[i]>bufEnd-bufStart){
-                NABTO_LOG_INFO(("Too much data"));
+                NABTO_LOG_ERROR(("Too much data"));
                 return NULL;
             }
             memcpy(bufStart, dataBuffer[i], lengths[i]);
             return bufStart+lengths[i];
         }
     }
-    NABTO_LOG_INFO(("Did not find the seq for get data"));
+    NABTO_LOG_ERROR(("Did not find the seq for get data"));
     return NULL;
 }
 
@@ -138,12 +135,13 @@ void nabto_yield(int msec);
  */
 int main(int argc, char* argv[])
 {
+//{"App_id": "58a88e8b-83f1-429d-8863-8d8180ae83ed","Player_id":"a1925aa7-5126-46a7-99c7-ecb7f888299b"}
     // Set nabto to default values
     nabto_main_setup* nms = unabto_init_context();
-    const uint8_t* staticData = "\"playerId\" : \"hasdgadsg\"";
-    size_t lenSd = 24;
-    const uint8_t* msg = "The roof is on fire";
-    size_t lenMsg = 19;
+    const uint8_t* staticData = "{\"App_id\": \"58a88e8b-83f1-429d-8863-8d8180ae83ed\",\"Player_id\":\"a1925aa7-5126-46a7-99c7-ecb7f888299b\"}";
+    size_t lenSd = 101;
+    const uint8_t* msg = "{\"temp\": 943}";
+    size_t lenMsg = 13;
     uint16_t pnsid = 1;
     // Overwrite default values with command line args
     if (!check_args(argc, argv, nms)) {

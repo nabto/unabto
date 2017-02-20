@@ -59,13 +59,12 @@ bool unabto_push_seq_exists(uint32_t seq);
  * Push global state variables                          *
  * ---------------------------------------------------- */
 
-//NABTO_TREAD_LOCAL_STORAGE unabto_push_element pushSeqQ[NABTO_PUSH_QUEUE_LENGTH];
 unabto_push_element pushSeqQ[NABTO_PUSH_QUEUE_LENGTH];
 /* -------------------------------------------------------*
  * initialization function to be called before using push *
  * -------------------------------------------------------*/
 void unabto_push_init(void){
-    NABTO_LOG_INFO(("BACKOFF PERIOD: %d",UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF));
+    NABTO_LOG_TRACE(("BACKOFF PERIOD: %d",UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF));
     pushCtx.nextPushEvent = NULL;
     pushCtx.pushSeqQHead = 0;
     pushCtx.nextSeq = 0;
@@ -75,17 +74,19 @@ void unabto_push_init(void){
     size_t i;
     for (i = 0; i<NABTO_PUSH_QUEUE_LENGTH; i++){
         pushSeqQ[i].state = UNABTO_PUSH_IDLE;
+        pushSeqQ[i].hint = UNABTO_PUSH_HINT_OK;
     }
 }
 
 unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq){
-    if(pushCtx.reattachNeeded){
-        return UNABTO_PUSH_HINT_QUOTA_EXCEEDED_REATTACH;
-    }
-
     nabto_stamp_t now = nabtoGetStamp();
-    if (pushCtx.pushSeqQHead >= NABTO_PUSH_QUEUE_LENGTH){
-        return UNABTO_PUSH_HINT_QUEUE_FULL;
+    // With reattach needed or queue full we must still call callback without releasing Zalgo
+    if(pushCtx.reattachNeeded){
+        pushSeqQ[pushCtx.pushSeqQHead].hint = UNABTO_PUSH_HINT_QUOTA_EXCEEDED_REATTACH;
+    } else if (pushCtx.pushSeqQHead >= NABTO_PUSH_QUEUE_LENGTH){
+        pushSeqQ[pushCtx.pushSeqQHead].hint = UNABTO_PUSH_HINT_QUEUE_FULL;
+    } else {
+        pushSeqQ[pushCtx.pushSeqQHead].hint = UNABTO_PUSH_HINT_OK;
     }
     pushSeqQ[pushCtx.pushSeqQHead].seq = pushCtx.nextSeq;
     *seq = pushCtx.nextSeq;
@@ -101,7 +102,7 @@ unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq){
 
     pushCtx.pushSeqQHead++;
     unabto_push_set_next_event();
-    return UNABTO_PUSH_HINT_OK;
+    return pushSeqQ[pushCtx.pushSeqQHead].hint;
 }
 
 bool unabto_push_notification_remove(uint32_t seq)
@@ -223,8 +224,17 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
         unabto_push_notification_callback(elem->seq,&hint);
         unabto_push_notification_remove(elem->seq);
-       return;
+        return;
+    } else if (elem->hint == UNABTO_PUSH_HINT_QUOTA_EXCEEDED_REATTACH){
+        unabto_push_notification_callback(elem->seq,&elem->hint);
+        unabto_push_notification_remove(elem->seq);
+        return;
+    } else if (elem->hint == UNABTO_PUSH_HINT_QUOTA_EXCEEDED_REATTACH){
+        unabto_push_notification_callback(elem->seq,&elem->hint);
+        unabto_push_notification_remove(elem->seq);
+        return;
     }
+        
     
     bool retrans = elem->retrans;
     uint8_t* ptr = insert_header(buf,0, nmc.context.gspnsi, U_PUSH, false, 0, 0, NULL);
@@ -253,7 +263,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         unabto_push_notification_remove(elem->seq);
        return;
     }
-    // REMOVE 
+    /*/ REMOVE 
     {
         char str[(ptr-buf+1)*8];
         int i = 0;
@@ -264,7 +274,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         str[j] = '\n';
         NABTO_LOG_INFO(("Ready to send packet: %s",str));
         
-    }
+    }*/
     if(!send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoConnect, cryptDataStart, ptr-cryptDataStart, cryptHdrEnd)){
         unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
         unabto_push_notification_callback(elem->seq,&hint);
