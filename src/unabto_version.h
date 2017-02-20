@@ -24,36 +24,36 @@
  * Labels are used to distinguish real releases from development, rc
  * and beta releases. Set this string to "" for a final release.
  */
-#define RELEASE_MAJOR            3
-#define RELEASE_MINOR            0
-#define RELEASE_PATCH            16
+#define UNABTO_VERSION_MAJOR            3
+#define UNABTO_VERSION_MINOR            0
+#define UNABTO_VERSION_PATCH            16
 
 /**
  * Labels are used to distinguish real releases from development, rc
- * and beta releases. Set this string to "" for a final release.
+ * and beta releases. Set this string to "" for a final
+ * release. Remember to include the first dash.
  */
-#define RELEASE_LABEL "pre.0"
+#define UNABTO_VERSION_PRERELEASE "-alpha.0"
+
+/**
+ * Build info is used to distinguish builds, it could for example be
+ * the jenkins build id. Remember to include a plus in start of the
+ * build version.
+ */
+#define UNABTO_VERSION_BUILD ""
 
 
 /**
  * use the following helper macros as
  * printf("Version " PRIversion "\n", MAKE_VERSION_PRINTABLE());
  */
-#ifndef PRIlabel
-#define PRIlabel "%s%s"
-#endif
 
 #ifndef PRIversion
-#define PRIversion "%" PRIu32 ".%" PRIu32 ".%" PRIu32 PRIlabel
-#endif
-
-#ifndef MAKE_LABEL_PRINTABLE
-// only print a - if the length of the label is not empty
-#define MAKE_LABEL_PRINTABLE() (strlen(RELEASE_LABEL) > 0 ? "-" : ""), (strlen(RELEASE_LABEL) > 0 ? RELEASE_LABEL : "")
+#define PRIversion "%" PRIu32 ".%" PRIu32 ".%" PRIu32 "%s%s"
 #endif
 
 #ifndef MAKE_VERSION_PRINTABLE
-#define MAKE_VERSION_PRINTABLE() (uint32_t)RELEASE_MAJOR, (uint32_t)RELEASE_MINOR, (uint32_t)RELEASE_PATCH, MAKE_LABEL_PRINTABLE()
+#define MAKE_VERSION_PRINTABLE() (uint32_t)UNABTO_VERSION_MAJOR, (uint32_t)UNABTO_VERSION_MINOR, (uint32_t)UNABTO_VERSION_PATCH, UNABTO_VERSION_PRERELEASE, UNABTO_VERSION_BUILD
 #endif
 
 #endif
