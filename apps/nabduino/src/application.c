@@ -329,7 +329,7 @@ application_event_result application_event(application_request* request, unabto_
       }
 
       // write version information
-      if(!unabto_query_write_uint16(writeBuffer, INFORMATION_FIRMWARE_VERSION) || !unabto_query_write_uint32(writeBuffer, RELEASE_MAJOR) || !unabto_query_write_uint32(writeBuffer, RELEASE_MINOR))
+      if(!unabto_query_write_uint16(writeBuffer, INFORMATION_FIRMWARE_VERSION) || !unabto_query_write_uint32(writeBuffer, UNABTO_VERSION_MAJOR) || !unabto_query_write_uint32(writeBuffer, UNABTO_VERSION_MINOR))
       {
         return AER_REQ_RSP_TOO_LARGE;
       }
