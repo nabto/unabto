@@ -24,23 +24,23 @@
  * Labels are used to distinguish real releases from development, rc
  * and beta releases. Set this string to "" for a final release.
  */
-#define VERSION_MAJOR            3
-#define VERSION_MINOR            0
-#define VERSION_PATCH            16
+#define UNABTO_VERSION_MAJOR            3
+#define UNABTO_VERSION_MINOR            0
+#define UNABTO_VERSION_PATCH            16
 
 /**
  * Labels are used to distinguish real releases from development, rc
  * and beta releases. Set this string to "" for a final
  * release. Remember to include the first dash.
  */
-#define VERSION_PRERELEASE "-alpha.x.y.z"
+#define UNABTO_VERSION_PRERELEASE "-alpha.0"
 
 /**
  * Build info is used to distinguish builds, it could for example be
  * the jenkins build id. Remember to include a plus in start of the
  * build version.
  */
-#define VERSION_BUILD "+build.x.y.z"
+#define UNABTO_VERSION_BUILD ""
 
 
 /**
@@ -53,7 +53,7 @@
 #endif
 
 #ifndef MAKE_VERSION_PRINTABLE
-#define MAKE_VERSION_PRINTABLE() (uint32_t)VERSION_MAJOR, (uint32_t)VERSION_MINOR, (uint32_t)VERSION_PATCH, VERSION_PRERELEASE, VERSION_BUILD
+#define MAKE_VERSION_PRINTABLE() (uint32_t)UNABTO_VERSION_MAJOR, (uint32_t)UNABTO_VERSION_MINOR, (uint32_t)UNABTO_VERSION_PATCH, UNABTO_VERSION_PRERELEASE, UNABTO_VERSION_BUILD
 #endif
 
 #endif

@@ -73,8 +73,8 @@ typedef struct
 /****************************************************************************
 *                            Global variables/const                           
 ****************************************************************************/
-const rsuint16 UnabtoVersionMajor = VERSION_MAJOR; 
-const rsuint16 UnabtoVersionMinor = VERSION_MINOR; 
+const rsuint16 UnabtoVersionMajor = UNABTO_VERSION_MAJOR; 
+const rsuint16 UnabtoVersionMinor = UNABTO_VERSION_MINOR; 
 
 /****************************************************************************
 *                            Local variables/const                            
