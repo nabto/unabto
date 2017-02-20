@@ -234,9 +234,16 @@ enum np_payload_type_e {
 *      +-----+-----+----------------------------------------------------------+
 *      | +10 |  +6 |  Minor version number                                    |
 *      +-----+-----+----------------------------------------------------------+
+*      | +14 | +10 |  Patch version number (optional)                         |
+*      +-----+----------------------------------------------------------------+
+*      | +18 | +14 |  The rest of the payload is a label string e.g. pre.0    |
+*      |     |     |  (optional) if present patch is also needed.             |
+*      +-----+-----+----------------------------------------------------------+
 */
 
-#define NP_PAYLOAD_VERSION_BYTELENGTH          14  ///< size of a VERSION payload
+#define NP_PAYLOAD_VERSION_BYTELENGTH              14  ///< Minimum size of a VERSION payload
+#define NP_PAYLOAD_VERSION_BYTELENGTH_PATCH        18  ///< Size with patch 
+
 
 /* Type of version */
 #define NP_PAYLOAD_VERSION_TYPE_UNDEF 0x0000 // The object type is not defined.
@@ -254,7 +261,8 @@ enum np_payload_type_e {
 *      +-----+-----+----------------------------------------------------------+
 *      |  +4 |  +0 |  Crypto code                                             |
 *      +-----+-----+----------------------------------------------------------+
-*      |  +6 |  +2 |  one or more payloads                                    |
+*      |  +6 |  +2 |  One or more payloads or data depending on the crypto    |
+       |     |     |  code                                                    |
 *      +-----+-----+----------------------------------------------------------+
 * After the crypto code one or more payloads will be present. The total number
 * of bytes in the payloads are (payload Length - NP_PAYLOAD_CRYPTO_BYTELENGTH)
@@ -300,6 +308,19 @@ enum np_payload_type_e {
 #define NP_PAYLOAD_CRYPTO_SYMM_AES_CBC        0x2000
 #define NP_PAYLOAD_CRYPTO_CODEMASK_SYM_ALG    0xF000
 #define NP_PAYLOAD_CRYPTO_CODESHIFT_SYM_ALG   12
+
+/* -- Crypto payload flags */
+
+/**
+ * Change the default payload behavior. If the encryption method is
+ * NP_PAYLOAD_CRYPTO_ENCR_SECR then the default behavior is that the
+ * crypto payload does not contain payloads, but raw data. For
+ * NP_PAYLOAD_CRYPTO_ENCR_NONE and NP_PAYLOAD_CRYPTO_ENCR_CERT the
+ * default behavior is that the crypto payloads does contain
+ * payloads. This flag will change the default behavior and make data
+ * in the crypto payload be handled as payloads instead of raw data.
+ */
+#define NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS 0x01
 
 
 /*****************************************************************************/
@@ -912,28 +933,34 @@ enum np_payload_system_info_nat64_e {
  *    +-----+-----------------------------------------------------------------+
  *    |  +4 |  +0 | Sequence number                                           |
  *    +-----+-----+-----------------------------------------------------------+
- *    |  +8 |  +4 | Segment number                                            |
+ *    |  +8 |  +4 | PNS id                                                    |
  *    +-----+-----+-----------------------------------------------------------+
- *    |  +10|  +6 | total number of segments                                  |
- *    +-----+-----+-----------------------------------------------------------+
- *    |  +12|  +8 | PNS id                                                    |
+ *    |  +10|  +6 | Flags                                                     |
  *    +-----+-----+-----------------------------------------------------------+
  */
 
-#define NP_PAYLOAD_PUSH_SIZE    14 ///< Size of the push notification payload
- 
+#define NP_PAYLOAD_PUSH_BYTELENGTH    11 ///< Size of the push notification payload
+
+#define NP_PAYLOAD_PUSH_FLAG_SEND                    0x00
+#define NP_PAYLOAD_PUSH_FLAG_ACK                     0x10
+#define NP_PAYLOAD_PUSH_FLAG_FAIL                    0x20
+#define NP_PAYLOAD_PUSH_FLAG_QUOTA_EXCEEDED          0x40
+#define NP_PAYLOAD_PUSH_FLAG_QUOTA_EXCEEDED_REATTACH 0x80
+
 /******************************************************************************/
 /* Push notification Data payload */
 /* The Push notification Data payload has the following layout:
  *    +-----+-----------------------------------------------------------------+
  *    |  +0 |  Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)               |
  *    +-----+-----------------------------------------------------------------+
- *    |  +4 |  +0 | type                                                      |
+ *    |  +4 |  +0 | purpose                                                   |
  *    +-----+-----+-----------------------------------------------------------+
- *    |  +5 |  +1 | Data                                                      |
+ *    |  +5 |  +1 | type                                                      |
+ *    +-----+-----+-----------------------------------------------------------+
+ *    |  +6 |  +2 | Data                                                      |
  *    +-----+-----+-----------------------------------------------------------+
  */
 
-#define NP_PAYLOAD_PUSH_DATA_SIZE_WO_DATA    5 ///< Size of the push notification payload
+#define NP_PAYLOAD_PUSH_DATA_SIZE_WO_DATA    6 ///< Size of the push notification payload
  
 #endif

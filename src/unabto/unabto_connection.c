@@ -587,7 +587,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
                         con->hasFingerprint = true;
                         memcpy(con->fingerprint, fingerprint.dataBegin, NP_TRUNCATED_SHA256_LENGTH_BYTES);
                     } else {
-                        NABTO_LOG_ERROR(("fingerprint has the wrong length %"PRIsize, fingerprint.dataLength));
+                        NABTO_LOG_ERROR(("fingerprint has the wrong length %"PRIu16, fingerprint.dataLength));
                     }
                 } else {
                     NABTO_LOG_TRACE(("cannot read fignerprint type: %"PRIu8, fingerprint.type));

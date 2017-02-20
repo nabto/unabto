@@ -22,12 +22,6 @@
 #    include <platforms/win32/unabto_platform.h>
 #elif UNABTO_PLATFORM_ARDUINO
 #    include <platforms/arduino/unabto_env_base_arduino.h>
-#elif UNABTO_PLATFORM_PIC32_FREERTOS
-#    include <platforms/pic32_freertos/unabto_env_base_pic32_freertos.h>
-#elif UNABTO_PLATFORM_PIC32 || __XC32
-#    include <platforms/pic32/unabto_platform.h>
-#elif UNABTO_PLATFORM_PIC18 || __18CXX
-#    include <platforms/pic18/unabto_platform.h>
 #elif UNABTO_PLATFORM_COLDFIRE
 #    include <platforms/coldfire/unabto_env_base_coldfire.h>
 #elif UNABTO_PLATFORM_UNIX || __unix || __unix__ || __APPLE__
