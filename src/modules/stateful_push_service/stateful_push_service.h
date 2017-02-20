@@ -10,12 +10,12 @@
 extern "C" {
 #endif
 
-typedef int (__stdcall *pushCallback)(void*);
+typedef void (*pushCallback)(void*, const unabto_push_hint*);
 typedef struct push_payload_data
 {
     uint8_t purpose;
-    uint8_t encoding = 1;
-    uint8_t* data;
+    uint8_t encoding;
+    const uint8_t* data;
     uint16_t len;
 }push_payload_data;
 

@@ -1,7 +1,6 @@
 /*
  * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
  */
-#define UNABTO_PUSH_CALLBACK_FUNCTIONS
 #include "stateful_push_service.h"
 #include <unabto/unabto_protocol_defines.h>
 #include <unabto/unabto_util.h>
@@ -66,7 +65,7 @@ void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint){
             if(i<PUSH_NOTIFICATION_TABLE_SIZE-1){
                 memmove(&dataBuffer[i], &dataBuffer[i+1],dataHead-i);
             }
-            cbList[i](cbArgList[i]);
+            cbList[i](cbArgList[i],hint);
             dataHead--;
             return;
         }
