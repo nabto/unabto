@@ -21,11 +21,13 @@
 
 /** 
  * Major, minor, patch release number (uint32_t), The version numbers
- * can be grepped out into bash with these commands: 
+ * can be grepped out into bash with these commands, remove the extra
+ * underscore which is inserted such that this file remains bash
+ * friendly.
  *
- * grep UNABTO_VERSION src/unabto_version.h | awk '{print $2 "=" $3}'
+ * grep U_NABTO_VERSION src/unabto_version.h | awk '{print $2 "=" $3}'
  * 
- * export `grep UNABTO_VERSION src/unabto_version.h | awk '{print $2 "=" $3}'`
+ * export `grep U_NABTO_VERSION src/unabto_version.h | awk '{print $2 "=" $3}'`
  */
 #define UNABTO_VERSION_MAJOR            3
 #define UNABTO_VERSION_MINOR            0
