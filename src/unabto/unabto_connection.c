@@ -140,10 +140,6 @@ void nabto_release_connection_req(nabto_connect* con)
 #if NABTO_ENABLE_STREAM
         nabto_stream_connection_closed(con);
 #endif
-        con->sendConnectionEndedStatistics = true;
-        // trigger recalculation of timeout such that statistics can be sent.
-        connection_timeout_cache_cached = false;
-    
     } else {
         NABTO_LOG_TRACE(("nabto_release_connection_req on closed connection"));
     }
@@ -159,6 +155,9 @@ void nabto_release_connection(nabto_connect* con)
             nabto_stream_connection_released(con);
 #endif
         }
+
+        // trigger sending of statistics packet
+        con->sendConnectionEndedStatistics = true;
 
         // in case the rendezvous state is still active.
         nabto_rendezvous_end(con);
@@ -911,7 +910,6 @@ void nabto_time_event_connection(void)
         for (con = connections; con < connections + NABTO_MEMORY_CONNECTIONS_SIZE; ++con) {
             if (con->state != CS_IDLE) {
                 rendezvous_time_event(con);
-                statistics_time_event(con);
 #if NABTO_ENABLE_TCP_FALLBACK
                 if (con->hasTcpFallbackCapabilities) {
                     unabto_tcp_fallback_time_event(con);
@@ -922,6 +920,7 @@ void nabto_time_event_connection(void)
                     NABTO_LOG_DEBUG((PRInsi " Connection timeout", MAKE_NSI_PRINTABLE(0, con->spnsi, 0))); //, Stamp value is: %ul", con->spnsi, con->stamp));
                     nabto_release_connection(con);
                 }
+                statistics_time_event(con);
             }
         }
     }
