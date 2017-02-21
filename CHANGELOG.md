@@ -12,8 +12,19 @@ the release and a new unreleased section is added.
 
 ## Unreleased
 
+### Added
+- Fingerprints, such that clients can connect with self signed certificates.
+- Fingerprint acl module in `src/modules/fingerprint_acl`
+- Multi Tunnel tool, a tool which can act as both tcp, uart and echo tunnel on linux. `apps/multi_tunnel`
+
 ### Removed
-- Nano streaming.
+- Nano streaming. Use micro streaming which has always been the default streaming module.
 
 ### Deprecated
-- html_dd applications.
+- html_dd applications. See client change logs and documentation.
+- Browser plugins. See client change logs and documentation.
+
+### Breaking Changes
+- Tunnel module has been changed. Read readme in the `src/modules/tunnel`
+
+
