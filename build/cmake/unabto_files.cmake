@@ -42,7 +42,6 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_stream_event.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_stream_window.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_stream_environment.c
-  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_nano_stream.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_common_main.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_next_event.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_prf.c
