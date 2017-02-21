@@ -2,8 +2,8 @@
  * Copyright (C) 2008-2014 Nabto - All Rights Reserved.
  */
 
-#ifndef _UNABTO_VERSION_H_
-#define _UNABTO_VERSION_H_
+#ifndef _U_NABTO_VERSION_H_
+#define _U_NABTO_VERSION_H_
 /**
  * @file
  *
@@ -20,40 +20,29 @@
  */
 
 /** 
- * Major, minor, patch release number (uint32_t),
- * Labels are used to distinguish real releases from development, rc
- * and beta releases. Set this string to "" for a final release.
+ * Major, minor, patch release number (uint32_t), The version numbers
+ * can be grepped out into bash with these commands: 
+ *
+ * grep UNABTO_VERSION src/unabto_version.h | awk '{print $2 "=" $3}'
+ * 
+ * export `grep UNABTO_VERSION src/unabto_version.h | awk '{print $2 "=" $3}'`
  */
 #define UNABTO_VERSION_MAJOR            3
 #define UNABTO_VERSION_MINOR            0
 #define UNABTO_VERSION_PATCH            16
 
 /**
- * Labels are used to distinguish real releases from development, rc
- * and beta releases. Set this string to "" for a final
- * release. Remember to include the first dash.
+ * Prerelease identifiers are used to distinguish real releases from
+ * development, rc and beta releases. Set this string to "" for a
+ * final release. Remember to include the first dash.
  */
 #define UNABTO_VERSION_PRERELEASE "-alpha.0"
 
 /**
  * Build info is used to distinguish builds, it could for example be
- * the jenkins build id. Remember to include a plus in start of the
+ * the jenkins build id. Remember to include a plus (+) in start of the
  * build version.
  */
 #define UNABTO_VERSION_BUILD ""
-
-
-/**
- * use the following helper macros as
- * printf("Version " PRIversion "\n", MAKE_VERSION_PRINTABLE());
- */
-
-#ifndef PRIversion
-#define PRIversion "%" PRIu32 ".%" PRIu32 ".%" PRIu32 "%s%s"
-#endif
-
-#ifndef MAKE_VERSION_PRINTABLE
-#define MAKE_VERSION_PRINTABLE() (uint32_t)UNABTO_VERSION_MAJOR, (uint32_t)UNABTO_VERSION_MINOR, (uint32_t)UNABTO_VERSION_PATCH, UNABTO_VERSION_PRERELEASE, UNABTO_VERSION_BUILD
-#endif
 
 #endif
