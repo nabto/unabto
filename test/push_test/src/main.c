@@ -102,8 +102,13 @@ int main(int argc, char* argv[])
         unabto_tick();
         nabto_yield(10);
         if (nabtoIsStampPassed(&attachExpireStamp)) {
-            NABTO_LOG_ERROR(("Push took too long."));
-            exit(4);
+            if(first){
+                NABTO_LOG_ERROR(("Timeout before getting attached"));
+                exit(3);
+            } else {
+                NABTO_LOG_ERROR(("Timeout before Push ack was received."));
+                exit(4);
+            }
         }
         if (unabto_is_connected_to_gsp() && first) {
             NABTO_LOG_INFO(("Successfully attached to the gsp, sending push notification"));
