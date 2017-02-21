@@ -61,8 +61,7 @@ void unabto_printf_unabto_config(FILE * f, const char *progname)
     fprintf(f, "/*---------------------------------------------------------*/\n");
     fprintf(f, "#define NABTO_ENABLE_STREAM %d\n", NABTO_ENABLE_STREAM);
     fprintf(f, "#define NABTO_ENABLE_MICRO_STREAM %d\n", NABTO_ENABLE_MICRO_STREAM);
-    fprintf(f, "#define NABTO_ENABLE_NANO_STREAM %d\n", NABTO_ENABLE_NANO_STREAM);
-
+    
     fprintf(f, "/*---------------------------------------------------------*/\n");
     fprintf(f, "#define NABTO_ENABLE_UCRYPTO %d\n", NABTO_ENABLE_UCRYPTO);
     fprintf(f, "/*---------------------------------------------------------*/\n");
