@@ -12,6 +12,21 @@ The document [TEN036 "Security in Nabto Solutions"](https://www.nabto.com/downlo
 
 The TESTING.md document in this directory describes how integrators may test their uNabto SDK based applications and what their responsibilities are.
 
+### Example applications and demos
+
+This repository contains example applications for the three major OS's
+Windows, Linux and Mac. Demos for these platforms is located in the
+`apps` folder.
+
+We have repositories for other embedded platforms as well.
+
+  * [PIC32 Ethernet starterkit II (Ethernet)](https://github.com/nabto/unabto-pic32-sdk)
+  * [STM32 Discovery (Ethernet)](https://github.com/nabto/unabto-stm32-sdk)
+  * [CC3200 (WiFi)](https://github.com/nabto/unabto-cc3200)
+  * [ESP8266 (WiFi)](https://github.com/nabto/unabto-esp8266-sdk)
+
+
+
 ## Source code
 
 ### Core 
@@ -51,19 +66,6 @@ add_definitions(${unabto_definitions})
 add_library(example ${unabto_src})
 target_link_libraries(example ${unabto_link_libraries})
 ```
-
-### Example applications and demos
-
-This repository contains example applications for the three major OS's
-Windows, Linux and Mac. Demos for these platforms is located in the
-`apps` folder.
-
-We have repositories for other embedded platforms as well.
-
-  * [PIC32 Ethernet starterkit II (Ethernet)](https://github.com/nabto/unabto-pic32-sdk)
-  * [STM32 Discovery (Ethernet)](https://github.com/nabto/unabto-stm32-sdk)
-  * [CC3200 (WiFi)](https://github.com/nabto/unabto-cc3200)
-  * [ESP8266 (WiFi)](https://github.com/nabto/unabto-esp8266-sdk)
 
 ## Building Linux, Windows And MacOS
 
