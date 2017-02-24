@@ -19,6 +19,9 @@ the release and a new unreleased section is added.
 
 ### Removed
 - Nano streaming. Use micro streaming which has always been the default streaming module.
+- PIC32 demo is moved to (https://github.com/nabto/unabto-pic32-sdk)
+- PIC18 demo has been removed as xc8 did not support the mla ip stack.
+- Nabduino demo has been removed since the PIC18 with c18 compiler support was removed.
 
 ### Deprecated
 - html_dd applications. See client change logs and documentation.
