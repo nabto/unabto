@@ -41,16 +41,7 @@ NABTO_THREAD_LOCAL_STORAGE bool connection_timeout_cache_cached = false;
 
 #if !NABTO_ENABLE_DYNAMIC_MEMORY
 
-/** the connection resources, shared by all connected clients */
-#if UNABTO_PLATFORM_PIC18
-#pragma udata big_mem
-#endif
-
 NABTO_THREAD_LOCAL_STORAGE nabto_connect connections[NABTO_MEMORY_CONNECTIONS_SIZE];
-
-#if UNABTO_PLATFORM_PIC18
-#pragma udata
-#endif
 
 #endif
 

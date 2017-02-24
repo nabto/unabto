@@ -31,9 +31,6 @@
 
 #include <string.h>
 
-#if UNABTO_PLATFORM_PIC18
-#pragma udata big_mem
-#endif
 
 NABTO_THREAD_LOCAL_STORAGE uint8_t nabtoCommunicationBuffer[NABTO_COMMUNICATION_BUFFER_SIZE];     /**< the communication buffer */
 NABTO_THREAD_LOCAL_STORAGE uint16_t nabtoCommunicationBufferSize = NABTO_COMMUNICATION_BUFFER_SIZE;
@@ -44,10 +41,6 @@ NABTO_THREAD_LOCAL_STORAGE uint16_t nabtoCommunicationBufferSize = NABTO_COMMUNI
 NABTO_THREAD_LOCAL_STORAGE nabto_crypto_context cryptoContextAttach;                            /**< context for U_ATTACH packets    */
 NABTO_THREAD_LOCAL_STORAGE nabto_crypto_context cryptoContextConnection;                        /**< context for U_CONNECT + U_ALIVE */
 #endif
-#endif
-
-#if UNABTO_PLATFORM_PIC18
-#pragma udata
 #endif
 
 static ssize_t read_event_socket(nabto_socket_t socket, message_event* event);
