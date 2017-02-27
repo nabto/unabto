@@ -32,6 +32,16 @@ typedef struct push_payload_data
     uint16_t len;
 }push_payload_data;
 
+
+typedef struct buffer_element
+{
+    uint8_t data[NABTO_PUSH_BUFFER_ELEMENT_SIZE];
+    uint32_t seq;
+    uint16_t len;
+    pushCallback cb;
+    void * args;
+} buffer_element;
+
 /**
  * Function used to send push notifications. Push notifications are sent asyncronously, meaning this 
  * function will return immediately. The PN can be considered handled when the provided callback 
@@ -43,10 +53,12 @@ typedef struct push_payload_data
  * @param msg        Data structure containing PN specific information for pnsid=1 should be purpose=2
  *                    using JSON encoding(encoding=1) and contain any data to be pushed.
  * @param cb         Callback function to be called once response is received from basestation, will 
- *                   be called once and only once in a new context.
- * @param cbArgs     Pointer to arguments to be passed to the callback function for context.
+ *                   be called once and only once in a new context, if this succeeds.
+ * @param cbArgs     Pointer to arguments to be passed to the callback function for context
+ * @return           Hint to the status of the PN, UNABTO_PUSH_HINT_OK if success, UNABTO_PUSH_HINT_QUEUE_FULL
+ *                   if queue is full. Callback is NOT called on queue full.
  */
-void send_push_notification(uint16_t pnsid, push_payload_data staticData, push_payload_data msg, pushCallback cb, void* cbArgs);
+unabto_push_hint send_push_notification(uint16_t pnsid, push_payload_data staticData, push_payload_data msg, pushCallback cb, void* cbArgs);
 
 /**
  * Functions needed for internal interface with the core

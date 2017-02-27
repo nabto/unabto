@@ -395,7 +395,12 @@
 
 /** Define length of push notification queue */
 #ifndef NABTO_PUSH_QUEUE_LENGTH
-#define NABTO_PUSH_QUEUE_LENGTH 16
+#define NABTO_PUSH_QUEUE_LENGTH 10
+#endif
+
+/** Define size of push notification buffer_element data buffer */
+#ifndef NABTO_PUSH_BUFFER_ELEMENT_SIZE
+#define NABTO_PUSH_BUFFER_ELEMENT_SIZE 1000
 #endif
 
 /*************************************************/
