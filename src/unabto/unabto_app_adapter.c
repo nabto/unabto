@@ -169,16 +169,8 @@ struct queue_entry_s {
     queue_state  state;              /**< the state of the data in the queue */
 };
 
-#if UNABTO_PLATFORM_PIC18
-#pragma udata big_mem
-#endif
-
 /** The FIFO queue */
 static NABTO_THREAD_LOCAL_STORAGE queue_entry queue[NABTO_APPREQ_QUEUE_SIZE];
-
-#if UNABTO_PLATFORM_PIC18
-#pragma udata
-#endif
 
 #if NABTO_APPREQ_QUEUE_SIZE > 1
 /** The first application ressource that may be being handled by the application */
