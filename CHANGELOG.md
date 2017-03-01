@@ -12,6 +12,8 @@ the release and a new unreleased section is added.
 
 ## Unreleased
 
+## 3.0.15
+
 ### Added
 - Fingerprints, such that clients can connect with self signed certificates.
 - Fingerprint acl module in `src/modules/fingerprint_acl`
