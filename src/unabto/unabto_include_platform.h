@@ -20,8 +20,6 @@
 #    include <platforms/unabto_app/unabto_platform.h>
 #elif UNABTO_PLATFORM_WIN32 || WIN32
 #    include <platforms/win32/unabto_platform.h>
-#elif UNABTO_PLATFORM_ARDUINO
-#    include <platforms/arduino/unabto_env_base_arduino.h>
 #elif UNABTO_PLATFORM_COLDFIRE
 #    include <platforms/coldfire/unabto_env_base_coldfire.h>
 #elif UNABTO_PLATFORM_UNIX || __unix || __unix__ || __APPLE__

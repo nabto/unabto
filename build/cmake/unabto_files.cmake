@@ -187,7 +187,6 @@ set(unabto_module_crypto_libtomcrypt_src
   ${UNABTO_MODULES_SRC_DIR}/crypto/libtomcrypt/unabto_libtomcrypt.c)
 source_group(modules\\crypto\\libtomcrypt FILES ${unabto_module_crypto_libtomcrypt_src})
 
-
 # modules/cli
 set(unabto_module_cli_gopt_src
   ${UNABTO_MODULES_SRC_DIR}/cli/gopt/gopt.c
@@ -277,9 +276,12 @@ source_group(modules\\network\\winsock FILES ${unabto_module_winsock_src} ${unab
 
 
 set(unabto_module_dns_client_src
-  ${UNABTO_MODULES_SRC_DIR}/network/dns/dns_client.c
-  ${UNABTO_MODULES_SRC_DIR}/network/dns/dns_client_wrapper.c)
+  ${UNABTO_MODULES_SRC_DIR}/network/dns/dns_client.c)
 source_group(modules\\network\\dns_client FILES ${unabto_module_dns_client_src})
+
+set(unabto_module_dhcp_client_src
+  ${UNABTO_MODULES_SRC_DIR}/network/dhcp/dhcp_client.c)
+source_group(modules\\network\\dhcp_client FILES ${unabto_module_dhcp_client_src})
 
 set(unabto_module_network_bsd_src
   ${UNABTO_MODULES_SRC_DIR}/network/bsd/unabto_network_bsd.c)

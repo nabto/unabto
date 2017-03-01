@@ -5,6 +5,7 @@
 
 #include "dns_client.h"
 #include <unabto/unabto_memory.h>
+#include <unabto/unabto_util.h>
 #include <string.h>
 
 #define TIMEOUT                                                     500
