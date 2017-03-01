@@ -3,6 +3,7 @@
  */
 #include <unabto/unabto_env_base.h>
 #include "w5100_network.h"
+#include <device_drivers/w5100/w5100.h>
 #include <modules/network/dhcp/dhcp_client.h>
 #include <modules/network/dns/dns_client.h>
 #include <unabto/unabto_common_main.h>

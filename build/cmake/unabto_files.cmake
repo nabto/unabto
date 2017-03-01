@@ -15,6 +15,7 @@ set(UNABTO_INCLUDE_DIR      ${UNABTO_ROOT}/src)
 
 # Define different root directories containing source code to be included in a project file
 set(UNABTO_MODULES_SRC_DIR   ${UNABTO_ROOT}/src/modules)
+set(UNABTO_DEVICE_DRIVER_SRC_DIR   ${UNABTO_ROOT}/src/device_drivers)
 set(UNABTO_PLATFORMS_SRC_DIR ${UNABTO_ROOT}/src/platforms)
 set(UNABTO_SERVER_SRC_DIR    ${UNABTO_ROOT}/src)
 
@@ -274,6 +275,9 @@ set (unabto_module_winsock_dns_src
   ${UNABTO_MODULES_SRC_DIR}/network/winsock/unabto_winsock_dns.c)
 source_group(modules\\network\\winsock FILES ${unabto_module_winsock_src} ${unabto_module_winsock_dns_src})
 
+set(unabto_module_network_w5100_src
+  ${UNABTO_MODULES_SRC_DIR}/network/w5100/w5100_network.c
+  ${UNABTO_MODULES_SRC_DIR}/network/w5100/w5100_network.h)
 
 set(unabto_module_dns_client_src
   ${UNABTO_MODULES_SRC_DIR}/network/dns/dns_client.c)
@@ -376,6 +380,15 @@ set(unabto_module_fingerprint_acl_src
   ${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl_ae.c
   ${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl.c
   )
+
+##################
+# DEVICE DRIVERS #
+##################
+
+set(unabto_device_driver_w5100_src
+  ${UNABTO_DEVICE_DRIVER_SRC_DIR}/w5100/w5100.c
+  )
+
 
 #######################
 # DEMO SOURCE SECTION #
