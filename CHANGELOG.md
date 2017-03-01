@@ -12,6 +12,12 @@ the release and a new unreleased section is added.
 
 ## Unreleased
 
+### Removed
+- The arduino demo has been moved to (https://github.com/nabto/unabto-arduino-sdk)
+
+### Breaking changes
+- The W5100 driver interface has changed.
+
 ## 3.0.15
 
 ### Added
