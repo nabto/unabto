@@ -127,14 +127,14 @@ uint16_t unabto_push_notification_data_size()
 
 void nabto_time_event_push(void)
 {
-    NABTO_LOG_TRACE(("Push Next event called"));
+//    NABTO_LOG_TRACE(("Push Next event called"));
     nabto_stamp_t now = nabtoGetStamp();
     if (!pushCtx.nextPushEvent){
-        NABTO_LOG_TRACE(("No Next event"));
+//        NABTO_LOG_TRACE(("No Next event"));
         return;
     }
     if (!nabtoStampLess(&pushCtx.nextPushEvent->stamp,&now)){
-        NABTO_LOG_TRACE(("Next event is not ready"));
+//        NABTO_LOG_TRACE(("Next event is not ready"));
         return;
     } else {
         NABTO_LOG_TRACE(("Invoking Event"));
