@@ -249,6 +249,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
     cryptDataStart = ptr;
     ptr = unabto_push_notification_get_data(ptr, end-NP_PAYLOAD_VERIFY_BYTELENGTH, elem->seq);
     if(ptr > end-NP_PAYLOAD_VERIFY_BYTELENGTH || ptr < cryptDataStart){
+        NABTO_TRACE(("Allowed message size is: %d",end-NP_PAYLOAD_VERIFY_BYTELENGTH));
         unabto_push_hint hint = UNABTO_PUSH_HINT_INVALID_DATA_PROVIDED;
         unabto_push_notification_callback(elem->seq,&hint);
         unabto_push_notification_remove(elem->seq);
