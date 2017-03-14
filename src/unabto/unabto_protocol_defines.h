@@ -948,12 +948,37 @@ enum np_payload_system_info_nat64_e {
  *    +-----+-----------------------------------------------------------------+
  *    |  +4 |  +0 | purpose                                                   |
  *    +-----+-----+-----------------------------------------------------------+
- *    |  +5 |  +1 | type                                                      |
+ *    |  +5 |  +1 | encoding                                                  |
  *    +-----+-----+-----------------------------------------------------------+
  *    |  +6 |  +2 | Data                                                      |
  *    +-----+-----+-----------------------------------------------------------+
  */
 
 #define NP_PAYLOAD_PUSH_DATA_SIZE_WO_DATA    6 ///< Size of the push notification payload
- 
+#define NP_PAYLOAD_PUSH_DATA_PURPOSE_STATIC  1 ///< purpose value for static data from client
+#define NP_PAYLOAD_PUSH_DATA_PURPOSE_DYNAMIC 2 ///< Purpose value for dynamic data from uNabto
+#define NP_PAYLOAD_PUSH_DATA_ENCODING_JSON   1 ///< JSON encoded payload
+#define NP_PAYLOAD_PUSH_DATA_ENCODING_TLV    2 ///< TLV encoded payload
+
+/******************************************************************************/
+/* Push notification data types                                               */
+/* The Push notification data payload of type                                 */
+/* NP_PAYLOAD_PUSH_DATA_PURPOSE_DYNAMIC can contain the following data with   */
+/* the format:                                                                */
+/*  +-----+-------------------------------------------------------------------+
+ *  |  +0 | Type                                                              |
+ *  +-----+-------------------------------------------------------------------+
+ *  |  +1 | Length                                                            |
+ *  +-----+-------------------------------------------------------------------+
+ *  |  +2 | Data                                                              |
+ *  +-----+-------------------------------------------------------------------+
+ */
+#define NP_PAYLOAD_PUSH_DATA_VALUE_TITLE          1
+#define NP_PAYLOAD_PUSH_DATA_VALUE_BODY           2
+#define NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_KEY   3
+#define NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_ARGS  4
+#define NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_KEY  5
+#define NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_ARGS 6
+
+
 #endif
