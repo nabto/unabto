@@ -973,12 +973,12 @@ enum np_payload_system_info_nat64_e {
  *  |  +2 | Data                                                              |
  *  +-----+-------------------------------------------------------------------+
  */
-#define NP_PAYLOAD_PUSH_DATA_VALUE_TITLE          1
-#define NP_PAYLOAD_PUSH_DATA_VALUE_BODY           2
-#define NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_KEY   3
-#define NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_ARGS  4
-#define NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_KEY  5
-#define NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_ARGS 6
+#define NP_PAYLOAD_PUSH_DATA_VALUE_TITLE                1
+#define NP_PAYLOAD_PUSH_DATA_VALUE_BODY                 2
+#define NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_KEY         3
+#define NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_STRING_ARG  4
+#define NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_KEY        5
+#define NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_STRING_ARG 6
 
 
 #endif

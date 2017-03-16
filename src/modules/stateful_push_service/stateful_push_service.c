@@ -24,6 +24,7 @@ unabto_push_hint send_push_notification(uint16_t pnsid, push_payload_data static
     ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_PUSH_DATA, 0,msg.len+2);
     WRITE_FORWARD_U8(ptr, msg.purpose);
     WRITE_FORWARD_U8(ptr, msg.encoding);
+    NABTO_LOG_INFO(("using msg.encoding: %i",msg.encoding));
     memcpy(ptr,msg.data,msg.len); ptr += msg.len;
 
     buffer[dataHead].cb = cb;
