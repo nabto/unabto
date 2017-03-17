@@ -61,23 +61,42 @@ void nabto_yield(int msec);
  */
 int main(int argc, char* argv[])
 {
-//{"App_id": "58a88e8b-83f1-429d-8863-8d8180ae83ed","Player_id":"a1925aa7-5126-46a7-99c7-ecb7f888299b"}
     // Set nabto to default values
-    nabto_main_setup* nms = unabto_init_context();
-    int testContext = 1;
-    const uint8_t* sd = "{\"App_id\": \"58a88e8b-83f1-429d-8863-8d8180ae83ed\",\"Player_id\":\"a1925aa7-5126-46a7-99c7-ecb7f888299b\"}";
-    const uint8_t* msgData = "{\"temp\": 943}";
+    nabto_main_setup* nms = unabto_init_context(); 
+
+    // setting push notification data 
     uint16_t pnsid = 1;
-    push_payload_data staticData;
-    push_payload_data msg;
-    staticData.data = sd;
-    staticData.purpose = 1;
-    staticData.encoding = 1;
-    staticData.len = 101;
-    msg.data = msgData;
-    msg.len = 13;
-    msg.purpose = 2;
-    msg.encoding = 1;
+    int testContext = 1;
+    const uint8_t* sd = "{\"to\": \"58a88e8b-83f1-429d-8863-8d8180ae83ed\"}";
+    const uint8_t* titleKey = "title_1";
+    const uint8_t* bodyKey = "body_1";
+    const uint8_t* bodyArg1 = "943";
+    const uint8_t* bodyArg2 = "349";
+    
+    push_message pm;
+    if(!init_push_message(&pm, pnsid,sd)){
+        NABTO_LOG_ERROR(("init_push_message failed"));
+        return 1;
+    }
+    if(!add_title_loc_key(&pm, titleKey)){
+        NABTO_LOG_ERROR(("add_title_loc_key failed"));
+        return 1;
+    }
+    if(!add_body_loc_key(&pm, bodyKey)){
+        NABTO_LOG_ERROR(("add_body_loc_key failed"));
+        return 1;
+    }
+    if(!add_body_loc_string_arg(&pm, bodyArg1)){
+        NABTO_LOG_ERROR(("add_body_loc_string_arg failed"));
+        return 1;
+    }
+    if(!add_body_loc_string_arg(&pm, bodyArg2)){
+        NABTO_LOG_ERROR(("add_body_loc_string_arg failed"));
+        return 1;
+    }
+    
+       
+    
     // Overwrite default values with command line args
     if (!check_args(argc, argv, nms)) {
         return 1;
@@ -112,7 +131,8 @@ int main(int argc, char* argv[])
         }
         if (unabto_is_connected_to_gsp() && first) {
             NABTO_LOG_INFO(("Successfully attached to the gsp, sending push notification"));
-            send_push_notification(pnsid,staticData,msg,&callback, (void*)&testContext);
+//            send_push_notification(pnsid,staticData,msg,&callback, (void*)&testContext);
+            send_push_message(&pm, &callback, (void*)&testContext);
             first = false;
         }
         if (isCallbackReceived){

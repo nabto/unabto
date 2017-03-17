@@ -28,10 +28,16 @@ typedef struct push_payload_data
 {
     uint8_t purpose;
     uint8_t encoding;
-    const uint8_t* data;
+    uint8_t data[NABTO_PUSH_BUFFER_ELEMENT_SIZE]; // reusing the length of a buffer element may be too much!
     uint16_t len;
 }push_payload_data;
 
+typedef struct push_message
+{
+    push_payload_data staticData;
+    push_payload_data dynamicData;
+    uint16_t pnsId;
+}push_message;
 
 typedef struct buffer_element
 {
@@ -41,6 +47,19 @@ typedef struct buffer_element
     pushCallback cb;
     void * args;
 } buffer_element;
+
+
+unabto_push_hint send_push_message(push_message* msg, pushCallback cb, void* cbArgs);
+
+bool init_push_message(push_message* msg, uint16_t pnsid, const char* staticData);
+bool add_title(push_message* msg, const char* title);
+bool add_body(push_message* msg, const char* body);
+bool add_title_loc_key(push_message* msg, const char* titleKey);
+bool add_title_loc_string_arg(push_message* msg, const char* titleArg);
+bool add_body_loc_key(push_message* msg, const char* bodyKey);
+bool add_body_loc_string_arg(push_message* msg, const char* bodyArg);
+
+
 
 /**
  * Function used to send push notifications. Push notifications are sent asyncronously, meaning this 
