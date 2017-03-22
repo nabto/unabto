@@ -9,8 +9,6 @@
 #include "unabto_env_base.h"
 #include "unabto_packet_util.h"
 
-//#include "unabto_config_defaults.h"
-
 #if NABTO_ENABLE_PUSH
 
 #ifdef __cplusplus
@@ -83,6 +81,10 @@ bool unabto_push_notification_remove(uint32_t seq);
  */
 uint16_t unabto_push_notification_data_size(void);
 
+
+/**
+ * help functions for internal use
+ */
 void nabto_time_event_push(void);
 
 bool nabto_push_event(nabto_packet_header* hdr);

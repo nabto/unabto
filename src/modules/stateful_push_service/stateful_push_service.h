@@ -32,6 +32,12 @@ typedef struct push_payload_data
     uint16_t len;
 }push_payload_data;
 
+/**
+ * push message structure defining a complete push notification
+ * @param staticData  Data passed directly from the subscribed client
+ * @param dynamicData Data containing message specifics from the device
+ * @param pnsId       ID of the PNS to be used
+ */
 typedef struct push_message
 {
     push_payload_data staticData;
@@ -39,6 +45,9 @@ typedef struct push_message
     uint16_t pnsId;
 }push_message;
 
+/**
+ * Buffer structure for internal use in the module
+ */
 typedef struct buffer_element
 {
     uint8_t data[NABTO_PUSH_BUFFER_ELEMENT_SIZE];
@@ -51,6 +60,14 @@ typedef struct buffer_element
 
 unabto_push_hint send_push_message(push_message* msg, pushCallback cb, void* cbArgs);
 
+/**
+ * Functions used to build a push_message structure to be sent
+ * init_push_message should be called for every push notification
+ * add_* functions can be called as needed.
+ * only add_title_loc_string_arg and add_body_loc_string_arg should be called multiple
+ * times if multiple arguments are needed. 
+ * All const char* arguments must be zero terminated
+ */
 bool init_push_message(push_message* msg, uint16_t pnsid, const char* staticData);
 bool add_title(push_message* msg, const char* title);
 bool add_body(push_message* msg, const char* body);
