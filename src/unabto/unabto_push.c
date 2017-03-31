@@ -109,7 +109,7 @@ bool unabto_push_notification_remove(uint32_t seq)
     int i;
     for(i = 0; i<pushCtx.pushSeqQHead; i++){
         if(pushSeqQ[i].seq == seq){
-            memmove(&pushSeqQ[i],&pushSeqQ[pushCtx.pushSeqQHead],sizeof(unabto_push_element));
+            memmove(&pushSeqQ[i],&pushSeqQ[pushCtx.pushSeqQHead-1],sizeof(unabto_push_element));
             pushCtx.pushSeqQHead--;
             pushSeqQ[pushCtx.pushSeqQHead].state = UNABTO_PUSH_IDLE;
             unabto_push_set_next_event();
@@ -167,7 +167,7 @@ bool nabto_push_event(nabto_packet_header* hdr){
         }
     }
     if(!unabto_push_seq_exists(pushData.sequence)){
-        NABTO_LOG_ERROR(("Push packet with unknown sequence number received"));
+        NABTO_LOG_ERROR(("Push packet with unknown sequence number received. Sequence number: %i",pushData.sequence));
         return false;
     }
     if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_ACK){
@@ -222,7 +222,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         unabto_push_notification_callback(elem->seq,&hint);
         unabto_push_notification_remove(elem->seq);
         return;
-    } else if (elem->hint == UNABTO_PUSH_HINT_QUOTA_EXCEEDED_REATTACH){
+    } else if (elem->hint == UNABTO_PUSH_HINT_QUOTA_EXCEEDED){
         unabto_push_notification_callback(elem->seq,&elem->hint);
         unabto_push_notification_remove(elem->seq);
         return;
