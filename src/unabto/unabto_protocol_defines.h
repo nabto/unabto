@@ -803,27 +803,28 @@ enum np_payload_stream_stats_e {
     NP_PAYLOAD_STREAM_STATS_SENT_RESENT_PACKETS                   = 3,  /* uint32_t */
     NP_PAYLOAD_STREAM_STATS_RECEIVED_PACKETS                      = 4,  /* uint32_t */
     NP_PAYLOAD_STREAM_STATS_RECEIVED_BYTES                        = 5,  /* uint32_t */
-    NP_PAYLOAD_STREAM_STATS_RECEIVED_RECEIVED_RESENT_PACKETS      = 6,  /* uint32_t */
-    NP_PAYLOAD_STREAM_STATS_RECEIVED_REORDERED_OR_LOST_PACKETS    = 7,  /* uint32_t */
-    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_RTT_MIN            = 8,  /* uint16_t round trip time */
-    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_RTT_MAX            = 9,  /* uint16_t */
-    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_RTT_AVG            = 10, /* uint16_t */
-    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_CWND_MIN           = 11, /* uint16_t congestion window size */
-    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_CWND_MAX           = 12, /* uint16_t */
-    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_CWND_AVG           = 13, /* uint16_t */
-    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SS_THRESHOLD_MIN   = 14, /* uint16_t slow start threshold */
-    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SS_THRESHOLD_MAX   = 15, /* uint16_t */
-    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SS_THRESHOLD_AVG   = 16, /* uint16_t */
-    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SENT_NOT_ACKED_MIN = 17, /* uint16_t packets awaiting acknowledgedment on the network */
-    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SENT_NOT_ACKED_MAX = 18, /* uint16_t */
-    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SENT_NOT_ACKED_AVG = 19, /* uint16_t */
-    NP_PAYLOAD_STREAM_STATS_DURATION                              = 20, /* uint32_t duration in ms */
-    NP_PAYLOAD_STREAM_STATS_STATUS                                = 21, /* uitn8_t (np_payload_stream_stats_status_e)*/
-    NP_PAYLOAD_STREAM_STATS_INITIATOR_ID                          = 22, /* uint16_t */
-    NP_PAYLOAD_STREAM_STATS_RESPONDER_ID                          = 23, /* uint16_t */
-    NP_PAYLOAD_STREAM_STATS_TAG                                   = 24, /* uint16_t */
-    NP_PAYLOAD_STREAM_STATS_USER_WRITE                            = 25, /* uint32_t number of times write was called oin the stream */
-    NP_PAYLOAD_STREAM_STATS_USER_READ                             = 26  /* uint32_t number of times read was called oin the stream */
+    NP_PAYLOAD_STREAM_STATS_RECEIVED_RESENT_PACKETS               = 6,  /* uint32_t */
+    NP_PAYLOAD_STREAM_STATS_REORDERED_OR_LOST_PACKETS             = 7,  /* uint32_t */
+    NP_PAYLOAD_STREAM_STATS_USER_WRITE                            = 8,  /* uint32_t number of times write was called on the stream */
+    NP_PAYLOAD_STREAM_STATS_USER_READ                             = 9,  /* uint32_t number of times read was called on the stream */
+
+    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_RTT_MIN            = 10, /* uint16_t round trip time */
+    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_RTT_MAX            = 11, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_RTT_AVG            = 12, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_CWND_MIN           = 13, /* uint16_t congestion window size */
+    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_CWND_MAX           = 14, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_CWND_AVG           = 15, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SS_THRESHOLD_MIN   = 16, /* uint16_t slow start threshold */
+    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SS_THRESHOLD_MAX   = 17, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SS_THRESHOLD_AVG   = 18, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SENT_NOT_ACKED_MIN = 19, /* uint16_t packets awaiting acknowledgedment on the network */
+    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SENT_NOT_ACKED_MAX = 20, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SENT_NOT_ACKED_AVG = 21, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_DURATION                              = 22, /* uint32_t duration in ms */
+    NP_PAYLOAD_STREAM_STATS_STATUS                                = 23, /* uint8_t (np_payload_stream_stats_status_e)*/
+    NP_PAYLOAD_STREAM_STATS_CP_ID                                 = 24, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_SP_ID                                 = 25, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_TAG                                   = 26  /* uint16_t */
 };
 
 enum np_payload_stream_stats_status_e {

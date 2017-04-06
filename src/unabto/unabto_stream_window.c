@@ -901,7 +901,7 @@ void update_ack_after_packet(struct nabto_stream_s* stream, uint32_t seq) {
         }
     }
 }
-        
+
 /**
  * ack data
  * @param ack_start start of area of the sequence numbers which is acked
@@ -1843,5 +1843,91 @@ static uint16_t nabto_stream_next_cp_id(void) {
    do { idCP = ++idCP__; } while (idCP == 0);
    return idCP;
 }
+
+uint8_t* unabto_stream_stats_write_u32(uint8_t* ptr, uint8_t* end, uint8_t type, uint32_t value)
+{
+    if (ptr == NULL) {
+        return NULL;
+    }
+    if (end - ptr < sizeof(uint32_t) + 2) {
+        return NULL;
+    }
+    WRITE_FORWARD_U8(ptr, type);
+    WRITE_FORWARD_U8(ptr, 4);
+    WRITE_FORWARD_U32(ptr, value);
+    return ptr;
+}
+
+uint8_t* unabto_stream_stats_write_u16(uint8_t* ptr, uint8_t* end, uint8_t type, uint16_t value)
+{
+    if (ptr == NULL) {
+        return ptr;
+    }
+    if (end - ptr < sizeof(uint16_t) + 2) {
+        return NULL;
+    }
+    WRITE_FORWARD_U8(ptr, type);
+    WRITE_FORWARD_U8(ptr, 4);
+    WRITE_FORWARD_U16(ptr, value);
+    return ptr;
+}
+
+uint8_t* unabto_stream_stats_write_u8(uint8_t* ptr, uint8_t* end, uint8_t type, uint8_t value)
+{
+    if (ptr == NULL) {
+        return NULL;
+    }
+    if (end - ptr < sizeof(uint8_t) + 2) {
+        return NULL;
+    }
+    WRITE_FORWARD_U8(ptr, type);
+    WRITE_FORWARD_U8(ptr, 4);
+    WRITE_FORWARD_U8(ptr, value);
+    return ptr;
+}
+
+uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct nabto_stream_s* stream)
+{
+    uint8_t* payloadBegin = ptr;
+    ptr = insert_stats_payload(ptr, end, NP_PAYLOAD_TYPE_STREAM_STATS);
+
+    // stream info
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_TAG,   stream->streamTag);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CP_ID, stream->idCP);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SP_ID, stream->idSP);
+    // NP_PAYLOAD_STREAM_STATS_DURATION
+    // NP_PAYLOAD_STREAM_STATS_STATUS
+
+    // stream stats
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_PACKETS,              stream->stats.sentPackets);
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_BYTES,                stream->stats.sentBytes);
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_RESENT_PACKETS,       stream->stats.sentResentPackets);
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_PACKETS,          stream->stats.receivedPackets);
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_BYTES,            stream->stats.receivedBytes);
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_RESENT_PACKETS,   stream->stats.receivedResentPackets);
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_REORDERED_OR_LOST_PACKETS, stream->stats.reorderedOrLostPackets);
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_USER_WRITE,                stream->stats.userWrite);
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_USER_READ,                 stream->stats.userRead);
+
+    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_RTT_MIN             */
+    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_RTT_MAX             */
+    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_RTT_AVG             */
+    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_CWND_MIN            */
+    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_CWND_MAX            */
+    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_CWND_AVG            */
+    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SS_THRESHOLD_MIN    */
+    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SS_THRESHOLD_MAX    */
+    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SS_THRESHOLD_AVG    */
+    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SENT_NOT_ACKED_MIN */
+    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SENT_NOT_ACKED_MAX  */
+    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SENT_NOT_ACKED_AVG */
+
+    // insert payload length
+    if (ptr != NULL) {
+        WRITE_U16(payloadBegin + 2, end - payloadBegin);
+    }
+    return ptr;
+}
+
 
 #endif /* NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM */
