@@ -24,6 +24,7 @@ We have repositories for other embedded platforms as well.
   * [STM32 Discovery (Ethernet)](https://github.com/nabto/unabto-stm32-sdk)
   * [CC3200 (WiFi)](https://github.com/nabto/unabto-cc3200)
   * [ESP8266 (WiFi)](https://github.com/nabto/unabto-esp8266-sdk)
+  * [Arduino](https://github.com/nabto/unabto-arduino-sdk)
 
 
 
