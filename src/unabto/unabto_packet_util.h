@@ -274,12 +274,13 @@ uint8_t* insert_data_header(uint8_t* buf, uint32_t nsi, uint8_t* nsico, uint16_t
 /**
  * Write the Payload
  * @param buf      the place to put the payload
+ * @param end      the end of the buffer
  * @param type     the payload type
  * @param content  the content of the payload (may be 0)
  * @param size     the size of the payload (excl payload header)
  * @return         the first byte after the payload
  */
-uint8_t* insert_payload(uint8_t* buf, uint8_t type, const uint8_t* content, size_t size);
+uint8_t* insert_payload(uint8_t* buf, uint8_t* end, uint8_t type, const uint8_t* content, size_t size);
 
 /**
  * Write the Payload with the OPTIONAL flag set
@@ -289,7 +290,7 @@ uint8_t* insert_payload(uint8_t* buf, uint8_t type, const uint8_t* content, size
  * @param size     the size of the payload (excl payload header)
  * @return         the first byte after the payload
  */
-uint8_t* insert_optional_payload(uint8_t* buf, uint8_t type, const uint8_t* content, size_t size);
+uint8_t* insert_optional_payload(uint8_t* buf, uint8_t* end, uint8_t type, const uint8_t* content, size_t size);
 
 /** 
  * insert a capabilities packet
@@ -297,7 +298,7 @@ uint8_t* insert_optional_payload(uint8_t* buf, uint8_t type, const uint8_t* cont
  * @param cap_encr_off  true if we accept unencrypted connections
  * @return pointer to end of packet.
  */
-uint8_t* insert_capabilities(uint8_t* buf, bool cap_encr_off);
+uint8_t* insert_capabilities(uint8_t* buf, uint8_t* end, bool cap_encr_off);
 
 /**
  * insert payloads, return NULL if there is not enough room for the payload in the buffer

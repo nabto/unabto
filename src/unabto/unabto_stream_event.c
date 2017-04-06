@@ -167,13 +167,14 @@ bool build_and_send_rst_packet(nabto_connect* con, uint16_t tag, struct nabto_wi
     uint16_t encodeLength;
     uint8_t*       ptr;
     uint8_t*       buf   = nabtoCommunicationBuffer;
+    uint8_t*       end   = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
     memset(&rst, 0, sizeof( struct nabto_win_info));
     
     nabto_stream_make_rst_response_window(win, &rst);
     winLength = nabto_stream_window_payload_length(&rst);
 
     ptr = insert_data_header(buf, con->spnsi, con->nsico, tag);
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_WINDOW, 0, winLength);
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_WINDOW, 0, winLength);
 
     if (nabto_stream_encode_window(&rst, ptr, &encodeLength)) {
         ptr += encodeLength;
@@ -181,7 +182,7 @@ bool build_and_send_rst_packet(nabto_connect* con, uint16_t tag, struct nabto_wi
         return false;
     }
 
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
     
     return send_and_encrypt_packet_con(con, 0, 0, ptr);
 }

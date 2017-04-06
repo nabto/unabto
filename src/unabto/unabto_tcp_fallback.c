@@ -32,6 +32,7 @@ bool unabto_tcp_fallback_time_event(nabto_connect* con) {
 
 bool build_handshake_packet(nabto_connect* con, uint8_t* buffer, size_t bufferLength, size_t* packetLength) {
     uint8_t* packetPtr;
+    uint8_t* bufferEnd = buffer+bufferLength;
     
     /*
      * type,   1 bytes
@@ -57,7 +58,7 @@ bool build_handshake_packet(nabto_connect* con, uint8_t* buffer, size_t bufferLe
     memcpy(noncePtr, con->consi, 8); noncePtr+=8;
     memcpy(noncePtr, con->gatewayId, 20);
 
-    packetPtr = insert_payload(packetPtr, NP_PAYLOAD_TYPE_NONCE, nonce, nonceLength);
+    packetPtr = insert_payload(packetPtr, bufferEnd, NP_PAYLOAD_TYPE_NONCE, nonce, nonceLength);
     
     *packetLength = packetPtr - buffer;
 
