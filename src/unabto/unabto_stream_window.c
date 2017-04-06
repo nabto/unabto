@@ -150,6 +150,7 @@ void nabto_stream_state_transition(struct nabto_stream_s* stream, nabto_stream_t
             break;
         case ST_CLOSED:
             stream->applicationEvents.closed = true;
+            stream->statisticsEvents.streamEnded = true;
             break;
         case ST_CLOSED_ABORTED:
             /**
@@ -1927,6 +1928,42 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
         WRITE_U16(payloadBegin + 2, end - payloadBegin);
     }
     return ptr;
+}
+
+void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
+{
+    size_t length;
+    uint8_t* ptr = insert_header(nabtoCommunicationBuffer, 0, stream->connection->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
+    uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
+
+    ptr = insert_stats_payload(ptr, end, event);
+    if (ptr == NULL) {
+        return;
+    }
+
+    ptr = insert_version_payload(ptr, end);
+    if (ptr == NULL) {
+        return;
+    }
+
+    ptr = insert_sp_id_payload(ptr, end);
+    if (ptr == NULL) {
+        return;
+    }
+
+    ptr = unabto_stream_insert_stream_stats(ptr, end, stream);
+    if ( ptr == NULL) {
+        return;
+    }
+
+    ptr = insert_connection_stats_payload(ptr, end, stream->connection);
+    if (ptr == NULL) {
+        return;
+    }
+
+    length = ptr - nabtoCommunicationBuffer;
+    insert_length(nabtoCommunicationBuffer, length);
+    send_to_basestation(nabtoCommunicationBuffer, length, &nmc.context.gsp);
 }
 
 

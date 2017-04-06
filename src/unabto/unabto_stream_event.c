@@ -194,7 +194,10 @@ void unabto_time_event_stream(void)
         if (stream__[i].state != STREAM_IDLE) {
             struct nabto_stream_s* stream = &stream__[i];
             nabto_stream_tcb_check_xmit(&stream__[i], true, false);
-
+            if (stream->statisticsEvents.streamEnded) {
+                unabto_stream_send_stats(stream, NP_PAYLOAD_STATS_TYPE_STREAM_ENDED);
+                stream->statisticsEvents.streamEnded = false;
+            }
             if (stream->applicationEvents.dataReady) {
                 unabto_stream_event(stream, UNABTO_STREAM_EVENT_TYPE_DATA_READY);
                 stream->applicationEvents.dataReady = false;
@@ -361,7 +364,8 @@ void nabto_stream_update_next_event(nabto_stamp_t* current_min_stamp)
                 stream->applicationEvents.dataWritten ||
                 stream->applicationEvents.readClosed ||
                 stream->applicationEvents.writeClosed ||
-                stream->applicationEvents.closed) 
+                stream->applicationEvents.closed ||
+                stream->statisticsEvents.streamEnded)
             {
                 nabto_stamp_t now = nabtoGetStamp();
                 nabto_update_min_stamp(current_min_stamp, &now);

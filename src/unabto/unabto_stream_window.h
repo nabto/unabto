@@ -366,6 +366,11 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
  */
 bool unabto_stream_congestion_control_can_send(struct nabto_stream_tcb* tcb, uint16_t ix, bool new_data);
 
+/**
+ * Send stream statistics packet
+ */
+void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

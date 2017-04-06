@@ -675,6 +675,7 @@ enum np_payload_type_e {
 #define NP_PAYLOAD_STATS_TYPE_CLIENT_CONNECTION_FAILED        5
 #define NP_PAYLOAD_STATS_TYPE_CLIENT_CONNECTION_ENDED         6
 #define NP_PAYLOAD_STATS_TYPE_UNABTO_ATTACH_FAILED            7
+#define NP_PAYLOAD_STATS_TYPE_STREAM_ENDED                    8
 
 /*****************************************************************************/
 /* Connect stats payload */
