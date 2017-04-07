@@ -345,12 +345,11 @@ void unabto_sha256_final(sha256_ctx* context,sha2_byte digest[]) {
         /* Set the bit count: */
         /* Convert FROM host byte order */
     {
-      uint16_t tmp16;
-      uint16_t tmp16_ = context->byteCount;
-      tmp16_ <<= 3;
-      READ_U16(tmp16, &tmp16_);
-      memset(&context->buffer[SHA256_BLOCK_LENGTH - 8], 0, 6);
-      *(uint16_t*)&context->buffer[SHA256_BLOCK_LENGTH - 2] = tmp16;
+        // write length in bits in network byte order.
+        uint16_t tmp16 = context->byteCount;
+        tmp16 <<= 3;
+        memset(&context->buffer[SHA256_BLOCK_LENGTH - 8], 0, 6);
+        WRITE_U16(&context->buffer[SHA256_BLOCK_LENGTH - 2], tmp16);
     }
         //print_sha256_ctx(context);
         /* Final transform: */

@@ -5,6 +5,7 @@
 
 #include <modules/tunnel/unabto_tunnel.h>
 #include <modules/tunnel/unabto_tunnel_epoll.h>
+#include <modules/util/read_hex.h>
 
 #include "param.h"
 #include <unistd.h>
@@ -40,25 +41,23 @@ init_signals(void)
 
 int main(int argc, char* argv[]) {
     openlog(appname, LOG_PID, LOG_LOCAL4);
-
     init_signals();
-    
     daemon(0,0);
-
     if (param_init(appname) < 0) {
         syslog(LOG_CRIT, "Could not initialize parameter handling\n");
         exit(1);
     }
 
     nabto_main_setup* nms = unabto_init_context();
-    
+    unabto_epoll_init();
+
     char* deviceid;
     char* preSharedKey; 
     if (param_get ("deviceid", &deviceid) != 0) {
         syslog(LOG_CRIT, "Could not get parameter deviceid\n");
         exit(1);
     }
-
+    
     nms->id = strdup(deviceid);
     param_free(deviceid);
 
@@ -66,18 +65,14 @@ int main(int argc, char* argv[]) {
         syslog(LOG_CRIT, "Could not get parameter sharedkey\n");
         exit(1);
     }
-
-    if (!unabto_read_psk_from_hex(preSharedKey, nms->preSharedKey, 16)) {
+    if (!unabto_read_psk_from_hex(preSharedKey, nms->presharedKey, 16)) {
         syslog(LOG_CRIT, "Could not parse parameter sharedkey\n");
         exit(1);
     }
-    
     nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
     nms->secureAttach = true;
     nms->secureData = true;
-    
     param_free(preSharedKey);
-
     tunnel_loop_epoll();
     return 0;
 }

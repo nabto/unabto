@@ -228,7 +228,7 @@ bool verification_check(verification_t* verif, const uint8_t* buf, const uint8_t
  * @param toGSP  true if the invite is to the GSP (also sends a nonce from ctx)
  * @return       the size of the U_INVITE
  */
-static size_t mk_invite(uint8_t* buf, bool toGSP)
+static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
 {
     size_t len;
     uint8_t* ptr = insert_header(buf, 0, 0, U_INVITE, false, 0, 0, 0);
@@ -236,10 +236,11 @@ static size_t mk_invite(uint8_t* buf, bool toGSP)
 
     NABTO_LOG_TRACE(("len=%" PRIsize, sid_len));
     NABTO_LOG_TRACE(("Send INVITE from '%s' to %" PRItext, nmc.nabtoMainSetup.id, toGSP ? "GSP" : "BS"));
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_VERSION, 0, 2 + 4 + 4);
-    WRITE_U16(ptr, NP_PAYLOAD_VERSION_TYPE_UD); ptr += 2; // version.type
-    WRITE_U32(ptr, (uint32_t)RELEASE_MAJOR);    ptr += 4; // version.major
-    WRITE_U32(ptr, (uint32_t)RELEASE_MINOR);    ptr += 4; // version.minor
+    ptr = insert_version_payload(ptr, end);
+    if (ptr == NULL) {
+        return 0;
+    }
+    
     if (toGSP) {
         const char dummy[2] = { '-', 0 };
         const char* version;
@@ -298,7 +299,7 @@ static void send_controller_invite(void) {
 
     NABTO_LOG_DEBUG(("Sending INVITE to Base Station: %i", nmc.context.counter));
 
-    bytes = mk_invite(nabtoCommunicationBuffer, false); /* Send Packet (1) */
+    bytes = mk_invite(nabtoCommunicationBuffer, nabtoCommunicationBuffer + nabtoCommunicationBufferSize, false); /* Send Packet (1) */
     if (bytes) {
         send_to_basestation(nabtoCommunicationBuffer, bytes, &nmc.controllerEp);
     }
@@ -309,7 +310,7 @@ static void send_gsp_invite(void) {
 
     NABTO_LOG_DEBUG(("Sending INVITE to GSP: %i", nmc.context.counter));
     
-    bytes = mk_invite(nabtoCommunicationBuffer, true); /* Send Packet(3) */
+    bytes = mk_invite(nabtoCommunicationBuffer, nabtoCommunicationBuffer + nabtoCommunicationBufferSize, true); /* Send Packet(3) */
     if (bytes) {
         if (nmc.context.nonceSize == NONCE_SIZE_OLD) {
             verification_init(&nmc.context.verif1);

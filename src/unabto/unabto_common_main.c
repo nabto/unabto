@@ -32,9 +32,6 @@
 
 #include <string.h>
 
-#if UNABTO_PLATFORM_PIC18
-#pragma udata big_mem
-#endif
 
 NABTO_THREAD_LOCAL_STORAGE uint8_t nabtoCommunicationBuffer[NABTO_COMMUNICATION_BUFFER_SIZE];     /**< the communication buffer */
 NABTO_THREAD_LOCAL_STORAGE uint16_t nabtoCommunicationBufferSize = NABTO_COMMUNICATION_BUFFER_SIZE;
@@ -45,10 +42,6 @@ NABTO_THREAD_LOCAL_STORAGE uint16_t nabtoCommunicationBufferSize = NABTO_COMMUNI
 NABTO_THREAD_LOCAL_STORAGE nabto_crypto_context cryptoContextAttach;                            /**< context for U_ATTACH packets    */
 NABTO_THREAD_LOCAL_STORAGE nabto_crypto_context cryptoContextConnection;                        /**< context for U_CONNECT + U_ALIVE */
 #endif
-#endif
-
-#if UNABTO_PLATFORM_PIC18
-#pragma udata
 #endif
 
 static ssize_t read_event_socket(nabto_socket_t socket, message_event* event);
@@ -126,7 +119,7 @@ bool unabto_init(void) {
     }
 
     NABTO_LOG_INFO(("Device id: '%s'", nmc.nabtoMainSetup.id));
-    NABTO_LOG_INFO(("Program Release %" PRIu32 ".%" PRIu32, (uint32_t)RELEASE_MAJOR, (uint32_t)RELEASE_MINOR));
+    NABTO_LOG_INFO(("Program Release " PRIversion, MAKE_VERSION_PRINTABLE()));
     if(nmc.nabtoMainSetup.version)
     {
         NABTO_LOG_INFO(("Version string: '%s'", nmc.nabtoMainSetup.version));

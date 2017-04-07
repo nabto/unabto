@@ -227,13 +227,6 @@
 /* uStreaming configuration */
 /****************************/
 
-/**
- * We have two stream implementations a nano streaming and micro
- * streaming. The nano streaming is for use with really resource tight
- * devices which does not require a lot of streaming bandwidth. The
- * micro streaming is for devices which requires good streaming
- * performance.
- */
 
 /** 
  * Define default inclusion of STREAM related functionality. 
@@ -245,19 +238,11 @@
 #endif
 
 /**
- * MICRO streaming is the default streaming module if you want to use
- * nano streaming define micro streaming to 0 and nano streaming to
- * 1. When using streaming atleast one of micro and nano streaming
- * must be enabled.
+ * MICRO streaming is the default streaming module.
  */
 #ifndef NABTO_ENABLE_MICRO_STREAM
 #define NABTO_ENABLE_MICRO_STREAM 1
 #endif
-
-#ifndef NABTO_ENABLE_NANO_STREAM
-#define NABTO_ENABLE_NANO_STREAM 0
-#endif
-
 
 /**
  * If this option is enabled the user application should implement the

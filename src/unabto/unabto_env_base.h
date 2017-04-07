@@ -130,4 +130,18 @@ typedef char _nabtoDummyType; // Some compilers (e.g. the MPLAB C18 compiler for
 #define NABTO_CONCATENATE(x, y) _NABTO_CONCATENATE(x, y)
 #define _NABTO_CONCATENATE(x, y) x ## y
 
+
+/**
+ * use the following helper macros as
+ * printf("Version " PRIversion "\n", MAKE_VERSION_PRINTABLE());
+ */
+
+#ifndef PRIversion
+#define PRIversion "%" PRIu32 ".%" PRIu32 ".%" PRIu32 "%s%s"
+#endif
+
+#ifndef MAKE_VERSION_PRINTABLE
+#define MAKE_VERSION_PRINTABLE() (uint32_t)UNABTO_VERSION_MAJOR, (uint32_t)UNABTO_VERSION_MINOR, (uint32_t)UNABTO_VERSION_PATCH, UNABTO_VERSION_PRERELEASE, UNABTO_VERSION_BUILD
+#endif
+
 #endif

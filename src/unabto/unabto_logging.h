@@ -139,9 +139,9 @@
 #endif
 
 #ifndef UNABTO_ASSERT
-#  if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_FATAL) || !UNABTO_PLATFORM_PIC18
+#  if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_FATAL)
 #    define UNABTO_ASSERT(expr)  do { if (!(expr)) { NABTO_LOG_FATAL(("Assertion fails: %" PRItext, #expr)); } } while(0)
-#  else // no room for asserts in release builds on the PIC18
+#  else // no room for asserts in release builds on small platforms
 #    define UNABTO_ASSERT(expr)
 #  endif
 #endif
