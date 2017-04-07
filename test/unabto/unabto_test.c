@@ -12,6 +12,7 @@
 #include "unabto_aes_cbc_test.h"
 #include "unabto_prfplus_test.h"
 #include "unabto_crypto_test.h"
+#include "unabto_push_test.h"
 #include "unabto_aes128_sha256_test.h"
 #include "util/unabto_util_test.h"
 #include "util/unabto_buffer_test.h"
@@ -90,6 +91,15 @@ bool unabto_test_all(void) {
         ret = false;
     }
 
+#if NABTO_ENABLE_PUSH
+    NABTO_LOG_INFO(("Testing unabto_push"));
+    r = unabto_push_test();
+    if (!r) {
+        NABTO_LOG_INFO(("testing of unabto_push failed"));
+        ret = false;
+    }
+#endif
+    
     NABTO_LOG_INFO(("Testing unabto_buffer"));
     r = unabto_buffer_test();
     if (!r) {

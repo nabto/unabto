@@ -35,6 +35,7 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_connection.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_context.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_crypto.c
+  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_push.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_message.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_packet.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_packet_util.c
@@ -66,6 +67,7 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_connection_type.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_context.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_crypto.h
+  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_push.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_debug_packet.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_dns_fallback.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_env_base.h
@@ -135,6 +137,11 @@ source_group(platforms\\win32 FILES ${unabto_platform_win32_src})
 
 set(unabto_module_application_event_dummy_src
   ${UNABTO_MODULES_SRC_DIR}/application_event/dummy/application_event_dummy.c)
+
+# modules/stateful_push_service
+set (unabto_module_stateful_push_service_src
+  ${UNABTO_MODULES_SRC_DIR}/stateful_push_service/stateful_push_service.c)
+source_group(modules\\stateful_push_service FILES ${unabto_module_stateful_push_service_src})
 
 # modules/coap
 set (unabto_module_coap_src
@@ -461,6 +468,7 @@ set(unabto_server_common_src_test
   ${UNABTO_SERVER_TEST_DIR}/unabto/util/unabto_buffer_test.c
   ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_payload_test.c
   ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_crypto_test.c
+  ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_push_test.c
   ${UNABTO_SERVER_TEST_DIR}/modules/util/unabto_base32_test.c
   ${UNABTO_SERVER_TEST_DIR}/modules/util/read_hex_test.c
   ${UNABTO_SERVER_TEST_DIR}/modules/fingerprint_acl/fp_acl_mem_test.c

@@ -1,7 +1,6 @@
 /**
  *  Implementation of main for uNabto SDK demo
  */
-
 #include "unabto/unabto_env_base.h"
 #include "unabto/unabto_common_main.h"
 #include "unabto/unabto_logging.h"
