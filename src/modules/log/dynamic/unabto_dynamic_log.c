@@ -1,7 +1,7 @@
-#include "unabto_dynamic_log.h"
 #include "unabto_dynamic_log_util.h"
 #include <unabto/unabto_env_base.h>
 #include <unabto/unabto_logging.h>
+#include "unabto_dynamic_log.h"
 #include <modules/log/unix/unabto_logging_unix.h>
 #include <platforms/unabto_printf_logger.h>
 #include <unabto/unabto_context.h>

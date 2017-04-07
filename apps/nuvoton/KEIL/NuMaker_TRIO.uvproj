@@ -686,11 +686,6 @@
               <FilePath>..\..\..\src\unabto\unabto_message.c</FilePath>
             </File>
             <File>
-              <FileName>unabto_nano_stream.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\src\unabto\unabto_nano_stream.c</FilePath>
-            </File>
-            <File>
               <FileName>unabto_next_event.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\src\unabto\unabto_next_event.c</FilePath>

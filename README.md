@@ -12,17 +12,87 @@ The document [TEN036 "Security in Nabto Solutions"](https://www.nabto.com/downlo
 
 The TESTING.md document in this directory describes how integrators may test their uNabto SDK based applications and what their responsibilities are.
 
-### Source code
-
-The `src` directory contains the uNabto framework source code and device specific config files.
-
-`build/cmake/unabto_files.cmake` sets the build environment used by some of the demos.
-
-`external` is where you put all uNabto externals.
-
 ### Example applications and demos
 
-The `apps` directory contains uNabto examples for different platforms (e.g. Windows, Unix, Microchip, Arduino, etc.).
+This repository contains example applications for the three major OS's
+Windows, Linux and Mac. Demos for these platforms is located in the
+`apps` folder.
+
+We have repositories for other embedded platforms as well.
+
+  * [PIC32 Ethernet starterkit II (Ethernet)](https://github.com/nabto/unabto-pic32-sdk)
+  * [STM32 Discovery (Ethernet)](https://github.com/nabto/unabto-stm32-sdk)
+  * [CC3200 (WiFi)](https://github.com/nabto/unabto-cc3200)
+  * [ESP8266 (WiFi)](https://github.com/nabto/unabto-esp8266-sdk)
+  * [Arduino (Ethernet)](https://github.com/nabto/unabto-arduino-sdk)
+
+
+
+## Source code
+
+### Core 
+
+The unabto core is located in `src/unabto/` this source is needed by
+all unabto instances.
+
+### Modules
+
+In the folder `src/modules` there are modules
+for encryption, random, timers, utilities, etc. These modules makes it
+easier to implement unabto on a platform.
+
+### Platforms
+
+The `src/platforms` folder includes various modules and implementation
+which together forms as a platform adapter for some specific
+platforms.
+
+### build/cmake/unabto_files.cmake
+
+The build/cmake/unabto_files.cmake is a file which lists all the source code in the repository which is used together with cmake projects. The file does not have any logic included it is only a list of variables assigned to specific files or definitions.
+
+### build/cmake/unabto_project.cmake
+
+The build/cmake/unabto_project.cmake is a cmake project definition file which is used to simply create unabto projects for Windows, Linux and Mac.
+
+A simple unabto static library project based on unabto_project.cmake
+is created as follows:
+
+```
+cmake_minimum_required(VERSION 2.8)
+project(example)
+include(${CMAKE_CURRENT_SOURCE_DIR}/ ... /build/cmake/unabto_project.cmake)
+
+add_definitions(${unabto_definitions})
+add_library(example ${unabto_src})
+target_link_libraries(example ${unabto_link_libraries})
+```
+
+## Building Linux, Windows And MacOS
+
+### General build instructions
+
+```
+clone repository
+mkdir builddir
+cd builddir
+cmake ..
+make
+```
+
+### Windows
+
+Prerequisities:
+  * CMake,
+  * Visual studio E.g. 2015
+
+```
+clone repository
+mkdir builddir
+cd builddir
+cmake -DCMAKE_GENERATOR_TOOLSET=v140_xp ..
+cmake --build .
+```
 
 ## License
 

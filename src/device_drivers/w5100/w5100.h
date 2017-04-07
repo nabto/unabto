@@ -6,8 +6,7 @@
 
 #include <unabto_platform_types.h>
 
-#define W5100_INVALID_SOCKET        0xff
-typedef uint8_t w5100_socket;
+#include "w5100_types.h"
 
 //#include <unabto/unabto_external_environment.h>
 

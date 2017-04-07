@@ -271,19 +271,23 @@ uint8_t* insert_ipx_payload(uint8_t* ptr, uint8_t* end) {
     return ptr;
 }
 
-uint8_t* insert_version_payload(uint8_t* ptr, uint8_t* end) {
+uint8_t* insert_version_payload(uint8_t* ptr, uint8_t* end)
+{
+    size_t prereleaseLength = strlen(UNABTO_VERSION_PRERELEASE);
+    size_t buildLength = strlen(UNABTO_VERSION_BUILD);
     UNABTO_ASSERT(ptr <= end);
-    if (end-ptr < NP_PAYLOAD_VERSION_BYTELENGTH) {
+    if (end-ptr < NP_PAYLOAD_VERSION_BYTELENGTH_PATCH + prereleaseLength + buildLength) {
         return NULL;
     }
     
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_VERSION, 0, 10);
-
+    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_VERSION, 0, (14+prereleaseLength+buildLength));
 
     WRITE_FORWARD_U16(ptr, NP_PAYLOAD_VERSION_TYPE_UD);
-    WRITE_FORWARD_U32(ptr, RELEASE_MAJOR);
-    WRITE_FORWARD_U32(ptr, RELEASE_MINOR);
-    
+    WRITE_FORWARD_U32(ptr, UNABTO_VERSION_MAJOR);
+    WRITE_FORWARD_U32(ptr, UNABTO_VERSION_MINOR);
+    WRITE_FORWARD_U32(ptr, UNABTO_VERSION_PATCH);
+    memcpy(ptr, UNABTO_VERSION_PRERELEASE, prereleaseLength); ptr += prereleaseLength;
+    memcpy(ptr, UNABTO_VERSION_BUILD, buildLength); ptr += buildLength;
     return ptr;
 }
 

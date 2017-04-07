@@ -5,6 +5,7 @@
 
 #include "dhcp_client.h"
 #include <unabto/unabto_memory.h>
+#include <unabto/unabto_util.h>
 #include <string.h>
 
 typedef struct

@@ -4,11 +4,10 @@
 #define NABTO_LOG_MODULE_CURRENT NABTO_LOG_MODULE_DEVICE_DRIVER
 
 #include <unabto/unabto_env_base.h>
+#include <unabto/unabto_util.h>
 #include "w5100.h"
-#include <spi.h>
-
-// externally provided function to control the chip select pin.
-void w5100_set_chip_select_pin(bool state);
+#include "w5100_platform.h"
+#include <string.h>
 
 // <editor-fold defaultstate="collapsed" desc="Register, bit and constant definitions">
 
@@ -167,8 +166,6 @@ static internal_socket sockets[MAXIMUM_NUMBER_OF_SOCKETS];
 
 void w5100_initialize(void)
 {
-  w5100_set_chip_select_pin(1);
-
   write_register(REGISTER_MODE, MODE_RESET);
 
   memset(sockets, 0, sizeof (sockets));
@@ -458,11 +455,7 @@ static uint8_t read_register(uint16_t address)
   registerTransferBuffer[2] = (uint8_t) address;
   registerTransferBuffer[3] = 0;
 
-  w5100_set_chip_select_pin(0);
-
-  spi_transfer_buffer(registerTransferBuffer, sizeof (registerTransferBuffer));
-
-  w5100_set_chip_select_pin(1);
+  w5100_spi_transfer_buffer(registerTransferBuffer, sizeof (registerTransferBuffer));
 
   return registerTransferBuffer[3];
 }
@@ -475,12 +468,7 @@ static void write_register(uint16_t address, uint8_t value)
   registerTransferBuffer[1] = (uint8_t) (address >> 8);
   registerTransferBuffer[2] = (uint8_t) address;
   registerTransferBuffer[3] = value;
-
-  w5100_set_chip_select_pin(0);
-
-  spi_transfer_buffer(registerTransferBuffer, sizeof (registerTransferBuffer));
-
-  w5100_set_chip_select_pin(1);
+  w5100_spi_transfer_buffer(registerTransferBuffer, sizeof (registerTransferBuffer));
 }
 
 static uint16_t read_register_16(uint16_t address)
@@ -508,15 +496,9 @@ static void read_buffer(uint16_t address, uint8_t* buffer, uint16_t length)
     registerTransferBuffer[1] = (uint8_t) (address >> 8);
     registerTransferBuffer[2] = (uint8_t) address;
     registerTransferBuffer[3] = 0x00;
-
-    w5100_set_chip_select_pin(0);
-
-    spi_transfer_buffer(registerTransferBuffer, sizeof (registerTransferBuffer));
+    w5100_spi_transfer_buffer(registerTransferBuffer, sizeof (registerTransferBuffer));
 
     *buffer++ = registerTransferBuffer[3];
-
-    w5100_set_chip_select_pin(1);
-
     address++;
   }
 }
@@ -532,11 +514,7 @@ static void write_buffer(uint16_t address, const uint8_t* buffer, uint16_t lengt
     registerTransferBuffer[2] = (uint8_t) address;
     registerTransferBuffer[3] = *buffer++;
 
-    w5100_set_chip_select_pin(0);
-
-    spi_transfer_buffer(registerTransferBuffer, sizeof (registerTransferBuffer));
-
-    w5100_set_chip_select_pin(1);
+    w5100_spi_transfer_buffer(registerTransferBuffer, sizeof (registerTransferBuffer));
 
     address++;
   }

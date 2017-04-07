@@ -299,29 +299,7 @@ void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
 /* Prototypes for application and platform specific query and non query related buffer writing */
 /***********************************************************************************************/
 
-#if UNABTO_PLATFORM_PIC18
-/** Deprecated - no substitute here. check in the PIC18 platform
- * Append a null terminated string to a buffer
- * @param buffer     the target buffer
- * @param str        the string
- * @return true if room
- */
-bool buffer_write_str_pgm(buffer_write_t *buffer, text str);
-
-
-/** Deprecated - no substitute here check in PIC18 platform
- * Append a buffer from program space to the buffer,
- * The length is prefixed as a uint16
- */
-bool buffer_write_raw_pgm(buffer_write_t* w_buf, __ROM uint8_t* src, uint16_t len);
-
-#define buffer_write_text(buffer, string) buffer_write_str_pgm(buffer, string)
-
-#else
-
 #define buffer_write_text(buffer, string) buffer_write_str(buffer, string)
-
-#endif
 
 
 /** Deprecated - no substitute check in modules

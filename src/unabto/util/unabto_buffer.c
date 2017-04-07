@@ -58,38 +58,6 @@ void buffer_read_reset(buffer_read_t* buffer) {
 /* Deprecated buffer write function wrappers */
 /*****************************************/
 
-
-
-
-#if UNABTO_PLATFORM_PIC18
-
-bool buffer_write_raw_pgm(buffer_write_t* w_buf, __ROM uint8_t* src, uint16_t len) 
-{
-    if (NULL == w_buf ||  unabto_query_get_write_unused(w_buf) < len + sizeof(uint16_t))
-    {
-        return false; // not enough space in destination buffer
-    }
-    unabto_query_write_uint16(w_buf, len);
-    memcpypgm2ram(unabto_query_get_write_head(w_buf), src, len);
-    unabto_query_advance_write_head(w_buf, len);
-    return true;
-}
-
-bool buffer_write_str_pgm(buffer_write_t *buffer, text str) {
-    uint16_t len;
-    if (NULL == buffer || NULL == str || UNABTO_ABUFFER_GET_UNUSED(buffer) < (len = strlenpgm(str)))
-    {
-        return false;
-    }
-    strcpypgm2ram((char*)UNABTO_ABUFFER_GET_HEAD(buffer), str);
-    UNABTO_ABUFFER_ADVANCE(buffer, len);
-    return true;
-}
-
-#endif
-
-
-
 bool buffer_write_raw_from_queue(buffer_write_t* w_buf, queue_t* q) {
     uint16_t count = q->count;
     uint16_t i;
