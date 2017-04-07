@@ -41,6 +41,8 @@ void unabto_stream_init_data_structure(struct nabto_stream_s* stream) {
     nabtoSetFutureStamp(&tcb->dataTimeoutStamp, 0);
     nabtoSetFutureStamp(&tcb->dataExpireStamp, 0);
     nabtoSetFutureStamp(&tcb->ackStamp, 0);
+
+    stream->stats.streamStart = nabtoGetStamp();
 }
 
 bool unabto_stream_is_open(unabto_stream* stream)

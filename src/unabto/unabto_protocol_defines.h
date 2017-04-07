@@ -675,7 +675,7 @@ enum np_payload_type_e {
 #define NP_PAYLOAD_STATS_TYPE_CLIENT_CONNECTION_FAILED        5
 #define NP_PAYLOAD_STATS_TYPE_CLIENT_CONNECTION_ENDED         6
 #define NP_PAYLOAD_STATS_TYPE_UNABTO_ATTACH_FAILED            7
-#define NP_PAYLOAD_STATS_TYPE_STREAM_ENDED                    8
+#define NP_PAYLOAD_STATS_TYPE_UNABTO_STREAM_ENDED             8
 
 /*****************************************************************************/
 /* Connect stats payload */
@@ -790,7 +790,7 @@ enum np_payload_type_e {
  *      +-----+----------------------------------------------------------+
  *      | +0 | Value type (uint8_t)                                      |
  *      +-----+----------------------------------------------------------+
- *      | +1 | Value Length (uint8_t)                                    |
+ *      | +1 | Value Length (uint8_t) (including type and length)        |
  *      +-----+----------------------------------------------------------+
  *      | +2 | Value format which depends on the type                    |
  *      +-----+----------------------------------------------------------+
@@ -825,7 +825,8 @@ enum np_payload_stream_stats_e {
     NP_PAYLOAD_STREAM_STATS_STATUS                                = 23, /* uint8_t (np_payload_stream_stats_status_e)*/
     NP_PAYLOAD_STREAM_STATS_CP_ID                                 = 24, /* uint16_t */
     NP_PAYLOAD_STREAM_STATS_SP_ID                                 = 25, /* uint16_t */
-    NP_PAYLOAD_STREAM_STATS_TAG                                   = 26  /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_TAG                                   = 26, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB                         = 27  /* uint32_t duration in ms */
 };
 
 enum np_payload_stream_stats_status_e {
@@ -847,7 +848,7 @@ enum np_payload_stream_stats_status_e {
  * +-----+----------------------------------------------------------+
  * | +0 | Value type (uint8_t)                                      |
  * +-----+----------------------------------------------------------+
- * | +1 | Value Length (uint8_t)                                    |
+ * | +1 | Value Length (uint8_t)  (including type and length bytes) |
  * +-----+----------------------------------------------------------+
  * | +2 | Value format which depends on the type                    |
  * +-----+----------------------------------------------------------+

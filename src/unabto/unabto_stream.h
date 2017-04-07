@@ -41,6 +41,8 @@ typedef struct unabto_stream_stats_s {
     unsigned int reorderedOrLostPackets;
     unsigned int userWrite;
     unsigned int userRead;
+    nabto_stamp_t streamStart;
+    unsigned int timeFirstMB;
 } unabto_stream_stats;
 
 typedef enum
