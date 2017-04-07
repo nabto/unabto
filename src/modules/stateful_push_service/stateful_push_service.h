@@ -12,7 +12,9 @@ extern "C" {
 
 /**
  * callback function typedef
- * the callback function used with send_push_notification should be of this type
+ * the callback function used with send_push_notification should be of this type.
+ * The callback is always called once and only once if send_push_message returns successfully.
+ * The callback is always called in a new context.
  * @param void* void pointer to any data the user needs in this context
  * @param unabto_push_hint* pointer to hint to the status of the PN (defined in unabto_push.h)
  */

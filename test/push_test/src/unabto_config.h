@@ -8,6 +8,7 @@
  */
 
 #define NABTO_ENABLE_STREAM                         0
+#define NABTO_ENABLE_PUSH                           1
 #define NABTO_CONNECTIONS_SIZE                      4
 #define NABTO_ENABLE_UCRYPTO                        1
 

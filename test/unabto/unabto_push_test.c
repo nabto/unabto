@@ -50,6 +50,7 @@ bool unabto_push_test(void){
         NABTO_LOG_INFO(("Push Queue does not contain 5 elements, it contains: %d",pushCtx.pushSeqQHead));
         return false;
     }
+    // Manually ticking push events since we do not have a main loop
     nabto_time_event_push();
     nabto_time_event_push();
     nabto_time_event_push();

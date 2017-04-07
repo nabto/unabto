@@ -8,7 +8,6 @@
 #include "unabto_protocol_defines.h"
 #include "unabto_packet.h"
 
-#define UNABTO_PUSH_DATA_SIZE nabtoCommunicationBufferSize-NP_PACKET_HDR_MIN_BYTELENGTH-NP_PAYLOAD_PUSH_BYTELENGTH-NP_PAYLOAD_CRYPTO_BYTELENGTH-NP_PAYLOAD_VERIFY_BYTELENGTH
 
 #ifndef UNABTO_PUSH_MIN_SEND_INTERVAL
 #define UNABTO_PUSH_MIN_SEND_INTERVAL 100
@@ -16,35 +15,6 @@
 
 #ifndef UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF
 #define UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF 60000ul //ms (1 minute)
-#endif
-
-/* ---------------------------------------------------- *
- * These functions must be implemented by the developer *
- * 
- * ---------------------------------------------------- */
-/*
- * @param bufStart A pointer to the start of the address space available for data
- * @param bufEnd   A pointer to the end of the address space available for data
- * @param seq      The sequence number of the push notification for which the data is requested
- * @return         Pointer to the first empty space of the buffer after data is added
-uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq)
- */
-/*
- * @param seq  The sequence number of push notification
- * @param hint Pointer to a hint showing the status of the push notification
-void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint)
-*/
-
-#ifndef UNABTO_PUSH_CALLBACK_FUNCTIONS
-#define UNABTO_PUSH_CALLBACK_FUNCTIONS
-#define unabto_push_notification_get_data(bufStart,bufEnd,seq) unabto_push_get_data_mock(bufStart,bufEnd, seq)
-#define unabto_push_notification_callback(seq,hint) unabto_push_callback_mock(seq, hint)
-uint8_t* unabto_push_get_data_mock(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq){NABTO_LOG_INFO(("PLEASE DEFINE unabto_push_notification_get_data"));return bufStart;}
-void unabto_push_callback_mock(uint32_t seq, unabto_push_hint* hint){NABTO_LOG_INFO(("PLEASE DEFINE unabto_push_notification_callback"));}
-#else
-extern uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq);
-extern void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint);
-
 #endif
 
 /* ---------------------------------------------------- *
@@ -122,7 +92,11 @@ bool unabto_push_notification_remove(uint32_t seq)
 
 uint16_t unabto_push_notification_data_size()
 {
-    return UNABTO_PUSH_DATA_SIZE;
+    return nabtoCommunicationBufferSize
+        -NP_PACKET_HDR_MIN_BYTELENGTH
+        -NP_PAYLOAD_PUSH_BYTELENGTH
+        -NP_PAYLOAD_CRYPTO_BYTELENGTH
+        -NP_PAYLOAD_VERIFY_BYTELENGTH;
 }
 
 void nabto_time_event_push(void)

@@ -390,7 +390,7 @@
 
 /** Define whether to include push notifications */
 #ifndef NABTO_ENABLE_PUSH
-#define NABTO_ENABLE_PUSH 1
+#define NABTO_ENABLE_PUSH 0
 #endif
 
 /** Define length of push notification queue */

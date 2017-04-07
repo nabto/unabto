@@ -90,8 +90,9 @@ text stName(nabto_state state)
 #define REPORT_STATUS_CALLBACK(state)
 #endif
 
-#if NABTO_ENABLE_PUSH                                                
-#define PUSHNOTIFY if (newState == NABTO_AS_ATTACHED) unabto_push_notify_reattach();
+#if NABTO_ENABLE_PUSH
+#include "unabto_push.h"
+#define PUSHNOTIFY unabto_push_notify_reattach();
 #else
 #define PUSHNOTIFY 
 #endif                                                              
@@ -105,7 +106,6 @@ text stName(nabto_state state)
     {                                                 \
         NABTO_STATE_LOG(nmc.context.state, newState); \
         REPORT_STATUS_CALLBACK(newState);             \
-        PUSHNOTIFY                                    \
         nmc.context.state = newState;                 \
     }
 
@@ -585,6 +585,7 @@ static uint8_t handle_actual_attach(nabto_packet_header* hdr, uint8_t* ptr)
     NABTO_LOG_DEBUG(("GSP-ID(nsi): %u", nmc.context.gspnsi));
     if(send_gsp_attach_rsp(hdr->seq, nonceGSP, seedGSP)) { /* Send packet (5) */
         SET_CTX_STATE_STAMP(NABTO_AS_ATTACHED, nmc.nabtoMainSetup.gspPollTimeout);
+        PUSHNOTIFY;
         result =  NP_PAYLOAD_ATTACH_STATS_STATUS_OK;
     }
 

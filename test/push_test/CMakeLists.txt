@@ -20,7 +20,6 @@ include_directories(
 add_definitions(
   ${unabto_definitions}
 )
-add_definitions("-DUNABTO_PUSH_CALLBACK_FUNCTIONS")
 
 add_executable(${PROJECT_NAME} ${src})
 
