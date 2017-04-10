@@ -978,7 +978,7 @@ enum np_payload_system_info_nat64_e {
 /* Push notification data types                                               */
 /* The Push notification data payload of type                                 */
 /* NP_PAYLOAD_PUSH_DATA_PURPOSE_DYNAMIC can contain the following data with   */
-/* the format:                                                                */
+/* the format, where length is the length of Data w/o Type and Length:        */
 /*  +-----+-------------------------------------------------------------------+
  *  |  +0 | Type                                                              |
  *  +-----+-------------------------------------------------------------------+
