@@ -25,9 +25,10 @@ extern "C" {
 #ifndef NABTO_LOG_BASIC_PRINT
 #define NABTO_LOG_BASIC_PRINT(loglevel, cmsg) \
 do {                                          \
-    unabto_log_header(__FILE__, __LINE__);       \
+    unabto_log_header(__FILE__, __LINE__);    \
     printf cmsg;                              \
     printf("\n");                             \
+    fflush(stdout);                           \
 } while(0)
 #endif
 
