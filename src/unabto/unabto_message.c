@@ -13,6 +13,7 @@
 #include "unabto_message.h"
 #include "unabto_connection.h"
 #include "unabto_attach.h"
+#include "unabto_push.h"
 #include "unabto_app.h"
 #include "unabto_app_adapter.h"
 #include "unabto_packet.h"
@@ -268,6 +269,11 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
             if (fromGSP && nabto_attach_event(&hdr)) return;
             NABTO_LOG_TRACE(("failed to handle U_ATTACH from GSP"));
             break;
+#if NABTO_ENABLE_PUSH
+        case U_PUSH:
+            if (fromGSP && nabto_push_event(&hdr)) return;
+            break;
+#endif
         case U_ALIVE:
             if (fromGSP && nabto_alive_event(&hdr)) return;
             {

@@ -411,7 +411,7 @@ bool unabto_decrypt(nabto_crypto_context* cryptoContext, uint8_t* ptr, uint16_t 
 
 /******************************************************************************/
 
-bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, uint16_t size, uint8_t* dst, uint16_t dstSize, uint16_t *packetSize)
+bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, uint16_t size, uint8_t* dst, uint16_t dstSize, uint16_t *encryptedSize)
 {
     bool res = false;
     switch(cryptoContext->code) {
@@ -426,19 +426,20 @@ bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, uin
          uint8_t* ptr = dst;
          uint16_t paddingSize;
          
-         *packetSize = 16+(size/16 + 1)*16+16; // IV + padded_data + Integrity
-            
-         WRITE_U16(dst - SIZE_CODE - 2, (uint16_t)(SIZE_PAYLOAD_HEADER + SIZE_CODE + *packetSize)); // 2 is packet length field
-         WRITE_U16(dst - SIZE_CODE, cryptoContext->code);
-            
-         if (dstSize < *packetSize) { // dst size too small to hold packet
+         *encryptedSize = 16+(size/16 + 1)*16+16; // IV + padded_data + Integrity
+         if (dstSize < *encryptedSize) { // dst size too small to hold packet
              break;
          }
-
+         // Write length to payload header   
+         WRITE_U16(dst - SIZE_CODE - 2, (uint16_t)(SIZE_PAYLOAD_HEADER + SIZE_CODE + *encryptedSize)); // 2 is packet length field
+            
          // First move the data because src and dst may overlap
          ptr += 16; // iv length
          memmove(ptr, src, size); ptr += size;        
             
+         // Write crypto code to payload
+         WRITE_U16(dst - SIZE_CODE, cryptoContext->code);
+         
          // put the iv into the start of the buffer
          nabto_random(dst, 16);
             
@@ -456,19 +457,22 @@ bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, uin
     }
     default: {
         uint8_t pad;
-        *packetSize = (size/2 + 1) * 2; /* excluding integrity */
-        if (*packetSize + 2 > dstSize) {
-            NABTO_LOG_TRACE(("Encryption Overflow %" PRIu16 " > %" PRIu16,  *packetSize, dstSize));
+        *encryptedSize = (size/2 + 1) * 2; /* excluding integrity */
+        if (*encryptedSize + 2 > dstSize) {
+            NABTO_LOG_TRACE(("Encryption Overflow %" PRIu16 " > %" PRIu16,  *encryptedSize, dstSize));
         }
         else
         {
-            WRITE_U16(dst - 4, (uint16_t)(SIZE_PAYLOAD_HEADER + SIZE_CODE + *packetSize + 2)); // add 2 for integrity
+            // Write payload length
+            WRITE_U16(dst - 4, (uint16_t)(SIZE_PAYLOAD_HEADER + SIZE_CODE + *encryptedSize + 2)); // add 2 for integrity
+            if (size && src != dst) {
+                memmove(dst, src, size);
+            }
+            // Write crypto code to payload
             WRITE_U16(dst - 2, CRYPT_W_NULL_DATA);
-            if (size && src != dst)
-                memcpy(dst, src, size);
-            pad = (uint8_t)(*packetSize - size);
+            pad = (uint8_t)(*encryptedSize - size);
             memset(dst + size, pad, pad);
-            *packetSize += 2;  // including integrity
+            *encryptedSize += 2;  // including integrity
             res = true;
         }
         break;

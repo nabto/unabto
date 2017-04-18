@@ -97,6 +97,11 @@ struct unabto_payload_crypto {
     uint16_t       dataLength;
 };
 
+struct unabto_payload_push {
+    uint32_t sequence;
+    uint16_t pnsId;
+    uint8_t flags;
+};
 /** Packet and payload size and offset declarations. */
 enum {
     SIZE_HEADER         = NP_PACKET_HDR_MIN_BYTELENGTH, ///< the size of the fixed size header
@@ -124,6 +129,7 @@ typedef enum {
     U_LIMIT    = NP_PACKET_HDR_TYPE_U_LIMIT,
     U_INVITE   = NP_PACKET_HDR_TYPE_U_INVITE,
     U_ATTACH   = NP_PACKET_HDR_TYPE_U_ATTACH,
+    U_PUSH     = NP_PACKET_HDR_TYPE_U_PUSH,
     U_ALIVE    = NP_PACKET_HDR_TYPE_U_ALIVE,
     U_CONNECT  = NP_PACKET_HDR_TYPE_U_CONNECT,
     U_DEBUG    = NP_PACKET_HDR_TYPE_U_DEBUG
@@ -313,6 +319,7 @@ uint8_t* insert_piggy_payload(uint8_t* ptr, uint8_t* end, uint8_t* piggyData, ui
 /**
  * read a payload, return true iff it succeedes
  */
+bool unabto_payload_read_push(struct unabto_payload_packet* payload, struct unabto_payload_push* push);
 bool unabto_payload_read_ipx(struct unabto_payload_packet* payload, struct unabto_payload_ipx* ipx);
 bool unabto_payload_read_typed_buffer(struct unabto_payload_packet* payload, struct unabto_payload_typed_buffer* buffer);
 bool unabto_payload_read_gw(struct unabto_payload_packet* payload, struct unabto_payload_gw* gw);

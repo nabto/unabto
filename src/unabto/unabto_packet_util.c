@@ -354,7 +354,19 @@ uint8_t* insert_piggy_payload(uint8_t* ptr, uint8_t* end, uint8_t* piggyData, ui
     
     return ptr;
 }
-
+bool unabto_payload_read_push(struct unabto_payload_packet* payload, struct unabto_payload_push* push){
+    const uint8_t* ptr = payload->dataBegin;
+    if (payload->type != NP_PAYLOAD_TYPE_PUSH) {
+        return false;
+    }
+    if (payload->length < NP_PAYLOAD_PUSH_BYTELENGTH){
+        return false;
+    }
+    READ_FORWARD_U32(push->sequence,ptr);
+    READ_FORWARD_U16(push->pnsId,ptr);
+    READ_FORWARD_U8(push->flags,ptr);
+    return true;
+}
 bool unabto_payload_read_ipx(struct unabto_payload_packet* payload, struct unabto_payload_ipx* ipx)
 {
     const uint8_t* ptr = payload->dataBegin;

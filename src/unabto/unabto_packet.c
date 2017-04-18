@@ -397,8 +397,7 @@ bool encrypt_packet(nabto_crypto_context* cryptoCtx, uint8_t* plaintextStart, ui
     // Encrypt the data and insert the length and encryption code into
     // the packet
     uint16_t dlen;
-   
-    if (!unabto_encrypt(cryptoCtx, plaintextStart, plaintextLength, cryptoPayloadDataStart+SIZE_CODE, (uint16_t)((nabtoCommunicationBuffer+nabtoCommunicationBufferSize)-cryptoPayloadDataStart), &dlen)) {
+    if (!unabto_encrypt(cryptoCtx, plaintextStart, plaintextLength, cryptoPayloadDataStart+SIZE_CODE, (uint16_t)((nabtoCommunicationBuffer+nabtoCommunicationBufferSize)-(cryptoPayloadDataStart+SIZE_CODE)), &dlen)) {
         NABTO_LOG_ERROR(("failed to encrypt data"));
         return false;
     }
