@@ -215,10 +215,11 @@ static void send_exception(nabto_connect* con, nabto_packet_header* hdr, int aer
     uint8_t  buf[SIZE_HEADER_MAX + SIZE_PAYLOAD_HEADER + SIZE_CODE + 48]; // maximum length cryptosuites implemented as of aug 2012
     uint16_t dlen;
     uint8_t* ptr = buf + hlen;
+    uint8_t* end = buf + sizeof(buf); 
 
     WRITE_U32(notif, (uint32_t)aer);
     memcpy(buf, (const void*) nabtoCommunicationBuffer, hlen);
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_CRYPTO, 0, 0); ptr += SIZE_CODE;
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0); ptr += SIZE_CODE;
     if (!unabto_encrypt(&con->cryptoctx, notif, sizeof(notif), ptr, len - (uint16_t)(ptr - buf), &dlen)) {
         NABTO_LOG_TRACE(("(." PRInsi ".) Encryption failure, seq: %" PRIu16, MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), hdr->seq));
     } else {
