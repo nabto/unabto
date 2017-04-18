@@ -434,8 +434,33 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
     ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_TAG,   stream->streamTag);
     ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CP_ID, stream->idCP);
     ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SP_ID, stream->idSP);
-    // NP_PAYLOAD_STREAM_STATS_DURATION
-    // NP_PAYLOAD_STREAM_STATS_STATUS
+
+    // duration
+    {
+        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_DURATION, unabto_stream_get_duration(stream));
+
+    }
+
+    // time for first MiB
+    if (stream->stats.timeFirstMBReceived != 0) {
+        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_RECEIVED, stream->stats.timeFirstMBReceived);
+    }
+    if (stream->stats.timeFirstMBSent != 0) {
+        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_SENT, stream->stats.timeFirstMBSent);
+    }
+
+    // status
+    {
+        uint8_t streamState;
+        if (stream->u.tcb.streamState == ST_CLOSED_ABORTED) {
+            streamState = NP_PAYLOAD_STREAM_STATS_STATUS_CLOSED_ABORTED;
+        } else if (stream->u.tcb.streamState == ST_CLOSED) {
+            streamState = NP_PAYLOAD_STREAM_STATS_STATUS_CLOSED;
+        } else {
+            streamState = NP_PAYLOAD_STREAM_STATS_STATUS_OPEN;  
+        }
+        ptr = unabto_stream_stats_write_u8(ptr, end, NP_PAYLOAD_STREAM_STATS_STATUS, streamState);
+    }
 
     // stream stats
     ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_PACKETS,              stream->stats.sentPackets);
@@ -448,18 +473,21 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
     ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_USER_WRITE,                stream->stats.userWrite);
     ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_USER_READ,                 stream->stats.userRead);
 
-    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_RTT_MIN             */
-    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_RTT_MAX             */
-    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_RTT_AVG             */
-    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_CWND_MIN            */
-    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_CWND_MAX            */
-    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_CWND_AVG            */
-    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SS_THRESHOLD_MIN    */
-    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SS_THRESHOLD_MAX    */
-    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SS_THRESHOLD_AVG    */
-    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SENT_NOT_ACKED_MIN */
-    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SENT_NOT_ACKED_MAX  */
-    /* NP_PAYLOAD_STREAM_STATS_CONGESTION_CONTROL_SENT_NOT_ACKED_AVG */
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_MIN,                   stream->u.tcb.ccStats.rtt.min);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_MAX,                   stream->u.tcb.ccStats.rtt.max);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_AVG,                   stream->u.tcb.ccStats.rtt.avg);
+
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_MIN,                  stream->u.tcb.ccStats.cwnd.min);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_MAX,                  stream->u.tcb.ccStats.cwnd.max);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_AVG,                  stream->u.tcb.ccStats.cwnd.avg);
+
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MIN,          stream->u.tcb.ccStats.ssThreshold.min);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MAX,          stream->u.tcb.ccStats.ssThreshold.max);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_AVG,          stream->u.tcb.ccStats.ssThreshold.avg);
+
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_MIN,        stream->u.tcb.ccStats.sentNotAcked.min);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_MAX,        stream->u.tcb.ccStats.sentNotAcked.max);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_AVG,        stream->u.tcb.ccStats.sentNotAcked.avg);
 
     // insert payload length
     if (ptr != NULL) {

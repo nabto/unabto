@@ -59,6 +59,7 @@ bool unabto_stream_is_readable(unabto_stream* stream) {
 size_t unabto_stream_read(unabto_stream* stream, const uint8_t** buf, unabto_stream_hint* hint)
 {
     size_t avail = 0;
+    stream->stats.userRead++;
     avail = nabto_stream_tcb_read(stream, buf, hint);
     return avail;
 }
@@ -108,6 +109,8 @@ bool unabto_stream_is_writeable(unabto_stream* stream) {
 size_t unabto_stream_write(unabto_stream* stream, const uint8_t* buf, size_t size, unabto_stream_hint* hint)
 {
     size_t queued = 0;
+
+    stream->stats.userWrite++;
 
     NABTO_LOG_TRACE(("write size=%" PRIsize, size));
     if (!nabto_stream_tcb_is_writeable(&stream->u.tcb)) {

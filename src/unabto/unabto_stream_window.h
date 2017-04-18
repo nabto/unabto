@@ -112,6 +112,23 @@ typedef struct {
     bool          resentByRetransmissionTimer;
 } x_buffer;
 
+
+// structure which can tell some statistics about a double.
+
+struct unabto_stats {
+    double min;
+    double max;
+    double avg;
+    double count;
+};
+
+typedef struct {
+    struct unabto_stats rtt; // rount trip time
+    struct unabto_stats cwnd; // congestion window size
+    struct unabto_stats ssThreshold; // slow start threshold
+    struct unabto_stats sentNotAcked; // data on the line
+} nabto_stream_congestion_control_stats;
+
 typedef struct {
     double        srtt;          ///< Smoothed round trip time.
     double        rttVar;        ///< Round trip time variance.
@@ -124,7 +141,9 @@ typedef struct {
                                  ///and we are running the fast
                                  ///retransmit / fast recovery
                                  ///algorithm
+    
 } nabto_stream_congestion_control;
+
 
 /** Stream Transfer Control Block */
 struct nabto_stream_tcb {
@@ -178,6 +197,7 @@ struct nabto_stream_tcb {
     r_buffer*                       recv; /**< receive window          */
  
     nabto_stream_congestion_control cCtrl;
+    nabto_stream_congestion_control_stats ccStats;
 
     // Receiving packets designated by a sequence number 'seq'
     // -------------------------------------------------------
@@ -370,6 +390,17 @@ bool unabto_stream_congestion_control_can_send(struct nabto_stream_tcb* tcb, uin
  * Send stream statistics packet
  */
 void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event);
+
+
+/**
+ * observe a value.
+ */
+void unabto_stream_stats_observe(struct unabto_stats* stat, double value);
+
+/**
+ * get stream duration in ms
+ */
+uint32_t unabto_stream_get_duration(struct nabto_stream_s * stream);
 
 #ifdef __cplusplus
 } // extern "C"
