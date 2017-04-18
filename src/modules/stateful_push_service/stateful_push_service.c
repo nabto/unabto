@@ -17,17 +17,19 @@ unabto_push_hint send_push_message(push_message *msg, pushCallback cb, void* cbA
 unabto_push_hint send_push_notification(uint16_t pnsid, push_payload_data staticData, push_payload_data msg, pushCallback cb, void* cbArgs){
     uint32_t seq;
     uint8_t* ptr;
+    uint8_t* end;
     if(dataHead >= NABTO_PUSH_QUEUE_LENGTH){
         return UNABTO_PUSH_HINT_QUEUE_FULL;
     }
     buffer[dataHead].len = staticData.len+msg.len+2*NP_PAYLOAD_PUSH_DATA_SIZE_WO_DATA;
     ptr = buffer[dataHead].data;
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_PUSH_DATA, 0,staticData.len+2);
+    end = ptr + sizeof(buffer_element);
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PUSH_DATA, 0,staticData.len+2);
     WRITE_FORWARD_U8(ptr, staticData.purpose);
     WRITE_FORWARD_U8(ptr, staticData.encoding);
     memcpy(ptr,staticData.data,staticData.len); ptr += staticData.len;
     
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_PUSH_DATA, 0,msg.len+2);
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PUSH_DATA, 0,msg.len+2);
     WRITE_FORWARD_U8(ptr, msg.purpose);
     WRITE_FORWARD_U8(ptr, msg.encoding);
     memcpy(ptr,msg.data,msg.len); ptr += msg.len;

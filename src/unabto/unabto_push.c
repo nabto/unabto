@@ -212,11 +212,11 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
     uint8_t* cryptHdrEnd;
     uint8_t* cryptDataStart;
 
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_PUSH, 0, NP_PAYLOAD_PUSH_BYTELENGTH-NP_PAYLOAD_HDR_BYTELENGTH);
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PUSH, 0, NP_PAYLOAD_PUSH_BYTELENGTH-NP_PAYLOAD_HDR_BYTELENGTH);
     WRITE_FORWARD_U32(ptr, elem->seq);
     WRITE_FORWARD_U16(ptr, elem->pnsId);
     WRITE_FORWARD_U8(ptr, NP_PAYLOAD_PUSH_FLAG_SEND);
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
     WRITE_U8((ptr-3), NP_PAYLOAD_HDR_FLAG_NONE | NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS);
     cryptHdrEnd = ptr;
 
