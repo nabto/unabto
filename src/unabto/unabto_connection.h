@@ -250,6 +250,7 @@ void send_connection_statistics(nabto_connect* con, uint8_t event);
 void send_connection_ended_statistics(nabto_connect* con);
 
 uint8_t* insert_connection_stats_payload(uint8_t* ptr, uint8_t* end, nabto_connect* con);
+uint8_t* insert_connect_stats_payload(uint8_t* ptr, uint8_t* end, nabto_connect* con);
 
 #ifdef __cplusplus
 } // extern "C"

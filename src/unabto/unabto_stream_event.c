@@ -527,6 +527,11 @@ void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
         return;
     }
 
+    ptr = insert_connect_stats_payload(ptr, end, stream->connection);
+    if (ptr == NULL) {
+        return;
+    }
+
     length = ptr - nabtoCommunicationBuffer;
     insert_length(nabtoCommunicationBuffer, length);
     send_to_basestation(nabtoCommunicationBuffer, length, &nmc.context.gsp);
