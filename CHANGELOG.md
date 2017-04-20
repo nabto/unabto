@@ -12,6 +12,10 @@ the release and a new unreleased section is added.
 
 ## Unreleased
 
+### Added
+- Stream stats has been added whenever a stream ends a packet with
+  statistics information is sent to the basestation.
+
 ### Removed
 - The arduino demo has been moved to (https://github.com/nabto/unabto-arduino-sdk)
 

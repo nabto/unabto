@@ -150,6 +150,7 @@ void nabto_stream_state_transition(struct nabto_stream_s* stream, nabto_stream_t
             break;
         case ST_CLOSED:
             stream->applicationEvents.closed = true;
+            stream->statisticsEvents.streamEnded = true;
             break;
         case ST_CLOSED_ABORTED:
             /**
@@ -386,6 +387,9 @@ size_t nabto_stream_tcb_write(struct nabto_stream_s * stream, const uint8_t* buf
     }
 
     stream->stats.sentBytes += queued;
+    if (stream->stats.timeFirstMBSent == 0 && stream->stats.sentBytes >= 1048576) {
+        stream->stats.timeFirstMBSent = unabto_stream_get_duration(stream);
+    }
     return queued;
 }
 
@@ -901,7 +905,7 @@ void update_ack_after_packet(struct nabto_stream_s* stream, uint32_t seq) {
         }
     }
 }
-        
+
 /**
  * ack data
  * @param ack_start start of area of the sequence numbers which is acked
@@ -1028,6 +1032,9 @@ static void handle_data(struct nabto_stream_s* stream,
                 } else {
                     NABTO_LOG_DEBUG(("%" PRIu16 "     Data=%i bytes, seq=%i inserted into slot=%i",stream->streamTag, dlen, win->seq, ix));
                     stream->stats.receivedBytes += dlen;
+                    if (stream->stats.timeFirstMBReceived == 0 && stream->stats.receivedBytes >= 1048576) {
+                        stream->stats.timeFirstMBReceived = unabto_stream_get_duration(stream);
+                    }
                     memcpy(rbuf->buf, (const void*) start, dlen);
                     rbuf->size = dlen;
                     rbuf->used = 0;
@@ -1035,6 +1042,8 @@ static void handle_data(struct nabto_stream_s* stream,
                     LOG_STATE(stream);
                     // update the highest received data sequence number, used in sack calculation.
                     tcb->recvMax = MAX(tcb->recvMax, win->seq);
+
+
                 }
                 if (tcb->cfg.enableWSRF) {
                     tcb->ackSent--; // to force sending an ACK
@@ -1588,17 +1597,27 @@ void update_data_timeout(struct nabto_stream_s * stream) {
 
 #define CWND_INITIAL_VALUE 4
 
-void unabto_stream_congestion_control_init(struct nabto_stream_tcb* tcb) {
+void unabto_stream_secondary_data_structure_init(struct nabto_stream_s* stream)
+{
+    struct nabto_stream_tcb* tcb = &stream->u.tcb;
+    unabto_stream_congestion_control_init(tcb);
+    
+}
+
+void unabto_stream_congestion_control_init(struct nabto_stream_tcb* tcb)
+{
     tcb->cCtrl.isFirstAck = true;
     tcb->cCtrl.cwnd = CWND_INITIAL_VALUE;
     tcb->cCtrl.srtt = tcb->cfg.timeoutMsec;
     tcb->cCtrl.rto =  tcb->cfg.timeoutMsec;
     tcb->timeoutData = tcb->cfg.timeoutMsec;
     tcb->cCtrl.ssThreshold = tcb->cfg.xmitWinSize;
+    unabto_stream_stats_observe(&tcb->ccStats.ssThreshold, tcb->cCtrl.ssThreshold);
 }
 
 void unabto_stream_congestion_control_adjust_ssthresh_after_triple_ack(struct nabto_stream_tcb* tcb) {
     tcb->cCtrl.ssThreshold = MAX(flight_size(tcb)/2.0, 2);
+    unabto_stream_stats_observe(&tcb->ccStats.ssThreshold, tcb->cCtrl.ssThreshold);
     tcb->cCtrl.lostSegment = true;
 }
 
@@ -1638,6 +1657,7 @@ void unabto_stream_congestion_control_timeout(struct nabto_stream_s * stream) {
  */
 void unabto_stream_congestion_control_sent(struct nabto_stream_tcb* tcb, uint16_t ix) {
     tcb->cCtrl.sentNotAcked++;
+    unabto_stream_stats_observe(&tcb->ccStats.sentNotAcked, (double)tcb->cCtrl.sentNotAcked);
 }
 
 void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, uint16_t ix) {
@@ -1656,6 +1676,7 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
         } else {
             tcb->cCtrl.cwnd += 1.0/tcb->cCtrl.cwnd;
         }
+        unabto_stream_stats_observe(&tcb->ccStats.cwnd, tcb->cCtrl.cwnd);
     }
 
     NABTO_LOG_TRACE(("adjusting cwnd: %f", tcb->cCtrl.cwnd));
@@ -1767,6 +1788,7 @@ void update_receive_stats(struct nabto_stream_s * stream, uint16_t ix) {
             tcb->cCtrl.rttVar = (1.0-beta) * tcb->cCtrl.rttVar + beta * fabs(tcb->cCtrl.srtt - time);
             tcb->cCtrl.srtt = (1.0-alpha) * tcb->cCtrl.srtt + alpha * time;
         }
+        unabto_stream_stats_observe(&tcb->ccStats.rtt, time);
         tcb->cCtrl.rto = tcb->cCtrl.srtt + 4.0*tcb->cCtrl.rttVar;
         NABTO_LOG_TRACE(("packet time %f, tcb->srtt %f, tcb->rttVar %f, tcb->rto %f", time, tcb->cCtrl.srtt, tcb->cCtrl.rttVar, tcb->cCtrl.rto));
 
@@ -1842,6 +1864,37 @@ static uint16_t nabto_stream_next_cp_id(void) {
    uint16_t idCP;
    do { idCP = ++idCP__; } while (idCP == 0);
    return idCP;
+}
+
+void unabto_stat_init(struct unabto_stats* stat)
+{
+    stat->min = 0;
+    stat->max = 0;
+    stat->count = 0;
+    stat->avg = 0;
+}
+
+void unabto_stream_stats_observe(struct unabto_stats* stat, double value)
+{
+    if (stat->min == 0 && stat->max == 0) {
+        stat->min = stat->max = value;
+    }
+    
+    if (value < stat->min) {
+        stat->min = value;
+    }
+    if (value > stat->max) {
+        stat->max = value;
+    }
+    stat->count += 1;
+    stat->avg += (value - stat->avg) / stat->count;    
+}
+
+uint32_t unabto_stream_get_duration(struct nabto_stream_s* stream)
+{
+    nabto_stamp_t now = nabtoGetStamp();
+    nabto_stamp_diff_t duration = nabtoStampDiff(&now, &stream->stats.streamStart);
+    return nabtoStampDiff2ms(duration);
 }
 
 #endif /* NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM */

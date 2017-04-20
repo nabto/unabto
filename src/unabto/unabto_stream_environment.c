@@ -24,6 +24,7 @@ bool build_and_send_packet(struct nabto_stream_s* stream, uint8_t type, uint32_t
     uint8_t*       ptr;
     nabto_connect* con           = stream->connection;
     uint8_t*       buf           = nabtoCommunicationBuffer;
+    uint8_t*       end           = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
     uint32_t       ackToSend     = unabto_stream_ack_number_to_send(tcb);
     uint16_t       recvWinSize   = unabto_stream_advertised_window_size(tcb);
@@ -35,7 +36,7 @@ bool build_and_send_packet(struct nabto_stream_s* stream, uint8_t type, uint32_t
     nabtoSetFutureStamp(&tcb->ackStamp, 2*tcb->cfg.timeoutMsec);
 
     ptr = insert_data_header(buf, con->spnsi, con->nsico, stream->streamTag);
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_WINDOW, 0, l_win + winInfoSize + (type == NP_PAYLOAD_WINDOW_FLAG_ACK ? 2 : 0));
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_WINDOW, 0, l_win + winInfoSize + (type == NP_PAYLOAD_WINDOW_FLAG_ACK ? 2 : 0));
     WRITE_FORWARD_U8 (ptr, type);
     WRITE_FORWARD_U8 (ptr, NP_STREAM_VERSION);
     WRITE_FORWARD_U16(ptr, stream->idCP);
@@ -52,7 +53,7 @@ bool build_and_send_packet(struct nabto_stream_s* stream, uint8_t type, uint32_t
     
     if (sackData && sackData->nPairs > 0) {
         uint8_t i;
-        ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_SACK, 0, 8 * sackData->nPairs);
+        ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_SACK, 0, 8 * sackData->nPairs);
         for (i = 0; i < sackData->nPairs; i++) {
             WRITE_FORWARD_U32(ptr, sackData->pairs[i].start);
             WRITE_FORWARD_U32(ptr, sackData->pairs[i].end);
@@ -60,7 +61,7 @@ bool build_and_send_packet(struct nabto_stream_s* stream, uint8_t type, uint32_t
     }
 
 
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
 
     if (send_and_encrypt_packet_con(con, data, size, ptr)) {
         tcb->ackSent = ackToSend;
