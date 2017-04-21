@@ -20,7 +20,6 @@
 
 bool isCallbackReceived = false;
 void callback(void* ptr,const unabto_push_hint* hint){
-    int i;
     switch(*hint){
         case UNABTO_PUSH_HINT_OK:
             NABTO_LOG_INFO(("Callback with hint: OK"));
@@ -67,12 +66,12 @@ int main(int argc, char* argv[])
     // setting push notification data 
     uint16_t pnsid = 1;
     int testContext = 1;
-    const uint8_t* sd = "{\"to\": \"58a88e8b-83f1-429d-8863-8d8180ae83ed\"}";
-    const uint8_t* titleKey = "title_1";
-    const uint8_t* bodyKey = "body_1";
-    const uint8_t* bodyArg1 = "943";
-    const uint8_t* bodyArg2 = "349";
-    
+    const char* sd = "{\"to\": \"58a88e8b-83f1-429d-8863-8d8180ae83ed\"}";
+    const char* titleKey = "title_1";
+    const char* bodyKey = "body_1";
+    const char* bodyArg1 = "943";
+    const char* bodyArg2 = "349";
+
     push_message pm;
     if(!init_push_message(&pm, pnsid,sd)){
         NABTO_LOG_ERROR(("init_push_message failed"));
@@ -94,9 +93,7 @@ int main(int argc, char* argv[])
         NABTO_LOG_ERROR(("add_body_loc_string_arg failed"));
         return 1;
     }
-    
-       
-    
+
     // Overwrite default values with command line args
     if (!check_args(argc, argv, nms)) {
         return 1;
