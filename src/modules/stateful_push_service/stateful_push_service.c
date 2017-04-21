@@ -61,7 +61,7 @@ bool init_push_message(push_message* msg, uint16_t pnsid, const char* staticData
     if(msg->staticData.len > NABTO_PUSH_BUFFER_ELEMENT_SIZE){
         return false;
     }
-    strcpy(msg->staticData.data,staticData);
+    strcpy((char *)msg->staticData.data,staticData);
     msg->pnsId = pnsid;
     msg->dynamicData.purpose = NP_PAYLOAD_PUSH_DATA_PURPOSE_DYNAMIC;
     msg->dynamicData.encoding = NP_PAYLOAD_PUSH_DATA_ENCODING_TLV;
@@ -75,7 +75,7 @@ bool add_title(push_message* msg, const char* title){
     }
     WRITE_FORWARD_U8(ptr, NP_PAYLOAD_PUSH_DATA_VALUE_TITLE);
     WRITE_FORWARD_U8(ptr, strlen(title)+2);
-    strcpy(ptr,title);
+    strcpy((char *)ptr,title);
     return true;
 }
 bool add_body(push_message* msg, const char* body){
@@ -85,7 +85,7 @@ bool add_body(push_message* msg, const char* body){
     }
     WRITE_FORWARD_U8(ptr, NP_PAYLOAD_PUSH_DATA_VALUE_BODY);
     WRITE_FORWARD_U8(ptr, strlen(body)+2);
-    strcpy(ptr,body);
+    strcpy((char *)ptr,body);
     return true;
 }
 bool add_title_loc_key(push_message* msg, const char* titleKey){
@@ -95,7 +95,7 @@ bool add_title_loc_key(push_message* msg, const char* titleKey){
     }
     WRITE_FORWARD_U8(ptr, NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_KEY);
     WRITE_FORWARD_U8(ptr, strlen(titleKey)+2);
-    strcpy(ptr,titleKey);
+    strcpy((char *)ptr,titleKey);
     return true;
 }
 bool add_title_loc_string_arg(push_message* msg, const char* titleArg){
@@ -105,7 +105,7 @@ bool add_title_loc_string_arg(push_message* msg, const char* titleArg){
     }
     WRITE_FORWARD_U8(ptr, NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_STRING_ARG);
     WRITE_FORWARD_U8(ptr, strlen(titleArg)+2);
-    strcpy(ptr,titleArg);
+    strcpy((char *)ptr,titleArg);
     return true;
 }
 bool add_body_loc_key(push_message* msg, const char* bodyKey){
@@ -115,7 +115,7 @@ bool add_body_loc_key(push_message* msg, const char* bodyKey){
     }
     WRITE_FORWARD_U8(ptr, NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_KEY);
     WRITE_FORWARD_U8(ptr, strlen(bodyKey)+2);
-    strcpy(ptr,bodyKey);
+    strcpy((char *)ptr,bodyKey);
     return true;
 }
 bool add_body_loc_string_arg(push_message* msg, const char* bodyArg){
@@ -125,7 +125,7 @@ bool add_body_loc_string_arg(push_message* msg, const char* bodyArg){
     }
     WRITE_FORWARD_U8(ptr, NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_STRING_ARG);
     WRITE_FORWARD_U8(ptr, strlen(bodyArg)+2);
-    strcpy(ptr,bodyArg);
+    strcpy((char *)ptr,bodyArg);
     return true;
 }
 
@@ -141,6 +141,7 @@ uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* buf
             return bufStart+buffer[i].len;
         }
     }
+    return NULL;
 }
 
 void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint){
