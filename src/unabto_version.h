@@ -29,9 +29,9 @@
  * 
  * export `grep U_NABTO_VERSION src/unabto_version.h | awk '{print $2 "=" $3}'`
  */
-#define UNABTO_VERSION_MAJOR            3
+#define UNABTO_VERSION_MAJOR            4
 #define UNABTO_VERSION_MINOR            0
-#define UNABTO_VERSION_PATCH            16
+#define UNABTO_VERSION_PATCH            0
 
 /**
  * Prerelease identifiers are used to distinguish real releases from
