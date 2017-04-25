@@ -32,7 +32,7 @@ bool unabto_push_test(void){
         return false;
     }
 
-    int seq;
+    uint32_t seq;
     unabto_push_hint ret = unabto_send_push_notification(1,&seq);
     if (ret != UNABTO_PUSH_HINT_OK){
         NABTO_LOG_INFO(("send push notification did not return OK"));
