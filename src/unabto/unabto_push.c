@@ -51,9 +51,9 @@ unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq){
     nabto_stamp_t now = nabtoGetStamp();
     // With reattach needed or queue full we must still call callback without releasing Zalgo
     if(pushCtx.reattachNeeded){
-        pushSeqQ[pushCtx.pushSeqQHead].hint = UNABTO_PUSH_HINT_QUOTA_EXCEEDED_REATTACH;
+        return UNABTO_PUSH_HINT_QUOTA_EXCEEDED_REATTACH;
     } else if (pushCtx.pushSeqQHead >= NABTO_PUSH_QUEUE_LENGTH){
-        pushSeqQ[pushCtx.pushSeqQHead].hint = UNABTO_PUSH_HINT_QUEUE_FULL;
+        return UNABTO_PUSH_HINT_QUEUE_FULL;
     } else {
         pushSeqQ[pushCtx.pushSeqQHead].hint = UNABTO_PUSH_HINT_OK;
     }
@@ -101,17 +101,13 @@ uint16_t unabto_push_notification_data_size()
 
 void nabto_time_event_push(void)
 {
-//    NABTO_LOG_TRACE(("Push Next event called"));
     nabto_stamp_t now = nabtoGetStamp();
     if (!pushCtx.nextPushEvent){
-//        NABTO_LOG_TRACE(("No Next event"));
         return;
     }
     if (!nabtoStampLess(&pushCtx.nextPushEvent->stamp,&now)){
-//        NABTO_LOG_TRACE(("Next event is not ready"));
         return;
     } else {
-        NABTO_LOG_TRACE(("Invoking Event"));
         unabto_push_create_and_send_packet(pushCtx.nextPushEvent);
         unabto_push_set_next_event();
     }

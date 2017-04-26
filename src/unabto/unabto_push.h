@@ -77,13 +77,12 @@ void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint);
 
 
 /**
- * Send a Push notification
- * @param pnsId    The ID of the used push notification service as configured in the basestation
- * @param seq      A pointer to where the sequence number assigned to the PN should be placed
- * @param hint     Information about status of the particular PN
- * -  UNABTO_PUSH_HINT_OK
- * -  UNABTO_PUSH_HINT_QUEUE_FULL
- * @return seqNr   The sequence number assigned to the particular PN.
+ * Send a Push notification. If this function return UNABTO_PUSH_HINT_OK, the 
+ * unabto_push_notification_callback function will call once and only once, and always from a new
+ * context. If this function returns any other unabto_push_hint, the callback will not be called.
+ * @param  pnsId    The ID of the used push notification service as configured in the basestation
+ * @param  seq      A pointer to where the sequence number assigned to the PN should be placed
+ * @return hint     Information about status of the particular PN
  */
 unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq);
 

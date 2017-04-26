@@ -18,12 +18,16 @@ unabto_push_hint send_push_notification(uint16_t pnsid, push_payload_data static
     uint32_t seq;
     uint8_t* ptr;
     uint8_t* end;
+    unabto_push_hint hint;
     if(dataHead >= NABTO_PUSH_QUEUE_LENGTH){
         return UNABTO_PUSH_HINT_QUEUE_FULL;
     }
     buffer[dataHead].len = staticData.len+msg.len+2*NP_PAYLOAD_PUSH_DATA_SIZE_WO_DATA;
+    if(buffer[dataHead].len > NABTO_PUSH_BUFFER_ELEMENT_SIZE){
+        return UNABTO_PUSH_HINT_INVALID_DATA_PROVIDED;
+    }
     ptr = buffer[dataHead].data;
-    end = ptr + sizeof(buffer_element);
+    end = ptr + NABTO_PUSH_BUFFER_ELEMENT_SIZE;
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PUSH_DATA, 0,staticData.len+2);
     WRITE_FORWARD_U8(ptr, staticData.purpose);
     WRITE_FORWARD_U8(ptr, staticData.encoding);
@@ -36,21 +40,15 @@ unabto_push_hint send_push_notification(uint16_t pnsid, push_payload_data static
 
     buffer[dataHead].cb = cb;
     buffer[dataHead].args = cbArgs;
-    NABTO_LOG_INFO(("logging buffer with len: %i",buffer[dataHead].len ));
-    char buf[1000];
-    size_t c = 0,i;
-    for (i = 0; i<buffer[dataHead].len; i++){
-        sprintf(&buf[c], "%02X ,", buffer[dataHead].data[i]);
-        c += 4;
-    }
-    NABTO_LOG_INFO(("%s",buf));
-//    NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_INFO,("push notification data:"),buffer[dataHead].data, buffer[dataHead].len);
-    log_buffer(buffer[dataHead].data, buffer[dataHead].len);
     
-    unabto_send_push_notification(pnsid, &seq);
-    buffer[dataHead].seq = seq;
-    dataHead++;
-    return UNABTO_PUSH_HINT_OK;
+    hint = unabto_send_push_notification(pnsid, &seq);
+    if(hint == UNABTO_PUSH_HINT_OK){
+        buffer[dataHead].seq = seq;
+        dataHead++;
+        return hint;
+    } else {
+        return hint;
+    }
 }
 
 
