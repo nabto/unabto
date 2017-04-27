@@ -485,6 +485,7 @@ void handle_ok_invite_event(void)
     
     if (nmc.context.state == NABTO_AS_WAIT_BS) {
         SET_CTX_STATE_STAMP(NABTO_AS_WAIT_GSP, 0);
+        NABTO_LOG_INFO(("GSP address: " PRIep, MAKE_EP_PRINTABLE(nmc.context.gsp)));
         return;
     }
     if (nmc.context.state == NABTO_AS_WAIT_DNS_FALLBACK_BS) {
@@ -493,6 +494,7 @@ void handle_ok_invite_event(void)
             if (nmc.nabtoMainSetup.forceDnsFallback) {
                 // force dns fallback
                 SET_CTX_STATE_STAMP(NABTO_AS_WAIT_GSP, 0);
+                NABTO_LOG_INFO(("GSP address: " PRIep, MAKE_EP_PRINTABLE(nmc.context.gsp)));
                 return;
             }
         }
@@ -504,6 +506,7 @@ void handle_ok_invite_event(void)
     if (nmc.context.state == NABTO_AS_WAIT_DNS_FALLBACK_UDP_BS) {
         nmc.context.useDnsFallback = false;
         SET_CTX_STATE_STAMP(NABTO_AS_WAIT_GSP, 0);
+        NABTO_LOG_INFO(("GSP address: " PRIep, MAKE_EP_PRINTABLE(nmc.context.gsp)));
         return;
     }
 }
