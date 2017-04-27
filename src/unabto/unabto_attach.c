@@ -356,7 +356,6 @@ static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uin
 
     if (nmc.context.nonceSize == NONCE_SIZE_OLD) {
         size_t sz;
-        //NABTO_LOG_INFO(("########    U_ATTACH response without crypto payload sent"));
         sz = verification_complete(&nmc.context.verif2, buf, end, ptr);
         send_to_basestation(nabtoCommunicationBuffer, sz, &nmc.context.gsp);
         res = true;
@@ -800,7 +799,7 @@ void handle_as_idle(void) {
         return;
     }
     SET_CTX_STATE_STAMP(NABTO_AS_WAIT_DNS, 0);
-    NABTO_LOG_INFO(("Resolving dns: %s", nmc.nabtoMainSetup.id));
+    NABTO_LOG_INFO(("Resolving DNS for %s", nmc.nabtoMainSetup.id));
     nabto_dns_resolve(nmc.nabtoMainSetup.id);
 }
 
@@ -819,7 +818,7 @@ void handle_as_wait_dns(void) {
         nmc.context.errorCount += 2;
         break;
     case NABTO_DNS_OK:
-        NABTO_LOG_TRACE(("Base station resolved to EP: " PRIep, MAKE_EP_PRINTABLE(nmc.controllerEp)));
+        NABTO_LOG_INFO(("Resolved DNS for %s to " PRIep, nmc.nabtoMainSetup.id, MAKE_EP_PRINTABLE(nmc.controllerEp)));
         nmc.context.errorCount = 0;
         SET_CTX_STATE_STAMP(NABTO_AS_WAIT_BS, 0);
         break;
