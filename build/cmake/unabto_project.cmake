@@ -184,7 +184,7 @@ if (UNABTO_EXTERNAL_BUILD_ROOT)
 endif()
 
 list(APPEND unabto_src ${unabto_module_dns_fallback_src})
-
+list(APPEND unabto_definitions "-DJSON_USE_EXCEPTION=0")
 if(${CMAKE_SYSTEM} MATCHES Linux)
 
   # Glibc 2.17 and newer dows not use -lrt and moxa does not have the lib at all.
