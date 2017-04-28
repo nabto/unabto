@@ -1,4 +1,4 @@
-# Change Log
+:# Change Log
 
 All notable changes to this project will be documented in this
 file. This projects changelog started with version [3.0.15] 2017-02-21
@@ -10,7 +10,12 @@ Guide: always keep an unreleased section which keeps track of current
 changes. When a release is made the unreleased section is renamed to
 the release and a new unreleased section is added.
 
-## 4.0.0 Unreleased
+## 4.1.0 Unreleased
+
+...
+
+
+## 4.0.0 2017-04-28
 
 ### Added
 - Stream stats has been added whenever a stream ends a packet with
@@ -25,7 +30,7 @@ the release and a new unreleased section is added.
 - The W5100 driver interface has changed.
 - Changed version scheme to semver hence the bump of version from 3.x.x to 4.x.x.
 
-## 3.0.15
+## 3.0.15 2017-02-23
 
 ### Added
 - Fingerprints, such that clients can connect with self signed certificates.
