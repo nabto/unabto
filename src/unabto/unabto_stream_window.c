@@ -1668,10 +1668,7 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
     if (tcb->xmit[ix].xstate == B_SENT) {
         if (tcb->cCtrl.lostSegment) {
             tcb->cCtrl.lostSegment = false;
-            tcb->cCtrl.cwnd = MAX(CWND_INITIAL_VALUE,tcb->cCtrl.ssThreshold);
-            if(tcb->cCtrl.ssThreshold < 4){
-                NABTO_LOG_INFO(("ssThreshold less than 4 %f",tcb->cCtrl.cwnd));
-            }
+            tcb->cCtrl.cwnd = tcb->cCtrl.ssThreshold;
         }
         
         tcb->cCtrl.sentNotAcked--;
