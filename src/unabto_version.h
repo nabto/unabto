@@ -36,9 +36,9 @@
 /**
  * Prerelease identifiers are used to distinguish real releases from
  * development, rc and beta releases. Set this string to "" for a
- * final release. Remember to include the first dash.
+ * final release. Remember to include the first dash. e.g. "-alpha.0"
  */
-#define UNABTO_VERSION_PRERELEASE "-alpha.0"
+#define UNABTO_VERSION_PRERELEASE "-rc.1"
 
 /**
  * Build info is used to distinguish builds, it could for example be
