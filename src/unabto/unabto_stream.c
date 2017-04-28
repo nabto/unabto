@@ -143,6 +143,7 @@ bool unabto_stream_is_closed(unabto_stream* stream) {
 
 bool unabto_stream_close(unabto_stream* stream)
 {
+    //NABTO_LOG_INFO(("timed out %d times", stream->stats.timeouts));
     return nabto_stream_tcb_close(stream);
 }
 

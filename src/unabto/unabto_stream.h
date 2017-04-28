@@ -42,6 +42,7 @@ typedef struct unabto_stream_stats_s {
     unsigned int userWrite;
     unsigned int userRead;
     nabto_stamp_t streamStart;
+    unsigned int timeouts;
     unsigned int timeFirstMBReceived; // ms, 0 if not set,
     unsigned int timeFirstMBSent; // ms, 0 if not set
 } unabto_stream_stats;

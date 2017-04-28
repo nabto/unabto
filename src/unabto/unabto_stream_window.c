@@ -1648,6 +1648,7 @@ void unabto_stream_congestion_control_timeout(struct nabto_stream_s * stream) {
     }
 
     update_data_timeout(stream);
+    stream->stats.timeouts++;
     
     windowStatus("Stream data timeout:", tcb);
 }
