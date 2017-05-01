@@ -1744,7 +1744,7 @@ bool use_slow_start(struct nabto_stream_tcb* tcb) {
 
 bool is_in_advertised_window(struct nabto_stream_tcb* tcb, uint16_t ix) {
     uint32_t thisSeq = tcb->xmit[ix].seq;
-    NABTO_LOG_TRACE(("advertised_window: %" PRIu32 ", ix: %i, xmitfirst: %" PRIu32 ", seq %" PRIu32, tcb->maxAdvertisedWindow, ix, tcb->xmitFirst, tcb->xmit[ix].seq));
+    NABTO_LOG_TRACE(("maxAdvertisedWindow: %" PRIu32 ", ix: %i, xmitfirst: %" PRIu32 ", seq %" PRIu32, tcb->maxAdvertisedWindow, ix, tcb->xmitFirst, tcb->xmit[ix].seq));
     
     // thisSeq should be >= than firstUnackedSeq
     return thisSeq < tcb->maxAdvertisedWindow;
