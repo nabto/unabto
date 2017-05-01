@@ -827,7 +827,9 @@ enum np_payload_stream_stats_e {
     NP_PAYLOAD_STREAM_STATS_SP_ID                                 = 25, /* uint16_t */
     NP_PAYLOAD_STREAM_STATS_TAG                                   = 26, /* uint16_t */
     NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_RECEIVED                = 27, /* uint32_t duration in ms */
-    NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_SENT                    = 28  /* uint32_t duration in ms */
+    NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_SENT                    = 28, /* uint32_t duration in ms */
+    NP_PAYLOAD_STREAM_STATS_TIMEOUTS                              = 29  /* uint32_t counter of stream congestion cointrol timeouts*/
+    
 };
 
 enum np_payload_stream_stats_status_e {

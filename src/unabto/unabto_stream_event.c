@@ -489,6 +489,8 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
     ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_MAX,        stream->u.tcb.ccStats.sentNotAcked.max);
     ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_AVG,        stream->u.tcb.ccStats.sentNotAcked.avg);
 
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIMEOUTS,                  stream->stats.timeouts);
+
     // insert payload length
     if (ptr != NULL) {
         WRITE_U16(payloadBegin + 2, ptr - payloadBegin);
