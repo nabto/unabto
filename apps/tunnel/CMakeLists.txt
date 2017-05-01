@@ -31,8 +31,9 @@ set(ENABLE_TUNNEL_TCP 1)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../src/modules/tunnel ${CMAKE_CURRENT_BINARY_DIR}/tunnel_library)
 
 set(tunnel_src
-  ${unabto_server_unabto_tunneling_src}/platform_checks.c
+  ${unabto_server_unabto_tunneling_src}/platform_checks.c  
   ${unabto_module_util_src}
+  ${unabto_module_fingerprint_acl_src}
   )
 
 add_definitions(${unabto_definitions})
