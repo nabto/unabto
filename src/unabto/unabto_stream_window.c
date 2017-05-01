@@ -913,7 +913,7 @@ bool update_triple_ack(struct nabto_stream_s* stream, uint32_t ackSeq)
 {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
     uint16_t ix = ackSeq % tcb->cfg.xmitWinSize;
-    if (tcb->xmit[ix].xstate == B_SENT) {
+    if (tcb->xmit[ix].xstate == B_SENT && tcb->xmit[ix].nRetrans == 0) {
         tcb->xmit[ix].ackedAfter++;
         if (tcb->xmit[ix].ackedAfter == 2) {
             stream->stats.reorderedOrLostPackets++;
