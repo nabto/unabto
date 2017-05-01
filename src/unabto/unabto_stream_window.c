@@ -1355,7 +1355,11 @@ static bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struc
             start = 0;
         }
     }
-
+    
+    if (start != 0) {
+        unabto_stream_insert_sack_pair(start, tcb->recvMax+1, sackData);
+        start = 0;
+    }
     return (sackData->nPairs > 0);
 }
 
