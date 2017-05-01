@@ -907,6 +907,22 @@ void update_ack_after_packet(struct nabto_stream_s* stream, uint32_t seq) {
 }
 
 /**
+ * we have received an ack for the top of the receive window.
+ */
+bool update_triple_ack(struct nabto_stream_s* stream, uint32_t ackSeq)
+{
+    struct nabto_stream_tcb* tcb = &stream->u.tcb;
+    uint16_t ix = ackSeq % tcb->cfg.xmitWinSize;
+    if (tcb->xmit[ix].xstate == B_SENT) {
+        tcb->xmit[ix].ackedAfter++;
+        if (tcb->xmit[ix].ackedAfter == 2) {
+            stream->stats.reorderedOrLostPackets++;
+        }
+    }
+    return (tcb->xmit[ix].ackedAfter >= 2);
+}
+
+/**
  * ack data
  * @param ack_start start of area of the sequence numbers which is acked
  * @param ack_end   end of area of sequence numbers which is acked
@@ -924,8 +940,15 @@ bool handle_ack(struct nabto_stream_s* stream, uint32_t ack_start, uint32_t ack_
     // This is the first unacknowledged packet sequence number in the window.
 
 
-    NABTO_LOG_TRACE(("%" PRIu16 " acking: [%" PRIu32 "..%" PRIu32 "]", stream->streamTag, ack_start, ack_end));
+    NABTO_LOG_TRACE(("%" PRIu16 " acking: [%" PRIu32 "..%" PRIu32 "] xmitFirstSeq: %" PRIu32, stream->streamTag, ack_start, ack_end, xmitFirstSeq));
     // Check that what we are acking is contained in the current active window.
+
+    if (ack_start == ack_end && ack_start == xmitFirstSeq) {
+        // update ack status to detect triple acks.
+        
+        dataAcked |= update_triple_ack(stream, ack_start);
+    }
+    
     if (ack_start >= xmitFirstSeq) { // we are in the window
         uint32_t i;
         // Check that we are not acking more than is actually sent.
