@@ -322,6 +322,8 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
             const char* opt = gopt_arg_i(options, ALLOW_PORT_OPTION, i);
             ports[i] = atoi(opt);
         }
+    } else {
+        NABTO_LOG_FATAL(("You did not allow client to connect to any ports, specify with '--allow_port'. Try -h for help."));
     }
     
     hosts_length = gopt(options, ALLOW_HOST_OPTION);
