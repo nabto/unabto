@@ -79,6 +79,7 @@ enum {
     ALLOW_ALL_HOSTS_OPTION,
     NO_ACCESS_CONTROL_OPTION,
     DISABLE_TCP_FALLBACK_OPTION,
+    DISABLE_CRYPTO_OPTION,
     CONTROLLER_PORT_OPTION,
     SELECT_BASED_OPTION,
     TUNNELS_OPTION,
@@ -124,7 +125,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x9s[] = "d";      const char* x9l[] = { "device-name", 0 };
     const char x10s[] = "H";     const char* x10l[] = { "tunnel-default-host", 0 }; // only used together with the tunnel.
     const char x11s[] = "P";     const char* x11l[] = { "tunnel-default-port", 0 };
-    const char x12s[] = "s";     const char* x12l[] = { "use-encryption", 0 };
+    const char x12s[] = "s";     const char* x12l[] = { "dummy-key", 0 };
     const char x13s[] = "k";     const char* x13l[] = { "encryption-key", 0 };
     const char x14s[] = "p";     const char* x14l[] = { "localport", 0 };
     const char x15s[] = "a";     const char* x15l[] = { "check-acl", 0 };
@@ -146,6 +147,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x29s[] = "";      const char* x29l[] = { "disable-extended-rendezvous-multiple-sockets", 0 };
     const char x30s[] = "";      const char* x30l[] = { "allow-all-hosts", 0};
     const char x31s[] = "";      const char* x31l[] = { "no-access-control", 0};
+    const char x32s[] = "";      const char* x32l[] = { "no-crypto", 0};
 
     const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
         { 'h', GOPT_NOARG,   x1s, x1l },
@@ -165,6 +167,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         { 'l', GOPT_REPEAT|GOPT_ARG,  x21s, x21l },
         { 'A', GOPT_ARG, x22s, x22l },
         { DISABLE_TCP_FALLBACK_OPTION, GOPT_NOARG, x23s, x23l },
+        { DISABLE_CRYPTO_OPTION, GOPT_NOARG, x32s, x32l },
         { CONTROLLER_PORT_OPTION, GOPT_ARG, x24s, x24l },
 #if NABTO_ENABLE_EPOLL
         { SELECT_BASED_OPTION, GOPT_NOARG, x25s, x25l },
@@ -207,6 +210,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("  -H, --tunnel-default-host   Set default host name for tunnel (%s).\n", UNABTO_TUNNEL_TCP_DEFAULT_HOST);
         printf("  -P, --tunnel-default-port   Set default port for tunnel (%u).\n", UNABTO_TUNNEL_TCP_DEFAULT_PORT);
         printf("  -k, --encryption-key        Specify encryption key.\n");
+        printf("  -s, --dummy-key             Use dummy key (for testing only).\n");
         printf("  -p, --localport             Specify port for local connections.\n");
         printf("  -A, --controller            Specify controller address\n");
         printf("      --controller-port       sets the controller port number.\n");
@@ -216,6 +220,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("      --allow-all-hosts       Allow connections to all TCP hosts.\n");
         printf("      --no-access-control     Do not enforce client access control on incoming connections. \n");
         printf("  -x, --nice-exit             Close the tunnels nicely when pressing Ctrl+C.\n");
+        printf("      --no-crypto             Disable crypto (requires special basestation and client).\n");
 #if NABTO_ENABLE_TCP_FALLBACK
         printf("      --disable-tcp-fb        Disable tcp fallback.\n");
 #endif
@@ -287,18 +292,23 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     }
 
     const char* preSharedKey;
-    nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
-    nms->secureAttach = true;
-    nms->secureData = true;
-    if ( gopt_arg( options, 'k', &preSharedKey)) {
-        if (!unabto_read_psk_from_hex(preSharedKey, nms->presharedKey ,16)) {
-            NABTO_LOG_FATAL(("Cannot read psk"));
-        }
+    if (gopt(options, DISABLE_CRYPTO_OPTION)) {
+        nms->secureAttach = false;
+        nms->secureData = false;
     } else {
-        if (!gopt( options, 's' )) {
-            NABTO_LOG_FATAL(("Specify a preshared key with -k. Try -h for help."));
+        nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
+        nms->secureAttach = true;
+        nms->secureData = true;
+        if ( gopt_arg( options, 'k', &preSharedKey)) {
+            if (!unabto_read_psk_from_hex(preSharedKey, nms->presharedKey ,16)) {
+                NABTO_LOG_FATAL(("Cannot read psk"));
+            }
         } else {
-            // using zero key, undocumented but handy for testing
+            if (!gopt( options, 's' )) {
+                NABTO_LOG_FATAL(("Specify a preshared key with -k. Try -h for help."));
+            } else {
+                // using zero key, undocumented but handy for testing
+            }
         }
     }
 
@@ -536,9 +546,8 @@ application_event_result application_event(application_request* request,
                                            unabto_query_response* query_response)
 {
     NABTO_LOG_INFO(("Nabto application_event: %u", request->queryId));
-
-    switch (request->queryId) {
-    case 10000:
+    
+    if (request->queryId == 10000) {
         // allow using the standard AMP clients to simplify pairing (AMP get_public_device_info.json)
         if (!write_string(query_response, "Tunnel")) return AER_REQ_RSP_TOO_LARGE;
         if (!write_string(query_response, "Tunnel")) return AER_REQ_RSP_TOO_LARGE;
@@ -547,10 +556,13 @@ application_event_result application_event(application_request* request,
         if (!unabto_query_write_uint8(query_response, fp_acl_is_user_paired(request))) return AER_REQ_RSP_TOO_LARGE; 
         if (!unabto_query_write_uint8(query_response, fp_acl_is_user_owner(request))) return AER_REQ_RSP_TOO_LARGE;
         return AER_REQ_RESPONSE_READY;
-    default:
-        // use the default request id base 11000 from the example interface definition
-        // in src/modules/fingerprint_acl/unabto_queries-fp-acl-snippet.xml
+        
+    } else if (request->queryId >= 11000 && request->queryId < 12000) {
         return fp_acl_ae_dispatch(11000, request, query_request, query_response);
+        
+    } else {
+        NABTO_LOG_WARN(("Unhandled query id: %u", request->queryId));
+        return AER_REQ_INV_QUERY_ID;
     }
 }
 
