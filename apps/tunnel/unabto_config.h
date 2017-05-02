@@ -3,6 +3,8 @@
 
 #include <modules/log/dynamic/unabto_dynamic_log.h>
 
+#define NABTO_ENABLE_CONNECTION_ESTABLISHMENT_ACL_CHECK 1
+
 #define NABTO_ENABLE_STREAM 1
 #define NABTO_STREAM_MAX_STREAMS 16
 

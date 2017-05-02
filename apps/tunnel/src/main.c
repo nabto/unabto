@@ -474,7 +474,7 @@ bool allow_client_access(nabto_connect* connection) {
         return true;
     } else {
         bool local = connection->isLocal;
-        bool allow = fp_acl_is_connection_allowed(connection) || local;
+        bool allow = fp_acl_is_connection_allowed(connection);
         NABTO_LOG_INFO(("Allowing %s connect request: %s", (local ? "local" : "remote"), (allow ? "yes" : "no")));
         return allow;
     }
@@ -537,15 +537,9 @@ application_event_result application_event(application_request* request,
 {
     NABTO_LOG_INFO(("Nabto application_event: %u", request->queryId));
 
-    // handle requests as defined in interface definition shared with
-    // client - for the default demo, see
-    // https://github.com/nabto/ionic-starter-nabto/blob/master/www/nabto/unabto_queries.xml
-
-    application_event_result res;
-
     switch (request->queryId) {
     case 10000:
-        // get_public_device_info.json
+        // allow using the standard AMP clients to simplify pairing (AMP get_public_device_info.json)
         if (!write_string(query_response, "Tunnel")) return AER_REQ_RSP_TOO_LARGE;
         if (!write_string(query_response, "Tunnel")) return AER_REQ_RSP_TOO_LARGE;
         if (!write_string(query_response, "")) return AER_REQ_RSP_TOO_LARGE;
@@ -553,42 +547,10 @@ application_event_result application_event(application_request* request,
         if (!unabto_query_write_uint8(query_response, fp_acl_is_user_paired(request))) return AER_REQ_RSP_TOO_LARGE; 
         if (!unabto_query_write_uint8(query_response, fp_acl_is_user_owner(request))) return AER_REQ_RSP_TOO_LARGE;
         return AER_REQ_RESPONSE_READY;
-
-    case 11000:
-        // get_users.json
-        return fp_acl_ae_users_get(request, query_request, query_response); // implied admin priv check
-        
-    case 11010: 
-        // pair_with_device.json
-        return fp_acl_ae_pair_with_device(request, query_request, query_response); 
-
-    case 11020:
-        // get_current_user.json
-        return fp_acl_ae_user_me(request, query_request, query_response); 
-
-    case 11030:
-        // get_system_security_settings.json
-        return fp_acl_ae_system_get_acl_settings(request, query_request, query_response); // implied admin priv check
-
-    case 11040:
-        // set_system_security_settings.json
-        return fp_acl_ae_system_set_acl_settings(request, query_request, query_response); // implied admin priv check
-
-    case 11050:
-        // set_user_permissions.json
-        return fp_acl_ae_user_set_permissions(request, query_request, query_response); // implied admin priv check
-
-    case 11060:
-        // set_user_name.json
-        return fp_acl_ae_user_set_name(request, query_request, query_response); // implied admin priv check
-
-    case 11070:
-        // remove_user.json
-        return fp_acl_ae_user_remove(request, query_request, query_response); // implied admin priv check
-
     default:
-        NABTO_LOG_WARN(("Unhandled query id: %u", request->queryId));
-        return AER_REQ_INV_QUERY_ID;
+        // use the default request id base 11000 from the example interface definition
+        // in src/modules/fingerprint_acl/unabto_queries-fp-acl-snippet.xml
+        return fp_acl_ae_dispatch(11000, request, query_request, query_response);
     }
 }
 
