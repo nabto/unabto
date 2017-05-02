@@ -121,30 +121,30 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x2s[] = "V";      const char* x2l[] = { "version", 0 };
     const char x3s[] = "C";      const char* x3l[] = { "config", 0 };
     const char x4s[] = "S";      const char* x4l[] = { "size", 0 };
-    const char x9s[] = "d";      const char* x9l[] = { "device_name", 0 };
-    const char x10s[] = "H";     const char* x10l[] = { "tunnel_default_host", 0 }; // only used together with the tunnel.
-    const char x11s[] = "P";     const char* x11l[] = { "tunnel_default_port", 0 };
-    const char x12s[] = "s";     const char* x12l[] = { "use_encryption", 0 };
-    const char x13s[] = "k";     const char* x13l[] = { "encryption_key", 0 };
+    const char x9s[] = "d";      const char* x9l[] = { "device-name", 0 };
+    const char x10s[] = "H";     const char* x10l[] = { "tunnel-default-host", 0 }; // only used together with the tunnel.
+    const char x11s[] = "P";     const char* x11l[] = { "tunnel-default-port", 0 };
+    const char x12s[] = "s";     const char* x12l[] = { "use-encryption", 0 };
+    const char x13s[] = "k";     const char* x13l[] = { "encryption-key", 0 };
     const char x14s[] = "p";     const char* x14l[] = { "localport", 0 };
-    const char x15s[] = "a";     const char* x15l[] = { "check_acl", 0 };
-    const char x16s[] = "";      const char* x16l[] = { "allow_port", 0};
-    const char x17s[] = "";      const char* x17l[] = { "allow_host", 0};
-    const char x18s[] = "x";     const char* x18l[] = { "nice_exit", 0};
-    const char x19s[] = "";      const char* x19l[] = { "allow_all_ports", 0};
+    const char x15s[] = "a";     const char* x15l[] = { "check-acl", 0 };
+    const char x16s[] = "";      const char* x16l[] = { "allow-port", 0};
+    const char x17s[] = "";      const char* x17l[] = { "allow-host", 0};
+    const char x18s[] = "x";     const char* x18l[] = { "nice-exit", 0};
+    const char x19s[] = "";      const char* x19l[] = { "allow-all-ports", 0};
     const char x21s[] = "l";     const char* x21l[] = { "nabtolog", 0 };
     const char x22s[] = "A";     const char* x22l[] = { "controller", 0 };
-    const char x23s[] = "";      const char* x23l[] = { "disable_tcp_fb", 0 };
-    const char x24s[] = "";      const char* x24l[] = { "controller_port", 0 };
+    const char x23s[] = "";      const char* x23l[] = { "disable-tcp-fb", 0 };
+    const char x24s[] = "";      const char* x24l[] = { "controller-port", 0 };
 #if NABTO_ENABLE_EPOLL
-    const char x25s[] = "";      const char* x25l[] = { "select_based", 0 };
+    const char x25s[] = "";      const char* x25l[] = { "select-based", 0 };
 #endif
 
     const char x26s[] = "";      const char* x26l[] = { "tunnels", 0 };
-    const char x27s[] = "";      const char* x27l[] = { "stream_window_size",0 };
+    const char x27s[] = "";      const char* x27l[] = { "stream-window-size",0 };
     const char x28s[] = "";      const char* x28l[] = { "connections", 0 };
-    const char x29s[] = "";      const char* x29l[] = { "disable_extended_rendezvous_multiple_sockets", 0 };
-    const char x30s[] = "";      const char* x30l[] = { "allow_all_hosts", 0};
+    const char x29s[] = "";      const char* x29l[] = { "disable-extended-rendezvous-multiple-sockets", 0 };
+    const char x30s[] = "";      const char* x30l[] = { "allow-all-hosts", 0};
     const char x31s[] = "";      const char* x31l[] = { "no-access-control", 0};
 
     const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
@@ -203,31 +203,32 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("  -C, --config                Print configuration (unabto_config.h).\n");
         printf("  -S, --size                  Print size (in bytes) of memory usage.\n");
         printf("  -l, --nabtolog              Speficy log level such as *.trace.\n");
-        printf("  -d, --device_name           Specify name of this device.\n");
-        printf("  -H, --tunnel_default_host   Set default host name for tunnel (%s).\n", UNABTO_TUNNEL_TCP_DEFAULT_HOST);
-        printf("  -P, --tunnel_default_port   Set default port for tunnel (%u).\n", UNABTO_TUNNEL_TCP_DEFAULT_PORT);
-        printf("  -k, --encryption_key        Specify encryption key.\n");
+        printf("  -d, --device-name           Specify name of this device.\n");
+        printf("  -H, --tunnel-default-host   Set default host name for tunnel (%s).\n", UNABTO_TUNNEL_TCP_DEFAULT_HOST);
+        printf("  -P, --tunnel-default-port   Set default port for tunnel (%u).\n", UNABTO_TUNNEL_TCP_DEFAULT_PORT);
+        printf("  -k, --encryption-key        Specify encryption key.\n");
         printf("  -p, --localport             Specify port for local connections.\n");
         printf("  -A, --controller            Specify controller address\n");
-        printf("      --controller_port       sets the controller port number.\n");
-        printf("      --allow_port            Ports that are allowed. \n");
-        printf("      --allow_all_ports       Allow connections to all port numbers.\n");
-        printf("      --allow_host            Hostnames that are allowed in addition to localhost \n");
-        printf("      --allow_all_hosts       Allow connections to all TCP hosts.\n");
-        printf("  -x, --nice_exit             Close the tunnels nicely when pressing Ctrl+C.\n");
+        printf("      --controller-port       sets the controller port number.\n");
+        printf("      --allow-port            Ports that tunnel is allowed to connect to. \n");
+        printf("      --allow-all-ports       Allow connections to all port numbers.\n");
+        printf("      --allow-host            Hostnames that tunnel is allowed to connect to in addition to localhost \n");
+        printf("      --allow-all-hosts       Allow connections to all TCP hosts.\n");
+        printf("      --no-access-control     Do not enforce client access control on incoming connections. \n");
+        printf("  -x, --nice-exit             Close the tunnels nicely when pressing Ctrl+C.\n");
 #if NABTO_ENABLE_TCP_FALLBACK
-        printf("      --disable_tcp_fb        Disable tcp fallback.\n");
+        printf("      --disable-tcp-fb        Disable tcp fallback.\n");
 #endif
 #if NABTO_ENABLE_EPOLL
-        printf("      --select_based          Use select instead of epoll.\n");
+        printf("      --select-based          Use select instead of epoll.\n");
 #endif
 #if NABTO_ENABLE_DYNAMIC_MEMORY
         printf("      --tunnels               Specify how many concurrent tcp streams should be possible.\n");
-        printf("      --stream_window_size    Specify the stream window size, the larger the value the more memory the aplication will use, but higher throughput will be possible.\n");
+        printf("      --stream-window-size    Specify the stream window size, the larger the value the more memory the aplication will use, but higher throughput will be possible.\n");
         printf("      --connections           Specify the maximum number of allowed concurrent connections.\n");
 #endif
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
-        printf("      --disable_extended_rendezvous_multiple_sockets     Disable multiple sockets in extended rendezvous.\n");
+        printf("      --disable-extended-rendezvous-multiple-sockets     Disable multiple sockets in extended rendezvous.\n");
 #endif
         exit(0);
     }
@@ -559,9 +560,7 @@ application_event_result application_event(application_request* request,
         
     case 11010: 
         // pair_with_device.json
-        if (!fp_acl_is_pair_allowed(request)) return AER_REQ_NO_ACCESS;
-        res = fp_acl_ae_pair_with_device(request, query_request, query_response); 
-        return res;
+        return fp_acl_ae_pair_with_device(request, query_request, query_response); 
 
     case 11020:
         // get_current_user.json
