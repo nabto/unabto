@@ -526,6 +526,10 @@ bool tunnel_allow_connection(const char* host, int port) {
 }
 
 
+int write_string(unabto_query_response* write_buffer, const char* string) {
+    return unabto_query_write_uint8_list(write_buffer, (uint8_t *)string, strlen(string));
+}
+
 application_event_result application_event(application_request* request,
                                            unabto_query_request* query_request,
                                            unabto_query_response* query_response)
@@ -539,6 +543,16 @@ application_event_result application_event(application_request* request,
     application_event_result res;
 
     switch (request->queryId) {
+    case 10000:
+        // get_public_device_info.json
+        if (!write_string(query_response, "Tunnel")) return AER_REQ_RSP_TOO_LARGE;
+        if (!write_string(query_response, "Tunnel")) return AER_REQ_RSP_TOO_LARGE;
+        if (!write_string(query_response, "")) return AER_REQ_RSP_TOO_LARGE;
+        if (!unabto_query_write_uint8(query_response, fp_acl_is_pair_allowed(request))) return AER_REQ_RSP_TOO_LARGE;
+        if (!unabto_query_write_uint8(query_response, fp_acl_is_user_paired(request))) return AER_REQ_RSP_TOO_LARGE; 
+        if (!unabto_query_write_uint8(query_response, fp_acl_is_user_owner(request))) return AER_REQ_RSP_TOO_LARGE;
+        return AER_REQ_RESPONSE_READY;
+
     case 11000:
         // get_users.json
         return fp_acl_ae_users_get(request, query_request, query_response); // implied admin priv check
