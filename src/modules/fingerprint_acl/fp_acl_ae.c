@@ -564,3 +564,52 @@ bool fp_acl_is_user_paired(application_request* request)
     }
     return false;
 }
+
+application_event_result fp_acl_ae_dispatch(uint32_t query_id_base,
+                                            application_request* request,
+                                            unabto_query_request* read_buffer,
+                                            unabto_query_response* write_buffer)
+{
+    switch (request->queryId - query_id_base) {
+    case 0:
+        // get_users.json
+        return fp_acl_ae_users_get(request, read_buffer, write_buffer); // implied admin priv check
+        
+    case 10: 
+        // pair_with_device.json
+        return fp_acl_ae_pair_with_device(request, read_buffer, write_buffer); 
+
+    case 20:
+        // get_current_user.json
+        return fp_acl_ae_user_me(request, read_buffer, write_buffer); 
+
+    case 30:
+        // get_system_security_settings.json
+        return fp_acl_ae_system_get_acl_settings(request, read_buffer, write_buffer); // implied admin priv check
+
+    case 40:
+        // set_system_security_settings.json
+        return fp_acl_ae_system_set_acl_settings(request, read_buffer, write_buffer); // implied admin priv check
+
+    case 50:
+        // set_user_permissions.json
+        return fp_acl_ae_user_set_permissions(request, read_buffer, write_buffer); // implied admin priv check
+
+    case 60:
+        // set_user_name.json
+        return fp_acl_ae_user_set_name(request, read_buffer, write_buffer); // implied admin priv check
+
+    case 65:
+        // add_user.json
+        return fp_acl_ae_user_add(request, read_buffer, write_buffer); // implied admin priv check
+
+    case 70:
+        // remove_user.json
+        return fp_acl_ae_user_remove(request, read_buffer, write_buffer); // implied admin priv check
+
+    default:
+        NABTO_LOG_WARN(("Unhandled query id: %u", request->queryId));
+        return AER_REQ_INV_QUERY_ID;
+    }
+}
+

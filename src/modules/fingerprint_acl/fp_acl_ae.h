@@ -125,4 +125,13 @@ application_event_result fp_acl_ae_system_set_acl_settings(application_request* 
                                                            unabto_query_request* read_buffer,
                                                            unabto_query_response* write_buffer);
 
+
+// handle application events according to the interface definition in unabto_queries-fp-acl-snippet.xml,
+// use base 11000 to use the exact interface definition as in the snippet
+application_event_result fp_acl_ae_dispatch(uint32_t query_id_base,
+                                            application_request* request,
+                                            unabto_query_request* read_buffer,
+                                            unabto_query_response* write_buffer);
+
+
 #endif
