@@ -357,7 +357,7 @@ uint32_t unabto_stream_ack_number_to_send(struct nabto_stream_tcb* tcb);
  * functions. Further it should define the type nabto_stream_congestion_control_t
  * which it can use for store congestion control data 
  */
-void update_receive_stats(struct nabto_stream_s * stream, uint16_t ix);
+void unabto_stream_update_congestion_control_receive_stats(struct nabto_stream_s * stream, uint16_t ix);
 
 void unabto_stream_congestion_control_adjust_ssthresh_after_triple_ack(struct nabto_stream_tcb* tcb);
 
@@ -379,7 +379,7 @@ void unabto_stream_congestion_control_sent(struct nabto_stream_tcb* tcb, uint16_
 /**
  * Called when an ack is handled.
  */
-void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, uint16_t ix);
+void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, uint16_t ix, bool ackStartOfWindow);
 
 /**
  * Called before a data packet is sent to test if it's allowed to be sent.
