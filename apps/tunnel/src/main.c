@@ -70,6 +70,8 @@ struct fp_mem_persistence fp_persistence_file;
 static bool useSelectBased = false;
 #endif
 
+static char* default_hosts[] = { "127.0.0.1", "localhost", 0 };
+
 enum {
     ALLOW_PORT_OPTION = 1,
     ALLOW_HOST_OPTION,
@@ -204,7 +206,6 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("  -d, --device_name           Specify name of this device.\n");
         printf("  -H, --tunnel_default_host   Set default host name for tunnel (%s).\n", UNABTO_TUNNEL_TCP_DEFAULT_HOST);
         printf("  -P, --tunnel_default_port   Set default port for tunnel (%u).\n", UNABTO_TUNNEL_TCP_DEFAULT_PORT);
-        printf("  -s, --use_encryption        Encrypt communication.\n");
         printf("  -k, --encryption_key        Specify encryption key.\n");
         printf("  -p, --localport             Specify port for local connections.\n");
         printf("  -A, --controller            Specify controller address\n");
@@ -284,19 +285,20 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         nms->localPort = localPort;
     }
 
-
-    if (gopt(options, 's')) {
-        const char* preSharedKey;
-        uint8_t key[16];
-        memset(key, 0, 16);
-        if ( gopt_arg( options, 'k', &preSharedKey)) {
-            if (!unabto_read_psk_from_hex(preSharedKey, nms->presharedKey ,16)) {
-                NABTO_LOG_FATAL(("Cannot read psk"));
-            }
+    const char* preSharedKey;
+    nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
+    nms->secureAttach = true;
+    nms->secureData = true;
+    if ( gopt_arg( options, 'k', &preSharedKey)) {
+        if (!unabto_read_psk_from_hex(preSharedKey, nms->presharedKey ,16)) {
+            NABTO_LOG_FATAL(("Cannot read psk"));
         }
-        nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
-        nms->secureAttach = true;
-        nms->secureData = true;
+    } else {
+        if (!gopt( options, 's' )) {
+            NABTO_LOG_FATAL(("Specify a preshared key with -k. Try -h for help."));
+        } else {
+            // using zero key, undocumented but handy for testing
+        }
     }
 
     if( gopt_arg( options, 'A', & basestationAddress ) ){
@@ -475,6 +477,16 @@ bool allow_client_access(nabto_connect* connection) {
     }
 }
 
+bool is_default_host(const char* host) {
+    char** p = default_hosts;
+    while (*p) {
+        if (strcmp(*p++, host) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool tunnel_allow_connection(const char* host, int port) {
     size_t i;
     
@@ -492,7 +504,7 @@ bool tunnel_allow_connection(const char* host, int port) {
         }
     }
 
-    if (allow_all_hosts) {
+    if (allow_all_hosts || is_default_host(host)) {
         hostFound = true;
     } else {
         for(i = 0; i < hosts_length; i++) {
