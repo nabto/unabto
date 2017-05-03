@@ -465,19 +465,29 @@ application_event_result fp_acl_ae_system_set_acl_settings(application_request* 
 
 
 // Helper function
-bool fp_acl_is_request_allowed(application_request* request, uint32_t requiredPermissions)
+bool fp_acl_is_user_allowed(nabto_connect* connection, uint32_t requiredPermissions)
 {
-    if (! (request->connection && request->connection->hasFingerprint)) {
+    if (! (connection && connection->hasFingerprint)) {
         return false;
     }
     
     struct fp_acl_user user;
-    void* it = aclDb.find(request->connection->fingerprint);
+    void* it = aclDb.find(connection->fingerprint);
     if (it == NULL || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return false;
     }
 
-    return fp_acl_check_user_permissions(&user, request->isLocal, requiredPermissions);
+    return fp_acl_check_user_permissions(&user, connection->isLocal, requiredPermissions);
+}
+
+bool fp_acl_is_request_allowed(application_request* request, uint32_t requiredPermissions)
+{
+    return fp_acl_is_user_allowed(request->connection, requiredPermissions);
+}
+
+bool fp_acl_is_tunnel_allowed(nabto_connect* connection, uint32_t requiredPermissions)
+{
+    return fp_acl_is_user_allowed(connection, requiredPermissions);
 }
 
 bool fp_acl_is_pair_allowed(application_request* request)
@@ -537,6 +547,7 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
     }
     return true;
 }
+
 
 bool fp_acl_is_user_owner(application_request* request)
 {
