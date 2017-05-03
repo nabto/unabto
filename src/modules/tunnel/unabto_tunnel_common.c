@@ -1,4 +1,4 @@
-
+#include <unabto/unabto_app.h>
 #include <unabto/unabto_stream.h>
 #include <unabto/unabto_memory.h>
 #include <errno.h>
@@ -49,6 +49,13 @@ void unabto_tunnel_deinit_tunnels()
 }
 
 void unabto_tunnel_stream_accept(unabto_stream* stream) {
+#if NABTO_ENABLE_TUNNEL_OPEN_ACL_CHECK
+    nabto_connect* con = unabto_stream_connection(stream);
+    if (!con || !allow_client_tunnel(con)) {
+        unabto_stream_close(stream);
+        return;
+    }
+#endif
     tunnel* t = &tunnels[unabto_stream_index(stream)];
     NABTO_LOG_TRACE(("Accepting stream and assigning it to tunnel %i", t));
     UNABTO_ASSERT(t->state == TS_IDLE);
