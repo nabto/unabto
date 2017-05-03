@@ -167,13 +167,14 @@ bool build_and_send_rst_packet(nabto_connect* con, uint16_t tag, struct nabto_wi
     uint16_t encodeLength;
     uint8_t*       ptr;
     uint8_t*       buf   = nabtoCommunicationBuffer;
+    uint8_t*       end   = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
     memset(&rst, 0, sizeof( struct nabto_win_info));
     
     nabto_stream_make_rst_response_window(win, &rst);
     winLength = nabto_stream_window_payload_length(&rst);
 
     ptr = insert_data_header(buf, con->spnsi, con->nsico, tag);
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_WINDOW, 0, winLength);
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_WINDOW, 0, winLength);
 
     if (nabto_stream_encode_window(&rst, ptr, &encodeLength)) {
         ptr += encodeLength;
@@ -181,7 +182,7 @@ bool build_and_send_rst_packet(nabto_connect* con, uint16_t tag, struct nabto_wi
         return false;
     }
 
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
     
     return send_and_encrypt_packet_con(con, 0, 0, ptr);
 }
@@ -193,7 +194,10 @@ void unabto_time_event_stream(void)
         if (stream__[i].state != STREAM_IDLE) {
             struct nabto_stream_s* stream = &stream__[i];
             nabto_stream_tcb_check_xmit(&stream__[i], true, false);
-
+            if (stream->statisticsEvents.streamEnded) {
+                unabto_stream_send_stats(stream, NP_PAYLOAD_STATS_TYPE_UNABTO_STREAM_ENDED);
+                stream->statisticsEvents.streamEnded = false;
+            }
             if (stream->applicationEvents.dataReady) {
                 unabto_stream_event(stream, UNABTO_STREAM_EVENT_TYPE_DATA_READY);
                 stream->applicationEvents.dataReady = false;
@@ -360,7 +364,8 @@ void nabto_stream_update_next_event(nabto_stamp_t* current_min_stamp)
                 stream->applicationEvents.dataWritten ||
                 stream->applicationEvents.readClosed ||
                 stream->applicationEvents.writeClosed ||
-                stream->applicationEvents.closed) 
+                stream->applicationEvents.closed ||
+                stream->statisticsEvents.streamEnded)
             {
                 nabto_stamp_t now = nabtoGetStamp();
                 nabto_update_min_stamp(current_min_stamp, &now);
@@ -376,5 +381,163 @@ void nabto_stream_update_next_event(nabto_stamp_t* current_min_stamp)
 int unabto_stream_index(unabto_stream* stream) {
     return stream - stream__;
 }
+
+
+uint8_t* unabto_stream_stats_write_u32(uint8_t* ptr, uint8_t* end, uint8_t type, uint32_t value)
+{
+    if (ptr == NULL) {
+        return NULL;
+    }
+    if (end - ptr < sizeof(uint32_t) + 2) {
+        return NULL;
+    }
+    WRITE_FORWARD_U8(ptr, type);
+    WRITE_FORWARD_U8(ptr, 6);
+    WRITE_FORWARD_U32(ptr, value);
+    return ptr;
+}
+
+uint8_t* unabto_stream_stats_write_u16(uint8_t* ptr, uint8_t* end, uint8_t type, uint16_t value)
+{
+    if (ptr == NULL) {
+        return ptr;
+    }
+    if (end - ptr < sizeof(uint16_t) + 2) {
+        return NULL;
+    }
+    WRITE_FORWARD_U8(ptr, type);
+    WRITE_FORWARD_U8(ptr, 4);
+    WRITE_FORWARD_U16(ptr, value);
+    return ptr;
+}
+
+uint8_t* unabto_stream_stats_write_u8(uint8_t* ptr, uint8_t* end, uint8_t type, uint8_t value)
+{
+    if (ptr == NULL) {
+        return NULL;
+    }
+    if (end - ptr < sizeof(uint8_t) + 2) {
+        return NULL;
+    }
+    WRITE_FORWARD_U8(ptr, type);
+    WRITE_FORWARD_U8(ptr, 3);
+    WRITE_FORWARD_U8(ptr, value);
+    return ptr;
+}
+
+uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct nabto_stream_s* stream)
+{
+    uint8_t* payloadBegin = ptr;
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_STREAM_STATS, 0, 0);
+
+    // stream info
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_TAG,   stream->streamTag);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CP_ID, stream->idCP);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SP_ID, stream->idSP);
+
+    // duration
+    {
+        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_DURATION, unabto_stream_get_duration(stream));
+
+    }
+
+    // time for first MiB
+    if (stream->stats.timeFirstMBReceived != 0) {
+        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_RECEIVED, stream->stats.timeFirstMBReceived);
+    }
+    if (stream->stats.timeFirstMBSent != 0) {
+        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_SENT, stream->stats.timeFirstMBSent);
+    }
+
+    // status
+    {
+        uint8_t streamState;
+        if (stream->u.tcb.streamState == ST_CLOSED_ABORTED) {
+            streamState = NP_PAYLOAD_STREAM_STATS_STATUS_CLOSED_ABORTED;
+        } else if (stream->u.tcb.streamState == ST_CLOSED) {
+            streamState = NP_PAYLOAD_STREAM_STATS_STATUS_CLOSED;
+        } else {
+            streamState = NP_PAYLOAD_STREAM_STATS_STATUS_OPEN;  
+        }
+        ptr = unabto_stream_stats_write_u8(ptr, end, NP_PAYLOAD_STREAM_STATS_STATUS, streamState);
+    }
+
+    // stream stats
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_PACKETS,              stream->stats.sentPackets);
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_BYTES,                stream->stats.sentBytes);
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_RESENT_PACKETS,       stream->stats.sentResentPackets);
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_PACKETS,          stream->stats.receivedPackets);
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_BYTES,            stream->stats.receivedBytes);
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_RESENT_PACKETS,   stream->stats.receivedResentPackets);
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_REORDERED_OR_LOST_PACKETS, stream->stats.reorderedOrLostPackets);
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_USER_WRITE,                stream->stats.userWrite);
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_USER_READ,                 stream->stats.userRead);
+
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_MIN,                   stream->u.tcb.ccStats.rtt.min);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_MAX,                   stream->u.tcb.ccStats.rtt.max);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_AVG,                   stream->u.tcb.ccStats.rtt.avg);
+
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_MIN,                  stream->u.tcb.ccStats.cwnd.min);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_MAX,                  stream->u.tcb.ccStats.cwnd.max);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_AVG,                  stream->u.tcb.ccStats.cwnd.avg);
+
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MIN,          stream->u.tcb.ccStats.ssThreshold.min);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MAX,          stream->u.tcb.ccStats.ssThreshold.max);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_AVG,          stream->u.tcb.ccStats.ssThreshold.avg);
+
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_MIN,        stream->u.tcb.ccStats.sentNotAcked.min);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_MAX,        stream->u.tcb.ccStats.sentNotAcked.max);
+    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_AVG,        stream->u.tcb.ccStats.sentNotAcked.avg);
+
+    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIMEOUTS,                  stream->stats.timeouts);
+
+    // insert payload length
+    if (ptr != NULL) {
+        WRITE_U16(payloadBegin + 2, ptr - payloadBegin);
+    }
+    return ptr;
+}
+
+void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
+{
+    size_t length;
+    uint8_t* ptr = insert_header(nabtoCommunicationBuffer, 0, stream->connection->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
+    uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
+
+    ptr = insert_stats_payload(ptr, end, event);
+    if (ptr == NULL) {
+        return;
+    }
+
+    ptr = insert_version_payload(ptr, end);
+    if (ptr == NULL) {
+        return;
+    }
+
+    ptr = insert_sp_id_payload(ptr, end);
+    if (ptr == NULL) {
+        return;
+    }
+
+    ptr = unabto_stream_insert_stream_stats(ptr, end, stream);
+    if ( ptr == NULL) {
+        return;
+    }
+
+    ptr = insert_connection_stats_payload(ptr, end, stream->connection);
+    if (ptr == NULL) {
+        return;
+    }
+
+    ptr = insert_connect_stats_payload(ptr, end, stream->connection);
+    if (ptr == NULL) {
+        return;
+    }
+
+    length = ptr - nabtoCommunicationBuffer;
+    insert_length(nabtoCommunicationBuffer, length);
+    send_to_basestation(nabtoCommunicationBuffer, length, &nmc.context.gsp);
+}
+
 
 #endif /* NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM */

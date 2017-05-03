@@ -117,7 +117,6 @@ if (NOT UNABTO_DISABLE_EPOLL)
   CHECK_INCLUDE_FILES("sys/epoll.h" UNABTO_HAVE_EPOLL)
 endif()
 
-
 if (UNABTO_RANDOM_MODULE MATCHES dummy)
   list(APPEND unabto_src ${unabto_module_random_dummy_src})
 elseif(UNABTO_RANDOM_MODULE MATCHES openssl_armv4)
@@ -132,6 +131,7 @@ elseif(UNABTO_RANDOM_MODULE MATCHES libtomcrypt)
   list(APPEND unabto_include_directories ${unabto_3rdparty_libtomcrypt_include_directories})
   list(APPEND unabto_src ${unabto_module_random_libtomcrypt_src})
   list(APPEND unabto_src ${unabto_3rdparty_libtomcrypt_src})
+  list(APPEND unabto_definitions -DLTC_NO_ASM)
 else()
   message(WARNING "No random module")
 endif()
@@ -184,7 +184,7 @@ if (UNABTO_EXTERNAL_BUILD_ROOT)
 endif()
 
 list(APPEND unabto_src ${unabto_module_dns_fallback_src})
-
+list(APPEND unabto_definitions "-DJSON_USE_EXCEPTION=0")
 if(${CMAKE_SYSTEM} MATCHES Linux)
 
   # Glibc 2.17 and newer dows not use -lrt and moxa does not have the lib at all.

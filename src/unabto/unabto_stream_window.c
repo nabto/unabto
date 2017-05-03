@@ -150,6 +150,7 @@ void nabto_stream_state_transition(struct nabto_stream_s* stream, nabto_stream_t
             break;
         case ST_CLOSED:
             stream->applicationEvents.closed = true;
+            stream->statisticsEvents.streamEnded = true;
             break;
         case ST_CLOSED_ABORTED:
             /**
@@ -386,6 +387,9 @@ size_t nabto_stream_tcb_write(struct nabto_stream_s * stream, const uint8_t* buf
     }
 
     stream->stats.sentBytes += queued;
+    if (stream->stats.timeFirstMBSent == 0 && stream->stats.sentBytes >= 1048576) {
+        stream->stats.timeFirstMBSent = unabto_stream_get_duration(stream);
+    }
     return queued;
 }
 
@@ -892,7 +896,7 @@ void update_ack_after_packet(struct nabto_stream_s* stream, uint32_t seq) {
         // If the windows packet was sent before the packet was sent
         // this ack acks, then count the window packets unordered ack
         // count.
-        if (nabtoStampLess(&sentStampOfThisSeq, &sentStampOfAckedSeq)) {
+        if (nabtoStampLessOrEqual(&sentStampOfThisSeq, &sentStampOfAckedSeq)) {
             NABTO_LOG_TRACE(("Increment ACK after for seq %i beacuse ack on %i was received", i, seq));
             tcb->xmit[ix].ackedAfter++;
             if (tcb->xmit[ix].ackedAfter == 2) {
@@ -901,12 +905,28 @@ void update_ack_after_packet(struct nabto_stream_s* stream, uint32_t seq) {
         }
     }
 }
-        
+
+/**
+ * we have received an ack for the top of the receive window.
+ */
+bool update_triple_ack(struct nabto_stream_s* stream, uint32_t ackSeq)
+{
+    struct nabto_stream_tcb* tcb = &stream->u.tcb;
+    uint16_t ix = ackSeq % tcb->cfg.xmitWinSize;
+    if (tcb->xmit[ix].xstate == B_SENT && tcb->xmit[ix].nRetrans == 0) {
+        tcb->xmit[ix].ackedAfter++;
+        if (tcb->xmit[ix].ackedAfter == 2) {
+            stream->stats.reorderedOrLostPackets++;
+        }
+    }
+    return (tcb->xmit[ix].ackedAfter >= 2);
+}
+
 /**
  * ack data
  * @param ack_start start of area of the sequence numbers which is acked
  * @param ack_end   end of area of sequence numbers which is acked
- * @return true if it is neccessary to run checkXmit afterwards
+ * @return true if data has been acked.
  */
 bool handle_ack(struct nabto_stream_s* stream, uint32_t ack_start, uint32_t ack_end) {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
@@ -920,33 +940,41 @@ bool handle_ack(struct nabto_stream_s* stream, uint32_t ack_start, uint32_t ack_
     // This is the first unacknowledged packet sequence number in the window.
 
 
-    NABTO_LOG_TRACE(("%" PRIu16 " acking: [%" PRIu32 "..%" PRIu32 "]", stream->streamTag, ack_start, ack_end));
+    NABTO_LOG_TRACE(("%" PRIu16 " acking: [%" PRIu32 "..%" PRIu32 "] xmitFirstSeq: %" PRIu32, stream->streamTag, ack_start, ack_end, xmitFirstSeq));
     // Check that what we are acking is contained in the current active window.
+
+    
     if (ack_start >= xmitFirstSeq) { // we are in the window
         uint32_t i;
         // Check that we are not acking more than is actually sent.
 
         for (i = ack_start; i < ack_end; i++) {
             int ix = i % tcb->cfg.xmitWinSize;
+            bool ackOnStartOfWindow = (i == tcb->xmitFirst);
+
             
             if (i > tcb->xmitLastSent) {
                 NABTO_LOG_ERROR(("trying to ack segment which has not been sent yet"));
                 break;
             }
-            // Mark segment as acked.
+
+            // Only update the last segment in the ack sequence since
+            // it will have the most correct timing.
             if (i == tcb->xmitFirst && i == (ack_end - 1)) {
-                update_receive_stats(stream, ix);
+                unabto_stream_update_congestion_control_receive_stats(stream, ix);
             }
-            
-            unabto_stream_congestion_control_handle_ack(tcb, ix);
+
+            // Mark segment as acked.
             if (tcb->xmit[ix].xstate != B_IDLE) {
+                unabto_stream_congestion_control_handle_ack(tcb, ix, ackOnStartOfWindow);
                 update_ack_after_packet(stream, i);
                 NABTO_LOG_TRACE(("setting buffer %i for seq %i to IDLE", ix, i));
                 tcb->xmit[ix].xstate = B_IDLE;
+                dataAcked = true;
             } 
             // If we are acking in the start of the window we need to 
             // increase the pointers and decrease counts to move the window.
-            if (i == tcb->xmitFirst) {
+            if (ackOnStartOfWindow) {
                 NABTO_LOG_TRACE(("ix == tcb->xmitFirst"));
                 
                 tcb->xmitFirst++;
@@ -962,12 +990,16 @@ bool handle_ack(struct nabto_stream_s* stream, uint32_t ack_start, uint32_t ack_
     return dataAcked;
 }
 
-
-static void handle_sack(struct nabto_stream_s* stream, struct nabto_stream_sack_data* sackData) {
+/**
+ * return true if data has been acked.
+ */
+static bool handle_sack(struct nabto_stream_s* stream, struct nabto_stream_sack_data* sackData) {
     uint8_t i;
+    bool dataAcked = false;
     for (i = 0; i < sackData->nPairs; i++) {
-        handle_ack(stream, sackData->pairs[i].start, sackData->pairs[i].end);
-    } 
+        dataAcked |= handle_ack(stream, sackData->pairs[i].start, sackData->pairs[i].end);
+    }
+    return dataAcked;
 }
 
 /**
@@ -996,11 +1028,19 @@ static void handle_data(struct nabto_stream_s* stream,
             /* use ack's from received packet to roll transmit window */
             NABTO_LOG_TRACE(("xmitLastSent %" PRIu32 " xmitFirst %" PRIu32, tcb->xmitLastSent, tcb->xmitFirst));
             if (tcb->xmitLastSent != tcb->xmitFirst) {
-                uint32_t seqF;
+                uint32_t ackStart = tcb->xmitFirst; // first seq awaiting ack
+                uint32_t ackEnd = win->ack;
+                
 
-                seqF = tcb->xmitFirst; // first seq awaiting ack
-
-                if (handle_ack(stream, seqF, win->ack)) {
+                if (ackStart == ackEnd &&
+                    (sackData == NULL || (sackData != NULL && sackData->nPairs == 0))) {
+                    // update ack status to detect triple acks. based
+                    // on the win->ack. If the packet contains sack
+                    // data use that instead.
+                    update_triple_ack(stream, ackStart);
+                }
+                
+                if (handle_ack(stream, ackStart, ackEnd)) {
                     stream->applicationEvents.dataWritten = true;
                 }
             }
@@ -1028,6 +1068,9 @@ static void handle_data(struct nabto_stream_s* stream,
                 } else {
                     NABTO_LOG_DEBUG(("%" PRIu16 "     Data=%i bytes, seq=%i inserted into slot=%i",stream->streamTag, dlen, win->seq, ix));
                     stream->stats.receivedBytes += dlen;
+                    if (stream->stats.timeFirstMBReceived == 0 && stream->stats.receivedBytes >= 1048576) {
+                        stream->stats.timeFirstMBReceived = unabto_stream_get_duration(stream);
+                    }
                     memcpy(rbuf->buf, (const void*) start, dlen);
                     rbuf->size = dlen;
                     rbuf->used = 0;
@@ -1035,6 +1078,8 @@ static void handle_data(struct nabto_stream_s* stream,
                     LOG_STATE(stream);
                     // update the highest received data sequence number, used in sack calculation.
                     tcb->recvMax = MAX(tcb->recvMax, win->seq);
+
+
                 }
                 if (tcb->cfg.enableWSRF) {
                     tcb->ackSent--; // to force sending an ACK
@@ -1052,7 +1097,9 @@ static void handle_data(struct nabto_stream_s* stream,
             }
                 
             // Handle eventual sack data..
-            handle_sack(stream, sackData);
+            if (handle_sack(stream, sackData)) {
+                stream->applicationEvents.dataWritten = true;
+            }
             break;
 
         case SEQ_INVALID:
@@ -1323,7 +1370,11 @@ static bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struc
             start = 0;
         }
     }
-
+    
+    if (start != 0) {
+        unabto_stream_insert_sack_pair(start, tcb->recvMax+1, sackData);
+        start = 0;
+    }
     return (sackData->nPairs > 0);
 }
 
@@ -1586,20 +1637,34 @@ void update_data_timeout(struct nabto_stream_s * stream) {
     
 }
 
-#define CWND_INITIAL_VALUE 4
+#define CWND_INITIAL_VALUE 6
+#define SLOWSTART_MIN_VALUE 6
 
-void unabto_stream_congestion_control_init(struct nabto_stream_tcb* tcb) {
+void unabto_stream_secondary_data_structure_init(struct nabto_stream_s* stream)
+{
+    struct nabto_stream_tcb* tcb = &stream->u.tcb;
+    unabto_stream_congestion_control_init(tcb);
+    
+}
+
+void unabto_stream_congestion_control_init(struct nabto_stream_tcb* tcb)
+{
     tcb->cCtrl.isFirstAck = true;
     tcb->cCtrl.cwnd = CWND_INITIAL_VALUE;
     tcb->cCtrl.srtt = tcb->cfg.timeoutMsec;
     tcb->cCtrl.rto =  tcb->cfg.timeoutMsec;
     tcb->timeoutData = tcb->cfg.timeoutMsec;
     tcb->cCtrl.ssThreshold = tcb->cfg.xmitWinSize;
+    unabto_stream_stats_observe(&tcb->ccStats.ssThreshold, tcb->cCtrl.ssThreshold);
 }
 
 void unabto_stream_congestion_control_adjust_ssthresh_after_triple_ack(struct nabto_stream_tcb* tcb) {
-    tcb->cCtrl.ssThreshold = MAX(flight_size(tcb)/2.0, 2);
-    tcb->cCtrl.lostSegment = true;
+    if (!tcb->cCtrl.lostSegment) {
+        tcb->cCtrl.ssThreshold = MAX(flight_size(tcb)/2.0, SLOWSTART_MIN_VALUE);
+        unabto_stream_stats_observe(&tcb->ccStats.ssThreshold, tcb->cCtrl.ssThreshold);
+        tcb->cCtrl.lostSegment = true;
+    }
+    tcb->cCtrl.cwnd += 3;
 }
 
 /**
@@ -1629,6 +1694,14 @@ void unabto_stream_congestion_control_timeout(struct nabto_stream_s * stream) {
     }
 
     update_data_timeout(stream);
+    stream->stats.timeouts++;
+    {
+        int ix;
+        x_buffer* xbuf;    
+        ix = tcb->xmitFirst % tcb->cfg.xmitWinSize;
+        xbuf = &tcb->xmit[ix];
+        NABTO_LOG_INFO(("timeout, nretrans: %" PRIu16, xbuf->nRetrans));
+    }
     
     windowStatus("Stream data timeout:", tcb);
 }
@@ -1638,13 +1711,14 @@ void unabto_stream_congestion_control_timeout(struct nabto_stream_s * stream) {
  */
 void unabto_stream_congestion_control_sent(struct nabto_stream_tcb* tcb, uint16_t ix) {
     tcb->cCtrl.sentNotAcked++;
+    unabto_stream_stats_observe(&tcb->ccStats.sentNotAcked, (double)tcb->cCtrl.sentNotAcked);
 }
 
-void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, uint16_t ix) {
+void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, uint16_t ix, bool ackOnStartOfWindow) {
     // unabto_stream_window.c will set the buffer to IDLE when this function
     // returns.
     if (tcb->xmit[ix].xstate == B_SENT) {
-        if (tcb->cCtrl.lostSegment) {
+        if (tcb->cCtrl.lostSegment && ackOnStartOfWindow) {
             tcb->cCtrl.lostSegment = false;
             tcb->cCtrl.cwnd = tcb->cCtrl.ssThreshold;
         }
@@ -1656,9 +1730,10 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
         } else {
             tcb->cCtrl.cwnd += 1.0/tcb->cCtrl.cwnd;
         }
+        unabto_stream_stats_observe(&tcb->ccStats.cwnd, tcb->cCtrl.cwnd);
     }
 
-    NABTO_LOG_TRACE(("adjusting cwnd: %f", tcb->cCtrl.cwnd));
+    NABTO_LOG_TRACE(("adjusting cwnd: %f ssThreshold: %f", tcb->cCtrl.cwnd, tcb->cCtrl.ssThreshold));
 }
 
 /**
@@ -1691,7 +1766,7 @@ bool use_slow_start(struct nabto_stream_tcb* tcb) {
 
 bool is_in_advertised_window(struct nabto_stream_tcb* tcb, uint16_t ix) {
     uint32_t thisSeq = tcb->xmit[ix].seq;
-    NABTO_LOG_TRACE(("advertised_window: %" PRIu32 ", ix: %i, xmitfirst: %" PRIu32 ", seq %" PRIu32, tcb->maxAdvertisedWindow, ix, tcb->xmitFirst, tcb->xmit[ix].seq));
+    NABTO_LOG_TRACE(("maxAdvertisedWindow: %" PRIu32 ", ix: %i, xmitfirst: %" PRIu32 ", seq %" PRIu32, tcb->maxAdvertisedWindow, ix, tcb->xmitFirst, tcb->xmit[ix].seq));
     
     // thisSeq should be >= than firstUnackedSeq
     return thisSeq < tcb->maxAdvertisedWindow;
@@ -1734,7 +1809,7 @@ void windowStatus(const char* str, struct nabto_stream_tcb* tcb) {
     NABTO_LOG_TRACE(("%s, ssthres: %f, cwnd: %f, srtt: %f, rttVar: %f", str, tcb->cCtrl.ssThreshold, tcb->cCtrl.cwnd, tcb->cCtrl.srtt, tcb->cCtrl.rttVar));
 }
 
-void update_receive_stats(struct nabto_stream_s * stream, uint16_t ix) {
+void unabto_stream_update_congestion_control_receive_stats(struct nabto_stream_s * stream, uint16_t ix) {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
     // Update the rtt if the packet has been sent and but not resent
     if (tcb->xmit[ix].xstate == B_SENT && tcb->xmit[ix].nRetrans == 0) {
@@ -1767,6 +1842,7 @@ void update_receive_stats(struct nabto_stream_s * stream, uint16_t ix) {
             tcb->cCtrl.rttVar = (1.0-beta) * tcb->cCtrl.rttVar + beta * fabs(tcb->cCtrl.srtt - time);
             tcb->cCtrl.srtt = (1.0-alpha) * tcb->cCtrl.srtt + alpha * time;
         }
+        unabto_stream_stats_observe(&tcb->ccStats.rtt, time);
         tcb->cCtrl.rto = tcb->cCtrl.srtt + 4.0*tcb->cCtrl.rttVar;
         NABTO_LOG_TRACE(("packet time %f, tcb->srtt %f, tcb->rttVar %f, tcb->rto %f", time, tcb->cCtrl.srtt, tcb->cCtrl.rttVar, tcb->cCtrl.rto));
 
@@ -1842,6 +1918,37 @@ static uint16_t nabto_stream_next_cp_id(void) {
    uint16_t idCP;
    do { idCP = ++idCP__; } while (idCP == 0);
    return idCP;
+}
+
+void unabto_stat_init(struct unabto_stats* stat)
+{
+    stat->min = 0;
+    stat->max = 0;
+    stat->count = 0;
+    stat->avg = 0;
+}
+
+void unabto_stream_stats_observe(struct unabto_stats* stat, double value)
+{
+    if (stat->min == 0 && stat->max == 0) {
+        stat->min = stat->max = value;
+    }
+    
+    if (value < stat->min) {
+        stat->min = value;
+    }
+    if (value > stat->max) {
+        stat->max = value;
+    }
+    stat->count += 1;
+    stat->avg += (value - stat->avg) / stat->count;    
+}
+
+uint32_t unabto_stream_get_duration(struct nabto_stream_s* stream)
+{
+    nabto_stamp_t now = nabtoGetStamp();
+    nabto_stamp_diff_t duration = nabtoStampDiff(&now, &stream->stats.streamStart);
+    return nabtoStampDiff2ms(duration);
 }
 
 #endif /* NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM */

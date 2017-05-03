@@ -15,6 +15,7 @@ set(UNABTO_INCLUDE_DIR      ${UNABTO_ROOT}/src)
 
 # Define different root directories containing source code to be included in a project file
 set(UNABTO_MODULES_SRC_DIR   ${UNABTO_ROOT}/src/modules)
+set(UNABTO_DEVICE_DRIVER_SRC_DIR   ${UNABTO_ROOT}/src/device_drivers)
 set(UNABTO_PLATFORMS_SRC_DIR ${UNABTO_ROOT}/src/platforms)
 set(UNABTO_SERVER_SRC_DIR    ${UNABTO_ROOT}/src)
 
@@ -34,6 +35,7 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_connection.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_context.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_crypto.c
+  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_push.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_message.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_packet.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_packet_util.c
@@ -65,6 +67,7 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_connection_type.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_context.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_crypto.h
+  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_push.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_debug_packet.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_dns_fallback.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_env_base.h
@@ -135,6 +138,11 @@ source_group(platforms\\win32 FILES ${unabto_platform_win32_src})
 set(unabto_module_application_event_dummy_src
   ${UNABTO_MODULES_SRC_DIR}/application_event/dummy/application_event_dummy.c)
 
+# modules/stateful_push_service
+set (unabto_module_stateful_push_service_src
+  ${UNABTO_MODULES_SRC_DIR}/stateful_push_service/stateful_push_service.c)
+source_group(modules\\stateful_push_service FILES ${unabto_module_stateful_push_service_src})
+
 # modules/coap
 set (unabto_module_coap_src
   ${UNABTO_MODULES_SRC_DIR}/coap/er-coap-13/er-coap-13-engine.c
@@ -186,7 +194,6 @@ source_group(modules\\crypto\\openssl_armv4 FILES ${unabto_random_module_openssl
 set(unabto_module_crypto_libtomcrypt_src
   ${UNABTO_MODULES_SRC_DIR}/crypto/libtomcrypt/unabto_libtomcrypt.c)
 source_group(modules\\crypto\\libtomcrypt FILES ${unabto_module_crypto_libtomcrypt_src})
-
 
 # modules/cli
 set(unabto_module_cli_gopt_src
@@ -275,11 +282,17 @@ set (unabto_module_winsock_dns_src
   ${UNABTO_MODULES_SRC_DIR}/network/winsock/unabto_winsock_dns.c)
 source_group(modules\\network\\winsock FILES ${unabto_module_winsock_src} ${unabto_module_winsock_dns_src})
 
+set(unabto_module_network_w5100_src
+  ${UNABTO_MODULES_SRC_DIR}/network/w5100/w5100_network.c
+  ${UNABTO_MODULES_SRC_DIR}/network/w5100/w5100_network.h)
 
 set(unabto_module_dns_client_src
-  ${UNABTO_MODULES_SRC_DIR}/network/dns/dns_client.c
-  ${UNABTO_MODULES_SRC_DIR}/network/dns/dns_client_wrapper.c)
+  ${UNABTO_MODULES_SRC_DIR}/network/dns/dns_client.c)
 source_group(modules\\network\\dns_client FILES ${unabto_module_dns_client_src})
+
+set(unabto_module_dhcp_client_src
+  ${UNABTO_MODULES_SRC_DIR}/network/dhcp/dhcp_client.c)
+source_group(modules\\network\\dhcp_client FILES ${unabto_module_dhcp_client_src})
 
 set(unabto_module_network_bsd_src
   ${UNABTO_MODULES_SRC_DIR}/network/bsd/unabto_network_bsd.c)
@@ -375,6 +388,15 @@ set(unabto_module_fingerprint_acl_src
   ${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl.c
   )
 
+##################
+# DEVICE DRIVERS #
+##################
+
+set(unabto_device_driver_w5100_src
+  ${UNABTO_DEVICE_DRIVER_SRC_DIR}/w5100/w5100.c
+  )
+
+
 #######################
 # DEMO SOURCE SECTION #
 #######################
@@ -446,6 +468,7 @@ set(unabto_server_common_src_test
   ${UNABTO_SERVER_TEST_DIR}/unabto/util/unabto_buffer_test.c
   ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_payload_test.c
   ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_crypto_test.c
+  ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_push_test.c
   ${UNABTO_SERVER_TEST_DIR}/modules/util/unabto_base32_test.c
   ${UNABTO_SERVER_TEST_DIR}/modules/util/read_hex_test.c
   ${UNABTO_SERVER_TEST_DIR}/modules/fingerprint_acl/fp_acl_mem_test.c

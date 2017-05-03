@@ -1,3 +1,0 @@
-Nabto   KEYWORD1
-version KEYWORD2
-tick    KEYWORD2

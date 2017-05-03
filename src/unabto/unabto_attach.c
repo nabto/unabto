@@ -90,15 +90,22 @@ text stName(nabto_state state)
 #define REPORT_STATUS_CALLBACK(state)
 #endif
 
+#if NABTO_ENABLE_PUSH
+#include "unabto_push.h"
+#define PUSHNOTIFY unabto_push_notify_reattach();
+#else
+#define PUSHNOTIFY 
+#endif                                                              
+
 /**
  * Set a new state, and log the change
  * @param newState  the new state
  */
-#define SET_CTX_STATE(newState)                   \
-    if (nmc.context.state != newState) \
-    {                                        \
+#define SET_CTX_STATE(newState)                       \
+    if (nmc.context.state != newState)                \
+    {                                                 \
         NABTO_STATE_LOG(nmc.context.state, newState); \
-        REPORT_STATUS_CALLBACK(newState);         \
+        REPORT_STATUS_CALLBACK(newState);             \
         nmc.context.state = newState;                 \
     }
 
@@ -162,10 +169,11 @@ static void verification_add(verification_t* verif, const uint8_t* buf, const ui
  * Complete the calculation of the verification and insert it into the buffer.
  * @param verif  the verification data
  * @param buf    the buffer
+ * @param end    the end of the buffer
  * @param ptr    the position to insert the verify payload
  * @return       the size of the completed message
  */
-static size_t verification_complete(verification_t* verif, uint8_t* buf, uint8_t* ptr)
+static size_t verification_complete(verification_t* verif, uint8_t* buf, uint8_t* end, uint8_t* ptr)
 {
     size_t   len;
     uint32_t sum;
@@ -173,7 +181,7 @@ static size_t verification_complete(verification_t* verif, uint8_t* buf, uint8_t
     uint8_t  data[12];
     memset(data, NP_PAYLOAD_VERIFY_DEV_FILLERBYTE, sizeof(data));
 
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_VERIFY, 0, sizeof(data));
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_VERIFY, 0, sizeof(data));
     len = ptr - buf + sizeof(data);
     insert_length(buf, len);
     verification_add(verif, buf, ptr);
@@ -242,7 +250,7 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
 
         uint16_t code;
         code = nmc.nabtoMainSetup.cryptoSuite;
-        ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_NONCE, nmc.context.nonceMicro, nmc.context.nonceSize);
+        ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_NONCE, nmc.context.nonceMicro, nmc.context.nonceSize);
 
         if (nmc.nabtoMainSetup.version) {
             version = nmc.nabtoMainSetup.version;
@@ -251,14 +259,14 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
             version = dummy;
             sz = 1;
         }
-        ptr = insert_optional_payload(ptr, NP_PAYLOAD_TYPE_DESCR, 0, sz + 1);
+        ptr = insert_optional_payload(ptr, end, NP_PAYLOAD_TYPE_DESCR, 0, sz + 1);
         WRITE_U8(ptr, NP_PAYLOAD_DESCR_TYPE_VERSION); ptr += 1;
         memcpy(ptr, version, sz); ptr += sz;
 
         if (nmc.nabtoMainSetup.url) {
             url = nmc.nabtoMainSetup.url;
             sz = strlen(url);
-            ptr = insert_optional_payload(ptr, NP_PAYLOAD_TYPE_DESCR, 0, sz + 1);
+            ptr = insert_optional_payload(ptr, end, NP_PAYLOAD_TYPE_DESCR, 0, sz + 1);
             WRITE_U8(ptr, NP_PAYLOAD_DESCR_TYPE_URL); ptr += 1;
             memcpy(ptr, url, sz); ptr += sz;
         } else {
@@ -267,14 +275,14 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
         NABTO_LOG_INFO(("########    U_INVITE with %" PRItext " nonce sent, version: %s URL: %s", nmc.context.nonceSize == NONCE_SIZE ? "LARGE" : "small", version, url));
 
         // send encryption capabilities
-        ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_CAPABILITY, 0, 9 + 2*2);
+        ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CAPABILITY, 0, 9 + 2*2);
         *ptr++ = 0; /* type */
         WRITE_U32(ptr,   0l); ptr += 4; // mask
         WRITE_U32(ptr,   0l); ptr += 4; // bits
         WRITE_U16(ptr,    1); ptr += 2; // number of codes
         WRITE_U16(ptr, code); ptr += 2;
     }
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_SP_ID, 0, sid_len + 1);
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_SP_ID, 0, sid_len + 1);
     *ptr++ = NP_PAYLOAD_SP_ID_TYPE_URL; /* SPID_URL */
     memcpy(ptr, nmc.nabtoMainSetup.id, sid_len);
     
@@ -335,9 +343,9 @@ static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uin
     bool res = false;
     uint8_t* ptr = insert_header(buf, 0, nmc.context.gspnsi, U_ATTACH, true, seq, 0, 0);
 
-    ptr = insert_capabilities(ptr, nmc.context.clearTextData);
+    ptr = insert_capabilities(ptr, end, nmc.context.clearTextData);
 
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_IPX, 0, 13);
+    ptr = insert_payload(ptr, end,  NP_PAYLOAD_TYPE_IPX, 0, 13);
     WRITE_U32(ptr, nmc.socketGSPLocalEndpoint.addr); ptr += 4;
     WRITE_U16(ptr, nmc.socketGSPLocalEndpoint.port); ptr += 2;
     WRITE_U32(ptr, nmc.context.globalAddress.addr); ptr += 4;
@@ -348,8 +356,7 @@ static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uin
 
     if (nmc.context.nonceSize == NONCE_SIZE_OLD) {
         size_t sz;
-        //NABTO_LOG_INFO(("########    U_ATTACH response without crypto payload sent"));
-        sz = verification_complete(&nmc.context.verif2, buf, ptr);
+        sz = verification_complete(&nmc.context.verif2, buf, end, ptr);
         send_to_basestation(nabtoCommunicationBuffer, sz, &nmc.context.gsp);
         res = true;
     } else {
@@ -360,7 +367,7 @@ static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uin
         nabto_random(tmp + NONCE_SIZE, SEED_SIZE);
         unabto_crypto_reinit_c(nonceGSP, tmp + NONCE_SIZE, seedGSP);
 
-        ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
+        ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
 
         return send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoAttach, tmp, sizeof(tmp), ptr);
 
@@ -478,6 +485,7 @@ void handle_ok_invite_event(void)
     
     if (nmc.context.state == NABTO_AS_WAIT_BS) {
         SET_CTX_STATE_STAMP(NABTO_AS_WAIT_GSP, 0);
+        NABTO_LOG_INFO(("GSP address: " PRIep, MAKE_EP_PRINTABLE(nmc.context.gsp)));
         return;
     }
     if (nmc.context.state == NABTO_AS_WAIT_DNS_FALLBACK_BS) {
@@ -486,6 +494,7 @@ void handle_ok_invite_event(void)
             if (nmc.nabtoMainSetup.forceDnsFallback) {
                 // force dns fallback
                 SET_CTX_STATE_STAMP(NABTO_AS_WAIT_GSP, 0);
+                NABTO_LOG_INFO(("GSP address: " PRIep, MAKE_EP_PRINTABLE(nmc.context.gsp)));
                 return;
             }
         }
@@ -497,6 +506,7 @@ void handle_ok_invite_event(void)
     if (nmc.context.state == NABTO_AS_WAIT_DNS_FALLBACK_UDP_BS) {
         nmc.context.useDnsFallback = false;
         SET_CTX_STATE_STAMP(NABTO_AS_WAIT_GSP, 0);
+        NABTO_LOG_INFO(("GSP address: " PRIep, MAKE_EP_PRINTABLE(nmc.context.gsp)));
         return;
     }
 }
@@ -579,6 +589,7 @@ static uint8_t handle_actual_attach(nabto_packet_header* hdr, uint8_t* ptr)
     NABTO_LOG_DEBUG(("GSP-ID(nsi): %u", nmc.context.gspnsi));
     if(send_gsp_attach_rsp(hdr->seq, nonceGSP, seedGSP)) { /* Send packet (5) */
         SET_CTX_STATE_STAMP(NABTO_AS_ATTACHED, nmc.nabtoMainSetup.gspPollTimeout);
+        PUSHNOTIFY;
         result =  NP_PAYLOAD_ATTACH_STATS_STATUS_OK;
     }
 
@@ -791,7 +802,7 @@ void handle_as_idle(void) {
         return;
     }
     SET_CTX_STATE_STAMP(NABTO_AS_WAIT_DNS, 0);
-    NABTO_LOG_INFO(("Resolving dns: %s", nmc.nabtoMainSetup.id));
+    NABTO_LOG_INFO(("Resolving DNS for %s", nmc.nabtoMainSetup.id));
     nabto_dns_resolve(nmc.nabtoMainSetup.id);
 }
 
@@ -810,7 +821,7 @@ void handle_as_wait_dns(void) {
         nmc.context.errorCount += 2;
         break;
     case NABTO_DNS_OK:
-        NABTO_LOG_TRACE(("Base station resolved to EP: " PRIep, MAKE_EP_PRINTABLE(nmc.controllerEp)));
+        NABTO_LOG_INFO(("Resolved DNS for %s to " PRIep, nmc.nabtoMainSetup.id, MAKE_EP_PRINTABLE(nmc.controllerEp)));
         nmc.context.errorCount = 0;
         SET_CTX_STATE_STAMP(NABTO_AS_WAIT_BS, 0);
         break;
@@ -969,7 +980,7 @@ uint8_t* insert_attach_stats_payload(uint8_t* ptr, uint8_t* end, uint8_t statusC
         return NULL;
     }
 
-    ptr = insert_payload(ptr, NP_PAYLOAD_TYPE_ATTACH_STATS, 0, 3);
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_ATTACH_STATS, 0, 3);
 
     WRITE_FORWARD_U8(ptr, NP_PAYLOAD_ATTACH_STATS_VERSION);
 

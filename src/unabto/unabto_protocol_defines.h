@@ -157,6 +157,7 @@ enum np_payload_type_e {
     NP_PAYLOAD_TYPE_FP               = 0x4B, /* 'K' fingerprint of certificate payload */
     NP_PAYLOAD_TYPE_PUSH             = 0x4C, /* 'L' Push notification payload          */
     NP_PAYLOAD_TYPE_PUSH_DATA        = 0x4D, /* 'M' Push notification data payload     */
+    NP_PAYLOAD_TYPE_STREAM_STATS     = 0x4E, /* 'N' Stream statistics */
 };
 
 /* Payload header flags */
@@ -674,6 +675,7 @@ enum np_payload_type_e {
 #define NP_PAYLOAD_STATS_TYPE_CLIENT_CONNECTION_FAILED        5
 #define NP_PAYLOAD_STATS_TYPE_CLIENT_CONNECTION_ENDED         6
 #define NP_PAYLOAD_STATS_TYPE_UNABTO_ATTACH_FAILED            7
+#define NP_PAYLOAD_STATS_TYPE_UNABTO_STREAM_ENDED             8
 
 /*****************************************************************************/
 /* Connect stats payload */
@@ -778,6 +780,63 @@ enum np_payload_type_e {
 
 #define NP_PAYLOAD_ATTACH_STATS_FLAGS_SECURE_ATTACH 0x1
 
+/*****************************************************************************/
+/* Stream stats payload */
+/* The attachment statistics payload data has the following layout:
+ *      +-----+----------------------------------------------------------------+
+ *      |  +0 |  Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)              |
+        +-----+----------------------------------------------------------------+
+ *      List of the following data type
+ *      +-----+----------------------------------------------------------+
+ *      | +0 | Value type (uint8_t)                                      |
+ *      +-----+----------------------------------------------------------+
+ *      | +1 | Value Length (uint8_t) (including type and length)        |
+ *      +-----+----------------------------------------------------------+
+ *      | +2 | Value format which depends on the type                    |
+ *      +-----+----------------------------------------------------------+
+ */
+
+#define NP_PAYLOAD_STREAM_STATS_VERSION 1
+
+enum np_payload_stream_stats_e {
+    NP_PAYLOAD_STREAM_STATS_SENT_PACKETS                          = 1,  /* uint32_t */
+    NP_PAYLOAD_STREAM_STATS_SENT_BYTES                            = 2,  /* uint32_t */
+    NP_PAYLOAD_STREAM_STATS_SENT_RESENT_PACKETS                   = 3,  /* uint32_t */
+    NP_PAYLOAD_STREAM_STATS_RECEIVED_PACKETS                      = 4,  /* uint32_t */
+    NP_PAYLOAD_STREAM_STATS_RECEIVED_BYTES                        = 5,  /* uint32_t */
+    NP_PAYLOAD_STREAM_STATS_RECEIVED_RESENT_PACKETS               = 6,  /* uint32_t */
+    NP_PAYLOAD_STREAM_STATS_REORDERED_OR_LOST_PACKETS             = 7,  /* uint32_t */
+    NP_PAYLOAD_STREAM_STATS_USER_WRITE                            = 8,  /* uint32_t number of times write was called on the stream */
+    NP_PAYLOAD_STREAM_STATS_USER_READ                             = 9,  /* uint32_t number of times read was called on the stream */
+
+    NP_PAYLOAD_STREAM_STATS_RTT_MIN                               = 10, /* uint16_t round trip time */
+    NP_PAYLOAD_STREAM_STATS_RTT_MAX                               = 11, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_RTT_AVG                               = 12, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_CWND_MIN                              = 13, /* uint16_t congestion window size */
+    NP_PAYLOAD_STREAM_STATS_CWND_MAX                              = 14, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_CWND_AVG                              = 15, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MIN                      = 16, /* uint16_t slow start threshold */
+    NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MAX                      = 17, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_AVG                      = 18, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_MIN                    = 19, /* uint16_t packets awaiting acknowledgedment on the network */
+    NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_MAX                    = 20, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_AVG                    = 21, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_DURATION                              = 22, /* uint32_t duration in ms */
+    NP_PAYLOAD_STREAM_STATS_STATUS                                = 23, /* uint8_t (np_payload_stream_stats_status_e)*/
+    NP_PAYLOAD_STREAM_STATS_CP_ID                                 = 24, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_SP_ID                                 = 25, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_TAG                                   = 26, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_RECEIVED                = 27, /* uint32_t duration in ms */
+    NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_SENT                    = 28, /* uint32_t duration in ms */
+    NP_PAYLOAD_STREAM_STATS_TIMEOUTS                              = 29  /* uint32_t counter of stream congestion cointrol timeouts*/
+    
+};
+
+enum np_payload_stream_stats_status_e {
+    NP_PAYLOAD_STREAM_STATS_STATUS_OPEN = 1,
+    NP_PAYLOAD_STREAM_STATS_STATUS_CLOSED = 2,
+    NP_PAYLOAD_STREAM_STATS_STATUS_CLOSED_ABORTED = 3
+};
 
 /*****************************************************************************/
 /* System info payload */
@@ -785,15 +844,15 @@ enum np_payload_type_e {
  * idea is to provide a lightweight optional data structure for system
  * information of statistical characterization.
  * +-----+----------------------------------------------------------------+
- * | +0 | Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes) |
+ * | +0 | Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)                |
  * +-----+-----+----------------------------------------------------------+
  * List of the following data type
  * +-----+----------------------------------------------------------+
- * | +0 | Value type (uint8_t) |
+ * | +0 | Value type (uint8_t)                                      |
  * +-----+----------------------------------------------------------+
- * | +1 | Value Length (uint8_t) |
+ * | +1 | Value Length (uint8_t)  (including type and length bytes) |
  * +-----+----------------------------------------------------------+
- * | +2 | Value format which depends on the type |
+ * | +2 | Value format which depends on the type                    |
  * +-----+----------------------------------------------------------+
  */
 enum np_payload_system_info_e {
@@ -962,12 +1021,37 @@ enum np_payload_system_info_nat64_e {
  *    +-----+-----------------------------------------------------------------+
  *    |  +4 |  +0 | purpose                                                   |
  *    +-----+-----+-----------------------------------------------------------+
- *    |  +5 |  +1 | type                                                      |
+ *    |  +5 |  +1 | encoding                                                  |
  *    +-----+-----+-----------------------------------------------------------+
  *    |  +6 |  +2 | Data                                                      |
  *    +-----+-----+-----------------------------------------------------------+
  */
 
 #define NP_PAYLOAD_PUSH_DATA_SIZE_WO_DATA    6 ///< Size of the push notification payload
- 
+#define NP_PAYLOAD_PUSH_DATA_PURPOSE_STATIC  1 ///< purpose value for static data from client
+#define NP_PAYLOAD_PUSH_DATA_PURPOSE_DYNAMIC 2 ///< Purpose value for dynamic data from uNabto
+#define NP_PAYLOAD_PUSH_DATA_ENCODING_JSON   1 ///< JSON encoded payload
+#define NP_PAYLOAD_PUSH_DATA_ENCODING_TLV    2 ///< TLV encoded payload
+
+/******************************************************************************/
+/* Push notification data types                                               */
+/* The Push notification data payload of type                                 */
+/* NP_PAYLOAD_PUSH_DATA_PURPOSE_DYNAMIC can contain the following data with   */
+/* the format, where length is the combined length of Data, Type and Length:  */
+/*  +-----+-------------------------------------------------------------------+
+ *  |  +0 | Type                                                              |
+ *  +-----+-------------------------------------------------------------------+
+ *  |  +1 | Length                                                            |
+ *  +-----+-------------------------------------------------------------------+
+ *  |  +2 | Data                                                              |
+ *  +-----+-------------------------------------------------------------------+
+ */
+#define NP_PAYLOAD_PUSH_DATA_VALUE_TITLE                1
+#define NP_PAYLOAD_PUSH_DATA_VALUE_BODY                 2
+#define NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_KEY         3
+#define NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_STRING_ARG  4
+#define NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_KEY        5
+#define NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_STRING_ARG 6
+
+
 #endif

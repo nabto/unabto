@@ -112,6 +112,23 @@ typedef struct {
     bool          resentByRetransmissionTimer;
 } x_buffer;
 
+
+// structure which can tell some statistics about a double.
+
+struct unabto_stats {
+    double min;
+    double max;
+    double avg;
+    double count;
+};
+
+typedef struct {
+    struct unabto_stats rtt; // rount trip time
+    struct unabto_stats cwnd; // congestion window size
+    struct unabto_stats ssThreshold; // slow start threshold
+    struct unabto_stats sentNotAcked; // data on the line
+} nabto_stream_congestion_control_stats;
+
 typedef struct {
     double        srtt;          ///< Smoothed round trip time.
     double        rttVar;        ///< Round trip time variance.
@@ -124,7 +141,9 @@ typedef struct {
                                  ///and we are running the fast
                                  ///retransmit / fast recovery
                                  ///algorithm
+    
 } nabto_stream_congestion_control;
+
 
 /** Stream Transfer Control Block */
 struct nabto_stream_tcb {
@@ -178,6 +197,7 @@ struct nabto_stream_tcb {
     r_buffer*                       recv; /**< receive window          */
  
     nabto_stream_congestion_control cCtrl;
+    nabto_stream_congestion_control_stats ccStats;
 
     // Receiving packets designated by a sequence number 'seq'
     // -------------------------------------------------------
@@ -337,7 +357,7 @@ uint32_t unabto_stream_ack_number_to_send(struct nabto_stream_tcb* tcb);
  * functions. Further it should define the type nabto_stream_congestion_control_t
  * which it can use for store congestion control data 
  */
-void update_receive_stats(struct nabto_stream_s * stream, uint16_t ix);
+void unabto_stream_update_congestion_control_receive_stats(struct nabto_stream_s * stream, uint16_t ix);
 
 void unabto_stream_congestion_control_adjust_ssthresh_after_triple_ack(struct nabto_stream_tcb* tcb);
 
@@ -359,12 +379,28 @@ void unabto_stream_congestion_control_sent(struct nabto_stream_tcb* tcb, uint16_
 /**
  * Called when an ack is handled.
  */
-void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, uint16_t ix);
+void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, uint16_t ix, bool ackStartOfWindow);
 
 /**
  * Called before a data packet is sent to test if it's allowed to be sent.
  */
 bool unabto_stream_congestion_control_can_send(struct nabto_stream_tcb* tcb, uint16_t ix, bool new_data);
+
+/**
+ * Send stream statistics packet
+ */
+void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event);
+
+
+/**
+ * observe a value.
+ */
+void unabto_stream_stats_observe(struct unabto_stats* stat, double value);
+
+/**
+ * get stream duration in ms
+ */
+uint32_t unabto_stream_get_duration(struct nabto_stream_s * stream);
 
 #ifdef __cplusplus
 } // extern "C"

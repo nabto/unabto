@@ -90,6 +90,10 @@
 #define nabtoStampLess(s1,s2) (*s1 < *s2)
 #endif
 
+#ifndef nabtoStampLessOrEqual
+#define nabtoStampLessOrEqual(s1,s2) (*s1 <= *s2)
+#endif
+
 
 #ifndef UNABTO_INADDR_NONE
 #define UNABTO_INADDR_NONE (0xffffffffu)
