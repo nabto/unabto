@@ -128,7 +128,6 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x12s[] = "s";     const char* x12l[] = { "dummy-key", 0 };
     const char x13s[] = "k";     const char* x13l[] = { "encryption-key", 0 };
     const char x14s[] = "p";     const char* x14l[] = { "localport", 0 };
-    const char x15s[] = "a";     const char* x15l[] = { "check-acl", 0 };
     const char x16s[] = "";      const char* x16l[] = { "allow-port", 0};
     const char x17s[] = "";      const char* x17l[] = { "allow-host", 0};
     const char x18s[] = "x";     const char* x18l[] = { "nice-exit", 0};
@@ -334,7 +333,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
             ports[i] = atoi(opt);
         }
     } else {
-        NABTO_LOG_FATAL(("You did not allow client to connect to any ports, specify with '--allow_port'. Try -h for help."));
+        NABTO_LOG_FATAL(("You did not allow client to connect to any ports, specify with '--allow-port'. Try -h for help."));
     }
     
     hosts_length = gopt(options, ALLOW_HOST_OPTION);
@@ -489,7 +488,7 @@ bool allow_client_access(nabto_connect* connection) {
     }
 }
 
-bool allow_client_tunnel(nabto_connect* connection) {
+bool unabto_tunnel_allow_client_access(nabto_connect* connection) {
     if (no_access_control) {
         return true;
     } else {

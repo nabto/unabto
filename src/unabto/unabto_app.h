@@ -52,15 +52,6 @@ extern "C" {
 bool allow_client_access(nabto_connect* connection);
 #endif
 
-#if NABTO_ENABLE_TUNNEL_OPEN_ACL_CHECK
-/**
- * Query at tunnel open request whether a client is allowed access (check ACL, optional functionality).
- * @param connection  the connection being established
- * @return            true if access to the devices is allowed
- */
-bool allow_client_tunnel(nabto_connect* connection);
-#endif
-
     
 /** Identifies the request including the caller */
 typedef struct {

@@ -109,11 +109,6 @@
 #define NABTO_ENABLE_CONNECTION_ESTABLISHMENT_ACL_CHECK 0
 #endif
 
-/** Query at tunnel open request whether a client is allowed access */
-#ifndef NABTO_ENABLE_TUNNEL_OPEN_ACL_CHECK
-#define NABTO_ENABLE_TUNNEL_OPEN_ACL_CHECK 0
-#endif
-
 /**
  * Enable status callbacks. The status callback functionality enables
  * applications which uses the uNabto framework to get status callbacks
