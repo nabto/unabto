@@ -46,6 +46,7 @@ typedef enum {
 } tunnel_event_source;
 
 typedef enum {
+    TUNNEL_TYPE_NONE,
     TUNNEL_TYPE_TCP,
     TUNNEL_TYPE_UART,
     TUNNEL_TYPE_ECHO
@@ -111,7 +112,7 @@ void unabto_tunnel_event(tunnel* tunnel, tunnel_event_source event_source);
 void unabto_tunnel_idle(tunnel* tunnel, tunnel_event_source tunnel_event);
 void unabto_tunnel_read_command(tunnel* tunnel, tunnel_event_source tunnel_event);
 void unabto_tunnel_parse_command(tunnel* tunnel, tunnel_event_source tunnel_event);
-void unabto_tunnel_failed_command(tunnel* tunnel, tunnel_event_source tunnel_event);
+void unabto_tunnel_closing(tunnel* tunnel, tunnel_event_source tunnel_event);
 
 void unabto_tunnel_event_dispatch(tunnel* tunnel, tunnel_event_source event_source);
 
@@ -123,6 +124,15 @@ bool tunnel_send_init_message(tunnel* tunnel, const char* msg);
 #if NABTO_ENABLE_EPOLL
 void unabto_tunnel_epoll_event(struct epoll_event* event);
 #endif
+
+/**
+ * Query at tunnel open request whether a client is allowed access (check ACL, optional functionality).
+ * @param connection  the connection being established
+ * @return            true if access to the devices is allowed
+ */
+bool unabto_tunnel_allow_client_access(nabto_connect* connection);
+
+
 
 
 #endif // _UNABTO_TUNNEL_COMMON_H_

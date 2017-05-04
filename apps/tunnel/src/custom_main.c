@@ -50,7 +50,7 @@ bool allow_client_access(nabto_connect* connection) {
     return false;
 }
 
-bool allow_client_tunnel(nabto_connect* connection) {
+bool unabto_tunnel_allow_client_access(nabto_connect* connection) {
     // see allow_client_access in main.c for example of an implementation that uses the FP ACL module
     return false;
 }
