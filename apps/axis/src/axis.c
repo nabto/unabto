@@ -101,3 +101,7 @@ application_event_result application_poll(application_request* applicationReques
 
 void application_poll_drop(application_request* applicationRequest) {
 }
+
+bool unabto_tunnel_allow_client_access(nabto_connect* connection) {
+    return true;
+}

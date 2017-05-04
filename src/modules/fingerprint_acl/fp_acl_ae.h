@@ -26,6 +26,11 @@ void fp_acl_ae_init(struct fp_acl_db* db);
 bool fp_acl_is_request_allowed(application_request* request, uint32_t requiredPermissions);
 
 /**
+ * call this function when opening a tunnel to check that sufficient permissions is present 
+ */
+bool fp_acl_is_tunnel_allowed(nabto_connect* connection, uint32_t requiredPermissions);
+
+/**
  * call this function to see if the given application
  * requets/connection is allowed to pair with the device.
  */

@@ -52,7 +52,7 @@ extern "C" {
 bool allow_client_access(nabto_connect* connection);
 #endif
 
-
+    
 /** Identifies the request including the caller */
 typedef struct {
     uint32_t       queryId;    ///< The query id.

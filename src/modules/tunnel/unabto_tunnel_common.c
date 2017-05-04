@@ -1,4 +1,4 @@
-
+#include <unabto/unabto_app.h>
 #include <unabto/unabto_stream.h>
 #include <unabto/unabto_memory.h>
 #include <errno.h>
@@ -49,13 +49,23 @@ void unabto_tunnel_deinit_tunnels()
 }
 
 void unabto_tunnel_stream_accept(unabto_stream* stream) {
+    bool allowTunnel = false;
+    nabto_connect* con = unabto_stream_connection(stream);
+    if (con && unabto_tunnel_allow_client_access(con)) {
+        allowTunnel = true;
+    }
+
     tunnel* t = &tunnels[unabto_stream_index(stream)];
     NABTO_LOG_TRACE(("Accepting stream and assigning it to tunnel %i", t));
     UNABTO_ASSERT(t->state == TS_IDLE);
     unabto_tunnel_reset_tunnel_struct(t);
 
     t->stream = stream;
-    t->state = TS_READ_COMMAND;
+    if (allowTunnel) {
+        t->state = TS_READ_COMMAND;
+    } else {
+        t->state = TS_CLOSING;
+    }
     t->tunnelId = tunnelCounter++;
 }
 
@@ -66,11 +76,8 @@ tunnel* unabto_tunnel_get_tunnel(unabto_stream* stream)
     return t;
 }
 
-
-
 void unabto_tunnel_event(tunnel* tunnel, tunnel_event_source event_source)
 {
-    
     NABTO_LOG_TRACE(("Tunnel event on tunnel %i, source %i", tunnel->tunnelId, event_source));
     if (tunnel->state == TS_IDLE) {
         unabto_tunnel_idle(tunnel, event_source);
@@ -86,7 +93,7 @@ void unabto_tunnel_event(tunnel* tunnel, tunnel_event_source event_source)
     }
 
     if (tunnel->state == TS_FAILED_COMMAND) {
-        unabto_tunnel_failed_command(tunnel, event_source);
+        unabto_tunnel_closing(tunnel, event_source);
     }
     
     if (tunnel->state >= TS_PARSE_COMMAND) {
@@ -170,9 +177,9 @@ void unabto_tunnel_parse_command(tunnel* tunnel, tunnel_event_source tunnel_even
 }
 
 
-void unabto_tunnel_failed_command(tunnel* tunnel, tunnel_event_source tunnel_event)
+void unabto_tunnel_closing(tunnel* tunnel, tunnel_event_source tunnel_event)
 {
-    if (tunnel->state == TS_FAILED_COMMAND) {
+    if (tunnel->state == TS_CLOSING || tunnel->state == TS_FAILED_COMMAND) {
         const uint8_t* buf;
         unabto_stream_hint hint;
         size_t readen;
@@ -200,6 +207,7 @@ void unabto_tunnel_failed_command(tunnel* tunnel, tunnel_event_source tunnel_eve
     }
 }
 
+
 void unabto_tunnel_idle(tunnel* tunnel, tunnel_event_source event_source)
 {
     NABTO_LOG_ERROR(("Tunnel(%i), Event on tunnel which should not be in IDLE state. source %i, unabtoReadState %i, stream index %i, Tunnel type unrecognized.", tunnel->tunnelId, event_source,tunnel->unabtoReadState, unabto_stream_index(tunnel->stream)));
@@ -211,20 +219,29 @@ void unabto_tunnel_event_dispatch(tunnel* tunnel, tunnel_event_source tunnel_eve
 #if NABTO_ENABLE_TUNNEL_UART
     if (tunnel->tunnelType == TUNNEL_TYPE_UART) {
         unabto_tunnel_uart_event(tunnel, tunnel_event);
+        return;
     }
 #endif
 
 #if NABTO_ENABLE_TUNNEL_TCP
     if (tunnel->tunnelType == TUNNEL_TYPE_TCP) {
         unabto_tunnel_tcp_event(tunnel, tunnel_event);
+        return;
     }
 #endif
 
 #if NABTO_ENABLE_TUNNEL_ECHO
     if (tunnel->tunnelType == TUNNEL_TYPE_ECHO) {
         unabto_tunnel_echo_event(tunnel, tunnel_event);
+        return;
     }
 #endif
+
+    // else unknown type or closing.
+    if (tunnel->tunnelType == TUNNEL_TYPE_NONE) {
+        unabto_tunnel_closing(tunnel, tunnel_event);
+        return;
+    }
 }
 
 void unabto_tunnel_select_add_to_fd_set(fd_set* readFds, int* maxReadFd, fd_set* writeFds, int* maxWriteFd)

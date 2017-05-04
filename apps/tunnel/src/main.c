@@ -128,7 +128,6 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x12s[] = "s";     const char* x12l[] = { "dummy-key", 0 };
     const char x13s[] = "k";     const char* x13l[] = { "encryption-key", 0 };
     const char x14s[] = "p";     const char* x14l[] = { "localport", 0 };
-    const char x15s[] = "a";     const char* x15l[] = { "check-acl", 0 };
     const char x16s[] = "";      const char* x16l[] = { "allow-port", 0};
     const char x17s[] = "";      const char* x17l[] = { "allow-host", 0};
     const char x18s[] = "x";     const char* x18l[] = { "nice-exit", 0};
@@ -211,6 +210,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("  -P, --tunnel-default-port   Set default port for tunnel (%u).\n", UNABTO_TUNNEL_TCP_DEFAULT_PORT);
         printf("  -k, --encryption-key        Specify encryption key.\n");
         printf("  -s, --dummy-key             Use dummy key (for testing only).\n");
+        printf("      --no-crypto             Disable crypto (requires special basestation and client).\n");
         printf("  -p, --localport             Specify port for local connections.\n");
         printf("  -A, --controller            Specify controller address\n");
         printf("      --controller-port       sets the controller port number.\n");
@@ -220,7 +220,6 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("      --allow-all-hosts       Allow connections to all TCP hosts.\n");
         printf("      --no-access-control     Do not enforce client access control on incoming connections. \n");
         printf("  -x, --nice-exit             Close the tunnels nicely when pressing Ctrl+C.\n");
-        printf("      --no-crypto             Disable crypto (requires special basestation and client).\n");
 #if NABTO_ENABLE_TCP_FALLBACK
         printf("      --disable-tcp-fb        Disable tcp fallback.\n");
 #endif
@@ -334,7 +333,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
             ports[i] = atoi(opt);
         }
     } else {
-        NABTO_LOG_FATAL(("You did not allow client to connect to any ports, specify with '--allow_port'. Try -h for help."));
+        NABTO_LOG_FATAL(("You did not allow client to connect to any ports, specify with '--allow-port'. Try -h for help."));
     }
     
     hosts_length = gopt(options, ALLOW_HOST_OPTION);
@@ -483,9 +482,18 @@ bool allow_client_access(nabto_connect* connection) {
     if (no_access_control) {
         return true;
     } else {
-        bool local = connection->isLocal;
         bool allow = fp_acl_is_connection_allowed(connection);
-        NABTO_LOG_INFO(("Allowing %s connect request: %s", (local ? "local" : "remote"), (allow ? "yes" : "no")));
+        NABTO_LOG_INFO(("Allowing %s connect request: %s", (connection->isLocal ? "local" : "remote"), (allow ? "yes" : "no")));
+        return allow;
+    }
+}
+
+bool unabto_tunnel_allow_client_access(nabto_connect* connection) {
+    if (no_access_control) {
+        return true;
+    } else {
+        bool allow = fp_acl_is_tunnel_allowed(connection, FP_ACL_PERMISSION_NONE);
+        NABTO_LOG_INFO(("Allowing %s tunnel open request: %s", (connection->isLocal ? "local" : "remote"), (allow ? "yes" : "no")));
         return allow;
     }
 }
