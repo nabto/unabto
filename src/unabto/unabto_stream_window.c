@@ -1664,7 +1664,6 @@ void unabto_stream_congestion_control_adjust_ssthresh_after_triple_ack(struct na
         unabto_stream_stats_observe(&tcb->ccStats.ssThreshold, tcb->cCtrl.ssThreshold);
         tcb->cCtrl.lostSegment = true;
     }
-    tcb->cCtrl.cwnd += 3;
 }
 
 /**
