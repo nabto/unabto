@@ -174,6 +174,19 @@ int unabto_stream_get_connection_type(unabto_stream* stream, nabto_connection_ty
 #endif
 
 int unabto_stream_get_stats(unabto_stream* stream, unabto_stream_stats* stats) {
+
+    stream->stats.rttMin = stream->u.tcb.ccStats.rtt.min;
+    stream->stats.rttMax = stream->u.tcb.ccStats.rtt.max;
+    stream->stats.rttAvg = stream->u.tcb.ccStats.rtt.avg;
+    stream->stats.cwndMin = stream->u.tcb.ccStats.cwnd.min;
+    stream->stats.cwndMax = stream->u.tcb.ccStats.cwnd.max;
+    stream->stats.cwndAvg = stream->u.tcb.ccStats.cwnd.avg;
+    stream->stats.ssThresholdMin = stream->u.tcb.ccStats.ssThreshold.min;
+    stream->stats.ssThresholdMax = stream->u.tcb.ccStats.ssThreshold.max;
+    stream->stats.ssThresholdAvg = stream->u.tcb.ccStats.ssThreshold.avg;
+    stream->stats.sentNotAckedMin = stream->u.tcb.ccStats.sentNotAcked.min;
+    stream->stats.sentNotAckedMax = stream->u.tcb.ccStats.sentNotAcked.max;
+    stream->stats.sentNotAckedAvg = stream->u.tcb.ccStats.sentNotAcked.avg;
     *stats = stream->stats;
     return 0;
 }

@@ -45,7 +45,28 @@ typedef struct unabto_stream_stats_s {
     unsigned int timeouts;
     unsigned int timeFirstMBReceived; // ms, 0 if not set,
     unsigned int timeFirstMBSent; // ms, 0 if not set
+    unsigned int rttMin;
+    unsigned int rttMax;
+    unsigned int rttAvg;
+    unsigned int cwndMin;
+    unsigned int cwndMax;
+    unsigned int cwndAvg;
+    unsigned int ssThresholdMin;
+    unsigned int ssThresholdMax;
+    unsigned int ssThresholdAvg;
+    unsigned int sentNotAckedMin;
+    unsigned int sentNotAckedMax;
+    unsigned int sentNotAckedAvg;
+
 } unabto_stream_stats;
+
+#ifndef UNABTO_STREAM_STATS_MAKE_PRINTABLE
+#define UNABTO_STREAM_STATS_MAKE_PRINTABLE(stats) (stats.sentPackets), (stats.sentBytes), (stats.sentResentPackets),(stats.receivedPackets), (stats.receivedBytes), (stats.receivedResentPackets), (stats.reorderedOrLostPackets), (stats.timeouts), (stats.rttAvg), (stats.cwndAvg), (stats.ssThresholdAvg), (stats.sentNotAckedAvg)
+#endif
+
+#ifndef UNABTO_STREAM_STATS_PRI
+#define UNABTO_STREAM_STATS_PRI "sentPackets: %u, sentBytes %u, sentResentPackets %u, receivedPackets %u, receivedBytes %u, receivedResentPackets %u, reorderedOrLostPackets %u, timeouts %u, rtt avg %u, cwnd avg %u, ssthreshold avg %u, sentNotAcked avg %u"
+#endif
 
 typedef enum
 {

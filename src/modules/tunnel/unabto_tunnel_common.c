@@ -196,10 +196,7 @@ void unabto_tunnel_closing(tunnel* tunnel, tunnel_event_source tunnel_event)
             unabto_stream_get_stats(tunnel->stream, &info);
             
             NABTO_LOG_TRACE(("Closed tunnel successfully"));
-            NABTO_LOG_INFO(("Tunnel(%i) closed, sentPackets: %u, sentBytes %u, sentResentPackets %u, receivedPackets %u, receivedBytes %u, receivedResentPackets %u, reorderedOrLostPackets %u, timeouts %u", 
-                            tunnel->tunnelId,
-                            info.sentPackets, info.sentBytes, info.sentResentPackets,
-                            info.receivedPackets, info.receivedBytes, info.receivedResentPackets, info.reorderedOrLostPackets,info.timeouts));
+            NABTO_LOG_INFO(("Tunnel(%i) closed, " UNABTO_STREAM_STATS_PRI, tunnel->tunnelId, UNABTO_STREAM_STATS_MAKE_PRINTABLE(info)));
             
             unabto_stream_release(tunnel->stream);
             unabto_tunnel_reset_tunnel_struct(tunnel);

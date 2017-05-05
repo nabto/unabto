@@ -461,36 +461,37 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
         }
         ptr = unabto_stream_stats_write_u8(ptr, end, NP_PAYLOAD_STREAM_STATS_STATUS, streamState);
     }
+    unabto_stream_stats stats;
+    if(unabto_stream_get_stats(stream, &stats) == UNABTO_STREAM_HINT_OK){
+        // stream stats
+        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_PACKETS,              stats.sentPackets);
+        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_BYTES,                stats.sentBytes);
+        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_RESENT_PACKETS,       stats.sentResentPackets);
+        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_PACKETS,          stats.receivedPackets);
+        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_BYTES,            stats.receivedBytes);
+        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_RESENT_PACKETS,   stats.receivedResentPackets);
+        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_REORDERED_OR_LOST_PACKETS, stats.reorderedOrLostPackets);
+        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_USER_WRITE,                stats.userWrite);
+        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_USER_READ,                 stats.userRead);
 
-    // stream stats
-    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_PACKETS,              stream->stats.sentPackets);
-    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_BYTES,                stream->stats.sentBytes);
-    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_RESENT_PACKETS,       stream->stats.sentResentPackets);
-    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_PACKETS,          stream->stats.receivedPackets);
-    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_BYTES,            stream->stats.receivedBytes);
-    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_RESENT_PACKETS,   stream->stats.receivedResentPackets);
-    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_REORDERED_OR_LOST_PACKETS, stream->stats.reorderedOrLostPackets);
-    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_USER_WRITE,                stream->stats.userWrite);
-    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_USER_READ,                 stream->stats.userRead);
+        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_MIN,                   stats.rttMin);
+        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_MAX,                   stats.rttMax);
+        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_AVG,                   stats.rttAvg);
 
-    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_MIN,                   stream->u.tcb.ccStats.rtt.min);
-    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_MAX,                   stream->u.tcb.ccStats.rtt.max);
-    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_AVG,                   stream->u.tcb.ccStats.rtt.avg);
+        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_MIN,                  stats.cwndMin);
+        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_MAX,                  stats.cwndMax);
+        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_AVG,                  stats.cwndAvg);
 
-    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_MIN,                  stream->u.tcb.ccStats.cwnd.min);
-    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_MAX,                  stream->u.tcb.ccStats.cwnd.max);
-    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_AVG,                  stream->u.tcb.ccStats.cwnd.avg);
+        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MIN,          stats.ssThresholdMin);
+        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MAX,          stats.ssThresholdMax);
+        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_AVG,          stats.ssThresholdAvg);
 
-    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MIN,          stream->u.tcb.ccStats.ssThreshold.min);
-    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MAX,          stream->u.tcb.ccStats.ssThreshold.max);
-    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_AVG,          stream->u.tcb.ccStats.ssThreshold.avg);
+        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_MIN,        stats.sentNotAckedMin);
+        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_MAX,        stats.sentNotAckedMax);
+        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_AVG,        stats.sentNotAckedAvg);
 
-    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_MIN,        stream->u.tcb.ccStats.sentNotAcked.min);
-    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_MAX,        stream->u.tcb.ccStats.sentNotAcked.max);
-    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_AVG,        stream->u.tcb.ccStats.sentNotAcked.avg);
-
-    ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIMEOUTS,                  stream->stats.timeouts);
-
+        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIMEOUTS,                  stats.timeouts);
+    }
     // insert payload length
     if (ptr != NULL) {
         WRITE_U16(payloadBegin + 2, ptr - payloadBegin);
