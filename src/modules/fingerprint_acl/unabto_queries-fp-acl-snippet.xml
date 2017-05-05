@@ -1,0 +1,125 @@
+<!-- the following queries are implemented by the fp_acl_ae module's fp_acl_ae_dispatch function -->
+
+<unabto_queries 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://www.nabto.com/unabto/query_model.xsd">
+
+  <!-- ... -->
+  
+  <!-- get all users that have access to device -->
+  <query name="get_users.json" id="11000">
+    <request>
+      <parameter name="count" type="uint8"/> 
+      <parameter name="start" type="uint32"/> 
+    </request>
+    <response format="json">
+      <list name="users">
+        <parameter name="fingerprint" type="raw" representation="hex"/>
+        <parameter name="name" type="raw"/>
+        <parameter name="permissions" type="uint32"/>
+      </list>
+    </response>
+  </query>
+
+  <!-- pair client (user) with this device -->
+  <query name="pair_with_device.json" id="11010">
+    <request>
+      <parameter name="name" type="raw"/>
+    </request>
+    <response format="json">
+      <parameter name="status" type="uint8"/>
+      <parameter name="fingerprint" type="raw" representation="hex"/>
+      <parameter name="name" type="raw"/>
+      <parameter name="permissions" type="uint32"/>
+    </response>
+  </query>
+  
+  <!-- get current user -->
+  <query name="get_current_user.json" id="11020">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="status" type="uint8"/>
+      <parameter name="fingerprint" type="raw" representation="hex"/>
+      <parameter name="name" type="raw"/>
+      <parameter name="permissions" type="uint32"/>
+    </response>
+  </query>
+  
+  <!-- get system security settings -->
+  <query name="get_system_security_settings.json" id="11030">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="status" type="uint8"/> 
+      <parameter name="permissions" type="uint32"/> 
+      <parameter name="default_user_permissions_after_pairing" type="uint32"/>
+    </response>
+  </query>
+
+  <!-- set system security settings -->
+  <query name="set_system_security_settings.json" id="11040">
+    <request>
+      <parameter name="permissions" type="uint32"/> 
+      <parameter name="default_user_permissions_after_pairing" type="uint32"/>
+    </request>
+    <response format="json">
+      <parameter name="status" type="uint8"/> 
+      <parameter name="permissions" type="uint32"/> 
+      <parameter name="default_user_permissions_after_pairing" type="uint32"/>
+    </response>
+  </query>
+
+  <!-- set user permissions -->
+  <query name="set_user_permissions.json" id="11050">
+    <request>
+      <parameter name="fingerprint" type="raw" representation="hex"/>
+      <parameter name="permissions" type="uint32"/> 
+    </request>
+    <response format="json">
+      <parameter name="status" type="uint8"/>
+      <parameter name="fingerprint" type="raw" representation="hex"/>
+      <parameter name="name" type="raw"/>
+      <parameter name="permissions" type="uint32"/>
+    </response>
+  </query>
+
+  <!-- set user name -->
+  <query name="set_user_name.json" id="11060">
+    <request>
+      <parameter name="fingerprint" type="raw" representation="hex"/>
+      <parameter name="name" type="raw"/>
+    </request>
+    <response format="json">
+      <parameter name="status" type="uint8"/>
+      <parameter name="fingerprint" type="raw" representation="hex"/>
+      <parameter name="name" type="raw"/>
+      <parameter name="permissions" type="uint32"/>
+    </response>
+  </query>
+
+  <!-- add user -->
+  <query name="add_user.json" id="11065">
+    <request>
+      <parameter name="fingerprint" type="raw" representation="hex"/>
+      <parameter name="name" type="raw"/>
+    </request>
+    <response format="json">
+      <parameter name="status" type="uint8"/>
+      <parameter name="fingerprint" type="raw" representation="hex"/>
+      <parameter name="name" type="raw"/>
+      <parameter name="permissions" type="uint32"/>
+    </response>
+  </query>
+
+  <!-- remove user -->
+  <query name="remove_user.json" id="11070">
+    <request>
+      <parameter name="fingerprint" type="raw" representation="hex"/>
+    </request>
+    <response format="json">
+      <parameter name="status" type="uint8"/>
+    </response>
+  </query>
+
+</unabto_queries>
