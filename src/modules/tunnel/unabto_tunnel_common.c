@@ -50,12 +50,13 @@ void unabto_tunnel_deinit_tunnels()
 
 void unabto_tunnel_stream_accept(unabto_stream* stream) {
     bool allowTunnel = false;
+    tunnel* t;
     nabto_connect* con = unabto_stream_connection(stream);
     if (con && unabto_tunnel_allow_client_access(con)) {
         allowTunnel = true;
     }
 
-    tunnel* t = &tunnels[unabto_stream_index(stream)];
+    t = &tunnels[unabto_stream_index(stream)];
     NABTO_LOG_TRACE(("Accepting stream and assigning it to tunnel %i", t));
     UNABTO_ASSERT(t->state == TS_IDLE);
     unabto_tunnel_reset_tunnel_struct(t);
