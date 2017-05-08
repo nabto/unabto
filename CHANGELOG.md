@@ -12,7 +12,14 @@ the release and a new unreleased section is added.
 
 ## 4.1.0 Unreleased
 
-...
+### Added
+### Removed
+
+### Changed
+- NABTO-1480: triple acks were not handled correct, this fix improves streaming throughput.
+
+### Breaking Changes
+- unabto_tunnel takes a new commandline format.
 
 
 ## 4.0.0 2017-04-28
