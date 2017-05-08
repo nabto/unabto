@@ -59,13 +59,11 @@ void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keys_size,
     uint16_t key_size = 0;
     uint8_t i;
     uint8_t* key;
-
+    uint8_t key_buffer[UNABTO_SHA256_BLOCK_LENGTH];
     if (keys_size == 1) {
         key = keys[0].data;
         key_size = keys[0].size;
     } else {
-        uint8_t key_buffer[UNABTO_SHA256_BLOCK_LENGTH];
-        
         for (i = 0; i < keys_size; i++) {
             key_size += keys[i].size;
         }
