@@ -427,6 +427,7 @@ uint8_t* unabto_stream_stats_write_u8(uint8_t* ptr, uint8_t* end, uint8_t type, 
 
 uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct nabto_stream_s* stream)
 {
+    unabto_stream_stats stats;
     uint8_t* payloadBegin = ptr;
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_STREAM_STATS, 0, 0);
 
@@ -461,7 +462,6 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
         }
         ptr = unabto_stream_stats_write_u8(ptr, end, NP_PAYLOAD_STREAM_STATS_STATUS, streamState);
     }
-    unabto_stream_stats stats;
     if(unabto_stream_get_stats(stream, &stats) == UNABTO_STREAM_HINT_OK){
         // stream stats
         ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_PACKETS,              stats.sentPackets);
