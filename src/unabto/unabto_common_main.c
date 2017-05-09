@@ -286,23 +286,19 @@ void unabto_time_event(void) {
 
 }
 
-bool unabto_init_aes_crypto(nabto_main_setup* nms, uint8_t* preSharedKey, size_t pskLength){
+bool unabto_set_aes_crypto(nabto_main_setup* nms, uint8_t* preSharedKey, size_t pskLength){
     nms->secureAttach = true;
     nms->secureData = true;
     nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
-    if (pskLength == 0 || preSharedKey == NULL) {
-        // using zero key, undocumented but handy for testing
-        return true;
-    }
-    if (pskLength != 16) {
-        NABTO_LOG_ERROR(("The pre shared key buffer needs to be exactly 16 bytes"));
+    if (pskLength != PRE_SHARED_KEY_SIZE) {
+        NABTO_LOG_ERROR(("The pre shared key buffer needs to be exactly %i bytes", PRE_SHARED_KEY_SIZE));
         return false;
     }
     memcpy(nms->presharedKey,preSharedKey,pskLength);
     return true;
 }
 
-void unabto_init_no_crypto(nabto_main_setup* nms){
+void unabto_set_no_crypto(nabto_main_setup* nms){
     nms->secureAttach = false;
     nms->secureData = false;
 }
