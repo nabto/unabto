@@ -286,22 +286,25 @@ void unabto_time_event(void) {
 
 }
 
-bool unabto_init_nms_crypto(nabto_main_setup* nms, bool secureAttach, bool secureData, crypto_suite crypt, uint8_t* preSharedKey, size_t pskLength){
-    nms->secureAttach = secureAttach;
-    nms->secureData = secureData;
-    if(secureAttach || secureData){
-        nms->cryptoSuite = crypt;
-        if (pskLength == 0 || preSharedKey == NULL) {
-            // using zero key, undocumented but handy for testing
-            return true;
-        }
-        if (pskLength != 16) {
-            NABTO_LOG_ERROR(("The pre shared key buffer needs to be exactly 16 bytes"));
-            return false;
-        }
-        memcpy(nms->presharedKey,preSharedKey,pskLength);
+bool unabto_init_aes_crypto(nabto_main_setup* nms, uint8_t* preSharedKey, size_t pskLength){
+    nms->secureAttach = true;
+    nms->secureData = true;
+    nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
+    if (pskLength == 0 || preSharedKey == NULL) {
+        // using zero key, undocumented but handy for testing
+        return true;
     }
+    if (pskLength != 16) {
+        NABTO_LOG_ERROR(("The pre shared key buffer needs to be exactly 16 bytes"));
+        return false;
+    }
+    memcpy(nms->presharedKey,preSharedKey,pskLength);
     return true;
+}
+
+void unabto_init_no_crypto(nabto_main_setup* nms){
+    nms->secureAttach = false;
+    nms->secureData = false;
 }
 
 static ssize_t read_event_socket(nabto_socket_t socket, message_event* event) {

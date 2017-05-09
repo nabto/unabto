@@ -90,7 +90,20 @@ void unabto_close(void);
  */
 void unabto_tick(void);
 
-bool unabto_init_nms_crypto(nabto_main_setup* nms, bool secureAttach, bool secureData, crypto_suite crypt, uint8_t* preSharedKey, size_t pskLength);
+/**
+ * Initialize the nabto main setup to use AES cyptography.
+ * @param nms          The nabto main setup.
+ * @param preSharedKey Array of exactly 16Bytes containing the pre-shared key.
+ * @param pskLenght    The length of the pre-shared key.
+ * @return             Return true if the cryptography was successfully initialized.
+ */
+bool unabto_init_aes_crypto(nabto_main_setup* nms, uint8_t* preSharedKey, size_t pskLength);
+
+/**
+ * Initialize the nabto main setup to use no cryptography
+ * @param nms The nabto main setup.
+ */
+void unabto_init_no_crypto(nabto_main_setup* nms);
 
 /**
  * Read and handle data on a single socket.

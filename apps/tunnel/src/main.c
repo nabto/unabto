@@ -292,16 +292,14 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 
     const char* preSharedKey;
     if (gopt(options, DISABLE_CRYPTO_OPTION)) {
-        if(!unabto_init_nms_crypto(nms, false, false, 0, NULL, 0)){
-            NABTO_LOG_FATAL(("init_nms_crypto failed"));
-        }
+        unabto_init_no_crypto(nms);
     } else {
         if ( gopt_arg( options, 'k', &preSharedKey)) {
             uint8_t psk[16];
             if (!unabto_read_psk_from_hex(preSharedKey, psk ,16)) {
                 NABTO_LOG_FATAL(("Cannot read psk"));
             }
-            if(!unabto_init_nms_crypto(nms, true, true, CRYPT_W_AES_CBC_HMAC_SHA256 , psk, 16)){
+            if(!unabto_init_aes_crypto(nms, psk, 16)){
                 NABTO_LOG_FATAL(("init_nms_crypto failed"));
             }
         } else {
@@ -309,7 +307,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
                 NABTO_LOG_FATAL(("Specify a preshared key with -k. Try -h for help."));
             } else {
                 // using zero key, undocumented but handy for testing
-                if(!unabto_init_nms_crypto(nms, true, true, CRYPT_W_AES_CBC_HMAC_SHA256 , NULL, 0)){
+                if(!unabto_init_aes_crypto(nms, NULL, 0)){
                     NABTO_LOG_FATAL(("init_nms_crypto failed"));
                 }
             }
