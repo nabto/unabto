@@ -292,21 +292,25 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 
     const char* preSharedKey;
     if (gopt(options, DISABLE_CRYPTO_OPTION)) {
-        nms->secureAttach = false;
-        nms->secureData = false;
+        unabto_set_no_crypto(nms);
     } else {
-        nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
-        nms->secureAttach = true;
-        nms->secureData = true;
+        uint8_t psk[PRE_SHARED_KEY_SIZE];
         if ( gopt_arg( options, 'k', &preSharedKey)) {
-            if (!unabto_read_psk_from_hex(preSharedKey, nms->presharedKey ,16)) {
+            if (!unabto_read_psk_from_hex(preSharedKey, psk ,PRE_SHARED_KEY_SIZE)) {
                 NABTO_LOG_FATAL(("Cannot read psk"));
+            }
+            if(!unabto_set_aes_crypto(nms, psk, PRE_SHARED_KEY_SIZE)){
+                NABTO_LOG_FATAL(("init_nms_crypto failed"));
             }
         } else {
             if (!gopt( options, 's' )) {
                 NABTO_LOG_FATAL(("Specify a preshared key with -k. Try -h for help."));
             } else {
                 // using zero key, undocumented but handy for testing
+                memset(psk,0,PRE_SHARED_KEY_SIZE);
+                if(!unabto_set_aes_crypto(nms, psk, PRE_SHARED_KEY_SIZE)){
+                    NABTO_LOG_FATAL(("init_nms_crypto failed"));
+                }
             }
         }
     }
