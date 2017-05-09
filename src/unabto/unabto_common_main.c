@@ -286,6 +286,24 @@ void unabto_time_event(void) {
 
 }
 
+bool unabto_init_nms_crypto(nabto_main_setup* nms, bool secureAttach, bool secureData, crypto_suite crypt, uint8_t* preSharedKey, size_t pskLength){
+    nms->secureAttach = secureAttach;
+    nms->secureData = secureData;
+    if(secureAttach || secureData){
+        nms->cryptoSuite = crypt;
+        if (pskLength == 0 || preSharedKey == NULL) {
+            // using zero key, undocumented but handy for testing
+            return true;
+        }
+        if (pskLength != 16) {
+            NABTO_LOG_ERROR(("The pre shared key buffer needs to be exactly 16 bytes"));
+            return false;
+        }
+        memcpy(nms->presharedKey,preSharedKey,pskLength);
+    }
+    return true;
+}
+
 static ssize_t read_event_socket(nabto_socket_t socket, message_event* event) {
     ssize_t ilen;
     event->type = MT_UDP;

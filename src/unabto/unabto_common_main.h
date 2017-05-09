@@ -90,6 +90,8 @@ void unabto_close(void);
  */
 void unabto_tick(void);
 
+bool unabto_init_nms_crypto(nabto_main_setup* nms, bool secureAttach, bool secureData, crypto_suite crypt, uint8_t* preSharedKey, size_t pskLength);
+
 /**
  * Read and handle data on a single socket.
  * called from an event driven implementation to inform that
