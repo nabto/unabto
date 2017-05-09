@@ -150,7 +150,6 @@ void nabto_stream_state_transition(struct nabto_stream_s* stream, nabto_stream_t
             break;
         case ST_CLOSED:
             stream->applicationEvents.closed = true;
-            stream->statisticsEvents.streamEnded = true;
             break;
         case ST_CLOSED_ABORTED:
             /**

@@ -42,9 +42,6 @@ struct nabto_stream_s {
         bool                          writeClosed : 1;
         bool                          closed : 1;
     } applicationEvents;
-    struct {
-        bool                          streamEnded : 1;
-    } statisticsEvents;
     struct unabto_stream_stats_s      stats;           /**< Stats for the stream        */
 
     union {

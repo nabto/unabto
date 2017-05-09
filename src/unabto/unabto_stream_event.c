@@ -194,10 +194,6 @@ void unabto_time_event_stream(void)
         if (stream__[i].state != STREAM_IDLE) {
             struct nabto_stream_s* stream = &stream__[i];
             nabto_stream_tcb_check_xmit(&stream__[i], true, false);
-            if (stream->statisticsEvents.streamEnded) {
-                unabto_stream_send_stats(stream, NP_PAYLOAD_STATS_TYPE_UNABTO_STREAM_ENDED);
-                stream->statisticsEvents.streamEnded = false;
-            }
             if (stream->applicationEvents.dataReady) {
                 unabto_stream_event(stream, UNABTO_STREAM_EVENT_TYPE_DATA_READY);
                 stream->applicationEvents.dataReady = false;
@@ -364,8 +360,7 @@ void nabto_stream_update_next_event(nabto_stamp_t* current_min_stamp)
                 stream->applicationEvents.dataWritten ||
                 stream->applicationEvents.readClosed ||
                 stream->applicationEvents.writeClosed ||
-                stream->applicationEvents.closed ||
-                stream->statisticsEvents.streamEnded)
+                stream->applicationEvents.closed)
             {
                 nabto_stamp_t now = nabtoGetStamp();
                 nabto_update_min_stamp(current_min_stamp, &now);
@@ -505,6 +500,10 @@ void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
     uint8_t* ptr = insert_header(nabtoCommunicationBuffer, 0, stream->connection->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
 
+    if (stream->state == STREAM_IDLE) {
+        return;
+    }
+    
     ptr = insert_stats_payload(ptr, end, event);
     if (ptr == NULL) {
         return;

@@ -73,6 +73,8 @@ void stream_init_static_config(struct nabto_stream_s* stream);
 
 bool build_and_send_rst_packet(nabto_connect* con, uint16_t tag, struct nabto_win_info* win);
 
+void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
