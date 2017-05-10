@@ -495,8 +495,14 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
 void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
 {
     size_t length;
-    uint8_t* ptr = insert_header(nabtoCommunicationBuffer, 0, stream->connection->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
+    uint8_t* ptr;
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
+
+    if (stream->connection == NULL) {
+        return;
+    }
+
+    ptr = insert_header(nabtoCommunicationBuffer, 0, stream->connection->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
 
     if (stream->state == STREAM_IDLE) {
         return;
@@ -522,16 +528,14 @@ void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
         return;
     }
 
-    if (stream->connection != NULL) {
-        ptr = insert_connection_stats_payload(ptr, end, stream->connection);
-        if (ptr == NULL) {
-            return;
-        }
-        
-        ptr = insert_connect_stats_payload(ptr, end, stream->connection);
-        if (ptr == NULL) {
-            return;
-        }
+    ptr = insert_connection_stats_payload(ptr, end, stream->connection);
+    if (ptr == NULL) {
+        return;
+    }
+
+    ptr = insert_connect_stats_payload(ptr, end, stream->connection);
+    if (ptr == NULL) {
+        return;
     }
 
     length = ptr - nabtoCommunicationBuffer;
