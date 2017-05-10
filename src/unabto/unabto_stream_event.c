@@ -437,14 +437,6 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
 
     }
 
-    // time for first MiB
-    if (stream->stats.timeFirstMBReceived != 0) {
-        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_RECEIVED, stream->stats.timeFirstMBReceived);
-    }
-    if (stream->stats.timeFirstMBSent != 0) {
-        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_SENT, stream->stats.timeFirstMBSent);
-    }
-
     // status
     {
         uint8_t streamState;
@@ -457,7 +449,13 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
         }
         ptr = unabto_stream_stats_write_u8(ptr, end, NP_PAYLOAD_STREAM_STATS_STATUS, streamState);
     }
-    if(unabto_stream_get_stats(stream, &stats) == UNABTO_STREAM_HINT_OK){
+    if(unabto_stream_get_stats(stream, &stats) == UNABTO_STREAM_HINT_OK) {
+        if (stats.timeFirstMBReceived != 0) {
+            ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_RECEIVED, stats.timeFirstMBReceived);
+        }
+        if (stats.timeFirstMBSent != 0) {
+            ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_SENT, stats.timeFirstMBSent);
+        }
         // stream stats
         ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_PACKETS,              stats.sentPackets);
         ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_BYTES,                stats.sentBytes);
@@ -508,7 +506,7 @@ void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
     if (ptr == NULL) {
         return;
     }
-
+    
     ptr = insert_version_payload(ptr, end);
     if (ptr == NULL) {
         return;
@@ -524,14 +522,16 @@ void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
         return;
     }
 
-    ptr = insert_connection_stats_payload(ptr, end, stream->connection);
-    if (ptr == NULL) {
-        return;
-    }
-
-    ptr = insert_connect_stats_payload(ptr, end, stream->connection);
-    if (ptr == NULL) {
-        return;
+    if (stream->connection != NULL) {
+        ptr = insert_connection_stats_payload(ptr, end, stream->connection);
+        if (ptr == NULL) {
+            return;
+        }
+        
+        ptr = insert_connect_stats_payload(ptr, end, stream->connection);
+        if (ptr == NULL) {
+            return;
+        }
     }
 
     length = ptr - nabtoCommunicationBuffer;

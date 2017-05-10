@@ -154,7 +154,6 @@ bool unabto_stream_force_close(unabto_stream* stream)
 
 void unabto_stream_release(unabto_stream* stream)
 {
-    unabto_stream_send_stats(stream, NP_PAYLOAD_STATS_TYPE_UNABTO_STREAM_ENDED);
     nabto_stream_tcb_release(stream);
     stream_reset(stream);
 }

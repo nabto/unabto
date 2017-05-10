@@ -150,6 +150,7 @@ void nabto_stream_state_transition(struct nabto_stream_s* stream, nabto_stream_t
             break;
         case ST_CLOSED:
             stream->applicationEvents.closed = true;
+            unabto_stream_send_stats(stream, NP_PAYLOAD_STATS_TYPE_UNABTO_STREAM_ENDED);
             break;
         case ST_CLOSED_ABORTED:
             /**
@@ -162,6 +163,7 @@ void nabto_stream_state_transition(struct nabto_stream_s* stream, nabto_stream_t
             // just wanted to send an unsupported rst packet.
             // nabto_release_connection_req(stream->connection);
             stream->applicationEvents.closed = true;
+            unabto_stream_send_stats(stream, NP_PAYLOAD_STATS_TYPE_UNABTO_STREAM_ENDED);
             break;
     default: 
         break; 
