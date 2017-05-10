@@ -156,6 +156,10 @@ void unabto_tunnel_parse_command(tunnel* tunnel, tunnel_event_source tunnel_even
 {
 #if NABTO_ENABLE_TUNNEL_UART
     if (strncmp((const char*)tunnel->staticMemory->command, UART_TXT, strlen(UART_TXT)) == 0) {
+        if (uart_tunnel_get_default_device() == 0){
+            NABTO_LOG_INFO(("Command 'uart' failed: no UART device configured"));
+            return;
+        }
         return unabto_tunnel_uart_parse_command(tunnel, tunnel_event, tunnels, NABTO_MEMORY_STREAM_MAX_STREAMS);
     }
 #endif

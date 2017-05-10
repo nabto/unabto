@@ -85,7 +85,8 @@ enum {
     TUNNELS_OPTION,
     STREAM_WINDOW_SIZE_OPTION,
     CONNECTIONS_SIZE_OPTION,
-    DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
+    DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS,
+    UART_DEVICE_OPTION
 };
 
 #if HANDLE_SIGNALS
@@ -147,7 +148,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x30s[] = "";      const char* x30l[] = { "allow-all-hosts", 0};
     const char x31s[] = "";      const char* x31l[] = { "no-access-control", 0};
     const char x32s[] = "";      const char* x32l[] = { "no-crypto", 0};
-
+    const char x33s[] = "";      const char* x33l[] = { "uart-device", 0 };
     const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
         { 'h', GOPT_NOARG,   x1s, x1l },
         { 'V', GOPT_NOARG,   x2s, x2l },
@@ -181,6 +182,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 #endif
         { ALLOW_ALL_HOSTS_OPTION, GOPT_NOARG, x30s, x30l },
         { NO_ACCESS_CONTROL_OPTION, GOPT_NOARG, x31s, x31l },
+        { UART_DEVICE_OPTION, GOPT_ARG, x33s, x33l },
         { 0,0,0,0 }
     };
 
@@ -195,6 +197,8 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char* tunnelsOption;
     const char* streamWindowSizeOption;
     const char* connectionsOption;
+    const char* uartDevice = 0;
+    bool fatalPortError = true;
     uint32_t addr;
 
 
@@ -219,6 +223,9 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("      --allow-host            Hostnames that tunnel is allowed to connect to in addition to localhost \n");
         printf("      --allow-all-hosts       Allow connections to all TCP hosts.\n");
         printf("      --no-access-control     Do not enforce client access control on incoming connections. \n");
+#if NABTO_ENABLE_TUNNEL_UART
+        printf("      --uart-device           Sets the uart device\n");
+#endif
         printf("  -x, --nice-exit             Close the tunnels nicely when pressing Ctrl+C.\n");
 #if NABTO_ENABLE_TCP_FALLBACK
         printf("      --disable-tcp-fb        Disable tcp fallback.\n");
@@ -327,18 +334,6 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         nice_exit = true;
     }
 
-    ports_length = gopt(options, ALLOW_PORT_OPTION);
-    if (ports_length > 0) {
-        size_t i;
-        ports = (uint16_t*) malloc(ports_length*sizeof(uint16_t));
-        memset(ports,0,ports_length*sizeof(uint16_t));
-        for (i = 0; i < ports_length; i++) {
-            const char* opt = gopt_arg_i(options, ALLOW_PORT_OPTION, i);
-            ports[i] = atoi(opt);
-        }
-    } else {
-        NABTO_LOG_FATAL(("You did not allow client to connect to any ports, specify with '--allow-port'. Try -h for help."));
-    }
     
     hosts_length = gopt(options, ALLOW_HOST_OPTION);
     if (hosts_length > 0) {
@@ -352,8 +347,21 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 
     if (gopt(options, ALLOW_ALL_PORTS_OPTION)) {
         allow_all_ports = true;
+        fatalPortError = false;
     }
 
+    ports_length = gopt(options, ALLOW_PORT_OPTION);
+    if (ports_length > 0) {
+        size_t i;
+        ports = (uint16_t*) malloc(ports_length*sizeof(uint16_t));
+        memset(ports,0,ports_length*sizeof(uint16_t));
+        for (i = 0; i < ports_length; i++) {
+            const char* opt = gopt_arg_i(options, ALLOW_PORT_OPTION, i);
+            ports[i] = atoi(opt);
+        }
+        fatalPortError = false;
+    }
+    
     if (gopt(options, ALLOW_ALL_HOSTS_OPTION)) {
         allow_all_hosts = true;
     }
@@ -362,6 +370,16 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         no_access_control = true;
     }
 
+#if NABTO_ENABLE_TUNNEL_UART
+    if(gopt_arg(options, UART_DEVICE_OPTION, &uartDevice)) {
+        uart_tunnel_set_default_device(uartDevice);
+        fatalPortError = false;
+    } else {
+        NABTO_LOG_TRACE(("UART tunnel enabled, but UART device was given use --uart_device to specify a device."));
+        uartDevice = 0;
+    }
+#endif
+    
 #if NABTO_ENABLE_TCP_FALLBACK
     if (gopt(options, DISABLE_TCP_FALLBACK_OPTION)) {
         nms->enableTcpFallback = false;
@@ -412,7 +430,9 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         }
     }
 #endif
-
+    if(fatalPortError == true) {
+        NABTO_LOG_FATAL(("You did not allow client to connect to anything. For TCP tunnels please specify ports with '--allow-port' or '--allow-all-ports. For UART tunnel please specify a UART device with '--uart_device'. Try -h for help."));
+    }
     return true;
 }
 

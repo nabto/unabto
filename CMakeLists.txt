@@ -9,7 +9,6 @@ add_subdirectory(apps/tunnel)
 add_subdirectory(apps/stream_echo)
 
 if (NOT MSVC)
-  add_subdirectory(apps/multi_tunnel)
   add_subdirectory(apps/html_demo)
 endif()
 
