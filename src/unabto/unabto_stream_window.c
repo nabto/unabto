@@ -274,7 +274,6 @@ void nabto_stream_tcb_open(struct nabto_stream_s* stream) {
     stream->state = STREAM_IN_USE;
     SET_STATE(stream, ST_SYN_SENT);
     nabtoSetFutureStamp(&stream->u.tcb.timeoutStamp, 0);
-    nabtoSetFutureStamp(&stream->u.tcb.advertisedWindowReportStamp, 0);
 }
 
 /******************************************************************************/
@@ -782,15 +781,17 @@ void nabto_stream_tcb_check_xmit(struct nabto_stream_s* stream, bool isTimedEven
             bool ackReadyForConsumedData = (tcb->ackSent != tcb->recvTop);
             
             // we should only send advertised window information solely when a timeout has occured.
-            bool ackReadyForAdvertisedWindowInformation = (tcb->lastSentAdvertisedWindow != unabto_stream_advertised_window_size(tcb)) && nabtoIsStampPassed(&tcb->advertisedWindowReportStamp);
+            uint16_t advWindowSize = unabto_stream_advertised_window_size(tcb);
+            // window full event:
+            bool windowFullEvent = (advWindowSize == 0 && tcb->lastSentAdvertisedWindow != advWindowSize);
             bool sendWSRFAck = (tcb->cfg.enableWSRF && (tcb->ackWSRFcount < tcb->cfg.maxRetrans) && nabtoIsStampPassed(&tcb->ackStamp));
             
             if (ackReadyForConsumedData ||
-                ackReadyForAdvertisedWindowInformation ||
+                windowFullEvent ||
                 windowHasOpened ||
                 sendWSRFAck) {
                 if (send_data_packet(stream, tcb->xmitLastSent, 0, 0, 0, 0)) {
-                    if (ackReadyForConsumedData || ackReadyForAdvertisedWindowInformation) {
+                    if (ackReadyForConsumedData || windowFullEvent) {
                         tcb->ackWSRFcount = 0;
                     } else {
                         ++tcb->ackWSRFcount;
@@ -808,9 +809,6 @@ void nabto_stream_tcb_check_xmit(struct nabto_stream_s* stream, bool isTimedEven
     }
     if (nabtoIsStampPassed(&tcb->ackStamp)) {
         nabtoSetFutureStamp(&tcb->ackStamp, tcb->cfg.timeoutMsec);
-    }
-    if (nabtoIsStampPassed(&tcb->advertisedWindowReportStamp)) {
-        nabtoSetFutureStamp(&tcb->advertisedWindowReportStamp, NABTO_STREAM_ADVERTISED_WINDOW_REPORT_DELAY);
     }
 }
 
@@ -1506,10 +1504,6 @@ void nabto_stream_tcb_update_next_event(struct nabto_stream_s * stream, nabto_st
 
     if (tcb->xmitLastSent > tcb->xmitFirst && tcb->finSequence == 0 && tcb->streamState >= ST_ESTABLISHED) {
         nabto_update_min_stamp(current_min_stamp, &tcb->dataTimeoutStamp);
-    }
-
-    if (tcb->lastSentAdvertisedWindow != unabto_stream_advertised_window_size(tcb)) {
-        nabto_update_min_stamp(current_min_stamp, &tcb->advertisedWindowReportStamp);
     }
 
     nabto_update_min_stamp(current_min_stamp, &tcb->timeoutStamp);

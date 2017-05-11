@@ -158,7 +158,6 @@ struct nabto_stream_tcb {
     nabto_stamp_t                   timeoutStamp;           /**< Timeout stamp           */
     nabto_stamp_t                   dataTimeoutStamp;       /**< Timeout stamp for data  */
     nabto_stamp_t                   dataExpireStamp;        /**< When current data segment expires. */
-    nabto_stamp_t                   advertisedWindowReportStamp; /**< when to send advertised window data, assuming the local consumer blocks consuming the data. */
 
     uint32_t                        maxAdvertisedWindow;    
     uint16_t                        lastSentAdvertisedWindow;
