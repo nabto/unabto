@@ -146,8 +146,8 @@ void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint){
     int i;
     for(i=0;i<dataHead;i++){
         if(buffer[i].seq == seq){
-            memmove(&buffer[i].data, &buffer[dataHead-1].data,sizeof(buffer_element));
             buffer[i].cb(buffer[i].args,hint);
+            memmove(&buffer[i].data, &buffer[dataHead-1].data,sizeof(buffer_element));
             dataHead--;
             return;
         }
