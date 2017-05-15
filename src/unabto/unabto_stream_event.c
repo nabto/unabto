@@ -107,7 +107,6 @@ void nabto_stream_event(nabto_connect*       con,
         case NP_PAYLOAD_WINDOW_FLAG_RST                             : msg = "RST";     break;
         case NP_PAYLOAD_WINDOW_FLAG_ACK                             : msg = "DATA";    break;
         default       : msg = "?"; NABTO_LOG_TRACE(("Type?: %" PRIu8, win.type)); break;
-
         }
         NABTO_NOT_USED(msg);
         NABTO_LOG_DEBUG(("%" PRIu16 " --> [%" PRIu32 ",%" PRIu32 "] %" PRItext ", %d bytes", hdr->tag, win.seq, win.ack, msg, dlen));

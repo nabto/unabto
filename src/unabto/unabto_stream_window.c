@@ -426,16 +426,16 @@ static bool send_data_packet(struct nabto_stream_s* stream, uint32_t seq, uint8_
 {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
     struct nabto_stream_sack_data sackData;
-    
+    uint32_t ackNumber = unabto_stream_ack_number_to_send(tcb);
     NABTO_NOT_USED(tcb);
 
     unabto_stream_create_sack_pairs(stream, &sackData);
 
     if (build_and_send_packet(stream, ACK, seq, 0, 0, data, size, &sackData)) {
         if (size) {
-            NABTO_LOG_DEBUG(("%" PRIu16 " <-- [%" PRIu32 ",%" PRIu32 "] DATA(isRetrans: %u), %" PRIu16 " bytes from ix=%i (xmitFirst/Count = %" PRIu32 "/%" PRIu32 ")", stream->streamTag, seq, tcb->recvNext, retrans, size, ix, tcb->xmitFirst, tcb->xmitLastSent - tcb->xmitFirst ));
+            NABTO_LOG_DEBUG(("%" PRIu16 " <-- [%" PRIu32 ",%" PRIu32 "] DATA(isRetrans: %u), %" PRIu16 " bytes from ix=%i (xmitFirst/Count = %" PRIu32 "/%" PRIu32 ")", stream->streamTag, seq, ackNumber, retrans, size, ix, tcb->xmitFirst, tcb->xmitLastSent - tcb->xmitFirst ));
         } else {
-            NABTO_LOG_DEBUG(("%" PRIu16 ", <-- [%" PRIu32 ",%" PRIu32 "] DATA, 0 bytes (xmitFirst/Count=%" PRIu32 "/%" PRIu32 ")", stream->streamTag, seq, tcb->recvNext, tcb->xmitFirst, tcb->xmitSeq - tcb->xmitFirst));
+            NABTO_LOG_DEBUG(("%" PRIu16 ", <-- [%" PRIu32 ",%" PRIu32 "] DATA, 0 bytes (xmitFirst/Count=%" PRIu32 "/%" PRIu32 ")", stream->streamTag, seq, ackNumber, tcb->xmitFirst, tcb->xmitSeq - tcb->xmitFirst));
         }
         
         return true;
@@ -1036,7 +1036,11 @@ static void handle_data(struct nabto_stream_s* stream,
                     // update ack status to detect triple acks. based
                     // on the win->ack. If the packet contains sack
                     // data use that instead.
-                    update_triple_ack(stream, ackStart);
+
+                    // this should only be called if the packet contains data.
+                    if (dlen == 0) {
+                        update_triple_ack(stream, ackStart);
+                    }
                 }
                 
                 if (handle_ack(stream, ackStart, ackEnd)) {
@@ -1077,13 +1081,17 @@ static void handle_data(struct nabto_stream_s* stream,
                     LOG_STATE(stream);
                     // update the highest received data sequence number, used in sack calculation.
                     tcb->recvMax = MAX(tcb->recvMax, win->seq);
-
-
                 }
-                if (tcb->cfg.enableWSRF) {
-                    tcb->ackSent--; // to force sending an ACK
-                }
-                stream->applicationEvents.dataReady = true;
+
+                // force sending an ack, if this data is in line,
+                // fine, if it's out of order, then the other end
+                // should be notified by tripple acks. If this is a
+                // retransmission maybe the ack has been lost and the
+                // other end should have a new ack. So whatever the
+                // cause, answer data with an ack.
+                tcb->ackSent--;
+                
+                
 
                 // update recvTop which is the max available sequence number for receiving data from.
                 while (true) {
@@ -1092,6 +1100,7 @@ static void handle_data(struct nabto_stream_s* stream,
                         break;
                     }
                     tcb->recvTop++;
+                    stream->applicationEvents.dataReady = true;
                 }
             }
                 
@@ -1257,7 +1266,7 @@ void nabto_stream_tcb_event(struct nabto_stream_s* stream,
                 } else if(win->type == (FIN | ACK)) {
                     // If we have sent a fin and the acknowledge is on this fin
                     // then we should goto state TIME_WAIT.
-                    // Else if our FIN has not been acked we should go to the
+                   // Else if our FIN has not been acked we should go to the
                     // state CLOSING.
                     if (nabto_stream_tcb_is_ack_on_fin(tcb, win) && nabto_stream_tcb_handle_fin(tcb, win)) {
                         SET_STATE(stream, ST_TIME_WAIT);
@@ -1694,7 +1703,7 @@ void unabto_stream_congestion_control_timeout(struct nabto_stream_s * stream) {
         x_buffer* xbuf;    
         ix = tcb->xmitFirst % tcb->cfg.xmitWinSize;
         xbuf = &tcb->xmit[ix];
-        NABTO_LOG_INFO(("timeout, nretrans: %" PRIu16, xbuf->nRetrans));
+        NABTO_LOG_INFO(("timeout, nretrans: %" PRIu16 ", seq: %" PRIu32, xbuf->nRetrans, xbuf->seq));
     }
     
     windowStatus("Stream data timeout:", tcb);
