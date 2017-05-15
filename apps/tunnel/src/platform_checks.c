@@ -3,17 +3,19 @@
 #include <unabto/unabto_logging.h>
 #include <unabto/unabto_util.h>
 
+#define ENABLE_LO_EXISTS_CHECK() !(defined(WIN32) || defined(MOXA)) && defined(HAVE_IFADDRS_H)
+
 bool test_if_lo_exists();
 
 bool platform_checks() {
     bool result = true;
-#if !(defined(WIN32) || defined(MOXA))
+#if ENABLE_LO_EXISTS_CHECK()
     result &= test_if_lo_exists();
 #endif
     return result;
 }
 
-#if !(defined(WIN32) || defined(MOXA))
+#if ENABLE_LO_EXISTS_CHECK()
 
 #include <sys/types.h>
 #include <ifaddrs.h>
