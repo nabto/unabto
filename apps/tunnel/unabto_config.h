@@ -27,8 +27,6 @@
 
 #define NABTO_ENABLE_TCP_FALLBACK 1
 
-#define NABTO_ENABLE_TUNNEL_TCP 1
-
 #include <assert.h>
 #define UNABTO_ASSERT(expr) assert(expr)
 

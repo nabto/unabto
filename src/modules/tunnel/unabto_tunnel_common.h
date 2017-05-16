@@ -120,6 +120,7 @@ void unabto_tunnel_select_add_to_fd_set(fd_set* readFds, int* maxReadFd, fd_set*
 void unabto_tunnel_select_handle(fd_set* readFds, fd_set* writeFds);
 bool tunnel_send_init_message(tunnel* tunnel, const char* msg);
 
+bool unabto_tunnel_has_uart();
 
 #if NABTO_ENABLE_EPOLL
 void unabto_tunnel_epoll_event(struct epoll_event* event);
