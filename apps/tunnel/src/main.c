@@ -225,8 +225,6 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("      --no-access-control     Do not enforce client access control on incoming connections. \n");
         if(unabto_tunnel_has_uart()){
             printf("      --uart-device           Sets the uart device\n");
-        } else {
-            printf(" NO UART ENABLED");
         }
         printf("  -x, --nice-exit             Close the tunnels nicely when pressing Ctrl+C.\n");
 #if NABTO_ENABLE_TCP_FALLBACK
