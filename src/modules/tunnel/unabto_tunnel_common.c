@@ -155,25 +155,26 @@ void unabto_tunnel_reset_tunnel_struct(tunnel* t)
 void unabto_tunnel_parse_command(tunnel* tunnel, tunnel_event_source tunnel_event)
 {
 #if NABTO_ENABLE_TUNNEL_UART
-    if (strncmp((const char*)tunnel->staticMemory->command, UART_TXT, strlen(UART_TXT)) == 0) {
-        if (uart_tunnel_get_default_device() == 0){
-            NABTO_LOG_INFO(("Command 'uart' failed: no UART device configured"));
-            return;
-        }
-        return unabto_tunnel_uart_parse_command(tunnel, tunnel_event, tunnels, NABTO_MEMORY_STREAM_MAX_STREAMS);
+    
+    if (uart_tunnel_get_default_device() != 0){ 
+       if (strncmp((const char*)tunnel->staticMemory->command, UART_TXT, strlen(UART_TXT)) == 0) {
+           unabto_tunnel_uart_parse_command(tunnel, tunnel_event, tunnels, NABTO_MEMORY_STREAM_MAX_STREAMS);
+           return;
+       }
     }
 #endif
 
 #if NABTO_ENABLE_TUNNEL_TCP
     if (strncmp((const char*)tunnel->staticMemory->command, TUNNEL_TXT, strlen(TUNNEL_TXT)) == 0) {
         unabto_tunnel_tcp_parse_command(tunnel, tunnel_event);
-		return;
+        return;
     }
 #endif
 
 #if NABTO_ENABLE_TUNNEL_ECHO
     if (strncmp((const char*)tunnel->staticMemory->command, ECHO_TXT, strlen(ECHO_TXT)) == 0) {
-        return unabto_tunnel_echo_parse_command(tunnel, tunnel_event);
+        unabto_tunnel_echo_parse_command(tunnel, tunnel_event);
+        return;
     }
 #endif
     // if we rend here command parsing failed.
