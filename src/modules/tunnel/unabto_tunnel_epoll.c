@@ -39,6 +39,7 @@ void tunnel_loop_epoll() {
 
     while (true) {
         int i;
+        unabto_time_update_stamp();
         unabto_next_event(&ne);
         now = nabtoGetStamp();
         timeout = nabtoStampDiff2ms(nabtoStampDiff(&ne, &now));
@@ -47,12 +48,10 @@ void tunnel_loop_epoll() {
         }
 
         fflush(stdout);
-        
         nfds = epoll_wait(unabto_epoll_fd, events, MAX_EPOLL_EVENTS, timeout);
-        unabto_time_update_stamp();
         
         for (i = 0; i < nfds; i++) {
-            
+            unabto_time_update_stamp();
             unabto_epoll_event_handler* handler = (unabto_epoll_event_handler*)events[i].data.ptr;
 
             if (handler->epollEventType == UNABTO_EPOLL_TYPE_UDP) {
@@ -62,8 +61,9 @@ void tunnel_loop_epoll() {
             unabto_tcp_fallback_epoll_event(&events[i]);
 #endif
             unabto_tunnel_epoll_event(&events[i]);
+            
         }
-
+        unabto_time_update_stamp();
         unabto_time_event();
     }
     deinit_tunnel_module();

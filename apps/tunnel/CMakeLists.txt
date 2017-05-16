@@ -8,6 +8,14 @@ option(LOG_ALL "Print all unabto log statements" OFF)
 
 include(${UNABTO_ROOT}/build/cmake/unabto_project.cmake)
 
+INCLUDE (CheckIncludeFiles)
+# usage: CHECK_INCLUDE_FILES (<header> <RESULT_VARIABLE> )
+
+CHECK_INCLUDE_FILES (ifaddrs.h HAVE_IFADDRS_H)
+if (HAVE_IFADDRS_H)
+  add_definitions(-DHAVE_IFADDRS_H)
+endif()
+
 if(EXTERNAL_PREFIX) 
   include_directories(${EXTERNAL_PREFIX}/include)
   link_directories(${EXTERNAL_PREFIX}/lib)

@@ -107,7 +107,6 @@ void nabto_stream_event(nabto_connect*       con,
         case NP_PAYLOAD_WINDOW_FLAG_RST                             : msg = "RST";     break;
         case NP_PAYLOAD_WINDOW_FLAG_ACK                             : msg = "DATA";    break;
         default       : msg = "?"; NABTO_LOG_TRACE(("Type?: %" PRIu8, win.type)); break;
-
         }
         NABTO_NOT_USED(msg);
         NABTO_LOG_DEBUG(("%" PRIu16 " --> [%" PRIu32 ",%" PRIu32 "] %" PRItext ", %d bytes", hdr->tag, win.seq, win.ack, msg, dlen));
@@ -437,14 +436,6 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
 
     }
 
-    // time for first MiB
-    if (stream->stats.timeFirstMBReceived != 0) {
-        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_RECEIVED, stream->stats.timeFirstMBReceived);
-    }
-    if (stream->stats.timeFirstMBSent != 0) {
-        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_SENT, stream->stats.timeFirstMBSent);
-    }
-
     // status
     {
         uint8_t streamState;
@@ -457,7 +448,13 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
         }
         ptr = unabto_stream_stats_write_u8(ptr, end, NP_PAYLOAD_STREAM_STATS_STATUS, streamState);
     }
-    if(unabto_stream_get_stats(stream, &stats) == UNABTO_STREAM_HINT_OK){
+    if(unabto_stream_get_stats(stream, &stats) == UNABTO_STREAM_HINT_OK) {
+        if (stats.timeFirstMBReceived != 0) {
+            ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_RECEIVED, stats.timeFirstMBReceived);
+        }
+        if (stats.timeFirstMBSent != 0) {
+            ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_SENT, stats.timeFirstMBSent);
+        }
         // stream stats
         ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_PACKETS,              stats.sentPackets);
         ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_BYTES,                stats.sentBytes);
@@ -497,8 +494,14 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
 void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
 {
     size_t length;
-    uint8_t* ptr = insert_header(nabtoCommunicationBuffer, 0, stream->connection->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
+    uint8_t* ptr;
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
+
+    if (stream->connection == NULL) {
+        return;
+    }
+
+    ptr = insert_header(nabtoCommunicationBuffer, 0, stream->connection->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
 
     if (stream->state == STREAM_IDLE) {
         return;
@@ -508,7 +511,7 @@ void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
     if (ptr == NULL) {
         return;
     }
-
+    
     ptr = insert_version_payload(ptr, end);
     if (ptr == NULL) {
         return;
