@@ -148,6 +148,14 @@ void unabto_tunnel_reset_tunnel_struct(tunnel* t)
     memset(t->staticMemory, 0, sizeof(tunnel_static_memory));
 }
 
+bool unabto_tunnel_has_uart(){
+#if NABTO_ENABLE_TUNNEL_UART
+    return true;
+#else
+    return false;
+#endif
+}
+
 #define TUNNEL_TXT "tunnel"
 #define UART_TXT "uart"
 #define ECHO_TXT "echo"

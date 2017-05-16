@@ -223,11 +223,11 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("      --allow-host            Hostnames that tunnel is allowed to connect to in addition to localhost \n");
         printf("      --allow-all-hosts       Allow connections to all TCP hosts.\n");
         printf("      --no-access-control     Do not enforce client access control on incoming connections. \n");
-#if NABTO_ENABLE_TUNNEL_UART
-        printf("      --uart-device           Sets the uart device\n");
-#else
-        printf(" NO UART ENABLED");
-#endif
+        if(unabto_tunnel_has_uart()){
+            printf("      --uart-device           Sets the uart device\n");
+        } else {
+            printf(" NO UART ENABLED");
+        }
         printf("  -x, --nice-exit             Close the tunnels nicely when pressing Ctrl+C.\n");
 #if NABTO_ENABLE_TCP_FALLBACK
         printf("      --disable-tcp-fb        Disable tcp fallback.\n");
@@ -372,16 +372,15 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         no_access_control = true;
     }
 
-#if NABTO_ENABLE_TUNNEL_UART
-    if(gopt_arg(options, UART_DEVICE_OPTION, &uartDevice)) {
-        uart_tunnel_set_default_device(uartDevice);
-        fatalPortError = false;
-    } else {
-        NABTO_LOG_TRACE(("UART tunnel enabled, but UART device was given use --uart_device to specify a device."));
-        uartDevice = 0;
+    if(unabto_tunnel_has_uart()){
+        if(gopt_arg(options, UART_DEVICE_OPTION, &uartDevice)) {
+            uart_tunnel_set_default_device(uartDevice);
+            fatalPortError = false;
+        } else {
+            NABTO_LOG_TRACE(("UART tunnel enabled, but no UART device was given use --uart_device to specify a device."));
+            uartDevice = 0;
+        }
     }
-#endif
-    
 #if NABTO_ENABLE_TCP_FALLBACK
     if (gopt(options, DISABLE_TCP_FALLBACK_OPTION)) {
         nms->enableTcpFallback = false;

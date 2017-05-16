@@ -26,10 +26,6 @@ set(unabto_server_unabto_tunneling_src ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(ENABLE_TUNNEL_TCP 1)
 set(ENABLE_TUNNEL_UART 1)
 set(ENABLE_TUNNEL_ECHO 1)
-add_definitions("-DNABTO_ENABLE_TUNNEL_TCP")
-add_definitions("-DNABTO_ENABLE_TUNNEL_UART")
-add_definitions("-DNABTO_ENABLE_TUNNEL_ECHO")
-
 
 include_directories(
   # make it possible to override unabto_config.h with a supplied file
