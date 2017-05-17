@@ -67,6 +67,10 @@ static void nabto_stream_check_retransmit_data(struct nabto_stream_s* stream);
 
 static void nabto_stream_state_transition(struct nabto_stream_s* stream, nabto_stream_tcb_state new_state);
 
+/**
+ * This function is used when enquing data into the transmit buffers
+ */
+static bool congestion_control_accept_more_data(struct nabto_stream_tcb* tcb);
 static bool is_in_cwnd(struct nabto_stream_tcb* tcb, uint16_t ix, bool new_data);
 static bool is_in_advertised_window(struct nabto_stream_tcb* tcb, uint16_t ix);
 
@@ -353,7 +357,8 @@ size_t nabto_stream_tcb_write(struct nabto_stream_s * stream, const uint8_t* buf
         struct nabto_stream_tcb * tcb = &stream->u.tcb;
 //        NABTO_DECLARE_LOCAL_MODULE(nabto::Log::STREAM);
         while (size && (tcb->xmitSeq < (tcb->xmitFirst + tcb->cfg.xmitWinSize)) &&
-               is_in_cwnd(tcb,0,true))
+               (tcb->xmitSeq < tcb->maxAdvertisedWindow) &&
+               congestion_control_accept_more_data(tcb))
         {
             uint16_t sz;
             int ix = tcb->xmitSeq % tcb->cfg.xmitWinSize;
@@ -369,7 +374,13 @@ size_t nabto_stream_tcb_write(struct nabto_stream_s * stream, const uint8_t* buf
             memcpy(xbuf->buf, (const void*) &buf[queued], sz);
             xbuf->size = sz;
             xbuf->seq = tcb->xmitSeq;
-            xbuf->xstate = B_DATA;
+            {
+                // exactly the number of segments in the transmit buffers not sent yet!
+                tcb->cCtrl.notSent++;
+                xbuf->xstate = B_DATA;
+            }
+
+            
             queued += sz;
             size -= sz;
             ++tcb->xmitSeq;   // done here or after sending?
@@ -400,7 +411,8 @@ size_t nabto_stream_tcb_can_write(struct nabto_stream_s * stream) {
 
     // same check as the while uses in send.
     if ((tcb->xmitSeq < (tcb->xmitFirst + tcb->cfg.xmitWinSize)) &&
-        is_in_cwnd(tcb,0,true))
+        (tcb->xmitSeq < tcb->maxAdvertisedWindow) &&
+        congestion_control_accept_more_data(tcb))
     {
         return tcb->cfg.xmitPacketSize;
     } else {
@@ -606,9 +618,6 @@ void nabto_stream_check_retransmit_data(struct nabto_stream_s* stream) {
             
             stream->stats.sentResentPackets++;
 
-            if (xbuf->ackedAfter >= 2) {
-                unabto_stream_congestion_control_adjust_ssthresh_after_triple_ack(tcb);
-            }
             xbuf->isTimedOut = false;
             xbuf->sentStamp = nabtoGetStamp();
             xbuf->ackedAfter = 0;
@@ -649,8 +658,14 @@ void nabto_stream_check_new_data_xmit(struct nabto_stream_s* stream) {
         }
 
         // data was sent increment xmitLastSent etc.
-        unabto_stream_congestion_control_sent(tcb, ix);
-        xbuf->xstate = B_SENT;
+        {
+            // sentNotAcked is exactly the number of transmitbuffers in the state B_SENT!
+            tcb->cCtrl.sentNotAcked++;
+            unabto_stream_stats_observe(&tcb->ccStats.sentNotAcked, (double)tcb->cCtrl.sentNotAcked);
+            // exactly the number of not sent data segments!
+            tcb->cCtrl.notSent--;
+            xbuf->xstate = B_SENT;
+        }
         xbuf->isTimedOut = false;
         
         if (tcb->xmitLastSent == tcb->xmitFirst) {
@@ -899,6 +914,7 @@ void update_ack_after_packet(struct nabto_stream_s* stream, uint32_t seq) {
             NABTO_LOG_TRACE(("Increment ACK after for seq %i beacuse ack on %i was received", i, seq));
             tcb->xmit[ix].ackedAfter++;
             if (tcb->xmit[ix].ackedAfter == 2) {
+                unabto_stream_congestion_control_adjust_ssthresh_after_triple_ack(tcb);
                 stream->stats.reorderedOrLostPackets++;
             }
         }
@@ -915,6 +931,7 @@ bool update_triple_ack(struct nabto_stream_s* stream, uint32_t ackSeq)
     if (tcb->xmit[ix].xstate == B_SENT && tcb->xmit[ix].nRetrans == 0) {
         tcb->xmit[ix].ackedAfter++;
         if (tcb->xmit[ix].ackedAfter == 2) {
+            unabto_stream_congestion_control_adjust_ssthresh_after_triple_ack(tcb);
             stream->stats.reorderedOrLostPackets++;
         }
     }
@@ -964,11 +981,16 @@ bool handle_ack(struct nabto_stream_s* stream, uint32_t ack_start, uint32_t ack_
             }
 
             // Mark segment as acked.
-            if (tcb->xmit[ix].xstate != B_IDLE) {
-                unabto_stream_congestion_control_handle_ack(tcb, ix, ackOnStartOfWindow);
+            if (tcb->xmit[ix].xstate == B_SENT) {
                 update_ack_after_packet(stream, i);
+                unabto_stream_congestion_control_handle_ack(tcb, ix, ackOnStartOfWindow);
                 NABTO_LOG_TRACE(("setting buffer %i for seq %i to IDLE", ix, i));
-                tcb->xmit[ix].xstate = B_IDLE;
+                {
+                    // sentNotAcked is exactly the number of transmitbuffers in the state B_SENT!
+                    tcb->cCtrl.sentNotAcked--;
+                    unabto_stream_stats_observe(&tcb->ccStats.sentNotAcked, (double)tcb->cCtrl.sentNotAcked);
+                    tcb->xmit[ix].xstate = B_IDLE;
+                }
                 dataAcked = true;
             } 
             // If we are acking in the start of the window we need to 
@@ -1530,7 +1552,7 @@ bool nabto_stream_read_window(const uint8_t* ptr, uint16_t len, struct nabto_win
     READ_FORWARD_U32(info->ack,    ptr);
     if (info->type == NP_PAYLOAD_WINDOW_FLAG_ACK) {
         READ_FORWARD_U16(info->advertisedWindow, ptr);
-    } 
+    }
     if (info->type == NP_PAYLOAD_WINDOW_FLAG_NON) {
         NABTO_LOG_ERROR(("failed to read window"));
         return false;
@@ -1641,8 +1663,8 @@ void update_data_timeout(struct nabto_stream_s * stream) {
     
 }
 
-#define CWND_INITIAL_VALUE 6
-#define SLOWSTART_MIN_VALUE 6
+#define CWND_INITIAL_VALUE 4
+#define SLOWSTART_MIN_VALUE 2
 
 void unabto_stream_secondary_data_structure_init(struct nabto_stream_s* stream)
 {
@@ -1709,14 +1731,6 @@ void unabto_stream_congestion_control_timeout(struct nabto_stream_s * stream) {
     windowStatus("Stream data timeout:", tcb);
 }
 
-/**
- * Called after a streaming data packet has been sent.
- */
-void unabto_stream_congestion_control_sent(struct nabto_stream_tcb* tcb, uint16_t ix) {
-    tcb->cCtrl.sentNotAcked++;
-    unabto_stream_stats_observe(&tcb->ccStats.sentNotAcked, (double)tcb->cCtrl.sentNotAcked);
-}
-
 void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, uint16_t ix, bool ackOnStartOfWindow) {
     // unabto_stream_window.c will set the buffer to IDLE when this function
     // returns.
@@ -1725,15 +1739,17 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
             tcb->cCtrl.lostSegment = false;
             tcb->cCtrl.cwnd = tcb->cCtrl.ssThreshold;
         }
-        
-        tcb->cCtrl.sentNotAcked--;
-        if (use_slow_start(tcb)) {
-            NABTO_LOG_TRACE(("slow starting! %f", tcb->cCtrl.cwnd));
-            tcb->cCtrl.cwnd += 1;                        
-        } else {
-            tcb->cCtrl.cwnd += 1.0/tcb->cCtrl.cwnd;
+
+        // do not change cwnd in fast recovery, this works fine in con
+        if (!tcb->cCtrl.lostSegment) {
+            if (use_slow_start(tcb)) {
+                NABTO_LOG_TRACE(("slow starting! %f", tcb->cCtrl.cwnd));
+                tcb->cCtrl.cwnd += 1;                        
+            } else {
+                tcb->cCtrl.cwnd += 1.0/tcb->cCtrl.cwnd;
+            }
+            unabto_stream_stats_observe(&tcb->ccStats.cwnd, tcb->cCtrl.cwnd);
         }
-        unabto_stream_stats_observe(&tcb->ccStats.cwnd, tcb->cCtrl.cwnd);
     }
 
     NABTO_LOG_TRACE(("adjusting cwnd: %f ssThreshold: %f", tcb->cCtrl.cwnd, tcb->cCtrl.ssThreshold));
@@ -1775,12 +1791,16 @@ bool is_in_advertised_window(struct nabto_stream_tcb* tcb, uint16_t ix) {
     return thisSeq < tcb->maxAdvertisedWindow;
 }
 
+bool congestion_control_accept_more_data(struct nabto_stream_tcb* tcb) {
+    return (tcb->cCtrl.sentNotAcked + tcb->cCtrl.notSent <= tcb->cCtrl.cwnd);
+}
+
 bool is_in_cwnd(struct nabto_stream_tcb* tcb, uint16_t ix, bool new_data) {
     uint32_t i;
     int count = 0;
 
     // The trivial case
-    if (tcb->cCtrl.sentNotAcked <= tcb->cCtrl.cwnd) {
+    if (tcb->cCtrl.sentNotAcked < tcb->cCtrl.cwnd) {
         return true;
     }
 
@@ -1798,10 +1818,13 @@ bool is_in_cwnd(struct nabto_stream_tcb* tcb, uint16_t ix, bool new_data) {
         if (tcb->xmit[this_ix].xstate == B_SENT) {
             count++;
         }
+        if (count > tcb->cCtrl.cwnd) {
+            return false;
+        }
+        
         if (this_ix == ix) {
-            bool ret = (count <= tcb->cCtrl.cwnd);
-            NABTO_LOG_TRACE(("is_in_cwnd, count: %i, tcb->cwnd: %f, ret: %i", count, tcb->cCtrl.cwnd, ret));
-            return ret;
+            NABTO_LOG_TRACE(("is_in_cwnd, count: %i, cwnd: %f, ret: %i, sentNotAcked: %i", count, tcb->cCtrl.cwnd, true, tcb->cCtrl.sentNotAcked));
+            return true;
         }
     }
     NABTO_LOG_TRACE(("didn't find %i in the window?", ix));

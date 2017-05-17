@@ -136,7 +136,8 @@ typedef struct {
     bool          isFirstAck;    ///< True when the first ack has been received.
     double        cwnd;          ///< Congestion window size
     double        ssThreshold;   ///< Slow start threshold
-    int           sentNotAcked;  ///< counter of sent but not acked buffers.
+    int           sentNotAcked;  ///< Gauge of sent but not acked buffers.
+    int           notSent;       ///< Gauge of data ready for sending.
     bool          lostSegment;   ///< True if a segment has been lost
                                  ///and we are running the fast
                                  ///retransmit / fast recovery

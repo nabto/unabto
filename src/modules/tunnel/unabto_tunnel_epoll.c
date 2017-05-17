@@ -48,6 +48,7 @@ void tunnel_loop_epoll() {
         }
 
         fflush(stdout);
+        NABTO_LOG_INFO(("epoll wait %i", timeout));
         nfds = epoll_wait(unabto_epoll_fd, events, MAX_EPOLL_EVENTS, timeout);
         
         for (i = 0; i < nfds; i++) {

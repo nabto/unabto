@@ -6,6 +6,7 @@
 
 
 typedef struct timespec nabto_stamp_t;
+// milliseconds
 typedef int64_t nabto_stamp_diff_t;
 
 #endif
