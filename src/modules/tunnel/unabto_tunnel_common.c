@@ -22,6 +22,16 @@ NABTO_THREAD_LOCAL_STORAGE tunnel* tunnels = 0;
 NABTO_THREAD_LOCAL_STORAGE tunnel_static_memory* tunnels_static_memory = 0;
 NABTO_THREAD_LOCAL_STORAGE static int tunnelCounter = 0;
 
+
+static const char* defaultUartDevice = 0;
+
+void uart_tunnel_set_default_device(const char* device) {
+    defaultUartDevice = device;
+}
+const char* uart_tunnel_get_default_device() {
+    return defaultUartDevice;
+}
+
 bool unabto_tunnel_init_tunnels()
 {
     int i;

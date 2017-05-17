@@ -17,15 +17,6 @@
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
-static const char* defaultUartDevice = 0;
-
-void uart_tunnel_set_default_device(const char* device) {
-    defaultUartDevice = device;
-}
-const char* uart_tunnel_get_default_device() {
-    return defaultUartDevice;
-}
-
 static void unabto_tunnel_uart_closing(tunnel* tunnel, tunnel_event_source event_source);
 static void unabto_tunnel_uart_close(tunnel* tunnel);
     
