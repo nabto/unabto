@@ -46,16 +46,6 @@
 #endif
 
 /**
- * Add interval (in nanoseconds) to timestamp
- * @param stamp  pointer to the time stamp
- * @param msec   interval to add to the time stamp, in nanoseconds
- * void nabtoAddStamp(nabto_stamp_t* stamp, uint64_t nsec);
- */
-#ifndef nabtoAddStampNs
-#define nabtoAddStampNs(stamp, nsec) do { *(stamp) += nabtoMsec2Stamp(nsec/1000000); } while (0)
-#endif
-
-/**
  * Set timestamp to a future time.
  * @param stamp  pointer to the time stamp
  * @param msec   interval to add to the current time stamp, in milliseconds
@@ -64,17 +54,6 @@
 #ifndef nabtoSetFutureStamp
 #define nabtoSetFutureStamp(stamp, msec) do { *(stamp) = nabtoGetStamp(); nabtoAddStamp(stamp, msec); } while (0)
 #endif
-
-/**
- * Set timestamp to a future time.
- * @param stamp  pointer to the time stamp
- * @param msec   interval to add to the current time stamp, in nanoseconds
- * void nabtoSetFutureStamp(nabto_stamp_t* stamp, uint64_t nsec);
- */
-#ifndef nabtoSetFutureStampNs
-#define nabtoSetFutureStampNs(stamp, nsec) do { *(stamp) = nabtoGetStamp(); nabtoAddStampNs(stamp, nsec); } while (0)
-#endif
-
 
 /**
  * if (*s1 < *s2) return -1;

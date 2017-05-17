@@ -16,14 +16,6 @@ void unabto_unix_timer_add_stamp(nabto_stamp_t* stamp, int msec) {
     stamp->tv_nsec %= 1000000000;
 }
 
-void unabto_unix_timer_add_stamp_ns(nabto_stamp_t* stamp, int nsec) {
-    stamp->tv_sec += nsec/1000000000;
-    stamp->tv_nsec += (nsec%1000000000);
-    stamp->tv_sec += stamp->tv_nsec/1000000000;
-    stamp->tv_nsec %= 1000000000;
-}
-
-
 static NABTO_THREAD_LOCAL_STORAGE bool auto_update_enabled = true;
 static NABTO_THREAD_LOCAL_STORAGE struct timespec cachedTime;
 
