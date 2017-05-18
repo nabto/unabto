@@ -49,6 +49,10 @@
 /// @return    the ddifference
 #define SEQ_DIFF(s1, s2) ((uint16_t)(s1 - s2))
 
+#define CWND_INITIAL_VALUE 4
+#define SLOWSTART_MIN_VALUE 2
+
+
 enum {
     //SEQ_EXT = 0x01,
     //ACK_EXT = 0x02,
@@ -439,6 +443,7 @@ static bool send_data_packet(struct nabto_stream_s* stream, uint32_t seq, uint8_
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
     struct nabto_stream_sack_data sackData;
     uint32_t ackNumber = unabto_stream_ack_number_to_send(tcb);
+    NABTO_NOT_USED(ackNumber);
     NABTO_NOT_USED(tcb);
 
     unabto_stream_create_sack_pairs(stream, &sackData);
@@ -578,7 +583,8 @@ void nabto_stream_check_retransmit_data(struct nabto_stream_s* stream) {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
     uint32_t i;
     int ix;
-    x_buffer* xbuf;    
+    x_buffer* xbuf;
+    int packetsSent = 0;
     ix = tcb->xmitFirst % tcb->cfg.xmitWinSize;
     xbuf = &tcb->xmit[ix];
     
@@ -607,6 +613,12 @@ void nabto_stream_check_retransmit_data(struct nabto_stream_s* stream) {
         // if so there can be no retransmits since the data has not been sent.
 
         if (xbuf->xstate == B_SENT && (xbuf->ackedAfter >= 2 || xbuf->isTimedOut)) {
+            if (packetsSent > (tcb->cCtrl.cwnd/4)) {
+                // we should throttle retransmits such that we do not kill the stream because of small burst buffers.
+                nabtoSetFutureStamp(&tcb->retransmitTimer, (tcb->cCtrl.srtt/8));
+                break;
+            }
+
             xbuf->nRetrans++;
             if (! (unabto_stream_congestion_control_can_send(tcb, ix, false /* not new data*/) && 
                    send_data_packet(stream, xbuf->seq, xbuf->buf, xbuf->size, xbuf->nRetrans, ix))) {
@@ -621,6 +633,7 @@ void nabto_stream_check_retransmit_data(struct nabto_stream_s* stream) {
             xbuf->isTimedOut = false;
             xbuf->sentStamp = nabtoGetStamp();
             xbuf->ackedAfter = 0;
+            packetsSent++;
         }
     }
 }
@@ -824,6 +837,10 @@ void nabto_stream_tcb_check_xmit(struct nabto_stream_s* stream, bool isTimedEven
     }
     if (nabtoIsStampPassed(&tcb->ackStamp)) {
         nabtoSetFutureStamp(&tcb->ackStamp, tcb->cfg.timeoutMsec);
+    }
+
+    if (nabtoIsStampPassed(&tcb->retransmitTimer)) {
+        nabtoSetFutureStamp(&tcb->retransmitTimer, tcb->cfg.timeoutMsec);
     }
 }
 
@@ -1535,6 +1552,7 @@ void nabto_stream_tcb_update_next_event(struct nabto_stream_s * stream, nabto_st
 
     if (tcb->xmitLastSent > tcb->xmitFirst && tcb->finSequence == 0 && tcb->streamState >= ST_ESTABLISHED) {
         nabto_update_min_stamp(current_min_stamp, &tcb->dataTimeoutStamp);
+        nabto_update_min_stamp(current_min_stamp, &tcb->retransmitTimer);
     }
 
     nabto_update_min_stamp(current_min_stamp, &tcb->timeoutStamp);
@@ -1662,9 +1680,6 @@ void update_data_timeout(struct nabto_stream_s * stream) {
     NABTO_LOG_TRACE(("changing rto, tcb->srtt %f, tcb->rttVar %f, tcb->rto %f", tcb->cCtrl.srtt, tcb->cCtrl.rttVar, tcb->cCtrl.rto));
     
 }
-
-#define CWND_INITIAL_VALUE 4
-#define SLOWSTART_MIN_VALUE 2
 
 void unabto_stream_secondary_data_structure_init(struct nabto_stream_s* stream)
 {

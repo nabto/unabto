@@ -109,7 +109,6 @@ typedef struct {
                                           * after this buffer in the
                                           * window. */
     bool          isTimedOut;            /** true if this buffer has experienced a timeout */
-    bool          resentByRetransmissionTimer;
 } x_buffer;
 
 
@@ -137,7 +136,7 @@ typedef struct {
     double        cwnd;          ///< Congestion window size
     double        ssThreshold;   ///< Slow start threshold
     int           sentNotAcked;  ///< Gauge of sent but not acked buffers.
-    int           notSent;       ///< Gauge of data ready for sending.
+    int           notSent;       ///< Gauge of data ready for sending. (xmitSeq - xmitLastSent)
     bool          lostSegment;   ///< True if a segment has been lost
                                  ///and we are running the fast
                                  ///retransmit / fast recovery
@@ -159,6 +158,7 @@ struct nabto_stream_tcb {
     nabto_stamp_t                   timeoutStamp;           /**< Timeout stamp           */
     nabto_stamp_t                   dataTimeoutStamp;       /**< Timeout stamp for data  */
     nabto_stamp_t                   dataExpireStamp;        /**< When current data segment expires. */
+    nabto_stamp_t                   retransmitTimer;        /**< When we need to seperate retransmissions to eliminate bursts */
 
     uint32_t                        maxAdvertisedWindow;    
     uint16_t                        lastSentAdvertisedWindow;
