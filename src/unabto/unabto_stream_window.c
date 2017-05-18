@@ -584,7 +584,6 @@ void nabto_stream_check_retransmit_data(struct nabto_stream_s* stream) {
     uint32_t i;
     int ix;
     x_buffer* xbuf;
-    int packetsSent = 0;
     ix = tcb->xmitFirst % tcb->cfg.xmitWinSize;
     xbuf = &tcb->xmit[ix];
     
@@ -613,12 +612,6 @@ void nabto_stream_check_retransmit_data(struct nabto_stream_s* stream) {
         // if so there can be no retransmits since the data has not been sent.
 
         if (xbuf->xstate == B_SENT && (xbuf->ackedAfter >= 2 || xbuf->isTimedOut)) {
-            if (packetsSent > (tcb->cCtrl.cwnd/4)) {
-                // we should throttle retransmits such that we do not kill the stream because of small burst buffers.
-                nabtoSetFutureStamp(&tcb->retransmitTimer, (tcb->cCtrl.srtt/8));
-                break;
-            }
-
             xbuf->nRetrans++;
             if (! (unabto_stream_congestion_control_can_send(tcb, ix, false /* not new data*/) && 
                    send_data_packet(stream, xbuf->seq, xbuf->buf, xbuf->size, xbuf->nRetrans, ix))) {
@@ -633,7 +626,6 @@ void nabto_stream_check_retransmit_data(struct nabto_stream_s* stream) {
             xbuf->isTimedOut = false;
             xbuf->sentStamp = nabtoGetStamp();
             xbuf->ackedAfter = 0;
-            packetsSent++;
         }
     }
 }
@@ -837,10 +829,6 @@ void nabto_stream_tcb_check_xmit(struct nabto_stream_s* stream, bool isTimedEven
     }
     if (nabtoIsStampPassed(&tcb->ackStamp)) {
         nabtoSetFutureStamp(&tcb->ackStamp, tcb->cfg.timeoutMsec);
-    }
-
-    if (nabtoIsStampPassed(&tcb->retransmitTimer)) {
-        nabtoSetFutureStamp(&tcb->retransmitTimer, tcb->cfg.timeoutMsec);
     }
 }
 
@@ -1552,7 +1540,6 @@ void nabto_stream_tcb_update_next_event(struct nabto_stream_s * stream, nabto_st
 
     if (tcb->xmitLastSent > tcb->xmitFirst && tcb->finSequence == 0 && tcb->streamState >= ST_ESTABLISHED) {
         nabto_update_min_stamp(current_min_stamp, &tcb->dataTimeoutStamp);
-        nabto_update_min_stamp(current_min_stamp, &tcb->retransmitTimer);
     }
 
     nabto_update_min_stamp(current_min_stamp, &tcb->timeoutStamp);
