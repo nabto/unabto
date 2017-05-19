@@ -38,6 +38,7 @@ void unabto_epoll_init();
 #include <sys/epoll.h>
 
 void unabto_network_epoll_read(struct epoll_event* event);
+bool unabto_network_epoll_read_one(struct epoll_event* event);
 #endif
 
 
