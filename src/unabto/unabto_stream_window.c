@@ -454,7 +454,7 @@ static bool send_data_packet(struct nabto_stream_s* stream, uint32_t seq, uint8_
         } else {
             NABTO_LOG_DEBUG(("%" PRIu16 ", <-- [%" PRIu32 ",%" PRIu32 "] DATA, 0 bytes (xmitFirst/Count=%" PRIu32 "/%" PRIu32 ")", stream->streamTag, seq, ackNumber, tcb->xmitFirst, tcb->xmitSeq - tcb->xmitFirst));
         }
-        
+        tcb->burstPacketsSent++;
         return true;
     } else {
         NABTO_LOG_TRACE(("Failed to send stream data packet!"));
@@ -699,6 +699,15 @@ void unabto_stream_mark_all_xmit_buffers_as_timed_out(struct nabto_stream_tcb* t
     }
 }
 
+bool nabto_stream_is_burst_limited(struct nabto_stream_tcb* tcb)
+{
+    if (tcb->cCtrl.isFirstAck) {
+        return false;
+    }
+    
+    return tcb->burstPacketsSent >= tcb->burstPacketsMax;
+}
+
 void nabto_stream_tcb_check_xmit(struct nabto_stream_s* stream, bool isTimedEvent, bool windowHasOpened)
 {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
@@ -707,6 +716,15 @@ void nabto_stream_tcb_check_xmit(struct nabto_stream_s* stream, bool isTimedEven
         return;
     }
 
+    if (nabtoIsStampPassed(&tcb->burstLimitStamp)) {
+        // at max send cwnd/4 packets in srtt/16 time. This ensures
+        // throttling does not limit window expansion, but gives
+        // reasonable burst limits.        
+        nabtoSetFutureStamp(&tcb->burstLimitStamp, tcb->cCtrl.srtt/16);
+        tcb->burstPacketsMax = ceil(tcb->cCtrl.cwnd/4);
+        tcb->burstPacketsSent = 0;
+    }
+    
     switch (tcb->streamState) {
         case ST_SYN_SENT:
             if (nabtoIsStampPassed(&tcb->timeoutStamp)) {
@@ -1538,6 +1556,10 @@ void nabto_stream_tcb_update_next_event(struct nabto_stream_s * stream, nabto_st
         return;
     }
 
+    if (nabto_stream_is_burst_limited(tcb)) {
+        nabto_update_min_stamp(current_min_stamp, &tcb->burstLimitStamp);
+    }
+    
     if (tcb->xmitLastSent > tcb->xmitFirst && tcb->finSequence == 0 && tcb->streamState >= ST_ESTABLISHED) {
         nabto_update_min_stamp(current_min_stamp, &tcb->dataTimeoutStamp);
     }
@@ -1760,7 +1782,11 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
 /**
  * Called before a data packet is sent to test if it's allowed to be sent.
  */
-bool unabto_stream_congestion_control_can_send(struct nabto_stream_tcb* tcb, uint16_t ix, bool new_data) {
+bool unabto_stream_congestion_control_can_send(struct nabto_stream_tcb* tcb, uint16_t ix, bool new_data)
+{
+    if (nabto_stream_is_burst_limited(tcb)) {
+        return false;
+    }
     return is_in_cwnd(tcb, ix, new_data) && is_in_advertised_window(tcb, ix);
 }
 
