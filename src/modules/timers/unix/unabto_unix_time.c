@@ -52,21 +52,13 @@ struct timespec nabtoGetStamp() {
 
 // return s1 < s2
 bool unabto_unix_timer_stamp_less(nabto_stamp_t* s1, nabto_stamp_t* s2) {
-    if (s2->tv_sec < s1->tv_sec) {
-        return false;
-    }
-    
-    // s1 <= s2 here, if s1.sec == s2.sec then look at the nanoseconds.
-    return s1->tv_sec < s2->tv_sec || ((s1->tv_nsec/1000000) < (s2->tv_nsec/1000000));
+    nabto_stamp_diff_t diff = nabtoStampDiff(s1, s2);
+    return (diff < 0);
 }
 
 bool unabto_unix_timer_stamp_less_equal(nabto_stamp_t* s1, nabto_stamp_t* s2) {
-    if (s2->tv_sec < s1->tv_sec) {
-        return false;
-    }
-    
-    // s1 <= s2 here, if s1.sec == s2.sec then look at the nanoseconds which is converted to milliseconds since that is the smallest timeunit in unabto.
-    return s1->tv_sec < s2->tv_sec || ((s1->tv_nsec/1000000) <= (s2->tv_nsec/1000000));
+    nabto_stamp_diff_t diff = nabtoStampDiff(s1, s2);
+    return (diff <= 0);
 }
 
 
