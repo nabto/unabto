@@ -5,7 +5,12 @@
 #include <stdint.h>
 
 
-typedef struct timespec nabto_stamp_t;
+struct unabto_unix_time {
+    uint64_t milliseconds;
+    uint64_t vector; // the vector is used to distinguish two timestamps with equal milliseconds but with different place in time of calling nabtoGetStamp()
+};
+
+typedef struct unabto_unix_time nabto_stamp_t;
 // milliseconds
 typedef int64_t nabto_stamp_diff_t;
 
