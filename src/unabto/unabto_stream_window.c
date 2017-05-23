@@ -450,12 +450,14 @@ static bool send_data_packet(struct nabto_stream_s* stream, uint32_t seq, uint8_
 
     if (build_and_send_packet(stream, ACK, seq, 0, 0, data, size, &sackData)) {
         if (size) {
-            NABTO_LOG_DEBUG(("%" PRIu16 " <-- [%" PRIu32 ",%" PRIu32 "] DATA(isRetrans: %u), %" PRIu16 " bytes from ix=%i (xmitFirst/Count = %" PRIu32 "/%" PRIu32 ")", stream->streamTag, seq, ackNumber, retrans, size, ix, tcb->xmitFirst, tcb->xmitLastSent - tcb->xmitFirst ));
+            NABTO_LOG_DEBUG(("%" PRIu16 " <-- [%" PRIu32 ",%" PRIu32 "] DATA(isRetrans: %u), %" PRIu16 " bytes from ix=%i (xmitFirst/Count/sentNotAcked = %" PRIu32 "/%" PRIu32 "/%i)", stream->streamTag, seq, ackNumber, retrans, size, ix, tcb->xmitFirst, tcb->xmitLastSent - tcb->xmitFirst, tcb->cCtrl.sentNotAcked ));
         } else {
             NABTO_LOG_DEBUG(("%" PRIu16 ", <-- [%" PRIu32 ",%" PRIu32 "] DATA, 0 bytes (xmitFirst/Count=%" PRIu32 "/%" PRIu32 ")", stream->streamTag, seq, ackNumber, tcb->xmitFirst, tcb->xmitSeq - tcb->xmitFirst));
         }
-        tcb->burstPacketsSent++;
-        tcb->cCtrl.fastRecoverySent++;
+        if (size > 0) {
+            tcb->cCtrl.cwnd -= 1;
+        }
+
         return true;
     } else {
         NABTO_LOG_TRACE(("Failed to send stream data packet!"));
@@ -700,19 +702,6 @@ void unabto_stream_mark_all_xmit_buffers_as_timed_out(struct nabto_stream_tcb* t
     }
 }
 
-bool nabto_stream_is_burst_limited(struct nabto_stream_tcb* tcb)
-{
-    if (tcb->cCtrl.isFirstAck) {
-        return false;
-    }
-
-    if (tcb->cCtrl.cwnd > 8) {
-        return false;
-    }
-    
-    return tcb->burstPacketsSent >= tcb->burstPacketsMax;
-}
-
 void nabto_stream_tcb_check_xmit(struct nabto_stream_s* stream, bool isTimedEvent, bool windowHasOpened)
 {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
@@ -721,15 +710,6 @@ void nabto_stream_tcb_check_xmit(struct nabto_stream_s* stream, bool isTimedEven
         return;
     }
 
-    if (nabtoIsStampPassed(&tcb->burstLimitStamp)) {
-        // at max send cwnd/4 packets in srtt/16 time. This ensures
-        // throttling does not limit window expansion, but gives
-        // reasonable burst limits.        
-        nabtoSetFutureStamp(&tcb->burstLimitStamp, tcb->cCtrl.srtt/16);
-        tcb->burstPacketsMax = ceil(tcb->cCtrl.cwnd/4);
-        tcb->burstPacketsSent = 0;
-    }
-    
     switch (tcb->streamState) {
         case ST_SYN_SENT:
             if (nabtoIsStampPassed(&tcb->timeoutStamp)) {
@@ -1569,10 +1549,6 @@ void nabto_stream_tcb_update_next_event(struct nabto_stream_s * stream, nabto_st
         return;
     }
 
-    if (nabto_stream_is_burst_limited(tcb)) {
-        nabto_update_min_stamp(current_min_stamp, &tcb->burstLimitStamp);
-    }
-    
     if (tcb->xmitLastSent > tcb->xmitFirst && tcb->finSequence == 0 && tcb->streamState >= ST_ESTABLISHED) {
         nabto_update_min_stamp(current_min_stamp, &tcb->dataTimeoutStamp);
     }
@@ -1727,8 +1703,6 @@ void unabto_stream_congestion_control_adjust_ssthresh_after_triple_ack(struct na
         tcb->cCtrl.ssThreshold = MAX(flightSize/2.0, SLOWSTART_MIN_VALUE);
         unabto_stream_stats_observe(&tcb->ccStats.ssThreshold, tcb->cCtrl.ssThreshold);
         tcb->cCtrl.lostSegment = true;
-        tcb->cCtrl.fastRecoveryAcks = 0;
-        tcb->cCtrl.fastRecoverySent = 0;
     }
 }
 
@@ -1778,21 +1752,18 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
 
         if (tcb->cCtrl.lostSegment && ackOnStartOfWindow) {
             tcb->cCtrl.lostSegment = false;
-            tcb->cCtrl.cwnd = tcb->cCtrl.ssThreshold;
         }
 
-        tcb->cCtrl.fastRecoveryAcks++;
-
-        // do not change cwnd in fast recovery, this works fine in con
-        if (!tcb->cCtrl.lostSegment) {
-            if (use_slow_start(tcb)) {
-                NABTO_LOG_TRACE(("slow starting! %f", tcb->cCtrl.cwnd));
-                tcb->cCtrl.cwnd += 1;                        
-            } else {
-                tcb->cCtrl.cwnd += 1.0/tcb->cCtrl.cwnd;
-            }
-            unabto_stream_stats_observe(&tcb->ccStats.cwnd, tcb->cCtrl.cwnd);
+        if (tcb->cCtrl.lostSegment) {
+            tcb->cCtrl.cwnd += 1;
+        } else if (use_slow_start(tcb)) {
+            NABTO_LOG_TRACE(("slow starting! %f", tcb->cCtrl.cwnd));
+            tcb->cCtrl.cwnd += 2;                        
+        } else {
+            // congestion avoidance
+            tcb->cCtrl.cwnd += 1 + (1.0/tcb->cCtrl.sentNotAcked);
         }
+        unabto_stream_stats_observe(&tcb->ccStats.cwnd, tcb->cCtrl.cwnd);
     }
 
     NABTO_LOG_TRACE(("adjusting cwnd: %f ssThreshold: %f", tcb->cCtrl.cwnd, tcb->cCtrl.ssThreshold));
@@ -1803,16 +1774,6 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
  */
 bool unabto_stream_congestion_control_can_send(struct nabto_stream_tcb* tcb, uint16_t ix, bool new_data)
 {
-    if (nabto_stream_is_burst_limited(tcb)) {
-        return false;
-    }
-
-    if (tcb->cCtrl.lostSegment &&
-        (tcb->cCtrl.fastRecoverySent > tcb->cCtrl.fastRecoveryAcks))
-    {
-        return false;
-    }
-    
     return is_in_cwnd(tcb, ix, new_data) && is_in_advertised_window(tcb, ix);
 }
 
@@ -1834,7 +1795,7 @@ int flight_size(struct nabto_stream_tcb* tcb) {
 }
 
 bool use_slow_start(struct nabto_stream_tcb* tcb) {
-    return tcb->cCtrl.cwnd < tcb->cCtrl.ssThreshold;
+    return tcb->cCtrl.sentNotAcked < tcb->cCtrl.ssThreshold;
 }
 
 bool is_in_advertised_window(struct nabto_stream_tcb* tcb, uint16_t ix) {
@@ -1846,47 +1807,15 @@ bool is_in_advertised_window(struct nabto_stream_tcb* tcb, uint16_t ix) {
 }
 
 bool congestion_control_accept_more_data(struct nabto_stream_tcb* tcb) {
-    bool status = (tcb->cCtrl.sentNotAcked + tcb->cCtrl.notSent <= tcb->cCtrl.cwnd);
+    bool status = (tcb->cCtrl.notSent <= tcb->cCtrl.cwnd);
     if (!status) {
-        NABTO_LOG_TRACE(("Stream  does not accept more data sentNotAcked %i, notSent: %i, cwnd %f", tcb->cCtrl.sentNotAcked, tcb->cCtrl.notSent, tcb->cCtrl.cwnd));
+        NABTO_LOG_TRACE(("Stream  does not accept more data notSent: %i, cwnd %f", tcb->cCtrl.notSent, tcb->cCtrl.cwnd));
     }
     return status;
 }
 
 bool is_in_cwnd(struct nabto_stream_tcb* tcb, uint16_t ix, bool new_data) {
-    uint32_t i;
-    int count = 0;
-
-    // The trivial case
-    if (tcb->cCtrl.sentNotAcked < tcb->cCtrl.cwnd) {
-        return true;
-    }
-
-    // If this is new data then the following case can never be actual.
-    if (new_data) {
-        return false;
-    }
-
-    // Else we have to look at all B_SENT buffers up to our ix to decide if 
-    // the buffer is in our current cwnd
-    // This is rather expensive.
-    
-    for (i = tcb->xmitFirst; i < tcb->xmitLastSent; i++) {
-        uint16_t this_ix = i % tcb->cfg.xmitWinSize;
-        if (tcb->xmit[this_ix].xstate == B_SENT) {
-            count++;
-        }
-        if (count > tcb->cCtrl.cwnd) {
-            return false;
-        }
-        
-        if (this_ix == ix) {
-            NABTO_LOG_TRACE(("is_in_cwnd, count: %i, cwnd: %f, ret: %i, sentNotAcked: %i", count, tcb->cCtrl.cwnd, true, tcb->cCtrl.sentNotAcked));
-            return true;
-        }
-    }
-    NABTO_LOG_TRACE(("didn't find %i in the window?", ix));
-    return false;
+    return (tcb->cCtrl.cwnd > 0);
 }
 
 void windowStatus(const char* str, struct nabto_stream_tcb* tcb) {

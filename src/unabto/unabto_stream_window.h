@@ -133,7 +133,7 @@ typedef struct {
     double        rttVar;        ///< Round trip time variance.
     double        rto;           ///< Retransmission timeout.
     bool          isFirstAck;    ///< True when the first ack has been received.
-    double        cwnd;          ///< Congestion window size
+    double        cwnd;          ///< Room for windows to be sent
     double        ssThreshold;   ///< Slow start threshold
     int           sentNotAcked;  ///< Gauge of sent but not acked buffers.
     int           notSent;       ///< Gauge of data ready for sending. (xmitSeq - xmitLastSent)
@@ -141,9 +141,6 @@ typedef struct {
                                  ///and we are running the fast
                                  ///retransmit / fast recovery
                                  ///algorithm
-    int           fastRecoveryAcks; ///< acks received after lostSegment set.
-    int           fastRecoverySent; ///< sent packets during fastRecovery.
-    
 } nabto_stream_congestion_control;
 
 
@@ -160,24 +157,6 @@ struct nabto_stream_tcb {
     nabto_stamp_t                   timeoutStamp;           /**< Timeout stamp           */
     nabto_stamp_t                   dataTimeoutStamp;       /**< Timeout stamp for data  */
     nabto_stamp_t                   dataExpireStamp;        /**< When current data segment expires. */
-
-    /**
-     * Burst limiting functionality.
-     *
-     * The burst limiting functionality is a timer, which is set to
-     * srtt/16 milliseconds into the future. until this timer expoires
-     * at most cwnd/4 packets should be sent. This means that not all
-     * packets in the cwnd window will bu sent at once, but atleast
-     * will be sent in 4 buckets for a large latency network.
-     * 
-     * The burst limiting timer is set in the start of check_xmit if
-     * it has expired.  If the stream is limited by the burst limiter
-     * the expire stamp of the burst limiter is added to the next
-     * event for the stream.
-     */
-    nabto_stamp_t                   burstLimitStamp;
-    int                             burstPacketsSent;
-    int                             burstPacketsMax;
 
     uint32_t                        maxAdvertisedWindow;    
     uint16_t                        lastSentAdvertisedWindow;
