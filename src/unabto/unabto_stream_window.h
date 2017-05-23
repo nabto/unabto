@@ -141,6 +141,8 @@ typedef struct {
                                  ///and we are running the fast
                                  ///retransmit / fast recovery
                                  ///algorithm
+    int           fastRecoveryAcks; ///< acks received after lostSegment set.
+    int           fastRecoverySent; ///< sent packets during fastRecovery.
     
 } nabto_stream_congestion_control;
 
