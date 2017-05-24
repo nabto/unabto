@@ -40,7 +40,7 @@ void unabto_time_update_stamp() {
     milliseconds = res.tv_sec*1000 + (res.tv_nsec/1000000);
     if (cachedTime.milliseconds != milliseconds) {
         cachedTime.milliseconds = milliseconds;
-        cachedTime.vector = 0;
+        cachedTime.count = 0;
     }
 }
 
@@ -49,7 +49,7 @@ struct unabto_unix_time nabtoGetStamp() {
     if (auto_update_enabled) {
         unabto_time_update_stamp();
     }
-    cachedTime.vector++;
+    cachedTime.count++;
     return cachedTime;
 }
 
@@ -58,7 +58,7 @@ bool unabto_unix_timer_stamp_less(nabto_stamp_t* s1, nabto_stamp_t* s2) {
     if (s1->milliseconds < s2->milliseconds) {
         return true;
     }
-    if (s1->milliseconds == s2->milliseconds && s1->vector < s2->vector) {
+    if (s1->milliseconds == s2->milliseconds && s1->count < s2->count) {
         return true;
     }
     return false;
@@ -68,7 +68,7 @@ bool unabto_unix_timer_stamp_less_equal(nabto_stamp_t* s1, nabto_stamp_t* s2) {
     if (s1->milliseconds < s2->milliseconds) {
         return true;
     }
-    if (s1->milliseconds == s2->milliseconds && s1->vector <= s2->vector) {
+    if (s1->milliseconds == s2->milliseconds && s1->count <= s2->count) {
         return true;
     }
     return false;
