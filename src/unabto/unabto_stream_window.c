@@ -805,16 +805,14 @@ void nabto_stream_tcb_check_xmit(struct nabto_stream_s* stream, bool isTimedEven
             
             // we should only send advertised window information solely when a timeout has occured.
             uint16_t advWindowSize = unabto_stream_advertised_window_size(tcb);
-            // window full event:
-            bool windowFullEvent = (advWindowSize == 0 && tcb->lastSentAdvertisedWindow != advWindowSize);
+            
             bool sendWSRFAck = (tcb->cfg.enableWSRF && (tcb->ackWSRFcount < tcb->cfg.maxRetrans) && nabtoIsStampPassed(&tcb->ackStamp));
             
             if (ackReadyForConsumedData ||
-                windowFullEvent ||
                 windowHasOpened ||
                 sendWSRFAck) {
                 if (send_data_packet(stream, tcb->xmitLastSent, 0, 0, 0, 0)) {
-                    if (ackReadyForConsumedData || windowFullEvent) {
+                    if (ackReadyForConsumedData) {
                         tcb->ackWSRFcount = 0;
                     } else {
                         ++tcb->ackWSRFcount;
@@ -1056,6 +1054,11 @@ static void handle_data(struct nabto_stream_s* stream,
         case SEQ_EXPECTED:
             /* use ack's from received packet to roll transmit window */
             NABTO_LOG_TRACE(("xmitLastSent %" PRIu32 " xmitFirst %" PRIu32, tcb->xmitLastSent, tcb->xmitFirst));
+
+            
+            NABTO_LOG_TRACE(("current advertisedWindow %" PRIu32 " advertised window from packet %" PRIu32, tcb->maxAdvertisedWindow, win->ack+win->advertisedWindow));
+
+
             if (tcb->xmitLastSent != tcb->xmitFirst) {
                 uint32_t ackStart = tcb->xmitFirst; // first seq awaiting ack
                 uint32_t ackEnd = win->ack;
@@ -1077,6 +1080,8 @@ static void handle_data(struct nabto_stream_s* stream,
                     stream->applicationEvents.dataWritten = true;
                 }
             }
+
+            
 
             /* if possible insert data in receive window */
             if (dlen > 0) {
@@ -1166,9 +1171,19 @@ void nabto_stream_tcb_event(struct nabto_stream_s* stream,
 {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
 
-    if (win->type == ACK) {
-        NABTO_LOG_TRACE(("current advertisedWindow %" PRIu32 " advertised window from packet %" PRIu32, tcb->maxAdvertisedWindow, win->ack+win->advertisedWindow));
+    if (win->type == ACK ) {
+        uint32_t oldAdvWindow = tcb->maxAdvertisedWindow;
+        // all data has been acked and there is no more room for more data
+        bool windowWasFull = (tcb->maxAdvertisedWindow == tcb->xmitFirst);
+        
         tcb->maxAdvertisedWindow = MAX(tcb->maxAdvertisedWindow, win->ack+win->advertisedWindow);
+        if (oldAdvWindow != tcb->maxAdvertisedWindow) {
+            // trigger sending more data since the window has opened
+            stream->applicationEvents.dataWritten = true;
+        }
+        if (windowWasFull) {
+            tcb->cCtrl.cwnd += (tcb->maxAdvertisedWindow-oldAdvWindow);
+        }
     }
 
     if (win->type & RST) {
@@ -1763,10 +1778,23 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
             // congestion avoidance
             tcb->cCtrl.cwnd += 1 + (1.0/tcb->cCtrl.sentNotAcked);
         }
+
+        {
+            // cwnd should not crow above the maximum possible data on
+            // the network. This will also limit cwnd in cases where
+            // the client is slow to accept new data and hence end in
+            // some slow start situation when the window opens again.
+            uint32_t maxData = tcb->maxAdvertisedWindow - tcb->xmitFirst;
+            
+            if (tcb->cCtrl.cwnd > maxData) {
+                tcb->cCtrl.cwnd = maxData;
+            }
+        }
+            
         unabto_stream_stats_observe(&tcb->ccStats.cwnd, tcb->cCtrl.cwnd);
     }
 
-    NABTO_LOG_TRACE(("adjusting cwnd: %f ssThreshold: %f", tcb->cCtrl.cwnd, tcb->cCtrl.ssThreshold));
+    NABTO_LOG_TRACE(("adjusting cwnd: %f, ssThreshold: %f, sentNotAcked %i", tcb->cCtrl.cwnd, tcb->cCtrl.ssThreshold, tcb->cCtrl.sentNotAcked));
 }
 
 /**
