@@ -109,7 +109,6 @@ typedef struct {
                                           * after this buffer in the
                                           * window. */
     bool          isTimedOut;            /** true if this buffer has experienced a timeout */
-    bool          resentByRetransmissionTimer;
 } x_buffer;
 
 
@@ -134,14 +133,14 @@ typedef struct {
     double        rttVar;        ///< Round trip time variance.
     double        rto;           ///< Retransmission timeout.
     bool          isFirstAck;    ///< True when the first ack has been received.
-    double        cwnd;          ///< Congestion window size
+    double        cwnd;          ///< Room for windows to be sent
     double        ssThreshold;   ///< Slow start threshold
-    int           sentNotAcked;  ///< counter of sent but not acked buffers.
+    int           sentNotAcked;  ///< Gauge of sent but not acked buffers.
+    int           notSent;       ///< Gauge of data ready for sending. (xmitSeq - xmitLastSent)
     bool          lostSegment;   ///< True if a segment has been lost
                                  ///and we are running the fast
                                  ///retransmit / fast recovery
                                  ///algorithm
-    
 } nabto_stream_congestion_control;
 
 

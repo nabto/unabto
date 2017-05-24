@@ -334,6 +334,15 @@ void unabto_network_epoll_read(struct epoll_event* event)
         } while (status);
     }
 }
+
+bool unabto_network_epoll_read_one(struct epoll_event* event)
+{
+    unabto_epoll_event_handler_udp* udpHandler = (unabto_epoll_event_handler_udp*)event->data.ptr;
+    if (udpHandler->epollEventType == UNABTO_EPOLL_TYPE_UDP) {
+        return unabto_read_socket(udpHandler->fd);
+    }
+    return false;
+}
 #endif
 
 bool nabto_get_local_ip(uint32_t* ip) {
