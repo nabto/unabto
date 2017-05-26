@@ -31,7 +31,7 @@
  * @param size number of bytes to copy
  * @return
  */
-#define READ(dst, src, size) do { size_t i; for(i = 0; i<size; i++) { dst[i] = src[i]; } } while (0)
+#define READ(dst, src, size) do { size_t i; for (i = 0; i<size; i++) { dst[i] = src[i]; } } while (0)
 #endif
 
 #ifndef READ_U8

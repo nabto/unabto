@@ -79,7 +79,6 @@ static void nabto_stream_state_transition(struct nabto_stream_s* stream, nabto_s
  * This function is used when enquing data into the transmit buffers
  */
 static bool congestion_control_accept_more_data(struct nabto_stream_tcb* tcb);
-static bool is_in_cwnd(struct nabto_stream_tcb* tcb);
 
 static NABTO_THREAD_LOCAL_STORAGE uint16_t idSP__ = 0;       /**< the one and only */
 static NABTO_THREAD_LOCAL_STORAGE uint16_t idCP__ = 0;       /**< the one and only */
@@ -612,13 +611,16 @@ bool nabto_stream_check_retransmit_data(struct nabto_stream_s* stream) {
         int ix = i % tcb->cfg.xmitWinSize;
         xbuf = &tcb->xmit[ix];
 
+        if (!unabto_stream_congestion_control_can_send(tcb)) {
+            return false;
+        }
+
         // Check if we are above the most recent sent buffer
         // if so there can be no retransmits since the data has not been sent.
 
         if (xbuf->xstate == B_SENT && (xbuf->ackedAfter >= 2 || xbuf->isTimedOut)) {
             xbuf->nRetrans++;
-            if (! (unabto_stream_congestion_control_can_send(tcb, ix, false /* not new data*/) && 
-                   send_data_packet(stream, xbuf->seq, xbuf->buf, xbuf->size, xbuf->nRetrans, ix))) {
+            if (!send_data_packet(stream, xbuf->seq, xbuf->buf, xbuf->size, xbuf->nRetrans, ix)) {
                 
                 // we can't send data do not try to send more data.
                 xbuf->nRetrans--;
@@ -658,7 +660,7 @@ void nabto_stream_check_new_data_xmit(struct nabto_stream_s* stream) {
             break;
         }
 
-        if (!(unabto_stream_congestion_control_can_send(tcb, ix, true /* new data */))) {
+        if (!(unabto_stream_congestion_control_can_send(tcb))) {
             NABTO_LOG_TRACE(("Congestion control limits data sending"));
             break;
         } else if (!send_data_packet(stream, xbuf->seq, xbuf->buf, xbuf->size, xbuf->nRetrans, ix)) {
@@ -1803,9 +1805,10 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
 /**
  * Called before a data packet is sent to test if it's allowed to be sent.
  */
-bool unabto_stream_congestion_control_can_send(struct nabto_stream_tcb* tcb, uint16_t ix, bool new_data)
+bool unabto_stream_congestion_control_can_send(struct nabto_stream_tcb* tcb)
 {
-    return is_in_cwnd(tcb);
+    // is_in_cwnd(tcb);
+    return (tcb->cCtrl.cwnd > 0);    
 }
 
 
@@ -1827,10 +1830,6 @@ bool congestion_control_accept_more_data(struct nabto_stream_tcb* tcb) {
         NABTO_LOG_TRACE(("Stream  does not accept more data notSent: %i, cwnd %f", tcb->cCtrl.notSent, tcb->cCtrl.cwnd));
     }
     return status;
-}
-
-bool is_in_cwnd(struct nabto_stream_tcb* tcb) {
-    return (tcb->cCtrl.cwnd > 0);
 }
 
 void windowStatus(const char* str, struct nabto_stream_tcb* tcb) {

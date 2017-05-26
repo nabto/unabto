@@ -382,7 +382,7 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
 /**
  * Called before a data packet is sent to test if it's allowed to be sent.
  */
-bool unabto_stream_congestion_control_can_send(struct nabto_stream_tcb* tcb, uint16_t ix, bool new_data);
+bool unabto_stream_congestion_control_can_send(struct nabto_stream_tcb* tcb);
 
 /**
  * Send stream statistics packet
