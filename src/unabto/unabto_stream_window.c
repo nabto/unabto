@@ -1659,11 +1659,6 @@ bool use_slow_start(struct nabto_stream_tcb* tcb);
 void windowStatus(const char* str, struct nabto_stream_tcb* tcb);
 
 
-/**
- * @return the number of segments which is sent but not cumulative acknowledged.
- */
-int flight_size(struct nabto_stream_tcb* tcb);
-
 void unabto_stream_secondary_data_structure_init(struct nabto_stream_s* stream)
 {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
@@ -1683,8 +1678,7 @@ void unabto_stream_congestion_control_init(struct nabto_stream_tcb* tcb)
 
 void unabto_stream_congestion_control_adjust_ssthresh_after_triple_ack(struct nabto_stream_tcb* tcb) {
     if (!tcb->cCtrl.lostSegment) {
-        int flightSize = flight_size(tcb);
-        tcb->cCtrl.ssThreshold = MAX(flightSize/2.0, SLOWSTART_MIN_VALUE);
+        tcb->cCtrl.ssThreshold = MAX(tcb->cCtrl.flightSize/2.0, SLOWSTART_MIN_VALUE);
         unabto_stream_stats_observe(&tcb->ccStats.ssThreshold, tcb->cCtrl.ssThreshold);
         tcb->cCtrl.lostSegment = true;
     }
@@ -1777,15 +1771,6 @@ bool unabto_stream_congestion_control_can_send(struct nabto_stream_tcb* tcb)
 {
     // is_in_cwnd(tcb);
     return (tcb->cCtrl.cwnd > 0);
-}
-
-
-/**
- * Count number of unacked sent segments.
- */
-int flight_size(struct nabto_stream_tcb* tcb) {
-    NABTO_LOG_TRACE(("flight size aka flightSize %i", tcb->cCtrl.flightSize));
-    return tcb->cCtrl.flightSize;
 }
 
 bool use_slow_start(struct nabto_stream_tcb* tcb) {
