@@ -380,12 +380,7 @@ size_t nabto_stream_tcb_write(struct nabto_stream_s * stream, const uint8_t* buf
             memcpy(xbuf->buf, (const void*) &buf[queued], sz);
             xbuf->size = sz;
             xbuf->seq = tcb->xmitSeq;
-            {
-                // exactly the number of segments in the transmit buffers not sent yet!
-                tcb->cCtrl.notSent++;
-                xbuf->xstate = B_DATA;
-            }
-
+            xbuf->xstate = B_DATA;
 
             queued += sz;
             size -= sz;
@@ -667,8 +662,6 @@ void nabto_stream_check_new_data_xmit(struct nabto_stream_s* stream) {
             // sentNotAcked is exactly the number of transmitbuffers in the state B_SENT!
             tcb->cCtrl.sentNotAcked++;
             unabto_stream_stats_observe(&tcb->ccStats.sentNotAcked, (double)tcb->cCtrl.sentNotAcked);
-            // exactly the number of not sent data segments!
-            tcb->cCtrl.notSent--;
             xbuf->xstate = B_SENT;
         }
         xbuf->isTimedOut = false;
@@ -1799,10 +1792,20 @@ bool use_slow_start(struct nabto_stream_tcb* tcb) {
     return tcb->cCtrl.sentNotAcked < tcb->cCtrl.ssThreshold;
 }
 
+/**
+ * Count not sent data
+ */
+uint32_t unabto_stream_not_sent_segments(struct nabto_stream_tcb* tcb) {
+    // xmitSeq is the next sequence number for data to send.
+    // xmitLastSent is the sequence number for the lastSegment sent +
+    // 1. This means the following invariant holds xmitSeq >= xmitLastSent
+    return (tcb->xmitSeq - tcb->xmitLastSent);
+}
+
 bool congestion_control_accept_more_data(struct nabto_stream_tcb* tcb) {
-    bool status = (tcb->cCtrl.notSent <= tcb->cCtrl.cwnd);
+    bool status = (unabto_stream_not_sent_segments(tcb) <= tcb->cCtrl.cwnd);
     if (!status) {
-        NABTO_LOG_TRACE(("Stream  does not accept more data notSent: %i, cwnd %f", tcb->cCtrl.notSent, tcb->cCtrl.cwnd));
+        NABTO_LOG_TRACE(("Stream  does not accept more data notSent: %i, cwnd %f", unabto_stream_not_sent_segments(tcb), tcb->cCtrl.cwnd));
     }
     return status;
 }

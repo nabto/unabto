@@ -133,7 +133,6 @@ typedef struct {
     double        cwnd;          ///< Room for windows to be sent
     double        ssThreshold;   ///< Slow start threshold
     int           sentNotAcked;  ///< Gauge of sent but not acked buffers.
-    int           notSent;       ///< Gauge of data ready for sending. (xmitSeq - xmitLastSent)
     bool          lostSegment;   ///< True if a segment has been lost
                                  ///and we are running the fast
                                  ///retransmit / fast recovery
