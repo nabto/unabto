@@ -449,7 +449,7 @@ static bool send_data_packet(struct nabto_stream_s* stream, uint32_t seq, uint8_
         if (size) {
             tcb->cCtrl.cwnd -= 1;
 
-            NABTO_LOG_DEBUG(("%" PRIu16 " <-- [%" PRIu32 ",%" PRIu32 "] DATA(isRetrans: %u), %" PRIu16 " bytes from ix=%i (xmitFirst/Count/sentNotAcked = %" PRIu32 "/%" PRIu32 "/%i)", stream->streamTag, seq, ackNumber, retrans, size, ix, tcb->xmitFirst, tcb->xmitLastSent - tcb->xmitFirst, tcb->cCtrl.sentNotAcked ));
+            NABTO_LOG_DEBUG(("%" PRIu16 " <-- [%" PRIu32 ",%" PRIu32 "] DATA(isRetrans: %u), %" PRIu16 " bytes from ix=%i (xmitFirst/Count/flightSize = %" PRIu32 "/%" PRIu32 "/%i)", stream->streamTag, seq, ackNumber, retrans, size, ix, tcb->xmitFirst, tcb->xmitLastSent - tcb->xmitFirst, tcb->cCtrl.flightSize ));
         } else {
             NABTO_LOG_DEBUG(("%" PRIu16 ", <-- [%" PRIu32 ",%" PRIu32 "] DATA, 0 bytes (xmitFirst/Count=%" PRIu32 "/%" PRIu32 ")", stream->streamTag, seq, ackNumber, tcb->xmitFirst, tcb->xmitSeq - tcb->xmitFirst));
         }
@@ -659,9 +659,9 @@ void nabto_stream_check_new_data_xmit(struct nabto_stream_s* stream) {
 
         // data was sent increment xmitLastSent etc.
         {
-            // sentNotAcked is exactly the number of transmitbuffers in the state B_SENT!
-            tcb->cCtrl.sentNotAcked++;
-            unabto_stream_stats_observe(&tcb->ccStats.sentNotAcked, (double)tcb->cCtrl.sentNotAcked);
+            // flightSize is exactly the number of transmitbuffers in the state B_SENT!
+            tcb->cCtrl.flightSize++;
+            unabto_stream_stats_observe(&tcb->ccStats.flightSize, (double)tcb->cCtrl.flightSize);
             xbuf->xstate = B_SENT;
         }
         xbuf->isTimedOut = false;
@@ -973,9 +973,9 @@ bool handle_ack(struct nabto_stream_s* stream, uint32_t ack_start, uint32_t ack_
                 unabto_stream_congestion_control_handle_ack(tcb, ix, ackOnStartOfWindow);
                 NABTO_LOG_TRACE(("setting buffer %i for seq %i to IDLE", ix, i));
                 {
-                    // sentNotAcked is exactly the number of transmitbuffers in the state B_SENT!
-                    tcb->cCtrl.sentNotAcked--;
-                    unabto_stream_stats_observe(&tcb->ccStats.sentNotAcked, (double)tcb->cCtrl.sentNotAcked);
+                    // flightSize is exactly the number of transmitbuffers in the state B_SENT!
+                    tcb->cCtrl.flightSize--;
+                    unabto_stream_stats_observe(&tcb->ccStats.flightSize, (double)tcb->cCtrl.flightSize);
                     tcb->xmit[ix].xstate = B_IDLE;
                 }
                 dataAcked = true;
@@ -1750,7 +1750,7 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
             tcb->cCtrl.cwnd += 2;
         } else {
             // congestion avoidance
-            tcb->cCtrl.cwnd += 1 + (1.0/tcb->cCtrl.sentNotAcked);
+            tcb->cCtrl.cwnd += 1 + (1.0/tcb->cCtrl.flightSize);
         }
         {
             // cwnd should not grow above the maximum possible data on
@@ -1767,7 +1767,7 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
         unabto_stream_stats_observe(&tcb->ccStats.cwnd, tcb->cCtrl.cwnd);
     }
 
-    NABTO_LOG_TRACE(("adjusting cwnd: %f, ssThreshold: %f, sentNotAcked %i", tcb->cCtrl.cwnd, tcb->cCtrl.ssThreshold, tcb->cCtrl.sentNotAcked));
+    NABTO_LOG_TRACE(("adjusting cwnd: %f, ssThreshold: %f, flightSize %i", tcb->cCtrl.cwnd, tcb->cCtrl.ssThreshold, tcb->cCtrl.flightSize));
 }
 
 /**
@@ -1784,12 +1784,12 @@ bool unabto_stream_congestion_control_can_send(struct nabto_stream_tcb* tcb)
  * Count number of unacked sent segments.
  */
 int flight_size(struct nabto_stream_tcb* tcb) {
-    NABTO_LOG_TRACE(("flight size aka sentNotAcked %i", tcb->cCtrl.sentNotAcked));
-    return tcb->cCtrl.sentNotAcked;
+    NABTO_LOG_TRACE(("flight size aka flightSize %i", tcb->cCtrl.flightSize));
+    return tcb->cCtrl.flightSize;
 }
 
 bool use_slow_start(struct nabto_stream_tcb* tcb) {
-    return tcb->cCtrl.sentNotAcked < tcb->cCtrl.ssThreshold;
+    return tcb->cCtrl.flightSize < tcb->cCtrl.ssThreshold;
 }
 
 /**
@@ -1805,7 +1805,7 @@ uint32_t unabto_stream_not_sent_segments(struct nabto_stream_tcb* tcb) {
 bool congestion_control_accept_more_data(struct nabto_stream_tcb* tcb) {
     bool status = (unabto_stream_not_sent_segments(tcb) <= tcb->cCtrl.cwnd);
     if (!status) {
-        NABTO_LOG_TRACE(("Stream  does not accept more data notSent: %i, cwnd %f", unabto_stream_not_sent_segments(tcb), tcb->cCtrl.cwnd));
+        NABTO_LOG_TRACE(("Stream  does not accept more data notSent: %" PRIu32 ", cwnd %f", unabto_stream_not_sent_segments(tcb), tcb->cCtrl.cwnd));
     }
     return status;
 }
@@ -1898,7 +1898,7 @@ void unabto_stream_dump_state(struct nabto_stream_s* stream) {
     NABTO_LOG_TRACE(("  rto %" PRIu16, tcb->cCtrl.rto));
     NABTO_LOG_TRACE(("  cwnd %f", tcb->cCtrl.cwnd));
     NABTO_LOG_TRACE(("  ssThreshold %f", tcb->cCtrl.ssThreshold));
-    NABTO_LOG_TRACE(("  sentNotAcked %i", tcb->cCtrl.sentNotAcked));
+    NABTO_LOG_TRACE(("  flightSize %i", tcb->cCtrl.flightSize));
 #endif
 }
 

@@ -478,9 +478,9 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
         ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MAX,          stats.ssThresholdMax);
         ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_AVG,          stats.ssThresholdAvg);
 
-        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_MIN,        stats.sentNotAckedMin);
-        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_MAX,        stats.sentNotAckedMax);
-        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_AVG,        stats.sentNotAckedAvg);
+        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_FLIGHT_SIZE_MIN,        stats.flightSizeMin);
+        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_FLIGHT_SIZE_MAX,        stats.flightSizeMax);
+        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_FLIGHT_SIZE_AVG,        stats.flightSizeAvg);
 
         ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIMEOUTS,                  stats.timeouts);
     }

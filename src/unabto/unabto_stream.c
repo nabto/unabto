@@ -183,9 +183,9 @@ int unabto_stream_get_stats(unabto_stream* stream, unabto_stream_stats* stats) {
     stream->stats.ssThresholdMin = stream->u.tcb.ccStats.ssThreshold.min;
     stream->stats.ssThresholdMax = stream->u.tcb.ccStats.ssThreshold.max;
     stream->stats.ssThresholdAvg = stream->u.tcb.ccStats.ssThreshold.avg;
-    stream->stats.sentNotAckedMin = stream->u.tcb.ccStats.sentNotAcked.min;
-    stream->stats.sentNotAckedMax = stream->u.tcb.ccStats.sentNotAcked.max;
-    stream->stats.sentNotAckedAvg = stream->u.tcb.ccStats.sentNotAcked.avg;
+    stream->stats.flightSizeMin = stream->u.tcb.ccStats.flightSize.min;
+    stream->stats.flightSizeMax = stream->u.tcb.ccStats.flightSize.max;
+    stream->stats.flightSizeAvg = stream->u.tcb.ccStats.flightSize.avg;
     *stats = stream->stats;
     return 0;
 }

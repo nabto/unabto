@@ -54,18 +54,18 @@ typedef struct unabto_stream_stats_s {
     unsigned int ssThresholdMin;
     unsigned int ssThresholdMax;
     unsigned int ssThresholdAvg;
-    unsigned int sentNotAckedMin;
-    unsigned int sentNotAckedMax;
-    unsigned int sentNotAckedAvg;
+    unsigned int flightSizeMin;
+    unsigned int flightSizeMax;
+    unsigned int flightSizeAvg;
 
 } unabto_stream_stats;
 
 #ifndef UNABTO_STREAM_STATS_MAKE_PRINTABLE
-#define UNABTO_STREAM_STATS_MAKE_PRINTABLE(stats) (stats.sentPackets), (stats.sentBytes), (stats.sentResentPackets),(stats.receivedPackets), (stats.receivedBytes), (stats.receivedResentPackets), (stats.reorderedOrLostPackets), (stats.timeouts), (stats.rttAvg), (stats.cwndAvg), (stats.ssThresholdAvg), (stats.sentNotAckedAvg)
+#define UNABTO_STREAM_STATS_MAKE_PRINTABLE(stats) (stats.sentPackets), (stats.sentBytes), (stats.sentResentPackets),(stats.receivedPackets), (stats.receivedBytes), (stats.receivedResentPackets), (stats.reorderedOrLostPackets), (stats.timeouts), (stats.rttAvg), (stats.cwndAvg), (stats.ssThresholdAvg), (stats.flightSizeAvg)
 #endif
 
 #ifndef UNABTO_STREAM_STATS_PRI
-#define UNABTO_STREAM_STATS_PRI "sentPackets: %u, sentBytes %u, sentResentPackets %u, receivedPackets %u, receivedBytes %u, receivedResentPackets %u, reorderedOrLostPackets %u, timeouts %u, rtt avg %u, cwnd avg %u, ssthreshold avg %u, sentNotAcked avg %u"
+#define UNABTO_STREAM_STATS_PRI "sentPackets: %u, sentBytes %u, sentResentPackets %u, receivedPackets %u, receivedBytes %u, receivedResentPackets %u, reorderedOrLostPackets %u, timeouts %u, rtt avg %u, cwnd avg %u, ssthreshold avg %u, flightSize avg %u"
 #endif
 
 typedef enum

@@ -97,9 +97,6 @@ bool test_state_machine(void) {
     stream.u.tcb.xmitLastSent = stream.u.tcb.xmitFirst;
     stream.u.tcb.xmitLastSent++;
     stream.u.tcb.xmitSeq++;
-    stream.u.tcb.ackTop = stream.u.tcb.xmitFirst;
-
-
     
     make_ack_window(&window, 43, 34);
     ret &= test_state_machine_case(&stream, &window, ST_CLOSED);    

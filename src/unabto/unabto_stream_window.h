@@ -120,9 +120,9 @@ struct unabto_stats {
 
 typedef struct {
     struct unabto_stats rtt; // rount trip time
-    struct unabto_stats cwnd; // congestion window size
+    struct unabto_stats cwnd; // congestion window size.
     struct unabto_stats ssThreshold; // slow start threshold
-    struct unabto_stats sentNotAcked; // data on the line
+    struct unabto_stats flightSize; // data on the line
 } nabto_stream_congestion_control_stats;
 
 typedef struct {
@@ -130,9 +130,9 @@ typedef struct {
     double        rttVar;        ///< Round trip time variance.
     uint16_t      rto;           ///< Retransmission timeout.
     bool          isFirstAck;    ///< True when the first ack has been received.
-    double        cwnd;          ///< Room for windows to be sent
+    double        cwnd;          ///< Tokens available for sending data
     double        ssThreshold;   ///< Slow start threshold
-    int           sentNotAcked;  ///< Gauge of sent but not acked buffers.
+    int           flightSize;  ///< Gauge of sent but not acked buffers. Aka flight size.
     bool          lostSegment;   ///< True if a segment has been lost
                                  ///and we are running the fast
                                  ///retransmit / fast recovery
@@ -152,7 +152,8 @@ struct nabto_stream_tcb {
     /**
      * The timeoutStamp is used to signal if the stream window should
      * do something. It's both used as regular timeout and a timeout
-     * telling something to happen imidiately.
+     * telling something to happen imidiately. This timeout is not
+     * used for retransmission of regular data.
      */
     nabto_stamp_t                   timeoutStamp;
     /**
@@ -161,7 +162,6 @@ struct nabto_stream_tcb {
     nabto_stamp_t                   dataTimeoutStamp;       /**< Timeout stamp for data  */
     nabto_stamp_t                   ackStamp;               /**< time to send unsolicited ACK         */
     uint32_t                        maxAdvertisedWindow;
-    uint16_t                        lastSentAdvertisedWindow;
 
     uint32_t                        finSequence;            /**< The sequence number of the fin. */
 
@@ -193,7 +193,6 @@ struct nabto_stream_tcb {
     uint32_t                        ackSent;                /**< last ack sent           */
     uint32_t                        recvFinSeq;             /**< The received sequence number the fin has, if this is
                                                                set the other end has sent a fin. */
-    uint32_t                        ackTop;
     r_buffer*                       recv; /**< receive window          */
 
     nabto_stream_congestion_control cCtrl;

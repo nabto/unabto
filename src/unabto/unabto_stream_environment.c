@@ -65,7 +65,6 @@ bool build_and_send_packet(struct nabto_stream_s* stream, uint8_t type, uint32_t
 
     if (send_and_encrypt_packet_con(con, data, size, ptr)) {
         tcb->ackSent = ackToSend;
-        tcb->lastSentAdvertisedWindow = recvWinSize;
         stream->stats.sentPackets++;
         return true;
     } else {
