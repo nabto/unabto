@@ -99,10 +99,7 @@ typedef struct {
     uint16_t      size;                  /**< number of bytes       */
     uint8_t*      buf;                   /**< buffer                */
     b_state_t     xstate;                /**< state                 */
-    uint16_t      nRetrans;              /**< Retansmission
-                                          * counter. This is only used
-                                          * for logging. */ 
-    bool          fin;                   /**< FIN flag              */
+    uint16_t      nRetrans;              /**< Retansmission counter. */
     nabto_stamp_t sentStamp;             /**< When was the data sent. Used to measure rtt */
     uint16_t      ackedAfter;            /**< Number of buffers which
                                           * has been acked which is
@@ -123,20 +120,19 @@ struct unabto_stats {
 
 typedef struct {
     struct unabto_stats rtt; // rount trip time
-    struct unabto_stats cwnd; // congestion window size
+    struct unabto_stats cwnd; // congestion window size.
     struct unabto_stats ssThreshold; // slow start threshold
-    struct unabto_stats sentNotAcked; // data on the line
+    struct unabto_stats flightSize; // data on the line
 } nabto_stream_congestion_control_stats;
 
 typedef struct {
     double        srtt;          ///< Smoothed round trip time.
     double        rttVar;        ///< Round trip time variance.
-    double        rto;           ///< Retransmission timeout.
+    uint16_t      rto;           ///< Retransmission timeout.
     bool          isFirstAck;    ///< True when the first ack has been received.
-    double        cwnd;          ///< Room for windows to be sent
+    double        cwnd;          ///< Tokens available for sending data
     double        ssThreshold;   ///< Slow start threshold
-    int           sentNotAcked;  ///< Gauge of sent but not acked buffers.
-    int           notSent;       ///< Gauge of data ready for sending. (xmitSeq - xmitLastSent)
+    int           flightSize;  ///< Gauge of sent but not acked buffers. Aka flight size.
     bool          lostSegment;   ///< True if a segment has been lost
                                  ///and we are running the fast
                                  ///retransmit / fast recovery
@@ -151,16 +147,22 @@ struct nabto_stream_tcb {
     nabto_stream_tcb_config         cfg;                    /**< configuration (from SYN)    */
     uint16_t                        retransCount;           /**< Retransmission count,
                                                                  First used for retransmission of SYN,
-                                                                 Then retransmission of FIN, and lastly used for 
+                                                                 Then retransmission of FIN, and lastly used for
                                                                  waiting in ST_TIME_WAIT. */
-    uint16_t                        timeoutData;            ///< Timeout for retransmission of data packets in ms.
-    nabto_stamp_t                   timeoutStamp;           /**< Timeout stamp           */
+    /**
+     * The timeoutStamp is used to signal if the stream window should
+     * do something. It's both used as regular timeout and a timeout
+     * telling something to happen imidiately. This timeout is not
+     * used for retransmission of regular data.
+     */
+    nabto_stamp_t                   timeoutStamp;
+    /**
+     * timeout stamp for data, this is regularly updated.
+     */
     nabto_stamp_t                   dataTimeoutStamp;       /**< Timeout stamp for data  */
-    nabto_stamp_t                   dataExpireStamp;        /**< When current data segment expires. */
+    nabto_stamp_t                   ackStamp;               /**< time to send unsolicited ACK         */
+    uint32_t                        maxAdvertisedWindow;
 
-    uint32_t                        maxAdvertisedWindow;    
-    uint16_t                        lastSentAdvertisedWindow;
-    
     uint32_t                        finSequence;            /**< The sequence number of the fin. */
 
     /**
@@ -182,18 +184,17 @@ struct nabto_stream_tcb {
      * Data between xmitAcked and xmitHighSend has not been acknowledgeg
      */
     x_buffer*                       xmit;                   /**< transmit window                      */
-    nabto_stamp_t                   ackStamp;               /**< time to send unsolicited ACK         */
+
     uint16_t                        ackWSRFcount;           /**< count unsolicited acks               */
- 
+
     uint32_t                        recvNext;               /**< next seq to receive data from */
-    uint32_t                        recvTop;                /**< highest cumulative filled recv slots. */
+    uint32_t                        recvTop;                /**< highest cumulative filled recv slots +1. aka the next ack number to send. */
     uint32_t                        recvMax;                /**< max sequence number of used recv slot. */
     uint32_t                        ackSent;                /**< last ack sent           */
-    uint32_t                        recvFinSeq;             /**< The received sequence number the fin has, if this is 
+    uint32_t                        recvFinSeq;             /**< The received sequence number the fin has, if this is
                                                                set the other end has sent a fin. */
-    uint32_t                        ackTop;                
-    r_buffer*                       recv; /**< receive window          */
- 
+    r_buffer*                       recv;                   /**< receive window          */
+
     nabto_stream_congestion_control cCtrl;
     nabto_stream_congestion_control_stats ccStats;
 
@@ -208,7 +209,7 @@ struct nabto_stream_tcb {
     //
     // If the slot 'recvNext' is empty, the peer is known to have sent packets in range
     // [recvNext-cfg.recvWinSize .. recvNext[
-    // and if the slot 'recvNext' isn't empty, the peer is known to have sent kacket in range
+    // and if the slot 'recvNext' isn't empty, the peer is known to have sent packet in range
     // ]recvNext-cfg.recvWinSize .. recvNext]
     // Receiving these packets may be caused by the ack's to the peer being lost,
     // thus a new ack should be sent.
@@ -231,13 +232,13 @@ struct nabto_stream_sack_data {
 
 struct nabto_stream_s;
 struct nabto_win_info;
- 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * open a stream 
+ * open a stream
  *
  * Precondition: The stream structure has been initialized and
  * prepared for opening by giving it a tag and a connection.
@@ -282,7 +283,7 @@ void nabto_stream_tcb_check_xmit(struct nabto_stream_s* stream, bool isTimedEven
 
 /**
  * Query whether a valid stream is open.
- * @param stream  the stream 
+ * @param stream  the stream
  * @return        true if open
  */
 bool nabto_stream_tcb_is_open(const struct nabto_stream_tcb* tcb);
@@ -343,17 +344,19 @@ bool nabto_stream_read_window(const uint8_t* start, uint16_t length, struct nabt
 uint16_t nabto_stream_window_payload_length(struct nabto_win_info* win);
 bool nabto_stream_encode_window(const struct nabto_win_info* win, uint8_t* start, uint16_t* length);
 
-// Calculate the advertised window in 
+// Calculate the advertised window in
 uint16_t unabto_stream_advertised_window_size(struct nabto_stream_tcb* tcb);
 uint32_t unabto_stream_ack_number_to_send(struct nabto_stream_tcb* tcb);
 
+
+bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struct nabto_stream_sack_data* sackData);
 /******************************************************************************/
 /******************************************************************************/
 
 /**
  * A nabto streaming congestion control algorithm should implement the following
  * functions. Further it should define the type nabto_stream_congestion_control_t
- * which it can use for store congestion control data 
+ * which it can use for store congestion control data
  */
 void unabto_stream_update_congestion_control_receive_stats(struct nabto_stream_s * stream, uint16_t ix);
 
@@ -382,7 +385,7 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
 /**
  * Called before a data packet is sent to test if it's allowed to be sent.
  */
-bool unabto_stream_congestion_control_can_send(struct nabto_stream_tcb* tcb, uint16_t ix, bool new_data);
+bool unabto_stream_congestion_control_can_send(struct nabto_stream_tcb* tcb);
 
 /**
  * Send stream statistics packet

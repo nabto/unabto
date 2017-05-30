@@ -818,9 +818,9 @@ enum np_payload_stream_stats_e {
     NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MIN                      = 16, /* uint16_t slow start threshold */
     NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MAX                      = 17, /* uint16_t */
     NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_AVG                      = 18, /* uint16_t */
-    NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_MIN                    = 19, /* uint16_t packets awaiting acknowledgedment on the network */
-    NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_MAX                    = 20, /* uint16_t */
-    NP_PAYLOAD_STREAM_STATS_SENT_NOT_ACKED_AVG                    = 21, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_FLIGHT_SIZE_MIN                       = 19, /* uint16_t packets awaiting acknowledgedment on the network */
+    NP_PAYLOAD_STREAM_STATS_FLIGHT_SIZE_MAX                       = 20, /* uint16_t */
+    NP_PAYLOAD_STREAM_STATS_FLIGHT_SIZE_AVG                       = 21, /* uint16_t */
     NP_PAYLOAD_STREAM_STATS_DURATION                              = 22, /* uint32_t duration in ms */
     NP_PAYLOAD_STREAM_STATS_STATUS                                = 23, /* uint8_t (np_payload_stream_stats_status_e)*/
     NP_PAYLOAD_STREAM_STATS_CP_ID                                 = 24, /* uint16_t */

@@ -227,7 +227,11 @@ ssize_t nabto_write(nabto_socket_t sock,
     if (res < 0) {
         int status = errno;
         NABTO_NOT_USED(status);
-        NABTO_LOG_ERROR(("ERROR: %s (%i) in nabto_write()", strerror(status), (int) status));
+        if (status == EAGAIN || status == EWOULDBLOCK) {
+            // expected
+        } else {
+            NABTO_LOG_ERROR(("ERROR: %s (%i) in nabto_write()", strerror(status), (int) status));
+        }
     }
     return res;
 }
