@@ -348,6 +348,8 @@ bool nabto_stream_encode_window(const struct nabto_win_info* win, uint8_t* start
 uint16_t unabto_stream_advertised_window_size(struct nabto_stream_tcb* tcb);
 uint32_t unabto_stream_ack_number_to_send(struct nabto_stream_tcb* tcb);
 
+
+bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struct nabto_stream_sack_data* sackData);
 /******************************************************************************/
 /******************************************************************************/
 

@@ -89,7 +89,6 @@ static bool send_syn(struct nabto_stream_s* stream);
 static bool send_syn_ack(struct nabto_stream_s* stream);
 static bool send_syn_or_syn_ack(struct nabto_stream_s* stream, uint8_t type);
 
-static bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struct nabto_stream_sack_data* sackData);
 static bool unabto_stream_insert_sack_pair(uint32_t begin, uint32_t end, struct nabto_stream_sack_data* sackData);
 
 void unabto_stream_dump_state(struct nabto_stream_s* stream);
@@ -1388,7 +1387,7 @@ bool nabto_stream_tcb_handle_fin(struct nabto_stream_tcb* tcb, struct nabto_win_
  *
  * @return true iff there are any sack pairs available.
  */
-static bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struct nabto_stream_sack_data* sackData)
+bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struct nabto_stream_sack_data* sackData)
 {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
     uint32_t end = 0;

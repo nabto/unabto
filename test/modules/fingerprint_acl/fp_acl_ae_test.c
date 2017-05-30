@@ -314,7 +314,7 @@ bool fp_acl_pair(fingerprint fp, const char* name, struct fp_acl_user* result)
             return false;
         }
         memcpy(result->name, list, length);
-
+        
         if (!unabto_query_read_uint32(&testOutput, &result->permissions)) {
             return false;
         }
@@ -328,6 +328,9 @@ bool fp_acl_test_pair()
 
     struct fp_acl_user firstUser;
     struct fp_acl_user secondUser;
+
+    memset(&firstUser, 0, sizeof(struct fp_acl_user));
+    memset(&secondUser, 0, sizeof(struct fp_acl_user));
     
     {
         // pair user 1

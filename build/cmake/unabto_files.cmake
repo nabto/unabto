@@ -469,6 +469,7 @@ set(unabto_server_common_src_test
   ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_payload_test.c
   ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_crypto_test.c
   ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_push_test.c
+  ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_stream_window_test.c
   ${UNABTO_SERVER_TEST_DIR}/modules/util/unabto_base32_test.c
   ${UNABTO_SERVER_TEST_DIR}/modules/util/read_hex_test.c
   ${UNABTO_SERVER_TEST_DIR}/modules/fingerprint_acl/fp_acl_mem_test.c
