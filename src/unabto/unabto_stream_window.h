@@ -188,12 +188,12 @@ struct nabto_stream_tcb {
     uint16_t                        ackWSRFcount;           /**< count unsolicited acks               */
 
     uint32_t                        recvNext;               /**< next seq to receive data from */
-    uint32_t                        recvTop;                /**< highest cumulative filled recv slots. */
+    uint32_t                        recvTop;                /**< highest cumulative filled recv slots +1. aka the next ack number to send. */
     uint32_t                        recvMax;                /**< max sequence number of used recv slot. */
     uint32_t                        ackSent;                /**< last ack sent           */
     uint32_t                        recvFinSeq;             /**< The received sequence number the fin has, if this is
                                                                set the other end has sent a fin. */
-    r_buffer*                       recv; /**< receive window          */
+    r_buffer*                       recv;                   /**< receive window          */
 
     nabto_stream_congestion_control cCtrl;
     nabto_stream_congestion_control_stats ccStats;
@@ -209,7 +209,7 @@ struct nabto_stream_tcb {
     //
     // If the slot 'recvNext' is empty, the peer is known to have sent packets in range
     // [recvNext-cfg.recvWinSize .. recvNext[
-    // and if the slot 'recvNext' isn't empty, the peer is known to have sent kacket in range
+    // and if the slot 'recvNext' isn't empty, the peer is known to have sent packet in range
     // ]recvNext-cfg.recvWinSize .. recvNext]
     // Receiving these packets may be caused by the ack's to the peer being lost,
     // thus a new ack should be sent.
