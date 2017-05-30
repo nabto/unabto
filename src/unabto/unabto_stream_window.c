@@ -90,7 +90,7 @@ static bool send_syn_ack(struct nabto_stream_s* stream);
 static bool send_syn_or_syn_ack(struct nabto_stream_s* stream, uint8_t type);
 
 static bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struct nabto_stream_sack_data* sackData);
-static bool unabto_stream_insert_sack_pair(uint32_t begin, uint32_t end, struct nabto_stream_sack_data* sackData, bool force);
+static bool unabto_stream_insert_sack_pair(uint32_t begin, uint32_t end, struct nabto_stream_sack_data* sackData);
 
 void unabto_stream_dump_state(struct nabto_stream_s* stream);
 
@@ -1374,12 +1374,24 @@ bool nabto_stream_tcb_handle_fin(struct nabto_stream_tcb* tcb, struct nabto_win_
 
 
 /**
+ * According to rfc2018:
+ * The SACK option SHOULD be filled out by repeating the most
+ * recently reported SACK blocks (based on first SACK blocks in
+ * previous SACK options) that are not subsets of a SACK block
+ * already included in the SACK option being constructed.  This
+ * assures that in normal operation, any segment remaining part of a
+ * non-contiguous block of data held by the data receiver is reported
+ * in at least three successive SACK options, even for large-window
+ * TCP implementations [RFC1323]).  After the first SACK block, the
+ * following SACK blocks in the SACK option may be listed in
+ * arbitrary order.
+ *
  * @return true iff there are any sack pairs available.
  */
 static bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struct nabto_stream_sack_data* sackData)
 {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
-    uint32_t start = 0;
+    uint32_t end = 0;
     uint32_t i;
 
     memset(sackData, 0, sizeof(struct nabto_stream_sack_data));
@@ -1388,26 +1400,24 @@ static bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struc
         return false;
     }
 
-    for (i = tcb->recvTop; i <= tcb->recvMax; i++) {
+    // if recvMax == recvTop there are no sack holes.
+    for (i = tcb->recvMax; i > tcb->recvTop; i--) {
         uint16_t ix = i % tcb->cfg.recvWinSize;
         r_buffer* rBuf = &tcb->recv[ix];
 
-        bool slotUsed = (rBuf->size > 0 && rBuf->seq == i);
+        bool slotused = (rBuf->size > 0 && rBuf->seq == i);
 
-        if (start == 0 && slotUsed) {
-            start = i;
+        if (end == 0 && slotused) {
+            end = i+1;
         }
 
-        if (start != 0 && !slotUsed) {
-            unabto_stream_insert_sack_pair(start, i, sackData, false);
-            start = 0;
+        if (end != 0 && !slotused) {
+            unabto_stream_insert_sack_pair(i+1, end, sackData);
+            end = 0;
         }
+
     }
 
-    if (start != 0) {
-        unabto_stream_insert_sack_pair(start, tcb->recvMax+1, sackData, true);
-        start = 0;
-    }
     return (sackData->nPairs > 0);
 }
 
@@ -1417,13 +1427,9 @@ static bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struc
  * @return true if there was room for the sack
  *         pair, false otherwise.
  */
-static bool unabto_stream_insert_sack_pair(uint32_t start, uint32_t end, struct nabto_stream_sack_data* sackData, bool force)
+static bool unabto_stream_insert_sack_pair(uint32_t start, uint32_t end, struct nabto_stream_sack_data* sackData)
 {
     NABTO_LOG_TRACE(("inserting sack pair (%" PRIu32 ",%" PRIu32 ")", start, end));
-
-    if (force && sackData->nPairs == NP_PAYLOAD_SACK_MAX_PAIRS) {
-        sackData->nPairs--;
-    }
 
     if (sackData->nPairs < NP_PAYLOAD_SACK_MAX_PAIRS) {
         sackData->pairs[sackData->nPairs].start = start;
