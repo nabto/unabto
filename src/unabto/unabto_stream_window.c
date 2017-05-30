@@ -1400,8 +1400,10 @@ bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struct nabto
         return false;
     }
 
-    // if recvMax == recvTop there are no sack holes.
-    for (i = tcb->recvMax; i > tcb->recvTop; i--) {
+    // recvtop is one above max cumulative received sequence number.
+    // recvMax is the maximum filled recv slot
+    // if recvMax + 1 == recvTop there are no sack holes.
+    for (i = tcb->recvMax; i >= tcb->recvTop; i--) {
         uint16_t ix = i % tcb->cfg.recvWinSize;
         r_buffer* rBuf = &tcb->recv[ix];
 
@@ -1419,15 +1421,15 @@ bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struct nabto
     }
 
     // reverse the found pairs:
-    {
-        int idx;
-        for (idx = 0; idx < sackData->nPairs/2; idx++) {
-            struct nabto_stream_sack_pair pair1 = sackData->pairs[idx];
-            struct nabto_stream_sack_pair pair2 = sackData->pairs[sackData->nPairs-idx-1];
-            sackData->pairs[idx] = pair2;
-            sackData->pairs[sackData->nPairs-idx-1] = pair1;
-        }
-    }
+    //{
+    //    int idx;
+    //    for (idx = 0; idx < sackData->nPairs/2; idx++) {
+        /*     struct nabto_stream_sack_pair pair1 = sackData->pairs[idx]; */
+        /*     struct nabto_stream_sack_pair pair2 = sackData->pairs[sackData->nPairs-idx-1]; */
+        /*     sackData->pairs[idx] = pair2; */
+        /*     sackData->pairs[sackData->nPairs-idx-1] = pair1; */
+        /* } */
+    //}
     
     return (sackData->nPairs > 0);
 }

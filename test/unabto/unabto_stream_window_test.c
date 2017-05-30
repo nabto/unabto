@@ -23,7 +23,7 @@ bool unabto_stream_create_sack_pairs_test() {
     
     tcb->recv = rbufs;
     
-    tcb->recvTop = 220;
+    tcb->recvTop = 224; // upto and including 223 is cumulative filled.
     tcb->recvMax = 242;
     tcb->cfg.recvWinSize = 42;
     
@@ -50,11 +50,11 @@ bool unabto_stream_create_sack_pairs_test() {
         return false;
     }
 
-    if (sackData.pairs[1].start != 235 || sackData.pairs[1].end != 242) {
+    if (sackData.pairs[0].start != 235 || sackData.pairs[0].end != 242) {
         return false;
     }
 
-    if (sackData.pairs[0].start != 225 || sackData.pairs[0].end != 230) {
+    if (sackData.pairs[1].start != 225 || sackData.pairs[1].end != 230) {
         return false;
     }
 
