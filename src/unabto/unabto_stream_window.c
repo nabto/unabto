@@ -1392,6 +1392,7 @@ bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struct nabto
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
     uint32_t end = 0;
     uint32_t i;
+    
 
     memset(sackData, 0, sizeof(struct nabto_stream_sack_data));
 
@@ -1417,6 +1418,17 @@ bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struct nabto
 
     }
 
+    // reverse the found pairs:
+    {
+        int idx;
+        for (idx = 0; idx < sackData->nPairs/2; idx++) {
+            struct nabto_stream_sack_pair pair1 = sackData->pairs[idx];
+            struct nabto_stream_sack_pair pair2 = sackData->pairs[sackData->nPairs-idx-1];
+            sackData->pairs[idx] = pair2;
+            sackData->pairs[sackData->nPairs-idx-1] = pair1;
+        }
+    }
+    
     return (sackData->nPairs > 0);
 }
 
