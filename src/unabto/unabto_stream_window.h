@@ -105,7 +105,7 @@ typedef struct {
                                           * has been acked which is
                                           * after this buffer in the
                                           * window. */
-    bool          isTimedOut;            /** true if this buffer has experienced a timeout */
+    bool          shouldRetransmit;      /** true if this buffer should be retransmitted */
 } x_buffer;
 
 
@@ -132,7 +132,7 @@ typedef struct {
     bool          isFirstAck;    ///< True when the first ack has been received.
     double        cwnd;          ///< Tokens available for sending data
     double        ssThreshold;   ///< Slow start threshold
-    int           flightSize;  ///< Gauge of sent but not acked buffers. Aka flight size.
+    int           flightSize;    ///< Gauge of sent but not acked buffers. Aka flight size.
     bool          lostSegment;   ///< True if a segment has been lost
                                  ///and we are running the fast
                                  ///retransmit / fast recovery
@@ -185,6 +185,8 @@ struct nabto_stream_tcb {
      */
     x_buffer*                       xmit;                   /**< transmit window                      */
 
+    int                             retransmitSegmentCount; /**< Exactly the number of segments with (shouldRetransmit == true) aka waiting for retransmission */
+    
     uint16_t                        ackWSRFcount;           /**< count unsolicited acks               */
 
     uint32_t                        recvNext;               /**< next seq to receive data from */

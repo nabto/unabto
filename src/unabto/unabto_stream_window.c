@@ -72,7 +72,7 @@ static void nabto_stream_check_new_data_xmit(struct nabto_stream_s* stream);
  * if return false, do not try to send new data, the communication layer is probably congested.
  */
 static bool nabto_stream_check_retransmit_data(struct nabto_stream_s* stream);
-
+static void unabto_stream_mark_segment_for_retransmission(struct nabto_stream_tcb* tcb, x_buffer* xbuf);
 static void nabto_stream_state_transition(struct nabto_stream_s* stream, nabto_stream_tcb_state new_state);
 
 /**
@@ -594,10 +594,18 @@ bool nabto_stream_check_retransmit_data(struct nabto_stream_s* stream) {
         return true;
     }
 
+    if (tcb->retransmitSegmentCount == 0) {
+        return true;
+    }
+    
     for (i = tcb->xmitFirst; i < tcb->xmitLastSent; i++) {
         int ix = i % tcb->cfg.xmitWinSize;
         xbuf = &tcb->xmit[ix];
 
+        if (tcb->retransmitSegmentCount == 0) {
+            return true;
+        }
+        
         if (!unabto_stream_congestion_control_can_send(tcb)) {
             return false;
         }
@@ -605,7 +613,7 @@ bool nabto_stream_check_retransmit_data(struct nabto_stream_s* stream) {
         // Check if we are above the most recent sent buffer
         // if so there can be no retransmits since the data has not been sent.
 
-        if (xbuf->xstate == B_SENT && (xbuf->ackedAfter >= 2 || xbuf->isTimedOut)) {
+        if (xbuf->xstate == B_SENT && xbuf->shouldRetransmit) {
             xbuf->nRetrans++;
             if (!send_data_packet(stream, xbuf->seq, xbuf->buf, xbuf->size, xbuf->nRetrans, ix)) {
 
@@ -616,7 +624,8 @@ bool nabto_stream_check_retransmit_data(struct nabto_stream_s* stream) {
 
             stream->stats.sentResentPackets++;
 
-            xbuf->isTimedOut = false;
+            xbuf->shouldRetransmit = false;
+            tcb->retransmitSegmentCount--;
             xbuf->sentStamp = nabtoGetStamp();
             xbuf->ackedAfter = 0;
         }
@@ -663,7 +672,8 @@ void nabto_stream_check_new_data_xmit(struct nabto_stream_s* stream) {
             unabto_stream_stats_observe(&tcb->ccStats.flightSize, (double)tcb->cCtrl.flightSize);
             xbuf->xstate = B_SENT;
         }
-        xbuf->isTimedOut = false;
+        xbuf->shouldRetransmit = false;
+        xbuf->ackedAfter = 0;
 
         tcb->xmitLastSent = i+1; // +1 since it's the sequence number right after the last sent.
         xbuf->sentStamp = nabtoGetStamp();
@@ -679,7 +689,7 @@ void unabto_stream_mark_all_xmit_buffers_as_timed_out(struct nabto_stream_tcb* t
         ix = i % tcb->cfg.xmitWinSize;
         xbuf = &tcb->xmit[ix];
         if (xbuf->xstate == B_SENT) {
-            xbuf->isTimedOut = true;
+            unabto_stream_mark_segment_for_retransmission(tcb, xbuf);
         }
     }
 }
@@ -889,19 +899,21 @@ void update_ack_after_packet(struct nabto_stream_s* stream, uint32_t seq) {
     for (i = xmitFirstSeq; i < seq; i++) {
         nabto_stamp_t sentStampOfThisSeq;
         uint16_t ix = i % tcb->cfg.xmitWinSize;
-        if (tcb->xmit[ix].xstate != B_SENT) {
+        x_buffer* xbuf = &tcb->xmit[ix];
+        if (xbuf->xstate != B_SENT) {
             continue;
         }
-        sentStampOfThisSeq = tcb->xmit[ix].sentStamp;
+        sentStampOfThisSeq = xbuf->sentStamp;
         // If the windows packet was sent before the packet was sent
         // this ack acks, then count the window packets unordered ack
         // count.
         if (nabtoStampLess(&sentStampOfThisSeq, &sentStampOfAckedSeq)) {
             NABTO_LOG_TRACE(("Increment ACK after for seq %i beacuse ack on %i was received", i, seq));
-            tcb->xmit[ix].ackedAfter++;
-            if (tcb->xmit[ix].ackedAfter == 2) {
+            xbuf->ackedAfter++;
+            if (xbuf->ackedAfter == 2) {
                 unabto_stream_congestion_control_adjust_ssthresh_after_triple_ack(tcb);
                 stream->stats.reorderedOrLostPackets++;
+                unabto_stream_mark_segment_for_retransmission(tcb, xbuf);
             }
         }
     }
@@ -914,14 +926,16 @@ bool update_triple_ack(struct nabto_stream_s* stream, uint32_t ackSeq)
 {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
     uint16_t ix = ackSeq % tcb->cfg.xmitWinSize;
-    if (tcb->xmit[ix].xstate == B_SENT && tcb->xmit[ix].nRetrans == 0) {
-        tcb->xmit[ix].ackedAfter++;
-        if (tcb->xmit[ix].ackedAfter == 2) {
+    x_buffer* xbuf = &tcb->xmit[ix];
+    if (xbuf->xstate == B_SENT && xbuf->nRetrans == 0) {
+        xbuf->ackedAfter++;
+        if (xbuf->ackedAfter == 2) {
             unabto_stream_congestion_control_adjust_ssthresh_after_triple_ack(tcb);
             stream->stats.reorderedOrLostPackets++;
+            unabto_stream_mark_segment_for_retransmission(tcb, xbuf);
         }
     }
-    return (tcb->xmit[ix].ackedAfter >= 2);
+    return (xbuf->ackedAfter >= 2);
 }
 
 /**
@@ -953,7 +967,7 @@ bool handle_ack(struct nabto_stream_s* stream, uint32_t ack_start, uint32_t ack_
         for (i = ack_start; i < ack_end; i++) {
             int ix = i % tcb->cfg.xmitWinSize;
             bool ackOnStartOfWindow = (i == tcb->xmitFirst);
-
+            x_buffer* xbuf = &tcb->xmit[ix];
 
             if (i > tcb->xmitLastSent) {
                 NABTO_LOG_ERROR(("trying to ack segment which has not been sent yet"));
@@ -967,7 +981,7 @@ bool handle_ack(struct nabto_stream_s* stream, uint32_t ack_start, uint32_t ack_
             }
 
             // Mark segment as acked.
-            if (tcb->xmit[ix].xstate == B_SENT) {
+            if (xbuf->xstate == B_SENT) {
                 update_ack_after_packet(stream, i);
                 unabto_stream_congestion_control_handle_ack(tcb, ix, ackOnStartOfWindow);
                 NABTO_LOG_TRACE(("setting buffer %i for seq %i to IDLE", ix, i));
@@ -975,7 +989,11 @@ bool handle_ack(struct nabto_stream_s* stream, uint32_t ack_start, uint32_t ack_
                     // flightSize is exactly the number of transmitbuffers in the state B_SENT!
                     tcb->cCtrl.flightSize--;
                     unabto_stream_stats_observe(&tcb->ccStats.flightSize, (double)tcb->cCtrl.flightSize);
-                    tcb->xmit[ix].xstate = B_IDLE;
+                    xbuf->xstate = B_IDLE;
+                    if (xbuf->shouldRetransmit) {
+                        tcb->retransmitSegmentCount--;
+                        xbuf->shouldRetransmit = false;
+                    }
                 }
                 dataAcked = true;
             }
@@ -1770,6 +1788,23 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
 
     NABTO_LOG_TRACE(("adjusting cwnd: %f, ssThreshold: %f, flightSize %i", tcb->cCtrl.cwnd, tcb->cCtrl.ssThreshold, tcb->cCtrl.flightSize));
 }
+
+/**
+ * This is called after tripple acks or after a timeout.
+ */
+void unabto_stream_mark_segment_for_retransmission(struct nabto_stream_tcb* tcb, x_buffer* xbuf)
+{
+    if (xbuf->xstate != B_SENT) {
+        return;
+    }
+    if (xbuf->shouldRetransmit) {
+        return;
+    }
+    
+    xbuf->shouldRetransmit = true;
+    tcb->retransmitSegmentCount++;
+}
+
 
 /**
  * Called before a data packet is sent to test if it's allowed to be sent.
