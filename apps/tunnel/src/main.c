@@ -466,10 +466,30 @@ void acl_init() {
 }
 
 
+void educate_user() {
+    printf("================================================================================\n");
+    printf("IMPORTANT INFORMATION ABOUT SECURITY BEFORE USING IN PRODUCTION\n");
+    printf("\n");
+    printf("It is of utmost importance that you understand how security works in Nabto,\n");
+    printf("please carefully read TEN036 \"Security in Nabto Solutions\" available from\n");
+    printf("https://www.nabto.com/downloads.html.\n");
+    printf("\n");
+    printf("You must choose a client authorization model for use in your project to restrict\n");
+    printf("access to this device, the different possible models are outlined in section 8\n");
+    printf("of TEN036. Please contact support@nabto.com if you have any questions in this regard.");
+    printf("\n\n");
+    printf("PERFORMANCE\n");
+    printf("\n");
+    printf("Please see TEN030 \"Nabto Tunnels\" for information on how to optimize performance.\n");
+    printf("If you observe performance problems, consult the FAQ section in TEN030 and follow\n");
+    printf("the suggestions there before contacting support.\n");
+    printf("================================================================================\n\n");
+}
+
 int main(int argc, char** argv)
 {
     nabto_main_setup* nms = unabto_init_context();
-
+    educate_user();
     platform_checks();
     acl_init();
     
