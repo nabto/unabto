@@ -58,8 +58,8 @@ fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl)
         READ_U32(acl->users[i].permissions, buffer + FP_ACL_FP_LENGTH + FP_ACL_FILE_USERNAME_LENGTH);
     }
 
-	// close file, otherwise fp_acl_file_save_file() might throw error when updating the file
-	fclose(aclFile);
+    // close file, otherwise fp_acl_file_save_file() might throw error when updating the file
+    fclose(aclFile);
 
     return FP_ACL_DB_OK;
 }
@@ -118,9 +118,9 @@ fp_acl_db_status fp_acl_file_save_file(struct fp_mem_state* acl)
     fclose(aclFile);
 
     if (status == FP_ACL_DB_OK) {
-		
-		// remove destination file, otherwise rename() might throw an error 
-		remove(filename);
+        
+        // remove destination file, otherwise rename() might throw an error 
+        remove(filename);
         
         if (rename(tempFilename, filename) != 0) {
             return FP_ACL_DB_SAVE_FAILED;
