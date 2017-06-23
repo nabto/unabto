@@ -158,6 +158,7 @@ enum np_payload_type_e {
     NP_PAYLOAD_TYPE_PUSH             = 0x4C, /* 'L' Push notification payload          */
     NP_PAYLOAD_TYPE_PUSH_DATA        = 0x4D, /* 'M' Push notification data payload     */
     NP_PAYLOAD_TYPE_STREAM_STATS     = 0x4E, /* 'N' Stream statistics */
+    NP_PAYLOAD_TYPE_BASESTATION_AUTH = 0x4F  /* 'O' Basestation Auth key value pairs */
 };
 
 /* Payload header flags */
@@ -542,6 +543,20 @@ enum np_payload_type_e {
 * bytes in the Gateway ID are the rest of the bytes in the payload.
 */
 
+
+/*****************************************************************************/
+/* Basestation AUTH Payload */
+/* The Basestation AUTH  payload data has the following layout:
+*      +-----+----------------------------------------------------------------+
+*      |  +0 |  Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)              |
+*      +-----+-----+----------------------------------------------------------+
+*        A list of strings paired to be key value pairs.
+*      +-----+-----+----------------------------------------------------------+
+*      |     |  +x |  string length (16bits)                                  |
+*      +-----+-----+----------------------------------------------------------+
+*      |     |+x+2 |  string data                                             |
+*      +-----+-----+----------------------------------------------------------+
+*/
 
 
 /*****************************************************************************/
