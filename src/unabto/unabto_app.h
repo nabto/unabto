@@ -97,8 +97,13 @@ typedef enum {
  * - AER_REQ_QUEUED, w_b isn't used and the application allocates memory for building the response internally.
  * - the remaining results values are sent to the Client as an exception (w_b is overridden by the caller).
  *
- * The read and write buffer may use a shared buffer so you have to
- * read the input before writing to the output.
+ * WARNING: The read and write buffer use a shared input and output
+ * buffer. Before writing to the writeBuffer you need to read all the
+ * data you need from the readBuffer.
+ *
+ * The size of the writeBuffer is limited by the config parameter
+ * NABTO_RESPONSE_MAX_SIZE. The maximum request size is limited by the
+ * config parameter NABTO_REQUEST_MAX_SIZE.
  */
 application_event_result application_event(application_request* applicationRequest, unabto_query_request* readBuffer, unabto_query_response* writeBuffer);
 
