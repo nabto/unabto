@@ -311,9 +311,11 @@ void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* st
     int err;
     (void)payloadsStart; (void)payloadsEnd; (void)userData; /* Unused */
 
+#if NABTO_ENABLE_TCP_FALLBACK
     if (event->type == MT_TCP_FALLBACK) {
         con->relayIsActive = 1;
     }
+#endif
     
     aer = framework_event_query(con->clientId, hdr->seq, &handle);
     switch (aer) {

@@ -57,9 +57,11 @@ void handle_stream_packet(nabto_connect* con, nabto_packet_header* hdr,
          
     NABTO_NOT_USED(userData);
 
+#if NABTO_ENABLE_TCP_FALLBACK
     if (event->type == MT_TCP_FALLBACK) {
         con->relayIsActive = 1;
     }
+#endif
 
     if(!unabto_find_payload(payloadsStart, payloadsEnd, NP_PAYLOAD_TYPE_WINDOW, &window)) {
         NABTO_LOG_ERROR(("Stream %i, Packet has no WINDOW payload!", hdr->tag));
