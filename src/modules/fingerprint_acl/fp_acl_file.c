@@ -125,7 +125,6 @@ fp_acl_db_status fp_acl_file_save_file(struct fp_mem_state* acl)
     fclose(aclFile);
 
     if (status == FP_ACL_DB_OK) {
-        
         // remove destination file, otherwise rename() might throw an error 
         remove(filename);
         
