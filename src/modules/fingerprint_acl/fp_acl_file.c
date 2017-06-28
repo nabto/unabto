@@ -2,17 +2,8 @@
 
 #include <unabto/unabto_util.h>
 
-static char* filename = NULL;
-static char* tempFilename = NULL;
-
-fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl)
+fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
 {
-    FILE* aclFile = fopen(filename, "rb+");
-    if (aclFile == NULL) {
-        // there no saved acl file, consider it as a completely normal bootstrap scenario
-        return FP_ACL_DB_OK;
-    }
-
     memset(acl, 0, sizeof(struct fp_mem_state));
 
     uint8_t buffer[128];
@@ -38,7 +29,7 @@ fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl)
     uint8_t* ptr = buffer;
 
     uint32_t numUsers;
-    
+
     READ_FORWARD_U32(acl->settings.systemPermissions, ptr);
     READ_FORWARD_U32(acl->settings.defaultUserPermissions, ptr);
     READ_FORWARD_U32(acl->settings.firstUserPermissions, ptr);
@@ -48,7 +39,7 @@ fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl)
     enum {
         USER_RECORD_SIZE = FP_ACL_FP_LENGTH + FP_ACL_FILE_USERNAME_LENGTH + 4
     };
-    for(i = 0; i < numUsers && i < FP_MEM_ACL_ENTRIES; i++) {
+    for (i = 0; i < numUsers && i < FP_MEM_ACL_ENTRIES; i++) {
         readen = fread(buffer, USER_RECORD_SIZE, 1, aclFile);
         if (readen != 1) {
             return FP_ACL_DB_LOAD_FAILED;
@@ -58,10 +49,26 @@ fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl)
         READ_U32(acl->users[i].permissions, buffer + FP_ACL_FP_LENGTH + FP_ACL_FILE_USERNAME_LENGTH);
     }
 
+    return FP_ACL_DB_OK;
+}
+
+static char* filename = NULL;
+static char* tempFilename = NULL;
+
+fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl)
+{
+    FILE* aclFile = fopen(filename, "rb+");
+    if (aclFile == NULL) {
+        // there no saved acl file, consider it as a completely normal bootstrap scenario
+        return FP_ACL_DB_OK;
+    }
+
+	fp_acl_db_status status = fp_acl_file_read_file(aclFile, acl);
+
     // close file, otherwise fp_acl_file_save_file() might throw error when updating the file
     fclose(aclFile);
 
-    return FP_ACL_DB_OK;
+    return status;
 }
 
 fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* acl)
