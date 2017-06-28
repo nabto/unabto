@@ -159,7 +159,7 @@ void nabto_packet_event(message_event* event, nabto_packet_header* hdr)
     if (handler == 0) {
         NABTO_LOG_ERROR(("no handler for data with tag %i", hdr->tag));
     } else {
-        handler->handler(con, hdr, start, (uint16_t)dlen, nabtoCommunicationBuffer+hdr->hlen, nabtoCommunicationBuffer+ilen, handler->userData);
+        handler->handler(con, hdr, start, (uint16_t)dlen, nabtoCommunicationBuffer+hdr->hlen, nabtoCommunicationBuffer+ilen, handler->userData, event);
     }
 }
 
@@ -241,7 +241,7 @@ static void send_exception(nabto_connect* con, nabto_packet_header* hdr, int aer
 }
 
 
-void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* dataStart, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, void* userData) {
+void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* dataStart, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, void* userData, message_event* event) {
     uint16_t olen = 0;
 
     enum {
@@ -303,13 +303,17 @@ void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, ui
 }
 
 
-void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* start, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, void* userData) {
+void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* start, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, void* userData, message_event* event) {
     naf_handle handle = NULL;
     uint16_t olen;
     
     naf_query aer;
     int err;
     (void)payloadsStart; (void)payloadsEnd; (void)userData; /* Unused */
+
+    if (event->type == MT_TCP_FALLBACK) {
+        con->relayIsActive = 1;
+    }
     
     aer = framework_event_query(con->clientId, hdr->seq, &handle);
     switch (aer) {

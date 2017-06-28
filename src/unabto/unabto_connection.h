@@ -148,6 +148,8 @@ struct nabto_connect_s {
                             * establish a fallback connection. */
     uint32_t cpnsi; /**< The clientpeer nsi which should be used for
                      * this connection */
+
+    bool relayIsActive; // data has been transmitted on relay, indicating client has chosen this type
 #endif
 
     /*****************************************************************************************/

@@ -32,7 +32,8 @@
 static void handle_stream_packet(nabto_connect* con, nabto_packet_header* hdr,
                                  uint8_t* start, uint16_t dlen,
                                  uint8_t* payloadsStart, uint8_t* payloadsEnd,
-                                 void* userData);
+                                 void* userData,
+                                 message_event* event);
 
 static struct nabto_stream_s* find_stream(uint16_t tag, nabto_connect* con);
 
@@ -45,8 +46,9 @@ static bool nabto_stream_validate_win(struct nabto_win_info* info, struct nabto_
 void handle_stream_packet(nabto_connect* con, nabto_packet_header* hdr,
                           uint8_t* start, uint16_t dlen,
                           uint8_t* payloadsStart, uint8_t* payloadsEnd,
-                          void* userData) {
-    
+                          void* userData,
+                          message_event* event
+    ) {
     // read the window and sack payloads
     struct unabto_payload_packet window;
 
@@ -54,6 +56,10 @@ void handle_stream_packet(nabto_connect* con, nabto_packet_header* hdr,
     uint16_t sackLength = 0;
          
     NABTO_NOT_USED(userData);
+
+    if (event->type == MT_TCP_FALLBACK) {
+        con->relayIsActive = 1;
+    }
 
     if(!unabto_find_payload(payloadsStart, payloadsEnd, NP_PAYLOAD_TYPE_WINDOW, &window)) {
         NABTO_LOG_ERROR(("Stream %i, Packet has no WINDOW payload!", hdr->tag));
