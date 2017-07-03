@@ -42,7 +42,7 @@ void nabto_packet_event(message_event* event, nabto_packet_header* hdr);
  * @param  payloadsStart  Start of payloads including the crypto payload.
  * @param  payloadsEnd    End of payloads including the crypto payload.
  */
-typedef void (*unabto_packet_data_handler)(nabto_connect* con, nabto_packet_header* hdr, uint8_t* start, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, void* userData, message_event* event);
+typedef void (*unabto_packet_data_handler)(nabto_connect* con, nabto_packet_header* hdr, uint8_t* start, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, message_event* event, void* userData);
 
 typedef struct {
     uint16_t startTag;
@@ -55,9 +55,9 @@ bool unabto_packet_set_handler(uint16_t startTag, uint16_t endTag, unabto_packet
 
 void unabto_packet_init_handlers(void);
 
-void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* start, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, void* userData, message_event* event);
+void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* start, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, message_event* event, void* userData);
 
-void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* start, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, void* userData, message_event* event);
+void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* start, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, message_event* event, void* userData);
 
 bool send_and_encrypt_packet(nabto_endpoint* peer, nabto_crypto_context* cryptoCtx, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadDataStart);
 
