@@ -366,7 +366,7 @@ enum np_payload_type_e {
 
 /* IPX payload flags */
 #define NP_PAYLOAD_IPX_FLAG_NO_RENDEZVOUS 0x80  ///< disable rendez-vous
-#define NP_PAYLOAD_IPX_FLAG_TRY_PRIVATE   0x40  ///< try private endpoint/address first
+#define NP_PAYLOAD_IPX_FLAG_TRY_PRIVATE   0x40  ///< try private endpoint/address first this does not have any significance since we are trying private and public endpoints in parallel
 #define NP_PAYLOAD_IPX_FLAG_CP_ASYNC      0x20  ///< client peer is able of communication asynchroniously
 
 #define NP_PAYLOAD_IPX_NAT_MASK           0xf // the lowest 4 bits is reserved for the nat type.
@@ -455,6 +455,7 @@ enum np_payload_type_e {
 #define NP_PAYLOAD_NOTIFY_ERROR_MICRO_REQ_ERR     0x800A  ///< The Micro Server can't give response to dialogue request
 #define NP_PAYLOAD_NOTIFY_ERROR_MICRO_REATTACHING 0x800B  ///< The Micro Server is re-attaching
 #define NP_PAYLOAD_NOTIFY_ERROR_SELF_SIGNED       0x800C  ///< The CP certificate is self signed and not accepted by the gsp.
+#define NP_PAYLOAD_NOTIFY_ERROR_CP_ACCESS_BS      0x800D  ///< The CP is rejected access by the basestation.
 
 /* Notification codes for NP_PACKET_HDR_TYPE_U_ATTACH responses */
 #define NP_PAYLOAD_NOTIFY_ATTACH_OK          0x00000001l  ///< The device is attached.
