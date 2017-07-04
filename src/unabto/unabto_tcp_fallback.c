@@ -125,6 +125,12 @@ void unabto_tcp_fallback_socket_closed(nabto_connect* con) {
     if (con->state == CS_CONNECTED && con->type == NCT_REMOTE_RELAY_MICRO) {
         con->state = CS_CONNECTING;
         con->conAttr = CON_ATTR_DEFAULT;
+        if (con->relayIsActive) {
+            NABTO_LOG_DEBUG((PRI_tcp_fb "closing full connection as relay was active when closed", TCP_FB_ARGS(con)));
+            nabto_release_connection_req(con);
+        } else {
+            NABTO_LOG_DEBUG((PRI_tcp_fb "leaving connection open as relay was not active when closed", TCP_FB_ARGS(con)));
+        }
     }
 }
 
