@@ -809,7 +809,7 @@ void handle_as_idle(void) {
 
 /** timer event when waiting for response to the DNS request. */
 void handle_as_wait_dns(void) {
-    nabto_dns_status_t dns_status = nabto_dns_is_resolved(nmc.nabtoMainSetup.id, &nmc.controllerEp.addr);
+    nabto_dns_status_t dns_status = nabto_dns_is_resolved(nmc.nabtoMainSetup.id, nmc.controllerAddresses);
     switch (dns_status) {
     case NABTO_DNS_NOT_FINISHED:
         SET_CTX_STAMP(INTERVAL_DNS_RESOLVE);
@@ -821,7 +821,17 @@ void handle_as_wait_dns(void) {
         nmc.context.errorCount += 2;
         break;
     case NABTO_DNS_OK:
-        NABTO_LOG_INFO(("Resolved DNS for %s to " PRIep, nmc.nabtoMainSetup.id, MAKE_EP_PRINTABLE(nmc.controllerEp)));
+        NABTO_LOG_INFO(("Resolved DNS for %s to:", nmc.nabtoMainSetup.id));
+        {
+            uint8_t i;
+            for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
+                uint32_t ip = nmc.controllerAddresses[i];
+                if (ip != 0) {
+                    NABTO_LOG_INFO(("  Controller ip: " PRIip, MAKE_IP_PRINTABLE(ip)));
+                }
+            }
+        }
+
         nmc.context.errorCount = 0;
         SET_CTX_STATE_STAMP(NABTO_AS_WAIT_BS, 0);
         break;
@@ -830,6 +840,11 @@ void handle_as_wait_dns(void) {
 
 /** timer event when waiting for the BS response to invite request. */
 void handle_as_wait_bs(void) {
+    // cycle controller eps
+    uint32_t newip = nmc.controllerAddresses[nmc.context.counter % NABTO_DNS_RESOLVED_IPS_MAX];
+    if (newip != 0) {
+        nmc.controllerEp.addr = newip;
+    }
     
 #if NABTO_ENABLE_DNS_FALLBACK
     if (nmc.nabtoMainSetup.enableDnsFallback) {
@@ -840,6 +855,7 @@ void handle_as_wait_bs(void) {
         }
     }
 #endif
+
     SET_CTX_STATE_STAMP(NABTO_AS_WAIT_BS, EXP_WAIT(INTERVAL_BS_INVITE, nmc.context.counter));
     if(++nmc.context.counter > 6) {
         NABTO_LOG_INFO(("No answer from BS, trying with fallback via dns"));

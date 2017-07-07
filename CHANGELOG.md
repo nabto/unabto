@@ -17,6 +17,7 @@ the release and a new unreleased section is added.
 
 ### Changed
 - NABTO-1480: triple acks were not handled correct, this fix improves streaming throughput.
+- NABTO-1542: dns interface has been changed to be able to accept and array of resolved ipv4 addresses.
 
 ### Breaking Changes
 - unabto_tunnel takes a new commandline format.

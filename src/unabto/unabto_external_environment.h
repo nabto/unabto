@@ -122,8 +122,14 @@ void nabto_dns_resolve(const char* id);
  * see if the address is resolved. The id is always constant for a device
  * meaning the address could be hardcoded but then devices will fail if 
  * the basestation gets a new ip address.
+ *
+ * The array of returned ipv4 addresses has a min size of 1 and a max
+ * size of NABTO_DNS_RESOLVED_IPS_MAX, if less than
+ * NABTO_DNS_RESOLVED_IPS_MAX ips are discovered then the first
+ * entries in the result array should be filled first with ips.
+ *
  * @param id      name controller hostname
- * @param v4addr  pointer to ipaddress
+ * @param v4addr  pointer to output ipaddresses array
  * @return false if address is not resolved yet
  */
 nabto_dns_status_t nabto_dns_is_resolved(const char* id, uint32_t* v4addr);

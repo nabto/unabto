@@ -66,6 +66,15 @@
 #define NABTO_ENABLE_GET_LOCAL_IP 0
 #endif
 
+
+/**
+ * Limit how many addresses the dns resolver can return to unabto
+ * after a successfull resolution.
+ */
+#ifndef NABTO_DNS_RESOLVED_IPS_MAX
+#define NABTO_DNS_RESOLVED_IPS_MAX 3
+#endif
+
 /****************************/
 /* Connection configuration */
 /****************************/
