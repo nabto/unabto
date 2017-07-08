@@ -59,7 +59,7 @@ void handle_stream_packet(nabto_connect* con, nabto_packet_header* hdr,
     NABTO_NOT_USED(userData);
 
 #if NABTO_ENABLE_TCP_FALLBACK
-    if (event->type == MT_TCP_FALLBACK) {
+    if (event && event->type == MT_TCP_FALLBACK) {
         con->relayIsActive = 1;
     }
 #endif
