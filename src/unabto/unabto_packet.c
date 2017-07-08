@@ -159,7 +159,7 @@ void nabto_packet_event(message_event* event, nabto_packet_header* hdr)
     if (handler == 0) {
         NABTO_LOG_ERROR(("no handler for data with tag %i", hdr->tag));
     } else {
-        handler->handler(con, hdr, start, (uint16_t)dlen, nabtoCommunicationBuffer+hdr->hlen, nabtoCommunicationBuffer+ilen, handler->userData, event);
+        handler->handler(con, hdr, start, (uint16_t)dlen, nabtoCommunicationBuffer+hdr->hlen, nabtoCommunicationBuffer+ilen, event, handler->userData);
     }
 }
 
