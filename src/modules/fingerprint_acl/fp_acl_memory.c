@@ -16,8 +16,9 @@ static fp_acl_db_status fp_mem_persistence_null_load(struct fp_mem_state* unused
 bool fp_mem_is_slot_free(struct fp_acl_user* ix)
 {
     fingerprint emptyFp;
+    bool fpIsEmpty;
     memset(emptyFp, 0, sizeof(fingerprint));
-    bool fpIsEmpty = (memcmp(ix->fp, emptyFp, sizeof(fingerprint)) == 0);
+    fpIsEmpty = (memcmp(ix->fp, emptyFp, sizeof(fingerprint)) == 0);
     return fpIsEmpty;
 }
 
