@@ -198,6 +198,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char* streamWindowSizeOption;
     const char* connectionsOption;
     const char* uartDevice = 0;
+    const char* preSharedKey;
     bool fatalPortError = true;
     uint32_t addr;
 
@@ -297,7 +298,6 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         nms->localPort = localPort;
     }
 
-    const char* preSharedKey;
     if (gopt(options, DISABLE_CRYPTO_OPTION)) {
         unabto_set_no_crypto(nms);
     } else {
@@ -436,8 +436,8 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 }
 
 void acl_init() {
-    NABTO_LOG_WARN(("Please review default access permissions and just remove this warning if acceptable"));
     struct fp_acl_settings default_settings;
+    NABTO_LOG_WARN(("Please review default access permissions and just remove this warning if acceptable"));
 
     // master switch: system allows both local and remote access to
     // users with the right privileges and is open for pairing with new users 
