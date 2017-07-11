@@ -2,6 +2,10 @@
 
 #include <unabto/unabto_util.h>
 
+enum {
+    USER_RECORD_SIZE = FP_ACL_FP_LENGTH + FP_ACL_FILE_USERNAME_LENGTH + 4
+};
+
 fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
 {
     uint8_t buffer[128];
@@ -36,9 +40,6 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
     READ_FORWARD_U32(acl->settings.firstUserPermissions, ptr);
     READ_FORWARD_U32(numUsers, ptr);
 
-    enum {
-        USER_RECORD_SIZE = FP_ACL_FP_LENGTH + FP_ACL_FILE_USERNAME_LENGTH + 4
-    };
     for (i = 0; i < numUsers && i < FP_MEM_ACL_ENTRIES; i++) {
         readen = fread(buffer, USER_RECORD_SIZE, 1, aclFile);
         if (readen != 1) {
