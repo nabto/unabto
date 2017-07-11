@@ -10,7 +10,10 @@ Guide: always keep an unreleased section which keeps track of current
 changes. When a release is made the unreleased section is renamed to
 the release and a new unreleased section is added.
 
-## 4.1.0 Unreleased
+## 4.2.0 Unreleased
+
+
+## 4.1.0 2017-07-11
 
 ### Added
 ### Removed
