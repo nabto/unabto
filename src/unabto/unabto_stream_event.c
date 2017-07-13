@@ -107,20 +107,6 @@ void nabto_stream_event(nabto_connect*       con,
         return;
     }
 
-    {
-        text msg;
-        switch (win.type) {
-        case NP_PAYLOAD_WINDOW_FLAG_SYN                             : msg = "SYN";     break;
-        case NP_PAYLOAD_WINDOW_FLAG_SYN | NP_PAYLOAD_WINDOW_FLAG_ACK: msg = "SYN|ACK"; break;
-        case NP_PAYLOAD_WINDOW_FLAG_FIN | NP_PAYLOAD_WINDOW_FLAG_ACK: msg = "FIN|ACK"; break;
-        case NP_PAYLOAD_WINDOW_FLAG_RST                             : msg = "RST";     break;
-        case NP_PAYLOAD_WINDOW_FLAG_ACK                             : msg = "DATA";    break;
-        default       : msg = "?"; NABTO_LOG_TRACE(("Type?: %" PRIu8, win.type)); break;
-        }
-        NABTO_NOT_USED(msg);
-        NABTO_LOG_DEBUG(("%" PRIu16 " --> [%" PRIu32 ",%" PRIu32 "] %" PRItext ", %d bytes", hdr->tag, win.seq, win.ack, msg, dlen));
-    }
-
     stream = find_stream(hdr->tag, con);
     if (stream == NULL) {
         if (win.type == NP_PAYLOAD_WINDOW_FLAG_SYN) {

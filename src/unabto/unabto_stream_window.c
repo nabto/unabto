@@ -98,6 +98,11 @@ void unabto_stream_dump_state(struct nabto_stream_s* stream);
  */
 static void nabto_init_stream_state(unabto_stream * stream, const struct nabto_win_info* info);
 
+/**
+ * convert a window type to a const string
+ */
+static const char* unabto_stream_type_to_string(uint8_t winType);
+
 #if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_TRACE)
 
 static text stateNameW(nabto_stream_tcb_state state);
@@ -447,11 +452,10 @@ static bool send_data_packet(struct nabto_stream_s* stream, uint32_t seq, uint8_
     if (build_and_send_packet(stream, ACK, seq, 0, 0, data, size, &sackData)) {
         if (size) {
             tcb->cCtrl.cwnd -= 1;
-
-            NABTO_LOG_DEBUG(("%" PRIu16 " <-- [%" PRIu32 ",%" PRIu32 "] DATA(isRetrans: %u), %" PRIu16 " bytes from ix=%i (xmitFirst/Count/flightSize = %" PRIu32 "/%" PRIu32 "/%i)", stream->streamTag, seq, ackNumber, retrans, size, ix, tcb->xmitFirst, tcb->xmitLastSent - tcb->xmitFirst, tcb->cCtrl.flightSize ));
-        } else {
-            NABTO_LOG_DEBUG(("%" PRIu16 ", <-- [%" PRIu32 ",%" PRIu32 "] DATA, 0 bytes (xmitFirst/Count=%" PRIu32 "/%" PRIu32 ")", stream->streamTag, seq, ackNumber, tcb->xmitFirst, tcb->xmitSeq - tcb->xmitFirst));
         }
+
+        NABTO_LOG_DEBUG(("%" PRIu16 " <-- [%" PRIu32 ",%" PRIu32 "] DATA(isRetrans: %u), %" PRIu16 " bytes from ix=%i (xmitFirst/Count/flightSize = %" PRIu32 "/%" PRIu32 "/%i), advertisedWindow %" PRIu16, stream->streamTag, seq, ackNumber, retrans, size, ix, tcb->xmitFirst, tcb->xmitLastSent - tcb->xmitFirst, tcb->cCtrl.flightSize, unabto_stream_advertised_window_size(tcb)));
+
         return true;
     } else {
         NABTO_LOG_TRACE(("Failed to send stream data packet!"));
@@ -464,7 +468,7 @@ static bool send_data_packet(struct nabto_stream_s* stream, uint32_t seq, uint8_
 static bool send_rst(struct nabto_stream_s* stream)
 {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
-    NABTO_LOG_TRACE(("Sending RST packet"));
+    NABTO_LOG_DEBUG(("%" PRIu16 " <-- [%" PRIu32 ",%" PRIu32 "] RST ", stream->streamTag, tcb->xmitSeq, unabto_stream_ack_number_to_send(tcb)));
     return build_and_send_packet(stream, RST, tcb->xmitSeq, NULL, 0, 0, 0, NULL);
 }
 
@@ -527,6 +531,16 @@ static bool send_syn_or_syn_ack(struct nabto_stream_s* stream, uint8_t type)
     if (!build_and_send_packet(stream, type, tcb->xmitSeq, tmp, sizeof(tmp), 0, 0, NULL)) {
         return false;
     }
+
+    NABTO_LOG_DEBUG(("%" PRIu16 " <-- [%" PRIu32 ",%" PRIu32 "] %" PRItext " (xmitFirst/Count/flightSize = %" PRIu32 "/%" PRIu32 "/%i), advertisedWindow %" PRIu16,
+                     stream->streamTag,
+                     tcb->xmitSeq,
+                     unabto_stream_ack_number_to_send(tcb),
+                     unabto_stream_type_to_string(type),
+                     tcb->xmitFirst,
+                     tcb->xmitLastSent - tcb->xmitFirst,
+                     tcb->cCtrl.flightSize,
+                     unabto_stream_advertised_window_size(tcb)));
 
     return true;
 }
@@ -1168,6 +1182,8 @@ void nabto_stream_tcb_event(struct nabto_stream_s* stream,
 {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
 
+    NABTO_LOG_DEBUG(("%" PRIu16 " --> [%" PRIu32 ",%" PRIu32 "] %" PRItext ", advertisedWindow %" PRIu16 ", %d bytes", stream->streamTag, win->seq, win->ack, unabto_stream_type_to_string(win->type), win->advertisedWindow, dlen));
+
     if (win->type == ACK ) {
         uint32_t oldAdvWindow = tcb->maxAdvertisedWindow;
         // all data has been acked and there is no more room for more data
@@ -1184,7 +1200,6 @@ void nabto_stream_tcb_event(struct nabto_stream_s* stream,
     }
 
     if (win->type & RST) {
-        NABTO_LOG_TRACE(("Received RST packet"));
         if (tcb->streamState != ST_CLOSED || tcb->streamState != ST_CLOSED_ABORTED) {
             SET_STATE(stream, ST_CLOSED_ABORTED);
         }
@@ -1877,7 +1892,7 @@ void unabto_stream_update_congestion_control_receive_stats(struct nabto_stream_s
         unabto_stream_stats_observe(&tcb->ccStats.rtt, time);
         tcb->cCtrl.rto = tcb->cCtrl.srtt + 4.0*tcb->cCtrl.rttVar;
 
-        NABTO_LOG_TRACE(("packet time %f, tcb->srtt %f, tcb->rttVar %f, tcb->rto %f", time, tcb->cCtrl.srtt, tcb->cCtrl.rttVar, tcb->cCtrl.rto));
+        NABTO_LOG_TRACE(("packet time %f, tcb->srtt %f, tcb->rttVar %f, tcb->rto %" PRIu16, time, tcb->cCtrl.srtt, tcb->cCtrl.rttVar, tcb->cCtrl.rto));
 
 
         /**
@@ -1983,6 +1998,20 @@ uint32_t unabto_stream_get_duration(struct nabto_stream_s* stream)
     nabto_stamp_t now = nabtoGetStamp();
     nabto_stamp_diff_t duration = nabtoStampDiff(&now, &stream->stats.streamStart);
     return nabtoStampDiff2ms(duration);
+}
+
+const char* unabto_stream_type_to_string(uint8_t winType)
+{
+    text msg;
+    switch (winType) {
+        case NP_PAYLOAD_WINDOW_FLAG_SYN                             : msg = "SYN";     break;
+        case NP_PAYLOAD_WINDOW_FLAG_SYN | NP_PAYLOAD_WINDOW_FLAG_ACK: msg = "SYN|ACK"; break;
+        case NP_PAYLOAD_WINDOW_FLAG_FIN | NP_PAYLOAD_WINDOW_FLAG_ACK: msg = "FIN|ACK"; break;
+        case NP_PAYLOAD_WINDOW_FLAG_RST                             : msg = "RST";     break;
+        case NP_PAYLOAD_WINDOW_FLAG_ACK                             : msg = "ACK";    break;
+        default: msg = "?"; NABTO_LOG_TRACE(("Type?: %" PRIu8, winType)); break;
+    }
+    return msg;
 }
 
 #endif /* NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM */
