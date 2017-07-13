@@ -773,7 +773,7 @@ void nabto_stream_tcb_check_xmit(struct nabto_stream_s* stream, bool isTimedEven
              * data has been acked and send a FIN.
              */
             if (tcb->finSequence != 0 ||
-                (tcb->xmitSeq == tcb->xmitFirst && tcb->xmitSeq + tcb->cfg.recvWinSize == tcb->maxAdvertisedWindow) ) {
+                (tcb->xmitSeq == tcb->xmitFirst) ) {
                 if (nabtoIsStampPassed(&tcb->timeoutStamp)) {
                     if (tcb->retransCount > tcb->cfg.maxRetrans) {
                         NABTO_LOG_INFO(("retransCount > tcb->cfg.maxRetrans, releasing the stream"));
