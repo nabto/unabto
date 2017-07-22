@@ -133,6 +133,32 @@ void unabto_tunnel_epoll_event(struct epoll_event* event);
  */
 bool unabto_tunnel_allow_client_access(nabto_connect* connection);
 
+#if NABTO_ENABLE_TUNNEL_STATUS_CALLBACKS
+
+typedef enum {
+    NABTO_TCP_TUNNEL_OPENED,
+    NABTO_TCP_TUNNEL_CLOSED 
+} tunnel_status_event;
+
+/**
+ * Inform the application of a tunnel event
+ */
+void unabto_tunnel_status_callback(tunnel_status_event event, tunnel* tunnel);
+
+typedef struct tunnel_status_tcp_details {
+    char* host;
+    int port;
+    unsigned sentBytes;
+    unsigned receivedBytes;
+} tunnel_status_tcp_details;
+
+/**
+ * Access tcp tunnel information
+ */
+void unabto_tunnel_status_get_tcp_info(tunnel* tunnel, tunnel_status_tcp_details* info);
+
+
+#endif
 
 
 

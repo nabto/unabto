@@ -173,7 +173,6 @@ bool unabto_tunnel_has_uart(){
 void unabto_tunnel_parse_command(tunnel* tunnel, tunnel_event_source tunnel_event)
 {
 #if NABTO_ENABLE_TUNNEL_UART
-    
     if (uart_tunnel_get_default_device() != 0){ 
        if (strncmp((const char*)tunnel->staticMemory->command, UART_TXT, strlen(UART_TXT)) == 0) {
            unabto_tunnel_uart_parse_command(tunnel, tunnel_event, tunnels, NABTO_MEMORY_STREAM_MAX_STREAMS);
@@ -383,4 +382,17 @@ void unabto_tunnel_epoll_event(struct epoll_event* event)
     }
 #endif
 }
+#endif
+
+#if NABTO_ENABLE_TUNNEL_TCP && NABTO_ENABLE_TUNNEL_STATUS_CALLBACKS
+
+void unabto_tunnel_status_get_tcp_info(tunnel* tunnel, tunnel_status_tcp_details* info) {
+    unabto_stream_stats stats;
+    unabto_stream_get_stats(tunnel->stream, &stats);
+    info->host = tunnel->staticMemory->stmu.tcp_sm.host;
+    info->port = tunnel->tunnel_type_vars.tcp.port;
+    info->sentBytes = stats.sentBytes;
+    info->receivedBytes = stats.receivedBytes;
+}
+
 #endif
