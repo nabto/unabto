@@ -418,11 +418,4 @@ void unabto_tunnel_tcp_close_tcp_reader(tunnel* tunnel) {
     tunnel->extReadState = FS_CLOSING;
 }
 
-char* unabto_tunnel_tcp_get_host(tunnel* tunnel) {
-    return tunnel->staticMemory->stmu.tcp_sm.host;
-}
-
-int unabto_tunnel_tcp_get_port(tunnel* tunnel) {
-    return tunnel->tunnel_type_vars.tcp.port;
-}
 
