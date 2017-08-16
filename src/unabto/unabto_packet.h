@@ -65,6 +65,11 @@ bool send_and_encrypt_packet_con(nabto_connect* con, uint8_t* plaintextStart, ui
 
 bool send_to_basestation(uint8_t* buffer, size_t buflen, nabto_endpoint* peer);
 
+uint8_t* unabto_stats_write_u32(uint8_t* ptr, uint8_t* end, uint8_t type, uint32_t value);
+uint8_t* unabto_stats_write_u16(uint8_t* ptr, uint8_t* end, uint8_t type, uint16_t value);
+uint8_t* unabto_stats_write_u8(uint8_t* ptr, uint8_t* end, uint8_t type, uint8_t value);
+
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

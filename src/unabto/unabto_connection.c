@@ -997,31 +997,6 @@ bool nabto_write_con(nabto_connect* con, uint8_t* buf, size_t len) {
     return false;
 }
 
-uint8_t* insert_connect_stats_payload(uint8_t* ptr, uint8_t* end, nabto_connect* con) {
-    uint8_t connectionType;
-
-    UNABTO_ASSERT(ptr <= end);
-    if (end-ptr < NP_PAYLOAD_CONNECT_STATS_BYTELENGTH) {
-        return NULL;
-    }
-
-    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CONNECT_STATS, 0, 2);
-
-    switch (get_connection_type(con)) {
-     case NCT_LOCAL:              connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_LOCAL; break;
-     case NCT_CONNECTING:         connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_CONNECTING; break;
-     case NCT_REMOTE_RELAY:       connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_UDP_RELAY; break;
-     case NCT_REMOTE_RELAY_MICRO: connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_TCP_RELAY; break;
-     case NCT_REMOTE_P2P:         connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_P2P; break;
-     default:                     connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_CONNECTING; break;
-    }
-
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_CONNECT_STATS_VERSION);
-    WRITE_FORWARD_U8(ptr, connectionType);
-
-    return ptr;
-}
-
 uint8_t* insert_rendezvous_stats_payload(uint8_t* ptr, uint8_t* end, nabto_connect* con) {
     UNABTO_ASSERT(ptr <= end);
     if (end-ptr < NP_PAYLOAD_RENDEZVOUS_STATS_BYTELENGTH) {
@@ -1056,29 +1031,40 @@ uint8_t* insert_cp_id_payload(uint8_t* ptr, uint8_t* end, nabto_connect* con) {
     return ptr;
 }
 
-uint8_t* insert_connection_stats_payload(uint8_t* ptr, uint8_t* end, nabto_connect* con) {
+uint8_t* insert_connection_info_payload(uint8_t* ptr, uint8_t* end, nabto_connect* con) {
     nabto_stamp_t now;
     uint32_t connectionAge;
+    uint8_t connectionType;
 
-    UNABTO_ASSERT(ptr <= end);
-    if (end-ptr < NP_PAYLOAD_CONNECTION_STATS_BYTELENGTH) {
-        return NULL;
-    }
-
-    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CONNECTION_STATS, 0, 21);
-    
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_CONNECTION_STATS_VERSION);
-    
     now = nabtoGetStamp();
     connectionAge = nabtoStampDiff2ms(nabtoStampDiff(&now, &con->stats.connectionStart));
 
-    WRITE_FORWARD_U32(ptr, connectionAge);
+    switch (get_connection_type(con)) {
+        case NCT_LOCAL:              connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_LOCAL; break;
+        case NCT_CONNECTING:         connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_CONNECTING; break;
+        case NCT_REMOTE_RELAY:       connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_UDP_RELAY; break;
+        case NCT_REMOTE_RELAY_MICRO: connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_TCP_RELAY; break;
+        case NCT_REMOTE_P2P:         connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_P2P; break;
+        default:                     connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_CONNECTING; break;
+    }
 
-    WRITE_FORWARD_U32(ptr, con->stats.packetsReceived);
-    WRITE_FORWARD_U32(ptr, con->stats.packetsSent);
-    WRITE_FORWARD_U32(ptr, con->stats.bytesReceived);
-    WRITE_FORWARD_U32(ptr, con->stats.bytesSent);
+    if (ptr == NULL) {
+        return NULL;
+    }
+    
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CONNECTION_INFO, 0, 0);
 
+    ptr = unabto_stats_write_u8(ptr, end, NP_PAYLOAD_CONNECTION_INFO_TYPE, connectionType);
+    ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_DURATION, connectionAge);
+    ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_PACKETS_SENT, con->stats.packetsSent);
+    ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_PACKETS_RECEIVED, con->stats.packetsReceived);
+    ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_BYTES_SENT, con->stats.bytesSent);
+    ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_BYTES_RECEIVED, con->stats.bytesReceived);
+
+    if (con->peer.addr != 0x00000000) {
+        ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_CLIENT_IP, con->peer.addr);
+    }    
+    
     return ptr;
 }
 
@@ -1087,6 +1073,8 @@ void send_connection_statistics(nabto_connect* con, uint8_t event) {
     uint8_t* ptr = insert_header(nabtoCommunicationBuffer, 0, con->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
     
+
+
     ptr = insert_stats_payload(ptr, end, event);
     if (ptr == NULL) {
         return;
@@ -1112,10 +1100,6 @@ void send_connection_statistics(nabto_connect* con, uint8_t event) {
     if (ptr == NULL) {
         return;
     }
-    ptr = insert_connect_stats_payload(ptr, end, con);
-    if (ptr == NULL) {
-        return;
-    }
 
     if (!con->noRendezvous) {
         ptr = insert_rendezvous_stats_payload(ptr, end, con);
@@ -1124,7 +1108,7 @@ void send_connection_statistics(nabto_connect* con, uint8_t event) {
         }
     }
 
-    ptr = insert_connection_stats_payload(ptr, end, con);
+    ptr = insert_connection_info_payload(ptr, end, con);
     if (ptr == NULL) {
         return;
     }
@@ -1160,7 +1144,7 @@ void send_connection_ended_statistics(nabto_connect* con) {
     if (ptr == NULL) {
         return;
     }
-    ptr = insert_connection_stats_payload(ptr, end, con);
+    ptr = insert_connection_info_payload(ptr, end, con);
     if (ptr == NULL) {
         return;
     }

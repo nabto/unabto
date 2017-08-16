@@ -371,49 +371,6 @@ int unabto_stream_index(unabto_stream* stream) {
     return stream - stream__;
 }
 
-
-uint8_t* unabto_stream_stats_write_u32(uint8_t* ptr, uint8_t* end, uint8_t type, uint32_t value)
-{
-    if (ptr == NULL) {
-        return NULL;
-    }
-    if (end - ptr < sizeof(uint32_t) + 2) {
-        return NULL;
-    }
-    WRITE_FORWARD_U8(ptr, type);
-    WRITE_FORWARD_U8(ptr, 6);
-    WRITE_FORWARD_U32(ptr, value);
-    return ptr;
-}
-
-uint8_t* unabto_stream_stats_write_u16(uint8_t* ptr, uint8_t* end, uint8_t type, uint16_t value)
-{
-    if (ptr == NULL) {
-        return ptr;
-    }
-    if (end - ptr < sizeof(uint16_t) + 2) {
-        return NULL;
-    }
-    WRITE_FORWARD_U8(ptr, type);
-    WRITE_FORWARD_U8(ptr, 4);
-    WRITE_FORWARD_U16(ptr, value);
-    return ptr;
-}
-
-uint8_t* unabto_stream_stats_write_u8(uint8_t* ptr, uint8_t* end, uint8_t type, uint8_t value)
-{
-    if (ptr == NULL) {
-        return NULL;
-    }
-    if (end - ptr < sizeof(uint8_t) + 2) {
-        return NULL;
-    }
-    WRITE_FORWARD_U8(ptr, type);
-    WRITE_FORWARD_U8(ptr, 3);
-    WRITE_FORWARD_U8(ptr, value);
-    return ptr;
-}
-
 uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct nabto_stream_s* stream)
 {
     unabto_stream_stats stats;
@@ -421,13 +378,13 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_STREAM_STATS, 0, 0);
 
     // stream info
-    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_TAG,   stream->streamTag);
-    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CP_ID, stream->idCP);
-    ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SP_ID, stream->idSP);
+    ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_TAG,   stream->streamTag);
+    ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CP_ID, stream->idCP);
+    ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SP_ID, stream->idSP);
 
     // duration
     {
-        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_DURATION, unabto_stream_get_duration(stream));
+        ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_DURATION, unabto_stream_get_duration(stream));
 
     }
 
@@ -441,43 +398,43 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
         } else {
             streamState = NP_PAYLOAD_STREAM_STATS_STATUS_OPEN;  
         }
-        ptr = unabto_stream_stats_write_u8(ptr, end, NP_PAYLOAD_STREAM_STATS_STATUS, streamState);
+        ptr = unabto_stats_write_u8(ptr, end, NP_PAYLOAD_STREAM_STATS_STATUS, streamState);
     }
     if(unabto_stream_get_stats(stream, &stats) == UNABTO_STREAM_HINT_OK) {
         if (stats.timeFirstMBReceived != 0) {
-            ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_RECEIVED, stats.timeFirstMBReceived);
+            ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_RECEIVED, stats.timeFirstMBReceived);
         }
         if (stats.timeFirstMBSent != 0) {
-            ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_SENT, stats.timeFirstMBSent);
+            ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIME_FIRST_MB_SENT, stats.timeFirstMBSent);
         }
         // stream stats
-        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_PACKETS,              stats.sentPackets);
-        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_BYTES,                stats.sentBytes);
-        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_RESENT_PACKETS,       stats.sentResentPackets);
-        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_PACKETS,          stats.receivedPackets);
-        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_BYTES,            stats.receivedBytes);
-        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_RESENT_PACKETS,   stats.receivedResentPackets);
-        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_REORDERED_OR_LOST_PACKETS, stats.reorderedOrLostPackets);
-        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_USER_WRITE,                stats.userWrite);
-        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_USER_READ,                 stats.userRead);
+        ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_PACKETS,              stats.sentPackets);
+        ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_BYTES,                stats.sentBytes);
+        ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SENT_RESENT_PACKETS,       stats.sentResentPackets);
+        ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_PACKETS,          stats.receivedPackets);
+        ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_BYTES,            stats.receivedBytes);
+        ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_RECEIVED_RESENT_PACKETS,   stats.receivedResentPackets);
+        ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_REORDERED_OR_LOST_PACKETS, stats.reorderedOrLostPackets);
+        ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_USER_WRITE,                stats.userWrite);
+        ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_USER_READ,                 stats.userRead);
 
-        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_MIN,                   stats.rttMin);
-        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_MAX,                   stats.rttMax);
-        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_AVG,                   stats.rttAvg);
+        ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_MIN,                   stats.rttMin);
+        ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_MAX,                   stats.rttMax);
+        ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_AVG,                   stats.rttAvg);
 
-        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_MIN,                  stats.cwndMin);
-        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_MAX,                  stats.cwndMax);
-        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_AVG,                  stats.cwndAvg);
+        ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_MIN,                  stats.cwndMin);
+        ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_MAX,                  stats.cwndMax);
+        ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_AVG,                  stats.cwndAvg);
 
-        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MIN,          stats.ssThresholdMin);
-        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MAX,          stats.ssThresholdMax);
-        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_AVG,          stats.ssThresholdAvg);
+        ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MIN,          stats.ssThresholdMin);
+        ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MAX,          stats.ssThresholdMax);
+        ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_AVG,          stats.ssThresholdAvg);
 
-        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_FLIGHT_SIZE_MIN,        stats.flightSizeMin);
-        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_FLIGHT_SIZE_MAX,        stats.flightSizeMax);
-        ptr = unabto_stream_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_FLIGHT_SIZE_AVG,        stats.flightSizeAvg);
+        ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_FLIGHT_SIZE_MIN,        stats.flightSizeMin);
+        ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_FLIGHT_SIZE_MAX,        stats.flightSizeMax);
+        ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_FLIGHT_SIZE_AVG,        stats.flightSizeAvg);
 
-        ptr = unabto_stream_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIMEOUTS,                  stats.timeouts);
+        ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIMEOUTS,                  stats.timeouts);
     }
     // insert payload length
     if (ptr != NULL) {
@@ -522,12 +479,7 @@ void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
         return;
     }
 
-    ptr = insert_connection_stats_payload(ptr, end, stream->connection);
-    if (ptr == NULL) {
-        return;
-    }
-
-    ptr = insert_connect_stats_payload(ptr, end, stream->connection);
+    ptr = insert_connection_info_payload(ptr, end, stream->connection);
     if (ptr == NULL) {
         return;
     }

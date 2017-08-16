@@ -158,7 +158,8 @@ enum np_payload_type_e {
     NP_PAYLOAD_TYPE_PUSH             = 0x4C, /* 'L' Push notification payload          */
     NP_PAYLOAD_TYPE_PUSH_DATA        = 0x4D, /* 'M' Push notification data payload     */
     NP_PAYLOAD_TYPE_STREAM_STATS     = 0x4E, /* 'N' Stream statistics */
-    NP_PAYLOAD_TYPE_BASESTATION_AUTH = 0x4F  /* 'O' Basestation Auth key value pairs */
+    NP_PAYLOAD_TYPE_BASESTATION_AUTH = 0x4F, /* 'O' Basestation Auth key value pairs */
+    NP_PAYLOAD_TYPE_CONNECTION_INFO  = 0x50  /* 'P' Connection Info payload */
 };
 
 /* Payload header flags */
@@ -709,13 +710,15 @@ enum np_payload_type_e {
 
 #define NP_PAYLOAD_CONNECT_STATS_VERSION 1
 
-#define NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_CONNECTING   0  ///< Still trying to connect
-#define NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_LOCAL        1  
-#define NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_P2P          2
-#define NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_UDP_RELAY    3
-#define NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_TCP_RELAY    4
-#define NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_HTTP_RELAY   5
-#define NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_LOCAL_LEGACY 6  
+enum np_payload_connect_stats_connection_type_e {
+    NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_CONNECTING   = 0,  ///< Still trying to connect
+    NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_LOCAL        = 1,  
+    NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_P2P          = 2,
+    NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_UDP_RELAY    = 3,
+    NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_TCP_RELAY    = 4,
+    NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_HTTP_RELAY   = 5,
+    NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_LOCAL_LEGACY = 6
+};
 
 
 /*****************************************************************************/
@@ -740,9 +743,10 @@ enum np_payload_type_e {
 
 #define NP_PAYLOAD_RENDEZVOUS_STATS_VERSION 1
 
-/*****************************************************************************/
-/* Connection stats payload */
-/* The connection stats payload data has the following layout:
+/*****************************************************************************
+* Connection stats payload *
+* Deprecated
+* The connection stats payload data has the following layout:
 *      +-----+----------------------------------------------------------------+
 *      |  +0 |  Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)              |
 *      +-----+-----+----------------------------------------------------------+
@@ -760,10 +764,32 @@ enum np_payload_type_e {
 *      +-----+-----+----------------------------------------------------------+
 */
 
-#define NP_PAYLOAD_CONNECTION_STATS_BYTELENGTH   25  ///< size of a rendezvous stats payload
+#define NP_PAYLOAD_CONNECTION_STATS_BYTELENGTH   25  ///< size of a connection stats payload
 
 #define NP_PAYLOAD_CONNECTION_STATS_VERSION 1
 
+/*****************************************************************************/
+/* Connection info payload this is a replacement for the connection stats payload */
+/* The connection info payload data has the following layout:
+ *      List of the following data type
+ *      +-----+----------------------------------------------------------+
+ *      | +0 | Value type (uint8_t)                                      |
+ *      +-----+----------------------------------------------------------+
+ *      | +1 | Value Length (uint8_t) (including type and length)        |
+ *      +-----+----------------------------------------------------------+
+ *      | +2 | Value format which depends on the type                    |
+ *      +-----+----------------------------------------------------------+
+ */
+
+enum np_payload_connection_info_e {
+    NP_PAYLOAD_CONNECTION_INFO_TYPE              = 1, // uint8_t connection type see 
+    NP_PAYLOAD_CONNECTION_INFO_DURATION          = 2, // duration in milliseconds
+    NP_PAYLOAD_CONNECTION_INFO_PACKETS_SENT      = 3, // uint32_t
+    NP_PAYLOAD_CONNECTION_INFO_PACKETS_RECEIVED  = 4, // uint32_t
+    NP_PAYLOAD_CONNECTION_INFO_BYTES_SENT        = 5, // uint32_t
+    NP_PAYLOAD_CONNECTION_INFO_BYTES_RECEIVED    = 6, // uint32_t
+    NP_PAYLOAD_CONNECTION_INFO_CLIENT_IP         = 7  // uint32_t ipv4 in network byte order
+};
 
 /*****************************************************************************/
 /* Attach stats payload */
