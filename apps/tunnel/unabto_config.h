@@ -34,4 +34,6 @@
 #define NABTO_LOG_ALL 1
 #endif
 
+#define NABTO_ENABLE_TUNNEL_STATUS_CALLBACKS 1
+
 #endif

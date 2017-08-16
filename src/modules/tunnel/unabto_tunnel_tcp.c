@@ -35,6 +35,12 @@ void unabto_tunnel_tcp_close_stream_reader(tunnel* tunnel);
 void unabto_tunnel_tcp_close_tcp_reader(tunnel* tunnel);
 void unabto_tunnel_tcp_closing(tunnel* tunnel, tunnel_event_source event_source);
 
+#if NABTO_ENABLE_TUNNEL_STATUS_CALLBACKS
+#define INVOKE_STATUS_CALLBACK(event, tunnel) do { unabto_tunnel_status_callback(event, tunnel); } while(0)
+#else
+#define INVOKE_STATUS_CALLBACK(event, tunnel)
+#endif
+
 
 void unabto_tunnel_tcp_init(tunnel* tunnel)
 {
@@ -50,7 +56,9 @@ void unabto_tunnel_tcp_event(tunnel* tunnel, tunnel_event_source event_source)
     }
     
     if (tunnel->state == TS_OPEN_SOCKET) {
-        if (!open_socket(tunnel)) {
+        if (open_socket(tunnel)) {
+            INVOKE_STATUS_CALLBACK(NABTO_TCP_TUNNEL_OPENED, tunnel);
+        } else {
             tunnel->state = TS_CLOSING;
         }
     }
@@ -94,6 +102,7 @@ void unabto_tunnel_tcp_closing(tunnel* tunnel, tunnel_event_source event_source)
             epoll_ctl(unabto_epoll_fd, EPOLL_CTL_DEL, tunnel->tunnel_type_vars.tcp.sock, &ev);
         }
 #endif
+        INVOKE_STATUS_CALLBACK(NABTO_TCP_TUNNEL_CLOSED, tunnel);
         
         close(tunnel->tunnel_type_vars.tcp.sock);
         unabto_stream_release(tunnel->stream);
@@ -408,3 +417,5 @@ void unabto_tunnel_tcp_close_tcp_reader(tunnel* tunnel) {
     unabto_stream_close(tunnel->stream);
     tunnel->extReadState = FS_CLOSING;
 }
+
+

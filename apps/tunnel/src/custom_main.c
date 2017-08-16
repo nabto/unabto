@@ -54,3 +54,9 @@ bool unabto_tunnel_allow_client_access(nabto_connect* connection) {
     // see allow_client_access in main.c for example of an implementation that uses the FP ACL module
     return false;
 }
+
+#if NABTO_ENABLE_TUNNEL_STATUS_CALLBACKS
+void unabto_tunnel_status_callback(tunnel_status_event event, tunnel* tunnel) {
+}
+#endif
+

@@ -12,6 +12,7 @@
 #define NABTO_TICK 5
 
 #include <modules/tunnel/unabto_tunnel.h>
+#include <modules/tunnel/unabto_tunnel_common.h>
 #include <modules/tunnel/unabto_tunnel_select.h>
 #include <modules/tunnel/unabto_tunnel_epoll.h>
 #include <modules/fingerprint_acl/fp_acl_ae.h>
@@ -23,6 +24,7 @@
 #include <unabto/unabto_common_main.h>
 #include <unabto/unabto_attach.h>
 #include <unabto_version.h>
+#include <unabto/unabto_stream.h>
 
 #include <modules/cli/gopt/gopt.h>
 #include <modules/diagnostics/unabto_diag.h>
@@ -540,6 +542,15 @@ bool unabto_tunnel_allow_client_access(nabto_connect* connection) {
         return allow;
     }
 }
+
+#if NABTO_ENABLE_TUNNEL_STATUS_CALLBACKS
+void unabto_tunnel_status_callback(tunnel_status_event event, tunnel* tunnel) {
+    tunnel_status_tcp_details info;
+    unabto_tunnel_status_get_tcp_info(tunnel, &info);
+    NABTO_LOG_INFO(("Tunnel event [%d] on tunnel [%d] to host [%s] on port [%d], bytes sent: [%d]", event, tunnel->tunnelId,
+                    info.host, info.port, info.sentBytes));
+}
+#endif
 
 bool is_default_host(const char* host) {
     char** p = default_hosts;
