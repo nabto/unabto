@@ -878,7 +878,7 @@ void rendezvous_time_event(nabto_connect* con)
 
 void statistics_time_event(nabto_connect* con) {
     if (con->sendConnectStatistics) {
-        send_connection_statistics(con, NP_PAYLOAD_STATS_TYPE_UNABTO_CONNECTION_ESTABLISHED);
+        send_connection_statistics(con, NP_PAYLOAD_STATS_TYPE_DEVICE_CONNECTION_OPEN);
         con->sendConnectStatistics = false;
     }
 
@@ -1139,7 +1139,7 @@ void send_connection_ended_statistics(nabto_connect* con) {
     uint8_t* ptr = insert_header(nabtoCommunicationBuffer, 0, con->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
 
-    ptr = insert_stats_payload(ptr, end, NP_PAYLOAD_STATS_TYPE_UNABTO_CONNECTION_ENDED);
+    ptr = insert_stats_payload(ptr, end, NP_PAYLOAD_STATS_TYPE_DEVICE_CONNECTION_CLOSE);
     if (ptr == NULL) {
         return;
     }

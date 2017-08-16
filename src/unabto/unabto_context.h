@@ -74,6 +74,7 @@ typedef struct nabto_context_s {
                                                              be sent again                   */
     bool                  useDnsFallback;          /**< True if packets should be sent via dns fallback */
     bool                  hasDnsFallbackSocket;    /**< True if a dns fallback socket has been opened */
+    bool                  keepAliveReceived;       /**< True if a keepalive has been received */
 
     /*****************************************************************************************/
     /* fields below has specific init, reinit and release methods.                           */

@@ -738,6 +738,7 @@ bool nabto_alive_event(nabto_packet_header* hdr)
             piggyData = 0;
         }
 
+        nmc.context.keepAliveReceived = true;
         olen = mk_gsp_alive_rsp(hdr->seq, piggySize, piggyData);
         if (olen) {
             nmc.context.piggyOldHeaderSequence = hdr->seq;
@@ -936,7 +937,9 @@ void handle_as_wait_gsp(void) {
 void handle_as_attached(void) {
     if (++nmc.context.counter >= nmc.nabtoMainSetup.gspTimeoutCount) {
         NABTO_LOG_INFO(("No keep-alive from GSP, retrying Base Station at " PRIep, MAKE_EP_PRINTABLE(nmc.controllerEp)));
-        send_basestation_attach_failure(NP_PAYLOAD_ATTACH_STATS_STATUS_ATTACH_TIMED_OUT);
+        if (!nmc.context.keepAliveReceived) {
+            send_basestation_attach_failure(NP_PAYLOAD_ATTACH_STATS_STATUS_ATTACH_TIMED_OUT);
+        }
 #if NABTO_ENABLE_DNS_FALLBACK
         if (nmc.nabtoMainSetup.enableDnsFallback) {
             if (nmc.context.hasDnsFallbackSocket) {
@@ -1018,7 +1021,7 @@ void send_basestation_attach_failure(uint8_t statusCode) {
     uint8_t* ptr = insert_header(nabtoCommunicationBuffer, 0, 0, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
 
-    ptr = insert_stats_payload(ptr, end, NP_PAYLOAD_STATS_TYPE_UNABTO_ATTACH_FAILED);
+    ptr = insert_stats_payload(ptr, end, NP_PAYLOAD_STATS_TYPE_DEVICE_ATTACH_FAIL);
     if (ptr == NULL) {
         return;
     }
