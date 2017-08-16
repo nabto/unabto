@@ -1035,6 +1035,7 @@ uint8_t* insert_connection_info_payload(uint8_t* ptr, uint8_t* end, nabto_connec
     nabto_stamp_t now;
     uint32_t connectionAge;
     uint8_t connectionType;
+    uint8_t* payloadBegin = ptr;
 
     now = nabtoGetStamp();
     connectionAge = nabtoStampDiff2ms(nabtoStampDiff(&now, &con->stats.connectionStart));
@@ -1056,14 +1057,18 @@ uint8_t* insert_connection_info_payload(uint8_t* ptr, uint8_t* end, nabto_connec
 
     ptr = unabto_stats_write_u8(ptr, end, NP_PAYLOAD_CONNECTION_INFO_TYPE, connectionType);
     ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_DURATION, connectionAge);
-    ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_PACKETS_SENT, con->stats.packetsSent);
-    ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_PACKETS_RECEIVED, con->stats.packetsReceived);
-    ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_BYTES_SENT, con->stats.bytesSent);
-    ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_BYTES_RECEIVED, con->stats.bytesReceived);
+    ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_SENT_PACKETS, con->stats.packetsSent);
+    ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_SENT_BYTES, con->stats.bytesSent);
+    ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_RECEIVED_PACKETS, con->stats.packetsReceived);
+    ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_RECEIVED_BYTES, con->stats.bytesReceived);
 
-    if (con->peer.addr != 0x00000000) {
-        ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_CLIENT_IP, con->peer.addr);
-    }    
+    if (con->cp.globalEndpoint.addr != 0x00000000) {
+        ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_CLIENT_IP, con->cp.globalEndpoint.addr);
+    }
+
+    if (ptr != NULL) {
+        WRITE_U16(payloadBegin + 2, ptr - payloadBegin);
+    }
     
     return ptr;
 }

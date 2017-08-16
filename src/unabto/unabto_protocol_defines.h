@@ -784,11 +784,12 @@ enum np_payload_connect_stats_connection_type_e {
 enum np_payload_connection_info_e {
     NP_PAYLOAD_CONNECTION_INFO_TYPE              = 1, // uint8_t connection type see 
     NP_PAYLOAD_CONNECTION_INFO_DURATION          = 2, // duration in milliseconds
-    NP_PAYLOAD_CONNECTION_INFO_PACKETS_SENT      = 3, // uint32_t
-    NP_PAYLOAD_CONNECTION_INFO_PACKETS_RECEIVED  = 4, // uint32_t
-    NP_PAYLOAD_CONNECTION_INFO_BYTES_SENT        = 5, // uint32_t
-    NP_PAYLOAD_CONNECTION_INFO_BYTES_RECEIVED    = 6, // uint32_t
-    NP_PAYLOAD_CONNECTION_INFO_CLIENT_IP         = 7  // uint32_t ipv4 in network byte order
+    NP_PAYLOAD_CONNECTION_INFO_SENT_BYTES        = 3, // uint32_t
+    NP_PAYLOAD_CONNECTION_INFO_SENT_PACKETS      = 4, // uint32_t
+    NP_PAYLOAD_CONNECTION_INFO_RECEIVED_BYTES    = 5, // uint32_t
+    NP_PAYLOAD_CONNECTION_INFO_RECEIVED_PACKETS  = 6, // uint32_t
+    NP_PAYLOAD_CONNECTION_INFO_CLIENT_IP         = 7, // uint32_t ipv4 in network byte order
+    NP_PAYLOAD_CONNECTION_INFO_DEVICE_IP         = 8  // uint32_t ipv4 in network byte order
 };
 
 /*****************************************************************************/
