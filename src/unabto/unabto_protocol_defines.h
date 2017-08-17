@@ -694,17 +694,18 @@ enum np_payload_type_e {
 #define NP_PAYLOAD_STATS_TYPE_DEVICE_ATTACH_FAIL              7
 #define NP_PAYLOAD_STATS_TYPE_DEVICE_STREAM_CLOSE             8
 
-/*****************************************************************************/
-/* Connect stats payload */
-/* The connect stats payload data has the following layout:
-*      +-----+----------------------------------------------------------------+
-*      |  +0 |  Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)              |
-*      +-----+-----+----------------------------------------------------------+
-*      |  +4 |  +0 |  Version                                                 |
-*      +-----+-----+----------------------------------------------------------+
-*      |  +5 |  +1 |  Connection type                                         |
-*      +-----+-----+----------------------------------------------------------+
-*/
+/*****************************************************************************
+ * Connect stats payload *
+ * Deprecated use connection info payload instead
+ * The connect stats payload data has the following layout:
+ *      +-----+----------------------------------------------------------------+
+ *      |  +0 |  Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)              |
+ *      +-----+-----+----------------------------------------------------------+
+ *      |  +4 |  +0 |  Version                                                 |
+ *      +-----+-----+----------------------------------------------------------+
+ *      |  +5 |  +1 |  Connection type                                         |
+ *      +-----+-----+----------------------------------------------------------+
+ */
 
 #define NP_PAYLOAD_CONNECT_STATS_BYTELENGTH   6  ///< size of a connect stats payload
 
@@ -745,7 +746,7 @@ enum np_payload_connect_stats_connection_type_e {
 
 /*****************************************************************************
 * Connection stats payload *
-* Deprecated
+* Deprecated use connection info payload instead
 * The connection stats payload data has the following layout:
 *      +-----+----------------------------------------------------------------+
 *      |  +0 |  Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)              |
@@ -788,8 +789,8 @@ enum np_payload_connection_info_e {
     NP_PAYLOAD_CONNECTION_INFO_SENT_PACKETS      = 4, // uint32_t
     NP_PAYLOAD_CONNECTION_INFO_RECEIVED_BYTES    = 5, // uint32_t
     NP_PAYLOAD_CONNECTION_INFO_RECEIVED_PACKETS  = 6, // uint32_t
-    NP_PAYLOAD_CONNECTION_INFO_CLIENT_IP         = 7, // uint32_t ipv4 in network byte order
-    NP_PAYLOAD_CONNECTION_INFO_DEVICE_IP         = 8  // uint32_t ipv4 in network byte order
+    NP_PAYLOAD_CONNECTION_INFO_CLIENT_IP         = 7, // uint32_t public ipv4 in network byte order
+    NP_PAYLOAD_CONNECTION_INFO_DEVICE_IP         = 8  // uint32_t public ipv4 in network byte order
 };
 
 /*****************************************************************************/
