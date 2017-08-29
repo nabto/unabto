@@ -77,7 +77,7 @@ static char* default_hosts[] = { "127.0.0.1", "localhost", 0 };
 #define AMP_MAX_DEVICE_NAME_LENGTH 50
 static char device_name[AMP_MAX_DEVICE_NAME_LENGTH];
 static const char* device_product = "uNabto Video";
-static const char* device_icon = "img/video.png";
+static const char* device_icon = "assets/img/video.png";
 
 // PPKA (RSA fingerprint) access control
 static struct fp_acl_db fp_acl_db;
