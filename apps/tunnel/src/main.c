@@ -65,14 +65,25 @@ static bool nice_exit = false;
 #if HANDLE_SIGNALS && defined(WIN32)
 static HANDLE signal_event = NULL;
 #endif
-static struct fp_acl_db fp_acl_db;
-struct fp_mem_persistence fp_persistence_file;
 
 #if NABTO_ENABLE_EPOLL
 static bool useSelectBased = false;
 #endif
 
 static char* default_hosts[] = { "127.0.0.1", "localhost", 0 };
+
+// AMP video client
+#define AMP_DEVICE_NAME_DEFAULT "Tunnel"
+#define AMP_MAX_DEVICE_NAME_LENGTH 50
+static char device_name[AMP_MAX_DEVICE_NAME_LENGTH];
+static const char* device_product = "uNabto Video";
+static const char* device_icon = "assets/img/video.png";
+
+// PPKA (RSA fingerprint) access control
+static struct fp_acl_db fp_acl_db;
+struct fp_mem_persistence fp_persistence_file;
+#define REQUIRES_GUEST FP_ACL_PERMISSION_NONE
+#define REQUIRES_OWNER FP_ACL_PERMISSION_ADMIN
 
 enum {
     ALLOW_PORT_OPTION = 1,
@@ -494,6 +505,7 @@ int main(int argc, char** argv)
     educate_user();
     platform_checks();
     acl_init();
+    snprintf(device_name, sizeof(device_name), AMP_DEVICE_NAME_DEFAULT);
     
 #if NABTO_ENABLE_EPOLL
     unabto_epoll_init();
@@ -598,6 +610,27 @@ bool tunnel_allow_connection(const char* host, int port) {
     return allow;
 }
 
+int copy_buffer(unabto_query_request* read_buffer, uint8_t* dest, uint16_t bufSize, uint16_t* len) {
+    uint8_t* buffer;
+    if (!(unabto_query_read_uint8_list(read_buffer, &buffer, len))) {
+        return AER_REQ_TOO_SMALL;
+    }
+    if (*len > bufSize) {
+        return AER_REQ_TOO_LARGE;
+    }
+    memcpy(dest, buffer, *len);
+    return AER_REQ_RESPONSE_READY;
+}
+
+int copy_string(unabto_query_request* read_buffer, char* dest, uint16_t destSize) {
+    uint16_t len;
+    int res = copy_buffer(read_buffer, (uint8_t*)dest, destSize-1, &len);
+    if (res != AER_REQ_RESPONSE_READY) {
+        return res;
+    }
+    dest[len] = 0;
+    return AER_REQ_RESPONSE_READY;
+}
 
 int write_string(unabto_query_response* write_buffer, const char* string) {
     return unabto_query_write_uint8_list(write_buffer, (uint8_t *)string, strlen(string));
@@ -610,16 +643,26 @@ application_event_result application_event(application_request* request,
     NABTO_LOG_INFO(("Nabto application_event: %u", request->queryId));
     
     if (request->queryId == 10000) {
-        // allow using the standard AMP clients to simplify pairing (AMP get_public_device_info.json)
-        if (!write_string(query_response, "Tunnel")) return AER_REQ_RSP_TOO_LARGE;
-        if (!write_string(query_response, "Tunnel")) return AER_REQ_RSP_TOO_LARGE;
-        if (!write_string(query_response, "")) return AER_REQ_RSP_TOO_LARGE;
+        // AMP get_public_device_info.json
+        if (!write_string(query_response, device_name)) return AER_REQ_RSP_TOO_LARGE;
+        if (!write_string(query_response, device_product)) return AER_REQ_RSP_TOO_LARGE;
+        if (!write_string(query_response, device_icon)) return AER_REQ_RSP_TOO_LARGE;
         if (!unabto_query_write_uint8(query_response, fp_acl_is_pair_allowed(request))) return AER_REQ_RSP_TOO_LARGE;
         if (!unabto_query_write_uint8(query_response, fp_acl_is_user_paired(request))) return AER_REQ_RSP_TOO_LARGE; 
         if (!unabto_query_write_uint8(query_response, fp_acl_is_user_owner(request))) return AER_REQ_RSP_TOO_LARGE;
         return AER_REQ_RESPONSE_READY;
         
+    } else if (request->queryId == 10010) {
+        int res;
+        // AMP set_device_info.json
+        if (!fp_acl_is_request_allowed(request, REQUIRES_OWNER)) return AER_REQ_NO_ACCESS;
+        res = copy_string(query_request, device_name, sizeof(device_name));
+        if (res != AER_REQ_RESPONSE_READY) return res;
+        if (!write_string(query_response, device_name)) return AER_REQ_RSP_TOO_LARGE;
+        return AER_REQ_RESPONSE_READY;
+        
     } else if (request->queryId >= 11000 && request->queryId < 12000) {
+        // PPKA access control
         return fp_acl_ae_dispatch(11000, request, query_request, query_response);
         
     } else {
