@@ -33,7 +33,7 @@ function start() {
         mkdir -p $UNABTO_TUNNEL_HOMEDIR
     fi
     chown -R $UNABTO_TUNNEL_USER $UNABTO_TUNNEL_HOMEDIR
-    start-stop-daemon -d $UNABTO_TUNNEL_HOMEDIR -b -c $UNABTO_TUNNEL_USER -m -p $PIDFILE --exec $EXEC --start -- $EXEC -d $UNABTO_TUNNEL_DEVICE_ID -s -k $UNABTO_TUNNEL_DEVICE_KEY --allow-port=$UNABTO_TUNNEL_PORT --allow-host=$UNABTO_TUNNEL_HOST
+    start-stop-daemon -d $UNABTO_TUNNEL_HOMEDIR -b -c $UNABTO_TUNNEL_USER -m -p $PIDFILE --exec $EXEC --start -- -d $UNABTO_TUNNEL_DEVICE_ID -s -k $UNABTO_TUNNEL_DEVICE_KEY --allow-port=$UNABTO_TUNNEL_PORT --allow-host=$UNABTO_TUNNEL_HOST
 }
 
 function restart() {
