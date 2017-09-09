@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# init script to start the unabto_tunnel service
+#
+# chkconfig:
+# description: unabto_tunnel service
+#
+# processname: unabto_tunnel
+# config: /etc/unabto_tunnel.conf
+# pidfile: /var/run/unabto_tunnel.pid
+
+### BEGIN INIT INFO
+# Provides: unabto_tunnel
+# Required-Start: $network
+# Required-Stop: $network
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Starts/stops the unabto_tunnel service
+# Description: The unabto_tunnel service acts as a Nabto reverse proxy for TCP services
+### END INIT INFO
+
+PIDFILE=/var/run/unabto_tunnel.pid
+EXEC=/usr/bin/unabto_tunnel
+
+source /etc/unabto_tunnel.conf
+
+function stop() {
+    start-stop-daemon -p $PIDFILE --stop --retry=TERM/30/KILL/5
+}
+
+function start() {
+    if [ ! -d $UNABTO_TUNNEL_HOMEDIR ]; then
+        mkdir -p $UNABTO_TUNNEL_HOMEDIR
+    fi
+    chown -R $UNABTO_TUNNEL_USER $UNABTO_TUNNEL_HOMEDIR
+    start-stop-daemon -d $UNABTO_TUNNEL_HOMEDIR -b -c $UNABTO_TUNNEL_USER -m -p $PIDFILE --exec $EXEC --start -- $EXEC -d $UNABTO_TUNNEL_DEVICE_ID -s -k $UNABTO_TUNNEL_DEVICE_KEY --allow-port=$UNABTO_TUNNEL_PORT --allow-host=$UNABTO_TUNNEL_HOST
+}
+
+function restart() {
+    stop
+    sleep 1
+    start
+}
+
+case "$1" in
+    start)
+   start
+   ;;
+
+    stop)
+   stop
+   ;;
+    restart)
+   restart
+   ;;
+    *)
+   echo "Usage $0 (start|stop|restart)"
+   exit 1
+   ;;
+esac
