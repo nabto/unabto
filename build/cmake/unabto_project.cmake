@@ -48,6 +48,9 @@ set(unabto_link_libraries
 
 )
 
+# set to 1 if a module relies on asm
+set(unabto_use_asm 0)
+
 # Detect crypto suite
 CHECK_INCLUDE_FILES (openssl/rand.h HAVE_SYSTEM_OPENSSL_RANDOM_H)
 CHECK_INCLUDE_FILES (openssl/evp.h HAVE_SYSTEM_OPENSSL_EVP_H)
@@ -124,6 +127,7 @@ if (UNABTO_RANDOM_MODULE MATCHES dummy)
   list(APPEND unabto_src ${unabto_module_random_dummy_src})
 elseif(UNABTO_RANDOM_MODULE MATCHES openssl_armv4)
   list(APPEND unabto_src ${unabto_module_random_openssl_minimal_armv4_src})
+  set(unabto_use_asm 1)
 elseif(UNABTO_RANDOM_MODULE MATCHES openssl)
   list(APPEND unabto_src ${unabto_module_openssl_random_src})
   
@@ -155,6 +159,7 @@ elseif(UNABTO_CRYPTO_MODULE MATCHES libtomcrypt)
   endif()
 elseif(UNABTO_CRYPTO_MODULE MATCHES openssl_armv4)
   list(APPEND unabto_src ${unabto_module_crypto_openssl_minimal_armv4_src})
+  set(unabto_use_asm 1)
 elseif(UNABTO_CRYPTO_MODULE MATCHES openssl)
   list(APPEND unabto_src ${unabto_module_crypto_openssl_src})
   list(APPEND unabto_link_libraries ${OPENSSL_CRYPTO_LIBRARY})
@@ -267,6 +272,10 @@ if (APPLE OR IOS)
     ${unabto_module_timers_unix_src}
     )
   list(APPEND unabto_link_libraries pthread m)
+endif()
+
+if (unabto_use_asm)
+  enable_language(ASM)
 endif()
 
 message(STATUS "Configuration of uNabto")

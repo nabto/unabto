@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
-project(unabto-tunnel C ASM)
+project(unabto-tunnel C)
+
 
 set(UNABTO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 

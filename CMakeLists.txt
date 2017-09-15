@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(unabto)
+project(unabto C)
 
 option(UNABTO_ENABLE_TESTS "Enable testing of unabto, disable this if you are crosscompiling" ON)
 
