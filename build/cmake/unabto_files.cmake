@@ -143,6 +143,14 @@ set (unabto_module_stateful_push_service_src
   ${UNABTO_MODULES_SRC_DIR}/stateful_push_service/stateful_push_service.c)
 source_group(modules\\stateful_push_service FILES ${unabto_module_stateful_push_service_src})
 
+# modules/network/tcp
+set (unabto_module_tcp_unix_src
+  ${UNABTO_MODULES_SRC_DIR}/network/tcp/unix/unabto_tcp.c)
+source_group(modules\\tcp FILES ${unabto_module_tcp_unix_src})
+set (unabto_module_tcp_win32_src
+  ${UNABTO_MODULES_SRC_DIR}/network/tcp/windows/unabto_tcp.c)
+source_group(modules\\tcp FILES ${unabto_module_tcp_win32_src})
+
 # modules/coap
 set (unabto_module_coap_src
   ${UNABTO_MODULES_SRC_DIR}/coap/er-coap-13/er-coap-13-engine.c
