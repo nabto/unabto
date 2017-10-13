@@ -1,0 +1,1 @@
+#define NABTO_ENABLE_STREAM 0
