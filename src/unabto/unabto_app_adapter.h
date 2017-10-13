@@ -125,7 +125,8 @@ application_event_result framework_event(naf_handle               handle,
  * buffer.
  * This function will call the #application_poll() and
  * #application_poll_query() functions implemented by the user/customer.
- * @param buf      the buffer including all nabto headers
+ * @param buf      the output buffer including all nabto headers 
+ *                 encrypted and ready for transmission
  * @param size     size of the buffer in bytes
  * @param olen     pointer to buffer that will receive the length of output
  * @param con      pointer to buffer that will receive the connection to

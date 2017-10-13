@@ -53,7 +53,7 @@ void nabto_message_event(message_event* event, uint16_t ilen);
  * To be called to send an asynchroneous response from previously queued requests.
  * @return     true if a message has been sent.
  */
-bool nabto_message_remote_poll(void);
+bool nabto_message_async_response_poll(void);
 #endif
 
 #ifdef __cplusplus

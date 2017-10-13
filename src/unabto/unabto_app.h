@@ -104,6 +104,10 @@ typedef enum {
  * The size of the writeBuffer is limited by the config parameter
  * NABTO_RESPONSE_MAX_SIZE. The maximum request size is limited by the
  * config parameter NABTO_REQUEST_MAX_SIZE.
+ *
+ * If the application model is async you will need to copy the needed
+ * request parameters into the scope of your application and then
+ * return AER_REQ_ACCEPTED.
  */
 application_event_result application_event(application_request* applicationRequest, unabto_query_request* readBuffer, unabto_query_response* writeBuffer);
 
@@ -121,18 +125,21 @@ bool application_poll_query(application_request** applicationRequest);
 /**
  * Retrieve the response from a queued request.
  * @param appreq  the application request being responded to (from #application_poll_query)
- * @param r_b     buffer, holds the parameters
  * @param w_b     buffer, to retrieve the response message
  * @return        the result, see #application_event_result
  *
  * Must be called only after #application_poll_query returns true and then with appreq retrieved there.
  *
- * The application must release/delete its internal ressouce holding the requested request.
+ * The application must release/delete its internal ressouce holding
+ * the requested request.
  */
-application_event_result application_poll(application_request* applicationRequest, unabto_query_request* readBuffer, unabto_query_response* writeBuffer);
+application_event_result application_poll(application_request* applicationRequest, unabto_query_response* writeBuffer);
 
 /**
- * Drop the queued request - the framework has discarded it.
+ * Drop the queued request - the framework has discarded it.  This
+ * function is called from the framework, the implementor needs to
+ * implement this function such that a new query can take the opaque
+ * application_request pointer when this function has returned.
  */
 void application_poll_drop(application_request* applicationRequest);
 
@@ -147,7 +154,6 @@ void application_poll_drop(application_request* applicationRequest);
  * @param maximumSize  the largest message that can be delivered
  * @return             pointer to global piggyback message (or 0)
  *
- * Find example in projects/consulo/src/consulo_application.c
  */
 unabto_buffer* get_event_buffer2(size_t maximumSize);
 #endif

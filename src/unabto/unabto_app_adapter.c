@@ -657,14 +657,14 @@ bool framework_event_poll(uint8_t* buf, uint16_t size, uint16_t* olen, nabto_con
 
     ret = framework_poll_event(&entry->data, buf, size, olen);
 
-  if (ret != AER_REQ_RESPONSE_READY) {
-      // pass the result to caller to become an exception
-      if (!framework_write_exception(ret, &entry->data.header, buf, size, olen)) {
+    if (ret != AER_REQ_RESPONSE_READY) {
+        // pass the result to caller to become an exception
+        if (!framework_write_exception(ret, &entry->data.header, buf, size, olen)) {
             LOG_APPERR_1(entry, "Response dropped because an exception packet with error code %i couldn't be generated", (int)ret);
             goto drop_poll;
-      }
-  }
-
+        }
+    }
+    
     *con = entry->data.connection;
     framework_release_handle(handle);
     LOG_APPREQ_BYTES("framework_event_poll", "true", entry, *olen);
@@ -872,7 +872,7 @@ application_event_result framework_poll_event(struct naf_handle_s *handle,
   /* Call application */
     NABTO_LOG_TRACE(("APPREQ application_poll: client=" PRI_client_id_q, CLIENT_ID_Q_ARGH(*handle)));
 
-    res = application_poll(&handle->applicationRequest, NULL, &w_b);
+    res = application_poll(&handle->applicationRequest, &w_b);
     NABTO_LOG_TRACE(("APPREQ application_poll: result=%i %" PRItext, res, result_s(res)));
 
     if (res != AER_REQ_RESPONSE_READY)

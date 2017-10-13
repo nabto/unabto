@@ -326,7 +326,7 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
 #endif
 
 #if NABTO_ENABLE_CONNECTIONS
-bool nabto_message_remote_poll(void) {
+bool nabto_message_async_response_poll(void) {
     uint16_t         olen;
     nabto_connect*   con;
     bool             result = false;

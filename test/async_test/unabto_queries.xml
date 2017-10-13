@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<unabto_queries 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://www.nabto.com/unabto/query_model.xsd">
+
+  <query name="async_request" description="Make an async request" id="1">
+    <request>
+      <parameter name="expire_ms" type="uint32"/>
+    </request>
+    <response>
+      <parameter name="request_duration" type="int32"/>
+    </response>
+  </query>
+</unabto_queries>
