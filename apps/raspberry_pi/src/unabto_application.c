@@ -155,7 +155,7 @@ bool application_poll_query(application_request** appreq)
 }
 
 // Retrieve the response from a queued request
-application_event_result application_poll(application_request* request, unabto_query_request* r_b, unabto_query_response* w_b)
+application_event_result application_poll(application_request* request, unabto_query_response* w_b)
 {
     application_event_result res;
 

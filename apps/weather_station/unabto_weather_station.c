@@ -228,7 +228,7 @@ bool application_poll_query(application_request** appreq)
     return false;
 }
 
-application_event_result application_poll(application_request* request, unabto_query_request* r_b, unabto_query_response* w_b)
+application_event_result application_poll(application_request* request, unabto_query_response* w_b)
 {
     application_event_result res = AER_REQ_SYSTEM_ERROR;
     if (saved_app_req == 0) {
@@ -236,9 +236,7 @@ application_event_result application_poll(application_request* request, unabto_q
     } else if (request != saved_app_req) {
         NABTO_LOG_FATAL(("queued request and parameters doesn't match"));
     } else {
-        UNABTO_ASSERT(r_b == 0);
-        r_b = &saved_params.r_b;
-        UNABTO_ASSERT(r_b != 0);
+        unabto_query_request* r_b = &saved_params.r_b;
         res = weather_station_application(saved_app_req, r_b, w_b);
         PGR_LOG_APPREQ_RES(application_poll, (int)res);
         // hand the saved application request to the caller with the resulting response

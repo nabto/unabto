@@ -675,7 +675,7 @@ bool application_poll_query(application_request** applicationRequest) {
     return false;
 }
 
-application_event_result application_poll(application_request* applicationRequest, unabto_query_request* readBuffer, unabto_query_response* writeBuffer) {
+application_event_result application_poll(application_request* applicationRequest, unabto_query_response* writeBuffer) {
     return AER_REQ_SYSTEM_ERROR;
 }
 
