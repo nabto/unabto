@@ -94,7 +94,7 @@ typedef enum {
  * @return        the result
  * - AER_REQ_RESPONSE_READY, the response must be written in the w_b
  * - AER_REQ_INV_QUERY_ID, the queryId is invalid
- * - AER_REQ_QUEUED, w_b isn't used and the application allocates memory for building the response internally.
+ * - AER_REQ_ACCEPTED, w_b isn't used and the application allocates memory for building the response internally.
  * - the remaining results values are sent to the Client as an exception (w_b is overridden by the caller).
  *
  * WARNING: The read and write buffer use a shared input and output
@@ -107,7 +107,9 @@ typedef enum {
  *
  * If the application model is async you will need to copy the needed
  * request parameters into the scope of your application and then
- * return AER_REQ_ACCEPTED.
+ * return AER_REQ_ACCEPTED. The application_request* pointer value is
+ * used in subsequent requests and is used as the identifier for the
+ * specific request.
  */
 application_event_result application_event(application_request* applicationRequest, unabto_query_request* readBuffer, unabto_query_response* writeBuffer);
 
@@ -130,7 +132,7 @@ bool application_poll_query(application_request** applicationRequest);
  *
  * Must be called only after #application_poll_query returns true and then with appreq retrieved there.
  *
- * The application must release/delete its internal ressouce holding
+ * The application must release/delete its internal resource holding
  * the requested request.
  */
 application_event_result application_poll(application_request* applicationRequest, unabto_query_response* writeBuffer);
