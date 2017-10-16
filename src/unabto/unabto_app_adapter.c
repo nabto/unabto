@@ -171,13 +171,12 @@ struct queue_entry_s {
 
 /** The FIFO queue */
 static NABTO_THREAD_LOCAL_STORAGE queue_entry queue[NABTO_APPREQ_QUEUE_SIZE];
+static int queue_size = 0;
 
-#if NABTO_APPREQ_QUEUE_SIZE > 1
 /** The first application ressource that may be being handled by the application */
 static NABTO_THREAD_LOCAL_STORAGE queue_entry* queue_first_used = queue;
 /** The first application ressource candidate to receive a new request from a client */
 static NABTO_THREAD_LOCAL_STORAGE queue_entry* queue_next_free = queue;
-#endif
 /** Tell whether last operation was receiving a request or handling a request */
 static NABTO_THREAD_LOCAL_STORAGE bool queueLastAdd = false;
 
@@ -188,12 +187,10 @@ static NABTO_THREAD_LOCAL_STORAGE bool queueLastAdd = false;
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #define queue_index(p) (((queue_entry*)(p)) - queue)
 #define PRI_index PRIptrdiff
-#if NABTO_APPREQ_QUEUE_SIZE > 1
 #define queue_inc(p) \
         (p)++; \
         if ((p) >= queue + NABTO_APPREQ_QUEUE_SIZE) \
             (p) = queue;
-#endif
 #define CLIENT_ID_ARGH(h)    CLIENT_ID_ARGS((h).applicationRequest.clientId, (h).header.seq)
 #define CLIENT_ID_Q_ARGH(h)  CLIENT_ID_Q_ARGS((h).applicationRequest.clientId, (h).header.seq, (h).applicationRequest.queryId)
 #endif //DOXYGEN_SHOULD_SKIP_THIS
@@ -201,7 +198,6 @@ static NABTO_THREAD_LOCAL_STORAGE bool queueLastAdd = false;
 /****************************/
 /* Public API of FIFO queue */
 /****************************/
-#if NABTO_APPREQ_QUEUE_SIZE > 1
 /** Initialize queue */
 #define queue_init()  \
         memset(queue, 0, sizeof(queue)); \
@@ -228,26 +224,6 @@ static NABTO_THREAD_LOCAL_STORAGE bool queueLastAdd = false;
         queue_inc(queue_next_free); \
         queueLastAdd = true; /* now q is full if queue_first_used == queue_next_free */ \
         NABTO_LOG_TRACE(("APPREQ queue_push: next_free inc'd to %" PRI_index, queue_index(queue_next_free)));
-#else //NABTO_APPREQ_QUEUE_SIZE == 1
-/** Initialize queue */
-#define queue_init()  \
-        memset(queue, 0, sizeof(queue)); \
-        queueLastAdd = false;
-/** Returns true if queue is empty. */
-#define queue_empty()     (!queueLastAdd)
-/** Returns true if queue is full. */
-#define queue_full()      (queueLastAdd)
-/** Returns (struct naf_handle_s*) top element in queue. NULL if queue is empty. */
-#define queue_top_elem()  (queue_empty() ? NULL : &queue[0].data)
-/** Returns top of queue. If the queue is empty the result is undefined. */
-#define queue_top()       (queue) /* UNABTO_ASSERT(!queue_empty()) */
-/** Returns a new entry. Returns NULL if queue is full. */
-#define queue_alloc()     (queue_full() ? NULL : queue)
-/** Removes the top element from the queue. If the queue is empty the result is undefined. */
-#define queue_pop()       queueLastAdd = false; /* now q is empty */
-/** Advances last element in the queue. If the queue is full the result is undefined. */
-#define queue_push()      queueLastAdd = true; /* now q is full */
-#endif //NABTO_APPREQ_QUEUE_SIZE == 1
 /** Find the queue entry holding the given handle */
 #define queue_find_entry(h) ((queue_entry*)(h))
 /** Function prototype for callback function called from queue_enum.
@@ -277,7 +253,7 @@ static text result_s(application_event_result result);
 #if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_TRACE)
 static void log_app_state(char *state);
 static text state_s(queue_state state);
-#if NABTO_APPREQ_QUEUE_SIZE > 1
+
 #define LOG_APPREQ_ERROR(w,e) \
        NABTO_LOG_TRACE(("APPREQ " w ": returns '" e "' size=%i", NABTO_APPREQ_QUEUE_SIZE))
 #define LOG_APPREQ_STATE(w,s,p) \
@@ -305,27 +281,6 @@ static text state_s(queue_state state);
        NABTO_LOG_FATAL(("SW error: handle should be in 'WAIT' state. rec=%" PRI_index \
                         " is state=%" PRItext, \
                         queue_index(p), state_s((p)->state)))
-#else //NABTO_APPREQ_QUEUE_SIZE == 1
-#define LOG_APPREQ_ERROR(w,e) \
-       NABTO_LOG_TRACE(("APPREQ " w ": returns '" e "'"))
-#define LOG_APPREQ_STATE(w,s,p) \
-       NABTO_LOG_TRACE(("APPREQ " w ": returns '" s "'"))
-#define LOG_APPREQ_BYTES(w,r,p,s) \
-       NABTO_LOG_TRACE(("APPREQ " w ": returns " r " sending %" PRIu16 " bytes", (s)))
-#define LOG_APPREQ_WHERE(w,p) \
-       NABTO_LOG_TRACE(("APPREQ " w))
-#define LOG_APPREQ_LEAVE(w,r,h) \
-       NABTO_LOG_TRACE(("APPREQ " w ": returns %" PRItext " with state %" PRItext, \
-                        result_s(r), state_s(queue_find_entry(h)->state)))
-#define LOG_APPREQ_QUEUE() { \
-       char state[NABTO_APPREQ_QUEUE_SIZE * 8]; /* size + 1 of longest string returned by state_s */ \
-       log_app_state(state); \
-       NABTO_LOG_TRACE(("APPREQ: (%s)", state)); \
-    }
-#define LOG_APPREQ_EWAIT(w,p) \
-       NABTO_LOG_FATAL(("SW error: handle should be in 'WAIT' state. state=%" PRItext, \
-                        state_s((p)->state)))
-#endif
 #else // NABTO_LOG_ALL == 0
 #define LOG_APPREQ_ERROR(w,e)
 #define LOG_APPREQ_STATE(w,s,p)
@@ -345,19 +300,11 @@ static text state_s(queue_state state);
 #define LOG_APPREQ_EWAIT(w,p)
 #endif
 #if NABTO_ENABLE_LOGGING == 1
-#if NABTO_APPREQ_QUEUE_SIZE > 1
 #define LOG_APPERR_0(p,f)     NABTO_LOG_ERROR((f " [rec=%" PRI_index "]: client=" PRI_client_id, queue_index(p), CLIENT_ID_ARGH((p)->data)))
 #define LOG_APPERR_1(p,f,a)   NABTO_LOG_ERROR((f " [rec=%" PRI_index "]: client=" PRI_client_id, a, queue_index(p), CLIENT_ID_ARGH((p)->data)))
-#define LOG_APPERR_2(p,f,a,b) NABTO_LOG_ERROR((f " [rec=%" PRI_index "]: client=" PRI_client_id, a, b, queue_index(p), CLIENT_ID_ARGH((p)->data)))
-#else
-#define LOG_APPERR_0(p,f)     NABTO_LOG_ERROR((f ": client=" PRI_client_id, CLIENT_ID_ARGH((p)->data)))
-#define LOG_APPERR_1(p,f,a)   NABTO_LOG_ERROR((f ": client=" PRI_client_id, a, CLIENT_ID_ARGH((p)->data)))
-#define LOG_APPERR_2(p,f,a,b) NABTO_LOG_ERROR((f ": client=" PRI_client_id, a, b, CLIENT_ID_ARGH((p)->data)))
-#endif
 #else // NABTO_ENABLE_LOGGING == 0
 #define LOG_APPERR_0(p,f)     NABTO_LOG_ERROR((f))
 #define LOG_APPERR_1(p,f,a)   NABTO_LOG_ERROR((f,a))
-#define LOG_APPERR_2(p,f,a,b) NABTO_LOG_ERROR((f,a,b))
 #endif
 #endif //NABTO_APPLICATION_EVENT_MODEL_ASYNC
 
@@ -1057,7 +1004,6 @@ bool find_request_cb(struct naf_handle_s* entry, void * data)
  */
 queue_entry* find_any_request_in_queue(void)
 {
-#if NABTO_APPREQ_QUEUE_SIZE > 1
     queue_entry* first_pending;
     queue_entry* first_running;
     queue_entry* entry;
@@ -1089,10 +1035,6 @@ queue_entry* find_any_request_in_queue(void)
     if (first_pending)
         return first_pending;
     return NULL;
-#else //NABTO_APPREQ_QUEUE_SIZE == 1
-    UNABTO_ASSERT(!queue_empty());
-    return queue_top();
-#endif
 }
 #endif
 
@@ -1105,7 +1047,6 @@ queue_entry* find_any_request_in_queue(void)
  * Returns true if every call to proc returned true. */
 bool queue_enum(queue_enum_proc proc, void *data)
 {
-#if NABTO_APPREQ_QUEUE_SIZE > 1
     queue_entry* entry;
     if (queueLastAdd) {
         //At least one record in queue.
@@ -1142,14 +1083,6 @@ bool queue_enum(queue_enum_proc proc, void *data)
             queue_inc(entry);
         }
     }
-#else //NABTO_APPREQ_QUEUE_SIZE == 1
-    if (!queue_empty()) {
-         // Let caller determine whether to proceed.
-         if (!(*proc)(&queue[0].data, data)) {
-             return false;
-         }
-    }
-#endif
     return true;
 }
 #endif

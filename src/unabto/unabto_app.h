@@ -141,7 +141,9 @@ application_event_result application_poll(application_request* applicationReques
  * Drop the queued request - the framework has discarded it.  This
  * function is called from the framework, the implementor needs to
  * implement this function such that a new query can take the opaque
- * application_request pointer when this function has returned.
+ * application_request pointer when this function has returned. This
+ * function is called exactly once for each time AER_REQ_ACCEPTED is
+ * returned from the application_event function.
  */
 void application_poll_drop(application_request* applicationRequest);
 
