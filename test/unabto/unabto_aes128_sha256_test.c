@@ -50,7 +50,7 @@ static const uint8_t buffer[164] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x
 
 void truncated_hmac_sha256_verify_integrity_test(bool *a)
 {
-  *a = truncated_hmac_sha256_verify_integrity(key, 32, buffer, 164, integrity);
+  *a = unabto_truncated_hmac_sha256_verify_integrity(key, 32, buffer, 164, integrity);
 }
 
 int integrity_verify_timing(void)
