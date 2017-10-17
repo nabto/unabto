@@ -4,7 +4,6 @@
 
 struct unabto_tcp_socket {
     int socket;
-    struct sockaddr_in host;
 };
 
 #endif //_UNABTO_TCP_UNIX_H_
