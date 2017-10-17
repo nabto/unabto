@@ -1,5 +1,5 @@
-#ifndef _UNABTO_TCP_UNIX_H_
-#define _UNABTO_TCP_UNIX_H_
+#ifndef _UNABTO_TCP_H_
+#define _UNABTO_TCP_H_
 #include <netinet/in.h>
 
 struct unabto_tcp_socket {
