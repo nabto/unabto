@@ -1,5 +1,6 @@
 #include <modules/network/tcp/unabto_tcp.h>
 #include <modules/network/tcp/windows/unabto_tcp_windows.h>
+#include <modules/network/winsock/unabto_winsock.h>
 
 #include <winsock2.h>
 #include <windows.h>
@@ -73,13 +74,11 @@ enum unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock){
 
 enum unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock){
 	int flags = 1;
-	WSADATA wsa;
 
-	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-	{
-		NABTO_LOG_ERROR(("WSAStartup failed with: %d", WSAGetLastError()));
-		return UTS_FAILED;
-	}
+    if(!unabto_winsock_initialize()){
+        NABTO_LOG_ERROR(("unabto_winsock_initialize failed"));
+        return UTS_FAILED;
+    }
     sock->socket = socket(AF_INET, SOCK_STREAM, 0);
     if (setsockopt(sock->socket, IPPROTO_TCP, TCP_NODELAY, (char *) &flags, sizeof(int)) != 0) {
         NABTO_LOG_ERROR(("Could not set socket option TCP_NODELAY with error: %d", WSAGetLastError()));

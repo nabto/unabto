@@ -16,6 +16,8 @@ typedef SOCKET nabto_socket_t;
 extern "C" {
 #endif
 
+static bool unabto_winsock_initialize(void);
+
 uint16_t nabto_read_events(nabto_socket_t* sockets, uint16_t maxSockets, int timeout);
 
 #ifdef __cplusplus
