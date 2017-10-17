@@ -11,7 +11,7 @@
 
 #define MSG_NOSIGNAL 0
 
-enum unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, const size_t len, size_t* read) {
+unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, const size_t len, size_t* read) {
     int status;
 
 	status = recv(sock->socket, buf, len, 0);
@@ -35,7 +35,7 @@ enum unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf
     return UTS_OK;
 }
 
-enum unabto_tcp_status unabto_tcp_write(struct unabto_tcp_socket* sock, const void* buf, const size_t len, size_t* written) {
+unabto_tcp_status unabto_tcp_write(struct unabto_tcp_socket* sock, const void* buf, const size_t len, size_t* written) {
     int status;
     NABTO_LOG_TRACE(("Writing %i bytes to tcp socket", len));
     status = send(sock->socket, (const char*)buf, len, MSG_NOSIGNAL);
@@ -55,7 +55,7 @@ enum unabto_tcp_status unabto_tcp_write(struct unabto_tcp_socket* sock, const vo
     return UTS_OK;
 }
 
-enum unabto_tcp_status unabto_tcp_close(struct unabto_tcp_socket* sock){
+unabto_tcp_status unabto_tcp_close(struct unabto_tcp_socket* sock){
     if (sock->socket == INVALID_SOCKET) {
         NABTO_LOG_ERROR(("trying to close invalid socket"));
     } else {
@@ -66,13 +66,13 @@ enum unabto_tcp_status unabto_tcp_close(struct unabto_tcp_socket* sock){
 }
 
 
-enum unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock){
+unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock){
     shutdown(sock->socket, SD_BOTH);
     return UTS_OK;
 }
 
 
-enum unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock){
+unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock){
 	int flags = 1;
 
     if(!unabto_winsock_initialize()){
@@ -88,15 +88,17 @@ enum unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock){
 }
 
 
-enum unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpoint *ep){
+unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpoint *ep){
     int status;
+    struct sockaddr_in host;
+
     memset(&sock->host,0,sizeof(struct sockaddr_in));
-    sock->host.sin_family = AF_INET;
-    sock->host.sin_addr.s_addr = htonl(ep->addr);
-    sock->host.sin_port = htons(ep->port);
+    host.sin_family = AF_INET;
+    host.sin_addr.s_addr = htonl(ep->addr);
+    host.sin_port = htons(ep->port);
     NABTO_LOG_INFO(("Connecting to %d.%d.%d.%d:%d ", MAKE_EP_PRINTABLE(*ep)));
     
-    status = connect(sock->socket, (struct sockaddr*)&sock->host, sizeof(struct sockaddr_in));
+    status = connect(sock->socket, (struct sockaddr*)&host, sizeof(struct sockaddr_in));
    
     if (status == 0) {
         return UTS_OK;
@@ -116,6 +118,6 @@ enum unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_
  * Windows does not have async connect,
  * and this function should never be used
  */
-enum unabto_tcp_status unabto_tcp_connect_poll(struct unabto_tcp_socket* sock){
+unabto_tcp_status unabto_tcp_connect_poll(struct unabto_tcp_socket* sock){
     return UTS_FAILED;
 }

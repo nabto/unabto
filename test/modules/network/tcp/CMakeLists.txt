@@ -14,6 +14,7 @@ set(src
 
 if (WIN32)
   list(APPEND src
+    ${unabto_module_winsock_src}
     ${unabto_module_tcp_win32_src}
     )
 else ()
