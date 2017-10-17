@@ -1,12 +1,13 @@
 #ifndef _UNABTO_TCP_H_
 #define _UNABTO_TCP_H_
-#include <unistd.h>
 #include <unabto/unabto_context.h>
 
 #ifdef WIN32
+#include <basetsd.h>
 #include "windows/unabto_tcp_windows.h"
 #else
 #include "unix/unabto_tcp_unix.h"
+#include <unistd.h>
 #endif
 
 enum unabto_tcp_status {
@@ -27,7 +28,7 @@ enum unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock);
 
 enum unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sockfd);
 
-enum unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpoint ep);
+enum unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpoint* ep);
 
 /* Polls if socket has been connected
  */

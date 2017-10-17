@@ -147,6 +147,7 @@ source_group(modules\\stateful_push_service FILES ${unabto_module_stateful_push_
 set (unabto_module_tcp_unix_src
   ${UNABTO_MODULES_SRC_DIR}/network/tcp/unix/unabto_tcp.c)
 source_group(modules\\tcp FILES ${unabto_module_tcp_unix_src})
+
 set (unabto_module_tcp_win32_src
   ${UNABTO_MODULES_SRC_DIR}/network/tcp/windows/unabto_tcp.c)
 source_group(modules\\tcp FILES ${unabto_module_tcp_win32_src})
