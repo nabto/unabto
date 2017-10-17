@@ -30,14 +30,10 @@
 extern "C" {
 #endif
 
-#if NABTO_APPLICATION_EVENT_MODEL_ASYNC
-
 // Check/correct consistency of configuration at compile time:
 #if NABTO_APPREQ_QUEUE_SIZE < 1
-#error The number of request ressources, NABTO_APPREQ_QUEUE_SIZE must be positive
+#warning The number of request ressources, NABTO_APPREQ_QUEUE_SIZE should be greater than 0.
 #endif
-
-#endif // NABTO_APPLICATION_EVENT_MODEL_ASYNC == 0
 
 /******************************************************************************/
 

@@ -63,7 +63,8 @@ bool build_and_send_packet(struct nabto_stream_s* stream, uint8_t type, uint32_t
 
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
 
-    if (send_and_encrypt_packet_con(con, data, size, ptr)) {
+    
+    if (send_and_encrypt_packet_con(con, buf, end, data, size, ptr - NP_PAYLOAD_HDR_BYTELENGTH)) {
         tcb->ackSent = ackToSend;
         stream->stats.sentPackets++;
         return true;

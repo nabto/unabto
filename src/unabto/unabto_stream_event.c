@@ -178,7 +178,7 @@ bool build_and_send_rst_packet(nabto_connect* con, uint16_t tag, struct nabto_wi
 
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
     
-    return send_and_encrypt_packet_con(con, 0, 0, ptr);
+    return send_and_encrypt_packet_con(con, buf, end, 0, 0, ptr - NP_PAYLOAD_HDR_BYTELENGTH);
 }
 
 void unabto_time_event_stream(void)
