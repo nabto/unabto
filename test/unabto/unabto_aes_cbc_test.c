@@ -56,7 +56,7 @@ bool aes_cbc_test(void)
     plaintext[16 + i] = 160 + i;
   }
 
-  if(!aes128_cbc_encrypt(key, plaintext, sizeof (plaintext)))
+  if(!unabto_aes128_cbc_encrypt(key, plaintext, sizeof (plaintext)))
   {
     NABTO_LOG_TRACE(("aes_cbc_encrypt failed"));
   }
@@ -67,7 +67,7 @@ bool aes_cbc_test(void)
     NABTO_LOG_INFO(("Aes cbc encryption failed"));
   }
 
-  if(!aes128_cbc_decrypt(key, ciphertext, sizeof (ciphertext)))
+  if(!unabto_aes128_cbc_decrypt(key, ciphertext, sizeof (ciphertext)))
   {
     NABTO_LOG_TRACE(("aes_cbc decrypt failed"));
   }
@@ -100,8 +100,8 @@ int aes_cbc_timing_test(void)
 
   while(!nabtoIsStampPassed(&future))
   {
-    aes128_cbc_encrypt(key, plaintext, sizeof (plaintext));
-    aes128_cbc_decrypt(key, plaintext, sizeof (plaintext));
+    unabto_aes128_cbc_encrypt(key, plaintext, sizeof (plaintext));
+    unabto_aes128_cbc_decrypt(key, plaintext, sizeof (plaintext));
     i++;
   }
 
