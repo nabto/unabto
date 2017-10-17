@@ -7,11 +7,20 @@ include(${UNABTO_ROOT}/build/cmake/unabto_project.cmake)
 
 set(src
   ${unabto_src}
-  ${unabto_module_tcp_win32_src}
   ${unabto_module_application_event_dummy_src}
   ${CMAKE_CURRENT_SOURCE_DIR}/unabto_tcp_test.c
   ${unabto_module_util_src}
 )
+
+if (WIN32)
+  list(APPEND src
+    ${unabto_module_tcp_windows_src}
+    )
+else ()
+  list(APPEND src
+    ${unabto_module_tcp_unix_src}
+    )
+endif()
 
 include_directories(
   ${unabto_include_directories}

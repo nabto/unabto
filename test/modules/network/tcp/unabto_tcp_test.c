@@ -1,6 +1,5 @@
 #include <modules/network/tcp/unabto_tcp.h>
 #include <unabto/unabto_context.h>
-#include <basetsd.h>
 
 
 int main(int argc, char** argv)
