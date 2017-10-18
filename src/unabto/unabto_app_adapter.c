@@ -22,12 +22,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-
-
-/************************************************/
-/* Local prototypes (both SYNC and ASYNC model) */
-/************************************************/
-
 /**
  * Try to handle application event the first time.
  * Initialize request data in handle and call #application_event().
@@ -52,42 +46,8 @@ static application_event_result framework_first_event(struct naf_handle_s*      
 static bool framework_get_async_response(struct naf_handle_s *handle);
 #endif
 
-#if NABTO_APPLICATION_EVENT_MODEL_ASYNC
-/**
- * Build/reconstruct the first part of the response (nabto packet header
- * and crypto payload header).
- * @param  buf     the start of destination buffer
- * @param  hdr     the nabto packet header stored in the application queue
- * @return         pointer to the end of the written header. NULL on error.
- */
-static uint8_t* reconstruct_header(uint8_t* buf, uint8_t* end, const nabto_packet_header * hdr);
-#endif
-
-#if NABTO_APPLICATION_EVENT_MODEL_ASYNC
-/**
- * Writes a exception packet into given buffer.
- * Returns true if the exception packet has been written to the buffer. In
- * that case buf will contain the response and olen the number of bytes
- * written to buf.
- * Returns false on error. In that case all buffers are unmodified. */
-static bool framework_write_exception(nabto_connect             *con,
-                                      application_event_result   code,
-                                      const nabto_packet_header *hdr,
-                                      uint8_t                   *buf,
-                                      uint8_t                   *end);
-#endif
-
-/******************************************************************/
-/* Logging of application request info (both SYNC and ASYNC model */
-/******************************************************************/
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-#define PRI_client_id_q         "%" PRIptr " ('%s'), req=%" PRIu16 ", queryId=%" PRIu32
-#define CLIENT_ID_Q_ARGS(c,s,q) (c), (c), (s), (q)
-#endif //DOXYGEN_SHOULD_SKIP_THIS
-
-
+// Store the state for requests.
 static NABTO_THREAD_LOCAL_STORAGE struct naf_handle_s handles[NABTO_APPREQ_QUEUE_SIZE];
-
 
 // query list of requests
 struct naf_handle_s* find_existing_request_handle(nabto_connect* con, uint16_t reqId);
@@ -167,7 +127,8 @@ void framework_event(struct naf_handle_s* handle,
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
 
     /* Set up a write buffer to write into iobuf. */
-    unabto_buffer_init(&w_buf, iobuf, (end - iobuf));
+    uint16_t availableForData = unabto_crypto_max_data(&con->cryptoctx, (uint16_t)(end - iobuf));
+    unabto_buffer_init(&w_buf, iobuf, MIN(availableForData, NABTO_RESPONSE_MAX_SIZE));
     unabto_query_response_init(&queryResponse, &w_buf);
 
     /* Set up a read buffer that reads from iobuf. */
@@ -261,17 +222,28 @@ bool framework_get_async_response(struct naf_handle_s *handle)
     application_event_result   res;
     uint8_t*                   buf = nabtoCommunicationBuffer;
     uint8_t*                   end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
+    nabto_connect*             con = handle->connection;
     ptr = buf;
     
     /* Write packet header and crypto payload header into buf. */
-    ptr = reconstruct_header(ptr, end, &handle->header);
-    if (!ptr) {
-        NABTO_LOG_ERROR(("buffer too small to contain reconstructed header."));
-        return AER_REQ_SYSTEM_ERROR;
+    ptr = nabto_wr_header(buf, end, &handle->header);
+    if (ptr == NULL) {
+        return false;
     }
+    add_flags(buf, NP_PACKET_HDR_FLAG_RESPONSE);
 
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, NULL, 0);
+    if (ptr == NULL) {
+        return false;
+    }
+    ptr += 2; // skip over crypto code
+    if (ptr > end) {
+        return false;
+    }
+    
     /* Set up a write buffer to write into buf (after crypto payload header). */
-    unabto_buffer_init(&w_buf, ptr, (int)(end - ptr));
+    uint16_t availableForData = unabto_crypto_max_data(&con->cryptoctx, (uint16_t)(end - ptr));
+    unabto_buffer_init(&w_buf, ptr, MIN(availableForData, NABTO_RESPONSE_MAX_SIZE));
     unabto_query_response_init(&queryResponse, &w_buf);
 
     res = application_poll(&handle->applicationRequest, &queryResponse);
@@ -288,31 +260,6 @@ bool framework_get_async_response(struct naf_handle_s *handle)
 }
 #endif
 
-
-#if NABTO_APPLICATION_EVENT_MODEL_ASYNC
-/* Reconstruct nabto header with crypto payload header. */
-uint8_t* reconstruct_header(uint8_t* buf, uint8_t* end, const nabto_packet_header * hdr)
-{
-    uint8_t* ptr = buf;
-
-    ptr = nabto_wr_header(buf, end, hdr);
-    if (ptr == NULL) {
-        return NULL;
-    }
-
-    add_flags(buf, NP_PACKET_HDR_FLAG_RESPONSE);
-
-    // insert crypto header (len and code will be inserted later)
-    WRITE_U8(ptr, NP_PAYLOAD_TYPE_CRYPTO);                    ptr += 1;
-    WRITE_U8(ptr, NP_PAYLOAD_HDR_FLAG_NONE);                  ptr += 1;
-
-    // Crypto len and code 2+2 bytes is patched by unabto_encrypt()
-    ptr += 4;
-
-    return ptr; /* return end of packet (so far) */
-}
-
-#endif
 
 struct naf_handle_s* find_existing_request_handle(nabto_connect* con, uint16_t reqId) {
     int i;
@@ -359,15 +306,6 @@ void free_all_handles_for_connection(nabto_connect* connection) {
     }
 }
 
-
-
-/*****************************************************************************/
-/********************  Local helper functions  ************** *****************/
-/*****************************************************************************/
-
-/******************************/
-/* Logging of app/queue state */
-/******************************/
 #if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_TRACE)
 text result_s(application_event_result result)
 {
@@ -389,9 +327,5 @@ text result_s(application_event_result result)
     return "??";
 }
 #endif
-
-/***********************************/
-/* END: Logging of app/queue state */
-/***********************************/
 
 #endif
