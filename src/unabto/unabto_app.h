@@ -83,14 +83,20 @@ typedef enum {
 
 
 /**
- * The uNabto protocol implementation (application logic)
+ * The uNabto application request implementation. This is a function
+ * the implementor implements to answer unabto application rpc
+ * requests. It has two modes, synchronous and asynchronous. If
+ * AER_REQ_ACCEPTED is returned an asynchronous request is
+ * initiated. All other return values does imply a synchronous
+ * request.
+ * 
  * @param appreq  the request information
  * @param r_b     buffer, holds the parameters
  * @param w_b     buffer, to retrieve the response message
  * @return        the result
  * - AER_REQ_RESPONSE_READY, the response must be written in the w_b
  * - AER_REQ_INV_QUERY_ID, the queryId is invalid
- * - AER_REQ_ACCEPTED, w_b isn't used and the application allocates memory for building the response internally.
+ * - AER_REQ_ACCEPTED, w_b isn't used. The unabto framework handles the request asynchronous.
  * - the remaining results values are sent to the Client as an exception (w_b is overridden by the caller).
  *
  * WARNING: The read and write buffer use a shared input and output
@@ -106,7 +112,55 @@ typedef enum {
  * return AER_REQ_ACCEPTED. The application_request* pointer value is
  * used in subsequent requests and is used as the identifier for the
  * specific request.
- */
+ *
+ * Synchronous requests.
+ *
+ * A synchronous request is a request where the answer is sent
+ * imediately back to the requestor. It is not allowed to block inside
+ * the function since it blocks the whole system.
+ * 
+ * Example:
+ * application_event_result application_event(application_request* applicationRequest, unabto_query_request* readBuffer, unabto_query_response* writeBuffer) {
+ *     unabto_query_write_int32(writeBuffer, 42);
+ *     return AER_REQ_RESPONSE_READY;
+ * }
+ *
+ * Asynchronous requests.
+ *
+ * To initiate an asynchronous request the function needs to return
+ * AER_REQ_ACCEPTED. When the application later has an answer ready to
+ * the request the application should send the application_request*
+ * back to unabto through the application_poll_query function. Unabto
+ * then calls the function application_poll to retrieve the
+ * response. After applcation_poll is returned a call to
+ * application_poll_drop is called. * 
+ * 
+ * Example:
+ * static application_request* savedRequest = NULL;
+ * application_event_result application_event(application_request* applicationRequest, unabto_query_request* readBuffer, unabto_query_response* writeBuffer) {
+ *     if (savedRequest == NULL) {
+ *         savedRequest = applicationRequest;
+ *         return AER_REQ_ACCEPTED;
+ *     } else {
+ *         return AER_REQ_OUT_OF_RESOURCES;
+ *     }
+ * }
+ * bool application_poll_query(application_request** applicationRequest) {
+ *     if (savedRequest != NULL) { 
+ *          *applicationRequest = savedRequest;
+ *          return true;
+ *     } else {
+ *          return false;
+ *     }
+ * }
+ * application_event_result application_poll(application_request* applicationRequest, unabto_query_response* writeBuffer) {
+ *     unabto_query_write_int32(writeBuffer, 42);
+ *     return AER_REQ_RESPONSE_READY;
+ * }
+ * void application_poll_drop(application_request* applicationRequest) {
+ *     savedRequest = NULL;
+ * }
+ */    
 application_event_result application_event(application_request* applicationRequest, unabto_query_request* readBuffer, unabto_query_response* writeBuffer);
 
 
