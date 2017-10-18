@@ -1,0 +1,28 @@
+version: 1.0.{build}
+image: Visual Studio 2015
+build_script:
+- cmd: >-
+    cd apps\tunnel
+
+    mkdir build
+
+    cd build
+
+    cmake -DCMAKE_BUILD_TYPE=Release --config Release -G "Visual Studio 14 2015 Win64" ..
+
+    cmake --build . --config Release
+artifacts:
+- path: apps\tunnel\build\Release\unabto_tunnel.exe
+  name: unabto_tunnel
+deploy:
+  description: ''
+  provider: GitHub
+  auth_token:
+    secure: /ZS7w9J1/2S5ise/ZkEA/aig3ASgfNwS6uiPCMHlg4s6AH1+RPF0UY1FcP784Gyv
+  artifact: /unabto_tunnel.exe/
+  draft: false
+  prerelease: false
+  force_update: true
+  on:
+    branch: master                 # release from master branch only
+    appveyor_repo_tag: true

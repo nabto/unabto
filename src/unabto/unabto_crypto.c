@@ -323,7 +323,7 @@ bool unabto_verify_integrity(nabto_crypto_context* cryptoContext, uint16_t code,
         //NABTO_LOG_BUFFER(cryptoContext->theirhmackey, HMAC_SHA256_KEYLENGTH);
         //NABTO_LOG_BUFFER(buf, size-TRUNCATED_HMAC_SHA256_LENGTH);
         //NABTO_LOG_BUFFER(buf+size-TRUNCATED_HMAC_SHA256_LENGTH, TRUNCATED_HMAC_SHA256_LENGTH);
-        ret = truncated_hmac_sha256_verify_integrity(
+        ret = unabto_truncated_hmac_sha256_verify_integrity(
             cryptoContext->theirhmackey, HMAC_SHA256_KEYLENGTH,
             buf, size - TRUNCATED_HMAC_SHA256_LENGTH,
             buf+size-TRUNCATED_HMAC_SHA256_LENGTH);
@@ -364,7 +364,7 @@ bool unabto_decrypt(nabto_crypto_context* cryptoContext, uint8_t* ptr, uint16_t 
      * we have a hmac verified packet of some multiple of 16 in length, we need to make an
      * inbuffer decrypt and return the length without the padding.
      */
-        if (!aes128_cbc_decrypt(cryptoContext->decryptkey,
+        if (!unabto_aes128_cbc_decrypt(cryptoContext->decryptkey,
                              ptr, size)) {
             NABTO_LOG_TRACE(("Decrypting of packet failed size: %u", size));
         }
@@ -448,7 +448,7 @@ bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, uin
          memset(ptr, (int)paddingSize, paddingSize); ptr += paddingSize;
             
          UNABTO_ASSERT(ptr - dst <= 0xFFFF);
-         res = aes128_cbc_encrypt(cryptoContext->encryptkey, dst, (uint16_t)(ptr-dst));
+         res = unabto_aes128_cbc_encrypt(cryptoContext->encryptkey, dst, (uint16_t)(ptr-dst));
         }
 #else
         NABTO_LOG_FATAL(("aes cryptosuite not implemented"));

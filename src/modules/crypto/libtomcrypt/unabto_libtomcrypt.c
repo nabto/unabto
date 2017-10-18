@@ -5,7 +5,7 @@
 #include <unabto/unabto_hmac_sha256.h>
 #include "tomcrypt.h"
 
-bool aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t input_len) {
+bool unabto_aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t input_len) {
     /**
      * first 16 bytes of the input is the iv.
      */
@@ -31,7 +31,7 @@ bool aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t input_len) 
     return false;
 }
 
-bool aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t input_len) {
+bool unabto_aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t input_len) {
 
     symmetric_CBC cbc_ctx;
     int cipher;

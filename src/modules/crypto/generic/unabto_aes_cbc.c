@@ -18,7 +18,7 @@ static AES_CTX ctx;
 #pragma udata
 #endif
 
-bool aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t input_len) {
+bool unabto_aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t input_len) {
     if ((input_len < 16) || (input_len % 16 != 0)) {
         return false;
     }
@@ -34,7 +34,7 @@ bool aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t input_len) 
 /**
  * we are running the algoritm backwards to eliminate the need to remember too much state.
  */
-bool aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t input_len) {
+bool unabto_aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t input_len) {
     if (input_len < 16) return false; // the input contains at most the iv.
     if ((input_len % 16) != 0) return false; // the input_len should be a multiple of the block size.
     {

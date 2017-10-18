@@ -15,7 +15,7 @@ enum {
     TRUNCATED_HMAC_SHA256_LENGTH = 16
 };
 
-bool truncated_hmac_sha256_verify_integrity(
+bool unabto_truncated_hmac_sha256_verify_integrity(
     const uint8_t *key, uint16_t keyLength,
     const uint8_t *buf, uint16_t bufLength,
     const uint8_t integrity[16]);

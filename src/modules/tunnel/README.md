@@ -15,7 +15,7 @@ added which initializes unabto and calls void
 
 ```
 cmake_minimum_required(VERSION 2.8)
-project(tunnel C ASM)
+project(tunnel C)
 set(UNABTO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 set(ENABLE_TUNNEL_TCP 1)
 #set(ENABLE_TUNNEL_UART 1) 

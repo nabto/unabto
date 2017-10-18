@@ -9,7 +9,7 @@
 
 #include <string.h>
 
-bool aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t input_len)
+bool unabto_aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t input_len)
 {
     EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
     if (ctx == NULL) {
@@ -31,7 +31,7 @@ bool aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t input_len)
     return true;
 }
 
-bool aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t input_len)
+bool unabto_aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t input_len)
 {
     EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
     if (ctx == NULL) {
