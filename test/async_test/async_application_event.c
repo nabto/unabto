@@ -7,14 +7,15 @@
 
 /**
  * This is a test to show the unabto request/response async model. The
- * test consists of a queue with timeouts. when a request is accepted
- * it's added to the queue. It's timed out when the time is passed.
+ * application has a single request with one argument. The argument
+ * tells how many milliseconds to wait before sending an answer back
+ * to the client.
  */
 
 struct queued_request {
-    application_request* request;
-    nabto_stamp_t expire;
-    nabto_stamp_t created;
+    application_request* request; // Used to keep track of the request.
+    nabto_stamp_t        expire;  // Timestamp when passed the response is ready.
+    nabto_stamp_t        created; // Used to keep track of how long the actual request has been.
 };
 
 #define QUEUE_SIZE 10
