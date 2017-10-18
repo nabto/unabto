@@ -96,7 +96,7 @@ typedef enum {
  * @return        the result
  * - AER_REQ_RESPONSE_READY, the response must be written in the w_b
  * - AER_REQ_INV_QUERY_ID, the queryId is invalid
- * - AER_REQ_ACCEPTED, w_b isn't used. The unabto framework handles the request asynchronous.
+ * - AER_REQ_ACCEPTED, w_b isn't used. The unabto framework handles the request asynchronously.
  * - the remaining results values are sent to the Client as an exception (w_b is overridden by the caller).
  *
  * WARNING: The read and write buffer use a shared input and output
@@ -123,10 +123,10 @@ typedef enum {
  *
  * To initiate an asynchronous request the function needs to return
  * AER_REQ_ACCEPTED. When the application later has an answer ready to
- * the request the application should send the application_request*
+ * the request, the application should send the opaque application_request pointer
  * back to unabto through the application_poll_query function. Unabto
  * then calls the function application_poll to retrieve the
- * response. After applcation_poll is returned a call to
+ * response. After applcation_poll is returned, a call to
  * application_poll_drop is called. The application will need to copy
  * the required request parameters into its own scope. The
  * unabto_query_request pointer is invalid after returning from the
