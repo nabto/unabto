@@ -1,55 +1,9 @@
+#include "async_application_event.h"
+#include <unabto/unabto_next_event.h>
+
 #include "unabto/unabto_common_main.h"
 #include "unabto/unabto_logging.h"
-#include "unabto/unabto_environment.h"
-#include "modules/cli/unabto_args.h"
-#include "unabto_version.h"
-#include "unabto/unabto_app_adapter.h"
-
-void init_request_queue();
-    
-int main(int argc, char* argv[])
-{
-    nabto_main_setup* nms;
-    nabto_endpoint localEp;
-
-    // flush stdout
-    setvbuf(stdout, NULL, _IONBF, 0);
-
-    nms = unabto_init_context();
-
-    /**
-     * Overwrite default values with command line args
-     */
-    if (!check_args(argc, argv, nms)) {
-        return 1;
-    }
-
-    if (!unabto_init()) {
-        NABTO_LOG_FATAL(("Failed at nabto_main_init"));
-    }
-
-    while (true) {
-        /*
-         * Here the main application should do it's work
-         * and then whenever time is left for Nabto (but at least regularly)
-         * the nabto_main_tick() should be called.
-         *
-         * nabto_main_tick()
-         * - polls the socket for incoming messages
-         * - administers timers to do its own timer based work
-         */
-        unabto_tick();
-#if (_POSIX_C_SOURCE >= 199309L)
-        struct timespec sleepTime;
-        sleepTime.tv_sec = 0;
-        sleepTime.tv_nsec = 10*1000000;
-        nanosleep(&sleepTime, NULL);
-#endif
-    }
-
-    unabto_close();
-    return 0;
-}
+#include "unabto/unabto_app.h"
 
 /**
  * This is a test to show the unabto request/response async model. The
@@ -65,6 +19,18 @@ struct queued_request {
 
 #define QUEUE_SIZE 10
 struct queued_request queue[QUEUE_SIZE];
+
+void update_next_async_event_timeout(nabto_stamp_t* ne)
+{
+    int i;
+    for (i = 0; i < QUEUE_SIZE; i++) {
+        struct queued_request* req = &queue[i];
+        if (req->request != NULL) {
+            nabto_update_min_stamp(ne, &req->expire);
+        }
+    }
+}
+
 
 void init_request_queue()
 {
@@ -174,14 +140,11 @@ application_event_result application_poll(application_request* applicationReques
     nabto_stamp_t now = nabtoGetStamp();
     nabto_stamp_diff_t diff = nabtoStampDiff(&now, &(entry->created));
     int32_t duration = nabtoStampDiff2ms(diff);
-    application_event_result status;
     if (!unabto_query_write_int32(writeBuffer, duration)) {
-        status = AER_REQ_RSP_TOO_LARGE;
+        return AER_REQ_RSP_TOO_LARGE;
     } else {
-        status = AER_REQ_RESPONSE_READY;
+        return AER_REQ_RESPONSE_READY;
     }
-    clear_queue_entry(entry);
-    return status;
 }
 
 
@@ -195,3 +158,4 @@ void application_poll_drop(application_request* applicationRequest)
         clear_queue_entry(entry);
     }
 }
+

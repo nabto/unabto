@@ -86,14 +86,6 @@ naf_query framework_event_query(nabto_connect* con,
                                 nabto_packet_header* hdr,
                                 struct naf_handle_s** handle);
 
-/**
- * Release the event handle returned by #framework_event_query().
- * @param   handle returned by framework_event_query
- * 
- * Upon return of this function, the handle is invalid. Setting the handle
- * to 0 will prevent the handle from being misused afterwards.
- */
-void framework_release_handle(struct naf_handle_s* handle);
 
 /**
  * Handle unabto application event.

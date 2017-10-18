@@ -44,6 +44,16 @@ static application_event_result framework_first_event(struct naf_handle_s*      
  * All other return values are error codes. In that case all buffers
  * are unmodified. */
 static bool framework_get_async_response(struct naf_handle_s *handle);
+
+/**
+ * Release the event handle returned by #framework_event_query().
+ * @param   handle returned by framework_event_query
+ * 
+ * Upon return of this function, the handle is invalid. Setting the handle
+ * to 0 will prevent the handle from being misused afterwards.
+ */
+static void framework_release_handle(struct naf_handle_s* handle);
+
 #endif
 
 // Store the state for requests.
@@ -97,17 +107,6 @@ naf_query framework_event_query(nabto_connect* con, nabto_packet_header* hdr, st
     return NAF_QUERY_NEW;
 }
 
-/* Release the event handle returned by framework_event_query.
- * In the ASYNC model we must remove the event handle from the FIFO request
- * queue. */
-void framework_release_handle(struct naf_handle_s* handle)
-{
-    if (!handle) {
-        return;
-    }
-
-    handle->state = APPREQ_FREE;
-}
 
 /* Handle application event.
  * Initialize the handle and call applicaion_event. */
@@ -204,11 +203,12 @@ bool framework_event_poll()
 
     if (!handle) {
         NABTO_LOG_ERROR(("Cannot find handle matching req"));
-        framework_release_handle(handle);
+        application_poll_drop(req);
         return false;
     }
 
-    return framework_get_async_response(handle);
+    bool status = framework_get_async_response(handle);
+    framework_release_handle(handle);
 }
 #endif
 
@@ -255,7 +255,7 @@ bool framework_get_async_response(struct naf_handle_s *handle)
     } else {
         status = send_and_encrypt_packet_con(handle->connection, buf, end, ptr, unabto_query_response_used(&queryResponse), ptr - 6);
     }
-    framework_release_handle(handle);
+
     return status;
 }
 #endif
@@ -277,7 +277,7 @@ struct naf_handle_s* find_handle(application_request *req)
     int i;
     for (i = 0; i < NABTO_APPREQ_QUEUE_SIZE; i++) {
         struct naf_handle_s* h = &handles[i];
-        if (&h->applicationRequest == req) {
+        if (h->state == APPREQ_USED && &h->applicationRequest == req) {
             return h;
         }
     }
@@ -297,6 +297,7 @@ struct naf_handle_s* find_free_handle()
 }
 
 void free_all_handles_for_connection(nabto_connect* connection) {
+#if NABTO_APPLICATION_EVENT_MODEL_ASYNC
     int i;
     for (i = 0; i < NABTO_APPREQ_QUEUE_SIZE; i++) {
         struct naf_handle_s* h = &handles[i];
@@ -304,7 +305,24 @@ void free_all_handles_for_connection(nabto_connect* connection) {
             framework_release_handle(h);
         }
     }
+#endif
 }
+
+
+#if NABTO_APPLICATION_EVENT_MODEL_ASYNC
+/**
+ * Release the event handle returned by framework_event_query.
+ */
+void framework_release_handle(struct naf_handle_s* handle)
+{
+    if (!handle) {
+        return;
+    }
+    application_poll_drop(&handle->applicationRequest);
+    handle->state = APPREQ_FREE;
+}
+#endif
+
 
 #if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_TRACE)
 text result_s(application_event_result result)

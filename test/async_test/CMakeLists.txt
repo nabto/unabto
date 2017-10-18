@@ -7,7 +7,7 @@ set(src
   ${unabto_src}
   ${unabto_module_cli_gopt_src}
   ${unabto_module_util_src}
-  ${CMAKE_CURRENT_SOURCE_DIR}/main.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/async_application_event.c
 )
 
 add_definitions(
@@ -19,11 +19,24 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_executable(${PROJECT_NAME} ${src})
+set(tick_src
+  ${src}
+  ${CMAKE_CURRENT_SOURCE_DIR}/main_tick.c
+  )
 
-target_link_libraries(${PROJECT_NAME} ${unabto_link_libraries})
+set(select_src
+  ${src}
+  ${CMAKE_CURRENT_SOURCE_DIR}/main_select.c
+  )
 
-install( TARGETS ${PROJECT_NAME}
+add_executable(${PROJECT_NAME}_tick ${tick_src})
+
+add_executable(${PROJECT_NAME}_select ${select_src})
+
+target_link_libraries(${PROJECT_NAME}_tick ${unabto_link_libraries})
+target_link_libraries(${PROJECT_NAME}_select ${unabto_link_libraries})
+
+install( TARGETS ${PROJECT_NAME}_tick ${PROJECT_NAME}_select
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)
