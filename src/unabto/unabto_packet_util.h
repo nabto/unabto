@@ -200,6 +200,15 @@ enum {
  */
 uint16_t nabto_rd_header(const uint8_t* buf, const uint8_t* end, nabto_packet_header* hdr);
 
+/**
+ * Write a packet header
+ * @param buf  databuffer
+ * @param end  databuffer end
+ * @param hdr  header
+ * @return ptr to end of written header or NULL if the header could not be written.   
+ */
+uint8_t* nabto_wr_header(uint8_t* buf, const uint8_t* end, const nabto_packet_header* hdr);
+
 
 /**
  * Read a payload header

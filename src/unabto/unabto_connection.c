@@ -23,6 +23,7 @@
 #include "unabto_stream.h"
 #include "unabto_version.h"
 #include "unabto_packet.h"
+#include "unabto_app_adapter.h"
 
 #include <unabto/unabto_tcp_fallback.h>
 #include <unabto/unabto_dns_fallback.h>
@@ -145,6 +146,7 @@ void nabto_release_connection(nabto_connect* con)
 #if NABTO_ENABLE_STREAM
             nabto_stream_connection_released(con);
 #endif
+            framework_connection_released(con);
         }
 
         // trigger sending of statistics packet

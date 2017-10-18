@@ -204,7 +204,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         
     
     uint8_t* ptr = insert_header(buf,0, nmc.context.gspnsi, U_PUSH, false, 0, 0, NULL);
-    uint8_t* cryptHdrEnd;
+    uint8_t* cryptoPayloadStart;
     uint8_t* cryptDataStart;
 
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PUSH, 0, NP_PAYLOAD_PUSH_BYTELENGTH-NP_PAYLOAD_HDR_BYTELENGTH);
@@ -213,7 +213,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
     WRITE_FORWARD_U8(ptr, NP_PAYLOAD_PUSH_FLAG_SEND);
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
     WRITE_U8((ptr-3), NP_PAYLOAD_HDR_FLAG_NONE | NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS);
-    cryptHdrEnd = ptr;
+    cryptoPayloadStart = ptr - NP_PAYLOAD_HDR_BYTELENGTH;
 
     cryptDataStart = ptr;
     ptr = unabto_push_notification_get_data(ptr, end-NP_PAYLOAD_VERIFY_BYTELENGTH, elem->seq);
@@ -229,7 +229,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         unabto_push_notification_remove(elem->seq);
         return;
     }
-    if(!send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoConnect, cryptDataStart, ptr-cryptDataStart, cryptHdrEnd)){
+    if(!send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoConnect, buf, end, cryptDataStart, ptr-cryptDataStart, cryptoPayloadStart)){
         unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
         unabto_push_notification_callback(elem->seq,&hint);
         unabto_push_notification_remove(elem->seq);

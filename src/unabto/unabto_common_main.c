@@ -261,7 +261,7 @@ void unabto_tick(void) {
 void unabto_time_event(void) {
 #if NABTO_ENABLE_CONNECTIONS
     nabto_time_event_connection();
-    nabto_message_remote_poll();
+    nabto_message_async_response_poll();
 #endif
 
 #if NABTO_ENABLE_STREAM

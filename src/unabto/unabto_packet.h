@@ -59,9 +59,49 @@ void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, ui
 
 void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* start, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, message_event* event, void* userData);
 
-bool send_and_encrypt_packet(nabto_endpoint* peer, nabto_crypto_context* cryptoCtx, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadDataStart);
+/**
+ * @param peer peer to send to
+ * @param cryptoCtx  crypto context
+ * @param packetStart  start of packet buffer
+ * @param packetEnd  end of packet buffer
+ * @param plaintextStart start of plaintext data to be encrypted.
+ * @param plaintextLength length of plaintext data to be encrypted.
+ * @param cryptoPayloadStart start of the crypto payload, the first byte in the payload.
+ * @return true iff the packet was sent.
+ */
+bool send_and_encrypt_packet(nabto_endpoint* peer, nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadStart);
 
-bool send_and_encrypt_packet_con(nabto_connect* con, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadDataStart);
+/**
+ * Send an exception notification to the client.
+ * @param ctx   the context
+ * @param con   the connection
+ * @param hdr   the received header
+ * @param aer   the exception
+ *
+ * The exception is sent in an encrypted (DATA) packet with the EXCEPTION flag set.
+ */
+bool send_exception(nabto_connect* con, nabto_packet_header* hdr, uint32_t aer);
+
+    
+/**
+ * send and encrypt a packet on a connection.
+ * @param con                     The connection.
+ * @param packetBufferStart       The start of the packet.
+ * @param packetBufferEnd         The end of the packet buffer.
+ * @param plaintextStart          Start of data to be encrypted. 
+ * @param plaintextLength         Length of data to be encrypted.
+ * @param cryptoPayloadStart      Start of the crypto payload, this is the first byte in crypto payload.
+ * @return true iff the packet was sent.
+ * 
+ * The plain text can both be inside the current buffer or a buffer
+ * outside.
+ */
+bool send_and_encrypt_packet_con(nabto_connect* con,
+                                 uint8_t* packetBufferStart,
+                                 uint8_t* packetBufferEnd,
+                                 uint8_t* plaintextStart,
+                                 uint16_t plaintextLength,
+                                 uint8_t* cryptoPayloadStart);
 
 bool send_to_basestation(uint8_t* buffer, size_t buflen, nabto_endpoint* peer);
 

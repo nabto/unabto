@@ -34,7 +34,6 @@
 #define MAX_HANDLERS 5
 static NABTO_THREAD_LOCAL_STORAGE unabto_packet_data_handler_entry handlers[MAX_HANDLERS];
 
-static bool handle_new_query(nabto_connect* con, nabto_packet_header* hdr, uint8_t* dataStart, uint16_t dlen, uint16_t* olen, naf_handle* handle);
 
 void unabto_packet_init_handlers(void) {
     memset(handlers, 0, sizeof(handlers));
@@ -196,54 +195,31 @@ static void send_ack(nabto_connect* con, nabto_packet_header* hdr)
 
 /******************************************************************************/
 
-/**
- * Send an exception notification to the client.
- * @param ctx   the context
- * @param con   the connection
- * @param hdr   the received header
- * @param aer   the exception
- *
- * ctx->buf MUST contain the received message/packet
- *
- * The exception is sent in an encrypted (DATA) packet with the EXCEPTION flag set.
- */
-static void send_exception(nabto_connect* con, nabto_packet_header* hdr, int aer)
+bool send_exception(nabto_connect* con, nabto_packet_header* hdr, uint32_t aer)
 {
-    uint8_t  notif[4];
-    uint16_t hlen  = hdr->hlen;
-    uint16_t len   = hlen + SIZE_PAYLOAD_HEADER + SIZE_CODE + unabto_crypto_required_length(&con->cryptoctx, sizeof(notif));
     uint8_t  buf[SIZE_HEADER_MAX + SIZE_PAYLOAD_HEADER + SIZE_CODE + 48]; // maximum length cryptosuites implemented as of aug 2012
-    uint16_t dlen;
-    uint8_t* ptr = buf + hlen;
-    uint8_t* end = buf + sizeof(buf); 
+    uint8_t* end = buf + sizeof(buf);
+    uint8_t* dataStart;
+    uint8_t* ptr = buf;
 
-    WRITE_U32(notif, (uint32_t)aer);
-    memcpy(buf, (const void*) nabtoCommunicationBuffer, hlen);
+    ptr = nabto_wr_header(buf, end, hdr);
+
+    add_flags(buf, NP_PACKET_HDR_FLAG_RESPONSE);
+    add_flags(buf, NP_PACKET_HDR_FLAG_EXCEPTION);
+    
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0); ptr += SIZE_CODE;
-    if (!unabto_encrypt(&con->cryptoctx, notif, sizeof(notif), ptr, len - (uint16_t)(ptr - buf), &dlen)) {
-        NABTO_LOG_TRACE(("(." PRInsi ".) Encryption failure, seq: %" PRIu16, MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), hdr->seq));
-    } else {
-        /* Update packet length and flag fields */
-        if (len != hlen + (uint16_t)dlen + SIZE_PAYLOAD_HEADER + SIZE_CODE) {
-            NABTO_LOG_FATAL(("(." PRInsi ".) Length mismatch: %" PRIu16 " %" PRIu16 " %i %i", MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), len, hlen, dlen, SIZE_PAYLOAD_HEADER + SIZE_CODE));
-        }
-        insert_length(buf, len);
-        add_flags(buf, NP_PACKET_HDR_FLAG_RESPONSE | NP_PACKET_HDR_FLAG_EXCEPTION);
-        //NABTO_INFO("Before integrity:\n" << nabto::BufPH(nmc.ctx.buf, 80));
-        //NABTO_INFO("After integrity:\n" << nabto::BufPH(nmc.ctx.buf, 80));
-        if (!unabto_insert_integrity(&con->cryptoctx, buf, len)) {
-            NABTO_LOG_TRACE(("(." PRInsi ".) Signing failure, seq: %" PRIu16, MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), hdr->seq));
-        } else {
-            NABTO_LOG_TRACE(("(." PRInsi ".) send Exception %i to client, seq: %" PRIu16, MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), (int)aer, hdr->seq));
-            nabto_write_con(con, buf, len);
-        }
-    }
+    dataStart = ptr;
+    // write exception value
+    WRITE_FORWARD_U32(ptr, (uint32_t)aer);
+
+    return send_and_encrypt_packet_con(con, buf, end, dataStart, sizeof(uint32_t), dataStart - NP_PAYLOAD_HDR_BYTELENGTH);
 }
 
 
 void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* dataStart, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, message_event* event, void* userData) {
     uint16_t olen = 0;
-
+    uint8_t* packetStart = nabtoCommunicationBuffer;
+    uint8_t* packetBufferEnd = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
     enum {
         FRAMING_KEEP_ALIVE = 0, // Framing::CMD_KEEPALIVE
         FRAMING_CLOSED_OLD = 2, // Framing::CMD_UDT_CLOSED
@@ -297,18 +273,17 @@ void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, ui
     
     // If we are here we need to send a response to the sender
     hdr->flags |= NP_PACKET_HDR_FLAG_RESPONSE;
-    insert_flags(nabtoCommunicationBuffer, hdr->flags);
-
-    send_and_encrypt_packet_con(con, dataStart, olen, dataStart-SIZE_CODE);
+    insert_flags(packetStart, hdr->flags);
+    
+    send_and_encrypt_packet_con(con, packetStart, packetBufferEnd, dataStart, olen, dataStart-SIZE_CODE-NP_PAYLOAD_HDR_BYTELENGTH);
 }
 
 
 void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* start, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, message_event* event, void* userData) {
-    naf_handle handle = NULL;
+    struct naf_handle_s* handle = NULL;
     uint16_t olen;
     
-    naf_query aer;
-    int err;
+    naf_query_status nqs;
     (void)payloadsStart; (void)payloadsEnd; (void)userData; /* Unused */
 
 #if NABTO_ENABLE_TCP_FALLBACK
@@ -317,104 +292,56 @@ void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* st
     }
 #endif
     
-    aer = framework_event_query(con->clientId, hdr->seq, &handle);
-    switch (aer) {
+    nqs = framework_event_query(con, hdr, &handle);
+    switch (nqs) {
         case NAF_QUERY_NEW:
-            if (nmc.nabtoMainSetup.secureData && con->cpAsync) {
+            if (con->cpAsync) {
+                // send ack such that the client knows that we are processing the message
                 send_ack(con, hdr);
             }
-            if (handle_new_query(con, hdr, start, dlen, &olen, &handle)) {
-                // assume we have an answer to the client then we need to update
-                // the header and encrypt the response.
-                hdr->flags |= NP_PACKET_HDR_FLAG_RESPONSE;
-                insert_flags(nabtoCommunicationBuffer, hdr->flags);
-          
-                send_and_encrypt_packet_con(con, start, olen, start - SIZE_CODE);
-          
-            }
-            if (handle) {
-                framework_release_handle(handle);
-            }
+            framework_event(handle, start, dlen);
             break;
         case NAF_QUERY_QUEUED:
             NABTO_LOG_TRACE((PRInsi " The Application has previously queued the request %" PRIu16, MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), hdr->seq));
             if (con->cpAsync) {
                 nabtoSetFutureStamp(&con->stamp, con->timeOut);
+                // send ack such that the client knows that the message is being processed.
                 send_ack(con, hdr);
             }
             break;
-        default:
-            switch (aer) {
-                case NAF_QUERY_OUT_OF_RESOURCES:
-                    err = NP_E_OUT_OF_RESOURCES;
-                    break;
-                default:
-                    NABTO_LOG_ERROR((PRInsi " The framework has returned an unknown exception (%i) on query %" PRIu16 " (sending SYSTEM_ERROR)", MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), aer, hdr->seq));
-                    err = NP_E_SYSTEM_ERROR;
-                    break;
-            }
-            NABTO_LOG_TRACE((PRInsi " The Application has returned an exception (%i) on query %" PRIu16, MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), err, hdr->seq));
+
+        case NAF_QUERY_OUT_OF_RESOURCES:
             if (con->cpAsync) {
-                send_exception(con, hdr, err);
+                send_exception(con, hdr,  NP_E_SYSTEM_ERROR);
             }
             break;
     }
 }
 
-static bool handle_new_query(nabto_connect* con, nabto_packet_header* hdr, uint8_t* dataStart, uint16_t dlen, uint16_t* olen, naf_handle* handle) {
-    uint16_t sizeFreeCrypto = (uint16_t)(nabtoCommunicationBufferSize - (hdr->hlen + OFS_DATA)); /* space left for encrypted data (incl. IV and padding) and the integrity hash */
-    
-    nabtoSetFutureStamp(&con->stamp, con->timeOut);
-    
-    NABTO_LOG_DEBUG((PRInsi " DATA Request : ...", MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0)));
-    if (dlen == 0) {
-        NABTO_LOG_DEBUG((PRInsi " DATA Response: 0 bytes keep alive", MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0)));
-        return false;
-    } else {
-        uint16_t sizeFreeData = unabto_crypto_max_data(&con->cryptoctx, sizeFreeCrypto);
-        application_event_result aer = framework_event(*handle, dataStart, sizeFreeData, dlen, olen, con, hdr);
-#if NABTO_APPLICATION_EVENT_MODEL_ASYNC
-        if (aer == AER_REQ_ACCEPTED) {
-            *handle = 0; //Framework has queued the request, don't delete handle
-        }
-#endif
-        if (!con->cpAsync && aer != AER_REQ_RESPONSE_READY) {
-            // do no more, the Client can't understand ack's and error messages
-            return false;
-        }
-#if NABTO_APPLICATION_EVENT_MODEL_ASYNC
-        if (aer == AER_REQ_ACCEPTED) {
-            if (nmc.nabtoMainSetup.secureData) {
-                // ack has been sent after calling framework_event_query()
-            } else if (con->cpAsync) {
-                send_ack(con, hdr);
-            }
-            return false;
-        }
-#endif
-        // Response has been built with data or error message (that Client can understand)
-        // hdr may have been changed (EXCEPTION flag added) in framework_event()
-        NABTO_LOG_DEBUG((PRInsi " DATA Response: %i", MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), aer));
-    }
-    return true;
-}
-
-bool encrypt_packet(nabto_crypto_context* cryptoCtx, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadDataStart, uint16_t* len) {
+/**
+ * Encrypt a packet
+ * @param cryptoCtx crypto context
+ * @param bufferStart start of packet buffer
+ * @param bufferEnd   end of packet buffer
+ * @param plaintextStart  start of plaintext
+ * @param plaintextLength length of plaintext
+ * @param cryptoPayloadStart start of crypto payload 
+ * @param len  length of encrypted packet
+ * @return true iff the packet was encrypted.
+ */
+bool encrypt_packet(nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadStart, uint16_t* len) {
     // Encrypt the data and insert the length and encryption code into
     // the packet
-    uint16_t dlen;
-    if (!unabto_encrypt(cryptoCtx, plaintextStart, plaintextLength, cryptoPayloadDataStart+SIZE_CODE, (uint16_t)((nabtoCommunicationBuffer+nabtoCommunicationBufferSize)-(cryptoPayloadDataStart+SIZE_CODE)), &dlen)) {
+    uint8_t* cryptoPayloadEnd;
+    if (!unabto_encrypt(cryptoCtx, plaintextStart, plaintextLength, cryptoPayloadStart+4+SIZE_CODE, packetEnd, &cryptoPayloadEnd)) {
         NABTO_LOG_ERROR(("failed to encrypt data"));
         return false;
     }
     
     {
-        uint8_t* buf = nabtoCommunicationBuffer;
-        uint8_t* cryptoPayloadEnd = cryptoPayloadDataStart + dlen + SIZE_CODE;
-
-        *len = (uint16_t)(cryptoPayloadEnd - buf);
-        insert_length(buf, *len);
-        if (!unabto_insert_integrity(cryptoCtx, buf, *len)) {
+        *len = (uint16_t)(cryptoPayloadEnd - packetStart);
+        insert_length(packetStart, *len);
+        if (!unabto_insert_integrity(cryptoCtx, packetStart, *len)) {
             NABTO_LOG_ERROR(("Integrity insertion failing"));
             return false;
         }
@@ -424,27 +351,27 @@ bool encrypt_packet(nabto_crypto_context* cryptoCtx, uint8_t* plaintextStart, ui
 }
 
 
-bool send_and_encrypt_packet_con(nabto_connect* con, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadDataStart) {
+bool send_and_encrypt_packet_con(nabto_connect* con, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadStart) {
     uint16_t len;
 
-    if (!encrypt_packet(&con->cryptoctx, plaintextStart, plaintextLength, cryptoPayloadDataStart, &len)) {
+    if (!encrypt_packet(&con->cryptoctx, packetStart, packetEnd, plaintextStart, plaintextLength, cryptoPayloadStart, &len)) {
         return false;
     }
 
-    return nabto_write_con(con, nabtoCommunicationBuffer, len);
+    return nabto_write_con(con, packetStart, len);
 }
 /**
  * Send a packet where the header etc is setup correctly but the data
  * needs to be encrypted and an integrity has to be added.
  */
-bool send_and_encrypt_packet(nabto_endpoint* peer, nabto_crypto_context* cryptoCtx, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadDataStart) {
+bool send_and_encrypt_packet(nabto_endpoint* peer, nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadStart) {
     uint16_t len;
 
-    if (!encrypt_packet(cryptoCtx, plaintextStart, plaintextLength, cryptoPayloadDataStart, &len)) {
+    if (!encrypt_packet(cryptoCtx, packetStart, packetEnd, plaintextStart, plaintextLength, cryptoPayloadStart, &len)) {
         return false;
     }
 
-    return send_to_basestation(nabtoCommunicationBuffer, len, peer);
+    return send_to_basestation(packetStart, len, peer);
 }
 
 bool send_to_basestation(uint8_t* buffer, size_t buflen, nabto_endpoint* peer) {

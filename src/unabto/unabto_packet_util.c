@@ -31,8 +31,9 @@ uint16_t nabto_rd_header(const uint8_t* buf, const uint8_t* end, nabto_packet_he
     uint16_t hlen = NP_PACKET_HDR_MIN_BYTELENGTH;
 
     /* Buffer must contain at least minimum header size bytes */
-    if (buf + hlen > end)
+    if (buf + hlen > end) {
        return 0;
+    }
 
     /* Read fixed part of packet header */
     READ_U32(header->nsi_cp, buf + 0);
@@ -52,8 +53,9 @@ uint16_t nabto_rd_header(const uint8_t* buf, const uint8_t* end, nabto_packet_he
 
     /* Read NSI.co from packet header (optional) */
     if (header->flags & NP_PACKET_HDR_FLAG_NSI_CO) {
-        if (buf + hlen + 8 > end)
+        if (buf + hlen + 8 > end) {
             return 0;
+        }
         memcpy(header->nsi_co, buf + hlen, 8);
         hlen += 8;
     }
@@ -62,8 +64,9 @@ uint16_t nabto_rd_header(const uint8_t* buf, const uint8_t* end, nabto_packet_he
 
     /* Read tag from packet header (optional) */
     if (header->flags & NP_PACKET_HDR_FLAG_TAG) {
-        if (buf + hlen + 2 > end)
+        if (buf + hlen + 2 > end) {
             return 0;
+        }
         READ_U16(header->tag, buf + hlen);
         hlen += 2;
     }
@@ -72,7 +75,40 @@ uint16_t nabto_rd_header(const uint8_t* buf, const uint8_t* end, nabto_packet_he
 
     header->hlen = hlen;
     return hlen;
-} /* uint16_t nabto_rd_header(const uint8_t* buf, const uint8_t* end, nabto_packet_header_t* hdr, uint8_t expType, uint8_t expFlags) */
+}
+
+uint8_t* nabto_wr_header(uint8_t* buf, const uint8_t* end, const nabto_packet_header* hdr)
+{
+    uint8_t* ptr = buf;
+    if ((end - ptr) < NP_PACKET_HDR_MIN_BYTELENGTH) {
+        return NULL;
+    }
+    
+    WRITE_FORWARD_U32(ptr, hdr->nsi_cp);
+    WRITE_FORWARD_U32(ptr, hdr->nsi_sp);
+    WRITE_FORWARD_U8(ptr, hdr->type);
+    WRITE_FORWARD_U8(ptr, hdr->version);
+    WRITE_FORWARD_U8(ptr, hdr->rsvd);
+    WRITE_FORWARD_U8(ptr, hdr->flags);
+    WRITE_FORWARD_U16(ptr, hdr->seq);
+    WRITE_FORWARD_U16(ptr, hdr->len);
+
+    if (hdr->flags & NP_PACKET_HDR_FLAG_NSI_CO) {
+        if ((end - ptr) < 8) {
+            return NULL;
+        }
+        memcpy(ptr, hdr->nsi_co, 8); ptr += 8;
+    }
+    
+    if (hdr->flags & NP_PACKET_HDR_FLAG_TAG) {
+        if ((end - ptr) < 2) {
+            return NULL;
+        }
+        WRITE_FORWARD_U16(ptr, hdr->tag);
+    }
+    return ptr;
+}
+
 
 /******************************************************************************/
 

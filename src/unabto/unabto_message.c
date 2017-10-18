@@ -326,20 +326,11 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
 #endif
 
 #if NABTO_ENABLE_CONNECTIONS
-bool nabto_message_remote_poll(void) {
-    uint16_t         olen;
-    nabto_connect*   con;
+bool nabto_message_async_response_poll(void) {
     bool             result = false;
 
-    while (framework_event_poll(nabtoCommunicationBuffer, (uint16_t)nabtoCommunicationBufferSize, &olen, &con)) {
-        NABTO_LOG_TRACE(("The Application delivers a previously queued request"));
-        if (olen) {
-            nabto_write_con(con, nabtoCommunicationBuffer, olen);
-            NABTO_LOG_TRACE(("Remote response, %u bytes sent to " PRIep, olen, MAKE_EP_PRINTABLE(con->peer)));
-            result = true;
-        } else {
-            NABTO_LOG_ERROR(("Conflict, olen==0 and res!=AER_REQ_WAITING"));
-        }
+    while (framework_event_poll()) {
+        result = true;
     }
 
     return result;

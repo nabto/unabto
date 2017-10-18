@@ -369,7 +369,7 @@ static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uin
 
         ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
 
-        return send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoAttach, tmp, sizeof(tmp), ptr);
+        return send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoAttach, buf, end, tmp, sizeof(tmp), ptr - NP_PAYLOAD_HDR_BYTELENGTH);
 
 #else
         NABTO_LOG_FATAL(("AES encryption unavailable"));
