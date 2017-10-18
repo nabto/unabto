@@ -16,7 +16,7 @@ int main(int argc, char** argv)
 
 	recBuf[0] = 0;
 
-	ret = unabto_tcp_open(&sock, null);
+	ret = unabto_tcp_open(&sock, 0);
 	NABTO_LOG_INFO(("open return value was: %d", ret));
 
 	ep.addr = 2130706433;
