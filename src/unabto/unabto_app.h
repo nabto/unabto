@@ -83,12 +83,12 @@ typedef enum {
 
 
 /**
- * The uNabto application request implementation. This is a function
- * the implementor implements to answer unabto application rpc
- * requests. It has two modes, synchronous and asynchronous. If
- * AER_REQ_ACCEPTED is returned an asynchronous request is
- * initiated. All other return values does imply a synchronous
- * request.
+ * application_event(), The uNabto application request
+ * implementation. This is a function the implementor implements to
+ * answer rpc requests. It has two modes, synchronous and
+ * asynchronous. If AER_REQ_ACCEPTED is returned an asynchronous
+ * request is initiated. All other return values does imply a
+ * synchronous request.
  * 
  * @param appreq  the request information
  * @param r_b     buffer, holds the parameters
@@ -106,12 +106,6 @@ typedef enum {
  * The size of the writeBuffer is limited by the config parameter
  * NABTO_RESPONSE_MAX_SIZE. The maximum request size is limited by the
  * config parameter NABTO_REQUEST_MAX_SIZE.
- *
- * If the application model is async you will need to copy the needed
- * request parameters into the scope of your application and then
- * return AER_REQ_ACCEPTED. The application_request* pointer value is
- * used in subsequent requests and is used as the identifier for the
- * specific request.
  *
  * Synchronous requests.
  *
@@ -133,7 +127,10 @@ typedef enum {
  * back to unabto through the application_poll_query function. Unabto
  * then calls the function application_poll to retrieve the
  * response. After applcation_poll is returned a call to
- * application_poll_drop is called. * 
+ * application_poll_drop is called. The application will need to copy
+ * the required request parameters into its own scope. The
+ * unabto_query_request pointer is invalid after returning from the
+ * function.
  * 
  * Example:
  * static application_request* savedRequest = NULL;
