@@ -23,7 +23,11 @@ endif()
 source_group(modules\\tunnel\\src FILES ${unabto_tunnel_src})
 
 if(ENABLE_TUNNEL_TCP)
-  list(APPEND unabto_src ${unabto_module_tunnel_tcp_src})
+  if (NOT MSVC)
+    list(APPEND unabto_src ${unabto_module_tunnel_tcp_src} ${unabto_module_tcp_unix_src})
+  else ()
+    list(APPEND unabto_src ${unabto_module_tunnel_tcp_src} ${unabto_module_tcp_win32_src})
+  endif()
   add_definitions("-DNABTO_ENABLE_TUNNEL_TCP")
 endif()
 

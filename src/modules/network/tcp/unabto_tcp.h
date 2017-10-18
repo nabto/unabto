@@ -26,7 +26,7 @@ unabto_tcp_status unabto_tcp_close(struct unabto_tcp_socket* sock);
 
 unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock);
 
-unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sockfd);
+unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sockfd, void* dataPtr);
 
 unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpoint* ep);
 

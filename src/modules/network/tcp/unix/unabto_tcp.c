@@ -9,10 +9,9 @@
 #include <netinet/tcp.h>
 
 #if NABTO_ENABLE_EPOLL
+#include <modules/network/epoll/unabto_epoll.h>
 #include <sys/epoll.h>
 #endif
-
-#define INVALID_SOCKET (-1)
 
 unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, const size_t len, size_t* read) {
     int status;
@@ -29,10 +28,10 @@ unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, con
         }
     } else if (status == 0) {
         NABTO_LOG_INFO(("TCP connection closed by peer"));
+        unabto_tcp_shutdown(sock);
         unabto_tcp_close(sock);
         return UTS_FAILED;
     } else {
-        NABTO_LOG_INFO(("buf: %s", buf));
         *read = status;
         return UTS_OK;
     }
@@ -83,14 +82,14 @@ unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock){
 }
 
 
-unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock){
+unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* dataPtr){
     sock->socket = socket(AF_INET, SOCK_STREAM, 0);
 #if NABTO_ENABLE_EPOLL
     if (sock->socket >= 0) {
         struct epoll_event ev;
         ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
-        ev.data.ptr = sock;
-        epoll_ctl(unabto_epoll_fd, EPOLL_CTL_ADD, fbConn->socket, &ev);
+        ev.data.ptr = dataPtr;
+        epoll_ctl(unabto_epoll_fd, EPOLL_CTL_ADD, sock->socket, &ev);
     }
 #endif
 
@@ -149,7 +148,7 @@ unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpo
     int status;
     struct sockaddr_in host;
 
-    memset(&sock->host,0,sizeof(struct sockaddr_in));
+    memset(&host,0,sizeof(struct sockaddr_in));
     host.sin_family = AF_INET;
     host.sin_addr.s_addr = htonl(ep->addr);
     host.sin_port = htons(ep->port);

@@ -2,11 +2,6 @@
 #define _TUNNEL_TCP_H_
 #include <modules/tunnel/unabto_tunnel_common.h>
 
-#ifdef WIN32
-#else
-#define INVALID_SOCKET -1
-#endif
-
 /**
  * return false to disallow connections to the specified host:port
  */

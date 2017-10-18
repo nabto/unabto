@@ -72,7 +72,7 @@ unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock){
 }
 
 
-unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock){
+unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* dataPtr){
     int flags = 1;
 
     if(!unabto_winsock_initialize()){

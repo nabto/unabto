@@ -4,12 +4,7 @@
 #include <unabto_platform_types.h>
 #include <unabto/unabto_stream.h>
 #include <modules/network/select/unabto_select.h>
-
-#ifdef WIN32
-typedef SOCKET tunnelSocket;
-#else
-typedef int tunnelSocket;
-#endif
+#include <modules/network/tcp/unabto_tcp.h>
 
 #if NABTO_ENABLE_EPOLL
 #include <sys/epoll.h>
@@ -77,7 +72,7 @@ typedef struct uart_vars{
 
 typedef struct tcp_vars{
     int port;
-    tunnelSocket sock;
+    struct unabto_tcp_socket sock;
 } tcp_vars;
 
 
