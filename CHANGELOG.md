@@ -12,6 +12,11 @@ the release and a new unreleased section is added.
 
 ## 4.2.0 Unreleased
 
+### Breaking Changes
+- in file `src/unabto/unabto_app.h` the function argument
+  unabto_query_request* readBuffer has been removed from the function
+  `application_poll` the argument was always NULL. It has been removed
+  to limit confusion of how the api can be used.
 
 ## 4.1.0 2017-07-11
 
