@@ -49,7 +49,7 @@ static application_event_result framework_first_event(struct naf_handle_s*      
  * of bytes written to buf.
  * All other return values are error codes. In that case all buffers
  * are unmodified. */
-static bool framework_poll_event(struct naf_handle_s *handle);
+static bool framework_get_async_response(struct naf_handle_s *handle);
 #endif
 
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
@@ -138,7 +138,6 @@ naf_query framework_event_query(nabto_connect* con, nabto_packet_header* hdr, st
         return NAF_QUERY_OUT_OF_RESOURCES;
     }
 
-    (*handle)->state = APPREQ_USED;
     (*handle)->connection = con;
     (*handle)->header = *hdr;
 
@@ -212,7 +211,7 @@ application_event_result framework_event(struct naf_handle_s* handle,
 
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
         case AER_REQ_ACCEPTED:
-            // do nothing let the request be handled in the async queue
+            handle->state = APPREQ_USED;
             return res;
 #endif
 
@@ -255,13 +254,13 @@ bool framework_event_poll()
         return false;
     }
 
-    return framework_poll_event(handle);
+    return framework_get_async_response(handle);
 }
 #endif
 
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
-/* Handle event by polling application - use data from header stored in data */
-bool framework_poll_event(struct naf_handle_s *handle)
+/* Handle event by polling application - use data from header stored in handle */
+bool framework_get_async_response(struct naf_handle_s *handle)
 {
     unabto_buffer              w_buf;
     unabto_query_response      queryResponse;
@@ -285,11 +284,14 @@ bool framework_poll_event(struct naf_handle_s *handle)
     res = application_poll(&handle->applicationRequest, &queryResponse);
     NABTO_LOG_TRACE(("APPREQ application_poll: result=%" PRItext, result_s(res)));
 
+    bool status;
     if (res != AER_REQ_RESPONSE_READY) {
-        return send_exception(handle->connection, &handle->header, res);
+        status = send_exception(handle->connection, &handle->header, res);
     } else {
-        return send_and_encrypt_packet_con(handle->connection, buf, end, ptr, unabto_query_response_used(&queryResponse), ptr - 6);
+        status = send_and_encrypt_packet_con(handle->connection, buf, end, ptr, unabto_query_response_used(&queryResponse), ptr - 6);
     }
+    framework_release_handle(handle);
+    return status;
 }
 #endif
 

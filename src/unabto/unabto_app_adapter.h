@@ -110,8 +110,6 @@ void framework_release_handle(struct naf_handle_s* handle);
  *                  On return the buffer may contain a response.
  * @param size      the size of iobuf in bytes
  * @param ilen      length of input in bytes
- * @param con       the connection to the client
- * @param hdr       the packet header
  * @return          the result of the event, see #application_event_result
  *
  * The return value is AER_REQ_RESPONSE_READY if the request has been
