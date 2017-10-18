@@ -73,7 +73,7 @@ unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock){
 
 
 unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock){
-	int flags = 1;
+    int flags = 1;
 
     if(!unabto_winsock_initialize()){
         NABTO_LOG_ERROR(("unabto_winsock_initialize failed"));
@@ -92,7 +92,7 @@ unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpo
     int status;
     struct sockaddr_in host;
 
-    memset(&sock->host,0,sizeof(struct sockaddr_in));
+    memset(&host,0,sizeof(struct sockaddr_in));
     host.sin_family = AF_INET;
     host.sin_addr.s_addr = htonl(ep->addr);
     host.sin_port = htons(ep->port);
