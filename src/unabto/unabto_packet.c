@@ -35,8 +35,6 @@
 static NABTO_THREAD_LOCAL_STORAGE unabto_packet_data_handler_entry handlers[MAX_HANDLERS];
 
 
-static bool handle_new_query(uint8_t* dataStart, uint16_t dlen, struct naf_handle_s* handle);
-
 void unabto_packet_init_handlers(void) {
     memset(handlers, 0, sizeof(handlers));
 }
@@ -297,13 +295,10 @@ void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* st
     aer = framework_event_query(con, hdr, &handle);
     switch (aer) {
         case NAF_QUERY_NEW:
-            if (nmc.nabtoMainSetup.secureData && con->cpAsync) {
+            if (con->cpAsync) {
                 send_ack(con, hdr);
             }
-            
-            if (handle_new_query(start, dlen, handle)) {
-
-            }
+            framework_event(handle, start, dlen);
             break;
         case NAF_QUERY_QUEUED:
             NABTO_LOG_TRACE((PRInsi " The Application has previously queued the request %" PRIu16, MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), hdr->seq));
@@ -319,33 +314,6 @@ void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* st
             }
             break;
     }
-}
-
-static bool handle_new_query(uint8_t* dataStart, uint16_t dlen, struct naf_handle_s* handle)
-{
-    uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
-    nabto_connect* con = handle->connection;
-    nabtoSetFutureStamp(&con->stamp, con->timeOut);
-    
-    NABTO_LOG_DEBUG((PRInsi " DATA Request : ...", MAKE_NSI_PRINTABLE(0, handle->header.nsi_sp, 0)));
-    if (dlen == 0) {
-        NABTO_LOG_DEBUG((PRInsi " DATA Response: 0 bytes keep alive", MAKE_NSI_PRINTABLE(0, handle->header.nsi_sp, 0)));
-        return false;
-    } else {
-        application_event_result aer = framework_event(handle, dataStart, end, dlen);
-
-#if NABTO_APPLICATION_EVENT_MODEL_ASYNC
-        if (aer == AER_REQ_ACCEPTED) {
-            if (nmc.nabtoMainSetup.secureData) {
-                // ack has been sent after calling framework_event_query()
-            } else if (handle->connection->cpAsync) {
-                send_ack(handle->connection, &handle->header);
-            }
-            return false;
-        }
-#endif
-    }
-    return true;
 }
 
 /**

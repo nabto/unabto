@@ -126,7 +126,6 @@ void framework_release_handle(struct naf_handle_s* handle);
  */
 application_event_result framework_event(struct naf_handle_s*     handle,
                                          uint8_t*                 iobuf,
-                                         uint8_t*                 end,
                                          uint16_t                 ilen);
     
 /**

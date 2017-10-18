@@ -160,7 +160,6 @@ void framework_release_handle(struct naf_handle_s* handle)
  * Initialize the handle and call applicaion_event. */
 application_event_result framework_event(struct naf_handle_s* handle,
                                          uint8_t*             iobuf,
-                                         uint8_t*             end,
                                          uint16_t             ilen)
 {
     unabto_buffer                 w_buf;
@@ -172,6 +171,7 @@ application_event_result framework_event(struct naf_handle_s* handle,
     nabto_connect*                con = handle->connection;
     application_request* req = &handle->applicationRequest;
     uint8_t* buf = nabtoCommunicationBuffer;
+    uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
 
     handle->spnsi = handle->connection->spnsi;
     
