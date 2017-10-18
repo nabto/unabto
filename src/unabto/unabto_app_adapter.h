@@ -31,7 +31,7 @@ typedef enum {
     NAF_QUERY_QUEUED,
     NAF_QUERY_OUT_OF_RESOURCES,
     NAF_QUERY_NEW
-} naf_query;
+} naf_query_status;
 
 /** The states of an application request ressource */
 typedef enum {
@@ -66,7 +66,7 @@ void framework_connection_released(nabto_connect* connection);
  * @param clientId   the identity of the client
  * @param reqId      the request identifier
  * @param handle     a pointer to a buffer to copy the handle on success
- * @return           one of the naf_query values
+ * @return           one of the naf_query_status values
  *
  * The pair (clientId, reqId) identifies the request.
  *
@@ -82,9 +82,9 @@ void framework_connection_released(nabto_connect* connection);
  * available for a new client request. The buffer pointed to by handle is
  * left unchanged.
  */
-naf_query framework_event_query(nabto_connect* con,
-                                nabto_packet_header* hdr,
-                                struct naf_handle_s** handle);
+naf_query_status framework_event_query(nabto_connect* con,
+                                       nabto_packet_header* hdr,
+                                       struct naf_handle_s** handle);
 
 
 /**

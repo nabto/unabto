@@ -86,6 +86,8 @@ bool send_exception(nabto_connect* con, nabto_packet_header* hdr, uint32_t aer);
 /**
  * send and encrypt a packet on a connection.
  * @param con                     The connection.
+ * @param packetBufferStart       The start of the packet.
+ * @param packetBufferEnd         The end of the packet buffer.
  * @param plaintextStart          Start of data to be encrypted. 
  * @param plaintextLength         Length of data to be encrypted.
  * @param cryptoPayloadStart      Start of the crypto payload, this is the first byte in crypto payload.
@@ -94,7 +96,12 @@ bool send_exception(nabto_connect* con, nabto_packet_header* hdr, uint32_t aer);
  * The plain text can both be inside the current buffer or a buffer
  * outside.
  */
-bool send_and_encrypt_packet_con(nabto_connect* con, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadStart);
+bool send_and_encrypt_packet_con(nabto_connect* con,
+                                 uint8_t* packetBufferStart,
+                                 uint8_t* packetBufferEnd,
+                                 uint8_t* plaintextStart,
+                                 uint16_t plaintextLength,
+                                 uint8_t* cryptoPayloadStart);
 
 bool send_to_basestation(uint8_t* buffer, size_t buflen, nabto_endpoint* peer);
 

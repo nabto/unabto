@@ -218,7 +218,8 @@ bool send_exception(nabto_connect* con, nabto_packet_header* hdr, uint32_t aer)
 
 void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* dataStart, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, message_event* event, void* userData) {
     uint16_t olen = 0;
-
+    uint8_t* packetStart = nabtoCommunicationBuffer;
+    uint8_t* packetBufferEnd = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
     enum {
         FRAMING_KEEP_ALIVE = 0, // Framing::CMD_KEEPALIVE
         FRAMING_CLOSED_OLD = 2, // Framing::CMD_UDT_CLOSED
@@ -272,9 +273,9 @@ void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, ui
     
     // If we are here we need to send a response to the sender
     hdr->flags |= NP_PACKET_HDR_FLAG_RESPONSE;
-    insert_flags(nabtoCommunicationBuffer, hdr->flags);
-
-    send_and_encrypt_packet_con(con, nabtoCommunicationBuffer, nabtoCommunicationBuffer + nabtoCommunicationBufferSize, dataStart, olen, dataStart-SIZE_CODE-NP_PAYLOAD_HDR_BYTELENGTH);
+    insert_flags(packetStart, hdr->flags);
+    
+    send_and_encrypt_packet_con(con, packetStart, packetBufferEnd, dataStart, olen, dataStart-SIZE_CODE-NP_PAYLOAD_HDR_BYTELENGTH);
 }
 
 
@@ -282,7 +283,7 @@ void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* st
     struct naf_handle_s* handle = NULL;
     uint16_t olen;
     
-    naf_query aer;
+    naf_query_status nqs;
     (void)payloadsStart; (void)payloadsEnd; (void)userData; /* Unused */
 
 #if NABTO_ENABLE_TCP_FALLBACK
@@ -291,8 +292,8 @@ void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* st
     }
 #endif
     
-    aer = framework_event_query(con, hdr, &handle);
-    switch (aer) {
+    nqs = framework_event_query(con, hdr, &handle);
+    switch (nqs) {
         case NAF_QUERY_NEW:
             if (con->cpAsync) {
                 // send ack such that the client knows that we are processing the message

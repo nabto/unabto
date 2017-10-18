@@ -83,7 +83,7 @@ void framework_connection_released(nabto_connect* connection)
     free_all_handles_for_connection(connection);
 }
 
-naf_query framework_event_query(nabto_connect* con, nabto_packet_header* hdr, struct naf_handle_s** handle)
+naf_query_status framework_event_query(nabto_connect* con, nabto_packet_header* hdr, struct naf_handle_s** handle)
 {
     uint16_t reqId = hdr->seq;
     NABTO_LOG_TRACE(("APPREQ framework_event_query: reqId: %" PRIu16, reqId));
