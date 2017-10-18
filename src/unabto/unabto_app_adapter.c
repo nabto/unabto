@@ -93,6 +93,7 @@ static NABTO_THREAD_LOCAL_STORAGE struct naf_handle_s handles[NABTO_APPREQ_QUEUE
 struct naf_handle_s* find_existing_request_handle(nabto_connect* con, uint16_t reqId);
 struct naf_handle_s* find_handle(application_request *req);
 struct naf_handle_s* find_free_handle();
+void free_all_handles_for_connection(nabto_connect* connection);
 
 /******************************/
 /* Logging of app/queue state */
@@ -102,24 +103,16 @@ static text result_s(application_event_result result);
 #endif
 
 
-void init_application_event_framework(void) {
+void init_application_event_framework(void)
+{
     memset(handles, 0, sizeof(struct naf_handle_s));
 }
 
-/******************************************************************************/
-/**********  ASYNCHRONIOUS EVENT HANDLING IMPLEMENTATION   ********************/
-/******************************************************************************/
+void framework_connection_released(nabto_connect* connection)
+{
+    free_all_handles_for_connection(connection);
+}
 
-/* Ask for an event handle corresponding to the given client request (in
- * ASYNC mode). The event handle must be released again using the
- * framework_release_handle function.
- * The return value is NAF_QUERY_NEW if this is the first time the client
- * request is seen (i.e. a new event handle is created).
- * The return value is NAF_QUERY_QUEUED if the client request is already
- * known (and is pending to be processed).
- * The return value is NAF_QUERY_OUT_OF_RESOURCES if no more memory is
- * available for a new client request.
- */
 naf_query framework_event_query(nabto_connect* con, nabto_packet_header* hdr, struct naf_handle_s** handle)
 {
     uint16_t reqId = hdr->seq;
@@ -158,9 +151,9 @@ void framework_release_handle(struct naf_handle_s* handle)
 
 /* Handle application event.
  * Initialize the handle and call applicaion_event. */
-application_event_result framework_event(struct naf_handle_s* handle,
-                                         uint8_t*             iobuf,
-                                         uint16_t             ilen)
+void framework_event(struct naf_handle_s* handle,
+                     uint8_t*             iobuf,
+                     uint16_t             ilen)
 {
     unabto_buffer                 w_buf;
     unabto_query_response         queryResponse;
@@ -169,12 +162,10 @@ application_event_result framework_event(struct naf_handle_s* handle,
     application_event_result      res;
     uint32_t                      query_id;
     nabto_connect*                con = handle->connection;
-    application_request* req = &handle->applicationRequest;
+    application_request*          req = &handle->applicationRequest;
     uint8_t* buf = nabtoCommunicationBuffer;
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
 
-    handle->spnsi = handle->connection->spnsi;
-    
     /* Set up a write buffer to write into iobuf. */
     unabto_buffer_init(&w_buf, iobuf, (end - iobuf));
     unabto_query_response_init(&queryResponse, &w_buf);
@@ -185,10 +176,12 @@ application_event_result framework_event(struct naf_handle_s* handle,
 
 
     if (unabto_query_request_size(&queryRequest) > NABTO_REQUEST_MAX_SIZE) {
-        return AER_REQ_TOO_LARGE;
+        send_exception(con, &handle->header, AER_REQ_TOO_LARGE);
+        return;
     }
     if (!unabto_query_read_uint32(&queryRequest, &query_id)) {
-        return AER_REQ_NO_QUERY_ID;
+        send_exception(con, &handle->header, AER_REQ_NO_QUERY_ID);
+        return;
     }
 
     /* Initialize application request info */
@@ -212,7 +205,7 @@ application_event_result framework_event(struct naf_handle_s* handle,
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
         case AER_REQ_ACCEPTED:
             handle->state = APPREQ_USED;
-            return res;
+            break;
 #endif
 
         default:
@@ -221,7 +214,6 @@ application_event_result framework_event(struct naf_handle_s* handle,
             }
             break;
     }
-    return res;
 }
 
 #if !NABTO_APPLICATION_EVENT_MODEL_ASYNC
@@ -229,13 +221,14 @@ bool framework_event_poll()
 {
     return false;
 }
-#else
+#endif
+
+#if NABTO_APPLICATION_EVENT_MODEL_ASYNC
 /* Poll a pending event.
- * Returns true if a response is ready (from any event in the queue).
- * If this function fails (returns false) all buffers are unmodified. */
+ * Returns true iff a response is sent to the client
+ */
 bool framework_event_poll()
 {
-    application_event_result ret;
     application_request     *req;
     struct naf_handle_s     *handle;
 
@@ -355,6 +348,18 @@ struct naf_handle_s* find_free_handle()
     }
     return NULL;
 }
+
+void free_all_handles_for_connection(nabto_connect* connection) {
+    int i;
+    for (i = 0; i < NABTO_APPREQ_QUEUE_SIZE; i++) {
+        struct naf_handle_s* h = &handles[i];
+        if (h->state == APPREQ_USED && h->connection == connection) {
+            framework_release_handle(h);
+        }
+    }
+}
+
+
 
 /*****************************************************************************/
 /********************  Local helper functions  ************** *****************/

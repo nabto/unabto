@@ -283,7 +283,6 @@ void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* st
     uint16_t olen;
     
     naf_query aer;
-    int err;
     (void)payloadsStart; (void)payloadsEnd; (void)userData; /* Unused */
 
 #if NABTO_ENABLE_TCP_FALLBACK
@@ -296,6 +295,7 @@ void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* st
     switch (aer) {
         case NAF_QUERY_NEW:
             if (con->cpAsync) {
+                // send ack such that the client knows that we are processing the message
                 send_ack(con, hdr);
             }
             framework_event(handle, start, dlen);
@@ -304,6 +304,7 @@ void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* st
             NABTO_LOG_TRACE((PRInsi " The Application has previously queued the request %" PRIu16, MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), hdr->seq));
             if (con->cpAsync) {
                 nabtoSetFutureStamp(&con->stamp, con->timeOut);
+                // send ack such that the client knows that the message is being processed.
                 send_ack(con, hdr);
             }
             break;
