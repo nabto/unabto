@@ -1,5 +1,5 @@
 version: 1.0.{build}
-image: Visual Studio 2015
+image: Visual Studio 2017
 build_script:
 - cmd: >-
     cd apps\tunnel
@@ -8,7 +8,7 @@ build_script:
 
     cd build
 
-    cmake -DCMAKE_BUILD_TYPE=Release --config Release -G "Visual Studio 14 2015 Win64" ..
+    cmake -DCMAKE_BUILD_TYPE=Release --config Release ..
 
     cmake --build . --config Release
 artifacts:
