@@ -2,17 +2,15 @@ version: 1.0.{build}
 image: Visual Studio 2017
 build_script:
 - cmd: >-
-    cd apps\tunnel
+    mkdir builddir
 
-    mkdir build
-
-    cd build
+    cd builddir
 
     cmake -DCMAKE_BUILD_TYPE=Release --config Release ..
 
     cmake --build . --config Release
 artifacts:
-- path: apps\tunnel\build\Release\unabto_tunnel.exe
+- path: builddir\apps\tunnel\Release\unabto_tunnel.exe
   name: unabto_tunnel
 deploy:
   description: ''
