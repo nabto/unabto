@@ -98,10 +98,12 @@ void unabto_stream_dump_state(struct nabto_stream_s* stream);
  */
 static void nabto_init_stream_state(unabto_stream * stream, const struct nabto_win_info* info);
 
+#if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_DEBUG)
 /**
  * convert a window type to a const string
  */
 static const char* unabto_stream_type_to_string(uint8_t winType);
+#endif
 
 #if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_TRACE)
 
@@ -2000,6 +2002,7 @@ uint32_t unabto_stream_get_duration(struct nabto_stream_s* stream)
     return nabtoStampDiff2ms(duration);
 }
 
+#if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_DEBUG)
 const char* unabto_stream_type_to_string(uint8_t winType)
 {
     text msg;
@@ -2013,5 +2016,6 @@ const char* unabto_stream_type_to_string(uint8_t winType)
     }
     return msg;
 }
+#endif
 
 #endif /* NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM */

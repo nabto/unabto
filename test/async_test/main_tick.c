@@ -11,7 +11,6 @@ void init_request_queue();
 int main(int argc, char* argv[])
 {
     nabto_main_setup* nms;
-    nabto_endpoint localEp;
 
     // flush stdout
     setvbuf(stdout, NULL, _IONBF, 0);

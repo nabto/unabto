@@ -174,18 +174,18 @@ int unabto_stream_get_connection_type(unabto_stream* stream, nabto_connection_ty
 
 int unabto_stream_get_stats(unabto_stream* stream, unabto_stream_stats* stats) {
 
-    stream->stats.rttMin = stream->u.tcb.ccStats.rtt.min;
-    stream->stats.rttMax = stream->u.tcb.ccStats.rtt.max;
-    stream->stats.rttAvg = stream->u.tcb.ccStats.rtt.avg;
-    stream->stats.cwndMin = stream->u.tcb.ccStats.cwnd.min;
-    stream->stats.cwndMax = stream->u.tcb.ccStats.cwnd.max;
-    stream->stats.cwndAvg = stream->u.tcb.ccStats.cwnd.avg;
-    stream->stats.ssThresholdMin = stream->u.tcb.ccStats.ssThreshold.min;
-    stream->stats.ssThresholdMax = stream->u.tcb.ccStats.ssThreshold.max;
-    stream->stats.ssThresholdAvg = stream->u.tcb.ccStats.ssThreshold.avg;
-    stream->stats.flightSizeMin = stream->u.tcb.ccStats.flightSize.min;
-    stream->stats.flightSizeMax = stream->u.tcb.ccStats.flightSize.max;
-    stream->stats.flightSizeAvg = stream->u.tcb.ccStats.flightSize.avg;
+    stream->stats.rttMin = (uint16_t)(stream->u.tcb.ccStats.rtt.min);
+    stream->stats.rttMax = (uint16_t)(stream->u.tcb.ccStats.rtt.max);
+    stream->stats.rttAvg = (uint16_t)(stream->u.tcb.ccStats.rtt.avg);
+    stream->stats.cwndMin = (uint16_t)(stream->u.tcb.ccStats.cwnd.min);
+    stream->stats.cwndMax = (uint16_t)(stream->u.tcb.ccStats.cwnd.max);
+    stream->stats.cwndAvg = (uint16_t)(stream->u.tcb.ccStats.cwnd.avg);
+    stream->stats.ssThresholdMin = (uint16_t)(stream->u.tcb.ccStats.ssThreshold.min);
+    stream->stats.ssThresholdMax = (uint16_t)(stream->u.tcb.ccStats.ssThreshold.max);
+    stream->stats.ssThresholdAvg = (uint16_t)(stream->u.tcb.ccStats.ssThreshold.avg);
+    stream->stats.flightSizeMin = (uint16_t)(stream->u.tcb.ccStats.flightSize.min);
+    stream->stats.flightSizeMax = (uint16_t)(stream->u.tcb.ccStats.flightSize.max);
+    stream->stats.flightSizeAvg = (uint16_t)(stream->u.tcb.ccStats.flightSize.avg);
     *stats = stream->stats;
     return 0;
 }

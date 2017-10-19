@@ -22,18 +22,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-/**
- * Try to handle application event the first time.
- * Initialize request data in handle and call #application_event().
- * Returns AER_REQ_RESPONSE_READY if a response is ready for the given
- * request. In that case w_b will contain the response.
- * If this function fails all buffers are unmodified. */
-static application_event_result framework_first_event(struct naf_handle_s*       handle,
-                                                      unabto_query_request*      queryRequest,
-                                                      unabto_query_response*     queryResponse,
-                                                      nabto_connect*             con,
-                                                      const nabto_packet_header* hdr);
-
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
 /**
  * Poll for a response for a request in the application.
@@ -209,6 +197,7 @@ bool framework_event_poll()
 
     bool status = framework_get_async_response(handle);
     framework_release_handle(handle);
+    return status;
 }
 #endif
 

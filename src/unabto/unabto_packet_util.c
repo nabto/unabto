@@ -243,7 +243,7 @@ uint8_t* insert_payload(uint8_t* buf, uint8_t* end, uint8_t type, const uint8_t*
     
     /* Add payload data */
     if (content && size) {
-        if (end - buf < size) {
+        if (end - buf < (ptrdiff_t)size) {
             return NULL;
         }
         memcpy(buf, content, size);
@@ -321,7 +321,7 @@ uint8_t* insert_version_payload(uint8_t* ptr, uint8_t* end)
     size_t prereleaseLength = strlen(UNABTO_VERSION_PRERELEASE);
     size_t buildLength = strlen(UNABTO_VERSION_BUILD);
     UNABTO_ASSERT(ptr <= end);
-    if (end-ptr < NP_PAYLOAD_VERSION_BYTELENGTH_PATCH + prereleaseLength + buildLength) {
+    if (end-ptr < (ptrdiff_t)(NP_PAYLOAD_VERSION_BYTELENGTH_PATCH + prereleaseLength + buildLength)) {
         return NULL;
     }
     

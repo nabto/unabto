@@ -427,7 +427,7 @@ bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, uin
          uint16_t paddingSize;
          size_t encryptedSize;
          encryptedSize = (16+(size/16 + 1)*16+16); // IV + padded_data + Integrity
-         if ((dstEnd - dst) < encryptedSize) { // dst size too small to hold packet
+         if ((dstEnd - dst) < (ptrdiff_t)encryptedSize) { // dst size too small to hold packet
              break;
          }
          *encryptedEnd = dst + encryptedSize;
@@ -460,8 +460,8 @@ bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, uin
         uint8_t pad;
         size_t encryptedSize = ((size/2 + 1) * 2) + 2; /* including integrity */
         *encryptedEnd = dst + encryptedSize;
-        if ((encryptedSize) > (dstEnd - dst)) {
-            NABTO_LOG_TRACE(("Encryption Overflow %" PRIu16 " > %" PRIu16,  encryptedSize, (dstEnd - dst)));
+        if ((ptrdiff_t)(encryptedSize) > (dstEnd - dst)) {
+            NABTO_LOG_TRACE(("Encryption Overflow %" PRIsize " > %" PRIsize,  encryptedSize, (size_t)(dstEnd - dst)));
         }
         else
         {

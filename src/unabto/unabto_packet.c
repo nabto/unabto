@@ -279,9 +279,9 @@ void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, ui
 }
 
 
-void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* start, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, message_event* event, void* userData) {
+void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* start, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, message_event* event, void* userData)
+{
     struct naf_handle_s* handle = NULL;
-    uint16_t olen;
     
     naf_query_status nqs;
     (void)payloadsStart; (void)payloadsEnd; (void)userData; /* Unused */
