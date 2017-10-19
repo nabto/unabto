@@ -123,10 +123,12 @@ void nabto_dns_resolve(const char* id);
  * meaning the address could be hardcoded but then devices will fail if 
  * the basestation gets a new ip address.
  *
- * The array of returned ipv4 addresses has a min size of 1 and a max
- * size of NABTO_DNS_RESOLVED_IPS_MAX, if less than
- * NABTO_DNS_RESOLVED_IPS_MAX ips are discovered then the first
- * entries in the result array should be filled first with ips.
+ * The v4addr parameter is an array of size
+ * NABTO_DNS_RESOLVED_IPS_MAX. The caller has allocated this array,
+ * and the callee should fill up to NABTO_DNS_RESOLVED_IPS_MAX
+ * addresses into the array. The minimum size of this array is 1.
+ *
+ * For example implementation see modules/network/dns/unix
  *
  * @param id      name controller hostname
  * @param v4addr  pointer to output ipaddresses array
