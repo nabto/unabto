@@ -1,4 +1,5 @@
 #include <unabto/unabto_external_environment.h>
+#include <unabto/unabto_util.h>
 
 #include <netdb.h>
 #include <pthread.h>
@@ -60,7 +61,7 @@ static int create_detached_resolver() {
 void nabto_dns_resolve(const char* id) {
     uint32_t addr = inet_addr(id);
     if (addr != INADDR_NONE) {
-        resolver_state.resolved_addr = htonl(addr);
+        resolver_state.resolved_addrs[0] = htonl(addr);
         resolver_state.status = NABTO_DNS_OK;
     } else {
         // host isn't a dotted IP, so resolve it through DNS
@@ -85,7 +86,7 @@ nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr) {
     }
     
     if (resolver_state.status == NABTO_DNS_OK) {
-        *v4addr = resolver_state.resolved_addr;
+        v4addr = resolver_state.resolved_addrs;
         return NABTO_DNS_OK;
     }
     return NABTO_DNS_ERROR;
