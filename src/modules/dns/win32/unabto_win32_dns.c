@@ -5,7 +5,7 @@
 
 typedef struct {
     const char* id;
-    uint32_t resolved_addr;
+    uint32_t resolved_addr[NABTO_DNS_RESOLVED_IPS_MAX];
     nabto_dns_status_t status;
 } resolver_state_t;
 
@@ -19,9 +19,16 @@ DWORD WINAPI resolver_thread(LPVOID ctx) {
     struct hostent* he = gethostbyname(state->id);
     if (he == 0) {
         state->status = NABTO_DNS_ERROR;
-    } else {
+    } else if (he->h_addrtype == AF_INET && he->h_length == 4) {
+        uint8_t i;
         state->status = NABTO_DNS_OK;
-        state->resolved_addr = htonl(*((uint32_t*)he->h_addr_list[0]));
+        for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
+            uint8_t* addr = (uint8_t*)he->h_addr_list[i];
+            if (addr == NULL) {
+                break;
+            }
+            READ_U32(state->resolved_addr[i], addr);
+        }
     }
     resolver_is_running = false;
     return 0;
