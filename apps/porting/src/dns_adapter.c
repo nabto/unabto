@@ -80,13 +80,16 @@ void nabto_dns_resolve(const char* id) {
     }
 }
 
-nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr) {
+nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addrs) {
     if (resolver_is_running) {
         return NABTO_DNS_NOT_FINISHED;
     }
     
     if (resolver_state.status == NABTO_DNS_OK) {
-        v4addr = resolver_state.resolved_addrs;
+        uint8_t i;
+        for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
+            v4addrs[i] = resolver_state.resolved_addrs[i];
+        }
         return NABTO_DNS_OK;
     }
     return NABTO_DNS_ERROR;
