@@ -278,9 +278,7 @@ source_group(modules\\log\\win32 FILES ${unabto_module_log_win32_src})
 set(unabto_module_winsock_src
   ${UNABTO_MODULES_SRC_DIR}/network/winsock/unabto_winsock.c
   ${UNABTO_MODULES_SRC_DIR}/network/winsock/unabto_winsock.h)
-set (unabto_module_winsock_dns_src
-  ${UNABTO_MODULES_SRC_DIR}/network/winsock/unabto_winsock_dns.c)
-source_group(modules\\network\\winsock FILES ${unabto_module_winsock_src} ${unabto_module_winsock_dns_src})
+source_group(modules\\network\\winsock FILES ${unabto_module_winsock_src})
 
 set(unabto_module_network_w5100_src
   ${UNABTO_MODULES_SRC_DIR}/network/w5100/w5100_network.c

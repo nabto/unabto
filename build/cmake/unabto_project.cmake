@@ -180,7 +180,7 @@ if (UNABTO_DNS_MODULE MATCHES unix)
 endif()
 
 if (UNABTO_DNS_MODULE MATCHES win32)
-  list(APPEND unabto_src ${unabto_module_winsock_dns_src})
+  list(APPEND unabto_src ${unabto_module_dns_win32_src})
 endif()
 
 if (UNABTO_DNS_MODULE MATCHES builtin)
