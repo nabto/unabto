@@ -80,10 +80,27 @@ unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* dataPtr)
         return UTS_FAILED;
     }
     sock->socket = socket(AF_INET, SOCK_STREAM, 0);
+
+    // On windows we make a blocking accept since a nonblocking accept fails.
+    flags = fcntl(sock->socket, F_GETFL, 0);
+    if (flags < 0) return false;
+    flags = (flags|O_NONBLOCK);
+    if (fcntl(sock->socket, F_SETFL, flags) != 0) {
+        NABTO_LOG_FATAL(("Cannot set unblocking mode"));
+        return false;
+    }
+
     if (setsockopt(sock->socket, IPPROTO_TCP, TCP_NODELAY, (char *) &flags, sizeof(int)) != 0) {
         NABTO_LOG_ERROR(("Could not set socket option TCP_NODELAY with error: %d", WSAGetLastError()));
         return UTS_FAILED;
     }
+
+    flags = 1;
+    if (ioctlsocket(sock->socket, FIONBIO, &flags) != 0) {
+        NABTO_LOG_ERROR(("Cannot set unblocking mode"));
+        return false;
+    }
+
     return UTS_OK;
 }
 
