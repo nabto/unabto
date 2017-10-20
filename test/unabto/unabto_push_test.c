@@ -1,4 +1,5 @@
 
+#include <unabto/unabto_external_environment.h>
 #include "unabto_push_test.h"
 #if NABTO_ENABLE_PUSH
 extern int pushSeqQHead;
@@ -50,16 +51,14 @@ bool unabto_push_test(void){
         NABTO_LOG_INFO(("Push Queue does not contain 5 elements, it contains: %d",pushCtx.pushSeqQHead));
         return false;
     }
-    // Manually ticking push events since we do not have a main loop
-    nabto_time_event_push();
-    nabto_time_event_push();
-    nabto_time_event_push();
-    nabto_time_event_push();
-    nabto_time_event_push();
-    nabto_time_event_push();
-    nabto_time_event_push();
-    nabto_time_event_push();
-    nabto_time_event_push();
+
+    nabto_stamp_t timeout;
+    nabtoSetFutureStamp(&timeout, 10);
+
+    while (!nabtoIsStampPassed(&timeout)) {
+        nabto_time_event_push();
+    }
+
     if (!getDataCalled) {
         NABTO_LOG_INFO(("GetData function not called"));
         return false;
