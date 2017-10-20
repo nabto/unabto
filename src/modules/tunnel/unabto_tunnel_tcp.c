@@ -173,7 +173,9 @@ bool opening_socket(tunnel* tunnel) {
 bool open_socket(tunnel* tunnel) {
     unabto_tcp_status status;
 
+#if NABTO_ENABLE_EPOLL
     tunnel->epollEventType = UNABTO_EPOLL_TYPE_TCP_TUNNEL;
+#endif
     status = unabto_tcp_open(&tunnel->tunnel_type_vars.tcp.sock, (void *)tunnel);
     if(status == UTS_OK) {
         unabto_tcp_status conStat;
