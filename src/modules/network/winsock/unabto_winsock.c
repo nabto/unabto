@@ -30,7 +30,6 @@ typedef struct socketListElement {
 
 static struct socketListElement* socketList = 0;
 
-static bool unabto_winsock_initialize(void);
 static void unabto_winsock_shutdown(void);
 
 bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* sock)

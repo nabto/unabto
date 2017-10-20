@@ -286,13 +286,13 @@ void unabto_tunnel_select_add_to_fd_set(fd_set* readFds, int* maxReadFd, fd_set*
 #if NABTO_ENABLE_TUNNEL_TCP
             if (tunnels[i].tunnelType == TUNNEL_TYPE_TCP){
                 if (tunnels[i].state == TS_FORWARD && tunnels[i].extReadState == FS_READ) {
-                    FD_SET(tunnels[i].tunnel_type_vars.tcp.sock, readFds);
-                    *maxReadFd = MAX(*maxReadFd, (int)(tunnels[i].tunnel_type_vars.tcp.sock));
+                    FD_SET(tunnels[i].tunnel_type_vars.tcp.sock.socket, readFds);
+                    *maxReadFd = MAX(*maxReadFd, (int)(tunnels[i].tunnel_type_vars.tcp.sock.socket));
                 }
                 if ((tunnels[i].state == TS_FORWARD && tunnels[i].unabtoReadState == FS_WRITE) ||
                     tunnels[i].state == TS_OPENING_SOCKET) {
-                    FD_SET(tunnels[i].tunnel_type_vars.tcp.sock, writeFds);
-                    *maxWriteFd = MAX(*maxWriteFd, (int)(tunnels[i].tunnel_type_vars.tcp.sock));
+                    FD_SET(tunnels[i].tunnel_type_vars.tcp.sock.socket, writeFds);
+                    *maxWriteFd = MAX(*maxWriteFd, (int)(tunnels[i].tunnel_type_vars.tcp.sock.socket));
                 }                    
             }
 #endif
@@ -318,10 +318,10 @@ void unabto_tunnel_select_handle(fd_set* readFds, fd_set* writeFds)
 
 #if NABTO_ENABLE_TUNNEL_TCP
             if (tunnels[i].tunnelType == TUNNEL_TYPE_TCP){
-                if (tunnels[i].tunnel_type_vars.tcp.sock != INVALID_SOCKET && FD_ISSET(tunnels[i].tunnel_type_vars.tcp.sock, readFds)) {
+                if (tunnels[i].tunnel_type_vars.tcp.sock.socket != INVALID_SOCKET && FD_ISSET(tunnels[i].tunnel_type_vars.tcp.sock.socket, readFds)) {
                     unabto_tunnel_tcp_event(&tunnels[i], TUNNEL_EVENT_SOURCE_TCP_READ);
                 }
-                if (tunnels[i].tunnel_type_vars.tcp.sock != INVALID_SOCKET && FD_ISSET(tunnels[i].tunnel_type_vars.tcp.sock, writeFds)) {
+                if (tunnels[i].tunnel_type_vars.tcp.sock.socket != INVALID_SOCKET && FD_ISSET(tunnels[i].tunnel_type_vars.tcp.sock.socket, writeFds)) {
                     unabto_tunnel_tcp_event(&tunnels[i], TUNNEL_EVENT_SOURCE_TCP_WRITE);
                 }
             }
@@ -373,10 +373,10 @@ void unabto_tunnel_epoll_event(struct epoll_event* event)
         tunnel* tunnelPtr = (tunnel*)handler;
         //~ NABTO_LOG_INFO(("Generating tunnel event with TCP"));
         tunnelPtr->tunnelType = TUNNEL_TYPE_TCP;
-        if (tunnelPtr->tunnel_type_vars.tcp.sock != INVALID_SOCKET) {
+        if (tunnelPtr->tunnel_type_vars.tcp.sock.socket != INVALID_SOCKET) {
             unabto_tunnel_tcp_event(tunnelPtr, TUNNEL_EVENT_SOURCE_TCP_READ);
         }
-        if (tunnelPtr->tunnel_type_vars.tcp.sock != INVALID_SOCKET) {
+        if (tunnelPtr->tunnel_type_vars.tcp.sock.socket != INVALID_SOCKET) {
             unabto_tunnel_tcp_event(tunnelPtr, TUNNEL_EVENT_SOURCE_TCP_WRITE);
         }
     }

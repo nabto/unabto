@@ -5,17 +5,14 @@
 
 #include <modules/network/epoll/unabto_epoll.h>
 #include <modules/network/select/unabto_select.h>
+#include <modules/network/tcp/unabto_tcp.h>
 
 #ifdef WIN32
-#include <winsock2.h>
 #include <windows.h>
 
 #ifndef WINCE
 #include <io.h>
 #endif
-typedef SOCKET tcp_fallback_socket;
-#else
-typedef int tcp_fallback_socket;
 #endif
 
 
@@ -25,7 +22,7 @@ typedef struct unabto_tcp_fallback_connection {
     size_t  sendBufferSent;
     uint8_t recvBuffer[65536];
     size_t  recvBufferLength;
-    tcp_fallback_socket socket;
+    struct unabto_tcp_socket socket;
     struct sockaddr_in fbHost;
 } unabto_tcp_fallback_connection;
 
