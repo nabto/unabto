@@ -1,4 +1,4 @@
-#include <unistd.h>
+
 #include "unabto_push_test.h"
 #if NABTO_ENABLE_PUSH
 extern int pushSeqQHead;

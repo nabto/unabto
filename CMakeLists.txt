@@ -14,8 +14,9 @@ endif()
 
 
 if (UNABTO_ENABLE_TESTS)
+  add_subdirectory(test/unittest)
   if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    add_subdirectory(test/unittest)
+
     add_subdirectory(test/push_test)
     add_subdirectory(test/async_test)
   endif()

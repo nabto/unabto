@@ -8,7 +8,7 @@ bool negative_hex_test(const char* string);
 bool read_hex_test(void)
 {
     uint8_t expected1[8] = { 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef };
-    uint8_t expected2[0] = {};
+    uint8_t expected2[1] = { 0x00 }; // dummy size of 1.
 
     NABTO_LOG_INFO(("read hex test"));
     
