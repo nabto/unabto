@@ -326,7 +326,6 @@ void unabto_tunnel_tcp_close_stream_reader(tunnel* tunnel) {
     NABTO_LOG_INFO(("closing socket %i", tunnel->tunnel_type_vars.tcp.sock));
     tunnel->unabtoReadState = FS_CLOSING;
     unabto_tcp_shutdown(&tunnel->tunnel_type_vars.tcp.sock);
-    unabto_tcp_close(&tunnel->tunnel_type_vars.tcp.sock);
 }
 
 // no more data will come from the tcp connection to the stream

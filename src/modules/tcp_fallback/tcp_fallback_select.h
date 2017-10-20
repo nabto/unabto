@@ -7,15 +7,6 @@
 #include <modules/network/select/unabto_select.h>
 #include <modules/network/tcp/unabto_tcp.h>
 
-#ifdef WIN32
-#include <windows.h>
-
-#ifndef WINCE
-#include <io.h>
-#endif
-#endif
-
-
 typedef struct unabto_tcp_fallback_connection {
     uint8_t sendBuffer[65536];
     size_t  sendBufferLength;
@@ -23,7 +14,6 @@ typedef struct unabto_tcp_fallback_connection {
     uint8_t recvBuffer[65536];
     size_t  recvBufferLength;
     struct unabto_tcp_socket socket;
-    struct sockaddr_in fbHost;
 } unabto_tcp_fallback_connection;
 
 void unabto_tcp_fallback_select_add_to_read_fd_set(fd_set* readFds, int* maxReadFd);

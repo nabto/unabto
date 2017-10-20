@@ -84,6 +84,10 @@ unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock){
 
 unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* dataPtr){
     sock->socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock->socket < 0) {
+        NABTO_LOG_ERROR(("Could not create socket for TCP"));
+        return UTS_FAILED;
+    }
 #if NABTO_ENABLE_EPOLL
     if (sock->socket >= 0) {
         struct epoll_event ev;
@@ -137,9 +141,6 @@ unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* dataPtr)
         }
 #endif
         return UTS_OK;
-    } else {
-        NABTO_LOG_ERROR(("Could not create socket for TCP"));
-        return UTS_FAILED;
     }
 }
 
@@ -152,7 +153,7 @@ unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpo
     host.sin_family = AF_INET;
     host.sin_addr.s_addr = htonl(ep->addr);
     host.sin_port = htons(ep->port);
-    NABTO_LOG_INFO(("Connecting to %d.%d.%d.%d:%d ", MAKE_EP_PRINTABLE(*ep)));
+    NABTO_LOG_INFO(("Connecting to ", PRIep, MAKE_EP_PRINTABLE(*ep)));
     
     status = connect(sock->socket, (struct sockaddr*)&host, sizeof(struct sockaddr_in));
    

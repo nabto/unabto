@@ -266,7 +266,6 @@ static bool unabto_tcp_fallback_create_socket(unabto_tcp_fallback_connection* fb
 
 static void unabto_tcp_fallback_close_socket(unabto_tcp_fallback_connection* fbConn)
 {
-    unabto_tcp_shutdown(&fbConn->socket);
     unabto_tcp_close(&fbConn->socket);
 }
 

@@ -14,7 +14,7 @@
 unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, const size_t len, size_t* read) {
     int status;
 
-	status = recv(sock->socket, buf, len, 0);
+    status = recv(sock->socket, buf, len, 0);
     if (status < 0) {
         if (WSAGetLastError() == WSAEWOULDBLOCK) {
             return UTS_WOULD_BLOCK;
@@ -67,11 +67,13 @@ unabto_tcp_status unabto_tcp_close(struct unabto_tcp_socket* sock){
 
 
 unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock){
-    shutdown(sock->socket, SD_BOTH);
+    shutdown(sock->socket, SD_SEND);
     return UTS_OK;
 }
 
-
+/*
+ * TCP sockets are currently blocking until connected on windows
+ */
 unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* dataPtr){
     int flags = 1;
 
@@ -104,16 +106,16 @@ unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpo
    
     if (status == 0) {
         int flags = 1;
-	if (ioctlsocket(sock->socket, FIONBIO, &flags) != 0) {
-	  NABTO_LOG_ERROR(("Cannot set unblocking mode"));
-	  return false;
-	}
+        if (ioctlsocket(sock->socket, FIONBIO, &flags) != 0) {
+            NABTO_LOG_ERROR(("Cannot set unblocking mode"));
+            return false;
+        }
         return UTS_OK;
     } else {
         if (WSAGetLastError() == WSAEINPROGRESS) {
-             return UTS_CONNECTING;
+            return UTS_CONNECTING;
         } else {
-	    NABTO_LOG_ERROR(("Could not connect to tcp endpoint. Error code %i: %s", WSAGetLastError(), strerror(errno)));
+            NABTO_LOG_ERROR(("Could not connect to tcp endpoint. Error code %i: %s", WSAGetLastError(), strerror(errno)));
             unabto_tcp_close(sock);
             return UTS_FAILED;
         }
