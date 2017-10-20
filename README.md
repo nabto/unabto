@@ -1,4 +1,4 @@
-# uNabto SDK [![Build Status](https://travis-ci.org/nabto/unabto.svg?branch=master)](https://travis-ci.org/nabto/unabto)
+# uNabto SDK [![Build Status](https://travis-ci.org/nabto/unabto.svg?branch=master)](https://travis-ci.org/nabto/unabto) [![Build Status](https://ci.appveyor.com/api/projects/status/nabto/unabto)](https://ci.appveyor.com/project/nabto/unabto)
 
 Nabto provides a full communication infrastructure to allow direct, encrypted communication between clients and IoT devices - the Nabto  communication platform. The platform supports direct peer-to-peer connectivity through NAT traversal.
 
