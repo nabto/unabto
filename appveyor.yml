@@ -3,9 +3,13 @@ image: Visual Studio 2017
 build_script:
 - cmd: >-
     mkdir builddir || exit 1
+    
     cd builddir || exit 1
+    
     cmake -DCMAKE_BUILD_TYPE=Release --config Release .. || exit 1
+    
     cmake --build . --config Release || exit 1
+    
     test\unittest\Release\unabto_unittest.exe || exit 1
     
 artifacts:
