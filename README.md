@@ -1,6 +1,6 @@
 # uNabto SDK 
-[![Build Status] [1]][2]
-[![Build Status: Windows] [3]][4]
+[![Build Status][1]][2]
+[![Windows Build Status][3]][4]
 [1]: https://travis-ci.org/nabto/unabto.svg?branch=master
 [2]: https://travis-ci.org/nabto/unabto
 [3]: https://ci.appveyor.com/api/projects/status/github/nabto/unabto?svg=true&branch=master
