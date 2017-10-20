@@ -19,11 +19,19 @@ bool unabto_aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t inpu
     if (EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, key, input /* first 16 bytes of the input is the iv */) == 0) {
         NABTO_LOG_ERROR(("EVP_EncryptInit_ex should return 1"));
     }
+    // unabto handles padding itself.
+    EVP_CIPHER_CTX_set_padding(ctx, 0);
 
     int outLength;
     if(EVP_EncryptUpdate(ctx, input+16, &outLength, input+16, input_len-16) != 1) {
         NABTO_LOG_ERROR(("EVP_EncryptUpdate should return 1"));
     }
+
+    int tmpLength;
+    if(EVP_EncryptFinal_ex(ctx, input + 16 + outLength, &tmpLength) != 1) {
+        NABTO_LOG_ERROR(("EVP_EncryptFinal_ex should return 1"));
+    }
+
     if(EVP_CIPHER_CTX_cleanup(ctx) != 1) {
         NABTO_LOG_ERROR(("EVP_CIPHER_CTX_cleanup should return 1"));
     }
@@ -41,11 +49,19 @@ bool unabto_aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t inpu
     if (EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, key, input /* iv is the first 16 bytes*/) != 1) {
         NABTO_LOG_ERROR(("EVP_DecryptInit_ex should return 1"));
     }
-    
+    // unabto handles padding itself.
+    EVP_CIPHER_CTX_set_padding(ctx, 0);
+
     int outLength;
     if (EVP_DecryptUpdate(ctx, input+16, &outLength, input+16, input_len-16) != 1) {
         NABTO_LOG_ERROR(("EVP_DecryptUpdate should return 1"));
     }
+
+    int tmpLength;
+    if(EVP_DecryptFinal_ex(ctx, input + 16 + outLength, &tmpLength) != 1) {
+        NABTO_LOG_ERROR(("EVP_EncryptFinal_ex should return 1"));
+    }
+
     if (EVP_CIPHER_CTX_cleanup(ctx) != 1) {
         NABTO_LOG_ERROR(("EVP_CIPHER_CTX_cleanup should return 1"));
     }
