@@ -81,24 +81,9 @@ unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* dataPtr)
     }
     sock->socket = socket(AF_INET, SOCK_STREAM, 0);
 
-    // On windows we make a blocking accept since a nonblocking accept fails.
-    flags = fcntl(sock->socket, F_GETFL, 0);
-    if (flags < 0) return false;
-    flags = (flags|O_NONBLOCK);
-    if (fcntl(sock->socket, F_SETFL, flags) != 0) {
-        NABTO_LOG_FATAL(("Cannot set unblocking mode"));
-        return false;
-    }
-
     if (setsockopt(sock->socket, IPPROTO_TCP, TCP_NODELAY, (char *) &flags, sizeof(int)) != 0) {
         NABTO_LOG_ERROR(("Could not set socket option TCP_NODELAY with error: %d", WSAGetLastError()));
         return UTS_FAILED;
-    }
-
-    flags = 1;
-    if (ioctlsocket(sock->socket, FIONBIO, &flags) != 0) {
-        NABTO_LOG_ERROR(("Cannot set unblocking mode"));
-        return false;
     }
 
     return UTS_OK;
@@ -118,12 +103,17 @@ unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpo
     status = connect(sock->socket, (struct sockaddr*)&host, sizeof(struct sockaddr_in));
    
     if (status == 0) {
+        int flags = 1;
+	if (ioctlsocket(sock->socket, FIONBIO, &flags) != 0) {
+	  NABTO_LOG_ERROR(("Cannot set unblocking mode"));
+	  return false;
+	}
         return UTS_OK;
     } else {
         if (WSAGetLastError() == WSAEINPROGRESS) {
              return UTS_CONNECTING;
         } else {
-            NABTO_LOG_ERROR(("Could not connect to tcp endpoint. %s", strerror(errno)));
+	    NABTO_LOG_ERROR(("Could not connect to tcp endpoint. Error code %i: %s", WSAGetLastError(), strerror(errno)));
             unabto_tcp_close(sock);
             return UTS_FAILED;
         }
