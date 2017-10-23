@@ -476,7 +476,10 @@ application_event_result fp_acl_ae_system_set_acl_settings(application_request* 
 }
 
 
-// Helper function
+/**
+ * Helper function to check if a paired user is allowed to do the
+ * desired action
+ */
 bool fp_acl_is_user_allowed(nabto_connect* connection, uint32_t requiredPermissions)
 {
     struct fp_acl_user user;

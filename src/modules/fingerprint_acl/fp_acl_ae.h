@@ -50,7 +50,10 @@ bool fp_acl_is_user_paired(application_request* request);
 
 /**
  * This function should be called from the allow_client_access(...)
- * function. This will reject connections early in the connect phase.
+ * function. This will reject connections early in the connect
+ * phase. Some connections can be accepted in this function e.g. local
+ * connections which can be used for pairing or discovery, even if the
+ * user is not paired with the system.
  */
 bool fp_acl_is_connection_allowed(nabto_connect* connection);
 
