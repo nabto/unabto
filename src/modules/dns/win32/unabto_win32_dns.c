@@ -1,11 +1,13 @@
 #include <unabto/unabto_external_environment.h>
+#include <unabto/unabto_util.h>
 
 #include <winsock2.h>
 #include <windows.h>
+#include <string.h>
 
 typedef struct {
     const char* id;
-    uint32_t resolved_addr;
+    uint32_t resolved_addr[NABTO_DNS_RESOLVED_IPS_MAX];
     nabto_dns_status_t status;
 } resolver_state_t;
 
@@ -19,9 +21,16 @@ DWORD WINAPI resolver_thread(LPVOID ctx) {
     struct hostent* he = gethostbyname(state->id);
     if (he == 0) {
         state->status = NABTO_DNS_ERROR;
-    } else {
+    } else if (he->h_addrtype == AF_INET && he->h_length == 4) {
+        uint8_t i;
         state->status = NABTO_DNS_OK;
-        state->resolved_addr = htonl(*((uint32_t*)he->h_addr_list[0]));
+        for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
+            uint8_t* addr = (uint8_t*)he->h_addr_list[i];
+            if (addr == NULL) {
+                break;
+            }
+            READ_U32(state->resolved_addr[i], addr);
+        }
     }
     resolver_is_running = false;
     return 0;
@@ -37,24 +46,18 @@ static int create_detached_resolver() {
 }
 
 void nabto_dns_resolve(const char* id) {
-    uint32_t addr = inet_addr(id);
-    if (addr != INADDR_NONE) {
-        resolver_state.resolved_addr = htonl(addr);
-        resolver_state.status = NABTO_DNS_OK;
-    } else {
-        // host isn't a dotted IP, so resolve it through DNS
-        if (resolver_is_running) {
-            return;
-        }
-
-        resolver_is_running = true;
-        resolver_state.status = NABTO_DNS_NOT_FINISHED;
-        resolver_state.id = id;
-        if (create_detached_resolver() != 0) {
-            resolver_is_running = false;
-            resolver_state.status = NABTO_DNS_ERROR;
-            exit(1);
-        }
+    // host isn't a dotted IP, so resolve it through DNS
+    if (resolver_is_running) {
+        return;
+    }
+    memset(resolver_state.resolved_addr, 0, NABTO_DNS_RESOLVED_IPS_MAX*sizeof(uint32_t));
+    resolver_is_running = true;
+    resolver_state.status = NABTO_DNS_NOT_FINISHED;
+    resolver_state.id = id;
+    if (create_detached_resolver() != 0) {
+        resolver_is_running = false;
+        resolver_state.status = NABTO_DNS_ERROR;
+        exit(1);
     }
 }
 
@@ -64,7 +67,10 @@ nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr) {
     }
     
     if (resolver_state.status == NABTO_DNS_OK) {
-        *v4addr = resolver_state.resolved_addr;
+        uint8_t i;
+        for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
+            v4addr[i] = resolver_state.resolved_addr[i];
+        }
         return NABTO_DNS_OK;
     }
     return NABTO_DNS_ERROR;
