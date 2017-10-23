@@ -24,7 +24,7 @@ void* resolver_thread(void* ctx) {
     } else if (he->h_addrtype == AF_INET && he->h_length == 4) {
         uint8_t i;
         state->status = NABTO_DNS_OK;
-
+        memset(state->resolved_addrs, NULL, NABTO_DNS_RESOLVED_IPS_MAX*sizeof(uint32_t));
         for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
             uint8_t* addr = (uint8_t*)he->h_addr_list[i];
             if (addr == NULL) {
@@ -59,6 +59,7 @@ void nabto_dns_resolve(const char* id) {
     uint32_t addr = inet_addr(id);
     memset(resolver_state.resolved_addrs, 0, sizeof(uint32_t)*NABTO_DNS_RESOLVED_IPS_MAX); 
     if (addr != INADDR_NONE) {
+        memset(state->resolved_addrs, NULL, NABTO_DNS_RESOLVED_IPS_MAX*sizeof(uint32_t));
         resolver_state.resolved_addrs[0] = htonl(addr);
         resolver_state.status = NABTO_DNS_OK;
     } else {
