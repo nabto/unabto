@@ -46,25 +46,18 @@ static int create_detached_resolver() {
 }
 
 void nabto_dns_resolve(const char* id) {
-    uint32_t addr = inet_addr(id);
+    // host isn't a dotted IP, so resolve it through DNS
+    if (resolver_is_running) {
+        return;
+    }
     memset(resolver_state.resolved_addr, 0, NABTO_DNS_RESOLVED_IPS_MAX*sizeof(uint32_t));
-    if (addr != INADDR_NONE) {
-        resolver_state.resolved_addr[0] = htonl(addr);
-        resolver_state.status = NABTO_DNS_OK;
-    } else {
-        // host isn't a dotted IP, so resolve it through DNS
-        if (resolver_is_running) {
-            return;
-        }
-
-        resolver_is_running = true;
-        resolver_state.status = NABTO_DNS_NOT_FINISHED;
-        resolver_state.id = id;
-        if (create_detached_resolver() != 0) {
-            resolver_is_running = false;
-            resolver_state.status = NABTO_DNS_ERROR;
-            exit(1);
-        }
+    resolver_is_running = true;
+    resolver_state.status = NABTO_DNS_NOT_FINISHED;
+    resolver_state.id = id;
+    if (create_detached_resolver() != 0) {
+        resolver_is_running = false;
+        resolver_state.status = NABTO_DNS_ERROR;
+        exit(1);
     }
 }
 
