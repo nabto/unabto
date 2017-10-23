@@ -13,6 +13,10 @@
 #include <sys/epoll.h>
 #endif
 
+#ifdef __MACH__
+#define MSG_NOSIGNAL 0
+#endif
+
 unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, const size_t len, size_t* read) {
     int status;
     int err;
