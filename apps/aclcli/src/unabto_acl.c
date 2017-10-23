@@ -157,8 +157,8 @@ fp_acl_db_status fp_acl_file_list_file(struct configuration* config, struct fp_a
     if(db->load(iterator, &user) != FP_ACL_DB_OK) {
       printf("Could not load user %d", numUsers);
     } else {
-
-      for (int j=0; j<FP_ACL_FP_LENGTH;j++) {
+      int j;
+      for (j=0; j<FP_ACL_FP_LENGTH;j++) {
 	if (j) printf(":");
 	printf("%02x", user.fp[j]);
       }
