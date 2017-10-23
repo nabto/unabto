@@ -476,7 +476,10 @@ application_event_result fp_acl_ae_system_set_acl_settings(application_request* 
 }
 
 
-// Helper function
+/**
+ * Helper function to check if a paired user is allowed to do the
+ * desired action
+ */
 bool fp_acl_is_user_allowed(nabto_connect* connection, uint32_t requiredPermissions)
 {
     struct fp_acl_user user;
@@ -528,16 +531,30 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
     void* user;
     uint32_t requiredSystemPermissions;
     uint32_t requiredUserPermissions;
-    
+
+    // require that it's a fingerprint based connection!
     if (! (connection && connection->hasFingerprint)) {
         return false;
     }
-    
+
     if (aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
         return false;
     }
 
     user = aclDb.find(connection->fingerprint);
+
+    if (!user) {
+        // This is an unknown user, they are only allowed on local
+        // connections if the system allows pairing or if the system
+        // allows local discovery (it always do except when local
+        // access is disabled.)
+        if (connection->isLocal) {
+            requiredSystemPermissions = FP_ACL_SYSTEM_PERMISSION_NONE | FP_ACL_SYSTEM_PERMISSION_LOCAL_ACCESS;
+            return fp_acl_check_system_permissions(&aclSettings, requiredSystemPermissions);
+        } else {
+            return false;
+        }
+    }
 
     requiredSystemPermissions = FP_ACL_SYSTEM_PERMISSION_NONE;
     requiredUserPermissions = FP_ACL_PERMISSION_NONE;
@@ -546,23 +563,19 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
         requiredSystemPermissions |= FP_ACL_SYSTEM_PERMISSION_LOCAL_ACCESS;
     } else {
         requiredSystemPermissions |= FP_ACL_SYSTEM_PERMISSION_REMOTE_ACCESS;
-        if (!user) {
-            return false;
-        }
     }
 
     if (!fp_acl_check_system_permissions(&aclSettings, requiredSystemPermissions)) {
         return false;
     }
 
-    if (user) {
+    {
         struct fp_acl_user u;
         if (aclDb.load(user, &u) != FP_ACL_DB_OK) {
             return false;
         }
         return fp_acl_check_user_permissions(&u, connection->isLocal, requiredUserPermissions);
     }
-    return true;
 }
 
 
