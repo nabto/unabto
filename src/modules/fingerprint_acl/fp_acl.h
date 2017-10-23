@@ -95,7 +95,10 @@ struct fp_acl_db {
     fp_acl_db_status (*save_settings)(struct fp_acl_settings* settings);
 };
 
-// helper functions
+
+// The following functions are helper functions and does not
+// manipulate the acl database. They are just doing the simple bitwise
+// operations correctly.
 
 /**
  * Check if the system is allowed to do what the permission bits
@@ -105,23 +108,24 @@ struct fp_acl_db {
 bool fp_acl_check_system_permissions(struct fp_acl_settings* settings, uint32_t requiredPermissions);
 
 /**
- * Given a valid user in the ACL database, hence user cannot be NULL,
- * check if that user has the required permission bits set.
+ * Given a non null user, check if that user has the required
+ * permission bits set. isLocal refers to the type of the connection,
+ * set it to true if the connection is local.
  */
 bool fp_acl_check_user_permissions(struct fp_acl_user* user, bool isLocal, uint32_t requiredPermissions);
 
 /**
- * Add and save permissions to a user.
+ * Add permissions to a user.
  */
 void fp_acl_user_add_permissions(struct fp_acl_user* user, uint32_t permissions);
 
 /**
- * remove and save permission bits from a user
+ * remove permission bits from a user
  */
 void fp_acl_user_remove_permissions(struct fp_acl_user* user, uint32_t permissions);
 
 /**
- * set and save permission bits on a user.
+ * set permission bits on a user.
  */
 void fp_acl_user_set_permissions(struct fp_acl_user* user, uint32_t permissions);
 
