@@ -13,6 +13,7 @@
 #if defined(WIN32) || defined(WINCE)
 // use winsock
 #define WINSOCK 1
+#include <modules/network/winsock/unabto_winsock.h>
 #else
 // use a bsd api
 #include <fcntl.h>
@@ -34,6 +35,10 @@ void tunnel_loop_select() {
         return;
     }
 
+#if defined(WINSOCK)
+    unabto_winsock_initialize();
+#endif
+    
     unabto_time_auto_update(false);
     // time is updated here and after the select since that's the only blocking point.
     unabto_time_update_stamp();
