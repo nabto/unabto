@@ -323,7 +323,7 @@ uint16_t unabto_tunnel_tcp_get_default_port() {
 }
 
 void unabto_tunnel_tcp_close_stream_reader(tunnel* tunnel) {
-    NABTO_LOG_INFO(("closing socket %i", tunnel->tunnel_type_vars.tcp.sock));
+    NABTO_LOG_INFO(("closing socket %i", tunnel->tunnel_type_vars.tcp.sock.socket));
     tunnel->unabtoReadState = FS_CLOSING;
     unabto_tcp_shutdown(&tunnel->tunnel_type_vars.tcp.sock);
 }

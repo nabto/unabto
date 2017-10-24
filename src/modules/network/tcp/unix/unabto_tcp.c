@@ -32,8 +32,6 @@ unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, con
         }
     } else if (status == 0) {
         NABTO_LOG_TRACE(("TCP connection closed by peer"));
-        unabto_tcp_shutdown(sock);
-        unabto_tcp_close(sock);
         return UTS_FAILED;
     } else {
         *read = status;
@@ -55,7 +53,6 @@ unabto_tcp_status unabto_tcp_write(struct unabto_tcp_socket* sock, const void* b
             return UTS_WOULD_BLOCK;
         } else {
             NABTO_LOG_ERROR(("Send of tcp packet failed"));
-            unabto_tcp_close(sock);
             return UTS_FAILED; 
         }
     }
@@ -84,7 +81,7 @@ unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock){
     return UTS_OK;
 }
 
-unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* dataPtr){
+unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* epollDataPtr){
     sock->socket = socket(AF_INET, SOCK_STREAM, 0);
     if (sock->socket < 0) {
         NABTO_LOG_ERROR(("Could not create socket for TCP"));
@@ -93,7 +90,7 @@ unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* dataPtr)
 #if NABTO_ENABLE_EPOLL
     struct epoll_event ev;
     ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
-    ev.data.ptr = dataPtr;
+    ev.data.ptr = epollDataPtr;
     epoll_ctl(unabto_epoll_fd, EPOLL_CTL_ADD, sock->socket, &ev);
 #endif
 
@@ -165,7 +162,6 @@ unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpo
             return UTS_CONNECTING;
         } else {
             NABTO_LOG_ERROR(("Could not connect to tcp endpoint. %s", strerror(errno)));
-            unabto_tcp_close(sock);
             return UTS_FAILED;
         }
     }
@@ -179,7 +175,6 @@ unabto_tcp_status unabto_tcp_connect_poll(struct unabto_tcp_socket* sock){
     socklen_t len;
     len = sizeof(err);
     if (getsockopt(sock->socket, SOL_SOCKET, SO_ERROR, &err, &len) != 0) {
-        unabto_tcp_close(sock);
         return UTS_FAILED;
     } else {
         if (err == 0) {
@@ -188,7 +183,6 @@ unabto_tcp_status unabto_tcp_connect_poll(struct unabto_tcp_socket* sock){
             return UTS_CONNECTING;
         } else {
             NABTO_LOG_ERROR(("Socket not open %d", err));
-            unabto_tcp_close(sock);
             return UTS_FAILED;
         }
     }

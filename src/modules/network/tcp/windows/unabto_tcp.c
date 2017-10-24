@@ -24,7 +24,6 @@ unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, con
         }
     } else if (status == 0) {
         NABTO_LOG_TRACE(("TCP connection closed by peer"));
-        unabto_tcp_close(sock);
         return UTS_FAILED;
     } else {
         *read = status;
@@ -47,7 +46,6 @@ unabto_tcp_status unabto_tcp_write(struct unabto_tcp_socket* sock, const void* b
             return UTS_WOULD_BLOCK;
         } else {
             NABTO_LOG_ERROR(("Send of tcp packet failed"));
-            unabto_tcp_close(sock);
             return UTS_FAILED; 
         }
     }
@@ -73,7 +71,7 @@ unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock){
 /*
  * TCP sockets are currently blocking until connected on windows
  */
-unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* dataPtr){
+unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* epollDataPtr){
     int flags = 1;
 
     if(!unabto_winsock_initialize()){
@@ -81,9 +79,13 @@ unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* dataPtr)
         return UTS_FAILED;
     }
     sock->socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock->socket == -1) {
+        return UTS_FAILED;
+    }
 
     if (setsockopt(sock->socket, IPPROTO_TCP, TCP_NODELAY, (char *) &flags, sizeof(int)) != 0) {
         NABTO_LOG_ERROR(("Could not set socket option TCP_NODELAY with error: %d", WSAGetLastError()));
+        unabto_tcp_close(sock);
         return UTS_FAILED;
     }
 
@@ -115,7 +117,6 @@ unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpo
             return UTS_CONNECTING;
         } else {
             NABTO_LOG_ERROR(("Could not connect to tcp endpoint. Error code %i: %s", WSAGetLastError(), strerror(errno)));
-            unabto_tcp_close(sock);
             return UTS_FAILED;
         }
     }
