@@ -23,11 +23,10 @@ unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, con
             return UTS_FAILED;
         }
     } else if (status == 0) {
-        NABTO_LOG_INFO(("TCP connection closed by peer"));
+        NABTO_LOG_TRACE(("TCP connection closed by peer"));
         unabto_tcp_close(sock);
         return UTS_FAILED;
     } else {
-        NABTO_LOG_INFO(("buf: %s", (char*)buf));
         *read = status;
         return UTS_OK;
     }
@@ -100,7 +99,7 @@ unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpo
     host.sin_family = AF_INET;
     host.sin_addr.s_addr = htonl(ep->addr);
     host.sin_port = htons(ep->port);
-    NABTO_LOG_INFO(("Connecting to %d.%d.%d.%d:%d ", MAKE_EP_PRINTABLE(*ep)));
+    NABTO_LOG_TRACE(("Connecting to %d.%d.%d.%d:%d ", MAKE_EP_PRINTABLE(*ep)));
     
     status = connect(sock->socket, (struct sockaddr*)&host, sizeof(struct sockaddr_in));
    

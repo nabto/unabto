@@ -31,7 +31,7 @@ unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, con
             return UTS_FAILED;
         }
     } else if (status == 0) {
-        NABTO_LOG_INFO(("TCP connection closed by peer"));
+        NABTO_LOG_TRACE(("TCP connection closed by peer"));
         unabto_tcp_shutdown(sock);
         unabto_tcp_close(sock);
         return UTS_FAILED;
@@ -79,12 +79,10 @@ unabto_tcp_status unabto_tcp_close(struct unabto_tcp_socket* sock){
     return UTS_OK;
 }
 
-
 unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock){
     shutdown(sock->socket, SHUT_WR);
     return UTS_OK;
 }
-
 
 unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* dataPtr){
     sock->socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -93,15 +91,13 @@ unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* dataPtr)
         return UTS_FAILED;
     }
 #if NABTO_ENABLE_EPOLL
-    if (sock->socket >= 0) {
-        struct epoll_event ev;
-        ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
-        ev.data.ptr = dataPtr;
-        epoll_ctl(unabto_epoll_fd, EPOLL_CTL_ADD, sock->socket, &ev);
-    }
+    struct epoll_event ev;
+    ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
+    ev.data.ptr = dataPtr;
+    epoll_ctl(unabto_epoll_fd, EPOLL_CTL_ADD, sock->socket, &ev);
 #endif
 
-    if (sock->socket >= 0) {
+    {
         int flags = 1;
         if (setsockopt(sock->socket, IPPROTO_TCP, TCP_NODELAY, (char *) &flags, sizeof(int)) != 0) {
             NABTO_LOG_ERROR(("Could not set socket option TCP_NODELAY"));
@@ -122,7 +118,7 @@ unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* dataPtr)
         if(setsockopt(sock->socket, SOL_SOCKET, SO_KEEPALIVE, &flags, sizeof(flags)) < 0) {
             NABTO_LOG_ERROR(("could not enable KEEPALIVE"));
         }
-        
+
 #ifndef __MACH__
         flags = 9;
         if(setsockopt(sock->socket, SOL_TCP, TCP_KEEPCNT, &flags, sizeof(flags)) < 0) {
@@ -133,7 +129,7 @@ unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* dataPtr)
         if(setsockopt(sock->socket, SOL_TCP, TCP_KEEPIDLE, &flags, sizeof(flags)) < 0) {
             NABTO_LOG_ERROR(("could not set TCP_KEEPIDLE"));
         }
-    
+
         flags = 60;
         if(setsockopt(sock->socket, SOL_TCP, TCP_KEEPINTVL, &flags, sizeof(flags)) < 0) {
             NABTO_LOG_ERROR(("could not set TCP KEEPINTVL"));
@@ -157,7 +153,7 @@ unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpo
     host.sin_family = AF_INET;
     host.sin_addr.s_addr = htonl(ep->addr);
     host.sin_port = htons(ep->port);
-    NABTO_LOG_INFO(("Connecting to ", PRIep, MAKE_EP_PRINTABLE(*ep)));
+    NABTO_LOG_TRACE(("Connecting to ", PRIep, MAKE_EP_PRINTABLE(*ep)));
     
     status = connect(sock->socket, (struct sockaddr*)&host, sizeof(struct sockaddr_in));
    
@@ -190,8 +186,8 @@ unabto_tcp_status unabto_tcp_connect_poll(struct unabto_tcp_socket* sock){
             return UTS_OK;
         } else if ( err == EINPROGRESS) {
             return UTS_CONNECTING;
-        }else {
-            NABTO_LOG_INFO(("Socket not open %d", err));
+        } else {
+            NABTO_LOG_ERROR(("Socket not open %d", err));
             unabto_tcp_close(sock);
             return UTS_FAILED;
         }
