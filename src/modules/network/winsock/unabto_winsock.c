@@ -228,64 +228,6 @@ void unabto_winsock_shutdown(void)
     WSACleanup();
 }
 
-/**
- * Return a list of sockets which can be read from.
- */
-static uint16_t nabto_read_events(nabto_socket_t* sockets, uint16_t maxSockets, int timeout) {
-    fd_set read_fds;
-    unsigned int max_fd = 0;
-
-    struct timeval timeout_val;
-    int nfds;
-    int n = 0;
-                        
-    nabto_main_context* nmc = unabto_get_main_context();
-
-    timeout_val.tv_sec = timeout/1000;
-    timeout_val.tv_usec = (timeout*1000)%1000000;
-
-    FD_ZERO(&read_fds);
-    max_fd = 0;
-
-    // Rearm the selectors for each call
-
-#if NABTO_ENABLE_LOCAL_ACCESS
-    if (nmc->socketLocal != NABTO_INVALID_SOCKET) {
-        FD_SET(nmc->socketLocal, &read_fds);
-        max_fd = MAX(max_fd, nmc->socketLocal);
-    }
-#endif
-#if NABTO_ENABLE_REMOTE_ACCESS
-    if (nmc->socketGSP != NABTO_INVALID_SOCKET) {
-        FD_SET(nmc->socketGSP, &read_fds);
-        max_fd = MAX(max_fd, nmc->socketGSP);
-    }
-#endif
-    
-    nfds = select(max_fd+1, &read_fds, NULL, NULL, &timeout_val);
-    if (nfds < 0) {
-        NABTO_LOG_ERROR(("Select failed %i", WSAGetLastError()));
-    }
-    if (nfds > 0) {
-#if NABTO_ENABLE_LOCAL_ACCESS
-        if (nmc->socketLocal != NABTO_INVALID_SOCKET && FD_ISSET(nmc->socketLocal, &read_fds)) {
-            if (n < maxSockets) {
-                sockets[n++] = nmc->socketLocal;
-            }
-        }
-#endif
-#if NABTO_ENABLE_REMOTE_ACCESS
-        if (nmc->socketGSP != NABTO_INVALID_SOCKET && FD_ISSET(nmc->socketGSP, &read_fds)) {
-            if (n < maxSockets) {
-                sockets[n++] = nmc->socketGSP;
-            }
-        }
-#endif
-    }
-    return n;
-}
-
-
 
 void unabto_network_select_add_to_read_fd_set(fd_set* readFds, int* maxReadFd) {
     socketListElement* se;

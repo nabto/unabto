@@ -235,58 +235,6 @@ ssize_t nabto_write(nabto_socket_t sock,
     }
     return res;
 }
-
-/**
- * Return a list of sockets which can be read from.
- */
-uint16_t nabto_read_events(nabto_socket_t* sockets, uint16_t maxSockets, int timeout) {
-    int nfds;
-    uint16_t resultN;
-    fd_set read_fds;
-    unsigned int max_fd = 0;
-    struct timeval timeout_val;
-    socketListElement* se;
-        
-    FD_ZERO(&read_fds);
-    max_fd = 0;
-
-
-
-    DL_FOREACH(socketList, se) {
-        FD_SET(se->socket, &read_fds);
-        max_fd = MAX(max_fd, se->socket);
-    }
-
-    timeout_val.tv_sec = timeout/1000;
-    timeout_val.tv_usec = (timeout*1000)%1000000;
-    
-    nfds = select(max_fd+1, &read_fds, NULL, NULL, &timeout_val);
-
-    resultN = 0;
-
-    if (nfds == 0) {
-        return 0;
-    }
-
-    if (nfds < 0) {
-        NABTO_LOG_ERROR(("Select returned error"));
-        return 0;
-    }
-
-    DL_FOREACH(socketList, se) {
-        if (resultN >= maxSockets) {
-            break;
-        }
-
-        if (FD_ISSET(se->socket, &read_fds)) {
-            sockets[resultN] = se->socket;
-            resultN++;
-        }
-    }
-    return resultN;
-}
-
-
 void unabto_network_select_add_to_read_fd_set(fd_set* readFds, int* maxReadFd) {
     socketListElement* se;
     DL_FOREACH(socketList, se) {

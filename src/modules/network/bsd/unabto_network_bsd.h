@@ -18,7 +18,6 @@ extern "C" {
 #endif
 
 void nabto_bsd_set_nonblocking(nabto_socket_t* socketDescriptor);
-uint16_t nabto_read_events(nabto_socket_t* sockets, uint16_t maxSockets, int timeout);
 
 #ifdef __cplusplus
 } //extern "C"
