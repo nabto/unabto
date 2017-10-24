@@ -179,6 +179,7 @@ bool framework_event_poll()
 {
     application_request     *req;
     struct naf_handle_s     *handle;
+    bool status;
 
     //Ask for the request in the application
     req = NULL;
@@ -195,7 +196,7 @@ bool framework_event_poll()
         return false;
     }
 
-    bool status = framework_get_async_response(handle);
+    status = framework_get_async_response(handle);
     framework_release_handle(handle);
     return status;
 }
@@ -212,6 +213,7 @@ bool framework_get_async_response(struct naf_handle_s *handle)
     uint8_t*                   buf = nabtoCommunicationBuffer;
     uint8_t*                   end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
     nabto_connect*             con = handle->connection;
+    uint16_t                   availableForData;
     ptr = buf;
     
     /* Write packet header and crypto payload header into buf. */
@@ -231,21 +233,18 @@ bool framework_get_async_response(struct naf_handle_s *handle)
     }
     
     /* Set up a write buffer to write into buf (after crypto payload header). */
-    uint16_t availableForData = unabto_crypto_max_data(&con->cryptoctx, (uint16_t)(end - ptr));
+    availableForData = unabto_crypto_max_data(&con->cryptoctx, (uint16_t)(end - ptr));
     unabto_buffer_init(&w_buf, ptr, MIN(availableForData, NABTO_RESPONSE_MAX_SIZE));
     unabto_query_response_init(&queryResponse, &w_buf);
 
     res = application_poll(&handle->applicationRequest, &queryResponse);
     NABTO_LOG_TRACE(("APPREQ application_poll: result=%" PRItext, result_s(res)));
 
-    bool status;
     if (res != AER_REQ_RESPONSE_READY) {
-        status = send_exception(handle->connection, &handle->header, res);
+        return send_exception(handle->connection, &handle->header, res);
     } else {
-        status = send_and_encrypt_packet_con(handle->connection, buf, end, ptr, unabto_query_response_used(&queryResponse), ptr - 6);
+        return send_and_encrypt_packet_con(handle->connection, buf, end, ptr, unabto_query_response_used(&queryResponse), ptr - 6);
     }
-
-    return status;
 }
 #endif
 
