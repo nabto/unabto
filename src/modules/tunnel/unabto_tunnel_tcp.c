@@ -123,27 +123,21 @@ void tcp_forward(tunnel* tunnel) {
             size_t maxRead = MIN(NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE, canWriteToStreamBytes);
 
             status = unabto_tcp_read(&tunnel->tunnel_type_vars.tcp.sock, readBuffer, maxRead, &readen);
-            if (status == UTS_OK) {
-                if (readen == 0) {
-                    // eof
+            if (status == UTS_EOF) {
+                unabto_tunnel_tcp_close_tcp_reader(tunnel);
+                break;
+            } else if (status == UTS_OK) {
+                unabto_stream_hint hint;
+                size_t written = unabto_stream_write(tunnel->stream, readBuffer, readen, &hint);
+                if (hint != UNABTO_STREAM_HINT_OK) {
+                    NABTO_LOG_TRACE(("Can't write to stream"));
                     unabto_tunnel_tcp_close_tcp_reader(tunnel);
                     break;
-                } else if (readen > 0) {
-                    unabto_stream_hint hint;
-                    size_t written = unabto_stream_write(tunnel->stream, readBuffer, readen, &hint);
-                    if (hint != UNABTO_STREAM_HINT_OK) {
-                        NABTO_LOG_TRACE(("Can't write to stream"));
-                        unabto_tunnel_tcp_close_tcp_reader(tunnel);
-                        break;
-                    }
+                }
                 
-                    if (written != readen) {
-                        // Invalid state
-                        NABTO_LOG_ERROR(("Impossible state! wanted to write %i, wrote %i, unabto_said it could write %i bytes", readen, written, canWriteToStreamBytes));
-                    }
-                } else { // Should not happen
-                    unabto_tunnel_tcp_close_tcp_reader(tunnel);
-                    break;
+                if (written != readen) {
+                    // Invalid state
+                    NABTO_LOG_ERROR(("Impossible state! wanted to write %i, wrote %i, unabto_said it could write %i bytes", readen, written, canWriteToStreamBytes));
                 }
             } else if (status == UTS_WOULD_BLOCK) {
                 break;

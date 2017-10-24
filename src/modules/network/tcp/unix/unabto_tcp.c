@@ -32,7 +32,7 @@ unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, con
         }
     } else if (status == 0) {
         NABTO_LOG_TRACE(("TCP connection closed by peer"));
-        return UTS_FAILED;
+        return UTS_EOF;
     } else {
         *read = status;
         return UTS_OK;
@@ -44,18 +44,16 @@ unabto_tcp_status unabto_tcp_write(struct unabto_tcp_socket* sock, const void* b
     NABTO_LOG_TRACE(("Writing %i bytes to tcp socket", len));
     status = send(sock->socket, buf, len, MSG_NOSIGNAL);
     NABTO_LOG_TRACE(("tcp send status: %i", status));
-    if (status > 0) {
-        *written = status;
-        return UTS_OK;
-    } else if (status < 0) {
+    if (status < 0) {
         int err = errno;
         if ((err == EAGAIN) || err == EWOULDBLOCK) {
             return UTS_WOULD_BLOCK;
         } else {
             NABTO_LOG_ERROR(("Send of tcp packet failed"));
             return UTS_FAILED; 
-        }
+        } 
     }
+    *written = status;
     return UTS_OK;
 }
 

@@ -33,6 +33,10 @@ bool unabto_tcp_fallback_handle_connect(nabto_connect* con);
 void unabto_tcp_fallback_read_packets(nabto_connect* con);
 bool unabto_tcp_fallback_handle_write(nabto_connect* con);
 
+/**
+ * This function is called from this module when a tcp socket has been
+ * closed in an operation inside this module.
+ */
 void close_tcp_socket(nabto_connect* con);
 
 bool unabto_tcp_fallback_module_init()
@@ -184,7 +188,8 @@ bool unabto_tcp_fallback_init(nabto_connect* con) {
 
 /**
  * This is called by unabto when the resource is released. All
- * resources must have been released when returning.
+ * resources must have been released when returning. This function
+ * should not be called from this module.
  */
 bool unabto_tcp_fallback_close(nabto_connect* con) {
     if (con->tcpFallbackConnectionState != UTFS_CLOSED) {
@@ -204,10 +209,14 @@ void unabto_tcp_fallback_read_packets(nabto_connect* con) {
 
             if (status == UTS_OK) {
                 fbConn->recvBufferLength+=readen;
+            } else if (status == UTS_EOF) {
+                close_tcp_socket(con);
+                return;
             } else if (status == UTS_WOULD_BLOCK) {
                 return;
             } else { // UTS_FAILED
                 NABTO_LOG_ERROR((PRI_tcp_fb "unabto_tcp_fallback_read_single_packet failed", TCP_FB_ARGS(con)));
+                close_tcp_socket(con);
                 return;
             }
         }
@@ -221,16 +230,14 @@ void unabto_tcp_fallback_read_packets(nabto_connect* con) {
             status = unabto_tcp_read(&fbConn->socket, fbConn->recvBuffer + fbConn->recvBufferLength, packetLength - fbConn->recvBufferLength, &readen);
 
             if (status == UTS_OK) {
-                if (readen == 0) {
-                    NABTO_LOG_INFO((PRI_tcp_fb "TCP fallback connection closed by peer", TCP_FB_ARGS(con)));
-                    unabto_tcp_fallback_close(con);
-                    return;
-                } else {
-                    fbConn->recvBufferLength += readen;
-                }
+                fbConn->recvBufferLength += readen;
+            } else if (status == UTS_EOF) {
+                close_tcp_socket(con);
+                return;
             } else if (status == UTS_WOULD_BLOCK) {
                 return;
             } else { // UTS_FAILED
+                close_tcp_socket(con);
                 NABTO_LOG_ERROR((PRI_tcp_fb "Tcp read failed", TCP_FB_ARGS(con)));
                 return;
             }
@@ -264,26 +271,17 @@ static bool unabto_tcp_fallback_create_socket(unabto_tcp_fallback_connection* fb
     }
 }
 
-static void unabto_tcp_fallback_close_socket(unabto_tcp_fallback_connection* fbConn)
-{
-    unabto_tcp_close(&fbConn->socket);
-}
-
-
 
 bool unabto_tcp_fallback_connect(nabto_connect* con) {
     unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
-    int flags;
-    nabto_endpoint ep;
     unabto_tcp_status status;
 
     if (!unabto_tcp_fallback_create_socket(fbConn, con)) {
         NABTO_LOG_ERROR((PRI_tcp_fb "Could not create socket for tcp fallback.", TCP_FB_ARGS(con)));
         return false;
     }
-    ep.addr = con->fallbackHost.addr;
-    ep.port = con->fallbackHost.port;
-    status = unabto_tcp_connect(&fbConn->socket, &ep);
+    
+    status = unabto_tcp_connect(&fbConn->socket, &con->fallbackHost);
 
     NABTO_LOG_INFO((PRI_tcp_fb "Ep. " PRIep, TCP_FB_ARGS(con), MAKE_EP_PRINTABLE(con->fallbackHost)));
 
@@ -293,7 +291,7 @@ bool unabto_tcp_fallback_connect(nabto_connect* con) {
         con->tcpFallbackConnectionState = UTFS_CONNECTING;
     } else { // UTS_FAILED
         NABTO_LOG_ERROR((PRI_tcp_fb "Could not connect to fallback tcp endpoint. %s", TCP_FB_ARGS(con), strerror(errno)));
-        con->tcpFallbackConnectionState = UTFS_CLOSED;
+        close_tcp_socket(con);
         return false;
     }
     return true;
@@ -306,15 +304,14 @@ bool unabto_tcp_fallback_handle_connect(nabto_connect* con) {
         con->tcpFallbackConnectionState = UTFS_CONNECTED;
         return true;
     } else { // UTS_FAILED
-        unabto_tcp_fallback_close_socket(fbConn);
-        con->tcpFallbackConnectionState = UTFS_CLOSED;
-        return true;
+        close_tcp_socket(con);
+        return false;
     }
 }
 
 void close_tcp_socket(nabto_connect* con) {
     unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
-    unabto_tcp_fallback_close_socket(fbConn);
+    unabto_tcp_close(&fbConn->socket);
 
     con->tcpFallbackConnectionState = UTFS_CLOSED;
     unabto_tcp_fallback_socket_closed(con);

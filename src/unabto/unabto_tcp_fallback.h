@@ -76,7 +76,8 @@ bool unabto_tcp_fallback_init(nabto_connect* con);
 /**
  * Close and cleanup fallback resources associated with a connection,
  * this is called when the nabto_connection is released. Meaning this
- * should just do a close on the TCP socket.
+ * should just do a close on the TCP socket. This function should not
+ * trigger a call to unabto_tcp_fallback_socket_closed.
  */
 bool unabto_tcp_fallback_close(nabto_connect* con);
 
