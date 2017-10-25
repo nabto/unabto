@@ -78,6 +78,9 @@ static char* default_hosts[] = { "127.0.0.1", "localhost", 0 };
 static char device_name[AMP_MAX_DEVICE_NAME_LENGTH];
 static const char* device_product = "uNabto Video";
 static const char* device_icon = "video.png";
+static char* device_interface_id_ = "8eee78e7-8f22-4019-8cee-4dcbc1c8186c";
+static uint16_t device_interface_version_major_ = 1;
+static uint16_t device_interface_version_minor_ = 0;
 
 // PPKA (RSA fingerprint) access control
 static struct fp_acl_db fp_acl_db;
@@ -641,8 +644,15 @@ application_event_result application_event(application_request* request,
                                            unabto_query_response* query_response)
 {
     NABTO_LOG_INFO(("Nabto application_event: %u", request->queryId));
+
+    if (request->queryId == 0) {
+        // AMP get_interface_info.json
+        if (!write_string(query_response, device_interface_id_)) return AER_REQ_RSP_TOO_LARGE;
+        if (!unabto_query_write_uint16(query_response, device_interface_version_major_)) return AER_REQ_RSP_TOO_LARGE;
+        if (!unabto_query_write_uint16(query_response, device_interface_version_minor_)) return AER_REQ_RSP_TOO_LARGE;
+        return AER_REQ_RESPONSE_READY;
     
-    if (request->queryId == 10000) {
+    } else if (request->queryId == 10000) {
         // AMP get_public_device_info.json
         if (!write_string(query_response, device_name)) return AER_REQ_RSP_TOO_LARGE;
         if (!write_string(query_response, device_product)) return AER_REQ_RSP_TOO_LARGE;
