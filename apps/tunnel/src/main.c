@@ -78,7 +78,7 @@ static char* default_hosts[] = { "127.0.0.1", "localhost", 0 };
 static char device_name[AMP_MAX_DEVICE_NAME_LENGTH];
 static const char* device_product = "uNabto Video";
 static const char* device_icon = "video.png";
-static char* device_interface_id_ = "8eee78e7-8f22-4019-8cee-4dcbc1c8186c";
+static const char* device_interface_id_ = "8eee78e7-8f22-4019-8cee-4dcbc1c8186c";
 static uint16_t device_interface_version_major_ = 1;
 static uint16_t device_interface_version_minor_ = 0;
 
