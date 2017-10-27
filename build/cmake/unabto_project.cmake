@@ -212,6 +212,7 @@ if(${CMAKE_SYSTEM} MATCHES Linux)
   if (HAVE_PHTREAD_LIB)
     list(APPEND unabto_link_libraries pthread)
   else()
+    list(APPEND unabto_link_libraries -pthread)
     list(APPEND unabto_definitions -pthread)
   endif()
 
