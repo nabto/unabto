@@ -4,7 +4,7 @@
  * according to the OpenSSL license [found in ../../LICENSE].
  * ====================================================================
  */
-#include <modules/crypto/openssl_armv4/unabto_openssl_minimal_sha256.h>
+#include <modules/crypto/openssl_armv4/unabto_openssl_armv4_sha256.h>
 
 # include <stdlib.h>
 # include <string.h>

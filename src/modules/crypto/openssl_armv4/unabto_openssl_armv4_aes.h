@@ -1,5 +1,5 @@
-#ifndef _UNABTO_OPENSSL_MINIMAL_AES_H_
-#define _UNABTO_OPENSSL_MINIMAL_AES_H_
+#ifndef _UNABTO_OPENSSL_ARMV4_AES_H_
+#define _UNABTO_OPENSSL_ARMV4_AES_H_
 
 #include <unabto_platform_types.h>
 

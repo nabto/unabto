@@ -6,10 +6,10 @@
 
 
 # UNABTO_RANDOM_MODULE
-# possibilities: dummy openssl libtomcrypt openssl_armv4 none
+# possibilities: dummy openssl libtomcrypt openssl_armv4 openssl_mips none
 
 # UNABTO_CRYPTO_MODULE
-# possibilities: generic openssl libtomcrypt openssl_armv4 none
+# possibilities: generic openssl libtomcrypt openssl_armv4 openssl_mips none
 
 # UNABTO_NETWORK_MODULE
 # possibilities: bsd winsock none
@@ -126,7 +126,10 @@ endif()
 if (UNABTO_RANDOM_MODULE MATCHES dummy)
   list(APPEND unabto_src ${unabto_module_random_dummy_src})
 elseif(UNABTO_RANDOM_MODULE MATCHES openssl_armv4)
-  list(APPEND unabto_src ${unabto_module_random_openssl_minimal_armv4_src})
+  list(APPEND unabto_src ${unabto_module_random_openssl_armv4_src})
+  set(unabto_use_asm 1)
+elseif(UNABTO_RANDOM_MODULE MATCHES openssl_mips)
+  list(APPEND unabto_src ${unabto_module_random_openssl_mips_src})
   set(unabto_use_asm 1)
 elseif(UNABTO_RANDOM_MODULE MATCHES openssl)
   list(APPEND unabto_src ${unabto_module_openssl_random_src})
@@ -158,7 +161,10 @@ elseif(UNABTO_CRYPTO_MODULE MATCHES libtomcrypt)
     list(APPEND unabto_definitions "-DARGTYPE=2")
   endif()
 elseif(UNABTO_CRYPTO_MODULE MATCHES openssl_armv4)
-  list(APPEND unabto_src ${unabto_module_crypto_openssl_minimal_armv4_src})
+  list(APPEND unabto_src ${unabto_module_crypto_openssl_armv4_src})
+  set(unabto_use_asm 1)
+elseif(UNABTO_CRYPTO_MODULE MATCHES openssl_mips)
+  list(APPEND unabto_src ${unabto_module_crypto_openssl_mips_src})
   set(unabto_use_asm 1)
 elseif(UNABTO_CRYPTO_MODULE MATCHES openssl)
   list(APPEND unabto_src ${unabto_module_crypto_openssl_src})
