@@ -192,7 +192,6 @@ if (UNABTO_EXTERNAL_BUILD_ROOT)
 endif()
 
 list(APPEND unabto_src ${unabto_module_dns_fallback_src})
-list(APPEND unabto_definitions "-DJSON_USE_EXCEPTION=0")
 if(${CMAKE_SYSTEM} MATCHES Linux)
 
   # Glibc 2.17 and newer dows not use -lrt and moxa does not have the lib at all.
@@ -282,3 +281,6 @@ message(STATUS "Configuration of uNabto")
 message(STATUS "  Crypto module: " ${UNABTO_CRYPTO_MODULE})
 message(STATUS "  Random module: " ${UNABTO_RANDOM_MODULE})
 message(STATUS "  Network module: " ${UNABTO_NETWORK_MODULE})
+message(STATUS "  unabto_link_libraries: " "${unabto_link_libraries}")
+message(STATUS "  unabto_include_directories: " "${unabto_include_directories}")
+message(STATUS "  unabto_definitions: " "${unabto_definitions}")
