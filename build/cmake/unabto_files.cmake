@@ -187,17 +187,29 @@ set(unabto_module_crypto_openssl_src
 source_group(modules\\crypto\\openssl FILES ${unabto_module_crypto_openssl_src})
 
 
-set(unabto_module_crypto_openssl_minimal_armv4_src
-  ${UNABTO_ROOT}/3rdparty/openssl_armv4/unabto_openssl_minimal_sha256.c
-  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_armv4/unabto_openssl_minimal_hmac_sha256.c
+set(unabto_module_crypto_openssl_armv4_src
+  ${UNABTO_ROOT}/3rdparty/openssl_armv4/unabto_openssl_armv4_sha256.c
+  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_armv4/unabto_openssl_armv4_hmac_sha256.c
   ${UNABTO_ROOT}/3rdparty/openssl_armv4/asm/sha256-armv4.S
   ${UNABTO_ROOT}/3rdparty/openssl_armv4/asm/aes-armv4.S
-  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_armv4/unabto_openssl_minimal_aes_cbc.c)
-set(unabto_module_random_openssl_minimal_armv4_src
+  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_armv4/unabto_openssl_armv4_aes_cbc.c)
+set(unabto_module_random_openssl_armv4_src
   ${UNABTO_ROOT}/3rdparty/openssl_armv4/asm/aes-armv4.S
-  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_armv4/unabto_openssl_minimal_aes_cbc.c
-  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_armv4/unabto_openssl_minimal_random.c)
-source_group(modules\\crypto\\openssl_armv4 FILES ${unabto_random_module_openssl_minimal_armv4_src} ${unabto_module_crypto_openssl_minimal_armv4_src})
+  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_armv4/unabto_openssl_armv4_aes_cbc.c
+  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_armv4/unabto_openssl_armv4_random.c)
+source_group(modules\\crypto\\openssl_armv4 FILES ${unabto_random_module_openssl_armv4_src} ${unabto_module_crypto_openssl_armv4_src})
+
+set(unabto_module_crypto_openssl_mips_src
+  ${UNABTO_ROOT}/3rdparty/openssl_mips/unabto_openssl_mips_sha256.c
+  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_mips/unabto_openssl_mips_hmac_sha256.c
+  ${UNABTO_ROOT}/3rdparty/openssl_mips/asm/sha256-mips.S
+  ${UNABTO_ROOT}/3rdparty/openssl_mips/asm/aes-mips.S
+  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_mips/unabto_openssl_mips_aes_cbc.c)
+set(unabto_module_random_openssl_mips_src
+  ${UNABTO_ROOT}/3rdparty/openssl_mips/asm/aes-mips.S
+  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_mips/unabto_openssl_mips_aes_cbc.c
+  ${UNABTO_MODULES_SRC_DIR}/crypto/openssl_mips/unabto_openssl_mips_random.c)
+source_group(modules\\crypto\\openssl_mips FILES ${unabto_random_module_openssl_mips_mips_src} ${unabto_module_crypto_openssl_mips_mips_src})
 
 
 set(unabto_module_crypto_libtomcrypt_src

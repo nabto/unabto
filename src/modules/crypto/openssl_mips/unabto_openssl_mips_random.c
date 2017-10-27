@@ -2,7 +2,7 @@
 #include <unabto/unabto_external_environment.h>
 #include <unabto/unabto_logging.h>
 
-#include "unabto_openssl_minimal_aes.h"
+#include "unabto_openssl_mips_aes.h"
 
 enum {
     UNABTO_PRNG_COUNTER_BYTE_LENGTH = 16

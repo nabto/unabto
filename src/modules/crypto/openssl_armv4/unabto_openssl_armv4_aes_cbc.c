@@ -1,6 +1,6 @@
 #include <unabto/unabto_aes_cbc.h>
 
-#include "unabto_openssl_minimal_aes.h"
+#include "unabto_openssl_armv4_aes.h"
 
 static AES_KEY ctx;
 

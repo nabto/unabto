@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "unabto_openssl_minimal_sha256.h"
+#include "unabto_openssl_armv4_sha256.h"
 
 static SHA256_CTX sha_ctx;
 static uint8_t block_pad[SHA256_BLOCK_LENGTH];
