@@ -52,11 +52,6 @@ struct{
 }pushCtx;
 
     
-/**
- * Initialization of push notifications. Should be called before using push. 
- */
-void unabto_push_init(void);
-
 /* ------------------------------------------------------------- *
  * These next two functions must be implemented by the developer *
  * ------------------------------------------------------------- */
@@ -98,6 +93,12 @@ bool unabto_push_notification_remove(uint32_t seq);
  * @return size The data size available for push notifications
  */
 uint16_t unabto_push_notification_data_size(void);
+
+/**
+ * Initialization function for push notifications called by the core.
+ * Should never be called from the application. 
+ */
+void unabto_push_init(void);
 
 
 /**
