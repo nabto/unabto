@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
  */
-#include "stateful_push_service.h"
+#include "push_service.h"
 #include <unabto/unabto_protocol_defines.h>
 #include <unabto/unabto_util.h>
 #include <platforms/unabto_printf_logger.h>

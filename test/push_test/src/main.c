@@ -1,7 +1,7 @@
 /**
  *  Implementation of main for uNabto SDK demo
  */
-#include "modules/stateful_push_service/stateful_push_service.h"
+#include "modules/push_service/push_service.h"
 #include "unabto/unabto_env_base.h"
 #include "unabto/unabto_common_main.h"
 #include "unabto/unabto_logging.h"
