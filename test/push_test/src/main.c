@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
     nabto_main_setup* nms = unabto_init_context(); 
 
     // setting push notification data 
-    uint16_t pnsid = 1;
+    uint16_t pnsid = UNABTO_PUSH_PNS_ID_FIREBASE;
     int testContext = 1;
     const char* sd = "{\"to\": \"58a88e8b-83f1-429d-8863-8d8180ae83ed\"}";
     const char* titleKey = "title_1";

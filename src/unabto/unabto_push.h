@@ -27,6 +27,11 @@ typedef enum {
 } unabto_push_hint;
 
 typedef enum {
+    UNABTO_PUSH_PNS_ID_FIREBASE = 1,
+    UNABTO_PUSH_PNS_ID_WEBHOOK = 2
+} unabto_push_pns_id;
+
+typedef enum {
     UNABTO_PUSH_IDLE,
     UNABTO_PUSH_WAITING_SEND,
     UNABTO_PUSH_AWAITING_ACK,
