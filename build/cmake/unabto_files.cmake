@@ -138,10 +138,10 @@ source_group(platforms\\win32 FILES ${unabto_platform_win32_src})
 set(unabto_module_application_event_dummy_src
   ${UNABTO_MODULES_SRC_DIR}/application_event/dummy/application_event_dummy.c)
 
-# modules/stateful_push_service
-set (unabto_module_stateful_push_service_src
-  ${UNABTO_MODULES_SRC_DIR}/stateful_push_service/stateful_push_service.c)
-source_group(modules\\stateful_push_service FILES ${unabto_module_stateful_push_service_src})
+# modules/push_service
+set (unabto_module_push_service_src
+  ${UNABTO_MODULES_SRC_DIR}/push_service/push_service.c)
+source_group(modules\\push_service FILES ${unabto_module_push_service_src})
 
 # modules/network/tcp
 set (unabto_module_tcp_unix_src

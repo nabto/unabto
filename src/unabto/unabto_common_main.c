@@ -177,6 +177,10 @@ bool unabto_init(void) {
     unabto_stream_init();
 #endif
 
+#if NABTO_ENABLE_PUSH
+    unabto_push_init();
+#endif
+
 #if NABTO_ENABLE_REMOTE_ACCESS
     if (!nabto_context_init()) {
         NABTO_LOG_ERROR(("Failed to initialize buffers"));

@@ -8,7 +8,7 @@ set(src
   ${unabto_src}
   ${unabto_module_cli_gopt_src}
   ${unabto_module_util_src}
-  ${unabto_module_stateful_push_service_src}
+  ${unabto_module_push_service_src}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
 )
 

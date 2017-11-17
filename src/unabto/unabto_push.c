@@ -30,9 +30,11 @@ bool unabto_push_seq_exists(uint32_t seq);
  * ---------------------------------------------------- */
 
 unabto_push_element pushSeqQ[NABTO_PUSH_QUEUE_LENGTH];
-/* -------------------------------------------------------*
- * initialization function to be called before using push *
- * -------------------------------------------------------*/
+
+/* -------------------------------------------------------------*
+ * initialization function called by the core before using push *
+ * should not be called from the application                    *
+ * -------------------------------------------------------------*/
 void unabto_push_init(void){
     pushCtx.nextPushEvent = NULL;
     pushCtx.pushSeqQHead = 0;

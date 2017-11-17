@@ -1,8 +1,8 @@
 /*
  * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
  */
-#ifndef _STATEFUL_PUSH_SERVICE_H_
-#define _STATEFUL_PUSH_SERVICE_H_
+#ifndef _PUSH_SERVICE_H_
+#define _PUSH_SERVICE_H_
 #include "unabto/unabto_push.h"
 
 
@@ -109,4 +109,4 @@ void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint);
 } //extern "C"
 #endif
 
-#endif // _STATEFUL_PUSH_SERVICE_H_
+#endif // _PUSH_SERVICE_H_
