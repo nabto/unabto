@@ -46,19 +46,19 @@ bool unabto_provision_new(nabto_main_setup* nms, provision_context_t* context) {
 bool unabto_provision_set_key(nabto_main_setup *nms, char *key)
 {
     size_t pskLen = strlen(key);
+    uint8_t psk[16] = { 0 };
 
     if (!key || pskLen != PRE_SHARED_KEY_SIZE * 2) {
         NABTO_LOG_ERROR(("Invalid key: %s", key));
         return false;
     }
 
-    if (!unabto_read_psk_from_hex(key, nms->presharedKey, 16)) {
+    if (!unabto_read_psk_from_hex(key, psk, 16)) {
         return false;
     }
-
-    nms->secureAttach= true;
-    nms->secureData = true;
-    nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
+    if (!unabto_set_aes_crypto(nms, psk, 16)) {
+        return false;
+    }
     return true;
 }
 

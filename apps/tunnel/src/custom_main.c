@@ -12,13 +12,11 @@ int main() {
 
     // Setup device id.
     nms->id = "deviceid";
+
+    uint8_t psk[16] = { 0 };
     
     // Setup encryption.
-    nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
-    nms->secureAttach = true;
-    nms->secureData = true;
-    // Copy the preshared key into unabto
-    // memcpy(nms->presharedKey, key,16);
+    unabto_set_aes_crypto(nms, psk, 16);
     
     // Loop forever.
     tunnel_loop_select();

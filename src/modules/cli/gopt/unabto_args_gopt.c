@@ -92,6 +92,8 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
     const char *dnsAddress;
     const char *dnsFallbackDomain;
 #endif
+
+    uint8_t psk[16] = { 0 };
     
     const char x0s[] = "h?";     const char* x0l[] = { "help", "HELP", 0 };
     const char x1s[] = "a";      const char* x1l[] = { "localAddress", 0 };
@@ -210,16 +212,16 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
     }
 
     if ( gopt_arg( options, 'k', &preSharedKey)) {
-        if (!unabto_read_psk_from_hex(preSharedKey, nms->presharedKey, 16)) {
+        if (!unabto_read_psk_from_hex(preSharedKey, psk, 16)) {
             return false;
         }
     }
 
     if (gopt(options, 's')) {
-        nms->secureAttach= true;
-        nms->secureData = true;
 #if NABTO_ENABLE_CONNECTIONS
-        nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
+        if (!unabto_set_aes_crypto(nms, psk, 16)) {
+            return false;
+        }
 #endif
     }
     if (gopt(options, 'n')) {

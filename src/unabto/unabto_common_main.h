@@ -53,10 +53,8 @@
  * If you need encrypotion in your application you need to set it up
  * in step 2.
  * 
- * nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256
- * nms->secureAttach = 1;
- * nms->secureData = 1;
- * memcpy(&nms->presharedKey, yourKey, PRE_SHARED_KEY_SIZE);
+ * uint8_t preSharedKey[16] = { the device preshared key }
+ * unabto_set_aes_crypto(nms, preSharedKey, 16);
  */
 
 #ifdef __cplusplus

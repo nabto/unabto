@@ -119,7 +119,7 @@ static bool test_parse_args(const char * progname, int argc, char* argv[], nabto
             }
         }
 #if NABTO_ENABLE_CONNECTIONS
-        nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
+        unabto_set_aes_crypto(nms, preSharedKey, 16);
 #endif
     }
 

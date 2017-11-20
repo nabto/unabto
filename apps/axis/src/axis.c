@@ -52,7 +52,8 @@ int main(int argc, char* argv[]) {
     unabto_epoll_init();
 
     char* deviceid;
-    char* preSharedKey; 
+    char* preSharedKey;
+    uint8_t psk[16];
     if (param_get ("deviceid", &deviceid) != 0) {
         syslog(LOG_CRIT, "Could not get parameter deviceid\n");
         exit(1);
@@ -65,13 +66,11 @@ int main(int argc, char* argv[]) {
         syslog(LOG_CRIT, "Could not get parameter sharedkey\n");
         exit(1);
     }
-    if (!unabto_read_psk_from_hex(preSharedKey, nms->presharedKey, 16)) {
+    if (!unabto_read_psk_from_hex(preSharedKey, psk, 16)) {
         syslog(LOG_CRIT, "Could not parse parameter sharedkey\n");
         exit(1);
     }
-    nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
-    nms->secureAttach = true;
-    nms->secureData = true;
+    unabto_set_aes_crypto(nms, psk, 16);
     param_free(preSharedKey);
     tunnel_loop_epoll();
     return 0;

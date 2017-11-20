@@ -197,11 +197,12 @@ portBASE_TYPE xReturn = pdPASS;
         nms->ipAddress = FreeRTOS_htonl(ipAddress);
 
         /* setup crypto */
-        nms->secureAttach = true;
-        nms->secureData = true;
-        nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
-        memcpy(nms->presharedKey, pcApplicationNabtoDeviceKey(), PRE_SHARED_KEY_SIZE);
 
+        if (unabto_set_aes_crypto(nms, pcApplicationNabtoDeviceKey(), PRE_SHARED_KEY_SIZE) == false)
+        {
+            xReturn = pdFAIL;
+        }
+        
         if( unabto_init() == false )
         {
             xReturn = pdFAIL;
