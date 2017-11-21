@@ -14,6 +14,7 @@
 #endif
 
 #include "unabto/unabto_logging.h"
+#include "unabto/unabto_common_main.h"
 #include "unabto_version.h"
 #include "gopt.h" // http://www.purposeful.co.uk/software/gopt/
 
