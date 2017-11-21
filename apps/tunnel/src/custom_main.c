@@ -9,11 +9,10 @@
  */
 int main() {
     nabto_main_setup* nms = unabto_init_context();
-
+    uint8_t psk[16] = { 0 };
+    
     // Setup device id.
     nms->id = "deviceid";
-
-    uint8_t psk[16] = { 0 };
     
     // Setup encryption.
     unabto_set_aes_crypto(nms, psk, 16);
