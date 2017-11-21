@@ -1047,9 +1047,8 @@ static bool handle_sack(struct nabto_stream_s* stream, struct nabto_stream_sack_
  * potentially send new data.
  */
 static void handle_data(struct nabto_stream_s* stream,
-                        struct
-                        nabto_win_info* win,
-                        uint8_t *              start,
+                        struct nabto_win_info* win,
+                        const uint8_t *        start,
                         int                    dlen,
                         struct nabto_stream_sack_data* sackData) {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
@@ -1178,7 +1177,7 @@ static void nabto_stream_tcb_event_error(struct nabto_stream_s* stream, struct n
 
 void nabto_stream_tcb_event(struct nabto_stream_s* stream,
                             struct nabto_win_info* win,
-                            uint8_t*               start,
+                            const uint8_t*         start,
                             int                    dlen,
                             struct nabto_stream_sack_data* sackData)
 {

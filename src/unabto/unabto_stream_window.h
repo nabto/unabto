@@ -274,7 +274,7 @@ size_t nabto_stream_tcb_can_write(struct nabto_stream_s * stream);
  */
 void nabto_stream_tcb_event(struct nabto_stream_s* stream,
                             struct nabto_win_info* win,
-                            uint8_t*               start,
+                            const uint8_t*         start,
                             int                    dlen,
                             struct nabto_stream_sack_data* sack);
  /**
