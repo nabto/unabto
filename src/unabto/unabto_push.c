@@ -55,7 +55,6 @@ void unabto_push_stop(void){
         unabto_push_notification_callback(pushSeqQ[i].seq, &hint);
         unabto_push_notification_remove(pushSeqQ[i].seq);
     }
-    unabto_push_init();
 }
 
 unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq){
