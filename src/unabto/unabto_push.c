@@ -51,7 +51,8 @@ void unabto_push_init(void){
 
 void unabto_push_stop(void){
     unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
-    for (int i = 0; i<pushCtx.pushSeqQHead; i++){
+    size_t i;
+    for (i = 0; i<pushCtx.pushSeqQHead; i++){
         unabto_push_notification_callback(pushSeqQ[i].seq, &hint);
         unabto_push_notification_remove(pushSeqQ[i].seq);
     }
