@@ -1,22 +1,6 @@
 /*
  * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
  */
-/**
- * @file
- * Nabto uServer test example server specific protocol including <a href="#access_control">Access Control</a>- Interface.
- *
- * ### <a name="access_control">Access Control.</a>
- *
- * All requests to the application holds (a pointer to) the identity of the client
- * having sent the request. The identity of the client is the e-mail-address found
- * in the certificate used to establish the connection.
- * Thus the application may execute any kind of access control before deciding how
- * to respond to the request.
- *
- * Additionally, unabto may implement a connection based access control,
- * i.e. when a client establishes a connection, the application is notified,
- * see #allow_client_access, thus the application is able to deny the connection attempt.
- */
 
 #ifndef _UNABTO_APP_H_
 #define _UNABTO_APP_H_
@@ -32,7 +16,7 @@ extern "C" {
 
 // Check/correct consistency of configuration at compile time:
 #if NABTO_APPREQ_QUEUE_SIZE < 1
-#warning The number of request ressources, NABTO_APPREQ_QUEUE_SIZE should be greater than 0.
+#warning The number of request ressources (NABTO_APPREQ_QUEUE_SIZE) should be greater than 0.
 #endif
 
 /******************************************************************************/
