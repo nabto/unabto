@@ -94,7 +94,10 @@ size_t unabto_stream_read_buf(unabto_stream* stream, uint8_t* buf, size_t size, 
                 return 0;
             }
         }
-    } while (avail > 0 && size > 0);
+        // test that we indeed read bytes, and that there are room for more bytes in the output buffer
+    } while (avail > 0 && // we did read some bytes in this loop!
+             size > 0 && // there are room for more bytes in the output buffer!
+             nabto_stream_tcb_is_readable(stream)); // the stream is not closed etc.
     *hint = UNABTO_STREAM_HINT_OK;
     return readen;
 }
