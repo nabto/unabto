@@ -33,7 +33,7 @@ script:
   - ./test/unittest/unabto_unittest
   - mkdir -p bin
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cp linux64/unabto/apps/tunnel/unabto_tunnel bin/unabto_tunnel_linux; fi;
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cp mac/unabto/apps/tunnel/unabto_tunnel bin/unabto_tunnel_osx; fi;
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cp mac/unabto/apps/tunnel/unabto_tunnel bin/unabto_tunnel_osx; fi;
 
 deploy:
   provider: releases
