@@ -1,17 +1,19 @@
 language: c
 
-os:
-  - linux
-  - osx
 matrix:
   include:
-    - compiler: gcc
+    - os: linux
+      compiler: gcc
       env: CFLAGS="-std=gnu99"
-    - compiler: clang
+    - os: linux
+      compiler: clang
       env: CFLAGS="-std=gnu99"
       # test that we can compile on old compilers.
-    - compiler: clang
+    - os: linux
+      compiler: clang
       env: CFLAGS="-std=c89 -Wno-endif-labels -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE -D_BSD_SOURCE -Wno-comment"
+    - os: osx
+      osx_image: xcode9.1
 
 addons:
   apt:
@@ -29,11 +31,9 @@ script:
   - cd cibuild
   - cmake .. && make -j VERBOSE=1
   - ./test/unittest/unabto_unittest
-
-before_deploy:
-  - mkdir bin
-  - cp linux64/unabto/apps/tunnel/unabto_tunnel bin/unabto_tunnel_linux
-  - cp mac/unabto/apps/tunnel/unabto_tunnel bin/unabto_tunnel_osx
+  - mkdir -p bin
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cp linux64/unabto/apps/tunnel/unabto_tunnel bin/unabto_tunnel_linux; fi;
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cp mac/unabto/apps/tunnel/unabto_tunnel bin/unabto_tunnel_osx; fi;
 
 deploy:
   provider: releases
