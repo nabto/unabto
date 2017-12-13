@@ -30,9 +30,9 @@ script:
   - mkdir cibuild
   - cd cibuild
   - cmake .. && make -j VERBOSE=1
-  - ./test/unittest/unabto_unittest
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./test/unittest/unabto_unittest; fi;
   - mkdir -p bin
-  - ls apps
+  - ls apps/tunnel
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cp apps/tunnel/unabto_tunnel bin/unabto_tunnel_linux; fi;
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then cp apps/tunnel/unabto_tunnel bin/unabto_tunnel_osx; fi;
 
