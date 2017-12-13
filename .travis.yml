@@ -44,3 +44,5 @@ deploy:
     - ${TRAVIS_BUILD_DIR}/bin/unabto_tunnel_mac
   on:
     repo: nabto/unabto
+    tags: true
+    all_branches: true
