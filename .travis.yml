@@ -39,7 +39,7 @@ deploy:
     secure: wDgmZWEIp9YqVIaE/RvDqG6CdENT9+omuUuavEf3ttHS8eOJSp4XUxvLZnNqLMS7mjA36uLFwAxlQ2/b7R4IIRf/v0L9zc24yUbuff2pZUxyfYHq9UVJtsm/KWEgBs8X+oinCVBevoGx1HyvNARf4Jt2jtFW2kOYyJGWugRhInWE7wRx/bTch5eMhw80E97ATQlcnb9dtnQa4I1mkYty0qwO3n+LQbyDMpEF6vHk4z/7vaCehIOofFAJJwDv5Trci3qzr/Z3kgfD6ZUXefa1ffh3LuxY8kAmkHea2Gp1G2rFr/Uotus1t89klrskMZHb7Y/ci2kWcU9S8o7NXInn7+hN5t/AYSeY/gPyYo9ZIePYOJLXoip3B2yvXJPD+b4ImOEot2faiqj2p6x9F4gIbaoXRKXsZeHV+MKVTD8W3E6IPFU/6wWr4V/VBeNtn2tgew51s84/Q/VaoJJqxSHisNZhY28rK3tQkX0fZXRH7HH3SQm8p5XMPL7sEr1X7FcGsi6jLCZYWB4ZDK3Ts32ULsyS5Fcnq77uPwHQVOwy/FY/W8Bj7N8qUQEDopdXU57R++uh6IqG23HIP7B/iAHEn2MGYhbh4k5Y1ZaGkRuhnv19nvp899WsLdYxA3JWVYhkhuCPJswMjyF0ddKUf7ZPVm6aehSN9AXipYvddlzY86I=
   skip_cleanup: true
   file:
-    - ${TRAVIS_BUILD_DIR}/bin/unabto_tunnel_${TRAVIS_OS_NAME}
+    - ${TRAVIS_BUILD_DIR}/cibuild/bin/unabto_tunnel_${TRAVIS_OS_NAME}
   on:
     repo: nabto/unabto
     tags: true
