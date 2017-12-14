@@ -224,6 +224,10 @@ void unabto_close(void) {
     nabto_context_release();
 #endif
 
+#if NABTO_ENABLE_PUSH
+    unabto_push_stop();
+#endif
+
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
     unabto_extended_rendezvous_close();
 #endif

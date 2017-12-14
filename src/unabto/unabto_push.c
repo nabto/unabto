@@ -49,6 +49,15 @@ void unabto_push_init(void){
     }
 }
 
+void unabto_push_stop(void){
+    unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
+    size_t i;
+    for (i = 0; i<pushCtx.pushSeqQHead; i++){
+        unabto_push_notification_callback(pushSeqQ[i].seq, &hint);
+        unabto_push_notification_remove(pushSeqQ[i].seq);
+    }
+}
+
 unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq){
     nabto_stamp_t now = nabtoGetStamp();
     // With reattach needed or queue full we must still call callback without releasing Zalgo
