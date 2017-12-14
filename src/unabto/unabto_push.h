@@ -107,6 +107,12 @@ void unabto_push_init(void);
 
 
 /**
+ * Function to stop push notifications called by the core.
+ * This resolves all outstanding push notifications with hint FAILED.
+ */
+void unabto_push_stop(void);
+
+/**
  * help functions for internal use
  */
 void nabto_time_event_push(void);
