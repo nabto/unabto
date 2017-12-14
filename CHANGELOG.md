@@ -69,5 +69,5 @@ the release and a new unreleased section is added.
 
 ### Breaking Changes
 - Tunnel module has been changed. Read readme in the `src/modules/tunnel`
-- The deprecated `buffer_read_t` and `buffer_write_t` type definitions in `application_event()` callback have been replaced with `unabto_query_request` and `unabto_query_response`, respectively. This means the functions `buffer_read_<TYPE>` and `buffer_write_<TYPE>` must be replaced with `unabto_query_read_<TYPE>` and `unabto_query_write_<TYPE>`, respectively.
+- The deprecated `buffer_read_t` and `buffer_write_t` type definitions in the `application_event()` callback have been replaced with `unabto_query_request` and `unabto_query_response`, respectively. This means that calls to `buffer_read_<TYPE>` and `buffer_write_<TYPE>` must be replaced with `unabto_query_read_<TYPE>` and `unabto_query_write_<TYPE>`, respectively.
 
