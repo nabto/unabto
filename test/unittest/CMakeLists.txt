@@ -52,10 +52,12 @@ endif()
 
 add_executable(${PROJECT_NAME} ${src})
 
-if (NOT MSVC)
+if (MSVC)
+  target_link_libraries(${PROJECT_NAME} Ws2_32)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   target_link_libraries(${PROJECT_NAME} pthread rt m)
 else()
-  target_link_libraries(${PROJECT_NAME} Ws2_32)
+  target_link_libraries(${PROJECT_NAME} pthread m)
 endif()
   
 install( TARGETS ${PROJECT_NAME}
