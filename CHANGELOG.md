@@ -10,13 +10,17 @@ Guide: always keep an unreleased section which keeps track of current
 changes. When a release is made the unreleased section is renamed to
 the release and a new unreleased section is added.
 
-## 4.2.0 Unreleased
+## 4.3.0 Unreleased
+
+## 4.2.0 2017-12-14
 
 ### Breaking Changes
 - in file `src/unabto/unabto_app.h` the function argument
   unabto_query_request* readBuffer has been removed from the function
   `application_poll` the argument was always NULL. It has been removed
   to limit confusion of how the api can be used.
+- the module `stateful_push_service` was renamed to `push_service`
+- Using unabto_push no longer requires `unabto_push_init()` to be called
 
 ## 4.1.0 2017-07-11
 
