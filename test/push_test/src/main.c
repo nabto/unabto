@@ -6,7 +6,8 @@
 #include "unabto/unabto_common_main.h"
 #include "unabto/unabto_logging.h"
 #include "unabto_version.h"
-#include "modules/cli/unabto_args.h"
+#include "modules/cli/gopt/gopt.h"
+#include <modules/util/read_hex.h>
 #include <unabto/unabto_app.h>
 #include "unabto/unabto_push.h"
 #include <unabto/unabto_protocol_defines.h>
@@ -17,6 +18,13 @@
 #else
 #include <sched.h>
 #endif
+
+struct configuration {
+    const char *device_id;
+    const char *pre_shared_key;
+    const char *notification;
+    const char *pnsid_str;
+};
 
 bool isCallbackReceived = false;
 void callback(void* ptr,const unabto_push_hint* hint){
@@ -53,6 +61,8 @@ void callback(void* ptr,const unabto_push_hint* hint){
 }
 
 void nabto_yield(int msec);
+static void help(const char* errmsg, const char *progname);
+bool parse_argv(int argc, char* argv[], struct configuration* config);
 
 /**
  *  main using gopt to check command line arguments
@@ -60,52 +70,48 @@ void nabto_yield(int msec);
  */
 int main(int argc, char* argv[])
 {
+    struct configuration conf;
+    memset(&conf, 0, sizeof(struct configuration));
+    // Overwrite default values with command line args
+    if (!parse_argv(argc, argv, &conf)) {
+        help(0, argv[0]);
+        return 1;
+    }
+
     // Set nabto to default values
     nabto_main_setup* nms = unabto_init_context(); 
+    nms->id = strdup(conf.device_id);
 
-    // setting push notification data 
-    uint16_t pnsid = UNABTO_PUSH_PNS_ID_FIREBASE;
+    nms->secureAttach = true;
+    nms->secureData = true;
+    nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
+
+    if (!unabto_read_psk_from_hex(conf.pre_shared_key, nms->presharedKey, 16)) {
+        help("Invalid cryptographic key specified", argv[0]);
+        return false;
+    }
+
+    uint16_t pnsID = 0;
+
+    if (conf.pnsid_str) {
+        pnsID = atoi(conf.pnsid_str);
+    } else {
+        help("No PNS ID provided", argv[0]);
+        return 1;
+    }
+
     int testContext = 1;
-    const char* sd = "{\"to\": \"58a88e8b-83f1-429d-8863-8d8180ae83ed\"}";
-    const char* titleKey = "title_1";
-    const char* bodyKey = "body_1";
-    const char* bodyArg1 = "943";
-    const char* bodyArg2 = "349";
-
     push_message pm;
-    if(!init_push_message(&pm, pnsid,sd)){
+    if(!init_push_message(&pm, pnsID, conf.notification)){
         NABTO_LOG_ERROR(("init_push_message failed"));
         return 1;
     }
-    if(!add_title_loc_key(&pm, titleKey)){
-        NABTO_LOG_ERROR(("add_title_loc_key failed"));
-        return 1;
-    }
-    if(!add_body_loc_key(&pm, bodyKey)){
-        NABTO_LOG_ERROR(("add_body_loc_key failed"));
-        return 1;
-    }
-    if(!add_body_loc_string_arg(&pm, bodyArg1)){
-        NABTO_LOG_ERROR(("add_body_loc_string_arg failed"));
-        return 1;
-    }
-    if(!add_body_loc_string_arg(&pm, bodyArg2)){
-        NABTO_LOG_ERROR(("add_body_loc_string_arg failed"));
-        return 1;
-    }
-
-    // Overwrite default values with command line args
-    if (!check_args(argc, argv, nms)) {
-        return 1;
-    }
-    NABTO_LOG_INFO(("Identity: '%s'", nms->id));
-    NABTO_LOG_INFO(("Buffer size: %i", nms->bufsize));
 
     // Initialize nabto
     if (!unabto_init()) {
         NABTO_LOG_FATAL(("Failed at nabto_main_init"));
     }
-    unabto_push_init();
+
     nabto_stamp_t attachExpireStamp;
     // 20 seconds
     nabtoSetFutureStamp(&attachExpireStamp, 1000*20);
@@ -156,4 +162,56 @@ void nabto_yield(int msec)
 #else
     if (msec) usleep(1000*msec); else sched_yield();
 #endif
+}
+
+bool parse_argv(int argc, char* argv[], struct configuration* config) {
+    const char x0s[] = "h?";     const char* x0l[] = { "help", 0 };
+    const char x1s[] = "d";      const char* x1l[] = { "deviceid", 0 };
+    const char x2s[] = "k";      const char* x2l[] = { "presharedkey", 0 };
+    const char x3s[] = "n";      const char* x3l[] = { "notification", 0 };
+    const char x4s[] = "i";      const char* x4l[] = { "PNS ID", 0 };
+
+    const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
+        { 'h', 0,           x0s, x0l },
+        { 'd', GOPT_ARG,    x1s, x1l },
+        { 'k', GOPT_ARG,    x2s, x2l },
+        { 'n', GOPT_ARG,    x3s, x3l },
+        { 'i', GOPT_ARG,    x4s, x4l },
+        { 0, 0, 0, 0 }
+    };
+    void *options = gopt_sort( & argc, (const char**)argv, opts);
+
+    if( gopt( options, 'h')) {
+        help(0, argv[0]);
+        exit(0);
+    }
+
+    if (!gopt_arg(options, 'd', &config->device_id)) {
+        return false;
+    }
+
+    if (!gopt_arg(options, 'k', &config->pre_shared_key)) {
+        return false;
+    }
+
+    if (!gopt_arg(options, 'n', &config->notification)) {
+        return false;
+    }
+
+    if (!gopt_arg(options, 'i', &config->pnsid_str)) {
+        return false;
+    }
+
+
+    return true;
+}
+
+static void help(const char* errmsg, const char *progname)
+{
+    if (errmsg) {
+        printf("ERROR: %s\n", errmsg);
+    }
+    printf("\nPush notification test application.\n");
+
+    printf("Usage: %s -d <device id> -k <crypto key> -n <json notification to send> -i <pns id>\n\n", progname);
 }
