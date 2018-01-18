@@ -67,9 +67,9 @@ void nabto_random(uint8_t* buf, size_t bytes) {
  * PRECONDITION bytes <= 16
  */
 void unabto_prng_generate_block(unabto_prng_state* state, uint8_t* buf, size_t bytes) {
+    uint8_t r[16];
     unabto_prng_inc_counter(state);
 
-    uint8_t r[16];
     AES_encrypt(state->counter, r, &state->key);
     
     memcpy(buf, r, bytes);
