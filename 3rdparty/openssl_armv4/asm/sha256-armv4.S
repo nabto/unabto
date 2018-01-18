@@ -28,7 +28,7 @@
 @
 @ Add NEON implementation. On Cortex A8 it was measured to process one
 @ byte in 12.5 cycles or 23% faster than integer-only code. Snapdragon
-@ S4 does it in 12.5 cycles too, but it's 50% faster than integer-only
+@ S4 does it in 12.5 cycles too, but its 50% faster than integer-only
 @ code (meaning that latter performs sub-optimally, nothing was done
 @ about it).
 
