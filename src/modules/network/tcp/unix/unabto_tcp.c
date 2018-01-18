@@ -27,7 +27,7 @@ unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, con
         if ((err == EAGAIN) || err == EWOULDBLOCK) {
             return UTS_WOULD_BLOCK;
         } else {
-            NABTO_LOG_ERROR(("unabto_tcp_read failed"));
+            NABTO_LOG_ERROR(("unabto_tcp_read failed error: %s, socket: %i", strerror(err), sock->socket));
             return UTS_FAILED;
         }
     } else if (status == 0) {
@@ -49,7 +49,7 @@ unabto_tcp_status unabto_tcp_write(struct unabto_tcp_socket* sock, const void* b
         if ((err == EAGAIN) || err == EWOULDBLOCK) {
             return UTS_WOULD_BLOCK;
         } else {
-            NABTO_LOG_ERROR(("Send of tcp packet failed"));
+            NABTO_LOG_ERROR(("Send of tcp packet failed error: %s, socket: %i", strerror(err), sock->socket));
             return UTS_FAILED; 
         } 
     }
