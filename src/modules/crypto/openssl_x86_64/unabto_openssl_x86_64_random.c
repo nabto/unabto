@@ -2,7 +2,7 @@
 #include <unabto/unabto_external_environment.h>
 #include <unabto/unabto_logging.h>
 
-#include "unabto_openssl_mips_aes.h"
+#include "unabto_openssl_x86_64_aes.h"
 
 enum {
     UNABTO_PRNG_COUNTER_BYTE_LENGTH = 16
@@ -70,7 +70,7 @@ void unabto_prng_generate_block(unabto_prng_state* state, uint8_t* buf, size_t b
     unabto_prng_inc_counter(state);
 
     uint8_t r[16];
-    AES_encrypt(state->counter, r, &state->key);
+    aesni_encrypt(state->counter, r, &state->key);
     
     memcpy(buf, r, bytes);
 }
@@ -80,7 +80,7 @@ void unabto_prng_init_state(unabto_prng_state* state) {
     unabto_prng_random_seed(aeskey, 16);
     unabto_prng_random_seed(state->counter, UNABTO_PRNG_COUNTER_BYTE_LENGTH);
 
-    private_AES_set_encrypt_key(aeskey, 128, &state->key);
+    aesni_set_encrypt_key(aeskey, 128, &state->key);
     
 }
 

@@ -1,5 +1,5 @@
-#ifndef _UNABTO_OPENSSL_SHA256_MIPS_H_
-#define _UNABTO_OPENSSL_SHA256_MIPS_H_
+#ifndef _UNABTO_OPENSSL_SHA256_X86_64_H_
+#define _UNABTO_OPENSSL_SHA256_X86_64_H_
 
 #include <unabto_platform_types.h>
 

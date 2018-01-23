@@ -1,5 +1,5 @@
-#ifndef _UNABTO_OPENSSL_MIPS_AES_H_
-#define _UNABTO_OPENSSL_MIPS_AES_H_
+#ifndef _UNABTO_OPENSSL_X86_64_AES_H_
+#define _UNABTO_OPENSSL_X86_64_AES_H_
 
 #include <unabto_platform_types.h>
 
@@ -13,14 +13,14 @@ struct aes_key_st {
 };
 typedef struct aes_key_st AES_KEY;
 
-int private_AES_set_encrypt_key(const unsigned char *userKey, const int bits,
+int aesni_set_encrypt_key(const unsigned char *userKey, const int bits,
                         AES_KEY *key);
-int private_AES_set_decrypt_key(const unsigned char *userKey, const int bits,
+int aesni_set_decrypt_key(const unsigned char *userKey, const int bits,
                         AES_KEY *key);
 
-void AES_encrypt(const unsigned char *in, unsigned char *out,
+void aesni_encrypt(const unsigned char *in, unsigned char *out,
                  const AES_KEY *key);
-void AES_decrypt(const unsigned char *in, unsigned char *out,
+void aesni_decrypt(const unsigned char *in, unsigned char *out,
                  const AES_KEY *key);
 
 #endif

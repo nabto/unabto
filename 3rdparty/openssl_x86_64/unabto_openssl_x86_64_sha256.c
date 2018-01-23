@@ -4,7 +4,7 @@
  * according to the OpenSSL license [found in ../../LICENSE].
  * ====================================================================
  */
-#include <modules/crypto/openssl_mips/unabto_openssl_mips_sha256.h>
+#include <modules/crypto/openssl_x86_64/unabto_openssl_x86_64_sha256.h>
 
 # include <stdlib.h>
 # include <string.h>

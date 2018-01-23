@@ -63,8 +63,6 @@
  *      #define HASH_BLOCK_DATA_ORDER   md5_block_data_order
  */
 
-#include <openssl/crypto.h>
-
 #if !defined(DATA_ORDER_IS_BIG_ENDIAN) && !defined(DATA_ORDER_IS_LITTLE_ENDIAN)
 # error "DATA_ORDER must be defined!"
 #endif
@@ -332,7 +330,7 @@ int HASH_FINAL(unsigned char *md, HASH_CTX *c)
     p -= HASH_CBLOCK;
     HASH_BLOCK_DATA_ORDER(c, p, 1);
     c->num = 0;
-    OPENSSL_cleanse(p, HASH_CBLOCK);
+    memset(p, 0, HASH_CBLOCK);
 
 #ifndef HASH_MAKE_STRING
 # error "HASH_MAKE_STRING must be defined!"
