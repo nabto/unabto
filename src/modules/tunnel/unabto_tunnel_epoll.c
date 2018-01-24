@@ -58,7 +58,6 @@ void tunnel_loop_epoll() {
             if (handler->epollEventType == UNABTO_EPOLL_TYPE_UDP) {
                 while (unabto_network_epoll_read_one(&events[i])) {
                     unabto_time_update_stamp();
-                    unabto_time_event();
                 }
             }
 #if NABTO_ENABLE_TCP_FALLBACK
