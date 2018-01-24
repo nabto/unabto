@@ -48,6 +48,7 @@ void unabto_prng_random_seed(uint8_t* buf, size_t bytes)
 }
 
 void nabto_random(uint8_t* buf, size_t bytes) {
+    OPENSSL_cpuid_setup();
     static bool unabto_prng_is_initialized = false;
     
     if (!unabto_prng_is_initialized) {

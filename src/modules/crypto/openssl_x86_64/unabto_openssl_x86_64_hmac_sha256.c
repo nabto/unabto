@@ -13,6 +13,7 @@ void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keys_size,
                                 const unabto_buffer messages[], uint8_t messages_size,
                                 uint8_t *mac, uint16_t mac_size)
 {
+    OPENSSL_cpuid_setup();
     uint16_t fill = 0;
     uint16_t num;
     const uint8_t *key_used;

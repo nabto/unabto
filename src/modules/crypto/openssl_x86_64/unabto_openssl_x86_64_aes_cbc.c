@@ -1,10 +1,12 @@
 #include <unabto/unabto_aes_cbc.h>
 
 #include "unabto_openssl_x86_64_aes.h"
+#include "unabto_openssl_x86_64.h"
 
 static AES_KEY ctx;
 
 bool unabto_aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t input_len) {
+    OPENSSL_cpuid_setup();
     if ((input_len < 16) || (input_len % 16 != 0)) {
         return false;
     }
@@ -39,6 +41,7 @@ bool unabto_aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t inpu
  * we are running the algoritm backwards to eliminate the need to remember too much state.
  */
 bool unabto_aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t input_len) {
+    OPENSSL_cpuid_setup();
     if (input_len < 16) {
         return false; // the input contains at most the iv.
     }
