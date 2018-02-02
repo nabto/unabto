@@ -949,14 +949,15 @@ enum np_payload_system_info_nat64_e {
 * bytes.
 */
 
-#define NP_PAYLOAD_DESCR_BYTELENGTH          5  ///< size of a DESCR payload without data
+#define NP_PAYLOAD_DESCR_BYTELENGTH            5  ///< size of a DESCR payload without data
 
 /* Type of descriptions */
-#define NP_PAYLOAD_DESCR_TYPE_VERSION        1  ///< version number of the micro device
-#define NP_PAYLOAD_DESCR_TYPE_URL            2  ///< location of html device driver
-#define NP_PAYLOAD_DESCR_TYPE_ATTACH_PORT    3  ///< deprecated - may still be in use in old code
-#define NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN     4  ///< send if the device supports local connections
-#define NP_PAYLOAD_DESCR_TYPE_FP             5  ///< send if the device support fingerprints
+#define NP_PAYLOAD_DESCR_TYPE_VERSION          1  ///< version number of the micro device
+#define NP_PAYLOAD_DESCR_TYPE_URL              2  ///< location of html device driver
+#define NP_PAYLOAD_DESCR_TYPE_ATTACH_PORT      3  ///< deprecated - may still be in use in old code
+#define NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN       4  ///< send if the device supports local connections
+#define NP_PAYLOAD_DESCR_TYPE_FP               5  ///< send if the device supports fingerprints
+#define NP_PAYLOAD_DESCR_TYPE_LOCAL_ENCRYPTION 6  ///< send if the device supports encrypted local connections
 
 
 /*****************************************************************************/
