@@ -81,7 +81,8 @@
 #define NP_PACKET_HDR_TYPE_U_ALIVE    130 ///< alive query send from gsp
 #define NP_PACKET_HDR_TYPE_U_CONNECT  131 ///< connect request send from client or gsp
 #define NP_PACKET_HDR_TYPE_U_DEBUG    132 ///< 
-#define NP_PACKET_HDR_TYPE_U_PUSH     133 ///< Push notification 
+#define NP_PACKET_HDR_TYPE_U_PUSH     133 ///< Push notification
+#define NP_PACKET_HDR_TYPE_U_VERIFY   134 ///< Verify a connect request
 
 /* Values below are used in the standard Nabto protocol. */
 /* Values above are used in the Micro Device protocol. */

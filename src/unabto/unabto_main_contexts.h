@@ -47,7 +47,7 @@ typedef struct {
 #endif
 #if NABTO_ENABLE_DNS_FALLBACK
     bool              enableDnsFallback;  /**< As long as the dns fallback feature is in beta it's neccessary to explicitly enable it on runtime */
-    bool              forceDnsFallback;        /**< Force unabto to use dns fallback */
+    bool              forceDnsFallback;   /**< Force unabto to use dns fallback */
     uint32_t          dnsAddress;         /**< Force a specific dns server address */
     const char*       dnsFallbackDomain;  /**< Force a specific dns fallback node */
 #endif
