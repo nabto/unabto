@@ -14,28 +14,39 @@
 
 
 /**
- * this maps to the sha256 hmac function, but does some concatenation first
- * as described in rfc4306
- * @return number of bytes written to data
+ * This module calculates the prf+ found in IKEv2. See rfc4306 for reference.
+ * prf+ (K,S) = T1 | T2 | T3 | T4 | ...
+ *  where:
+ *   T1 = prf (K, S | 0x01)
+ *   T2 = prf (K, T1 | S | 0x02)
+ *   T3 = prf (K, T2 | S | 0x03)
+ *   T4 = prf (K, T3 | S | 0x04)
  */
-static uint16_t prfhelper(const unabto_buffer keys[], uint8_t keys_size,
-                 const unabto_buffer seeds[], uint8_t seeds_size,
-                 const uint8_t* lastprf, uint16_t lastprflen,
-                 uint8_t octet,
-                 uint8_t* data, uint16_t datalen);
+
+
+/**
+ * This function calculates TN.
+ *
+ * @param oldTn     Empty in the first round.
+ * @param oldTnLen  0 in the first round.
+ * @param datalen   max data to write to the data pointer.
+ * @return  number of bytes written to data
+ */
+static uint16_t tn(const unabto_buffer keys[], uint8_t keys_size,
+                   const unabto_buffer seeds[], uint8_t seeds_size,
+                   const uint8_t* oldTn, uint16_t oldTnLen,
+                   uint8_t octet,
+                   uint8_t* data, uint16_t datalen);
+
 
 bool prfplus_sha256(const unabto_buffer keys[],  uint8_t keys_size,
                     const unabto_buffer seeds[], uint8_t seeds_size,
                     uint8_t* data, uint16_t dataLength) {
     uint8_t counter = 1;
     uint16_t  written;
-//    uint16_t  dataLengthTmp = dataLength;
-//    uint8_t *dataTmp = data;
-    
-    if (dataLength > 255*UNABTO_SHA256_DIGEST_LENGTH) // the ike v2 prf is only defined up to this.
-    {
-      return false;
-    }
+
+    // the ike v2 prf is only defined up to this.
+    UNABTO_ASSERT(dataLength <= 255*UNABTO_SHA256_DIGEST_LENGTH);
 
     written = prfhelper(keys, keys_size,
                         seeds, seeds_size,
@@ -54,20 +65,15 @@ bool prfplus_sha256(const unabto_buffer keys[],  uint8_t keys_size,
         data += written;
         dataLength -= written;
     }
-
-
-
-//    (void) dataTmp;
-//    (void) dataLengthTmp;
-
     return true;    
 }
 
-uint16_t prfhelper(const unabto_buffer keys[], uint8_t keys_size,
-                 const unabto_buffer seeds[], uint8_t seeds_size,
-                 const uint8_t* prfoutput, uint16_t prfoutputlen,
-                 uint8_t octet,
-                 uint8_t* data, uint16_t datalen) {
+uint16_t tn(const unabto_buffer keys[], uint8_t keys_size,
+            const unabto_buffer seeds[], uint8_t seeds_size,
+            const uint8_t* prfoutput, uint16_t prfoutputlen,
+            uint8_t octet,
+            uint8_t* data, uint16_t datalen)
+{
     unabto_buffer seedMark[4];
     unabto_buffer octetBuffer;
     unabto_buffer* ptr = seedMark;
@@ -94,7 +100,7 @@ uint16_t prfhelper(const unabto_buffer keys[], uint8_t keys_size,
     unabto_hmac_sha256_buffers(keys, keys_size,
                                seedMark, (uint8_t)(ptr-seedMark),
                                data, realDataLen);
-    
+
     return realDataLen;
 }
 
