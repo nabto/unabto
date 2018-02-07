@@ -48,20 +48,20 @@ bool prfplus_sha256(const unabto_buffer keys[],  uint8_t keys_size,
     // the ike v2 prf is only defined up to this.
     UNABTO_ASSERT(dataLength <= 255*UNABTO_SHA256_DIGEST_LENGTH);
 
-    written = prfhelper(keys, keys_size,
-                        seeds, seeds_size,
-                        NULL, 0,
-                        counter++,
-                        data, dataLength);
+    written = tn(keys, keys_size,
+                 seeds, seeds_size,
+                 NULL, 0,
+                 counter++,
+                 data, dataLength);
     data += written;
     dataLength -= written;
 
     while ( dataLength > 0 ) {
-        written = prfhelper(keys, keys_size,
-                            seeds, seeds_size,
-                            data-UNABTO_SHA256_DIGEST_LENGTH, UNABTO_SHA256_DIGEST_LENGTH,
-                            counter++,
-                            data, dataLength);
+        written = tn(keys, keys_size,
+                     seeds, seeds_size,
+                     data-UNABTO_SHA256_DIGEST_LENGTH, UNABTO_SHA256_DIGEST_LENGTH,
+                     counter++,
+                     data, dataLength);
         data += written;
         dataLength -= written;
     }
