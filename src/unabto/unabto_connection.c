@@ -250,7 +250,7 @@ bool nabto_connect_event_from_gsp(message_event* event, nabto_packet_header* hdr
 
 
 /**
- * Build U_CONNECT response to GSP
+ * Build U_CONNECT response to the GSP or Local Connection
  * @param buf                the destination buffer
  * @param seq                the sequence number
  * @param notif              the result notification
@@ -260,7 +260,7 @@ bool nabto_connect_event_from_gsp(message_event* event, nabto_packet_header* hdr
  * @param isLocalConnectRsp  true if a capabilities packet 
  * @return                   the size of the response
  */
-static size_t mk_gsp_connect_rsp(uint8_t* buf, uint8_t* end, uint16_t seq, uint32_t notif, uint32_t nsi, uint32_t cpnsi, uint32_t spnsi, bool isLocalConnectRsp)
+static size_t mk_connect_rsp(uint8_t* buf, uint8_t* end, uint16_t seq, uint32_t notif, uint32_t nsi, uint32_t cpnsi, uint32_t spnsi, bool isLocalConnectRsp)
 {
     uint8_t* ptr = insert_header(buf, cpnsi, spnsi, U_CONNECT, true, seq, 0, 0);
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_NOTIFY, 0, 8);
@@ -290,7 +290,7 @@ bool connect_event(message_event* event, nabto_packet_header* hdr)
         if (con) {
             size_t olen;
             NABTO_LOG_TRACE(("Couldn't find connection (good!). Created a new connection (nsi=%" PRIu32 ") con->spnsi=%" PRIu32, nsi, con->spnsi));
-            olen = mk_gsp_connect_rsp(nabtoCommunicationBuffer, nabtoCommunicationBuffer + nabtoCommunicationBufferSize, hdr->seq, NOTIFY_CONNECT_OK, con->spnsi, hdr->nsi_cp, hdr->nsi_sp, isLocal);
+            olen = mk_connect_rsp(nabtoCommunicationBuffer, nabtoCommunicationBuffer + nabtoCommunicationBufferSize, hdr->seq, NOTIFY_CONNECT_OK, con->spnsi, hdr->nsi_cp, hdr->nsi_sp, isLocal);
             
             if (olen == 0) {
                 NABTO_LOG_ERROR(("U_CONNECT out of resources in connect event."));
@@ -316,7 +316,7 @@ bool connect_event(message_event* event, nabto_packet_header* hdr)
             }
         } else if (nsi && ec) {
             // build negative answer
-            size_t olen = mk_gsp_connect_rsp(nabtoCommunicationBuffer, nabtoCommunicationBuffer + nabtoCommunicationBufferSize, hdr->seq, ec, nsi, hdr->nsi_cp, hdr->nsi_sp, isLocal);
+            size_t olen = mk_connect_rsp(nabtoCommunicationBuffer, nabtoCommunicationBuffer + nabtoCommunicationBufferSize, hdr->seq, ec, nsi, hdr->nsi_cp, hdr->nsi_sp, isLocal);
             NABTO_LOG_TRACE((PRInsi " Deny connection, result: %" PRIu32, MAKE_NSI_PRINTABLE(0, nsi, 0), ec));
             nabto_write(event->udpMessage.socket, nabtoCommunicationBuffer, olen, peer->addr, peer->port);
             return true;
