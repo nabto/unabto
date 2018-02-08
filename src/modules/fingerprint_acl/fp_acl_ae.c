@@ -50,17 +50,6 @@ static bool write_string(unabto_query_response* write_buffer, const char* string
     return unabto_query_write_uint8_list(write_buffer, (uint8_t*)string, strlen(string));
 }
 
-bool get_user(application_request* request, struct fp_acl_user* user)
-{
-    if (request->connection && request->connection->hasFingerprint) {
-        void* it = aclDb.find(request->connection->fingerprint);
-        if (aclDb.load(it, user) == FP_ACL_DB_OK) {
-            return true;
-        } 
-    }
-    return false;
-}
-
 application_event_result write_user(unabto_query_response* write_buffer, uint8_t status, struct fp_acl_user* user)
 {
     if (unabto_query_write_uint8(write_buffer, status) &&
@@ -415,6 +404,12 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
     struct fp_acl_user user;
     if (!fp_acl_is_pair_allowed(request)) {
         return AER_REQ_NO_ACCESS;
+    }
+
+    void* it = aclDb.find(request->connection->fingerprint);
+    if (it && aclDb.load(it, &user) == FP_ACL_DB_OK) {
+        // this fingerprint has already been added, return existing user
+        return write_user(write_buffer, FP_ACL_STATUS_USER_EXISTS, &user);
     }
 
     if (!read_string_null_terminated(read_buffer, user.name, FP_ACL_USERNAME_MAX_LENGTH)) {
