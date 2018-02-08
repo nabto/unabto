@@ -2,7 +2,9 @@
 
 ## To compile:
 
-	gcc unabto_acl.c gopt.c -o unabto_acl
+	mkdir build
+	cmake ..
+	make
 
 ## To execute:
 
