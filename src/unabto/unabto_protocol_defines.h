@@ -1099,5 +1099,34 @@ enum np_payload_system_info_nat64_e {
 #define NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_KEY        5
 #define NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_STRING_ARG 6
 
+/*******************
+ * Legacy Protocol *
+ *******************/
+
+/**
+ * The legacy protocol is a non connection based protocol which only
+ * consists of stateless request/response communication for new
+ * deployments it's only used for local discovery packets.
+ */
+
+/**
+ * The legacy protocol header consists of 12 bytes. The first field in 
+ * 
+ *  +-----+-------------------------------------------------------------------+
+ *  |  +0 | Hdr (think header header)                                         |
+ *  +-----+-------------------------------------------------------------------+
+ *  |  +4 | Sequence number                                                   |
+ *  +-----+-------------------------------------------------------------------+
+ *  |  +2 | Nabto (reserved)                                                  |
+ *  +-----+-------------------------------------------------------------------+
+ */
+#define NP_LEGACY_PACKET_HDR_SIZE 12
+
+#define NP_LEGACY_PACKET_HDR_TYPE_APPLICATION 0x00
+#define NP_LEGACY_PACKET_HDR_TYPE_DISCOVERY   0x01
+
+#define NP_LEGACY_PACKET_HDR_FLAG_RSP 0x00800000ul
+#define NP_LEGACY_PACKET_HDR_FLAG_ERR 0x00400000ul
+
 
 #endif

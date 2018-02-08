@@ -59,10 +59,6 @@ static void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* p
 static void nabto_message_local_legacy_application_event(uint16_t ilen, nabto_endpoint* peer);
 #endif
 
-/* Magic values */
-#define RSP 0x00800000ul /**< Response flag */
-#define ERR 0x00400000ul /**< Error flag    */
-
 #if NABTO_ENABLE_LOCAL_ACCESS
 /**
  * When room available, insert a string preceeded by a type field (1 byte), truncate when necesary.
@@ -92,10 +88,6 @@ static size_t add_typed_string(uint8_t* buf, uint8_t* end, uint8_t type, const c
 
 #if NABTO_ENABLE_LOCAL_ACCESS
 void nabto_message_local_event(message_event* event, uint16_t ilen) {
-    enum {
-        APPLICATION  = 0x00,
-        DISCOVERY    = 0x01
-    };
     uint32_t localHdr;
  
     READ_U32(localHdr, nabtoCommunicationBuffer);
@@ -107,12 +99,12 @@ void nabto_message_local_event(message_event* event, uint16_t ilen) {
         // this is either a discovery or an legacy application event.
         uint8_t mainOpcode = (uint8_t)localHdr;
         switch (mainOpcode) {
-            case DISCOVERY:
+            case NP_LEGACY_PACKET_HDR_TYPE_DISCOVERY:
             {
                 nabto_message_local_discovery_event(ilen, &event->udpMessage.peer);
                 break;
             }
-            case APPLICATION:
+            case NP_LEGACY_PACKET_HDR_TYPE_APPLICATION:
             {
 #if NABTO_ENABLE_LOCAL_ACCESS_LEGACY_PROTOCOL
                 nabto_message_local_legacy_application_event(ilen, &event->udpMessage.peer);
@@ -143,9 +135,6 @@ void nabto_message_local_event(message_event* event, uint16_t ilen) {
  *
  * This is 12 bytes in total.
  */
-enum {
-    LEGACY_HEADER_SIZE = 12
-};
 
 #if NABTO_ENABLE_LOCAL_ACCESS
 void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
@@ -159,10 +148,10 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
 
     NABTO_LOG_TRACE(("local_discover_event"));
 
-    NABTO_LOG_TRACE(("discover: %s", (char*)buf + LEGACY_HEADER_SIZE));
+    NABTO_LOG_TRACE(("discover: %s", (char*)buf + NP_LEGACY_PACKET_HDR_SIZE));
 
-    if (strcmp(nmc.nabtoMainSetup.id, (const char*) (buf + LEGACY_HEADER_SIZE)) == 0 || textcmp("*", (const char*) (buf + LEGACY_HEADER_SIZE)) == 0) {
-        uint8_t* ptr = buf + LEGACY_HEADER_SIZE;
+    if (strcmp(nmc.nabtoMainSetup.id, (const char*) (buf + NP_LEGACY_PACKET_HDR_SIZE)) == 0 || textcmp("*", (const char*) (buf + NP_LEGACY_PACKET_HDR_SIZE)) == 0) {
+        uint8_t* ptr = buf + NP_LEGACY_PACKET_HDR_SIZE;
         uint8_t* end = buf + bufsize;
         uint32_t localIp = 0;
         
@@ -182,7 +171,7 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
         }
 #endif
         olen = (uint16_t)(ptr - buf); // HSIZE is added again before returning
-        header |= RSP;
+        header |= NP_LEGACY_PACKET_HDR_FLAG_RSP;
         WRITE_U32(buf, header);
         NABTO_LOG_TRACE(("local_discover_event -> sending rsp olen=%" PRIu16, olen));
         nabto_write(nmc.socketLocal, nabtoCommunicationBuffer, olen, peer->addr, peer->port);
@@ -201,7 +190,7 @@ void nabto_message_local_legacy_application_event(uint16_t ilen, nabto_endpoint*
 
     application_request appreq;
     uint8_t* buf = nabtoCommunicationBuffer;
-    uint8_t* ptr = buf + LEGACY_HEADER_SIZE;
+    uint8_t* ptr = buf + NP_LEGACY_PACKET_HDR_SIZE;
     uint32_t header;
     uint16_t olen;
 
@@ -218,17 +207,17 @@ void nabto_message_local_legacy_application_event(uint16_t ilen, nabto_endpoint*
     appreq.isLegacy = true;
     appreq.isLocal = true;
 
-    unabto_buffer_init(&brb, ptr + 4, ilen - LEGACY_HEADER_SIZE - 4);
+    unabto_buffer_init(&brb, ptr + 4, ilen - NP_LEGACY_PACKET_HDR_SIZE - 4);
     unabto_query_request_init(&br, &brb);
 
-    unabto_buffer_init(&bwb, ptr, nabtoCommunicationBufferSize - LEGACY_HEADER_SIZE);
+    unabto_buffer_init(&bwb, ptr, nabtoCommunicationBufferSize - NP_LEGACY_PACKET_HDR_SIZE);
     unabto_query_response_init(&bw, &bwb);
 
     if (application_event(&appreq, &br, &bw) != AER_REQ_RESPONSE_READY) {
-        header |= ERR;
+        header |= NP_LEGACY_PACKET_HDR_FLAG_ERR;
     }
-    olen = LEGACY_HEADER_SIZE + unabto_query_response_used(&bw);
-    header |= RSP;
+    olen = NP_LEGACY_PACKET_HDR_SIZE + unabto_query_response_used(&bw);
+    header |= NP_LEGACY_PACKET_HDR_FLAG_RSP;
     WRITE_U32(buf, header);
 
     nabto_write(nmc.socketLocal, nabtoCommunicationBuffer, olen, peer->addr, peer->port);
