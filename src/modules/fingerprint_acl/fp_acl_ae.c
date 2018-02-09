@@ -358,6 +358,19 @@ application_event_result fp_acl_add_user_no_check(unabto_query_response* write_b
     if (aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
         return AER_REQ_SYSTEM_ERROR;
     }
+
+    struct fp_acl_user existingUser;
+    void* it = aclDb.find(user->fp);
+    if (it) {
+        if (aclDb.load(it, &existingUser) == FP_ACL_DB_OK) {
+            NABTO_LOG_TRACE(("User with fingerprint [%02x:%02x:%02x:%02x:...] already exists in acl with name [%s], returning existing user",
+                             user->fp[0], user->fp[1], user->fp[2], user->fp[3],
+                             existingUser.name));
+            return write_user(write_buffer, FP_ACL_STATUS_USER_EXISTS, &existingUser);
+        } else {
+            return AER_REQ_SYSTEM_ERROR;
+        }
+    }
     
     if (aclDb.first() == NULL) {
         user->permissions = aclSettings.firstUserPermissions;
@@ -404,12 +417,6 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
     struct fp_acl_user user;
     if (!fp_acl_is_pair_allowed(request)) {
         return AER_REQ_NO_ACCESS;
-    }
-
-    void* it = aclDb.find(request->connection->fingerprint);
-    if (it && aclDb.load(it, &user) == FP_ACL_DB_OK) {
-        // this fingerprint has already been added, return existing user
-        return write_user(write_buffer, FP_ACL_STATUS_USER_EXISTS, &user);
     }
 
     if (!read_string_null_terminated(read_buffer, user.name, FP_ACL_USERNAME_MAX_LENGTH)) {
