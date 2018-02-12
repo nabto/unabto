@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 #ifndef _UNABTO_COMMON_MAIN_H_
 #define _UNABTO_COMMON_MAIN_H_

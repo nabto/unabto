@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 #ifndef UNABTO_ENV_BASE_RTX4100
 #define UNABTO_ENV_BASE_RTX4100

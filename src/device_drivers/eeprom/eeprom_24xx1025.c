@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 #include "mcf52255.h"
 #include <devices/coldfire/unabto_env_base_coldfire.h>
