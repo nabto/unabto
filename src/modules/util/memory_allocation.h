@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 #ifndef _MEMORY_ALLOCATION_H_
 #define _MEMORY_ALLOCATION_H_

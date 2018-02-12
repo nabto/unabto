@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 #include <modules/log/unabto_log_header.h>
 #include <modules/log/unabto_basename.h>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 #include <unabto/unabto_aes_cbc.h>
 #include <unabto/unabto_hmac_sha256.h>

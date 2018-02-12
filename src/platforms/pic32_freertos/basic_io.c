@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 /*
     FreeRTOS.org V5.0.4 - Copyright (C) 2003-2008 Richard Barry.

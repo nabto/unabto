@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 #ifndef _UNABTO_ENV_BASE_EVOLUTION_
 #define _UNABTO_ENV_BASE_EVOLUTION_

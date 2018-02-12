@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 #ifndef PLATFORM_PIC32_FREERTOS_BASIC_IO_H
 #define PLATFORM_PIC32_FREERTOS_BASIC_IO_H

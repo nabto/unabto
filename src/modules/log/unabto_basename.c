@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 #if defined(_MSC_VER)
 #ifndef _CRT_SECURE_NO_WARNINGS

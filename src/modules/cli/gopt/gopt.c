@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 /* gopt.c version 8.1: tom.viza@gmail.com PUBLIC DOMAIN 2003-8 */
 /*
