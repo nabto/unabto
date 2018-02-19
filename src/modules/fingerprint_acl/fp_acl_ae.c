@@ -354,13 +354,15 @@ application_event_result fp_acl_ae_user_set_permissions(application_request* req
 
 application_event_result fp_acl_add_user_no_check(unabto_query_response* write_buffer, struct fp_acl_user* user) {
     struct fp_acl_settings aclSettings;
+    struct fp_acl_user existingUser;
     fp_acl_db_status status;
+    void* it;
+    
     if (aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
         return AER_REQ_SYSTEM_ERROR;
     }
 
-    struct fp_acl_user existingUser;
-    void* it = aclDb.find(user->fp);
+    it = aclDb.find(user->fp);
     if (it) {
         if (aclDb.load(it, &existingUser) == FP_ACL_DB_OK) {
             NABTO_LOG_TRACE(("User with fingerprint [%02x:%02x:%02x:%02x:...] already exists in acl with name [%s], returning existing user",
