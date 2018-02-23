@@ -12,6 +12,12 @@ the release and a new unreleased section is added.
 
 ## 4.3.0 Unreleased
 
+## 4.2.4 2018-02-23
+
+### Changed
+- fixed exception packet bug, causing application_event exceptions to not be propagated correctly
+- releases 4.2.1-4.2.3 were just version number updates or skipped due to procedural mistakes
+
 ## 4.2.0 2017-12-14
 
 ### Breaking Changes
