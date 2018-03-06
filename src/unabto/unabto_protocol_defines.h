@@ -61,30 +61,31 @@
 #define NP_PACKET_HDR_MIN_NSI_CP    100  ///< the min value of a client peer nsi
 
 /* Packet header types */
-#define NP_PACKET_HDR_TYPE_SP_ATTACH  1
-#define NP_PACKET_HDR_TYPE_SP_AUTH    2
-#define NP_PACKET_HDR_TYPE_SP_ALIVE   3
-#define NP_PACKET_HDR_TYPE_SP_DETACH  4
+#define NP_PACKET_HDR_TYPE_SP_ATTACH     1
+#define NP_PACKET_HDR_TYPE_SP_AUTH       2
+#define NP_PACKET_HDR_TYPE_SP_ALIVE      3
+#define NP_PACKET_HDR_TYPE_SP_DETACH     4
 
-#define NP_PACKET_HDR_TYPE_CP_REQ_SP  11
-#define NP_PACKET_HDR_TYPE_CP_CONN_SP 12
-#define NP_PACKET_HDR_TYPE_CP_DISC_SP 13
+#define NP_PACKET_HDR_TYPE_CP_REQ_SP     11
+#define NP_PACKET_HDR_TYPE_CP_CONN_SP    12
+#define NP_PACKET_HDR_TYPE_CP_DISC_SP    13
 
-#define NP_PACKET_HDR_TYPE_GW_CONN    21 ///< fallback connect request
-#define NP_PACKET_HDR_TYPE_DATA       22
-#define NP_PACKET_HDR_TYPE_GW_CONN_U  23 ///< fallback connect request (unencrypted)
+#define NP_PACKET_HDR_TYPE_GW_CONN       21 ///< fallback connect request
+#define NP_PACKET_HDR_TYPE_DATA          22
+#define NP_PACKET_HDR_TYPE_GW_CONN_U     23 ///< fallback connect request (unencrypted)
 
-#define NP_PACKET_HDR_TYPE_PROBE      30 ///< Probe packet to test for udp reachability.
-#define NP_PACKET_HDR_TYPE_STATS      31 ///< Statistics information packet.
-#define NP_PACKET_HDR_TYPE_PING       32 ///< Ping packet.
+#define NP_PACKET_HDR_TYPE_PROBE         30 ///< Probe packet to test for udp reachability.
+#define NP_PACKET_HDR_TYPE_STATS         31 ///< Statistics information packet.
+#define NP_PACKET_HDR_TYPE_PING          32 ///< Ping packet.
 
-#define NP_PACKET_HDR_TYPE_U_INVITE   128 ///< invite request send from bs
-#define NP_PACKET_HDR_TYPE_U_ATTACH   129 ///< attach request send from gsp
-#define NP_PACKET_HDR_TYPE_U_ALIVE    130 ///< alive query send from gsp
-#define NP_PACKET_HDR_TYPE_U_CONNECT  131 ///< connect request send from client or gsp
-#define NP_PACKET_HDR_TYPE_U_DEBUG    132 ///< 
-#define NP_PACKET_HDR_TYPE_U_PUSH     133 ///< Push notification
-#define NP_PACKET_HDR_TYPE_U_VERIFY   134 ///< Verify a connect request
+#define NP_PACKET_HDR_TYPE_U_INVITE      128 ///< invite request send from bs
+#define NP_PACKET_HDR_TYPE_U_ATTACH      129 ///< attach request send from gsp
+#define NP_PACKET_HDR_TYPE_U_ALIVE       130 ///< alive query send from gsp
+#define NP_PACKET_HDR_TYPE_U_CONNECT     131 ///< connect request send from client or gsp
+#define NP_PACKET_HDR_TYPE_U_DEBUG       132 ///< 
+#define NP_PACKET_HDR_TYPE_U_PUSH        133 ///< Push notification
+#define NP_PACKET_HDR_TYPE_U_VERIFY_PSK  134 ///< Verify a connect request
+#define NP_PACKET_HDR_TYPE_U_CONNECT_PSK 135 ///< PSK based connect request
 
 /* Values below are used in the standard Nabto protocol. */
 /* Values above are used in the Micro Device protocol. */
@@ -162,7 +163,8 @@ enum np_payload_type_e {
     NP_PAYLOAD_TYPE_PUSH_DATA        = 0x4D, /* 'M' Push notification data payload     */
     NP_PAYLOAD_TYPE_STREAM_STATS     = 0x4E, /* 'N' Stream statistics */
     NP_PAYLOAD_TYPE_BASESTATION_AUTH = 0x4F, /* 'O' Basestation Auth key value pairs */
-    NP_PAYLOAD_TYPE_CONNECTION_INFO  = 0x50  /* 'P' Connection Info payload */
+    NP_PAYLOAD_TYPE_CONNECTION_INFO  = 0x50, /* 'P' Connection Info payload */
+    NP_PAYLOAD_TYPE_RANDOM           = 0x51  /* 'Q' Random data used in connection handshake */
 };
 
 /* Payload header flags */
