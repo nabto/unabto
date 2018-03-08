@@ -963,7 +963,7 @@ enum np_payload_system_info_nat64_e {
 #define NP_PAYLOAD_DESCR_TYPE_ATTACH_PORT      3  ///< deprecated - may still be in use in old code
 #define NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN       4  ///< send if the device supports local connections
 #define NP_PAYLOAD_DESCR_TYPE_FP               5  ///< send if the device supports fingerprints
-#define NP_PAYLOAD_DESCR_TYPE_LOCAL_ENCRYPTION 6  ///< send if the device supports encrypted local connections
+#define NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN_PSK   6  ///< send if the device supports psk authenticated local connections
 
 
 /*****************************************************************************/
