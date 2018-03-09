@@ -164,7 +164,8 @@ enum np_payload_type_e {
     NP_PAYLOAD_TYPE_STREAM_STATS     = 0x4E, /* 'N' Stream statistics */
     NP_PAYLOAD_TYPE_BASESTATION_AUTH = 0x4F, /* 'O' Basestation Auth key value pairs */
     NP_PAYLOAD_TYPE_CONNECTION_INFO  = 0x50, /* 'P' Connection Info payload */
-    NP_PAYLOAD_TYPE_RANDOM           = 0x51  /* 'Q' Random data used in connection handshake */
+    NP_PAYLOAD_TYPE_RANDOM           = 0x51, /* 'Q' Random data used in connection handshake */
+    NP_PAYLOAD_TYPE_KEY_ID           = 0x52  /* 'R' Key id used in connection handshake */
 };
 
 /* Payload header flags */
