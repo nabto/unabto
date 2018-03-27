@@ -465,6 +465,7 @@ enum np_payload_type_e {
 #define NP_PAYLOAD_NOTIFY_ERROR_CP_ACCESS_BS       0x800D  ///< The CP is rejected access by the basestation.
 #define NP_PAYLOAD_NOTIFY_ERROR_CONNECTION_ABORTED 0x800E  ///< The CP has aborted the connection attempt.
 #define NP_PAYLOAD_NOTIFY_ERROR_BAD_KEY_ID         0x800F  ///< The Key id does not exists.
+#define NP_PAYLOAD_NOTIFY_ERROR_MISSING_CAPABILITIES 0x8010  ///< Some required capabilities is missing.
 
 /* Notification codes for NP_PACKET_HDR_TYPE_U_ATTACH responses */
 #define NP_PAYLOAD_NOTIFY_ATTACH_OK          0x00000001l  ///< The device is attached.
