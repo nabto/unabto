@@ -31,6 +31,15 @@
 #endif
 
 /**
+ * The local psk connection is a local connection type which is
+ * associated with a psk
+ */
+#ifndef NABTO_ENABLE_LOCAL_PSK_CONNECTION
+#define NABTO_ENABLE_LOCAL_PSK_CONNECTION 1
+#endif
+
+
+/**
  * Enable the old deprecated legacy 953 bytes protocol. This protocol
  * is deprecated since lot of the newer features requires a connection
  * resource. If the client is newer than 2012 this feature can safely

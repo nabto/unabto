@@ -9,6 +9,7 @@
 #include <unabto/unabto_protocol_exceptions.h>
 #include <unabto/unabto_connection.h>
 #include <unabto/unabto_query_rw.h>
+#include <unabto/unabto_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,6 +31,21 @@ extern "C" {
  * @return            true if access to the devices is allowed
  */
 bool allow_client_access(nabto_connect* connection);
+#endif
+
+#if NABTO_ENABLE_LOCAL_PSK_CONNECTION
+/**
+ * Get a pre shared key for a local psk conenction.
+ *
+ * @param keyId        key id, always non null
+ * @param clientId     id of the client NULL if not provided
+ * @param fingerprint  fingerprint of the client certificate, the fingerprint is 
+ *                     not validated in local psk connections. NULL if no 
+ *                     fingerprint was provided.
+ * @param key          output buffer where the key is copied.
+ * @return  true iff a psk was found and copied to the psk buffer.
+ */
+bool unabto_local_psk_connection_get_key(unabto_psk_id keyId, const char* clientId, unabto_public_key_fingerprint fingerprint, unabto_psk key);
 #endif
 
     

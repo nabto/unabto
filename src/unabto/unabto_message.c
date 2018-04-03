@@ -168,7 +168,7 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
             char capOk[2] = {'1', 0};
             ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN, capOk);
             ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_FP, capOk);
-            ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_LOCAL_ENCRYPTION, capOk);
+            ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN_PSK, capOk);
         }
 #endif
         olen = (uint16_t)(ptr - buf); // HSIZE is added again before returning
