@@ -167,10 +167,26 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
             // Send this capability if the device handles local connections.
             char capOk[2] = {'1', 0};
             ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN, capOk);
-            ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_FP, capOk);
+        }
+#endif
+
+# if NABTO_ENABLE_LOCAL_PSK_CONNECTION
+        {
+            // Send this capability if the device handles local psk connections.
+            char capOk[2] = {'1', 0};
             ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN_PSK, capOk);
         }
 #endif
+
+#if NABTO_ENABLE_LOCAL_CONNECTION || NABTO_ENABLE_LOCAL_PSK_CONNECTION
+        {
+            // local connections and local psk connections has
+            // fingerprint capabilities in unabto these days.
+            char capOk[2] = {'1', 0};
+            ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_FP, capOk);
+        }
+#endif
+
         olen = (uint16_t)(ptr - buf); // HSIZE is added again before returning
         header |= NP_LEGACY_PACKET_HDR_FLAG_RSP;
         WRITE_U32(buf, header);

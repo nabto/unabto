@@ -38,7 +38,6 @@
 #define NABTO_ENABLE_LOCAL_PSK_CONNECTION 1
 #endif
 
-
 /**
  * Enable the old deprecated legacy 953 bytes protocol. This protocol
  * is deprecated since lot of the newer features requires a connection
