@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 
 /**
@@ -200,21 +200,23 @@ bool send_exception(nabto_connect* con, nabto_packet_header* hdr, uint32_t aer)
     uint8_t  buf[SIZE_HEADER_MAX + SIZE_PAYLOAD_HEADER + SIZE_CODE + 48]; // maximum length cryptosuites implemented as of aug 2012
     uint8_t* end = buf + sizeof(buf);
     uint8_t* dataStart;
+    uint8_t* cryptoPayloadStart;
     uint8_t* ptr = buf;
-
+    
     ptr = nabto_wr_header(buf, end, hdr);
-
+    
     add_flags(buf, NP_PACKET_HDR_FLAG_RESPONSE);
     add_flags(buf, NP_PACKET_HDR_FLAG_EXCEPTION);
     
-    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0); ptr += SIZE_CODE;
+    cryptoPayloadStart = ptr;
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
+    ptr += SIZE_CODE; // make room for crypto suite code
     dataStart = ptr;
     // write exception value
     WRITE_FORWARD_U32(ptr, (uint32_t)aer);
-
-    return send_and_encrypt_packet_con(con, buf, end, dataStart, sizeof(uint32_t), dataStart - NP_PAYLOAD_HDR_BYTELENGTH);
+    
+    return send_and_encrypt_packet_con(con, buf, end, dataStart, sizeof(uint32_t), cryptoPayloadStart);
 }
-
 
 void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* dataStart, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, message_event* event, void* userData) {
     uint16_t olen = 0;

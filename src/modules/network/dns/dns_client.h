@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 #ifndef _DNS_CLIENT_H_
 #define _DNS_CLIENT_H_

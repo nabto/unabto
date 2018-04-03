@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 #ifndef _IPV4_CHECKSUM_H_
 #define _IPV4_CHECKSUM_H_

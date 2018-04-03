@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 #define NABTO_LOG_MODULE_CURRENT NABTO_LOG_MODULE_PERIPHERAL
 

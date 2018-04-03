@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 /**
  * @file
@@ -21,6 +21,8 @@
 ******************************************************************************/
 
 #define NP_VERSION         2
+#define NP_VERSION_MIN     2
+#define NP_VERSION_MAX     2
 #define NP_STREAM_VERSION  1
 
 /*****************************************************************************/
@@ -59,30 +61,31 @@
 #define NP_PACKET_HDR_MIN_NSI_CP    100  ///< the min value of a client peer nsi
 
 /* Packet header types */
-#define NP_PACKET_HDR_TYPE_SP_ATTACH  1
-#define NP_PACKET_HDR_TYPE_SP_AUTH    2
-#define NP_PACKET_HDR_TYPE_SP_ALIVE   3
-#define NP_PACKET_HDR_TYPE_SP_DETACH  4
+#define NP_PACKET_HDR_TYPE_SP_ATTACH     1
+#define NP_PACKET_HDR_TYPE_SP_AUTH       2
+#define NP_PACKET_HDR_TYPE_SP_ALIVE      3
+#define NP_PACKET_HDR_TYPE_SP_DETACH     4
 
-#define NP_PACKET_HDR_TYPE_CP_REQ_SP  11
-#define NP_PACKET_HDR_TYPE_CP_CONN_SP 12
-#define NP_PACKET_HDR_TYPE_CP_DISC_SP 13
+#define NP_PACKET_HDR_TYPE_CP_REQ_SP     11
+#define NP_PACKET_HDR_TYPE_CP_CONN_SP    12
+#define NP_PACKET_HDR_TYPE_CP_DISC_SP    13
 
-#define NP_PACKET_HDR_TYPE_GW_CONN    21 ///< fallback connect request
-#define NP_PACKET_HDR_TYPE_DATA       22
-#define NP_PACKET_HDR_TYPE_GW_CONN_U  23 ///< fallback connect request (unencrypted)
+#define NP_PACKET_HDR_TYPE_GW_CONN       21 ///< fallback connect request
+#define NP_PACKET_HDR_TYPE_DATA          22
+#define NP_PACKET_HDR_TYPE_GW_CONN_U     23 ///< fallback connect request (unencrypted)
 
-#define NP_PACKET_HDR_TYPE_PROBE      30 ///< Probe packet to test for udp reachability.
-#define NP_PACKET_HDR_TYPE_STATS      31 ///< Statistics information packet.
-#define NP_PACKET_HDR_TYPE_PING       32 ///< Ping packet.
+#define NP_PACKET_HDR_TYPE_PROBE         30 ///< Probe packet to test for udp reachability.
+#define NP_PACKET_HDR_TYPE_STATS         31 ///< Statistics information packet.
+#define NP_PACKET_HDR_TYPE_PING          32 ///< Ping packet.
 
-#define NP_PACKET_HDR_TYPE_U_INVITE   128 ///< invite request send from bs
-#define NP_PACKET_HDR_TYPE_U_ATTACH   129 ///< attach request send from gsp
-#define NP_PACKET_HDR_TYPE_U_ALIVE    130 ///< alive query send from gsp
-#define NP_PACKET_HDR_TYPE_U_CONNECT  131 ///< connect request send from client or gsp
-#define NP_PACKET_HDR_TYPE_U_DEBUG    132 ///< 
-#define NP_PACKET_HDR_TYPE_U_PUSH     133 ///< Push notification
-#define NP_PACKET_HDR_TYPE_U_VERIFY   134 ///< Verify a connect request
+#define NP_PACKET_HDR_TYPE_U_INVITE      128 ///< invite request send from bs
+#define NP_PACKET_HDR_TYPE_U_ATTACH      129 ///< attach request send from gsp
+#define NP_PACKET_HDR_TYPE_U_ALIVE       130 ///< alive query send from gsp
+#define NP_PACKET_HDR_TYPE_U_CONNECT     131 ///< connect request send from client or gsp
+#define NP_PACKET_HDR_TYPE_U_DEBUG       132 ///< 
+#define NP_PACKET_HDR_TYPE_U_PUSH        133 ///< Push notification
+#define NP_PACKET_HDR_TYPE_U_VERIFY_PSK  134 ///< Verify a connect request
+#define NP_PACKET_HDR_TYPE_U_CONNECT_PSK 135 ///< PSK based connect request
 
 /* Values below are used in the standard Nabto protocol. */
 /* Values above are used in the Micro Device protocol. */
@@ -160,7 +163,9 @@ enum np_payload_type_e {
     NP_PAYLOAD_TYPE_PUSH_DATA        = 0x4D, /* 'M' Push notification data payload     */
     NP_PAYLOAD_TYPE_STREAM_STATS     = 0x4E, /* 'N' Stream statistics */
     NP_PAYLOAD_TYPE_BASESTATION_AUTH = 0x4F, /* 'O' Basestation Auth key value pairs */
-    NP_PAYLOAD_TYPE_CONNECTION_INFO  = 0x50  /* 'P' Connection Info payload */
+    NP_PAYLOAD_TYPE_CONNECTION_INFO  = 0x50, /* 'P' Connection Info payload */
+    NP_PAYLOAD_TYPE_RANDOM           = 0x51, /* 'Q' Random data used in connection handshake */
+    NP_PAYLOAD_TYPE_KEY_ID           = 0x52  /* 'R' Key id used in connection handshake */
 };
 
 /* Payload header flags */
@@ -457,7 +462,10 @@ enum np_payload_type_e {
 #define NP_PAYLOAD_NOTIFY_ERROR_MICRO_REQ_ERR     0x800A  ///< The Micro Server can't give response to dialogue request
 #define NP_PAYLOAD_NOTIFY_ERROR_MICRO_REATTACHING 0x800B  ///< The Micro Server is re-attaching
 #define NP_PAYLOAD_NOTIFY_ERROR_SELF_SIGNED       0x800C  ///< The CP certificate is self signed and not accepted by the gsp.
-#define NP_PAYLOAD_NOTIFY_ERROR_CP_ACCESS_BS      0x800D  ///< The CP is rejected access by the basestation.
+#define NP_PAYLOAD_NOTIFY_ERROR_CP_ACCESS_BS       0x800D  ///< The CP is rejected access by the basestation.
+#define NP_PAYLOAD_NOTIFY_ERROR_CONNECTION_ABORTED 0x800E  ///< The CP has aborted the connection attempt.
+#define NP_PAYLOAD_NOTIFY_ERROR_BAD_KEY_ID         0x800F  ///< The Key id does not exists.
+#define NP_PAYLOAD_NOTIFY_ERROR_MISSING_CAPABILITIES 0x8010  ///< Some required capabilities is missing.
 
 /* Notification codes for NP_PACKET_HDR_TYPE_U_ATTACH responses */
 #define NP_PAYLOAD_NOTIFY_ATTACH_OK          0x00000001l  ///< The device is attached.
@@ -958,7 +966,7 @@ enum np_payload_system_info_nat64_e {
 #define NP_PAYLOAD_DESCR_TYPE_ATTACH_PORT      3  ///< deprecated - may still be in use in old code
 #define NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN       4  ///< send if the device supports local connections
 #define NP_PAYLOAD_DESCR_TYPE_FP               5  ///< send if the device supports fingerprints
-#define NP_PAYLOAD_DESCR_TYPE_LOCAL_ENCRYPTION 6  ///< send if the device supports encrypted local connections
+#define NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN_PSK   6  ///< send if the device supports psk authenticated local connections
 
 
 /*****************************************************************************/
@@ -1098,6 +1106,35 @@ enum np_payload_system_info_nat64_e {
 #define NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_STRING_ARG  4
 #define NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_KEY        5
 #define NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_STRING_ARG 6
+
+/*******************
+ * Legacy Protocol *
+ *******************/
+
+/**
+ * The legacy protocol is a non connection based protocol which only
+ * consists of stateless request/response communication for new
+ * deployments it's only used for local discovery packets.
+ */
+
+/**
+ * The legacy protocol header consists of 12 bytes. The first field in 
+ * 
+ *  +-----+-------------------------------------------------------------------+
+ *  |  +0 | Hdr (think header header)                                         |
+ *  +-----+-------------------------------------------------------------------+
+ *  |  +4 | Sequence number                                                   |
+ *  +-----+-------------------------------------------------------------------+
+ *  |  +2 | Nabto (reserved)                                                  |
+ *  +-----+-------------------------------------------------------------------+
+ */
+#define NP_LEGACY_PACKET_HDR_SIZE 12
+
+#define NP_LEGACY_PACKET_HDR_TYPE_APPLICATION 0x00
+#define NP_LEGACY_PACKET_HDR_TYPE_DISCOVERY   0x01
+
+#define NP_LEGACY_PACKET_HDR_FLAG_RSP 0x00800000ul
+#define NP_LEGACY_PACKET_HDR_FLAG_ERR 0x00400000ul
 
 
 #endif

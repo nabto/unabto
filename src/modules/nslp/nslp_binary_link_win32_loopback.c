@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 Nabto - All Rights Reserved.
+ * Copyright (C) Nabto - All Rights Reserved.
  */
 // This is a loop back link layer for the NSLP protocol.
 // It emulates a frame-based link between two threads running in the same process.

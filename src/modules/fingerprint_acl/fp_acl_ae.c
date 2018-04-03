@@ -50,17 +50,6 @@ static bool write_string(unabto_query_response* write_buffer, const char* string
     return unabto_query_write_uint8_list(write_buffer, (uint8_t*)string, strlen(string));
 }
 
-bool get_user(application_request* request, struct fp_acl_user* user)
-{
-    if (request->connection && request->connection->hasFingerprint) {
-        void* it = aclDb.find(request->connection->fingerprint);
-        if (aclDb.load(it, user) == FP_ACL_DB_OK) {
-            return true;
-        } 
-    }
-    return false;
-}
-
 application_event_result write_user(unabto_query_response* write_buffer, uint8_t status, struct fp_acl_user* user)
 {
     if (unabto_query_write_uint8(write_buffer, status) &&
@@ -365,9 +354,24 @@ application_event_result fp_acl_ae_user_set_permissions(application_request* req
 
 application_event_result fp_acl_add_user_no_check(unabto_query_response* write_buffer, struct fp_acl_user* user) {
     struct fp_acl_settings aclSettings;
+    struct fp_acl_user existingUser;
     fp_acl_db_status status;
+    void* it;
+    
     if (aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
         return AER_REQ_SYSTEM_ERROR;
+    }
+
+    it = aclDb.find(user->fp);
+    if (it) {
+        if (aclDb.load(it, &existingUser) == FP_ACL_DB_OK) {
+            NABTO_LOG_TRACE(("User with fingerprint [%02x:%02x:%02x:%02x:...] already exists in acl with name [%s], returning existing user",
+                             user->fp[0], user->fp[1], user->fp[2], user->fp[3],
+                             existingUser.name));
+            return write_user(write_buffer, FP_ACL_STATUS_USER_EXISTS, &existingUser);
+        } else {
+            return AER_REQ_SYSTEM_ERROR;
+        }
     }
     
     if (aclDb.first() == NULL) {
