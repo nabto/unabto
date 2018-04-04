@@ -79,6 +79,16 @@ typedef struct {
 #endif
 } nabto_rendezvous_connect_state;
 
+
+typedef struct {
+    enum {
+        WAIT_CONNECT = 0,
+        WAIT_VERIFY,
+        CONNECTED
+    } state;
+} unabto_connection_psk_handshake;
+
+
 #define CON_ATTR_DEFAULT        0x00  /**< unrealiable connection with keep alive       */
 #define CON_ATTR_NO_KEEP_ALIVE  0x01  /**< no keep alive traffic                        */
 #define CON_ATTR_NO_RETRANSMIT  0x80  /**< no retransmissions (reliable connection)     */
@@ -88,7 +98,7 @@ struct nabto_connect_s {
 #if NABTO_ENABLE_EPOLL
     int epollEventType;
 #endif
-
+    
     nabto_rendezvous_connect_state rendezvousConnectState;
     connection_state state; /**< The connection state it's used for
                              * determining both if the connection is
@@ -96,6 +106,12 @@ struct nabto_connect_s {
                              * the actual status and type of the
                              * connection. */
     nabto_connection_type type;
+
+    /**
+     * psk handshake state
+     */
+    unabto_connection_psk_handshake pskHandshake; 
+    
     uint32_t spnsi; /**< Serverpeer connection identifier. For local
                      * connections this identifier is between 100 and
                      * 1000 and assigned by uNabto. If the connection
@@ -103,6 +119,8 @@ struct nabto_connect_s {
                      * from the GSP which is the same NSI as the GSP
                      * uses for its communication with the client in
                      * the connection phase */
+    uint32_t cpnsi; /**< The clientpeer nsi which should be used for
+                     * this connection */
     uint8_t                   consi[8];     /**< the controller identification (opt.)     */
     uint8_t*                  nsico;        /**< addr of consi, 0 if not used             */
     nabto_stamp_t             stamp;        /**< the time stamp                           */
@@ -146,8 +164,6 @@ struct nabto_connect_s {
     uint8_t gatewayId[20]; /**< The Gateway Id is an unique key which
                             * both the client and server uses to
                             * establish a fallback connection. */
-    uint32_t cpnsi; /**< The clientpeer nsi which should be used for
-                     * this connection */
 
     bool relayIsActive; // data has been transmitted on relay, indicating client has chosen this type
 #endif
@@ -175,6 +191,8 @@ void nabto_release_connection(nabto_connect* con);
 
 /** Find the connection. @param spnsi  the identifier.  @return the connection (0 if not found). */
 nabto_connect* nabto_find_connection(uint32_t spnsi);
+
+nabto_connect* nabto_find_connection_cp_nsi(uint32_t cpnsi);
 
 
 /** @return the connection index (for logging). @param  con the connection. */

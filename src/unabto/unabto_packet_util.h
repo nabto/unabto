@@ -101,6 +101,11 @@ struct unabto_payload_notify {
     uint32_t code;
 };
 
+struct unabto_payload_key_id {
+    uint8_t* keyIdBegin;
+    uint8_t* keyIdEnd;
+};
+
 struct unabto_payload_push {
     uint32_t sequence;
     uint16_t pnsId;
@@ -339,7 +344,7 @@ bool unabto_payload_read_gw(struct unabto_payload_packet* payload, struct unabto
 bool unabto_payload_read_ep(struct unabto_payload_packet* payload, struct unabto_payload_ep* ep);
 bool unabto_payload_read_crypto(struct unabto_payload_packet* payload, struct unabto_payload_crypto* crypto);
 bool unabto_payload_read_notify(struct unabto_payload_packet* payload, struct unabto_payload_notify* notify);
-
+bool unabto_payload_read_key_id(struct unabto_payload_packet* payload, struct unabto_payload_key_id* keyId);
 
 uint8_t* unabto_payloads_begin(uint8_t* packetBegin, const nabto_packet_header* header);
 uint8_t* unabto_payloads_end(uint8_t* packetBegin, const nabto_packet_header* header);

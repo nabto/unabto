@@ -198,6 +198,25 @@ nabto_connect* nabto_find_connection(uint32_t spnsi) {
     return 0;
 }
 
+nabto_connect* nabto_find_connection_cp_nsi(uint32_t cpnsi)
+{
+    nabto_connect* con;
+
+    if (cpnsi == 0) {
+        NABTO_LOG_WARN(("cpnsi should not be 0"));
+        return NULL;
+    }
+    
+    for (con = connections; con < connections + NABTO_MEMORY_CONNECTIONS_SIZE; ++con) {
+        if (con->cpnsi == cpnsi && con->state != CS_IDLE) {
+            return con;
+        }
+    }
+    
+    NABTO_LOG_TRACE(("Connection not found (probably a good thing) (CPNSI=%" PRIu32 ")", cpnsi));
+    return NULL;
+}
+
 int nabto_connection_index(nabto_connect* con)
 {
     if (con == 0) {
@@ -528,25 +547,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
 #endif
 
     {
-        struct unabto_payload_packet cpIdPayload;
-        if (unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_CP_ID, &cpIdPayload)) {
-            struct unabto_payload_typed_buffer cpId;
-            con->clientId[0] = 0;
-            if (unabto_payload_read_typed_buffer(&cpIdPayload, &cpId)) {
-                if (cpId.type == 1) { // 1 == EMAIL
-                    size_t sz = cpId.dataLength;
-                    if (sz >= sizeof(con->clientId)) {
-                        if (sizeof(con->clientId) > 1) {
-                            NABTO_LOG_WARN(("Client ID truncated"));
-                        }
-                        sz = sizeof(con->clientId) - 1;
-                    }
-                    if (sz) {
-                        memcpy(con->clientId, (const void*) cpId.dataBegin, sz);
-                    }
-                    con->clientId[sz] = 0;
-                }
-            }
+        if (unabto_connection_util_read_client_id(header, con)) {
             NABTO_LOG_TRACE(("Connection opened from '%s' (to %s)", con->clientId, nmc.nabtoMainSetup.id));
         }
     }
