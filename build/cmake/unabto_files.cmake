@@ -89,6 +89,7 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_prf.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_protocol_defines.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_protocol_exceptions.h
+  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_psk_connection.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_query_rw.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_stream_environment.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_stream_event.h

@@ -340,6 +340,10 @@ bool unabto_payload_read_ep(struct unabto_payload_packet* payload, struct unabto
 bool unabto_payload_read_crypto(struct unabto_payload_packet* payload, struct unabto_payload_crypto* crypto);
 bool unabto_payload_read_notify(struct unabto_payload_packet* payload, struct unabto_payload_notify* notify);
 
+
+uint8_t* unabto_payloads_begin(uint8_t* packet_begin, const nabto_packet_header* header);
+uint8_t* unabto_payloads_end(uint8_t* packet_begin, const nabto_packet_header* header);
+
 #ifdef __cplusplus
 } //extern "C"
 #endif

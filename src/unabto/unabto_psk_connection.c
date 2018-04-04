@@ -1,10 +1,11 @@
 #include "unabto_psk_connection.h"
+#include <unabto/unabto_memory.h>
 
 
 void unabto_psk_connection_handle_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
 {
     if (header->type == NP_PACKET_HDR_TYPE_U_CONNECT_PSK && (header->flags & NP_PACKET_HDR_FLAG_EXCEPTION)) {
-        return unabtp_psk_connection_handle_exception_request();
+        return unabto_psk_connection_handle_exception_request(header);
     } else if (header->type == NP_PACKET_HDR_TYPE_U_CONNECT_PSK) {
         return unabto_psk_connection_handle_connect_request();
     } else if (header->type == NP_PACKET_HDR_TYPE_U_VERIFY_PSK) {
@@ -16,8 +17,8 @@ void unabtp_psk_connection_handle_exception_request(const nabto_packet_header* h
 {
     // packet structure:
     // U_CONNECT_PSK(Hdr(exception=1), notify(err) )
-    uint8_t* begin = unabto_beginning_of_payloads(header);
-    uint8_t* end = unabto_end_of_payloads(header);
+    uint8_t* begin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
+    uint8_t* end = unabto_payloads_end(nabtoCommunicationBuffer, header);
     struct unabto_payload_packet notifyPayload;
     struct unabto_payload_notify notify;
     if (!unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_NOTIFY, &notifyPayload)) {
@@ -31,11 +32,9 @@ void unabtp_psk_connection_handle_exception_request(const nabto_packet_header* h
 
     if (notify.code == NP_PAYLOAD_NOTIFY_ERROR_CONNECTION_ABORTED) {
         nabto_connect* connection;
-        connection = nabto_find_connection(header->spnsi);
-        if (!connection) {
-            return;
-        } else {
-            nabto_connection_client_aborted(connection);
+        connection = nabto_find_connection(header->nsi_sp);
+        if (connection) {
+            return nabto_connection_client_aborted(connection);
         }
     } else {
         NABTO_LOG_WARN(("unknown notification"));
@@ -57,7 +56,7 @@ void unabto_psk_connection_handle_verify_requst()
     // verify phase.
 }
 
-void unabto_psk_connection_send_connect_response()
+void unabto_psk_connection_send_connect_response(nabto_socket_t socket, nabto_endpoint peer, nabto_connect* connection)
 {
     // packet format:
     // U_CONNECT_PSK(Hdr, Capabilities, nonce_device, Enc(random_device, nonce_client))
@@ -109,7 +108,7 @@ void unabto_psk_connection_send_verify_error_response(nabto_socket_t socket, nab
 }
 
 
-void unabto_psk_connection_send_connect_error_response(struct nsi* nsi, uint32_t errorCode);
+void unabto_psk_connection_send_connect_error_response(nabto_socket_t socket, nabto_endpoint peer, uint32_t cpNsi, uint32_t spNsi, uint32_t errorCode)
 {
     // packet format:
     // U_CONNECT_PSK(Hdr(exception=1), NOTIFY(err))
