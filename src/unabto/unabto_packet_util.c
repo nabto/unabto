@@ -490,5 +490,23 @@ bool unabto_payload_read_crypto(struct unabto_payload_packet* payload, struct un
     return true;
 }
 
+bool unabto_payload_read_notify(struct unabto_payload_packet* payload, struct unabto_payload_notify* notify)
+{
+    if (payload->dataLength < 4) {
+        return false;
+    }
+    READ_U32(notify->code, payload->dataBegin);
+    return true;
+}
+
+uint8_t* unabto_payloads_begin(uint8_t* packetBegin, const nabto_packet_header* header)
+{
+    return packetBegin + header->hlen;
+}
+
+uint8_t* unabto_payloads_end(uint8_t* packetBegin, const nabto_packet_header* header)
+{
+    return packetBegin + header->len;
+}
 
 #endif

@@ -13,7 +13,7 @@ void unabto_psk_connection_handle_request(nabto_socket_t socket, const nabto_end
     }
 }
 
-void unabtp_psk_connection_handle_exception_request(const nabto_packet_header* header)
+void unabto_psk_connection_handle_exception_request(const nabto_packet_header* header)
 {
     // packet structure:
     // U_CONNECT_PSK(Hdr(exception=1), notify(err) )
