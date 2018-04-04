@@ -97,6 +97,10 @@ struct unabto_payload_crypto {
     uint16_t       dataLength;
 };
 
+struct unabto_payload_notify {
+    uint32_t code;
+};
+
 struct unabto_payload_push {
     uint32_t sequence;
     uint16_t pnsId;
@@ -334,6 +338,7 @@ bool unabto_payload_read_typed_buffer(struct unabto_payload_packet* payload, str
 bool unabto_payload_read_gw(struct unabto_payload_packet* payload, struct unabto_payload_gw* gw);
 bool unabto_payload_read_ep(struct unabto_payload_packet* payload, struct unabto_payload_ep* ep);
 bool unabto_payload_read_crypto(struct unabto_payload_packet* payload, struct unabto_payload_crypto* crypto);
+bool unabto_payload_read_notify(struct unabto_payload_packet* payload, struct unabto_payload_notify* notify);
 
 #ifdef __cplusplus
 } //extern "C"

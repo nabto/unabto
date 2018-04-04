@@ -173,7 +173,6 @@ void nabto_release_connection_req(nabto_connect* con);
 /** Release a connection. @param con the connection to be released */
 void nabto_release_connection(nabto_connect* con);
 
-
 /** Find the connection. @param spnsi  the identifier.  @return the connection (0 if not found). */
 nabto_connect* nabto_find_connection(uint32_t spnsi);
 
@@ -186,6 +185,8 @@ int nabto_connection_index(nabto_connect* con);
  */
 void 
 nabto_connection_event(nabto_connect* con, message_event* event);
+
+void nabto_connection_client_aborted(nabto_connect* con);
 
 /**
  * Initialise a new connection.
