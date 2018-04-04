@@ -697,8 +697,10 @@ void nabto_connection_event(nabto_connect* con, message_event* event) {
 
 }
 
-
-/******************************************************************************/
+void nabto_connection_client_aborted(nabto_connect* con)
+{
+    nabto_release_connection(con);
+}
 
 void nabto_rendezvous_stop(nabto_connect* con) {
     nabto_rendezvous_connect_state* rcs = &con->rendezvousConnectState;
