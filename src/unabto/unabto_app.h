@@ -45,7 +45,7 @@ bool allow_client_access(nabto_connect* connection);
  * @param key          output buffer where the key is copied.
  * @return  true iff a psk was found and copied to the psk buffer.
  */
-bool unabto_local_psk_connection_get_key(unabto_psk_id keyId, const char* clientId, unabto_public_key_fingerprint fingerprint, unabto_psk key);
+bool unabto_local_psk_connection_get_key(const unabto_psk_id keyId, const char* clientId, const unabto_public_key_fingerprint fingerprint, unabto_psk key);
 #endif
 
     

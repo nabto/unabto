@@ -175,6 +175,9 @@ struct nabto_connect_s {
 };
 typedef struct nabto_connect_s nabto_connect;
 
+
+nabto_connect* nabto_reserve_connection(void);
+
 /** Initialize the connection array (all values are zero). */
 void nabto_init_connections(void);
 

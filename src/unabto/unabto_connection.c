@@ -24,6 +24,7 @@
 #include "unabto_version.h"
 #include "unabto_packet.h"
 #include "unabto_app_adapter.h"
+#include "unabto_connection_util.h"
 
 #include <unabto/unabto_tcp_fallback.h>
 #include <unabto/unabto_dns_fallback.h>
@@ -104,7 +105,7 @@ void nabto_init_connections(void)
     memset(connections, 0, sizeof(struct nabto_connect_s) * NABTO_MEMORY_CONNECTIONS_SIZE);
 }
 
-static nabto_connect* nabto_reserve_connection(void)
+nabto_connect* nabto_reserve_connection(void)
 {
     nabto_connect* con;
 
@@ -547,7 +548,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
 #endif
 
     {
-        if (unabto_connection_util_read_client_id(header, con)) {
+        if (unabto_connection_util_read_client_id(hdr, con)) {
             NABTO_LOG_TRACE(("Connection opened from '%s' (to %s)", con->clientId, nmc.nabtoMainSetup.id));
         }
     }

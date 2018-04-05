@@ -1,5 +1,14 @@
-#include "unabto_psk_connection.h"
+#include <unabto/unabto_psk_connection.h>
+#include <unabto/unabto_connection_util.h>
 #include <unabto/unabto_memory.h>
+#include <unabto/unabto_app.h>
+
+bool unabto_local_psk_connection_get_key(const unabto_psk_id keyId, const char* clientId, const unabto_public_key_fingerprint fingerprint, unabto_psk key)
+{
+    // dummy implementation for now
+    memset(key, 0, 16);
+    return true;
+}
 
 
 void unabto_psk_connection_handle_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
@@ -42,7 +51,7 @@ void unabto_psk_connection_handle_exception_request(const nabto_packet_header* h
     }
 }
 
-void unabto_psk_connection_create_new_connection(const nabto_packet_header* header)
+void unabto_psk_connection_create_new_connection(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
 {
     nabto_connect* connection;
     connection = nabto_reserve_connection();
@@ -50,7 +59,7 @@ void unabto_psk_connection_create_new_connection(const nabto_packet_header* head
         return unabto_psk_connection_send_connect_error_response(socket, peer, header->nsi_cp, header->nsi_sp, NP_PAYLOAD_NOTIFY_ERROR_BUSY_MICRO);
     }
     
-    unabto_psk_connection_util_verify_connect(header)
+    unabto_psk_connection_util_verify_connect(header, connection);
 }
 
 void unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
@@ -65,11 +74,7 @@ void unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
     connection = nabto_find_connection_cp_nsi(header->nsi_cp);
     
     if (!connection) {
-        connection = nabto_reserve_connection();
-        if (!connection) {
-            return unabto_psk_connection_send_connect_error_response(socket, peer, header->nsi_cp, header->nsi_sp, NP_PAYLOAD_NOTIFY_ERROR_BUSY_MICRO);
-        }
-        connection->
+        return unabto_psk_connection_create_new_connection(socket, peer, header);
     }
     
     if (connection &&

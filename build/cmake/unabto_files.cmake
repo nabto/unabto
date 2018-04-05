@@ -64,6 +64,8 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_config_defaults.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_config_derived.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_connection.h
+  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_connection_util.h
+  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_connection_util.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_connection_type.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_context.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_crypto.h
@@ -90,6 +92,7 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_protocol_defines.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_protocol_exceptions.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_psk_connection.c
+  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_psk_connection.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_query_rw.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_stream_environment.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_stream_event.h

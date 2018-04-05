@@ -1,14 +1,20 @@
-#include "unabto_connection_util.h"
+#include <unabto/unabto_connection_util.h>
+#include <unabto/unabto_packet_util.h>
+#include <unabto/unabto_memory.h>
+#include <unabto/unabto_types.h>
+#include <unabto/unabto_app.h>
+
+
 
 bool unabto_connection_util_read_client_id(const nabto_packet_header* header, nabto_connect* con)
 {
-    unabto_payload_packet cpIdPayload;
+    struct unabto_payload_packet cpIdPayload;
     
     uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
     uint8_t* payloadsEnd = unabto_payloads_begin(nabtoCommunicationBuffer, header);
     
     if (!unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_CP_ID, &cpIdPayload)) {
-        return;
+        return false;
     }
 
     struct unabto_payload_typed_buffer cpId;
@@ -38,7 +44,7 @@ bool unabto_connection_util_read_client_id(const nabto_packet_header* header, na
 
 
 
-bool unabto_psk_connection_util_verify_connect(const nabto_packet_header* header, )
+bool unabto_psk_connection_util_verify_connect(const nabto_packet_header* header, nabto_connect* connection)
 {
     // packet structure
     //U_CONNECT_PSK(Hdr, Capabilities, CpId, Fingerprint, KeyId, nonce_client, Enc())
@@ -48,23 +54,25 @@ bool unabto_psk_connection_util_verify_connect(const nabto_packet_header* header
     uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
     uint8_t* payloadsEnd = unabto_payloads_begin(nabtoCommunicationBuffer, header);
 
-    unabto_payload_packet keyIdPayload;
+    struct unabto_payload_packet keyIdPayload;
     unabto_psk_id keyId;
     const char* clientId;
     if (!unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_KEY_ID, &keyIdPayload)) {
         NABTO_LOG_WARN(("missing key id payload"));
-        return;
+        return false;
     }
     
     
     
-    if (keyIdPayload->dataLength != 16) {
+    if (keyIdPayload.dataLength != 16) {
         NABTO_LOG_WARN(("invalid key id length"));
-        return;
+        return false;
     }
 
     uint8_t psk[16];
-    bool unabto_local_psk_connection_get_key(keyIdPayload->dataBegin, const char* clientId, unabto_public_key_fingerprint fingerprint, unabto_psk key);
+    unabto_public_key_fingerprint fingerprint;
+    unabto_psk key;
+    unabto_local_psk_connection_get_key(keyIdPayload.dataBegin, clientId, fingerprint, key);
     
     // get crypto key
 
