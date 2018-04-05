@@ -58,8 +58,42 @@ void unabto_psk_connection_create_new_connection(nabto_socket_t socket, const na
     if (!connection) {
         return unabto_psk_connection_send_connect_error_response(socket, peer, header->nsi_cp, header->nsi_sp, NP_PAYLOAD_NOTIFY_ERROR_BUSY_MICRO);
     }
+
+    if (!unabto_psk_connection_create_new_connection_init(socket, peer, header, connection)) {
+        nabto_release_connection(connection);
+        return;
+    }
+}
+
+bool unabto_psk_connection_create_new_connection_init(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header, nabto_connect* connection)
+{
+    // read client id and insert it into the connection
+    unabto_connection_util_read_client_id(header, connection);
     
-    unabto_psk_connection_util_verify_connect(header, connection);
+    // read fingerprint and insert it into the connection
+    unabto_connection_util_read_fingerprint(header, connection);
+
+    // read nonce_client and insert it into the connection
+    if (!unabto_connection_util_read_nonce_client(header, connection)) {
+        return false;
+    }
+
+    // read key id and insert it into the connection
+    if (!unabto_connection_util_read_key_id(header, connection)) {
+        return false;
+    }
+
+    // read capabilities and insert them into the connection
+    if (!unabto_connection_util_read_capabilities(header, connection)) {
+        return false;
+    }
+
+    // verify the integrity of the packet if ok accept the connection request else discard the connection
+    if (!unabto_psk_connection_util_verify_connect(header, connection)) {
+        return false;
+    }
+
+    return true;
 }
 
 void unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)

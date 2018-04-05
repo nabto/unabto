@@ -6,6 +6,8 @@
 
 
 
+
+// return true iff a client id was read
 bool unabto_connection_util_read_client_id(const nabto_packet_header* header, nabto_connect* con)
 {
     struct unabto_payload_packet cpIdPayload;
@@ -42,6 +44,48 @@ bool unabto_connection_util_read_client_id(const nabto_packet_header* header, na
     return false;
 }
 
+// return true iff a fingerprint was read
+bool unabto_connection_util_read_fingerprint(const nabto_packet_header* header, nabto_connect* con)
+{
+    uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
+    uint8_t* payloadsEnd = unabto_payloads_begin(nabtoCommunicationBuffer, header);
+
+    struct unabto_payload_packet fingerprintPayload;
+    if (unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_FP, &fingerprintPayload)) {
+        struct unabto_payload_typed_buffer fingerprint;
+        if (unabto_payload_read_typed_buffer(&fingerprintPayload, &fingerprint)) {
+            if (fingerprint.type == NP_PAYLOAD_FP_TYPE_SHA256_TRUNCATED) {
+                if (fingerprint.dataLength  ==  NP_TRUNCATED_SHA256_LENGTH_BYTES) {
+                    con->hasFingerprint = true;
+                    memcpy(con->fingerprint, fingerprint.dataBegin, NP_TRUNCATED_SHA256_LENGTH_BYTES);
+                    return true;
+                } else {
+                    NABTO_LOG_ERROR(("fingerprint has the wrong length %"PRIu16, fingerprint.dataLength));
+                }
+            } else {
+                NABTO_LOG_TRACE(("cannot read fignerprint type: %"PRIu8, fingerprint.type));
+            }
+        }
+    }
+}
+
+// read unencrypted client nonce
+bool unabto_connection_util_read_nonce_client(const nabto_packet_header* header, nabto_connect* connection)
+{
+    return false;
+}
+
+// read key id
+bool unabto_connection_util_read_key_id(const nabto_packet_header* header, nabto_connect* connection)
+{
+    return false;
+}
+
+// read capabilities
+bool unabto_connection_util_read_capabilities(const nabto_packet_header* header, nabto_connect* connection)
+{
+    return false;
+}
 
 
 bool unabto_psk_connection_util_verify_connect(const nabto_packet_header* header, nabto_connect* connection)
