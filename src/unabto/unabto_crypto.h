@@ -62,6 +62,11 @@ struct shared_key_handshake_data {
 
 #if NABTO_ENABLE_UCRYPTO
 
+/**
+ * expand a 128bit key into a cryptocontext
+ */
+void nabto_crypto_init_aes_128_hmac_sha256_psk_context(nabto_crypto_context* cryptoContext, const uint8_t* psk);
+
 void nabto_crypto_init_psk_handshake_data(struct shared_key_handshake_data* data);
 
 /**

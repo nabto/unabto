@@ -112,41 +112,40 @@ bool unabto_connection_util_read_capabilities(const nabto_packet_header* header,
 }
 
 
+bool unabto_connection_util_psk_connect_init_key(const nabto_packet_header* header, nabto_connect* connection)
+{
+    unabto_psk psk;
+    if (!unabto_local_psk_connection_get_key(connection->psk.keyId, connection->clientId, connection->fingerprint, psk))
+    {
+        return false;
+    }
+
+    // init crypto context given a 128bit key.
+
+    nabto_crypto_init_aes_128_hmac_sha256_psk_context(&connection->cryptoctx, psk);
+    return true;
+}
+
 bool unabto_psk_connection_util_verify_connect(const nabto_packet_header* header, nabto_connect* connection)
 {
     // packet structure
     //U_CONNECT_PSK(Hdr, Capabilities, CpId, Fingerprint, KeyId, nonce_client, Enc())
 
-    // read key id
-
+    // find crypto payload
     uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
     uint8_t* payloadsEnd = unabto_payloads_begin(nabtoCommunicationBuffer, header);
 
-    struct unabto_payload_packet keyIdPayload;
-    unabto_psk_id keyId;
-    const char* clientId;
-    if (!unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_KEY_ID, &keyIdPayload)) {
-        NABTO_LOG_WARN(("missing key id payload"));
-        return false;
-    }
-    
-    
-    
-    if (keyIdPayload.dataLength != 16) {
-        NABTO_LOG_WARN(("invalid key id length"));
+    struct unabto_payload_packet cryptoPayload;
+    struct unabto_payload_crypto crypto;
+    uint16_t verifSize;
+    if (!unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_CRYPTO, &cryptoPayload)) {
         return false;
     }
 
-    uint8_t psk[16];
-    unabto_public_key_fingerprint fingerprint;
-    unabto_psk key;
-    unabto_local_psk_connection_get_key(keyIdPayload.dataBegin, clientId, fingerprint, key);
-    
-    // get crypto key
+    if (!unabto_payload_read_crypto(&cryptoPayload, &crypto)) {
+        return false;
+    }
 
-    // initialize crypto context
-
-    // validate packet
-
-    
+    // validate mac on packet
+    return unabto_verify_integrity(&connection->cryptoctx, crypto.code, nabtoCommunicationBuffer, header->len, &verifSize);
 }

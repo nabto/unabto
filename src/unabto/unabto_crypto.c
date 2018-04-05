@@ -32,6 +32,7 @@
 
 /******************************************************************************/
 
+
 #if NABTO_ENABLE_REMOTE_ACCESS || NABTO_ENABLE_UCRYPTO
 /**
  * Reset/initialise the Crypto context used in the attach sequence.
@@ -43,19 +44,7 @@ static void nabto_crypto_reset_a(nabto_crypto_context* cryptoContext)
     switch(nmc.nabtoMainSetup.cryptoSuite) {
     case CRYPT_W_AES_CBC_HMAC_SHA256: {
 #if NABTO_ENABLE_UCRYPTO
-        unabto_buffer nonces[1];
-        unabto_buffer seeds[1];
-        
-        unabto_buffer_init(&nonces[0], (uint8_t*)nmc.nabtoMainSetup.id, (uint16_t)strlen(nmc.nabtoMainSetup.id));
-        unabto_buffer_init(&seeds[0], nmc.nabtoMainSetup.presharedKey, PRE_SHARED_KEY_SIZE);
-
-        nabto_crypto_create_key_material(nonces, 1,
-                                         seeds, 1,
-                                         cryptoContext->key, KEY_MATERIAL_LENGTH);
-
-        cryptoContext->code = CRYPT_W_AES_CBC_HMAC_SHA256;
-        nabto_crypto_init_key(cryptoContext, false);
-
+        nabto_crypto_init_aes_128_hmac_sha256_psk_context(cryptoContext, nmc.nabtoMainSetup.presharedKey);
 #else
         NABTO_LOG_FATAL(("aes chosen but no support is present"));
 #endif
@@ -149,6 +138,24 @@ static void nabto_crypto_reset_d(nabto_crypto_context* cryptoContext, uint16_t c
 /******************************************************************************/
 
 #if NABTO_ENABLE_UCRYPTO
+
+
+void nabto_crypto_init_aes_128_hmac_sha256_psk_context(nabto_crypto_context* cryptoContext, const uint8_t* psk)
+{
+    unabto_buffer nonces[1];
+    unabto_buffer seeds[1];
+    
+    unabto_buffer_init(&nonces[0], (uint8_t*)nmc.nabtoMainSetup.id, (uint16_t)strlen(nmc.nabtoMainSetup.id));
+    unabto_buffer_init(&seeds[0], (uint8_t*)psk, PRE_SHARED_KEY_SIZE);
+    
+    nabto_crypto_create_key_material(nonces, 1,
+                                     seeds, 1,
+                                     cryptoContext->key, KEY_MATERIAL_LENGTH);
+    
+    cryptoContext->code = CRYPT_W_AES_CBC_HMAC_SHA256;
+    nabto_crypto_init_key(cryptoContext, false);
+}
+
 
 void nabto_crypto_init_psk_handshake_data(struct shared_key_handshake_data* data)
 {
