@@ -80,15 +80,28 @@ bool unabto_connection_util_read_nonce_client(const nabto_packet_header* header,
         if (noncePayload.dataLength != 32) {
             return false;
         }
-        memcpy(connection->psk.handshakeData.initiatorNonce, noncePayload.dataBegin, 16);
-    }    
-    
+        memcpy(connection->psk.handshakeData.initiatorNonce, noncePayload.dataBegin, 32);
+        return true;
+    }
+
     return false;
 }
 
 // read key id
 bool unabto_connection_util_read_key_id(const nabto_packet_header* header, nabto_connect* connection)
 {
+    uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
+    uint8_t* payloadsEnd = unabto_payloads_begin(nabtoCommunicationBuffer, header);
+
+    struct unabto_payload_packet keyIdPayload;
+    if (unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_KEY_ID, &keyIdPayload)) {
+        if (keyIdPayload.dataLength != 16) {
+            return false;
+        }
+        memcpy(connection->psk.keyId, keyIdPayload.dataBegin, 16);
+        return true;
+    }
+
     return false;
 }
 

@@ -19,6 +19,7 @@
 #include <unabto/unabto_message.h>
 #include <unabto/unabto_extended_rendezvous.h>
 #include <unabto/unabto_crypto.h>
+#include <unabto/unabto_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -88,6 +89,7 @@ typedef struct {
         CONNECTED
     } state;
     struct shared_key_handshake_data handshakeData;
+    unabto_psk_id keyId;
 } unabto_connection_psk_connection;
 
 
