@@ -24,7 +24,20 @@ enum {
     PROTOVERSION = 2 /**< Nabto Protocol Version */
 };
 
-/******************************************************************************/
+void nabto_header_init(nabto_packet_header* header, uint8_t type, uint32_t cpnsi, uint32_t spnsi)
+{
+    memset(header, 0, sizeof(nabto_packet_header));
+    header->type = type;
+    header->nsi_cp = cpnsi;
+    header->nsi_sp = spnsi;
+}
+
+
+void nabto_header_add_flags(nabto_packet_header* header, uint8_t flags)
+{
+    header->flags |= flags;
+}
+
 
 uint16_t nabto_rd_header(const uint8_t* buf, const uint8_t* end, nabto_packet_header* header)
 {
@@ -390,6 +403,45 @@ uint8_t* insert_piggy_payload(uint8_t* ptr, uint8_t* end, uint8_t* piggyData, ui
     
     return ptr;
 }
+
+uint8_t* insert_nonce_payload(uint8_t* ptr, uint8_t* end, const uint8_t* nonceData, uint16_t nonceSize)
+{
+    if (end < ptr || ptr == NULL) {
+        return NULL;
+    }
+    
+    if ((uint16_t)(end - ptr) < 4 + nonceSize) {
+        return NULL;
+    }
+
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_NONCE, 0, nonceSize);
+    memcpy(ptr, nonceData, nonceSize);
+    ptr += nonceSize;
+    return ptr;
+    
+}
+
+uint8_t* insert_random_payload(uint8_t* ptr, uint8_t* end, uint8_t* randomData, uint16_t randomSize)
+{
+    
+}
+
+uint8_t* insert_crypto_payload_with_payloads(uint8_t* ptr, uint8_t* end)
+{
+    if (end < ptr || ptr == NULL) {
+        return NULL;
+    }
+    
+    if ((uint16_t)(end - ptr) < 4+2) {
+        return NULL;
+    }
+
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
+    WRITE_U8(ptr - 3, NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS);
+    ptr += 2;
+    return ptr;
+}
+
 bool unabto_payload_read_push(struct unabto_payload_packet* payload, struct unabto_payload_push* push){
     const uint8_t* ptr = payload->dataBegin;
     if (payload->type != NP_PAYLOAD_TYPE_PUSH) {

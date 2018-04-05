@@ -101,11 +101,6 @@ struct unabto_payload_notify {
     uint32_t code;
 };
 
-struct unabto_payload_key_id {
-    uint8_t* keyIdBegin;
-    uint8_t* keyIdEnd;
-};
-
 struct unabto_payload_push {
     uint32_t sequence;
     uint16_t pnsId;
@@ -199,6 +194,15 @@ enum {
     NOTIFY_LAST_ERROR 
 };
 
+/**
+ * create a basic header
+ */
+void nabto_header_init(nabto_packet_header* header, uint8_t type, uint32_t cpnsi, uint32_t spnsi);
+
+/**
+ * add one or more flags
+ */
+void nabto_header_add_flags(nabto_packet_header* header, uint8_t flags);
 
 /**
  * Read a packet header
@@ -333,6 +337,14 @@ uint8_t* insert_sp_id_payload(uint8_t* ptr, uint8_t* end);
 uint8_t* insert_stats_payload(uint8_t* ptr, uint8_t* end, uint8_t stats_event_type);
 uint8_t* insert_notify_payload(uint8_t* buf, uint8_t* end, uint32_t notifyValue);
 uint8_t* insert_piggy_payload(uint8_t* ptr, uint8_t* end, uint8_t* piggyData, uint16_t piggySize);
+uint8_t* insert_nonce_payload(uint8_t* ptr, uint8_t* end, const uint8_t* nonceData, uint16_t nonceSize);
+uint8_t* insert_random_payload(uint8_t* ptr, uint8_t* end, uint8_t* randomData, uint16_t randomSize);
+/**
+ * Return a pointer to the first byte after the code in the payload
+ * the payload has the bit set which says it has payloads within the
+ * packet.
+ */
+uint8_t* insert_crypto_payload_with_payloads(uint8_t* ptr, uint8_t* end);
 
 /**
  * read a payload, return true iff it succeedes
@@ -344,7 +356,6 @@ bool unabto_payload_read_gw(struct unabto_payload_packet* payload, struct unabto
 bool unabto_payload_read_ep(struct unabto_payload_packet* payload, struct unabto_payload_ep* ep);
 bool unabto_payload_read_crypto(struct unabto_payload_packet* payload, struct unabto_payload_crypto* crypto);
 bool unabto_payload_read_notify(struct unabto_payload_packet* payload, struct unabto_payload_notify* notify);
-bool unabto_payload_read_key_id(struct unabto_payload_packet* payload, struct unabto_payload_key_id* keyId);
 
 uint8_t* unabto_payloads_begin(uint8_t* packetBegin, const nabto_packet_header* header);
 uint8_t* unabto_payloads_end(uint8_t* packetBegin, const nabto_packet_header* header);

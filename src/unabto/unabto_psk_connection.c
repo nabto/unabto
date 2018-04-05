@@ -2,6 +2,8 @@
 #include <unabto/unabto_connection_util.h>
 #include <unabto/unabto_memory.h>
 #include <unabto/unabto_app.h>
+#include <unabto/unabto_crypto.h>
+#include <unabto/unabto_packet.h>
 
 bool unabto_local_psk_connection_get_key(const unabto_psk_id keyId, const char* clientId, const unabto_public_key_fingerprint fingerprint, unabto_psk key)
 {
@@ -63,6 +65,9 @@ void unabto_psk_connection_create_new_connection(nabto_socket_t socket, const na
         nabto_release_connection(connection);
         return;
     }
+
+    // the connection was created now send a packet back to the client.
+    unabto_psk_connection_send_connect_response(socket, peer, connection);
 }
 
 bool unabto_psk_connection_create_new_connection_init(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header, nabto_connect* connection)
@@ -132,22 +137,52 @@ void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const na
 {
     // packet format:
     // U_CONNECT_PSK(Hdr, Capabilities, nonce_device, Enc(random_device, nonce_client))
-    
+
     // create header
+    nabto_packet_header header;
+    nabto_header_init(&header, NP_PACKET_HDR_TYPE_U_CONNECT_PSK, connection->cpnsi, connection->spnsi);
 
     // set RSP bit
-    
-    // insert capabilities
+    nabto_header_add_flags(&header, NP_PACKET_HDR_FLAG_RESPONSE);
 
+    uint8_t* ptr = nabtoCommunicationBuffer;
+    uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
+
+    ptr = nabto_wr_header(ptr, end, &header);
+
+    // insert capabilities
+    ptr = insert_capabilities(ptr, end, false);
+    
     // insert nonce from device
+    ptr = insert_nonce_payload(ptr, end, connection->psk.handshakeData.responderNonce, 32);
+
+    // pointer before crypto payload
+    uint8_t* cryptoPayloadStart = ptr;
 
     // insert encrypted payload header
+    ptr = insert_crypto_payload_with_payloads(ptr, end);
 
+    // start of plaintext
+    uint8_t* plaintextStart = ptr;
+    
     // insert random_device
+    ptr = insert_random_payload(ptr, end, connection->psk.handshakeData.responderRandom, 32);
 
     // insert nonce_client
+    ptr = insert_nonce_payload(ptr, end, connection->psk.handshakeData.initiatorRandom, 32);
 
+    uint8_t* plaintextEnd = ptr;
+
+    uint16_t plaintextLength = plaintextEnd - plaintextStart;
+    
     // encrypt and send packet.
+
+    uint16_t packetLength;
+    if (encrypt_packet(&connection->cryptoctx, nabtoCommunicationBuffer, end, plaintextStart, plaintextLength, cryptoPayloadStart, &packetLength)) {
+        nabto_write(socket, nabtoCommunicationBuffer, packetLength, peer->addr, peer->port);
+    } else {
+        NABTO_LOG_WARN(("cannot encrypt packet"));
+    }
 }
 
 void unabto_psk_connection_send_verify_response(nabto_socket_t socket, const nabto_endpoint* peer, nabto_connect* connection)

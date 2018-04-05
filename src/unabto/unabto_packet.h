@@ -60,6 +60,19 @@ void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, ui
 void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* start, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, message_event* event, void* userData);
 
 /**
+ * Encrypt a packet
+ * @param cryptoCtx crypto context
+ * @param bufferStart start of packet buffer
+ * @param bufferEnd   end of packet buffer
+ * @param plaintextStart  start of plaintext
+ * @param plaintextLength length of plaintext
+ * @param cryptoPayloadStart start of crypto payload before payload header and crypto code.
+ * @param len  length of encrypted packet
+ * @return true iff the packet was encrypted.
+ */
+bool encrypt_packet(nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadStart, uint16_t* len);
+
+/**
  * @param peer peer to send to
  * @param cryptoCtx  crypto context
  * @param packetStart  start of packet buffer
