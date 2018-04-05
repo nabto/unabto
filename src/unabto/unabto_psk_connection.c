@@ -113,7 +113,7 @@ void unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
     
     if (connection &&
         connection->state == CS_CONNECTING &&
-        connection->pskHandshake.state == WAIT_CONNECT)
+        connection->psk.state == WAIT_CONNECT)
     {
         // there is a connection this is a retransmission the CONNECT
         // response is either lost or still on the line. Resend response.

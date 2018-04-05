@@ -547,10 +547,8 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
     }
 #endif
 
-    {
-        if (unabto_connection_util_read_client_id(hdr, con)) {
-            NABTO_LOG_TRACE(("Connection opened from '%s' (to %s)", con->clientId, nmc.nabtoMainSetup.id));
-        }
+    if (unabto_connection_util_read_client_id(hdr, con)) {
+        NABTO_LOG_TRACE(("Connection opened from '%s' (to %s)", con->clientId, nmc.nabtoMainSetup.id));
     }
 
 #if NABTO_ENABLE_TCP_FALLBACK
@@ -572,24 +570,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
         }
     }
 #endif
-    {
-        struct unabto_payload_packet fingerprintPayload;
-        if (unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_FP, &fingerprintPayload)) {
-            struct unabto_payload_typed_buffer fingerprint;
-            if (unabto_payload_read_typed_buffer(&fingerprintPayload, &fingerprint)) {
-                if (fingerprint.type == NP_PAYLOAD_FP_TYPE_SHA256_TRUNCATED) {
-                    if (fingerprint.dataLength  ==  NP_TRUNCATED_SHA256_LENGTH_BYTES) {
-                        con->hasFingerprint = true;
-                        memcpy(con->fingerprint, fingerprint.dataBegin, NP_TRUNCATED_SHA256_LENGTH_BYTES);
-                    } else {
-                        NABTO_LOG_ERROR(("fingerprint has the wrong length %"PRIu16, fingerprint.dataLength));
-                    }
-                } else {
-                    NABTO_LOG_TRACE(("cannot read fignerprint type: %"PRIu8, fingerprint.type));
-                }
-            }
-        }
-    }
+    unabto_connection_util_read_fingerprint(hdr, con);
 
 #if NABTO_ENABLE_UCRYPTO
     if (nmc.context.nonceSize == NONCE_SIZE && !isLocal) {

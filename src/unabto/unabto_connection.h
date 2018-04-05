@@ -18,6 +18,7 @@
 #include <unabto/unabto_connection_type.h>
 #include <unabto/unabto_message.h>
 #include <unabto/unabto_extended_rendezvous.h>
+#include <unabto/unabto_crypto.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -86,7 +87,8 @@ typedef struct {
         WAIT_VERIFY,
         CONNECTED
     } state;
-} unabto_connection_psk_handshake;
+    struct shared_key_handshake_data handshakeData;
+} unabto_connection_psk_connection;
 
 
 #define CON_ATTR_DEFAULT        0x00  /**< unrealiable connection with keep alive       */
@@ -110,7 +112,7 @@ struct nabto_connect_s {
     /**
      * psk handshake state
      */
-    unabto_connection_psk_handshake pskHandshake; 
+    unabto_connection_psk_connection psk; 
     
     uint32_t spnsi; /**< Serverpeer connection identifier. For local
                      * connections this identifier is between 100 and

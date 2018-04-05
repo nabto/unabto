@@ -150,6 +150,14 @@ static void nabto_crypto_reset_d(nabto_crypto_context* cryptoContext, uint16_t c
 
 #if NABTO_ENABLE_UCRYPTO
 
+void nabto_crypto_init_psk_handshake_data(struct shared_key_handshake_data* data)
+{
+    nabto_random(data->initiatorNonce, 32);
+    nabto_random(data->responderNonce, 32);
+    nabto_random(data->initiatorRandom, 32);
+    nabto_random(data->responderRandom, 32);
+}
+
 void nabto_crypto_create_key_material(const unabto_buffer nonces[], uint8_t nonces_size,
                                       const unabto_buffer seeds[],  uint8_t seeds_size,
                                       uint8_t* keyData, uint16_t keyDataLength)

@@ -51,7 +51,18 @@ typedef struct {
 
 } nabto_crypto_context;
 
+
+// data used in a shared key handshake
+struct shared_key_handshake_data {
+    uint8_t initiatorNonce[32];
+    uint8_t responderNonce[32];
+    uint8_t initiatorRandom[32];
+    uint8_t responderRandom[32];
+};
+
 #if NABTO_ENABLE_UCRYPTO
+
+void nabto_crypto_init_psk_handshake_data(struct shared_key_handshake_data* data);
 
 /**
  * construct the key material from nonces and secrets

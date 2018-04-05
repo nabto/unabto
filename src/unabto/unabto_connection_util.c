@@ -72,6 +72,17 @@ bool unabto_connection_util_read_fingerprint(const nabto_packet_header* header, 
 // read unencrypted client nonce
 bool unabto_connection_util_read_nonce_client(const nabto_packet_header* header, nabto_connect* connection)
 {
+    uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
+    uint8_t* payloadsEnd = unabto_payloads_begin(nabtoCommunicationBuffer, header);
+
+    struct unabto_payload_packet noncePayload;
+    if (unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_NONCE, &noncePayload)) {
+        if (noncePayload.dataLength != 32) {
+            return false;
+        }
+        memcpy(connection->psk.handshakeData.initiatorNonce, noncePayload.dataBegin, 16);
+    }    
+    
     return false;
 }
 
