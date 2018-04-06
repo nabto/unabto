@@ -73,23 +73,9 @@ static void nabto_crypto_reset_c(nabto_crypto_context* cryptoContext, const uint
 #if NABTO_ENABLE_UCRYPTO
     switch(nmc.nabtoMainSetup.cryptoSuite) {
     case CRYPT_W_AES_CBC_HMAC_SHA256: {
-        unabto_buffer nonces[2];
-        unabto_buffer seeds[2];
-
-        unabto_buffer_init(&nonces[0], (uint8_t*)nonceGSP, NONCE_SIZE);
-        unabto_buffer_init(&nonces[1], (uint8_t*)nmc.context.nonceMicro, NONCE_SIZE);
-        
-        unabto_buffer_init(&seeds[0], (uint8_t*)seedGSP, SEED_SIZE);
-        unabto_buffer_init(&seeds[1], (uint8_t*)seedUD, SEED_SIZE);
-
-        nabto_crypto_create_key_material(
-            nonces, 2,
-            seeds, 2,
-            cryptoContext->key, KEY_MATERIAL_LENGTH);
-        cryptoContext->code = CRYPT_W_AES_CBC_HMAC_SHA256;
-//        NABTO_LOG_BUFFER(("shared gsp key"),cryptoContext->key, KEY_MATERIAL_LENGTH);
-        nabto_crypto_init_key(cryptoContext, false);
-
+        nabto_crypto_init_aes_128_hmac_sha256_psk_context_from_handshake_data(
+            cryptoContext, nonceGSP, nmc.context.nonceMicro,
+            seedGSP, seedUD);
         break;
     }
 
@@ -152,6 +138,28 @@ void nabto_crypto_init_aes_128_hmac_sha256_psk_context(nabto_crypto_context* cry
                                      seeds, 1,
                                      cryptoContext->key, KEY_MATERIAL_LENGTH);
     
+    cryptoContext->code = CRYPT_W_AES_CBC_HMAC_SHA256;
+    nabto_crypto_init_key(cryptoContext, false);
+}
+
+void nabto_crypto_init_aes_128_hmac_sha256_psk_context_from_handshake_data(
+    nabto_crypto_context* cryptoContext,
+    const uint8_t* initiatorNonce, const uint8_t* responderNonce,
+    const uint8_t* initiatorRandom, const uint8_t* responderRandom)
+{
+    unabto_buffer nonces[2];
+    unabto_buffer seeds[2];
+    
+    unabto_buffer_init(&nonces[0], (uint8_t*)initiatorNonce, NONCE_SIZE);
+    unabto_buffer_init(&nonces[1], (uint8_t*)responderNonce, NONCE_SIZE);
+    
+    unabto_buffer_init(&seeds[0], (uint8_t*)initiatorRandom, SEED_SIZE);
+    unabto_buffer_init(&seeds[1], (uint8_t*)responderRandom, SEED_SIZE);
+    
+    nabto_crypto_create_key_material(
+        nonces, 2,
+        seeds, 2,
+        cryptoContext->key, KEY_MATERIAL_LENGTH);
     cryptoContext->code = CRYPT_W_AES_CBC_HMAC_SHA256;
     nabto_crypto_init_key(cryptoContext, false);
 }

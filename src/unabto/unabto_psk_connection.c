@@ -173,11 +173,18 @@ void unabto_psk_connection_handle_verify_request(nabto_socket_t socket, const na
 void unabto_psk_connection_init_connection(nabto_connect* connection)
 {
     // init crypto context
-
-    
+    nabto_crypto_init_aes_128_hmac_sha256_psk_context_from_handshake_data(
+        &connection->cryptoctx,
+        connection->psk.handshakeData.initiatorNonce,
+        connection->psk.handshakeData.responderNonce,
+        connection->psk.handshakeData.initiatorRandom,
+        connection->psk.handshakeData.responderRandom);
     
     // change connection state
+    connection->state = CS_CONNECTED;
+    
     // change psk state
+    connection->psk.state = CONNECTED;
 }
 
 void unabto_psk_connection_dispatch_verify_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
