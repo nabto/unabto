@@ -140,7 +140,7 @@ void unabto_psk_connection_handle_verify_request(nabto_socket_t socket, const na
     struct unabto_payload_crypto cryptoPayload;
 
     const uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
-    const uint8_t* payloadsEnd = unabto_payloads_begin(nabtoCommunicationBuffer, header);
+    const uint8_t* payloadsEnd = unabto_payloads_end(nabtoCommunicationBuffer, header);
 
     if (!unabto_payload_find_and_read_crypto(payloadsBegin, payloadsEnd, &cryptoPayload)) {
         NABTO_LOG_WARN(("expected a crypto payload, noone found."));

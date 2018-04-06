@@ -13,7 +13,7 @@ bool unabto_connection_util_read_client_id(const nabto_packet_header* header, na
     struct unabto_payload_packet cpIdPayload;
     
     uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
-    uint8_t* payloadsEnd = unabto_payloads_begin(nabtoCommunicationBuffer, header);
+    uint8_t* payloadsEnd = unabto_payloads_end(nabtoCommunicationBuffer, header);
     
     if (!unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_CP_ID, &cpIdPayload)) {
         return false;
@@ -48,7 +48,7 @@ bool unabto_connection_util_read_client_id(const nabto_packet_header* header, na
 bool unabto_connection_util_read_fingerprint(const nabto_packet_header* header, nabto_connect* con)
 {
     uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
-    uint8_t* payloadsEnd = unabto_payloads_begin(nabtoCommunicationBuffer, header);
+    uint8_t* payloadsEnd = unabto_payloads_end(nabtoCommunicationBuffer, header);
 
     struct unabto_payload_packet fingerprintPayload;
     if (unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_FP, &fingerprintPayload)) {
@@ -74,7 +74,7 @@ bool unabto_connection_util_read_fingerprint(const nabto_packet_header* header, 
 bool unabto_connection_util_read_nonce_client(const nabto_packet_header* header, nabto_connect* connection)
 {
     uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
-    uint8_t* payloadsEnd = unabto_payloads_begin(nabtoCommunicationBuffer, header);
+    uint8_t* payloadsEnd = unabto_payloads_end(nabtoCommunicationBuffer, header);
 
     struct unabto_payload_packet noncePayload;
     if (unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_NONCE, &noncePayload)) {
@@ -124,7 +124,7 @@ bool unabto_connection_util_read_and_validate_nonce_client(const uint8_t* payloa
 bool unabto_connection_util_read_key_id(const nabto_packet_header* header, nabto_connect* connection)
 {
     uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
-    uint8_t* payloadsEnd = unabto_payloads_begin(nabtoCommunicationBuffer, header);
+    uint8_t* payloadsEnd = unabto_payloads_end(nabtoCommunicationBuffer, header);
 
     struct unabto_payload_packet keyIdPayload;
     if (unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_KEY_ID, &keyIdPayload)) {
@@ -167,7 +167,7 @@ bool unabto_psk_connection_util_verify_connect(const nabto_packet_header* header
 
     // find crypto payload
     uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
-    uint8_t* payloadsEnd = unabto_payloads_begin(nabtoCommunicationBuffer, header);
+    uint8_t* payloadsEnd = unabto_payloads_end(nabtoCommunicationBuffer, header);
 
     struct unabto_payload_packet cryptoPayload;
     struct unabto_payload_crypto crypto;
