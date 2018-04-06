@@ -188,10 +188,14 @@ void nabto_init_connections(void);
 /** Closes all connections in the connection array. */
 void nabto_terminate_connections(void);
 
+// reset a connection to a welldefined state
+void nabto_reset_connection(nabto_connect* con);
 
 /** Request to release the connection has been received. @param con the connection to be released */
 void nabto_release_connection_req(nabto_connect* con);
 
+
+uint16_t nabto_connection_get_fresh_sp_nsi(void);
 
 /** Release a connection. @param con the connection to be released */
 void nabto_release_connection(nabto_connect* con);

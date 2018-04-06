@@ -65,13 +65,15 @@ void unabto_psk_connection_create_new_connection(nabto_socket_t socket, const na
         nabto_release_connection(connection);
         return;
     }
-
-    // the connection was created now send a packet back to the client.
-    unabto_psk_connection_send_connect_response(socket, peer, connection);
 }
 
 bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header, nabto_connect* connection)
 {
+    nabto_reset_connection(connection);
+    connection->cpnsi = header->nsi_cp;
+    connection->spnsi = nabto_connection_get_fresh_sp_nsi();
+    connection->state = CS_CONNECTING;
+    
     // read client id and insert it into the connection
     unabto_connection_util_read_client_id(header, connection);
     
@@ -98,6 +100,11 @@ bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
         return false;
     }
 
+
+    // the connection was created now send a packet back to the client.
+    unabto_psk_connection_send_connect_response(socket, peer, connection);
+    
+    
     return true;
 }
 

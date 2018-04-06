@@ -82,7 +82,7 @@ static void nabto_rendezvous_end(nabto_connect* con);
 static void nabto_rendezvous_start(nabto_connect* con);
 
 /** initialise a connection */
-static void nabto_reset_connection(nabto_connect* con)
+void nabto_reset_connection(nabto_connect* con)
 {
     nabto_stamp_t tmp = nabtoGetStamp();
     NABTO_LOG_TRACE((PRInsi " Reset connection", MAKE_NSI_PRINTABLE(0, con->spnsi, 0)));
@@ -405,7 +405,7 @@ nabto_connect* nabto_get_new_connection(uint32_t nsi)
 }
 
 /// Retrieve the next NSI. @return the NSI
-static uint16_t fresh_nsi(void) {
+uint16_t nabto_connection_get_fresh_sp_nsi(void) {
     uint16_t i;
     static uint16_t nsiStore = 0;  ///< the micoro device's very persistant NSI part:)
 
@@ -495,7 +495,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
         *nsi = ipxData.spNsi;
         NABTO_LOG_TRACE(("IPX payload with NSI (SPNSI=%" PRIu32 ")", *nsi));
     } else {
-        *nsi = fresh_nsi();
+        *nsi = nabto_connection_get_fresh_sp_nsi();
         NABTO_LOG_TRACE(("IPX payload without NSI (fresh NSI=%" PRIu32 ")", *nsi));
     }
 
