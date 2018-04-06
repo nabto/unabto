@@ -77,6 +77,7 @@ bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
     connection->psk.state = WAIT_CONNECT;
     connection->timeOut = CONNECTION_TIMEOUT;
     unabto_connection_set_future_stamp(&connection->stamp, 20000);
+    connection->rendezvousConnectState.state = RS_DONE;
     connection->noRendezvous = true;
     
     // read client id and insert it into the connection

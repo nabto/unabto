@@ -154,7 +154,7 @@ bool unabto_connection_util_read_capabilities(const nabto_packet_header* header,
 
 bool unabto_connection_util_verify_capabilities(nabto_connect* connection, struct unabto_payload_capabilities_read* capabilities)
 {
-    uint32_t requiredCapabilities = PEER_CAP_DIR | PEER_CAP_MICRO | PEER_CAP_TAG | PEER_CAP_FRCTRL | PEER_CAP_ASYNC;
+    uint32_t requiredCapabilities = PEER_CAP_MICRO | PEER_CAP_TAG | PEER_CAP_FRCTRL | PEER_CAP_ASYNC;
 
     if (capabilities->mask & requiredCapabilities != requiredCapabilities) {
         NABTO_LOG_WARN(("client does not provide enough capabilities in its capability mask"));
