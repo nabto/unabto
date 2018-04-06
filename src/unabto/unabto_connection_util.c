@@ -67,6 +67,7 @@ bool unabto_connection_util_read_fingerprint(const nabto_packet_header* header, 
             }
         }
     }
+    return false;
 }
 
 // read unencrypted client nonce

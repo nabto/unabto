@@ -4,7 +4,7 @@
 #include <unabto/unabto_env_base.h>
 
 // Truncated sha256 fingerprint of a public key.
-typedef char unabto_public_key_fingerprint[16];
+typedef uint8_t unabto_public_key_fingerprint[16];
 
 // ID of a psk.
 typedef uint8_t unabto_psk_id[16];
