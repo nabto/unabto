@@ -179,6 +179,7 @@ struct nabto_connect_s {
 };
 typedef struct nabto_connect_s nabto_connect;
 
+void unabto_connection_set_future_stamp(nabto_stamp_t* stamp, uint16_t future);
 
 nabto_connect* nabto_reserve_connection(void);
 

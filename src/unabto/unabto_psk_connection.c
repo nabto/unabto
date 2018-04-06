@@ -74,6 +74,9 @@ bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
     connection->spnsi = nabto_connection_get_fresh_sp_nsi();
     connection->state = CS_CONNECTING;
     connection->psk.state = WAIT_CONNECT;
+    connection->timeOut = CONNECTION_TIMEOUT;
+    unabto_connection_set_future_stamp(&connection->stamp, 20000);
+    connection->noRendezvous = true;
     
     // read client id and insert it into the connection
     unabto_connection_util_read_client_id(header, connection);
@@ -96,6 +99,12 @@ bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
         return false;
     }
 
+    // init crypto key for the connecton
+    if (!unabto_connection_util_psk_connect_init_key(connection)) {
+        NABTO_LOG_WARN(("Failed to initialise crypto context for psk connection"));
+        return false;
+    }
+        
     // verify the integrity of the packet if ok accept the connection request else discard the connection
     if (!unabto_psk_connection_util_verify_connect(header, connection)) {
         return false;
@@ -192,6 +201,8 @@ void unabto_psk_connection_init_connection(nabto_connect* connection)
     
     // change psk state
     connection->psk.state = CONNECTED;
+
+    NABTO_LOG_INFO(("PSK connection created with client nsi: " PRInsi,  MAKE_NSI_PRINTABLE(connection->cpnsi, connection->spnsi, 0) ));
 }
 
 void unabto_psk_connection_dispatch_verify_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
@@ -202,7 +213,7 @@ void unabto_psk_connection_dispatch_verify_request(nabto_socket_t socket, const 
     // verify phase.
 
     nabto_connect* connection;
-    connection = nabto_find_connection(header->nsi_cp);
+    connection = nabto_find_connection(header->nsi_sp);
     if (connection && connection->state == CS_CONNECTING && connection->psk.state == WAIT_VERIFY) {
         // This is a new unhandled packet for the state.
         return unabto_psk_connection_handle_verify_request(socket, peer, header, connection);
@@ -250,7 +261,7 @@ void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const na
     ptr = insert_random_payload(ptr, end, connection->psk.handshakeData.responderRandom, 32);
 
     // insert nonce_client
-    ptr = insert_nonce_payload(ptr, end, connection->psk.handshakeData.initiatorRandom, 32);
+    ptr = insert_nonce_payload(ptr, end, connection->psk.handshakeData.initiatorNonce, 32);
 
     uint8_t* plaintextEnd = ptr;
 
@@ -293,6 +304,8 @@ void unabto_psk_connection_send_verify_response(nabto_socket_t socket, const nab
     }
 
     uint16_t packetLength = ptr - nabtoCommunicationBuffer;
+
+    insert_length(nabtoCommunicationBuffer, packetLength);
     // send packet
     nabto_write(socket, nabtoCommunicationBuffer, packetLength, peer->addr, peer->port);
 }
@@ -333,6 +346,8 @@ void unabto_psk_connection_send_error_response(nabto_socket_t socket, const nabt
     }
 
     uint16_t packetLength = ptr - nabtoCommunicationBuffer;
+
+    insert_length(nabtoCommunicationBuffer, packetLength);
     // send packet
     nabto_write(socket, nabtoCommunicationBuffer, packetLength, peer->addr, peer->port);
 }

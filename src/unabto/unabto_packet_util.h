@@ -300,7 +300,7 @@ uint8_t* insert_data_header(uint8_t* buf, uint32_t nsi, uint8_t* nsico, uint16_t
  * @param buf  (uint8_t*) the start of the packet
  * @param len  (size_t) the total length of the payload
  */
-#define insert_length(buf, len)     WRITE_U16((uint8_t*)(buf) + OFS_PACKET_LGT, (uint16_t)(len))
+void insert_length(uint8_t* buf, uint16_t length);
 
 /**
  * Write the Payload

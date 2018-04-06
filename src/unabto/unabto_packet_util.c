@@ -239,6 +239,10 @@ uint8_t* insert_data_header(uint8_t* buf, uint32_t nsi, uint8_t* nsico, uint16_t
     return insert_header(buf, 0, nsi, DATA, false, 0, tag, nsico);
 }
 
+void insert_length(uint8_t* buf, uint16_t length) {
+    WRITE_U16((uint8_t*)(buf) + OFS_PACKET_LGT, (uint16_t)(length));
+}
+
 /******************************************************************************/
 
 uint8_t* insert_payload(uint8_t* buf, uint8_t* end, uint8_t type, const uint8_t* content, size_t size)

@@ -142,11 +142,11 @@ bool unabto_connection_util_read_key_id(const nabto_packet_header* header, nabto
 bool unabto_connection_util_read_capabilities(const nabto_packet_header* header, nabto_connect* connection)
 {
     // TODO
-    return false;
+    return true;
 }
 
 
-bool unabto_connection_util_psk_connect_init_key(const nabto_packet_header* header, nabto_connect* connection)
+bool unabto_connection_util_psk_connect_init_key(nabto_connect* connection)
 {
     unabto_psk psk;
     if (!unabto_local_psk_connection_get_key(connection->psk.keyId, connection->clientId, connection->fingerprint, psk))

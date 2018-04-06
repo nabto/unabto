@@ -29,7 +29,7 @@ bool unabto_connection_util_read_capabilities(const nabto_packet_header* header,
 // from the packet.
 // PostCondition: the connections crypto context is
 // initialized with the appropriate psk.
-bool unabto_connection_util_connect_psk_init(nabto_connect* connection);
+bool unabto_connection_util_psk_connect_init_key(nabto_connect* connection);
 
 // verify the integrity of a connect request
 bool unabto_psk_connection_util_verify_connect(const nabto_packet_header* header, nabto_connect* connection);

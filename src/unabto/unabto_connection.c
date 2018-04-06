@@ -48,7 +48,7 @@ NABTO_THREAD_LOCAL_STORAGE nabto_connect connections[NABTO_MEMORY_CONNECTIONS_SI
 #endif
 
 
-static void unabto_connection_set_future_stamp(nabto_stamp_t* stamp, uint16_t future)
+void unabto_connection_set_future_stamp(nabto_stamp_t* stamp, uint16_t future)
 {
     connection_timeout_cache_cached = false;
     nabtoSetFutureStamp(stamp, future);
@@ -682,6 +682,7 @@ void nabto_connection_event(nabto_connect* con, message_event* event) {
 
 void nabto_connection_client_aborted(nabto_connect* con)
 {
+    NABTO_LOG_TRACE(("Client aborted connection request"));
     nabto_release_connection(con);
 }
 
