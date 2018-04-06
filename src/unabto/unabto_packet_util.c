@@ -406,24 +406,12 @@ uint8_t* insert_piggy_payload(uint8_t* ptr, uint8_t* end, uint8_t* piggyData, ui
 
 uint8_t* insert_nonce_payload(uint8_t* ptr, uint8_t* end, const uint8_t* nonceData, uint16_t nonceSize)
 {
-    if (end < ptr || ptr == NULL) {
-        return NULL;
-    }
-    
-    if ((uint16_t)(end - ptr) < 4 + nonceSize) {
-        return NULL;
-    }
-
-    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_NONCE, 0, nonceSize);
-    memcpy(ptr, nonceData, nonceSize);
-    ptr += nonceSize;
-    return ptr;
-    
+    return insert_payload(ptr, end, NP_PAYLOAD_TYPE_NONCE, nonceData, nonceSize);
 }
 
 uint8_t* insert_random_payload(uint8_t* ptr, uint8_t* end, uint8_t* randomData, uint16_t randomSize)
 {
-    
+    return insert_payload(ptr, end, NP_PAYLOAD_TYPE_RANDOM, randomData, randomSize);
 }
 
 uint8_t* insert_crypto_payload_with_payloads(uint8_t* ptr, uint8_t* end)

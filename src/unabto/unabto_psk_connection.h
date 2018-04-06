@@ -30,6 +30,10 @@ void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const na
 void unabto_psk_connection_send_verify_response(nabto_socket_t socket, const nabto_endpoint* peer, nabto_connect* connection);
 void unabto_psk_connection_send_connect_error_response(nabto_socket_t socket, const nabto_endpoint* peer, uint32_t cpNsi, uint32_t spNsi, uint32_t errorCode);
 
+void unabto_psk_connection_send_verify_error_response(nabto_socket_t socket, const nabto_endpoint* peer, nabto_connect* connection, uint32_t errorCode);
+
+void unabto_psk_connection_send_error_response(nabto_socket_t socket, const nabto_endpoint* peer, uint32_t cpNsi, uint32_t spNsi, uint32_t errorCode, uint8_t type);
+
 void unabto_psk_connection_init_connection(nabto_connect* connection);
 
 #endif

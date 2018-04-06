@@ -344,6 +344,7 @@ uint8_t* insert_notify_payload(uint8_t* buf, uint8_t* end, uint32_t notifyValue)
 uint8_t* insert_piggy_payload(uint8_t* ptr, uint8_t* end, uint8_t* piggyData, uint16_t piggySize);
 uint8_t* insert_nonce_payload(uint8_t* ptr, uint8_t* end, const uint8_t* nonceData, uint16_t nonceSize);
 uint8_t* insert_random_payload(uint8_t* ptr, uint8_t* end, uint8_t* randomData, uint16_t randomSize);
+
 /**
  * Return a pointer to the first byte after the code in the payload
  * the payload has the bit set which says it has payloads within the

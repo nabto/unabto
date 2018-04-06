@@ -73,6 +73,7 @@ bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
     connection->cpnsi = header->nsi_cp;
     connection->spnsi = nabto_connection_get_fresh_sp_nsi();
     connection->state = CS_CONNECTING;
+    connection->psk.state = WAIT_CONNECT;
     
     // read client id and insert it into the connection
     unabto_connection_util_read_client_id(header, connection);
@@ -103,8 +104,7 @@ bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
 
     // the connection was created now send a packet back to the client.
     unabto_psk_connection_send_connect_response(socket, peer, connection);
-    
-    
+    connection->psk.state = WAIT_VERIFY;
     return true;
 }
 
@@ -271,42 +271,68 @@ void unabto_psk_connection_send_verify_response(nabto_socket_t socket, const nab
     // packet format:
     // U_VERIFY_PSK(Hdr, Notify(ok))
 
+    uint8_t* ptr = nabtoCommunicationBuffer;
+    uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
+    
     // create header
+   // create header
+    nabto_packet_header header;
+    nabto_header_init(&header, NP_PACKET_HDR_TYPE_U_VERIFY_PSK, connection->cpnsi, connection->spnsi);
 
-    // set rsp bit
+    // set RSP bit
+    nabto_header_add_flags(&header, NP_PACKET_HDR_FLAG_RESPONSE);
+
+    ptr = nabto_wr_header(ptr, end, &header);
     
     // insert notify
+    ptr = insert_notify_payload(ptr, end, NP_PAYLOAD_NOTIFY_CONNECT_OK);
 
+    if (ptr == NULL) {
+        NABTO_LOG_WARN(("packet encoding failed"));
+        return;
+    }
+
+    uint16_t packetLength = ptr - nabtoCommunicationBuffer;
     // send packet
+    nabto_write(socket, nabtoCommunicationBuffer, packetLength, peer->addr, peer->port);
 }
-
-void unabto_psk_connection_send_verify_error_response(nabto_socket_t socket, nabto_endpoint peer, nabto_connect* connection, uint32_t errorCode)
-{
-    // packet format:
-    // U_VERIFY_PSK(Hdr(exception=1), NOTIFY(err))
-
-    // create header
-
-    // set rsp bit
-    // set exception bit
-
-    // insert notify
-
-    // send packet
-}
-
 
 void unabto_psk_connection_send_connect_error_response(nabto_socket_t socket, const nabto_endpoint* peer, uint32_t cpNsi, uint32_t spNsi, uint32_t errorCode)
 {
-    // packet format:
-    // U_CONNECT_PSK(Hdr(exception=1), NOTIFY(err))
-
-    // create header
-
-    // set RSP bit
-    // set exception bit
-    // insert notify payload
-
-    // send packet
+    unabto_psk_connection_send_error_response(socket, peer, cpNsi, spNsi, errorCode, NP_PACKET_HDR_TYPE_U_CONNECT_PSK);
 }
 
+void unabto_psk_connection_send_verify_error_response(nabto_socket_t socket, const nabto_endpoint* peer, nabto_connect* connection, uint32_t errorCode)
+{
+    unabto_psk_connection_send_error_response(socket, peer, connection->cpnsi, connection->spnsi, errorCode, NP_PACKET_HDR_TYPE_U_VERIFY_PSK);
+}
+
+void unabto_psk_connection_send_error_response(nabto_socket_t socket, const nabto_endpoint* peer, uint32_t cpNsi, uint32_t spNsi, uint32_t errorCode, uint8_t type)
+{
+    // packet format <type>(Hdr(Exception = 1, RSP = 1), Notify(errorCode))
+    uint8_t* ptr = nabtoCommunicationBuffer;
+    uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
+    
+    // create header
+    // create header
+    nabto_packet_header header;
+    nabto_header_init(&header, type, cpNsi, spNsi);
+
+    // set RSP bit
+    nabto_header_add_flags(&header, NP_PACKET_HDR_FLAG_RESPONSE);
+    nabto_header_add_flags(&header, NP_PACKET_HDR_FLAG_EXCEPTION);
+
+    ptr = nabto_wr_header(ptr, end, &header);
+    
+    // insert notify
+    ptr = insert_notify_payload(ptr, end, errorCode);
+
+    if (ptr == NULL) {
+        NABTO_LOG_WARN(("packet encoding failed"));
+        return;
+    }
+
+    uint16_t packetLength = ptr - nabtoCommunicationBuffer;
+    // send packet
+    nabto_write(socket, nabtoCommunicationBuffer, packetLength, peer->addr, peer->port);
+}
