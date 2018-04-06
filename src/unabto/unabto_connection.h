@@ -90,6 +90,7 @@ typedef struct {
     } state;
     struct shared_key_handshake_data handshakeData;
     unabto_psk_id keyId;
+    struct unabto_capabilities capabilities;
 } unabto_connection_psk_connection;
 
 

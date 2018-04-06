@@ -282,38 +282,33 @@ uint8_t* insert_optional_payload(uint8_t* buf, uint8_t* end, uint8_t type, const
 }
 
 uint8_t* insert_capabilities(uint8_t* buf, uint8_t* end, bool cap_encr_off) {
-    uint8_t* ptr;
-    uint32_t mask;
-    uint32_t bits;
+
+    struct unabto_capabilities capabilities;
+    capabilities.type = 0;
 
     /* Build capabilities for this device */
-    mask = PEER_CAP_MICRO |
+    capabilities.mask = PEER_CAP_MICRO |
         PEER_CAP_TAG |
         PEER_CAP_ASYNC |
         PEER_CAP_FB_TCP_U |
         PEER_CAP_UDP |
         PEER_CAP_ENCR_OFF |
         PEER_CAP_FP;
-    bits = PEER_CAP_MICRO | PEER_CAP_TAG | PEER_CAP_UDP | PEER_CAP_FP;
+    capabilities.bits = PEER_CAP_MICRO | PEER_CAP_TAG | PEER_CAP_UDP | PEER_CAP_FP;
 #if NABTO_MICRO_CAP_ASYNC
-    bits |= PEER_CAP_ASYNC;
+    capabilities.bits |= PEER_CAP_ASYNC;
 #endif
 #if NABTO_ENABLE_TCP_FALLBACK
     if (nmc.nabtoMainSetup.enableTcpFallback) {
-        bits |= PEER_CAP_FB_TCP_U;
+        capabilities.bits |= PEER_CAP_FB_TCP_U;
     }
 #endif
 
     if (cap_encr_off) {
-        bits |= PEER_CAP_ENCR_OFF;
+        capabilities.bits |= PEER_CAP_ENCR_OFF;
     }
 
-    /* Write CAPABILITY payload into packet */
-    ptr = insert_payload(buf, end, NP_PAYLOAD_TYPE_CAPABILITY, 0, 9);
-    *ptr = 0;             ptr++; /*type*/
-    WRITE_U32(ptr, bits); ptr+=4;
-    WRITE_U32(ptr, mask); ptr+=4;
-    return ptr;
+    return insert_capabilities_payload(buf, end, &capabilities, 0);
 }
 
 
@@ -417,6 +412,38 @@ uint8_t* insert_random_payload(uint8_t* ptr, uint8_t* end, uint8_t* randomData, 
 {
     return insert_payload(ptr, end, NP_PAYLOAD_TYPE_RANDOM, randomData, randomSize);
 }
+
+uint8_t* insert_capabilities_payload(uint8_t* ptr, uint8_t* end, struct unabto_capabilities* capabilities, uint16_t encryptionCodes)
+{
+    if (end < ptr || ptr == NULL) {
+        return NULL;
+    }
+
+    uint16_t dataLength = 9;
+    if (encryptionCodes > 0) {
+        dataLength += 2 + encryptionCodes * 2;
+    }
+    
+    if (end - ptr < 4 + dataLength) {
+        return NULL;
+    }
+        
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CAPABILITY, 0, dataLength);
+    if (ptr == NULL) {
+        return NULL;
+    }
+
+    WRITE_FORWARD_U8(ptr, capabilities->type);
+    WRITE_FORWARD_U32(ptr, capabilities->bits);
+    WRITE_FORWARD_U32(ptr, capabilities->mask);
+
+    if (encryptionCodes > 0) {
+        WRITE_FORWARD_U16(ptr, encryptionCodes);
+    }
+    // the caller needs to insert the encryption codes
+    return ptr;
+}
+
 
 uint8_t* insert_crypto_payload_with_payloads(uint8_t* ptr, uint8_t* end)
 {
@@ -559,6 +586,31 @@ bool unabto_payload_read_notify(struct unabto_payload_packet* payload, struct un
         return false;
     }
     READ_U32(notify->code, payload->dataBegin);
+    return true;
+}
+
+bool unabto_payload_read_capabilities(struct unabto_payload_packet* payload, struct unabto_payload_capabilities_read* capabilities)
+{
+    if (payload->dataLength < 9) {
+        return false;
+    }
+
+    const uint8_t* ptr = payload->dataBegin;
+
+    READ_FORWARD_U8(capabilities->type, ptr);
+    READ_FORWARD_U32(capabilities->bits, ptr);
+    READ_FORWARD_U32(capabilities->mask, ptr);
+    
+    if (payload->dataLength >= 11) {
+        READ_FORWARD_U16(capabilities->codesLength, ptr);
+        if(capabilities->codesLength > ((payload->dataLength - 11)/2)) {
+            NABTO_LOG_WARN(("more encryption codes said than possibly"));
+            return false;
+        }
+        capabilities->codesStart = ptr;
+    } else {
+        capabilities->codesLength = 0;
+    }
     return true;
 }
 

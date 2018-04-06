@@ -95,7 +95,8 @@ bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
     }
 
     // read capabilities and insert them into the connection
-    if (!unabto_connection_util_read_capabilities(header, connection)) {
+    struct unabto_payload_capabilities_read capabilities;
+    if (!unabto_connection_util_read_capabilities(header, &capabilities)) {
         return false;
     }
 
@@ -110,6 +111,12 @@ bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
         return false;
     }
 
+    // verify capabilities read and add the approved subset to our connection.
+    if (!unabto_connection_util_verify_capabilities(connection, &capabilities)) {
+        unabto_psk_connection_send_connect_error_response(socket, peer, connection->cpnsi, connection->spnsi, NP_PAYLOAD_NOTIFY_ERROR_MISSING_CAPABILITIES);
+        return false;
+    }
+    
 
     // the connection was created now send a packet back to the client.
     unabto_psk_connection_send_connect_response(socket, peer, connection);

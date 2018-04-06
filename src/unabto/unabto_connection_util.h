@@ -23,7 +23,13 @@ bool unabto_connection_util_read_and_validate_nonce_client(const uint8_t* payloa
 bool unabto_connection_util_read_key_id(const nabto_packet_header* header, nabto_connect* connection);
 
 // read capabilities
-bool unabto_connection_util_read_capabilities(const nabto_packet_header* header, nabto_connect* connection);
+bool unabto_connection_util_read_capabilities(const nabto_packet_header* header, struct unabto_payload_capabilities_read* capabilities);
+
+
+bool unabto_connection_util_verify_capabilities(nabto_connect* connection, struct unabto_payload_capabilities_read* capabilities);
+
+
+
 
 // Precondition: the keyid, client id and fingerprint has been read
 // from the packet.

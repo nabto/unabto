@@ -106,6 +106,23 @@ struct unabto_payload_push {
     uint16_t pnsId;
     uint8_t flags;
 };
+
+// data which is read from a packet
+struct unabto_payload_capabilities_read {
+    uint8_t type;
+    uint32_t bits;
+    uint32_t mask;
+    uint16_t codesLength;
+    const uint8_t* codesStart;
+};
+
+// data to write to a packet. the individual encryption codes is needed to be inserted manually
+struct unabto_capabilities {
+    uint8_t type;
+    uint32_t bits;
+    uint32_t mask;
+};
+
 /** Packet and payload size and offset declarations. */
 enum {
     SIZE_HEADER         = NP_PACKET_HDR_MIN_BYTELENGTH, ///< the size of the fixed size header
@@ -346,6 +363,11 @@ uint8_t* insert_nonce_payload(uint8_t* ptr, uint8_t* end, const uint8_t* nonceDa
 uint8_t* insert_random_payload(uint8_t* ptr, uint8_t* end, uint8_t* randomData, uint16_t randomSize);
 
 /**
+ * insert type, bits, mask and codesLength but no encryption codes
+ */
+uint8_t* insert_capabilities_payload(uint8_t* ptr, uint8_t* end, struct unabto_capabilities* capabilities, uint16_t encryptionCodes);
+
+/**
  * Return a pointer to the first byte after the code in the payload
  * the payload has the bit set which says it has payloads within the
  * packet.
@@ -363,6 +385,7 @@ bool unabto_payload_read_ep(struct unabto_payload_packet* payload, struct unabto
 bool unabto_payload_read_crypto(struct unabto_payload_packet* payload, struct unabto_payload_crypto* crypto);
 bool unabto_payload_find_and_read_crypto(const uint8_t* buf, const uint8_t* end, struct unabto_payload_crypto* crypto);
 bool unabto_payload_read_notify(struct unabto_payload_packet* payload, struct unabto_payload_notify* notify);
+bool unabto_payload_read_capabilities(struct unabto_payload_packet* payload, struct unabto_payload_capabilities_read* capabilities);
 
 uint8_t* unabto_payloads_begin(uint8_t* packetBegin, const nabto_packet_header* header);
 uint8_t* unabto_payloads_end(uint8_t* packetBegin, const nabto_packet_header* header);

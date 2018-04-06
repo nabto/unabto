@@ -3,6 +3,7 @@
 #include <unabto/unabto_memory.h>
 #include <unabto/unabto_types.h>
 #include <unabto/unabto_app.h>
+#include <unabto/unabto_util.h>
 
 
 
@@ -139,10 +140,57 @@ bool unabto_connection_util_read_key_id(const nabto_packet_header* header, nabto
 }
 
 // read capabilities
-bool unabto_connection_util_read_capabilities(const nabto_packet_header* header, nabto_connect* connection)
+bool unabto_connection_util_read_capabilities(const nabto_packet_header* header, struct unabto_payload_capabilities_read* capabilities)
 {
-    // TODO
-    return true;
+    struct unabto_payload_packet capabilitiesPayload;
+    uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
+    uint8_t* payloadsEnd = unabto_payloads_end(nabtoCommunicationBuffer, header);
+    
+    if (unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_CAPABILITY, &capabilitiesPayload)) {
+        return unabto_payload_read_capabilities(&capabilitiesPayload, capabilities);
+    }
+    return false;
+}
+
+bool unabto_connection_util_verify_capabilities(nabto_connect* connection, struct unabto_payload_capabilities_read* capabilities)
+{
+    uint32_t requiredCapabilities = PEER_CAP_DIR | PEER_CAP_MICRO | PEER_CAP_TAG | PEER_CAP_FRCTRL | PEER_CAP_ASYNC;
+
+    if (capabilities->mask & requiredCapabilities != requiredCapabilities) {
+        NABTO_LOG_WARN(("client does not provide enough capabilities in its capability mask"));
+        return false;
+    }
+    if (capabilities->bits & requiredCapabilities != requiredCapabilities) {
+        NABTO_LOG_WARN(("client does not provide enough capabilities in its capability bits"));
+        return false;
+    }
+
+    bool codeFound = false;
+    uint16_t i;
+    const uint8_t* ptr = capabilities->codesStart;
+    for (i = 0; i < capabilities->codesLength; i++) {
+        uint16_t code;
+        READ_FORWARD_U16(code, ptr);
+        if (code == CRYPT_W_AES_CBC_HMAC_SHA256) {
+            codeFound = true;
+            break;
+        }
+    }
+    if (!codeFound) {
+        NABTO_LOG_WARN(("no suitable encryption code is found in psk connect packet"));
+        return false;
+    }
+
+    uint32_t supportedCapabilities = requiredCapabilities | PEER_CAP_FP;
+
+    connection->psk.capabilities.type = 0;
+    // limit the mask to capabilities we understand
+    connection->psk.capabilities.mask = supportedCapabilities;
+
+    // limit the proposed capabilities to capabilities we understand.
+    connection->psk.capabilities.bits = capabilities->bits & supportedCapabilities;
+
+    return true;    
 }
 
 
