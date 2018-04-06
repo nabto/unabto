@@ -14,6 +14,11 @@ bool unabto_connection_util_read_fingerprint(const nabto_packet_header* header, 
 // read unencrypted client nonce
 bool unabto_connection_util_read_nonce_client(const nabto_packet_header* header, nabto_connect* connection);
 
+// read random from client
+bool unabto_connection_util_read_random_client(const uint8_t* payloadsBegin, const uint8_t* payloadsEnd, nabto_connect* connection);
+
+bool unabto_connection_util_read_and_validate_nonce_client(const uint8_t* payloadsBegin, const uint8_t* payloadsEnd, nabto_connect* connection);
+
 // read key id
 bool unabto_connection_util_read_key_id(const nabto_packet_header* header, nabto_connect* connection);
 
@@ -28,5 +33,7 @@ bool unabto_connection_util_connect_psk_init(nabto_connect* connection);
 
 // verify the integrity of a connect request
 bool unabto_psk_connection_util_verify_connect(const nabto_packet_header* header, nabto_connect* connection);
+
+uint8_t* unabto_psk_connection_insert_nonce_device();
 
 #endif

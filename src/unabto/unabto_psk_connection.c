@@ -13,14 +13,14 @@ bool unabto_local_psk_connection_get_key(const unabto_psk_id keyId, const char* 
 }
 
 
-void unabto_psk_connection_handle_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
+void unabto_psk_connection_dispatch_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
 {
     if (header->type == NP_PACKET_HDR_TYPE_U_CONNECT_PSK && (header->flags & NP_PACKET_HDR_FLAG_EXCEPTION)) {
         return unabto_psk_connection_handle_exception_request(header);
     } else if (header->type == NP_PACKET_HDR_TYPE_U_CONNECT_PSK) {
-        return unabto_psk_connection_handle_connect_request(socket, peer, header);
+        return unabto_psk_connection_dispatch_connect_request(socket, peer, header);
     } else if (header->type == NP_PACKET_HDR_TYPE_U_VERIFY_PSK) {
-        return unabto_psk_connection_handle_verify_requst(socket, peer, header);
+        return unabto_psk_connection_dispatch_verify_request(socket, peer, header);
     }
 }
 
@@ -61,7 +61,7 @@ void unabto_psk_connection_create_new_connection(nabto_socket_t socket, const na
         return unabto_psk_connection_send_connect_error_response(socket, peer, header->nsi_cp, header->nsi_sp, NP_PAYLOAD_NOTIFY_ERROR_BUSY_MICRO);
     }
 
-    if (!unabto_psk_connection_create_new_connection_init(socket, peer, header, connection)) {
+    if (!unabto_psk_connection_handle_connect_request(socket, peer, header, connection)) {
         nabto_release_connection(connection);
         return;
     }
@@ -70,7 +70,7 @@ void unabto_psk_connection_create_new_connection(nabto_socket_t socket, const na
     unabto_psk_connection_send_connect_response(socket, peer, connection);
 }
 
-bool unabto_psk_connection_create_new_connection_init(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header, nabto_connect* connection)
+bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header, nabto_connect* connection)
 {
     // read client id and insert it into the connection
     unabto_connection_util_read_client_id(header, connection);
@@ -101,7 +101,7 @@ bool unabto_psk_connection_create_new_connection_init(nabto_socket_t socket, con
     return true;
 }
 
-void unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
+void unabto_psk_connection_dispatch_connect_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
 {
     // find a connection. If no connection is found make a new
     // connection. If a connection is found respond with the same
@@ -118,7 +118,7 @@ void unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
     
     if (connection &&
         connection->state == CS_CONNECTING &&
-        connection->psk.state == WAIT_CONNECT)
+        connection->psk.state == WAIT_VERIFY)
     {
         // there is a connection this is a retransmission the CONNECT
         // response is either lost or still on the line. Resend response.
@@ -126,12 +126,79 @@ void unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
     }
 }
 
-void unabto_psk_connection_handle_verify_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
+void unabto_psk_connection_handle_verify_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header, nabto_connect* connection)
 {
+    // packet format U_VERIFY_PSK(Hdr, Enc(random_client, nonce_device))
+
+    struct unabto_payload_crypto cryptoPayload;
+
+    const uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
+    const uint8_t* payloadsEnd = unabto_payloads_begin(nabtoCommunicationBuffer, header);
+
+    if (!unabto_payload_find_and_read_crypto(payloadsBegin, payloadsEnd, &cryptoPayload)) {
+        NABTO_LOG_WARN(("expected a crypto payload, noone found."));
+        return;
+    }
+    uint8_t* decryptedDataBegin;
+    uint16_t decryptedDataLength;
+    if (!unabto_crypto_verify_and_decrypt(header, &connection->cryptoctx, &cryptoPayload,
+                                          &decryptedDataBegin,
+                                          &decryptedDataLength))
+    {
+        NABTO_LOG_WARN(("decryption of packet failed"));
+        return;
+    }
+
+    {
+        // read random and nonce from packet
+        const uint8_t* cryptoPayloadsBegin = decryptedDataBegin;
+        const uint8_t* cryptoPayloadsEnd = decryptedDataBegin + decryptedDataLength;
+
+        if (!unabto_connection_util_read_random_client(cryptoPayloadsBegin, cryptoPayloadsEnd, connection)) {
+            
+            return;
+        }
+
+        if (!unabto_connection_util_read_and_validate_nonce_client(cryptoPayloadsBegin, cryptoPayloadsEnd, connection)) {
+            return;
+        }
+
+        // we have all we got to make a new connection.
+        unabto_psk_connection_init_connection(connection);
+        // send verify ok to client
+        unabto_psk_connection_send_verify_response(socket, peer, connection);
+    }
+}
+
+void unabto_psk_connection_init_connection(nabto_connect* connection)
+{
+    // init crypto context
+
+    
+    
+    // change connection state
+    // change psk state
+}
+
+void unabto_psk_connection_dispatch_verify_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
+{
+    
     // Find a connection if the state is past the verify phase send
     // the same response as the packet which made the state past the
     // verify phase.
+
+    nabto_connect* connection;
+    connection = nabto_find_connection(header->nsi_cp);
+    if (connection && connection->state == CS_CONNECTING && connection->psk.state == WAIT_VERIFY) {
+        // This is a new unhandled packet for the state.
+        return unabto_psk_connection_handle_verify_request(socket, peer, header, connection);
+    } else  if (connection && connection->state > CS_CONNECTING && connection->psk.state == CONNECTED) {
+        // Probably a retransmission since the old response got lost.
+        return unabto_psk_connection_send_verify_response(socket, peer, connection);
+    }
+    
 }
+
 
 void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const nabto_endpoint* peer, nabto_connect* connection)
 {

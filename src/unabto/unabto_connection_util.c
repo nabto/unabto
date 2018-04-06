@@ -87,6 +87,38 @@ bool unabto_connection_util_read_nonce_client(const nabto_packet_header* header,
     return false;
 }
 
+// read encrypted client random
+bool unabto_connection_util_read_random_client(const uint8_t* payloadsBegin, const uint8_t* payloadsEnd, nabto_connect* connection)
+{
+    struct unabto_payload_packet randomPayload;
+    if (unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_RANDOM, &randomPayload)) {
+        if (randomPayload.dataLength != 32) {
+            return false;
+        }
+        memcpy(connection->psk.handshakeData.initiatorRandom, randomPayload.dataBegin, 32);
+        return true;
+    }
+
+    return false;
+}
+
+// read and validate nonce from client in packet
+bool unabto_connection_util_read_and_validate_nonce_client(const uint8_t* payloadsBegin, const uint8_t* payloadsEnd, nabto_connect* connection)
+{
+    struct unabto_payload_packet noncePayload;
+    if (unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_NONCE, &noncePayload)) {
+        if (noncePayload.dataLength != 32) {
+            return false;
+        }
+        if (memcmp(connection->psk.handshakeData.responderNonce, noncePayload.dataBegin, 32) == 0) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 // read key id
 bool unabto_connection_util_read_key_id(const nabto_packet_header* header, nabto_connect* connection)
 {

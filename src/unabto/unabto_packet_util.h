@@ -256,6 +256,7 @@ const uint8_t* unabto_read_payload(const uint8_t* begin, const uint8_t* end, str
 bool unabto_find_payload(const uint8_t* buf, const uint8_t* end, uint8_t type, struct unabto_payload_packet* payload);
 
 
+
 /**
  * Write the packet header (excl the length field)
  * @param buf    the start of the packet
@@ -359,6 +360,7 @@ bool unabto_payload_read_typed_buffer(struct unabto_payload_packet* payload, str
 bool unabto_payload_read_gw(struct unabto_payload_packet* payload, struct unabto_payload_gw* gw);
 bool unabto_payload_read_ep(struct unabto_payload_packet* payload, struct unabto_payload_ep* ep);
 bool unabto_payload_read_crypto(struct unabto_payload_packet* payload, struct unabto_payload_crypto* crypto);
+bool unabto_payload_find_and_read_crypto(const uint8_t* buf, const uint8_t* end, struct unabto_payload_crypto* crypto);
 bool unabto_payload_read_notify(struct unabto_payload_packet* payload, struct unabto_payload_notify* notify);
 
 uint8_t* unabto_payloads_begin(uint8_t* packetBegin, const nabto_packet_header* header);

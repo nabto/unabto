@@ -542,6 +542,25 @@ bool unabto_payload_read_crypto(struct unabto_payload_packet* payload, struct un
     return true;
 }
 
+bool unabto_payload_find_and_read_crypto(const uint8_t* buf, const uint8_t* end, struct unabto_payload_crypto* crypto)
+{
+    if (end < buf || buf == NULL) {
+        return false;
+    }
+
+    struct unabto_payload_packet payload;
+    if (!unabto_find_payload(buf, end, NP_PAYLOAD_TYPE_CRYPTO, &payload)) {
+        return false;
+    }
+
+    if (!unabto_payload_read_crypto(&payload, crypto)) {
+        return false;
+    }
+
+    return true;
+    
+}
+
 bool unabto_payload_read_notify(struct unabto_payload_packet* payload, struct unabto_payload_notify* notify)
 {
     if (payload->dataLength < 4) {

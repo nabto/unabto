@@ -300,7 +300,7 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
             }
         case U_CONNECT_PSK:
         case U_VERIFY_PSK:
-            unabto_psk_connection_handle_request(event->udpMessage.socket, &event->udpMessage.peer, &hdr);
+            unabto_psk_connection_dispatch_request(event->udpMessage.socket, &event->udpMessage.peer, &hdr);
             break;
 
 #if NABTO_ENABLE_DEBUG_PACKETS

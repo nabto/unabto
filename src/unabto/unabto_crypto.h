@@ -187,7 +187,7 @@ bool unabto_decrypt(nabto_crypto_context* cryptoContext, uint8_t* ptr, uint16_t 
  * @param decryptedDataLength
  * @return true iff the verification and decryption was successful
  */
-bool unabto_crypto_verify_and_decrypt(nabto_packet_header* hdr,
+bool unabto_crypto_verify_and_decrypt(const nabto_packet_header* hdr,
                                       nabto_crypto_context* cryptoContext,
                                       struct unabto_payload_crypto* crypto,
                                       uint8_t** decryptedDataBegin,

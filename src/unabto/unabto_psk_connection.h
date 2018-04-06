@@ -14,19 +14,22 @@
  * connection packets.
  */
 
-void unabto_psk_connection_handle_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header);
+void unabto_psk_connection_dispatch_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header);
 void unabto_psk_connection_handle_exception_request(const nabto_packet_header* header);
 
 // Create a new connection and free it again if the initial packet cannot be correctly parsed.
 void unabto_psk_connection_create_new_connection(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header);
 
 // Initialise a connection based on the first packet received.
-bool unabto_psk_connection_create_new_connection_init(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header, nabto_connect* connection);
+bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header, nabto_connect* connection);
 
-void unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header);
-void unabto_psk_connection_handle_verify_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header);
+void unabto_psk_connection_dispatch_connect_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header);
+void unabto_psk_connection_handle_verify_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header, nabto_connect* connection);
+void unabto_psk_connection_dispatch_verify_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header);
 void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const nabto_endpoint* peer, nabto_connect* connection);
 void unabto_psk_connection_send_verify_response(nabto_socket_t socket, const nabto_endpoint* peer, nabto_connect* connection);
 void unabto_psk_connection_send_connect_error_response(nabto_socket_t socket, const nabto_endpoint* peer, uint32_t cpNsi, uint32_t spNsi, uint32_t errorCode);
+
+void unabto_psk_connection_init_connection(nabto_connect* connection);
 
 #endif

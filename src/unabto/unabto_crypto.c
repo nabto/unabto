@@ -542,7 +542,7 @@ bool unabto_insert_integrity(nabto_crypto_context* cryptoContext, uint8_t* start
     return res;
 }
 
-bool unabto_crypto_verify_and_decrypt(nabto_packet_header* hdr,
+bool unabto_crypto_verify_and_decrypt(const nabto_packet_header* hdr,
                                       nabto_crypto_context* cryptoContext,
                                       struct unabto_payload_crypto* crypto,
                                       uint8_t** decryptedDataBegin,
