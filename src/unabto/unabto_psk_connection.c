@@ -126,7 +126,7 @@ void unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
     }
 }
 
-void unabto_psk_connection_handle_verify_requst(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
+void unabto_psk_connection_handle_verify_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
 {
     // Find a connection if the state is past the verify phase send
     // the same response as the packet which made the state past the

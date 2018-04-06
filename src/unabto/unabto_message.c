@@ -23,6 +23,7 @@
 #include "unabto_memory.h"
 #include "unabto_external_environment.h"
 #include <unabto/unabto_tcp_fallback.h>
+#include <unabto/unabto_psk_connection.h>
 
 /*
  * Except the UATTACH protocol, this is the packet/message formats:
@@ -297,6 +298,9 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
                 return;
 #endif                
             }
+        case U_CONNECT_PSK:
+        case U_VERIFY_PSK:
+            unabto_psk_connection_handle_request(event->udpMessage.socket, &event->udpMessage.peer, &hdr);
             break;
 
 #if NABTO_ENABLE_DEBUG_PACKETS

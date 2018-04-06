@@ -136,7 +136,9 @@ typedef enum {
     U_PUSH     = NP_PACKET_HDR_TYPE_U_PUSH,
     U_ALIVE    = NP_PACKET_HDR_TYPE_U_ALIVE,
     U_CONNECT  = NP_PACKET_HDR_TYPE_U_CONNECT,
-    U_DEBUG    = NP_PACKET_HDR_TYPE_U_DEBUG
+    U_DEBUG    = NP_PACKET_HDR_TYPE_U_DEBUG,
+    U_CONNECT_PSK = NP_PACKET_HDR_TYPE_U_CONNECT_PSK,
+    U_VERIFY_PSK  = NP_PACKET_HDR_TYPE_U_VERIFY_PSK
 } nabto_header_type;
 
 
@@ -309,6 +311,8 @@ uint8_t* insert_data_header(uint8_t* buf, uint32_t nsi, uint8_t* nsico, uint16_t
  * @return         the first byte after the payload
  */
 uint8_t* insert_payload(uint8_t* buf, uint8_t* end, uint8_t type, const uint8_t* content, size_t size);
+
+
 
 /**
  * Write the Payload with the OPTIONAL flag set

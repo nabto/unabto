@@ -108,6 +108,7 @@ bool unabto_connection_util_read_key_id(const nabto_packet_header* header, nabto
 // read capabilities
 bool unabto_connection_util_read_capabilities(const nabto_packet_header* header, nabto_connect* connection)
 {
+    // TODO
     return false;
 }
 
