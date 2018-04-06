@@ -4,6 +4,7 @@
 #include <unabto/unabto_app.h>
 #include <unabto/unabto_crypto.h>
 #include <unabto/unabto_packet.h>
+#include <unabto/unabto_util.h>
 
 bool unabto_local_psk_connection_get_key(const unabto_psk_id keyId, const char* clientId, const unabto_public_key_fingerprint fingerprint, unabto_psk key)
 {
@@ -250,7 +251,8 @@ void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const na
     ptr = nabto_wr_header(ptr, end, &header);
 
     // insert capabilities
-    ptr = insert_capabilities(ptr, end, false);
+    ptr = insert_capabilities_payload(ptr, end, &connection->psk.capabilities, 1);
+    WRITE_FORWARD_U16(ptr, CRYPT_W_AES_CBC_HMAC_SHA256);
     
     // insert nonce from device
     ptr = insert_nonce_payload(ptr, end, connection->psk.handshakeData.responderNonce, 32);
