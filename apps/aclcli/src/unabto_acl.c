@@ -20,14 +20,7 @@
 #include "modules/util/read_hex.h"
 #include "unabto/unabto_env_base.h"
 #include "unabto/unabto_common_main.h"
-//#include "unabto/unabto_logging.h"
-//#include "unabto_version.h"
-//#include "modules/cli/unabto_args.h"
-//#include "modules/fingerprint_acl/fp_acl.h"
-//#include "modules/fingerprint_acl/fp_acl_ae.h"
-//#include "modules/fingerprint_acl/fp_acl_memory.h"
 #include "modules/fingerprint_acl/fp_acl_file.h"
-//#include "unabto/unabto_util.h"
 
 struct configuration {
     const char *action;
@@ -43,7 +36,7 @@ fp_acl_db_status fp_acl_file_list_file(struct configuration* config, struct fp_a
 bool parse_argv(int argc, char* argv[], struct configuration* config);
 bool fp_get_fingerprint(const char *, fingerprint fpLocal);
 
-#define splithex(x)  x >>= 16 , x & 0xffff
+#define splithex(x)  x >> 16 , x & 0xffff
 
 static void help(const char* errmsg, const char *progname)
 {
