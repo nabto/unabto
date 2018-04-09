@@ -29,9 +29,9 @@ struct configuration {
     const char *user;
 };
 
-fp_acl_db_status fp_acl_file_remove_file(struct configuration* config, struct fp_acl_db* db);
-fp_acl_db_status fp_acl_file_add_file(struct configuration* config, struct fp_acl_db* db);
-fp_acl_db_status fp_acl_file_list_file(struct configuration* config, struct fp_acl_db* db);
+fp_acl_db_status fp_acl_file_remove_entry(struct configuration* config, struct fp_acl_db* db);
+fp_acl_db_status fp_acl_file_add_entry(struct configuration* config, struct fp_acl_db* db);
+fp_acl_db_status fp_acl_file_list_entry(struct configuration* config, struct fp_acl_db* db);
 
 bool parse_argv(int argc, char* argv[], struct configuration* config);
 bool fp_get_fingerprint(const char *, fingerprint fpLocal);
@@ -91,17 +91,17 @@ int main(int argc, char* argv[]) {
     }
 
     if (!strcmp(config.action, "add")) {
-        if (fp_acl_file_add_file(&config, &db) != FP_ACL_DB_OK)
+        if (fp_acl_file_add_entry(&config, &db) != FP_ACL_DB_OK)
             printf("Add Failed\n");
     }
     
     if (!strcmp(config.action, "list")) {
-        if (fp_acl_file_list_file(&config, &db) != FP_ACL_DB_OK)
+        if (fp_acl_file_list_entry(&config, &db) != FP_ACL_DB_OK)
             printf("List Failed\n");
     }
 
     if (!strcmp(config.action, "remove")) {
-        if (fp_acl_file_remove_file(&config, &db) != FP_ACL_DB_OK)
+        if (fp_acl_file_remove_entry(&config, &db) != FP_ACL_DB_OK)
             printf("Remove Failed\n");
     }
 
@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
 }
 
 // listing of ACL file
-fp_acl_db_status fp_acl_file_list_file(struct configuration* config, struct fp_acl_db* db)
+fp_acl_db_status fp_acl_file_list_entry(struct configuration* config, struct fp_acl_db* db)
 {
 
     void* iterator;
@@ -166,7 +166,7 @@ fp_acl_db_status fp_acl_file_list_file(struct configuration* config, struct fp_a
 }
 
 // removing an entry from ACL file
-fp_acl_db_status fp_acl_file_remove_file(struct configuration* config, struct fp_acl_db* db)
+fp_acl_db_status fp_acl_file_remove_entry(struct configuration* config, struct fp_acl_db* db)
 {
   
     void* it;
@@ -213,7 +213,7 @@ fp_acl_db_status fp_acl_file_remove_file(struct configuration* config, struct fp
 }
 
 // adding an entry to ACL file
-fp_acl_db_status fp_acl_file_add_file(struct configuration* config, struct fp_acl_db* db)
+fp_acl_db_status fp_acl_file_add_entry(struct configuration* config, struct fp_acl_db* db)
 {
   
     fp_acl_db_status status;
