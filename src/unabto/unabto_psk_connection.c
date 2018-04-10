@@ -105,6 +105,7 @@ bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
     // init crypto key for the connecton
     if (!unabto_connection_util_psk_connect_init_key(connection)) {
         NABTO_LOG_WARN(("Failed to initialise crypto context for psk connection"));
+        unabto_psk_connection_send_connect_error_response(socket, peer, connection->cpnsi, connection->spnsi, NP_PAYLOAD_NOTIFY_ERROR_BAD_KEY_ID);
         return false;
     }
         
