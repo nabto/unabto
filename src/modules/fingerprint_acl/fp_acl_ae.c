@@ -207,7 +207,7 @@ application_event_result fp_acl_ae_user_me(application_request* request,
         return AER_REQ_NO_ACCESS;
     }
 
-    it = aclDb.find(request->connection->fingerprint);
+    it = aclDb.find(request->connection->fingerprint.value);
     if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return write_empty_user(write_buffer, FP_ACL_STATUS_NO_SUCH_USER);
     }
@@ -425,7 +425,7 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
         return AER_REQ_TOO_SMALL;
     }
 
-    memcpy(user.fp, request->connection->fingerprint, FP_ACL_FP_LENGTH);
+    memcpy(user.fp, request->connection->fingerprint.value, FINGERPRINT_LENGTH);
 
     return fp_acl_add_user_no_check(write_buffer, &user);
 
@@ -488,11 +488,11 @@ bool fp_acl_is_user_allowed(nabto_connect* connection, uint32_t requiredPermissi
 {
     struct fp_acl_user user;
     void* it;
-    if (! (connection && connection->hasFingerprint)) {
+    if (! (connection && connection->fingerprint.hasValue)) {
         return false;
     }
     
-    it = aclDb.find(connection->fingerprint);
+    it = aclDb.find(connection->fingerprint.value);
     if (it == NULL || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return false;
     }
@@ -513,7 +513,7 @@ bool fp_acl_is_tunnel_allowed(nabto_connect* connection, uint32_t requiredPermis
 bool fp_acl_is_pair_allowed(application_request* request)
 {
     struct fp_acl_settings aclSettings;
-    if (! (request->connection && request->connection->hasFingerprint)) {
+    if (! (request->connection && request->connection->fingerprint.hasValue)) {
         return false;
     }
 
@@ -537,7 +537,7 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
     uint32_t requiredUserPermissions;
 
     // require that it's a fingerprint based connection!
-    if (! (connection && connection->hasFingerprint)) {
+    if (! (connection && connection->fingerprint.hasValue)) {
         return false;
     }
 
@@ -545,7 +545,7 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
         return false;
     }
 
-    user = aclDb.find(connection->fingerprint);
+    user = aclDb.find(connection->fingerprint.value);
 
     if (!user) {
         // This is an unknown user, they are only allowed on local
@@ -587,11 +587,11 @@ bool fp_acl_is_user_owner(application_request* request)
 {
     void* it;
     struct fp_acl_user user;    
-    if (! (request->connection && request->connection->hasFingerprint)) {
+    if (! (request->connection && request->connection->fingerprint.hasValue)) {
         return false;
     }
 
-    it = aclDb.find(request->connection->fingerprint);
+    it = aclDb.find(request->connection->fingerprint.value);
     if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return false;
     }
@@ -602,10 +602,10 @@ bool fp_acl_is_user_owner(application_request* request)
 bool fp_acl_is_user_paired(application_request* request)
 {
     void* it;
-    if (! (request->connection && request->connection->hasFingerprint)) {
+    if (! (request->connection && request->connection->fingerprint.hasValue)) {
         return false;
     }
-    it = aclDb.find(request->connection->fingerprint);
+    it = aclDb.find(request->connection->fingerprint.value);
     if (it != NULL) {
         return true;
     }

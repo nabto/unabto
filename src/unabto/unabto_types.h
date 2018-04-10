@@ -3,13 +3,28 @@
 
 #include <unabto/unabto_env_base.h>
 
-// Truncated sha256 fingerprint of a public key.
-typedef uint8_t unabto_public_key_fingerprint[16];
+enum {
+    FINGERPRINT_LENGTH = 16,
+    PSK_ID_LENGTH = 16,
+    PSK_LENGTH = 16
+};
+
+// fingerprint of a public key
+struct unabto_fingerprint {
+    uint8_t value[FINGERPRINT_LENGTH];
+    bool hasValue;
+};
 
 // ID of a psk.
-typedef uint8_t unabto_psk_id[16];
+struct unabto_psk_id {
+    uint8_t value[PSK_ID_LENGTH];
+    bool hasValue;
+};
 
 // PSK
-typedef uint8_t unabto_psk[16];
+struct unabto_psk {
+    uint8_t value[PSK_LENGTH];
+    bool hasValue;
+};
 
 #endif

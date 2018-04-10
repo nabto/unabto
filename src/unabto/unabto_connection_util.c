@@ -57,8 +57,8 @@ bool unabto_connection_util_read_fingerprint(const nabto_packet_header* header, 
         if (unabto_payload_read_typed_buffer(&fingerprintPayload, &fingerprint)) {
             if (fingerprint.type == NP_PAYLOAD_FP_TYPE_SHA256_TRUNCATED) {
                 if (fingerprint.dataLength  ==  NP_TRUNCATED_SHA256_LENGTH_BYTES) {
-                    con->hasFingerprint = true;
-                    memcpy(con->fingerprint, fingerprint.dataBegin, NP_TRUNCATED_SHA256_LENGTH_BYTES);
+                    con->fingerprint.hasValue = true;
+                    memcpy(con->fingerprint.value, fingerprint.dataBegin, FINGERPRINT_LENGTH);
                     return true;
                 } else {
                     NABTO_LOG_ERROR(("fingerprint has the wrong length %"PRIu16, fingerprint.dataLength));
@@ -132,7 +132,8 @@ bool unabto_connection_util_read_key_id(const nabto_packet_header* header, nabto
         if (keyIdPayload.dataLength != 16) {
             return false;
         }
-        memcpy(connection->psk.keyId, keyIdPayload.dataBegin, 16);
+        memcpy(connection->psk.keyId.value, keyIdPayload.dataBegin, 16);
+        connection->psk.keyId.hasValue = true;
         return true;
     }
 
@@ -196,15 +197,15 @@ bool unabto_connection_util_verify_capabilities(nabto_connect* connection, struc
 
 bool unabto_connection_util_psk_connect_init_key(nabto_connect* connection)
 {
-    unabto_psk psk;
-    if (!unabto_local_psk_connection_get_key(connection->psk.keyId, connection->clientId, connection->fingerprint, psk))
+    struct unabto_psk psk;
+    if (!unabto_local_psk_connection_get_key(&connection->psk.keyId, connection->clientId, &connection->fingerprint, &psk))
     {
         return false;
     }
 
     // init crypto context given a 128bit key.
 
-    nabto_crypto_init_aes_128_hmac_sha256_psk_context(&connection->cryptoctx, psk);
+    nabto_crypto_init_aes_128_hmac_sha256_psk_context(&connection->cryptoctx, psk.value);
     return true;
 }
 

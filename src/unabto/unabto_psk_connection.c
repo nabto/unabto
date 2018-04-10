@@ -6,10 +6,11 @@
 #include <unabto/unabto_packet.h>
 #include <unabto/unabto_util.h>
 
-bool unabto_local_psk_connection_get_key(const unabto_psk_id keyId, const char* clientId, const unabto_public_key_fingerprint fingerprint, unabto_psk key)
+bool unabto_local_psk_connection_get_key(const struct unabto_psk_id* keyId, const char* clientId, const struct unabto_fingerprint* fingerprint, struct unabto_psk* key)
 {
     // dummy implementation for now
-    memset(key, 0, 16);
+    memset(key->value, 0, 16);
+    key->hasValue = true;
     return true;
 }
 

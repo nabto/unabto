@@ -51,8 +51,8 @@ bool init_users()
 void init_connection(nabto_connect* connection) {
     memset(connection, 0, sizeof(nabto_connect));
     connection->isLocal = true;
-    connection->hasFingerprint = true;
-    memset(connection->fingerprint, 42, FP_ACL_FP_LENGTH);
+    connection->fingerprint.hasValue = true;
+    memset(connection->fingerprint.value, 42, FP_ACL_FP_LENGTH);
 }
 
 void init_request(application_request* request, nabto_connect* connection)
@@ -262,7 +262,7 @@ bool fp_acl_pair(fingerprint fp, const char* name, struct fp_acl_user* result)
     application_request req;
     nabto_connect connection;
     init_request(&req, &connection);
-    memcpy(connection.fingerprint, fp, 16);
+    memcpy(connection.fingerprint.value, fp, 16);
 
     uint8_t buffer[256];
     memset(buffer,0, 256);

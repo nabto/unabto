@@ -89,7 +89,7 @@ typedef struct {
         CONNECTED
     } state;
     struct shared_key_handshake_data handshakeData;
-    unabto_psk_id keyId;
+    struct unabto_psk_id keyId;
     struct unabto_capabilities capabilities;
 } unabto_connection_psk_connection;
 
@@ -142,10 +142,7 @@ struct nabto_connect_s {
     connectionStats           stats;        /**< connection stats                         */
     bool                      sendConnectStatistics;
     bool                      sendConnectionEndedStatistics;
-    bool                      hasFingerprint;
-    uint8_t                   fingerprint[NP_TRUNCATED_SHA256_LENGTH_BYTES]; // client fingerprint
-
-
+    struct unabto_fingerprint fingerprint;  // client public key fingerprint
 
 #if NABTO_ENABLE_CLIENT_ID
     char                      clientId[NABTO_CLIENT_ID_MAX_SIZE + 1]; /**< the peer id (e-mail from certificate) */
@@ -208,7 +205,8 @@ nabto_connect* nabto_find_connection(uint32_t spnsi);
 /**
  * Find a local connection based on the cpnsi value. In the first
  * connect packets from the client on local connections the sp nsi
- * value is zero. 
+ * value is zero. So we are using the cp nsi value for finding the
+ * connection.
  */
 nabto_connect* nabto_find_local_connection_cp_nsi(uint32_t cpnsi);
 

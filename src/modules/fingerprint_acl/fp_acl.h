@@ -2,8 +2,9 @@
 #define _FP_ACL_H_
 
 #include <unabto_platform_types.h>
+#include <unabto/unabto_types.h>
 
-#define FP_ACL_FP_LENGTH 16
+#define FP_ACL_FP_LENGTH FINGERPRINT_LENGTH
 #define FP_ACL_USERNAME_MAX_LENGTH 64
 
 
