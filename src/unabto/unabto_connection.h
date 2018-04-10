@@ -205,6 +205,11 @@ void nabto_release_connection(nabto_connect* con);
 /** Find the connection. @param spnsi  the identifier.  @return the connection (0 if not found). */
 nabto_connect* nabto_find_connection(uint32_t spnsi);
 
+/**
+ * Find a local connection based on the cpnsi value. In the first
+ * connect packets from the client on local connections the sp nsi
+ * value is zero. 
+ */
 nabto_connect* nabto_find_local_connection_cp_nsi(uint32_t cpnsi);
 
 
