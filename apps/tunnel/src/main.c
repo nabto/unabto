@@ -691,3 +691,37 @@ application_event_result application_poll(application_request* applicationReques
 
 void application_poll_drop(application_request* applicationRequest) {
 }
+
+#if NABTO_ENABLE_LOCAL_PSK_CONNECTION
+bool is_obscurity_key(const unabto_psk_id keyId) {
+    // TODO: use dummy key for trusted network bootstrapping, injected from cmd line (not stored in acl)
+    return false;
+}
+
+bool unabto_local_psk_connection_get_key(const unabto_psk_id keyId, const char* clientId, const unabto_public_key_fingerprint pkFp, unabto_psk key) {
+    void* it;
+    struct fp_acl_user user;
+
+    // TODO: use common fp type when NABTO-1812 is fixed
+    fingerprint fp;
+
+    if (is_obscurity_key(keyId)) {
+        return true;
+    }
+    
+    memcpy(fp, pkFp, sizeof(fp));
+    it = fp_acl_db.find(fp);
+    if (it == 0 || fp_acl_db.load(it, &user) != FP_ACL_DB_OK) {
+        if (memcmp(keyId, user.pskId, FP_ACL_PSK_ID_LENGTH) == 0) {
+            memcpy(key, user.psk, FP_ACL_PSK_KEY_LENGTH);
+            return true;
+        } else {
+            NABTO_LOG_WARN(("User with fingerprint [%2x:%2x:%2x:...] is not configured with key [%2x:%2x:%2x:...]",
+                            fp[0], fp[1], fp[2],
+                            keyId[0], keyId[1], keyId[2]));
+            return false;
+        }
+    }
+    return false;
+}
+#endif

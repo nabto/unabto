@@ -6,14 +6,6 @@
 #include <unabto/unabto_packet.h>
 #include <unabto/unabto_util.h>
 
-bool unabto_local_psk_connection_get_key(const unabto_psk_id keyId, const char* clientId, const unabto_public_key_fingerprint fingerprint, unabto_psk key)
-{
-    // dummy implementation for now
-    memset(key, 0, 16);
-    return true;
-}
-
-
 void unabto_psk_connection_dispatch_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
 {
     if (header->type == NP_PACKET_HDR_TYPE_U_CONNECT_PSK && (header->flags & NP_PACKET_HDR_FLAG_EXCEPTION)) {

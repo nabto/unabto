@@ -57,3 +57,8 @@ void unabto_tunnel_status_callback(tunnel_status_event event, tunnel* tunnel) {
 }
 #endif
 
+#if NABTO_ENABLE_LOCAL_PSK_CONNECTION
+bool unabto_local_psk_connection_get_key(const unabto_psk_id keyId, const char* clientId, const unabto_public_key_fingerprint pkFp, unabto_psk key) {
+    return false;
+}
+#endif

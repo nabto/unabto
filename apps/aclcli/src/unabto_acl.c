@@ -26,11 +26,14 @@ struct configuration {
     const char *aclfilename;
     const char *fingerprint;
     const char *user;
+    const char *pskId;
+    const char *pskKey;
 };
 
 fp_acl_db_status fp_acl_file_remove_entry(struct configuration* config, struct fp_acl_db* db);
 fp_acl_db_status fp_acl_file_add_entry(struct configuration* config, struct fp_acl_db* db);
 fp_acl_db_status fp_acl_file_list_entry(struct configuration* config, struct fp_acl_db* db);
+fp_acl_db_status fp_acl_file_set_psk(struct configuration* config, struct fp_acl_db* db);
 
 bool parse_argv(int argc, char* argv[], struct configuration* config);
 bool fp_get_fingerprint(const char *, fingerprint fpLocal);
@@ -46,7 +49,8 @@ static void help(const char* errmsg, const char *progname)
     printf("Example: \n");
     printf("       %s list -F <acl filename>\n", progname);
     printf("       %s add -F <acl filename> -f <fingerprint> -u <user>\n", progname);
-    printf("       %s remove -F <acl filename> -f <fingerprint>\n\n", progname);
+    printf("       %s remove -F <acl filename> -f <fingerprint>\n", progname);
+    printf("       %s set-psk -F <acl filename> -f <fingerprint> -i <psk id> -k <psk>\n\n", progname);
 }
 
 
@@ -81,30 +85,45 @@ int main(int argc, char* argv[]) {
 
     if (fp_acl_file_init(config.aclfilename, "tmp.bin", &p) != FP_ACL_DB_OK) {
         NABTO_LOG_ERROR(("cannot init: fp_acl_file_init:%s", config.aclfilename));
+        return 1;
         return FP_ACL_DB_FAILED;
     }
         
     if (fp_mem_init(&db, &defaultSettings, &p) != FP_ACL_DB_OK) {
         NABTO_LOG_ERROR(("cannot init: fp_mem_init"));
-        return FP_ACL_DB_FAILED;
+        return 1;
     }
 
     if (!strcmp(config.action, "add")) {
-        if (fp_acl_file_add_entry(&config, &db) != FP_ACL_DB_OK)
-            printf("Add Failed\n");
+        if (fp_acl_file_add_entry(&config, &db) != FP_ACL_DB_OK) {
+            NABTO_LOG_ERROR(("Add Failed\n"));
+            return 1;
+        }
     }
     
     if (!strcmp(config.action, "list")) {
-        if (fp_acl_file_list_entry(&config, &db) != FP_ACL_DB_OK)
-            printf("List Failed\n");
+        if (fp_acl_file_list_entry(&config, &db) != FP_ACL_DB_OK) {
+            NABTO_LOG_ERROR(("List Failed\n"));
+            return 1;
+        }
     }
 
     if (!strcmp(config.action, "remove")) {
-        if (fp_acl_file_remove_entry(&config, &db) != FP_ACL_DB_OK)
-            printf("Remove Failed\n");
+        if (fp_acl_file_remove_entry(&config, &db) != FP_ACL_DB_OK) {
+            NABTO_LOG_ERROR(("Remove Failed\n"));
+            return 1;
+        }
     }
 
-    exit(0);
+    if (!strcmp(config.action, "set-psk")) {
+        fp_acl_db_status st = fp_acl_file_set_psk(&config, &db);
+        if (st != FP_ACL_DB_OK) {
+            NABTO_LOG_ERROR(("Set PSK Failed with status %d\n", st));
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 // listing of ACL file
@@ -221,7 +240,7 @@ fp_acl_db_status fp_acl_file_add_entry(struct configuration* config, struct fp_a
     struct fp_acl_settings aclSettings;
 
     // Load acl settings from file
-    if(db->load_settings(&aclSettings) != FP_ACL_DB_OK) {
+    if (db->load_settings(&aclSettings) != FP_ACL_DB_OK) {
         NABTO_LOG_ERROR(("Could not load aclsettings"));
         return FP_ACL_DB_LOAD_FAILED;
     }
@@ -248,17 +267,35 @@ fp_acl_db_status fp_acl_file_add_entry(struct configuration* config, struct fp_a
 
 }
 
-bool fp_get_fingerprint(const char *fpargv, fingerprint fpLocal)
+fp_acl_db_status fp_acl_file_set_psk(struct configuration* config, struct fp_acl_db* db)
+{
+    void* it;
+    fingerprint fp;
+    struct fp_acl_user user;
+
+    fp_get_fingerprint(config->fingerprint, fp);
+    it = db->find(fp);
+    
+    if (it == 0 || db->load(it, &user) != FP_ACL_DB_OK) {
+        return FP_ACL_DB_LOAD_FAILED;
+    }
+
+//    memcpy(config.
+
+    return FP_ACL_DB_OK;    
+}
+
+bool fp_read_hex(const char *fpargv, uint8_t* buf, size_t len)
 {
     uint32_t i,j = 0;
 
     i=0;j=0; bool last;
 
-    if(strlen(fpargv)!=FP_ACL_FP_LENGTH*3-1) 
+    if(strlen(fpargv)!=len*3-1) 
         return false;
 
-    for (j=0; j<FP_ACL_FP_LENGTH;j++) {
-        last = (j == FP_ACL_FP_LENGTH-1);
+    for (j=0; j<len;j++) {
+        last = (j == len-1);
 
         if(strchr("0123456789abcdefABCDEF", fpargv[i]) == NULL ||
            strchr("0123456789abcdefABCDEF", fpargv[i+1]) == NULL) {
@@ -270,17 +307,30 @@ bool fp_get_fingerprint(const char *fpargv, fingerprint fpLocal)
                 printf("hexvalues must be separated by ':'  ");
                 return false;
             }
-            sscanf(fpargv+i, "%2hhx:", &fpLocal[j]);
+            sscanf(fpargv+i, "%2hhx:", &buf[j]);
         } else {
-            sscanf(fpargv+i, "%2hhx", &fpLocal[j]);
+            sscanf(fpargv+i, "%2hhx", &buf[j]);
         }
         i+=3;
 
     }
 
-    //for (j=0; j<FP_ACL_FP_LENGTH;j++) 
-    //  printf("%02x ", fpLocal[j]);
     return true;
+}
+
+bool fp_get_fingerprint(const char *fpargv, fingerprint fp)
+{
+    return fp_read_hex(fpargv, fp, FP_ACL_FP_LENGTH);
+}
+
+bool fp_get_psk_id(const char *fpargv, psk_id pskId)
+{
+    return fp_read_hex(fpargv, pskId, FP_ACL_PSK_ID_LENGTH);
+}
+
+bool fp_get_psk_key(const char *fpargv, psk_key pskKey)
+{
+    return fp_read_hex(fpargv, pskKey, FP_ACL_PSK_KEY_LENGTH);
 }
 
 bool parse_argv(int argc, char* argv[], struct configuration* config) 
@@ -289,12 +339,16 @@ bool parse_argv(int argc, char* argv[], struct configuration* config)
     const char x1s[] = "F";      const char* x1l[] = { "aclfilename", 0 };
     const char x2s[] = "f";      const char* x2l[] = { "fingerprint", 0 };
     const char x3s[] = "u";      const char* x3l[] = { "user", 0 };
+    const char x4s[] = "i";      const char* x4l[] = { "psk-id", 0 };
+    const char x5s[] = "k";      const char* x5l[] = { "psk-key", 0 };
 
     const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
         { 'h', 0,           x0s, x0l },
         { 'F', GOPT_ARG,    x1s, x1l },
         { 'f', GOPT_ARG,    x2s, x2l },
         { 'u', GOPT_ARG,    x3s, x3l },
+        { 'i', GOPT_ARG,    x4s, x4l },
+        { 'k', GOPT_ARG,    x5s, x5l },
         { 0, 0, 0, 0 }
     };
     void *options = gopt_sort( & argc, (const char**)argv, opts);
@@ -306,7 +360,10 @@ bool parse_argv(int argc, char* argv[], struct configuration* config)
 
     if (argc <= 1) return false;
     config->action = strdup(argv[1]);
-    if (strcmp(config->action, "list") && strcmp(config->action, "add") && strcmp(config->action, "remove")) {
+    if (strcmp(config->action, "list") != 0 &&
+        strcmp(config->action, "add") != 0 &&
+        strcmp(config->action, "remove") != 0 &&
+        strcmp(config->action, "set-psk") != 0) {
         return false;
     }
 
@@ -314,14 +371,24 @@ bool parse_argv(int argc, char* argv[], struct configuration* config)
         return false;
     }
 
-    if (!strcmp(config->action, "add") || !strcmp(config->action, "remove")) {
+    if (strcmp(config->action, "add") == 0 ||
+        strcmp(config->action, "remove") == 0) {
         if (!gopt_arg(options, 'f', &config->fingerprint)) {
             return false;
         }
     }
 
-    if (!strcmp(config->action, "add")) {
+    if (strcmp(config->action, "add") == 0) {
         if (!gopt_arg(options, 'u', &config->user)) {
+            return false;
+        }
+    }
+
+    if (strcmp(config->action, "set-psk") == 0) {
+        if (!gopt_arg(options, 'i', &config->pskId)) {
+            return false;
+        }
+        if (!gopt_arg(options, 'k', &config->pskKey)) {
             return false;
         }
     }

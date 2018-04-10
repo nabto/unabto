@@ -396,6 +396,9 @@ application_event_result fp_acl_ae_user_add(application_request* request,
                                                unabto_query_response* write_buffer)
 {
     struct fp_acl_user user;
+
+    fp_acl_init_user(&user);
+    
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ADMIN)) {
         return AER_REQ_NO_ACCESS;
     }
