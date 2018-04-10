@@ -42,7 +42,8 @@ set(unabto_module_fp_src
 set(nabto_src
   ${unabto_module_util_src}
   ${unabto_module_fp_src}
-  ${unabto_module_cli_gopt_src}
+  ${UNABTO_MODULES_SRC_DIR}/cli/gopt/gopt.c
+  ${UNABTO_MODULES_SRC_DIR}/cli/gopt/gopt.h
   ${unabto_module_read_hex}
   ${unabto_module_log_unix_src}
   )
