@@ -19,7 +19,6 @@
 #include "modules/cli/gopt/gopt.h"
 #include "modules/util/read_hex.h"
 #include "unabto/unabto_env_base.h"
-#include "unabto/unabto_common_main.h"
 #include "modules/fingerprint_acl/fp_acl_file.h"
 
 struct configuration {
