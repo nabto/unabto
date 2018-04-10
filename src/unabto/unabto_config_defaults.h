@@ -35,7 +35,7 @@
  * associated with a psk
  */
 #ifndef NABTO_ENABLE_LOCAL_PSK_CONNECTION
-#define NABTO_ENABLE_LOCAL_PSK_CONNECTION 1
+#define NABTO_ENABLE_LOCAL_PSK_CONNECTION 0
 #endif
 
 /**

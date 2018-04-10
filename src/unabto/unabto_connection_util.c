@@ -194,7 +194,7 @@ bool unabto_connection_util_verify_capabilities(nabto_connect* connection, struc
     return true;    
 }
 
-
+#if NABTO_ENABLE_LOCAL_PSK_CONNECTION
 bool unabto_connection_util_psk_connect_init_key(nabto_connect* connection)
 {
     struct unabto_psk psk;
@@ -208,6 +208,7 @@ bool unabto_connection_util_psk_connect_init_key(nabto_connect* connection)
     nabto_crypto_init_aes_128_hmac_sha256_psk_context(&connection->cryptoctx, psk.value);
     return true;
 }
+#endif
 
 bool unabto_psk_connection_util_verify_connect(const nabto_packet_header* header, nabto_connect* connection)
 {

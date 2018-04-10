@@ -298,10 +298,12 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
                 return;
 #endif                
             }
+#if NABTO_ENABLE_LOCAL_PSK_CONNECTION
         case U_CONNECT_PSK:
         case U_VERIFY_PSK:
             unabto_psk_connection_dispatch_request(event->udpMessage.socket, &event->udpMessage.peer, &hdr);
             return;
+#endif            
 
 #if NABTO_ENABLE_DEBUG_PACKETS
 

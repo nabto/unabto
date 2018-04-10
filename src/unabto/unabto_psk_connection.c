@@ -6,14 +6,7 @@
 #include <unabto/unabto_packet.h>
 #include <unabto/unabto_util.h>
 
-bool unabto_local_psk_connection_get_key(const struct unabto_psk_id* keyId, const char* clientId, const struct unabto_fingerprint* fingerprint, struct unabto_psk* key)
-{
-    // dummy implementation for now
-    memset(key->value, 0, 16);
-    key->hasValue = true;
-    return true;
-}
-
+#if NABTO_ENABLE_LOCAL_PSK_CONNECTION
 
 void unabto_psk_connection_dispatch_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
 {
@@ -363,3 +356,5 @@ void unabto_psk_connection_send_error_response(nabto_socket_t socket, const nabt
     // send packet
     nabto_write(socket, nabtoCommunicationBuffer, packetLength, peer->addr, peer->port);
 }
+
+#endif

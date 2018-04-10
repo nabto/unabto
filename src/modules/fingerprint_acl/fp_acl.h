@@ -6,6 +6,8 @@
 
 #define FP_ACL_FP_LENGTH FINGERPRINT_LENGTH
 #define FP_ACL_USERNAME_MAX_LENGTH 64
+#define FP_ACL_PSK_ID_LENGTH 16
+#define FP_ACL_PSK_KEY_LENGTH 16
 
 
 // ACL permissions they are used on a per connection basis bit in the
@@ -41,12 +43,16 @@
 #define FP_ACL_SYSTEM_PERMISSION_PAIRING                            0x20000000ul
 
 typedef uint8_t fingerprint[FP_ACL_FP_LENGTH];
+typedef uint8_t psk_id[FP_ACL_PSK_ID_LENGTH];
+typedef uint8_t psk_key[FP_ACL_PSK_KEY_LENGTH];
 typedef char username[FP_ACL_USERNAME_MAX_LENGTH];
 
 struct fp_acl_user {
     fingerprint fp;
     username name;
     uint32_t permissions;
+    psk_id pskId;
+    psk_key psk;
 };
 
 struct fp_acl_settings {
@@ -96,6 +102,7 @@ struct fp_acl_db {
     fp_acl_db_status (*save_settings)(struct fp_acl_settings* settings);
 };
 
+void fp_acl_init_user(struct fp_acl_user* user);
 
 // The following functions are helper functions and does not
 // manipulate the acl database. They are just doing the simple bitwise
