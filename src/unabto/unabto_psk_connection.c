@@ -136,7 +136,7 @@ void unabto_psk_connection_dispatch_connect_request(nabto_socket_t socket, const
     // U_CONNECT_PSK pacḱets has an empty sp nsi so we are using the
     // cp nsi which should be unique enough on the local lan. There is
     // a chance for collisions.
-    connection = nabto_find_connection_cp_nsi(header->nsi_cp);
+    connection = nabto_find_local_connection_cp_nsi(header->nsi_cp);
     
     if (!connection) {
         return unabto_psk_connection_create_new_connection(socket, peer, header);

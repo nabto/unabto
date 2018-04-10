@@ -205,7 +205,7 @@ void nabto_release_connection(nabto_connect* con);
 /** Find the connection. @param spnsi  the identifier.  @return the connection (0 if not found). */
 nabto_connect* nabto_find_connection(uint32_t spnsi);
 
-nabto_connect* nabto_find_connection_cp_nsi(uint32_t cpnsi);
+nabto_connect* nabto_find_local_connection_cp_nsi(uint32_t cpnsi);
 
 
 /** @return the connection index (for logging). @param  con the connection. */

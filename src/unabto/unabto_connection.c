@@ -199,7 +199,7 @@ nabto_connect* nabto_find_connection(uint32_t spnsi) {
     return 0;
 }
 
-nabto_connect* nabto_find_connection_cp_nsi(uint32_t cpnsi)
+nabto_connect* nabto_find_local_connection_cp_nsi(uint32_t cpnsi)
 {
     nabto_connect* con;
 
@@ -209,7 +209,7 @@ nabto_connect* nabto_find_connection_cp_nsi(uint32_t cpnsi)
     }
     
     for (con = connections; con < connections + NABTO_MEMORY_CONNECTIONS_SIZE; ++con) {
-        if (con->cpnsi == cpnsi && con->state != CS_IDLE) {
+        if (con->cpnsi == cpnsi && con->state != CS_IDLE && con->spnsi <= 1000) {
             return con;
         }
     }
