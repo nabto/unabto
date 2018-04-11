@@ -45,9 +45,21 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
         if (readen != 1) {
             return FP_ACL_DB_LOAD_FAILED;
         }
-        memcpy(acl->users[i].fp, buffer, FP_ACL_FP_LENGTH);
-        memcpy(acl->users[i].name, buffer + FP_ACL_FP_LENGTH, FP_ACL_FILE_USERNAME_LENGTH); // guaranteed by compile time check
-        READ_U32(acl->users[i].permissions, buffer + FP_ACL_FP_LENGTH + FP_ACL_FILE_USERNAME_LENGTH);
+        size_t offset = 0;
+        
+        memcpy(acl->users[i].fp, buffer+offset, sizeof(struct unabto_fingerprint));
+        offset += sizeof(struct unabto_fingerprint);
+        
+        memcpy(acl->users[i].pskId, buffer+offset, sizeof(struct unabto_psk_id));
+        offset += sizeof(struct unabto_psk_id);
+        
+        memcpy(acl->users[i].psk, buffer+offset, sizeof(struct unabto_psk));
+        offset += sizeof(struct unabto_psk);
+
+        memcpy(acl->users[i].name, buffer+offset, FP_ACL_FILE_USERNAME_LENGTH); 
+        offset += FP_ACL_FILE_USERNAME_LENGTH;
+        
+        READ_U32(acl->users[i].permissions, buffer+offset);
     }
 
     return FP_ACL_DB_OK;
@@ -73,9 +85,14 @@ fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl)
     return status;
 }
 
+void copy_and_increment(void* dst, void* src, size_t len, size_t* offset) {
+    memcpy(dst, src, len);
+    offset* += len;
+}
+
 fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* acl)
 {
-    uint8_t buffer[128];
+    uint8_t buffer[sizeof(struct fp_acl_user)];
     uint8_t* ptr = buffer;
     uint32_t users = 0;
     int i;
@@ -93,7 +110,7 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
     WRITE_FORWARD_U32(ptr, acl->settings.firstUserPermissions);
     WRITE_FORWARD_U32(ptr, users);
 
-    written = fwrite(buffer, 20, 1, aclFile);
+    written = fwrite(buffer, 5*sizeof(uint32_t), 1, aclFile);
     if (written != 1) {
         return FP_ACL_DB_SAVE_FAILED;
     }
@@ -103,10 +120,15 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
     for (i = 0; i < users; i++) {
         struct fp_acl_user* it = &acl->users[i];
         if (!fp_mem_is_slot_free(it)) {
-            memcpy(buffer, it->fp, 16);
-            memcpy(buffer+16, it->name, 64);
-            WRITE_U32(buffer + 16 + 64, it->permissions);
-            written = fwrite(buffer, 84, 1, aclFile);
+            size_t offset = 0;
+
+            copy_and_increment(buffer, it->fp, sizeof(struct unabto_fingerprint), &offset);
+            copy_and_increment(buffer+offset, it->pskId, sizeof(struct unabto_psk_id), &offset);
+            copy_and_increment(buffer+offset, it->psk, sizeof(struct unabto_psk), &offset);
+            copy_and_increment(buffer+offset, it->name, FP_ACL_FILE_USERNAME_LENGTH, &offset);
+            WRITE_U32(buffer + offset, it->permissions);
+            
+            written = fwrite(buffer, offset+sizeof(uint32_t), 1, aclFile);
             if (written != 1) {
                 return FP_ACL_DB_SAVE_FAILED;
             }

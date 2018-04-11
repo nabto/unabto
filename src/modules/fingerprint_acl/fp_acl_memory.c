@@ -15,10 +15,10 @@ static fp_acl_db_status fp_mem_persistence_null_load(struct fp_mem_state* unused
 
 bool fp_mem_is_slot_free(struct fp_acl_user* ix)
 {
-    fingerprint emptyFp;
+    struct unabto_fingerprint emptyFp;
     bool fpIsEmpty;
-    memset(emptyFp, 0, sizeof(fingerprint));
-    fpIsEmpty = (memcmp(ix->fp, emptyFp, sizeof(fingerprint)) == 0);
+    memset(emptyFp, 0, sizeof(struct fingerprint));
+    fpIsEmpty = (memcmp(ix->fp, emptyFp, sizeof(struct fingerprint)) == 0);
     return fpIsEmpty;
 }
 

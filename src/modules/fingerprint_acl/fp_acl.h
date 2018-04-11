@@ -42,17 +42,14 @@
 // The PAIRING bit tells if the system is allowed to make pairings.
 #define FP_ACL_SYSTEM_PERMISSION_PAIRING                            0x20000000ul
 
-typedef uint8_t fingerprint[FP_ACL_FP_LENGTH];
-typedef uint8_t psk_id[FP_ACL_PSK_ID_LENGTH];
-typedef uint8_t psk_key[FP_ACL_PSK_KEY_LENGTH];
 typedef char username[FP_ACL_USERNAME_MAX_LENGTH];
 
 struct fp_acl_user {
-    fingerprint fp;
+    struct unabto_fingerprint fp;
+    struct unabto_psk_id pskId;
+    struct unabto_psk psk;
     username name;
     uint32_t permissions;
-    psk_id pskId;
-    psk_key psk;
 };
 
 struct fp_acl_settings {
@@ -86,7 +83,7 @@ struct fp_acl_db {
     void* (*next)(void* it);
     // Get an iterator to a user with the given fingerprint. Return
     // NULL if the user does not exists.
-    void* (*find)(fingerprint fp);
+    void* (*find)(struct unabto_fingerprint fp);
     // Create or overwrite user
     fp_acl_db_status (*save)(struct fp_acl_user* user);
     // Load a user given a valid iterator.
