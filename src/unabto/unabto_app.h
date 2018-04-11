@@ -35,13 +35,20 @@ bool allow_client_access(nabto_connect* connection);
 
 #if NABTO_ENABLE_LOCAL_PSK_CONNECTION
 /**
- * Get a pre shared key for a local psk conenction.
+ * Local Pre Shared Key(PSK) connections are local connections
+ * protected by a PSK. Whenever such a connection request arrives the
+ * following function is called to get a PSK for the connection. If no
+ * PSK exists the connection cannot be made. The PSK is a 128 bit
+ * secret shared between the device and the client. The shared secret
+ * has to be shared in some way out of scope of this functionality.
  *
- * @param keyId        key id, always non null
+ * The clientId and fingerprint is available as a way to help the
+ * device finding the PSK.
+ *
+ * @param keyId        key id, always non null, and always has a value
  * @param clientId     id of the client NULL if not provided
  * @param fingerprint  fingerprint of the client certificate, the fingerprint is 
- *                     not validated in local psk connections. NULL if no 
- *                     fingerprint was provided.
+ *                     not validated in local psk connections. Non null, but the value is optional.
  * @param key          output buffer where the key is copied.
  * @return  true iff a psk was found and copied to the psk buffer.
  */
