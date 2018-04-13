@@ -131,7 +131,6 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
             copy_and_increment(buffer+offset, &(it->name), FP_ACL_FILE_USERNAME_LENGTH, &offset);
 
             WRITE_U32(buffer + offset, it->permissions);
-            printf(" *** wrote permissions: %04x:%04x\n", it->permissions >> 16 , it->permissions & 0xffff);
             
             written = fwrite(buffer, offset+sizeof(uint32_t), 1, aclFile);
             if (written != 1) {

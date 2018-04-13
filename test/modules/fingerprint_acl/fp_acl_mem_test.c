@@ -122,6 +122,7 @@ bool fp_acl_mem_test() {
 
         struct fp_acl_user user;
         memset(&user, 0, sizeof(struct fp_acl_user));
+        user.fp.hasValue = 1;
         memset(user.fp.value, 42, 16);
         
         void* it = db.find(&(user.fp));
