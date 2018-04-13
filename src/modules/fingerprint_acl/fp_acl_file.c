@@ -46,6 +46,7 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
 
     for (i = 0; i < numUsers && i < FP_MEM_ACL_ENTRIES; i++) {
         nread = fread(buffer, FP_ACL_RECORD_SIZE, 1, aclFile);
+        ptr = buffer;
         if (nread != 1) {
             return FP_ACL_DB_LOAD_FAILED;
         }
