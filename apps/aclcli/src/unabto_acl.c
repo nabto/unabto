@@ -184,7 +184,7 @@ fp_acl_db_status fp_acl_file_list_entry(struct configuration* config, struct fp_
             int j;
             for (j=0; j<FP_ACL_FP_LENGTH;j++) {
                 if (j) printf(":");
-                printf("%02x", user.fp.value[j]);
+                printf("%02x", user.fp.value.fp[j]);
             }
       
             printf("  %04x:%04x  %s\n", splithex(user.permissions) , user.name);
@@ -220,13 +220,13 @@ fp_acl_db_status fp_acl_file_remove_entry(struct configuration* config, struct f
     }
 
   
-    if (fp_get_fingerprint(config->fingerprint, &(user.fp)) != 1) {
+    if (fp_get_fingerprint(config->fingerprint, &(user.fp.value)) != 1) {
         NABTO_LOG_ERROR(("Invalid Fingerprint\n"));
         return FP_ACL_DB_LOAD_FAILED;
     }
 
 
-    it = db->find(&(user.fp));
+    it = db->find(&(user.fp.value));
   
     if (it == 0 || db->load(it, &user) != FP_ACL_DB_OK) {
         printf("No such fingerprint");
@@ -267,7 +267,7 @@ fp_acl_db_status fp_acl_file_add_entry(struct configuration* config, struct fp_a
         user.permissions = aclSettings.defaultUserPermissions;
     }
 
-    if (fp_get_fingerprint(config->fingerprint, &user.fp) != 1) {
+    if (fp_get_fingerprint(config->fingerprint, &user.fp.value) != 1) {
         NABTO_LOG_ERROR(("Invalid Fingerprint\n"));
         return FP_ACL_DB_LOAD_FAILED;
     }
@@ -332,17 +332,17 @@ bool fp_read_hex(const char *fpargv, uint8_t* buf, size_t len)
 
 bool fp_get_fingerprint(const char *fpargv, struct unabto_fingerprint* fp)
 {
-    return fp_read_hex(fpargv, fp->value, FP_ACL_FP_LENGTH);
+    return fp_read_hex(fpargv, fp->fp, FP_ACL_FP_LENGTH);
 }
 
 bool fp_get_psk_id(const char *fpargv, struct unabto_psk_id* pskId)
 {
-    return fp_read_hex(fpargv, pskId->value, FP_ACL_PSK_ID_LENGTH);
+    return fp_read_hex(fpargv, pskId->pskId, FP_ACL_PSK_ID_LENGTH);
 }
 
 bool fp_get_psk_key(const char *fpargv, struct unabto_psk* pskKey)
 {
-    return fp_read_hex(fpargv, pskKey->value, FP_ACL_PSK_KEY_LENGTH);
+    return fp_read_hex(fpargv, pskKey->psk, FP_ACL_PSK_KEY_LENGTH);
 }
 
 bool parse_argv(int argc, char* argv[], struct configuration* config) 
