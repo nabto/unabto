@@ -52,13 +52,13 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
         }
         acl->users[i].fp.hasValue = 1;
 
-        READ_FORWARD_MEM(acl->users[i].fp.value.fp, ptr, FINGERPRINT_LENGTH);
+        READ_FORWARD_MEM(acl->users[i].fp.value.data, ptr, FINGERPRINT_LENGTH);
         
         READ_FORWARD_U8(acl->users[i].pskId.hasValue, ptr);
-        READ_FORWARD_MEM(acl->users[i].pskId.value.pskId, ptr, PSK_ID_LENGTH);
+        READ_FORWARD_MEM(acl->users[i].pskId.value.data, ptr, PSK_ID_LENGTH);
         
         READ_FORWARD_U8(acl->users[i].psk.hasValue, ptr);
-        READ_FORWARD_MEM(acl->users[i].psk.value.psk, ptr, PSK_LENGTH);
+        READ_FORWARD_MEM(acl->users[i].psk.value.data, ptr, PSK_LENGTH);
 
         READ_FORWARD_MEM(acl->users[i].name, ptr, FP_ACL_FILE_USERNAME_LENGTH); 
         

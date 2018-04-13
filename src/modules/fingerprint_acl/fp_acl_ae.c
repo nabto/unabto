@@ -21,7 +21,7 @@ static bool read_fingerprint(unabto_query_request* read_buffer, struct unabto_fi
         return false;
     }
     
-    memcpy(fp->fp, list, FINGERPRINT_LENGTH);
+    memcpy(fp->data, list, FINGERPRINT_LENGTH);
     return true;
 }
 
@@ -42,7 +42,7 @@ static bool read_string_null_terminated(unabto_query_request* read_buffer, char*
 
 static bool write_fingerprint(unabto_query_response* write_buffer, struct unabto_fingerprint* fp)
 {
-    return unabto_query_write_uint8_list(write_buffer, fp->fp, FINGERPRINT_LENGTH);
+    return unabto_query_write_uint8_list(write_buffer, fp->data, FINGERPRINT_LENGTH);
 }
 
 static bool write_string(unabto_query_response* write_buffer, const char* string)
@@ -366,7 +366,7 @@ application_event_result fp_acl_add_user_no_check(unabto_query_response* write_b
     if (it) {
         if (aclDb.load(it, &existingUser) == FP_ACL_DB_OK) {
             NABTO_LOG_TRACE(("User with fingerprint [%02x:%02x:%02x:%02x:...] already exists in acl with name [%s], returning existing user",
-                             user->fp.value.fp[0], user->fp.value.fp[1], user->fp.value.fp[2], user->fp.value.fp[3],
+                             user->fp.value.data[0], user->fp.value.data[1], user->fp.value.data[2], user->fp.value.data[3],
                              existingUser.name));
             return write_user(write_buffer, FP_ACL_STATUS_USER_EXISTS, &existingUser);
         } else {
@@ -428,7 +428,7 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
         return AER_REQ_TOO_SMALL;
     }
 
-    memcpy(&(user.fp.value.fp), request->connection->fingerprint.value.fp, FINGERPRINT_LENGTH);
+    memcpy(&(user.fp.value.data), request->connection->fingerprint.value.data, FINGERPRINT_LENGTH);
     user.fp.hasValue = 1;
 
     return fp_acl_add_user_no_check(write_buffer, &user);

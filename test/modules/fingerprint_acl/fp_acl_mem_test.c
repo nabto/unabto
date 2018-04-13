@@ -10,7 +10,7 @@ bool fp_acl_mem_test_db(struct fp_acl_db* db) {
     struct fp_acl_user user;
     memset(&user, 0, sizeof(struct fp_acl_user));
     user.fp.hasValue = 1;
-    memset(user.fp.value.fp, 42, 16);
+    memset(user.fp.value.data, 42, 16);
     const char* name = "foobar";
     memcpy(user.name, name, strlen(name)+1);
     user.permissions = 0x42424242;
@@ -27,14 +27,14 @@ bool fp_acl_mem_test_db(struct fp_acl_db* db) {
         return false;
     }
 
-    if (memcmp(user3.fp.value.fp, user.fp.value.fp, 16) != 0) {
+    if (memcmp(user3.fp.value.data, user.fp.value.data, 16) != 0) {
         return false;
     }
 
     if (db->load(user2, &user3) != FP_ACL_DB_OK) {
         return false;
     }
-    if (memcmp(user3.fp.value.fp, user.fp.value.fp, 16) != 0) {
+    if (memcmp(user3.fp.value.data, user.fp.value.data, 16) != 0) {
         return false;
     }
     
@@ -96,7 +96,7 @@ bool fp_acl_mem_test() {
         struct fp_acl_user user;
         memset(&user, 0, sizeof(struct fp_acl_user));
         user.fp.hasValue = 1;
-        memset(user.fp.value.fp, 42, 16);
+        memset(user.fp.value.data, 42, 16);
         const char* name = "foobar";
         memcpy(user.name, name, strlen(name)+1);
         user.permissions = 0x42424242;
@@ -123,7 +123,7 @@ bool fp_acl_mem_test() {
         struct fp_acl_user user;
         memset(&user, 0, sizeof(struct fp_acl_user));
         user.fp.hasValue = 1;
-        memset(user.fp.value.fp, 42, 16);
+        memset(user.fp.value.data, 42, 16);
         
         void* it = db.find(&(user.fp.value));
         if (it == NULL) {

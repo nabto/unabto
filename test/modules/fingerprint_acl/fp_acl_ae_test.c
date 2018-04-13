@@ -28,7 +28,7 @@ bool init_users()
         struct fp_acl_user user;
         memset(&user, 0, sizeof(struct fp_acl_user));
         user.fp.hasValue = 1;
-        memset(user.fp.value.fp, 42, 16);
+        memset(user.fp.value.data, 42, 16);
         const char* name = "admin";
         memcpy(user.name, name, strlen(name)+1);
         user.permissions = FP_ACL_PERMISSION_ALL;
@@ -39,7 +39,7 @@ bool init_users()
         struct fp_acl_user user;
         memset(&user, 0, sizeof(struct fp_acl_user));
         user.fp.hasValue = 1;
-        memset(user.fp.value.fp, 128+i, 16);
+        memset(user.fp.value.data, 128+i, 16);
         const char* name = "foobar";
         memcpy(user.name, name, strlen(name)+1);
         user.permissions = 0x42424242;
@@ -54,7 +54,7 @@ void init_connection(nabto_connect* connection) {
     memset(connection, 0, sizeof(nabto_connect));
     connection->isLocal = true;
     connection->fingerprint.hasValue = true;
-    memset(connection->fingerprint.value.fp, 42, FP_ACL_FP_LENGTH);
+    memset(connection->fingerprint.value.data, 42, FP_ACL_FP_LENGTH);
 }
 
 void init_request(application_request* request, nabto_connect* connection)
@@ -264,7 +264,7 @@ bool fp_acl_pair(struct unabto_fingerprint* fp, const char* name, struct fp_acl_
     application_request req;
     nabto_connect connection;
     init_request(&req, &connection);
-    memcpy(connection.fingerprint.value.fp, fp->fp, 16);
+    memcpy(connection.fingerprint.value.data, fp->data, 16);
 
     uint8_t buffer[256];
     memset(buffer,0, 256);
@@ -309,7 +309,7 @@ bool fp_acl_pair(struct unabto_fingerprint* fp, const char* name, struct fp_acl_
         if (length != FINGERPRINT_LENGTH) {
             return false;
         }
-        memcpy(result->fp.value.fp, list, FINGERPRINT_LENGTH);
+        memcpy(result->fp.value.data, list, FINGERPRINT_LENGTH);
 
         // read name
         if (!unabto_query_read_uint8_list(&testOutput, &list, &length)) {
@@ -337,7 +337,7 @@ bool fp_acl_test_pair()
     {
         // pair user 1
         struct unabto_fingerprint fp;
-        memset(fp.fp, 41, 16);
+        memset(fp.data, 41, 16);
         
         if (!fp_acl_pair(&fp, "first", &firstUser)) {
             return false;
@@ -347,7 +347,7 @@ bool fp_acl_test_pair()
     {
         // pair second user
         struct unabto_fingerprint fp;
-        memset(fp.fp, 40, 16);
+        memset(fp.data, 40, 16);
         
         if (!fp_acl_pair(&fp, "second", &secondUser)) {
             return false;
@@ -356,14 +356,14 @@ bool fp_acl_test_pair()
 
     if ( (firstUser.permissions != FP_ACL_PERMISSION_ALL) ||
          (strcmp(firstUser.name, "first") != 0) ||
-         (firstUser.fp.value.fp[0] != 41))
+         (firstUser.fp.value.data[0] != 41))
     {
         return false;
     }
 
     if ( (secondUser.permissions != (FP_ACL_PERMISSION_LOCAL_ACCESS | FP_ACL_PERMISSION_REMOTE_ACCESS)) ||
          (strcmp(secondUser.name, "second") != 0) ||
-         (secondUser.fp.value.fp[0] != 40))
+         (secondUser.fp.value.data[0] != 40))
     {
         return false;
     }

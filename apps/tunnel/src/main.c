@@ -713,15 +713,15 @@ bool unabto_local_psk_connection_get_key(const struct unabto_psk_id* keyId, cons
     it = fp_acl_db.find(&pkFp->value);
 
     if (it && fp_acl_db.load(it, &user) == FP_ACL_DB_OK && user.pskId.hasValue && user.psk.hasValue) {
-        if (memcmp(keyId, user.pskId.value.pskId, FP_ACL_PSK_ID_LENGTH) == 0) {
-            memcpy(&key->psk, user.psk.value.psk, FP_ACL_PSK_KEY_LENGTH);
+        if (memcmp(keyId, user.pskId.value.data, FP_ACL_PSK_ID_LENGTH) == 0) {
+            memcpy(&key->data, user.psk.value.data, FP_ACL_PSK_KEY_LENGTH);
             return true;
         }
     }
     
     NABTO_LOG_WARN(("User with fingerprint [%2x:%2x:%2x:...] is not configured with key [%2x:%2x:%2x:...]",
-                    pkFp->value.fp[0], pkFp->value.fp[1], pkFp->value.fp[2],
-                    keyId->pskId[0], keyId->pskId[1], keyId->pskId[2]));
+                    pkFp->value.data[0], pkFp->value.data[1], pkFp->value.data[2],
+                    keyId->data[0], keyId->data[1], keyId->data[2]));
     return false;
 }
 #endif

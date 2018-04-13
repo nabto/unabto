@@ -90,7 +90,7 @@ void* fp_mem_find(const struct unabto_fingerprint* fp)
     int i;
     for (i = 0; i < FP_MEM_ACL_ENTRIES; i++) {
         struct fp_acl_user* ix = &state.users[i];
-        if (memcmp(ix->fp.value.fp, fp->fp, sizeof(struct unabto_fingerprint)) == 0) {
+        if (memcmp(ix->fp.value.data, fp->data, sizeof(struct unabto_fingerprint)) == 0) {
             return ix;
         }
     }
