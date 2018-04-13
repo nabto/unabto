@@ -9,12 +9,23 @@
 /**
  * The fp acl file saves the fingerprint config in the following format
  * 
- * Version 2 of the file format is as follows:
+ * Version 3 of the file format is as follows:
  * 
  * uint32_t version
  * settings { uint32_t systemPermissions, uint32_t defaultUserPermissions, uint32_t firstUserPermissions}
  * number of users: uint32_t,
- * [users] user = {fingerprint: uint8_t[16], name: char[64], permissions: uint32_t}
+ * [users] user = {
+ *    fingerprint: uint8_t[16]
+ *    pskId: {
+ *         hasValue: uint8_t, 
+ *         value: uint8_t[16]
+ *    }
+ *    psk: {
+ *         hasValue: uint8_t, 
+ *         value: uint8_t[16]
+ *    }
+ *    name: char[64], 
+ *    permissions: uint32_t}
  *
  * saving rewrites the full file.
  * 
@@ -25,7 +36,13 @@
 
 #define FP_ACL_FILE_USERNAME_LENGTH 64
 
-#define FP_ACL_FILE_VERSION 2
+#define FP_ACL_FILE_VERSION 3
+
+#define FP_ACL_RECORD_SIZE FINGERPRINT_LENGTH +           \
+                             1 + PSK_ID_LENGTH +          \
+                             1 + PSK_LENGTH +             \
+                             FP_ACL_USERNAME_MAX_LENGTH + \
+                             sizeof(uint32_t)
 
 #if FP_ACL_USERNAME_MAX_LENGTH != FP_ACL_FILE_USERNAME_LENGTH
 #error incompatible user name length with current acl file format

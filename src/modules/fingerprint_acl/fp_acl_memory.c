@@ -15,11 +15,7 @@ static fp_acl_db_status fp_mem_persistence_null_load(struct fp_mem_state* unused
 
 bool fp_mem_is_slot_free(struct fp_acl_user* ix)
 {
-    struct unabto_fingerprint emptyFp;
-    bool fpIsEmpty;
-    memset(emptyFp, 0, sizeof(struct fingerprint));
-    fpIsEmpty = (memcmp(ix->fp, emptyFp, sizeof(struct fingerprint)) == 0);
-    return fpIsEmpty;
+    return !ix->fp.hasValue;
 }
 
 struct fp_acl_user* fp_mem_find_free_slot()
@@ -89,12 +85,12 @@ void* fp_mem_next(void* current)
     return NULL;
 }
 
-void* fp_mem_find(fingerprint fp)
+void* fp_mem_find(struct unabto_fingerprint fp)
 {
     int i;
     for (i = 0; i < FP_MEM_ACL_ENTRIES; i++) {
         struct fp_acl_user* ix = &state.users[i];
-        if (memcmp(ix->fp, fp, sizeof(fingerprint)) == 0) {
+        if (memcmp(ix->fp.value, fp.value, sizeof(struct unabto_fingerprint)) == 0) {
             return ix;
         }
     }

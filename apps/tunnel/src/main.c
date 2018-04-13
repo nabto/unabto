@@ -474,7 +474,7 @@ void acl_init() {
         FP_ACL_PERMISSION_REMOTE_ACCESS;
 
     if (fp_acl_file_init("persistence.bin", "tmp.bin", &fp_persistence_file) != FP_ACL_DB_OK) {
-        NABTO_LOG_ERROR(("cannot load acl file"));
+        NABTO_LOG_ERROR(("cannot prepare acl file"));
         exit(1);
     }
     fp_mem_init(&fp_acl_db, &default_settings, &fp_persistence_file);

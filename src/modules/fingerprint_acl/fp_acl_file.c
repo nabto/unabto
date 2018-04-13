@@ -2,23 +2,27 @@
 
 #include <unabto/unabto_util.h>
 
-enum {
-    USER_RECORD_SIZE = FP_ACL_FP_LENGTH + FP_ACL_FILE_USERNAME_LENGTH + 4
-};
+void copy_and_increment(void* dst, void* src, size_t len, size_t* offset) {
+    memcpy(dst, src, len);
+    *offset += len;
+}
 
 fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
 {
-    uint8_t buffer[128];
-    size_t readen;
+    uint8_t buffer[FP_ACL_RECORD_SIZE];
+    size_t nread;
     uint32_t version;
     uint8_t* ptr;
     uint32_t numUsers;
     uint32_t i;
+
+    UNABTO_ASSERT((sizeof(buffer) > 20));
+
     memset(acl, 0, sizeof(struct fp_mem_state));
 
     // load version
-    readen = fread(buffer, 4, 1, aclFile);
-    if (readen != 1) {
+    nread = fread(buffer, 4, 1, aclFile);
+    if (nread != 1) {
         return FP_ACL_DB_LOAD_FAILED;
     }
 
@@ -28,8 +32,8 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
     }
 
     // load system settings
-    readen = fread(buffer, 16, 1, aclFile);
-    if (readen != 1) {
+    nread = fread(buffer, 16, 1, aclFile);
+    if (nread != 1) {
         return FP_ACL_DB_LOAD_FAILED;
     }
 
@@ -41,23 +45,22 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
     READ_FORWARD_U32(numUsers, ptr);
 
     for (i = 0; i < numUsers && i < FP_MEM_ACL_ENTRIES; i++) {
-        readen = fread(buffer, USER_RECORD_SIZE, 1, aclFile);
-        if (readen != 1) {
+        nread = fread(buffer, FP_ACL_RECORD_SIZE, 1, aclFile);
+        if (nread != 1) {
             return FP_ACL_DB_LOAD_FAILED;
         }
         size_t offset = 0;
-        
-        memcpy(acl->users[i].fp, buffer+offset, sizeof(struct unabto_fingerprint));
-        offset += sizeof(struct unabto_fingerprint);
-        
-        memcpy(acl->users[i].pskId, buffer+offset, sizeof(struct unabto_psk_id));
-        offset += sizeof(struct unabto_psk_id);
-        
-        memcpy(acl->users[i].psk, buffer+offset, sizeof(struct unabto_psk));
-        offset += sizeof(struct unabto_psk);
 
-        memcpy(acl->users[i].name, buffer+offset, FP_ACL_FILE_USERNAME_LENGTH); 
-        offset += FP_ACL_FILE_USERNAME_LENGTH;
+        acl->users[i].fp.hasValue = 1;
+        copy_and_increment(&(acl->users[i].fp.value), buffer+offset, FINGERPRINT_LENGTH, &offset);
+        
+        acl->users[i].pskId.hasValue = buffer + offset++;
+        copy_and_increment(&(acl->users[i].pskId.value), buffer+offset, PSK_ID_LENGTH, &offset);
+        
+        acl->users[i].psk.hasValue = buffer + offset++;
+        copy_and_increment(&(acl->users[i].psk.value), buffer+offset, PSK_LENGTH, &offset);
+
+        copy_and_increment(&(acl->users[i].name), buffer+offset, FP_ACL_FILE_USERNAME_LENGTH, &offset); 
         
         READ_U32(acl->users[i].permissions, buffer+offset);
     }
@@ -85,14 +88,9 @@ fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl)
     return status;
 }
 
-void copy_and_increment(void* dst, void* src, size_t len, size_t* offset) {
-    memcpy(dst, src, len);
-    offset* += len;
-}
-
 fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* acl)
 {
-    uint8_t buffer[sizeof(struct fp_acl_user)];
+    uint8_t buffer[FP_ACL_RECORD_SIZE];
     uint8_t* ptr = buffer;
     uint32_t users = 0;
     int i;
@@ -122,11 +120,18 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
         if (!fp_mem_is_slot_free(it)) {
             size_t offset = 0;
 
-            copy_and_increment(buffer, it->fp, sizeof(struct unabto_fingerprint), &offset);
-            copy_and_increment(buffer+offset, it->pskId, sizeof(struct unabto_psk_id), &offset);
-            copy_and_increment(buffer+offset, it->psk, sizeof(struct unabto_psk), &offset);
-            copy_and_increment(buffer+offset, it->name, FP_ACL_FILE_USERNAME_LENGTH, &offset);
+            copy_and_increment(buffer+offset, &(it->fp.value), FINGERPRINT_LENGTH, &offset);
+            
+            buffer[offset++] = it->pskId.hasValue; 
+            copy_and_increment(buffer+offset, &(it->pskId.value), PSK_ID_LENGTH, &offset);
+
+            buffer[offset++] = it->pskId.hasValue; 
+            copy_and_increment(buffer+offset, &(it->psk.value), PSK_LENGTH, &offset);
+            
+            copy_and_increment(buffer+offset, &(it->name), FP_ACL_FILE_USERNAME_LENGTH, &offset);
+
             WRITE_U32(buffer + offset, it->permissions);
+            printf(" *** wrote permissions: %04x:%04x\n", it->permissions >> 16 , it->permissions & 0xffff);
             
             written = fwrite(buffer, offset+sizeof(uint32_t), 1, aclFile);
             if (written != 1) {

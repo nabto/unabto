@@ -38,7 +38,7 @@ void* fp_mem_get_first_user();
 void* fp_mem_next(void* current);
 
 // find a user given the fingerprint
-void* fp_mem_find(fingerprint fp);
+void* fp_mem_find(struct unabto_fingerprint fp);
 
 fp_acl_db_status fp_mem_save_user(struct fp_acl_user* user);
 fp_acl_db_status fp_mem_load_user(void* it, struct fp_acl_user* user);

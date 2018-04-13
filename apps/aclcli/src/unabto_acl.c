@@ -20,6 +20,7 @@
 #include "modules/util/read_hex.h"
 #include "unabto/unabto_env_base.h"
 #include "modules/fingerprint_acl/fp_acl_file.h"
+#include "unabto/unabto_types.h"
 
 struct configuration {
     const char *action;
@@ -36,7 +37,7 @@ fp_acl_db_status fp_acl_file_list_entry(struct configuration* config, struct fp_
 fp_acl_db_status fp_acl_file_set_psk(struct configuration* config, struct fp_acl_db* db);
 
 bool parse_argv(int argc, char* argv[], struct configuration* config);
-bool fp_get_fingerprint(const char *, fingerprint fpLocal);
+bool fp_get_fingerprint(const char *, struct unabto_fingerprint* fpLocal);
 
 #define splithex(x)  x >> 16 , x & 0xffff
 
@@ -56,6 +57,13 @@ static void help(const char* errmsg, const char *progname)
 
 int main(int argc, char* argv[]) {
     struct configuration config;
+    struct fp_mem_state acl;
+    struct fp_acl_settings defaultSettings;
+    struct fp_acl_db db;
+    struct fp_mem_persistence p;
+    fp_acl_db_status st;
+    FILE* aclFile;
+    
     memset(&config, 0, sizeof(struct configuration));
 
     if (!parse_argv(argc, argv, &config)) {
@@ -63,61 +71,66 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    struct fp_mem_state acl;
+    // master switch: system allows both local and remote access to
+    // users with the right privileges and is open for pairing with new users 
+    defaultSettings.systemPermissions =
+        FP_ACL_SYSTEM_PERMISSION_PAIRING |
+        FP_ACL_SYSTEM_PERMISSION_LOCAL_ACCESS |
+        FP_ACL_SYSTEM_PERMISSION_REMOTE_ACCESS;
 
-    struct fp_acl_settings defaultSettings;
-    defaultSettings.systemPermissions = FP_ACL_SYSTEM_PERMISSION_ALL;
-    defaultSettings.defaultUserPermissions = FP_ACL_PERMISSION_ALL;
+    // first user is granted admin permission and local+remote access
+    defaultSettings.firstUserPermissions =
+        FP_ACL_PERMISSION_ADMIN |
+        FP_ACL_PERMISSION_LOCAL_ACCESS |
+        FP_ACL_PERMISSION_REMOTE_ACCESS;
 
-
+    // subsequent users will just have guest privileges but still have local+remote access
+    defaultSettings.defaultUserPermissions =
+        FP_ACL_PERMISSION_LOCAL_ACCESS |
+        FP_ACL_PERMISSION_REMOTE_ACCESS;
+    
     // Test file existence
-    FILE* aclFile = fopen(config.aclfilename, "rb+");
+    aclFile = fopen(config.aclfilename, "rb+");
     if (aclFile == NULL) {
-        NABTO_LOG_ERROR(("Could not load aclfile %s", config.aclfilename));
-        return FP_ACL_DB_LOAD_FAILED;
+        printf("File %s does not existing, creating new\n", config.aclfilename);
     }
     fclose(aclFile);
 
-
     // initialise the acl database
-    struct fp_acl_db db;
-    struct fp_mem_persistence p;
 
-    if (fp_acl_file_init(config.aclfilename, "tmp.bin", &p) != FP_ACL_DB_OK) {
-        NABTO_LOG_ERROR(("cannot init: fp_acl_file_init:%s", config.aclfilename));
+    if ((st = fp_acl_file_init(config.aclfilename, "tmp.bin", &p)) != FP_ACL_DB_OK) {
+        NABTO_LOG_ERROR(("cannot init (status %d): fp_acl_file_init: %s", st, config.aclfilename));
         return 1;
-        return FP_ACL_DB_FAILED;
     }
         
-    if (fp_mem_init(&db, &defaultSettings, &p) != FP_ACL_DB_OK) {
-        NABTO_LOG_ERROR(("cannot init: fp_mem_init"));
+    if ((st = fp_mem_init(&db, &defaultSettings, &p)) != FP_ACL_DB_OK) {
+        NABTO_LOG_ERROR(("cannot init (status %d): fp_mem_init", st));
         return 1;
     }
 
     if (!strcmp(config.action, "add")) {
-        if (fp_acl_file_add_entry(&config, &db) != FP_ACL_DB_OK) {
-            NABTO_LOG_ERROR(("Add Failed\n"));
+        if ((st = fp_acl_file_add_entry(&config, &db)) != FP_ACL_DB_OK) {
+            NABTO_LOG_ERROR(("Add Failed (status %d)\n", st));
             return 1;
         }
     }
     
     if (!strcmp(config.action, "list")) {
-        if (fp_acl_file_list_entry(&config, &db) != FP_ACL_DB_OK) {
-            NABTO_LOG_ERROR(("List Failed\n"));
+        if ((st = fp_acl_file_list_entry(&config, &db)) != FP_ACL_DB_OK) {
+            NABTO_LOG_ERROR(("List Failed (status %d)\n", st));
             return 1;
         }
     }
 
     if (!strcmp(config.action, "remove")) {
-        if (fp_acl_file_remove_entry(&config, &db) != FP_ACL_DB_OK) {
-            NABTO_LOG_ERROR(("Remove Failed\n"));
+        if ((st = fp_acl_file_remove_entry(&config, &db)) != FP_ACL_DB_OK) {
+            NABTO_LOG_ERROR(("Remove Failed (status %d)\n", st));
             return 1;
         }
     }
 
     if (!strcmp(config.action, "set-psk")) {
-        fp_acl_db_status st = fp_acl_file_set_psk(&config, &db);
-        if (st != FP_ACL_DB_OK) {
+        if ((st = fp_acl_file_set_psk(&config, &db)) != FP_ACL_DB_OK) {
             NABTO_LOG_ERROR(("Set PSK Failed with status %d\n", st));
             return 1;
         }
@@ -171,7 +184,7 @@ fp_acl_db_status fp_acl_file_list_entry(struct configuration* config, struct fp_
             int j;
             for (j=0; j<FP_ACL_FP_LENGTH;j++) {
                 if (j) printf(":");
-                printf("%02x", user.fp[j]);
+                printf("%02x", user.fp.value[j]);
             }
       
             printf("  %04x:%04x  %s\n", splithex(user.permissions) , user.name);
@@ -207,7 +220,7 @@ fp_acl_db_status fp_acl_file_remove_entry(struct configuration* config, struct f
     }
 
   
-    if (fp_get_fingerprint(config->fingerprint, user.fp) != 1) {
+    if (fp_get_fingerprint(config->fingerprint, &(user.fp)) != 1) {
         NABTO_LOG_ERROR(("Invalid Fingerprint\n"));
         return FP_ACL_DB_LOAD_FAILED;
     }
@@ -239,6 +252,8 @@ fp_acl_db_status fp_acl_file_add_entry(struct configuration* config, struct fp_a
     struct fp_acl_user user;
     struct fp_acl_settings aclSettings;
 
+    fp_acl_init_user(&user);
+
     // Load acl settings from file
     if (db->load_settings(&aclSettings) != FP_ACL_DB_OK) {
         NABTO_LOG_ERROR(("Could not load aclsettings"));
@@ -252,28 +267,25 @@ fp_acl_db_status fp_acl_file_add_entry(struct configuration* config, struct fp_a
         user.permissions = aclSettings.defaultUserPermissions;
     }
 
-  
-    if (fp_get_fingerprint(config->fingerprint, user.fp) != 1) {
+    if (fp_get_fingerprint(config->fingerprint, &user.fp) != 1) {
         NABTO_LOG_ERROR(("Invalid Fingerprint\n"));
         return FP_ACL_DB_LOAD_FAILED;
     }
+    user.fp.hasValue = 1;
 
 
-    memcpy(user.name, config->user, FP_ACL_USERNAME_MAX_LENGTH);
+    strncpy(user.name, config->user, FP_ACL_USERNAME_MAX_LENGTH);
 
-    db->save(&user);
-
-    return FP_ACL_DB_OK;
-
+    return db->save(&user);
 }
 
 fp_acl_db_status fp_acl_file_set_psk(struct configuration* config, struct fp_acl_db* db)
 {
     void* it;
-    fingerprint fp;
+    struct unabto_fingerprint fp;
     struct fp_acl_user user;
 
-    fp_get_fingerprint(config->fingerprint, fp);
+    fp_get_fingerprint(config->fingerprint, &fp);
     it = db->find(fp);
     
     if (it == 0 || db->load(it, &user) != FP_ACL_DB_OK) {
@@ -318,19 +330,19 @@ bool fp_read_hex(const char *fpargv, uint8_t* buf, size_t len)
     return true;
 }
 
-bool fp_get_fingerprint(const char *fpargv, fingerprint fp)
+bool fp_get_fingerprint(const char *fpargv, struct unabto_fingerprint* fp)
 {
-    return fp_read_hex(fpargv, fp, FP_ACL_FP_LENGTH);
+    return fp_read_hex(fpargv, fp->value, FP_ACL_FP_LENGTH);
 }
 
-bool fp_get_psk_id(const char *fpargv, psk_id pskId)
+bool fp_get_psk_id(const char *fpargv, struct unabto_psk_id* pskId)
 {
-    return fp_read_hex(fpargv, pskId, FP_ACL_PSK_ID_LENGTH);
+    return fp_read_hex(fpargv, pskId->value, FP_ACL_PSK_ID_LENGTH);
 }
 
-bool fp_get_psk_key(const char *fpargv, psk_key pskKey)
+bool fp_get_psk_key(const char *fpargv, struct unabto_psk* pskKey)
 {
-    return fp_read_hex(fpargv, pskKey, FP_ACL_PSK_KEY_LENGTH);
+    return fp_read_hex(fpargv, pskKey->value, FP_ACL_PSK_KEY_LENGTH);
 }
 
 bool parse_argv(int argc, char* argv[], struct configuration* config) 
