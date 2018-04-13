@@ -72,6 +72,14 @@ static bool useSelectBased = false;
 
 static char* default_hosts[] = { "127.0.0.1", "localhost", 0 };
 
+uint8_t obscurity_key_id[] = {
+  0x7d, 0x61, 0x03, 0xa8, 0x97, 0xb1, 0xeb, 0x96, 0xd5, 0x38, 0x5e, 0xef, 0x58, 0x6d, 0xed, 0x5e
+};
+
+uint8_t obscurity_key[] = {
+    0x28, 0x6b, 0x1e, 0xe9, 0xa6, 0x02, 0x88, 0xc6, 0x8a, 0xc4, 0xa8, 0x6b, 0x23, 0x44, 0x0d, 0x73
+};
+
 // AMP video client
 #define AMP_DEVICE_NAME_DEFAULT "Tunnel"
 #define AMP_MAX_DEVICE_NAME_LENGTH 50
@@ -694,8 +702,8 @@ void application_poll_drop(application_request* applicationRequest) {
 
 #if NABTO_ENABLE_LOCAL_PSK_CONNECTION
 bool is_obscurity_key(const struct unabto_psk_id* keyId) {
-    // TODO: use dummy key for trusted network bootstrapping, injected from cmd line (not stored in acl)
-    return false;
+    // dummy key for trusted network bootstrapping
+    return memcmp(keyId, obscurity_key_id, PSK_ID_LENGTH) == 0;
 }
 
 bool unabto_local_psk_connection_get_key(const struct unabto_psk_id* keyId, const char* clientId, const struct unabto_optional_fingerprint* pkFp, struct unabto_psk* key) {
@@ -703,6 +711,7 @@ bool unabto_local_psk_connection_get_key(const struct unabto_psk_id* keyId, cons
     struct fp_acl_user user;
 
     if (is_obscurity_key(keyId)) {
+        memcpy(&key->data, obscurity_key, PSK_LENGTH);
         return true;
     }
 
