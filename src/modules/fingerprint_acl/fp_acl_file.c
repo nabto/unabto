@@ -115,13 +115,13 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
         struct fp_acl_user* it = &acl->users[i];
         if (!fp_mem_is_slot_free(it)) {
 
-            WRITE_FORWARD_MEM(ptr, it->fp.value.fp, FINGERPRINT_LENGTH);
+            WRITE_FORWARD_MEM(ptr, it->fp.value.data, FINGERPRINT_LENGTH);
             
             WRITE_FORWARD_U8(ptr, it->pskId.hasValue);
-            WRITE_FORWARD_MEM(ptr, it->pskId.value.pskId, PSK_ID_LENGTH);
+            WRITE_FORWARD_MEM(ptr, it->pskId.value.data, PSK_ID_LENGTH);
 
             WRITE_FORWARD_U8(ptr, it->psk.hasValue);
-            WRITE_FORWARD_MEM(ptr, it->psk.value.psk, PSK_LENGTH);
+            WRITE_FORWARD_MEM(ptr, it->psk.value.data, PSK_LENGTH);
 
             WRITE_FORWARD_MEM(ptr, it->name, FP_ACL_FILE_USERNAME_LENGTH);
 

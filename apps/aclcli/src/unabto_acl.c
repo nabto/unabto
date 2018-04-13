@@ -184,7 +184,7 @@ fp_acl_db_status fp_acl_file_list_entry(struct configuration* config, struct fp_
             int j;
             for (j=0; j<FP_ACL_FP_LENGTH;j++) {
                 if (j) printf(":");
-                printf("%02x", user.fp.value.fp[j]);
+                printf("%02x", user.fp.value.data[j]);
             }
       
             printf("  %04x:%04x  %s\n", splithex(user.permissions) , user.name);
@@ -332,17 +332,17 @@ bool fp_read_hex(const char *fpargv, uint8_t* buf, size_t len)
 
 bool fp_get_fingerprint(const char *fpargv, struct unabto_fingerprint* fp)
 {
-    return fp_read_hex(fpargv, fp->fp, FP_ACL_FP_LENGTH);
+    return fp_read_hex(fpargv, fp->data, FP_ACL_FP_LENGTH);
 }
 
 bool fp_get_psk_id(const char *fpargv, struct unabto_psk_id* pskId)
 {
-    return fp_read_hex(fpargv, pskId->pskId, FP_ACL_PSK_ID_LENGTH);
+    return fp_read_hex(fpargv, pskId->data, FP_ACL_PSK_ID_LENGTH);
 }
 
 bool fp_get_psk_key(const char *fpargv, struct unabto_psk* pskKey)
 {
-    return fp_read_hex(fpargv, pskKey->psk, FP_ACL_PSK_KEY_LENGTH);
+    return fp_read_hex(fpargv, pskKey->data, FP_ACL_PSK_KEY_LENGTH);
 }
 
 bool parse_argv(int argc, char* argv[], struct configuration* config) 
