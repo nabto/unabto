@@ -9,21 +9,33 @@ enum {
     PSK_LENGTH = 16
 };
 
-// fingerprint of a public key
 struct unabto_fingerprint {
-    uint8_t value[FINGERPRINT_LENGTH];
+    uint8_t fp[FINGERPRINT_LENGTH];
+};
+
+// fingerprint of a public key
+struct unabto_optional_fingerprint {
+    struct unabto_fingerprint value;
     bool hasValue;
 };
 
-// ID of a psk.
 struct unabto_psk_id {
-    uint8_t value[PSK_ID_LENGTH];
+    uint8_t pskId[PSK_ID_LENGTH];
+};
+
+// ID of a psk.
+struct unabto_optional_psk_id {
+    struct unabto_psk_id value;
     bool hasValue;
 };
 
 // PSK
 struct unabto_psk {
-    uint8_t value[PSK_LENGTH];
+    uint8_t psk[PSK_LENGTH];
+};
+
+struct unabto_optional_psk {
+    struct unabto_psk value;
     bool hasValue;
 };
 

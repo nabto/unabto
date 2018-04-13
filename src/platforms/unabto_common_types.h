@@ -187,7 +187,7 @@ typedef __ROM char* text;
 #endif
 
 #ifndef MAKE_FP_PRINTABLE
-#define MAKE_FP_PRINTABLE(fp) fp.value[0],fp.value[1],fp.value[2],fp.value[3]
+#define MAKE_FP_PRINTABLE(val) (val).fp[0],(val).fp[1],(val).fp[2],(val).fp[3]
 #endif
 
 #ifndef PRIfp

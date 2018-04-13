@@ -142,7 +142,7 @@ struct nabto_connect_s {
     connectionStats           stats;        /**< connection stats                         */
     bool                      sendConnectStatistics;
     bool                      sendConnectionEndedStatistics;
-    struct unabto_fingerprint fingerprint;  // client public key fingerprint
+    struct unabto_optional_fingerprint fingerprint;  // client public key fingerprint
 
 #if NABTO_ENABLE_CLIENT_ID
     char                      clientId[NABTO_CLIENT_ID_MAX_SIZE + 1]; /**< the peer id (e-mail from certificate) */

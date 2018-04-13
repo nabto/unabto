@@ -45,9 +45,9 @@
 typedef char username[FP_ACL_USERNAME_MAX_LENGTH];
 
 struct fp_acl_user {
-    struct unabto_fingerprint fp;
-    struct unabto_psk_id pskId;
-    struct unabto_psk psk;
+    struct unabto_optional_fingerprint fp;
+    struct unabto_optional_psk_id pskId;
+    struct unabto_optional_psk psk;
     username name;
     uint32_t permissions;
 };

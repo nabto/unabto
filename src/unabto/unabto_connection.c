@@ -609,7 +609,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
         NABTO_LOG_DEBUG((PRInsi " U_CONNECT: private:" PRIep ", global:" PRIep " rendezvous:%" PRIu8, MAKE_NSI_PRINTABLE(0, *nsi, 0), MAKE_EP_PRINTABLE(con->cp.privateEndpoint), MAKE_EP_PRINTABLE(con->cp.globalEndpoint), (uint8_t)(!con->noRendezvous)));
     }
 
-    NABTO_LOG_INFO(("Connection opened from '%s' (to %s). Encryption code %i. Fingerprint " PRIfp, con->clientId, nmc.nabtoMainSetup.id, con->cryptoctx.code, MAKE_FP_PRINTABLE(con->fingerprint)));
+    NABTO_LOG_INFO(("Connection opened from '%s' (to %s). Encryption code %i. Fingerprint " PRIfp, con->clientId, nmc.nabtoMainSetup.id, con->cryptoctx.code, MAKE_FP_PRINTABLE(con->fingerprint.value)));
 
     return con;
 

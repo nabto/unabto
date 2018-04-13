@@ -52,13 +52,13 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
         size_t offset = 0;
 
         acl->users[i].fp.hasValue = 1;
-        copy_and_increment(&(acl->users[i].fp.value), buffer+offset, FINGERPRINT_LENGTH, &offset);
+        copy_and_increment(&(acl->users[i].fp.value.fp), buffer+offset, FINGERPRINT_LENGTH, &offset);
         
         acl->users[i].pskId.hasValue = buffer + offset++;
-        copy_and_increment(&(acl->users[i].pskId.value), buffer+offset, PSK_ID_LENGTH, &offset);
+        copy_and_increment(&(acl->users[i].pskId.value.pskId), buffer+offset, PSK_ID_LENGTH, &offset);
         
         acl->users[i].psk.hasValue = buffer + offset++;
-        copy_and_increment(&(acl->users[i].psk.value), buffer+offset, PSK_LENGTH, &offset);
+        copy_and_increment(&(acl->users[i].psk.value.psk), buffer+offset, PSK_LENGTH, &offset);
 
         copy_and_increment(&(acl->users[i].name), buffer+offset, FP_ACL_FILE_USERNAME_LENGTH, &offset); 
         

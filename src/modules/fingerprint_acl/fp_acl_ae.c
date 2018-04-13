@@ -17,12 +17,11 @@ static bool read_fingerprint(unabto_query_request* read_buffer, struct unabto_fi
     if (!unabto_query_read_uint8_list(read_buffer, &list, &length)) {
         return false;
     }
-    if (length != sizeof(fp->value)) {
+    if (length != FINGERPRINT_LENGTH) {
         return false;
     }
     
-    memcpy(fp->value, list, sizeof(fp->value));
-    fp->hasValue = true;
+    memcpy(fp->fp, list, FINGERPRINT_LENGTH);
     return true;
 }
 
@@ -43,7 +42,7 @@ static bool read_string_null_terminated(unabto_query_request* read_buffer, char*
 
 static bool write_fingerprint(unabto_query_response* write_buffer, struct unabto_fingerprint* fp)
 {
-    return unabto_query_write_uint8_list(write_buffer, fp->value, sizeof(fp->value));
+    return unabto_query_write_uint8_list(write_buffer, fp->fp, FINGERPRINT_LENGTH);
 }
 
 static bool write_string(unabto_query_response* write_buffer, const char* string)
@@ -54,7 +53,7 @@ static bool write_string(unabto_query_response* write_buffer, const char* string
 application_event_result write_user(unabto_query_response* write_buffer, uint8_t status, struct fp_acl_user* user)
 {
     if (unabto_query_write_uint8(write_buffer, status) &&
-        write_fingerprint(write_buffer, &(user->fp)) &&
+        write_fingerprint(write_buffer, &(user->fp.value)) &&
         write_string(write_buffer, user->name) &&
         unabto_query_write_uint32(write_buffer, user->permissions))
     {
@@ -144,7 +143,7 @@ application_event_result fp_acl_ae_users_get(application_request* request,
             if (aclDb.load(it, &user) != FP_ACL_DB_OK) {
                 return AER_REQ_SYSTEM_ERROR;
             }
-            if (! (write_fingerprint(write_buffer, &(user.fp)) &&
+            if (! (write_fingerprint(write_buffer, &(user.fp.value)) &&
                    write_string(write_buffer, user.name) &&
                    unabto_query_write_uint32(write_buffer, user.permissions)))
             {
@@ -208,7 +207,7 @@ application_event_result fp_acl_ae_user_me(application_request* request,
         return AER_REQ_NO_ACCESS;
     }
 
-    it = aclDb.find(&(request->connection->fingerprint));
+    it = aclDb.find(&(request->connection->fingerprint.value));
     if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return write_empty_user(write_buffer, FP_ACL_STATUS_NO_SUCH_USER);
     }
@@ -363,11 +362,11 @@ application_event_result fp_acl_add_user_no_check(unabto_query_response* write_b
         return AER_REQ_SYSTEM_ERROR;
     }
 
-    it = aclDb.find(&(user->fp));
+    it = aclDb.find(&(user->fp.value));
     if (it) {
         if (aclDb.load(it, &existingUser) == FP_ACL_DB_OK) {
             NABTO_LOG_TRACE(("User with fingerprint [%02x:%02x:%02x:%02x:...] already exists in acl with name [%s], returning existing user",
-                             user->fp.value[0], user->fp.value[1], user->fp.value[2], user->fp.value[3],
+                             user->fp.value.fp[0], user->fp.value.fp[1], user->fp.value.fp[2], user->fp.value.fp[3],
                              existingUser.name));
             return write_user(write_buffer, FP_ACL_STATUS_USER_EXISTS, &existingUser);
         } else {
@@ -404,7 +403,7 @@ application_event_result fp_acl_ae_user_add(application_request* request,
         return AER_REQ_NO_ACCESS;
     }
 
-    if (!read_fingerprint(read_buffer, &(user.fp))) {
+    if (!read_fingerprint(read_buffer, &(user.fp.value))) {
         return AER_REQ_TOO_SMALL;
     }
     if (!read_string_null_terminated(read_buffer, user.name, FP_ACL_USERNAME_MAX_LENGTH)) {
@@ -429,7 +428,7 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
         return AER_REQ_TOO_SMALL;
     }
 
-    memcpy(&(user.fp.value), request->connection->fingerprint.value, FINGERPRINT_LENGTH);
+    memcpy(&(user.fp.value.fp), request->connection->fingerprint.value.fp, FINGERPRINT_LENGTH);
     user.fp.hasValue = 1;
 
     return fp_acl_add_user_no_check(write_buffer, &user);
@@ -497,7 +496,7 @@ bool fp_acl_is_user_allowed(nabto_connect* connection, uint32_t requiredPermissi
         return false;
     }
     
-    it = aclDb.find(&(connection->fingerprint));
+    it = aclDb.find(&(connection->fingerprint.value));
     if (it == NULL || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return false;
     }
@@ -550,7 +549,7 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
         return false;
     }
 
-    user = aclDb.find(&(connection->fingerprint));
+    user = aclDb.find(&(connection->fingerprint.value));
 
     if (!user) {
         // This is an unknown user, they are only allowed on local
@@ -596,7 +595,7 @@ bool fp_acl_is_user_owner(application_request* request)
         return false;
     }
 
-    it = aclDb.find(request->connection->fingerprint.value);
+    it = aclDb.find(&request->connection->fingerprint.value);
     if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return false;
     }
@@ -610,7 +609,7 @@ bool fp_acl_is_user_paired(application_request* request)
     if (! (request->connection && request->connection->fingerprint.hasValue)) {
         return false;
     }
-    it = aclDb.find(request->connection->fingerprint.value);
+    it = aclDb.find(&request->connection->fingerprint.value);
     if (it != NULL) {
         return true;
     }
