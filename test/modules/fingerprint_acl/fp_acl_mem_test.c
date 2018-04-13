@@ -125,7 +125,7 @@ bool fp_acl_mem_test() {
         user.fp.hasValue = 1;
         memset(user.fp.value.fp, 42, 16);
         
-        void* it = db.find(&(user.fp));
+        void* it = db.find(&(user.fp.value));
         if (it == NULL) {
             NABTO_LOG_ERROR(("user not found"));
             return false;
