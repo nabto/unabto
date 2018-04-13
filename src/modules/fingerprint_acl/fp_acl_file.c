@@ -2,11 +2,6 @@
 
 #include <unabto/unabto_util.h>
 
-void copy_and_increment(void* dst, void* src, size_t len, size_t* offset) {
-    memcpy(dst, src, len);
-    *offset += len;
-}
-
 fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
 {
     uint8_t buffer[FP_ACL_RECORD_SIZE];
@@ -116,23 +111,23 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
     // write user records
     
     for (i = 0; i < users; i++) {
+        ptr = buffer;
         struct fp_acl_user* it = &acl->users[i];
         if (!fp_mem_is_slot_free(it)) {
-            size_t offset = 0;
 
-            copy_and_increment(buffer+offset, &(it->fp.value), FINGERPRINT_LENGTH, &offset);
+            WRITE_FORWARD_MEM(ptr, it->fp.value.fp, FINGERPRINT_LENGTH);
             
-            buffer[offset++] = it->pskId.hasValue; 
-            copy_and_increment(buffer+offset, &(it->pskId.value), PSK_ID_LENGTH, &offset);
+            WRITE_FORWARD_U8(ptr, it->pskId.hasValue);
+            WRITE_FORWARD_MEM(ptr, it->pskId.value.pskId, PSK_ID_LENGTH);
 
-            buffer[offset++] = it->pskId.hasValue; 
-            copy_and_increment(buffer+offset, &(it->psk.value), PSK_LENGTH, &offset);
-            
-            copy_and_increment(buffer+offset, &(it->name), FP_ACL_FILE_USERNAME_LENGTH, &offset);
+            WRITE_FORWARD_U8(ptr, it->psk.hasValue);
+            WRITE_FORWARD_MEM(ptr, it->psk.value.psk, PSK_LENGTH);
 
-            WRITE_U32(buffer + offset, it->permissions);
+            WRITE_FORWARD_MEM(ptr, it->name, FP_ACL_FILE_USERNAME_LENGTH);
+
+            WRITE_FORWARD_U32(ptr, it->permissions);
             
-            written = fwrite(buffer, offset+sizeof(uint32_t), 1, aclFile);
+            written = fwrite(buffer, ptr-buffer, 1, aclFile);
             if (written != 1) {
                 return FP_ACL_DB_SAVE_FAILED;
             }
