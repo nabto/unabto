@@ -85,12 +85,12 @@ void* fp_mem_next(void* current)
     return NULL;
 }
 
-void* fp_mem_find(struct unabto_fingerprint fp)
+void* fp_mem_find(const struct unabto_fingerprint* fp)
 {
     int i;
     for (i = 0; i < FP_MEM_ACL_ENTRIES; i++) {
         struct fp_acl_user* ix = &state.users[i];
-        if (memcmp(ix->fp.value, fp.value, sizeof(struct unabto_fingerprint)) == 0) {
+        if (memcmp(ix->fp.value, fp->value, sizeof(struct unabto_fingerprint)) == 0) {
             return ix;
         }
     }
@@ -99,7 +99,7 @@ void* fp_mem_find(struct unabto_fingerprint fp)
 
 fp_acl_db_status fp_mem_save_user(struct fp_acl_user* user)
 {
-    void* index = fp_mem_find(user->fp);
+    void* index = fp_mem_find(&(user->fp));
 
     if (index == NULL) {
         index = fp_mem_find_free_slot();

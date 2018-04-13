@@ -702,26 +702,24 @@ bool unabto_local_psk_connection_get_key(const struct unabto_psk_id* keyId, cons
     void* it;
     struct fp_acl_user user;
 
-    // TODO: use common fp type when NABTO-1812 is fixed
-    fingerprint fp;
+    struct unabto_fingerprint fp;
 
     if (is_obscurity_key(keyId)) {
         return true;
     }
     
-    memcpy(fp, pkFp, sizeof(fp));
-    it = fp_acl_db.find(fp);
-    if (it == 0 || fp_acl_db.load(it, &user) != FP_ACL_DB_OK) {
-        if (memcmp(keyId, user.pskId, FP_ACL_PSK_ID_LENGTH) == 0) {
-            memcpy(key, user.psk, FP_ACL_PSK_KEY_LENGTH);
+    it = fp_acl_db.find(pkFp);
+
+    if (it && fp_acl_db.load(it, &user) == FP_ACL_DB_OK && user.pskId.hasValue && user.psk.hasValue) {
+        if (memcmp(keyId, user.pskId.value, FP_ACL_PSK_ID_LENGTH) == 0) {
+            memcpy(key, user.psk.value, FP_ACL_PSK_KEY_LENGTH);
             return true;
-        } else {
-            NABTO_LOG_WARN(("User with fingerprint [%2x:%2x:%2x:...] is not configured with key [%2x:%2x:%2x:...]",
-                            fp[0], fp[1], fp[2],
-                            keyId[0], keyId[1], keyId[2]));
-            return false;
         }
     }
+    
+    NABTO_LOG_WARN(("User with fingerprint [%2x:%2x:%2x:...] is not configured with key [%2x:%2x:%2x:...]",
+                    fp.value[0], fp.value[1], fp.value[2],
+                    keyId->value[0], keyId->value[1], keyId->value[2]));
     return false;
 }
 #endif

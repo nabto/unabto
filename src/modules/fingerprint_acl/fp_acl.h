@@ -83,7 +83,7 @@ struct fp_acl_db {
     void* (*next)(void* it);
     // Get an iterator to a user with the given fingerprint. Return
     // NULL if the user does not exists.
-    void* (*find)(struct unabto_fingerprint fp);
+    void* (*find)(const struct unabto_fingerprint* fp);
     // Create or overwrite user
     fp_acl_db_status (*save)(struct fp_acl_user* user);
     // Load a user given a valid iterator.
