@@ -226,7 +226,7 @@ fp_acl_db_status fp_acl_file_remove_entry(struct configuration* config, struct f
     }
 
 
-    it = db->find(user.fp);
+    it = db->find(&(user.fp));
   
     if (it == 0 || db->load(it, &user) != FP_ACL_DB_OK) {
         printf("No such fingerprint");
@@ -286,7 +286,7 @@ fp_acl_db_status fp_acl_file_set_psk(struct configuration* config, struct fp_acl
     struct fp_acl_user user;
 
     fp_get_fingerprint(config->fingerprint, &fp);
-    it = db->find(fp);
+    it = db->find(&fp);
     
     if (it == 0 || db->load(it, &user) != FP_ACL_DB_OK) {
         return FP_ACL_DB_LOAD_FAILED;

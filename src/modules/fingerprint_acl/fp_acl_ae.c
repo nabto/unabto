@@ -596,7 +596,7 @@ bool fp_acl_is_user_owner(application_request* request)
         return false;
     }
 
-    it = aclDb.find(request->connection->fingerprint.value);
+    it = aclDb.find(&(request->connection->fingerprint));
     if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return false;
     }
@@ -610,7 +610,7 @@ bool fp_acl_is_user_paired(application_request* request)
     if (! (request->connection && request->connection->fingerprint.hasValue)) {
         return false;
     }
-    it = aclDb.find(request->connection->fingerprint.value);
+    it = aclDb.find(&(request->connection->fingerprint));
     if (it != NULL) {
         return true;
     }

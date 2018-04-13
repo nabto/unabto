@@ -49,20 +49,18 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
         if (nread != 1) {
             return FP_ACL_DB_LOAD_FAILED;
         }
-        size_t offset = 0;
-
         acl->users[i].fp.hasValue = 1;
-        copy_and_increment(&(acl->users[i].fp.value), buffer+offset, FINGERPRINT_LENGTH, &offset);
+        READ_FORWARD_MEM(&(acl->users[i].fp.value), ptr, FINGERPRINT_LENGTH);
         
-        acl->users[i].pskId.hasValue = buffer + offset++;
-        copy_and_increment(&(acl->users[i].pskId.value), buffer+offset, PSK_ID_LENGTH, &offset);
+        READ_FORWARD_U8(acl->users[i].pskId.hasValue, ptr);
+        READ_FORWARD_MEM(&(acl->users[i].pskId.value), ptr, PSK_ID_LENGTH);
         
-        acl->users[i].psk.hasValue = buffer + offset++;
-        copy_and_increment(&(acl->users[i].psk.value), buffer+offset, PSK_LENGTH, &offset);
+        READ_FORWARD_U8(acl->users[i].psk.hasValue, ptr);
+        READ_FORWARD_MEM(&(acl->users[i].psk.value), ptr, PSK_LENGTH);
 
-        copy_and_increment(&(acl->users[i].name), buffer+offset, FP_ACL_FILE_USERNAME_LENGTH, &offset); 
+        READ_FORWARD_MEM(&(acl->users[i].name), ptr, FP_ACL_FILE_USERNAME_LENGTH); 
         
-        READ_U32(acl->users[i].permissions, buffer+offset);
+        READ_FORWARD_U32(acl->users[i].permissions, ptr);
     }
 
     return FP_ACL_DB_OK;
