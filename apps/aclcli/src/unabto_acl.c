@@ -38,6 +38,8 @@ fp_acl_db_status fp_acl_file_set_psk(struct configuration* config, struct fp_acl
 
 bool parse_argv(int argc, char* argv[], struct configuration* config);
 bool fp_get_fingerprint(const char *, struct unabto_fingerprint* fpLocal);
+bool fp_get_psk_id(const char *fpargv, struct unabto_psk_id* pskId);
+bool fp_get_psk_key(const char *fpargv, struct unabto_psk* pskKey);
 
 #define splithex(x)  x >> 16 , x & 0xffff
 
@@ -269,7 +271,7 @@ fp_acl_db_status fp_acl_file_add_entry(struct configuration* config, struct fp_a
 
     if (fp_get_fingerprint(config->fingerprint, &user.fp.value) != 1) {
         NABTO_LOG_ERROR(("Invalid Fingerprint\n"));
-        return FP_ACL_DB_LOAD_FAILED;
+        return FP_ACL_DB_SAVE_FAILED;
     }
     user.fp.hasValue = 1;
 
@@ -289,12 +291,22 @@ fp_acl_db_status fp_acl_file_set_psk(struct configuration* config, struct fp_acl
     it = db->find(&fp);
     
     if (it == 0 || db->load(it, &user) != FP_ACL_DB_OK) {
-        return FP_ACL_DB_LOAD_FAILED;
+        return FP_ACL_DB_SAVE_FAILED;
     }
 
-//    memcpy(config.
+    if (fp_get_psk_id(config->pskId, &user.pskId.value) != 1) {
+        NABTO_LOG_ERROR(("Invalid key id\n"));
+        return FP_ACL_DB_SAVE_FAILED;
+    }
+    user.pskId.hasValue = 1;
 
-    return FP_ACL_DB_OK;    
+    if (fp_get_psk_key(config->pskKey, &user.psk.value) != 1) {
+        NABTO_LOG_ERROR(("Invalid key\n"));
+        return FP_ACL_DB_SAVE_FAILED;
+    }
+    user.psk.hasValue = 1;
+
+    return db->save(&user);
 }
 
 bool fp_read_hex(const char *fpargv, uint8_t* buf, size_t len)
@@ -384,7 +396,8 @@ bool parse_argv(int argc, char* argv[], struct configuration* config)
     }
 
     if (strcmp(config->action, "add") == 0 ||
-        strcmp(config->action, "remove") == 0) {
+        strcmp(config->action, "remove") == 0 ||
+        strcmp(config->action, "set-psk") == 0) {
         if (!gopt_arg(options, 'f', &config->fingerprint)) {
             return false;
         }
