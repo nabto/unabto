@@ -94,7 +94,7 @@ int main(int argc, char* argv[]) {
     // Test file existence
     aclFile = fopen(config.aclfilename, "rb+");
     if (aclFile == NULL) {
-        printf("File %s does not existing, creating new\n", config.aclfilename);
+        printf("File %s does not exist, creating new\n", config.aclfilename);
     }
     fclose(aclFile);
 
