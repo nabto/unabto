@@ -95,8 +95,9 @@ int main(int argc, char* argv[]) {
     aclFile = fopen(config.aclfilename, "rb+");
     if (aclFile == NULL) {
         printf("File %s does not exist, creating new\n", config.aclfilename);
+    } else {
+        fclose(aclFile);
     }
-    fclose(aclFile);
 
     // initialise the acl database
 
