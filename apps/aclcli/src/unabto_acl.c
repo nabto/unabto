@@ -33,7 +33,7 @@ struct configuration {
 
 fp_acl_db_status fp_acl_file_remove_entry(struct configuration* config, struct fp_acl_db* db);
 fp_acl_db_status fp_acl_file_add_entry(struct configuration* config, struct fp_acl_db* db);
-fp_acl_db_status fp_acl_file_list_entry(struct configuration* config, struct fp_acl_db* db);
+fp_acl_db_status fp_acl_file_list_entries(struct configuration* config, struct fp_acl_db* db);
 fp_acl_db_status fp_acl_file_set_psk(struct configuration* config, struct fp_acl_db* db);
 
 bool parse_argv(int argc, char* argv[], struct configuration* config);
@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
     }
     
     if (!strcmp(config.action, "list")) {
-        if ((st = fp_acl_file_list_entry(&config, &db)) != FP_ACL_DB_OK) {
+        if ((st = fp_acl_file_list_entries(&config, &db)) != FP_ACL_DB_OK) {
             NABTO_LOG_ERROR(("List Failed (status %d)\n", st));
             return 1;
         }
@@ -141,8 +141,32 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
+void print_hex(uint8_t* data, size_t len) {
+    int i;
+    for (i=0; i<len; i++) {
+        if (i) {
+            printf(":");
+        };
+        printf("%02x", data[i]);
+    }
+}
+
+void print_psk(struct fp_acl_user* user) {
+    if (user->pskId.hasValue) {
+        printf("  PSK: [");
+        print_hex(user->pskId.value.data, FP_ACL_PSK_ID_LENGTH);
+        printf("] => [");
+        if (user->psk.hasValue) {
+            print_hex(user->psk.value.data, FP_ACL_PSK_KEY_LENGTH);
+        } else {
+            printf("(none)");
+        }
+        printf("]\n");
+    }
+}
+
 // listing of ACL file
-fp_acl_db_status fp_acl_file_list_entry(struct configuration* config, struct fp_acl_db* db)
+fp_acl_db_status fp_acl_file_list_entries(struct configuration* config, struct fp_acl_db* db)
 {
 
     void* iterator;
@@ -180,16 +204,12 @@ fp_acl_db_status fp_acl_file_list_entry(struct configuration* config, struct fp_
         struct fp_acl_user user;
         numUsers++;
 
-        if(db->load(iterator, &user) != FP_ACL_DB_OK) {
+        if (db->load(iterator, &user) != FP_ACL_DB_OK) {
             printf("Could not load user %d", numUsers);
         } else {
-            int j;
-            for (j=0; j<FP_ACL_FP_LENGTH;j++) {
-                if (j) printf(":");
-                printf("%02x", user.fp.value.data[j]);
-            }
-      
-            printf("  %04x:%04x  %s\n", splithex(user.permissions) , user.name);
+            print_hex(user.fp.value.data, FP_ACL_FP_LENGTH);
+            printf("  %04x:%04x  %s\n", splithex(user.permissions), user.name);
+            print_psk(&user);
         }
         iterator=db->next(iterator);
 
