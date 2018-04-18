@@ -16,7 +16,7 @@ static bool validate_string(char *string) {
 
 static bool set_unabto_id(nabto_main_setup *nms, char *id)
 {
-    char *nabtoId = malloc(sizeof(char) * strlen(id));
+    char *nabtoId = malloc(sizeof(char) * strlen(id) + 1);
     if (!nabtoId) {
         NABTO_LOG_ERROR(("Failed to allocate id"));
         return false;
