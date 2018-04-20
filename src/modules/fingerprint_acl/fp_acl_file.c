@@ -2,6 +2,8 @@
 
 #include <unabto/unabto_util.h>
 
+#include "errno.h"
+
 enum {
     USER_RECORD_SIZE = FP_ACL_FP_LENGTH + FP_ACL_FILE_USERNAME_LENGTH + 4
 };
@@ -24,6 +26,7 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
 
     READ_U32(version, buffer);
     if (version != FP_ACL_FILE_VERSION) {
+        NABTO_LOG_ERROR(("Incompatible ACL version: read version %d, needs version %d", version, FP_ACL_FILE_VERSION));
         return FP_ACL_DB_LOAD_FAILED;
     }
 
@@ -62,6 +65,7 @@ fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl)
     FILE* aclFile = fopen(filename, "rb+");
     if (aclFile == NULL) {
         // there no saved acl file, consider it as a completely normal bootstrap scenario
+        NABTO_LOG_INFO(("File %s does not exist yet"));
         return FP_ACL_DB_OK;
     }
 
@@ -125,14 +129,26 @@ fp_acl_db_status fp_acl_file_save_file(struct fp_mem_state* acl)
     }
     status = fp_acl_file_save_file_temp(aclFile, acl);
     
-    fflush(aclFile);
-    fclose(aclFile);
+    if (fflush(aclFile) != 0) {
+        NABTO_LOG_ERROR(("Could not flush temp file, errno=%d", errno));
+        fclose(aclFile);
+        return FP_ACL_DB_SAVE_FAILED;
+    }
+
+    if (fclose(aclFile) != 0) {
+        NABTO_LOG_ERROR(("Could not close temp file, errno=%d", errno));
+        return FP_ACL_DB_SAVE_FAILED;
+    }
 
     if (status == FP_ACL_DB_OK) {
-        // remove destination file, otherwise rename() might throw an error 
-        remove(filename);
+        // remove destination file, otherwise rename() might throw an error
+        if (remove(filename) != 0) {
+            NABTO_LOG_ERROR(("Could not remove temp file, errno=%d", errno));
+            return FP_ACL_DB_SAVE_FAILED;
+        }
         
         if (rename(tempFilename, filename) != 0) {
+            NABTO_LOG_ERROR(("Could not rename temp file, errno=%d", errno));
             return FP_ACL_DB_SAVE_FAILED;
         } 
     }
