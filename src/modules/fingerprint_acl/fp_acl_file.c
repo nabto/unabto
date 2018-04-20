@@ -65,7 +65,7 @@ fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl)
     FILE* aclFile = fopen(filename, "rb+");
     if (aclFile == NULL) {
         // there no saved acl file, consider it as a completely normal bootstrap scenario
-        NABTO_LOG_INFO(("File %s does not exist yet"));
+        NABTO_LOG_INFO(("File %s does not exist yet", filename));
         return FP_ACL_DB_OK;
     }
 
