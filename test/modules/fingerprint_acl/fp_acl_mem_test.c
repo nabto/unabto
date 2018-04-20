@@ -23,17 +23,21 @@ bool fp_acl_mem_test_db(struct fp_acl_db* db) {
     struct fp_acl_user user3;
 
     if (db->load(first, &user3) != FP_ACL_DB_OK) {
+        NABTO_LOG_ERROR(("fp_acl_mem_test_db: load failed"));
         return false;
     }
 
     if (memcmp(user3.fp, user.fp, 16) != 0) {
+        NABTO_LOG_ERROR(("memcmp failed"));
         return false;
     }
 
     if (db->load(user2, &user3) != FP_ACL_DB_OK) {
+        NABTO_LOG_ERROR(("fp_acl_mem_test_db: load 2 failed"));
         return false;
     }
     if (memcmp(user3.fp, user.fp, 16) != 0) {
+        NABTO_LOG_ERROR(("fp_acl_mem_test_db: memcmp 2 failed"));
         return false;
     }
     
@@ -68,6 +72,7 @@ bool fp_acl_mem_test() {
         }
         
         if (fp_mem_init(&db, &defaultSettings, &p) != FP_ACL_DB_OK) {
+            NABTO_LOG_ERROR(("fp_acl_mem_test: init failed"));
             return false;
         }
         if (!fp_acl_mem_test_db(&db)) {
@@ -80,15 +85,17 @@ bool fp_acl_mem_test() {
 
         struct fp_mem_persistence p;
         if (fp_acl_file_init("persistence2.bin", "tmp.bin", &p) != FP_ACL_DB_OK) {
-            NABTO_LOG_ERROR(("cannot load acl file"));
+            NABTO_LOG_ERROR(("fp_acl_mem_test: load acl failed"));
             return false;
         }
         
         if (fp_mem_init(&db, &defaultSettings, &p) != FP_ACL_DB_OK) {
+            NABTO_LOG_ERROR(("fp_acl_mem_test: init 2 failed"));
             return false;
         }
 
         if (db.clear() != FP_ACL_DB_OK) {
+            NABTO_LOG_ERROR(("fp_acl_mem_test: clear failed"));
             return false;
         }
 
@@ -99,6 +106,7 @@ bool fp_acl_mem_test() {
         memcpy(user.name, name, strlen(name)+1);
         user.permissions = 0x42424242;
         if (db.save(&user) != FP_ACL_DB_OK) {
+            NABTO_LOG_ERROR(("fp_acl_mem_test: save failed"));
             return false;
         }
 
@@ -114,7 +122,7 @@ bool fp_acl_mem_test() {
             return false;
         }
         if (fp_mem_init(&db, &defaultSettings, &p) != FP_ACL_DB_OK) {
-            
+            NABTO_LOG_ERROR(("fp_acl_mem_test: init 3 failed"));
             return false;
         }
 

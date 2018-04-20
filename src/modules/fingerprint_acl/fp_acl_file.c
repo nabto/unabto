@@ -125,6 +125,7 @@ fp_acl_db_status fp_acl_file_save_file(struct fp_mem_state* acl)
     FILE* aclFile = fopen(tempFilename, "wb+");
 
     if (aclFile == NULL) {
+        NABTO_LOG_ERROR(("Could not open temp file, file does not exist"));
         return FP_ACL_DB_SAVE_FAILED;
     }
     status = fp_acl_file_save_file_temp(aclFile, acl);
@@ -141,12 +142,15 @@ fp_acl_db_status fp_acl_file_save_file(struct fp_mem_state* acl)
     }
 
     if (status == FP_ACL_DB_OK) {
-        // remove destination file, otherwise rename() might throw an error
-        if (remove(filename) != 0) {
-            NABTO_LOG_ERROR(("Could not remove temp file, errno=%d", errno));
-            return FP_ACL_DB_SAVE_FAILED;
+        FILE* existingDb = fopen(filename, "r");
+        if (existingDb != NULL) {
+            fclose(existingDb);
+            // remove destination file, otherwise rename() might throw an error
+            if (remove(filename) != 0) {
+                NABTO_LOG_ERROR(("Could not remove temp file, errno=%d", errno));
+                return FP_ACL_DB_SAVE_FAILED;
+            }
         }
-        
         if (rename(tempFilename, filename) != 0) {
             NABTO_LOG_ERROR(("Could not rename temp file, errno=%d", errno));
             return FP_ACL_DB_SAVE_FAILED;
