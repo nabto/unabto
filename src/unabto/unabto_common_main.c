@@ -45,7 +45,7 @@ NABTO_THREAD_LOCAL_STORAGE nabto_crypto_context cryptoContextConnection;        
 #endif
 
 static ssize_t read_event_socket(nabto_socket_t socket, message_event* event);
-static bool checkValidDeviceId(const char* id);
+static void ensureValidDeviceId(const char* id);
 #if NABTO_ENABLE_DNS_FALLBACK
 static bool unabto_read_dns_fallback();
 #endif
@@ -113,11 +113,7 @@ nabto_main_setup* unabto_init_context(void) {
 }
 
 bool unabto_init(void) {
-    if (!checkValidDeviceId(nmc.nabtoMainSetup.id)) {
-        NABTO_LOG_FATAL(("%s is not a valid device id, only \"a\" to \"z\", \"0\" to \"9\", hyphen (\"-\") and period (\".\") are allowed in a device id.", nmc.nabtoMainSetup.id));
-        return false;
-    }
-
+    ensureValidDeviceId(nmc.nabtoMainSetup.id);
     NABTO_LOG_INFO(("Device id: '%s'", nmc.nabtoMainSetup.id));
     NABTO_LOG_INFO(("Program Release " PRIversion, MAKE_VERSION_PRINTABLE()));
     if(nmc.nabtoMainSetup.version)
@@ -386,16 +382,16 @@ void unabto_notify_ip_changed(uint32_t ip) {
 }
 #endif
 
-static bool checkValidDeviceId(const char* id) {
+static void ensureValidDeviceId(const char* id) {
+    if (strlen(id) > NABTO_DEVICE_NAME_MAX_SIZE) {
+        NABTO_LOG_FATAL(("Device id exceeds NABTO_DEVICE_NAME_MAX_SIZE (%d characters)", NABTO_DEVICE_NAME_MAX_SIZE));
+    }
     while(*id)
     {
         if(!((*id >= 'a' && *id <= 'z') || (*id >= '0' && *id <= '9') || *id == '-' || *id == '.')) 
         {
-            NABTO_LOG_TRACE(("%c is not a valid device name character", *id));
-            return false;
+            NABTO_LOG_FATAL(("%s is not a valid device id, only \"a\" to \"z\", \"0\" to \"9\", hyphen (\"-\") and period (\".\") are allowed in a device id.", nmc.nabtoMainSetup.id));
         }
         id++;
     }
-
-    return true;
 }
