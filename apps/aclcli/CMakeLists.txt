@@ -24,7 +24,7 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
 
   ${unabto_include_directories}
-  //${UNABTO_ROOT}/src/modules/fingerprint_acl
+  ${UNABTO_ROOT}/src/modules/fingerprint_acl
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   )
 
@@ -33,9 +33,9 @@ set(aclcli_src ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # modules/fingerprint_acl
 set(unabto_module_fp_src
-  //${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl_memory.c
+  ${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl_memory.c
   ${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl_file.c
-  //${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl.c
+  ${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl.c
   )
 
 
