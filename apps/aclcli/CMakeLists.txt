@@ -8,16 +8,6 @@ option(LOG_ALL "Print all unabto log statements" OFF)
 
 include(${UNABTO_ROOT}/build/cmake/unabto_project.cmake)
 
-INCLUDE (CheckIncludeFiles)
-# usage: CHECK_INCLUDE_FILES (<header> <RESULT_VARIABLE> )
-
-
-if(EXTERNAL_PREFIX) 
-  include_directories(${EXTERNAL_PREFIX}/include)
-  link_directories(${EXTERNAL_PREFIX}/lib)
-endif()
-
-
 include_directories(
   # make it possible to override unabto_config.h with a supplied file
   # to the build tree.
