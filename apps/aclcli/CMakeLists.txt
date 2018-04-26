@@ -8,23 +8,13 @@ option(LOG_ALL "Print all unabto log statements" OFF)
 
 include(${UNABTO_ROOT}/build/cmake/unabto_project.cmake)
 
-INCLUDE (CheckIncludeFiles)
-# usage: CHECK_INCLUDE_FILES (<header> <RESULT_VARIABLE> )
-
-
-if(EXTERNAL_PREFIX) 
-  include_directories(${EXTERNAL_PREFIX}/include)
-  link_directories(${EXTERNAL_PREFIX}/lib)
-endif()
-
-
 include_directories(
   # make it possible to override unabto_config.h with a supplied file
   # to the build tree.
   ${CMAKE_CURRENT_BINARY_DIR}
 
   ${unabto_include_directories}
-  //${UNABTO_ROOT}/src/modules/fingerprint_acl
+  ${UNABTO_ROOT}/src/modules/fingerprint_acl
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   )
 
@@ -33,9 +23,9 @@ set(aclcli_src ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # modules/fingerprint_acl
 set(unabto_module_fp_src
-  //${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl_memory.c
+  ${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl_memory.c
   ${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl_file.c
-  //${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl.c
+  ${UNABTO_MODULES_SRC_DIR}/fingerprint_acl/fp_acl.c
   )
 
 

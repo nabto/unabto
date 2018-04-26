@@ -72,6 +72,14 @@ static bool useSelectBased = false;
 
 static char* default_hosts[] = { "127.0.0.1", "localhost", 0 };
 
+uint8_t obscurity_key_id[] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+uint8_t obscurity_key[] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
 // AMP video client
 #define AMP_DEVICE_NAME_DEFAULT "Tunnel"
 #define AMP_MAX_DEVICE_NAME_LENGTH 50
@@ -474,7 +482,7 @@ void acl_init() {
         FP_ACL_PERMISSION_REMOTE_ACCESS;
 
     if (fp_acl_file_init("persistence.bin", "tmp.bin", &fp_persistence_file) != FP_ACL_DB_OK) {
-        NABTO_LOG_ERROR(("cannot load acl file"));
+        NABTO_LOG_ERROR(("cannot prepare acl file"));
         exit(1);
     }
     fp_mem_init(&fp_acl_db, &default_settings, &fp_persistence_file);
@@ -691,3 +699,38 @@ application_event_result application_poll(application_request* applicationReques
 
 void application_poll_drop(application_request* applicationRequest) {
 }
+
+#if NABTO_ENABLE_LOCAL_PSK_CONNECTION
+bool is_obscurity_key(const struct unabto_psk_id* keyId) {
+    // dummy key for trusted network bootstrapping
+    return memcmp(keyId, obscurity_key_id, PSK_ID_LENGTH) == 0;
+}
+
+bool unabto_local_psk_connection_get_key(const struct unabto_psk_id* keyId, const char* clientId, const struct unabto_optional_fingerprint* pkFp, struct unabto_psk* key) {
+    void* it;
+    struct fp_acl_user user;
+
+    if (is_obscurity_key(keyId)) {
+        memcpy(&key->data, obscurity_key, PSK_LENGTH);
+        return true;
+    }
+
+    if (!pkFp->hasValue) {
+        return false;
+    }
+    
+    it = fp_acl_db.find(&pkFp->value);
+
+    if (it && fp_acl_db.load(it, &user) == FP_ACL_DB_OK && user.pskId.hasValue && user.psk.hasValue) {
+        if (memcmp(keyId, user.pskId.value.data, FP_ACL_PSK_ID_LENGTH) == 0) {
+            memcpy(&key->data, user.psk.value.data, FP_ACL_PSK_KEY_LENGTH);
+            return true;
+        }
+    }
+    
+    NABTO_LOG_WARN(("User with fingerprint [%2x:%2x:%2x:...] is not configured with key [%2x:%2x:%2x:...]",
+                    pkFp->value.data[0], pkFp->value.data[1], pkFp->value.data[2],
+                    keyId->data[0], keyId->data[1], keyId->data[2]));
+    return false;
+}
+#endif

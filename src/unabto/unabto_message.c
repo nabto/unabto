@@ -23,6 +23,7 @@
 #include "unabto_memory.h"
 #include "unabto_external_environment.h"
 #include <unabto/unabto_tcp_fallback.h>
+#include <unabto/unabto_psk_connection.h>
 
 /*
  * Except the UATTACH protocol, this is the packet/message formats:
@@ -167,9 +168,26 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
             // Send this capability if the device handles local connections.
             char capOk[2] = {'1', 0};
             ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN, capOk);
-            ptr += add_typed_string(ptr,end, NP_PAYLOAD_DESCR_TYPE_FP, capOk);
         }
 #endif
+
+# if NABTO_ENABLE_LOCAL_PSK_CONNECTION
+        {
+            // Send this capability if the device handles local psk connections.
+            char capOk[2] = {'1', 0};
+            ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN_PSK, capOk);
+        }
+#endif
+
+#if NABTO_ENABLE_LOCAL_CONNECTION || NABTO_ENABLE_LOCAL_PSK_CONNECTION
+        {
+            // local connections and local psk connections has
+            // fingerprint capabilities in unabto these days.
+            char capOk[2] = {'1', 0};
+            ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_FP, capOk);
+        }
+#endif
+
         olen = (uint16_t)(ptr - buf); // HSIZE is added again before returning
         header |= NP_LEGACY_PACKET_HDR_FLAG_RSP;
         WRITE_U32(buf, header);
@@ -280,7 +298,12 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
                 return;
 #endif                
             }
-            break;
+#if NABTO_ENABLE_LOCAL_PSK_CONNECTION
+        case U_CONNECT_PSK:
+        case U_VERIFY_PSK:
+            unabto_psk_connection_dispatch_request(event->udpMessage.socket, &event->udpMessage.peer, &hdr);
+            return;
+#endif            
 
 #if NABTO_ENABLE_DEBUG_PACKETS
 

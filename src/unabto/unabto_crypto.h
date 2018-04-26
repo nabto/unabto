@@ -51,7 +51,28 @@ typedef struct {
 
 } nabto_crypto_context;
 
+
+// data used in a shared key handshake
+struct shared_key_handshake_data {
+    uint8_t initiatorNonce[32];
+    uint8_t responderNonce[32];
+    uint8_t initiatorRandom[32];
+    uint8_t responderRandom[32];
+};
+
 #if NABTO_ENABLE_UCRYPTO
+
+/**
+ * expand a 128bit key into a cryptocontext
+ */
+void nabto_crypto_init_aes_128_hmac_sha256_psk_context(nabto_crypto_context* cryptoContext, const uint8_t* psk);
+
+void nabto_crypto_init_aes_128_hmac_sha256_psk_context_from_handshake_data(
+    nabto_crypto_context* cryptoContext,
+    const uint8_t* initiatorNonce, const uint8_t* responderNonce,
+    const uint8_t* initiatorRandom, const uint8_t* responderRandom);
+
+void nabto_crypto_init_psk_handshake_data(struct shared_key_handshake_data* data);
 
 /**
  * construct the key material from nonces and secrets
@@ -171,7 +192,7 @@ bool unabto_decrypt(nabto_crypto_context* cryptoContext, uint8_t* ptr, uint16_t 
  * @param decryptedDataLength
  * @return true iff the verification and decryption was successful
  */
-bool unabto_crypto_verify_and_decrypt(nabto_packet_header* hdr,
+bool unabto_crypto_verify_and_decrypt(const nabto_packet_header* hdr,
                                       nabto_crypto_context* cryptoContext,
                                       struct unabto_payload_crypto* crypto,
                                       uint8_t** decryptedDataBegin,

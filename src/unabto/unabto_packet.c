@@ -327,7 +327,7 @@ void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* st
  * @param bufferEnd   end of packet buffer
  * @param plaintextStart  start of plaintext
  * @param plaintextLength length of plaintext
- * @param cryptoPayloadStart start of crypto payload 
+ * @param cryptoPayloadStart start of crypto payload before payload header and crypto code.
  * @param len  length of encrypted packet
  * @return true iff the packet was encrypted.
  */

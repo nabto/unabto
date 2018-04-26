@@ -9,6 +9,7 @@
 #include <unabto/unabto_protocol_exceptions.h>
 #include <unabto/unabto_connection.h>
 #include <unabto/unabto_query_rw.h>
+#include <unabto/unabto_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,6 +31,28 @@ extern "C" {
  * @return            true if access to the devices is allowed
  */
 bool allow_client_access(nabto_connect* connection);
+#endif
+
+#if NABTO_ENABLE_LOCAL_PSK_CONNECTION
+/**
+ * Local Pre Shared Key(PSK) connections are local connections
+ * protected by a PSK. Whenever such a connection request arrives the
+ * following function is called to get a PSK for the connection. If no
+ * PSK exists the connection cannot be made. The PSK is a 128 bit
+ * secret shared between the device and the client. The shared secret
+ * has to be shared in some way out of scope of this functionality.
+ *
+ * The clientId and fingerprint is available as a way to help the
+ * device finding the PSK.
+ *
+ * @param keyId        key id, always non null, and always has a value
+ * @param clientId     id of the client NULL if not provided
+ * @param fingerprint  fingerprint of the client certificate, the fingerprint is 
+ *                     not validated in local psk connections. Non null, but the value is optional.
+ * @param key          output buffer where the key is copied.
+ * @return  true iff a psk was found and copied to the psk buffer.
+ */
+bool unabto_local_psk_connection_get_key(const struct unabto_psk_id* keyId, const char* clientId, const struct unabto_optional_fingerprint* fingerprint, struct unabto_psk* key);
 #endif
 
     

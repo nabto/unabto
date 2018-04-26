@@ -24,6 +24,7 @@
 #include "unabto_version.h"
 #include "unabto_packet.h"
 #include "unabto_app_adapter.h"
+#include "unabto_connection_util.h"
 
 #include <unabto/unabto_tcp_fallback.h>
 #include <unabto/unabto_dns_fallback.h>
@@ -47,7 +48,7 @@ NABTO_THREAD_LOCAL_STORAGE nabto_connect connections[NABTO_MEMORY_CONNECTIONS_SI
 #endif
 
 
-static void unabto_connection_set_future_stamp(nabto_stamp_t* stamp, uint16_t future)
+void unabto_connection_set_future_stamp(nabto_stamp_t* stamp, uint16_t future)
 {
     connection_timeout_cache_cached = false;
     nabtoSetFutureStamp(stamp, future);
@@ -81,7 +82,7 @@ static void nabto_rendezvous_end(nabto_connect* con);
 static void nabto_rendezvous_start(nabto_connect* con);
 
 /** initialise a connection */
-static void nabto_reset_connection(nabto_connect* con)
+void nabto_reset_connection(nabto_connect* con)
 {
     nabto_stamp_t tmp = nabtoGetStamp();
     NABTO_LOG_TRACE((PRInsi " Reset connection", MAKE_NSI_PRINTABLE(0, con->spnsi, 0)));
@@ -104,7 +105,7 @@ void nabto_init_connections(void)
     memset(connections, 0, sizeof(struct nabto_connect_s) * NABTO_MEMORY_CONNECTIONS_SIZE);
 }
 
-static nabto_connect* nabto_reserve_connection(void)
+nabto_connect* nabto_reserve_connection(void)
 {
     nabto_connect* con;
 
@@ -196,6 +197,25 @@ nabto_connect* nabto_find_connection(uint32_t spnsi) {
 
     NABTO_LOG_TRACE(("Connection not found! (SPNSI=%" PRIu32 ")", spnsi));
     return 0;
+}
+
+nabto_connect* nabto_find_local_connection_cp_nsi(uint32_t cpnsi)
+{
+    nabto_connect* con;
+
+    if (cpnsi == 0) {
+        NABTO_LOG_WARN(("cpnsi should not be 0"));
+        return NULL;
+    }
+    
+    for (con = connections; con < connections + NABTO_MEMORY_CONNECTIONS_SIZE; ++con) {
+        if (con->cpnsi == cpnsi && con->state != CS_IDLE && con->spnsi <= 1000) {
+            return con;
+        }
+    }
+    
+    NABTO_LOG_TRACE(("Connection not found (probably a good thing) (CPNSI=%" PRIu32 ")", cpnsi));
+    return NULL;
 }
 
 int nabto_connection_index(nabto_connect* con)
@@ -385,7 +405,7 @@ nabto_connect* nabto_get_new_connection(uint32_t nsi)
 }
 
 /// Retrieve the next NSI. @return the NSI
-static uint16_t fresh_nsi(void) {
+uint16_t nabto_connection_get_fresh_sp_nsi(void) {
     uint16_t i;
     static uint16_t nsiStore = 0;  ///< the micoro device's very persistant NSI part:)
 
@@ -475,7 +495,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
         *nsi = ipxData.spNsi;
         NABTO_LOG_TRACE(("IPX payload with NSI (SPNSI=%" PRIu32 ")", *nsi));
     } else {
-        *nsi = fresh_nsi();
+        *nsi = nabto_connection_get_fresh_sp_nsi();
         NABTO_LOG_TRACE(("IPX payload without NSI (fresh NSI=%" PRIu32 ")", *nsi));
     }
 
@@ -527,28 +547,8 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
     }
 #endif
 
-    {
-        struct unabto_payload_packet cpIdPayload;
-        if (unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_CP_ID, &cpIdPayload)) {
-            struct unabto_payload_typed_buffer cpId;
-            con->clientId[0] = 0;
-            if (unabto_payload_read_typed_buffer(&cpIdPayload, &cpId)) {
-                if (cpId.type == 1) { // 1 == EMAIL
-                    size_t sz = cpId.dataLength;
-                    if (sz >= sizeof(con->clientId)) {
-                        if (sizeof(con->clientId) > 1) {
-                            NABTO_LOG_WARN(("Client ID truncated"));
-                        }
-                        sz = sizeof(con->clientId) - 1;
-                    }
-                    if (sz) {
-                        memcpy(con->clientId, (const void*) cpId.dataBegin, sz);
-                    }
-                    con->clientId[sz] = 0;
-                }
-            }
-            NABTO_LOG_TRACE(("Connection opened from '%s' (to %s)", con->clientId, nmc.nabtoMainSetup.id));
-        }
+    if (unabto_connection_util_read_client_id(hdr, con)) {
+        NABTO_LOG_TRACE(("Connection opened from '%s' (to %s)", con->clientId, nmc.nabtoMainSetup.id));
     }
 
 #if NABTO_ENABLE_TCP_FALLBACK
@@ -570,24 +570,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
         }
     }
 #endif
-    {
-        struct unabto_payload_packet fingerprintPayload;
-        if (unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_FP, &fingerprintPayload)) {
-            struct unabto_payload_typed_buffer fingerprint;
-            if (unabto_payload_read_typed_buffer(&fingerprintPayload, &fingerprint)) {
-                if (fingerprint.type == NP_PAYLOAD_FP_TYPE_SHA256_TRUNCATED) {
-                    if (fingerprint.dataLength  ==  NP_TRUNCATED_SHA256_LENGTH_BYTES) {
-                        con->hasFingerprint = true;
-                        memcpy(con->fingerprint, fingerprint.dataBegin, NP_TRUNCATED_SHA256_LENGTH_BYTES);
-                    } else {
-                        NABTO_LOG_ERROR(("fingerprint has the wrong length %"PRIu16, fingerprint.dataLength));
-                    }
-                } else {
-                    NABTO_LOG_TRACE(("cannot read fignerprint type: %"PRIu8, fingerprint.type));
-                }
-            }
-        }
-    }
+    unabto_connection_util_read_fingerprint(hdr, con);
 
 #if NABTO_ENABLE_UCRYPTO
     if (nmc.context.nonceSize == NONCE_SIZE && !isLocal) {
@@ -626,7 +609,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
         NABTO_LOG_DEBUG((PRInsi " U_CONNECT: private:" PRIep ", global:" PRIep " rendezvous:%" PRIu8, MAKE_NSI_PRINTABLE(0, *nsi, 0), MAKE_EP_PRINTABLE(con->cp.privateEndpoint), MAKE_EP_PRINTABLE(con->cp.globalEndpoint), (uint8_t)(!con->noRendezvous)));
     }
 
-    NABTO_LOG_INFO(("Connection opened from '%s' (to %s). Encryption code %i. Fingerprint " PRIfp, con->clientId, nmc.nabtoMainSetup.id, con->cryptoctx.code, MAKE_FP_PRINTABLE(con->fingerprint)));
+    NABTO_LOG_INFO(("Connection opened from '%s' (to %s). Encryption code %i. Fingerprint " PRIfp, con->clientId, nmc.nabtoMainSetup.id, con->cryptoctx.code, MAKE_FP_PRINTABLE(con->fingerprint.value)));
 
     return con;
 
@@ -697,8 +680,11 @@ void nabto_connection_event(nabto_connect* con, message_event* event) {
 
 }
 
-
-/******************************************************************************/
+void nabto_connection_client_aborted(nabto_connect* con)
+{
+    NABTO_LOG_TRACE(("Client aborted connection request"));
+    nabto_release_connection(con);
+}
 
 void nabto_rendezvous_stop(nabto_connect* con) {
     nabto_rendezvous_connect_state* rcs = &con->rendezvousConnectState;

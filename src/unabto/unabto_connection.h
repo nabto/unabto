@@ -18,6 +18,8 @@
 #include <unabto/unabto_connection_type.h>
 #include <unabto/unabto_message.h>
 #include <unabto/unabto_extended_rendezvous.h>
+#include <unabto/unabto_crypto.h>
+#include <unabto/unabto_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -79,6 +81,19 @@ typedef struct {
 #endif
 } nabto_rendezvous_connect_state;
 
+
+typedef struct {
+    enum {
+        WAIT_CONNECT = 0,
+        WAIT_VERIFY,
+        CONNECTED
+    } state;
+    struct shared_key_handshake_data handshakeData;
+    struct unabto_psk_id keyId;
+    struct unabto_capabilities capabilities;
+} unabto_connection_psk_connection;
+
+
 #define CON_ATTR_DEFAULT        0x00  /**< unrealiable connection with keep alive       */
 #define CON_ATTR_NO_KEEP_ALIVE  0x01  /**< no keep alive traffic                        */
 #define CON_ATTR_NO_RETRANSMIT  0x80  /**< no retransmissions (reliable connection)     */
@@ -88,7 +103,7 @@ struct nabto_connect_s {
 #if NABTO_ENABLE_EPOLL
     int epollEventType;
 #endif
-
+    
     nabto_rendezvous_connect_state rendezvousConnectState;
     connection_state state; /**< The connection state it's used for
                              * determining both if the connection is
@@ -96,6 +111,12 @@ struct nabto_connect_s {
                              * the actual status and type of the
                              * connection. */
     nabto_connection_type type;
+
+    /**
+     * psk handshake state
+     */
+    unabto_connection_psk_connection psk; 
+    
     uint32_t spnsi; /**< Serverpeer connection identifier. For local
                      * connections this identifier is between 100 and
                      * 1000 and assigned by uNabto. If the connection
@@ -103,6 +124,8 @@ struct nabto_connect_s {
                      * from the GSP which is the same NSI as the GSP
                      * uses for its communication with the client in
                      * the connection phase */
+    uint32_t cpnsi; /**< The clientpeer nsi which should be used for
+                     * this connection */
     uint8_t                   consi[8];     /**< the controller identification (opt.)     */
     uint8_t*                  nsico;        /**< addr of consi, 0 if not used             */
     nabto_stamp_t             stamp;        /**< the time stamp                           */
@@ -119,10 +142,7 @@ struct nabto_connect_s {
     connectionStats           stats;        /**< connection stats                         */
     bool                      sendConnectStatistics;
     bool                      sendConnectionEndedStatistics;
-    bool                      hasFingerprint;
-    uint8_t                   fingerprint[NP_TRUNCATED_SHA256_LENGTH_BYTES]; // client fingerprint
-
-
+    struct unabto_optional_fingerprint fingerprint;  // client public key fingerprint
 
 #if NABTO_ENABLE_CLIENT_ID
     char                      clientId[NABTO_CLIENT_ID_MAX_SIZE + 1]; /**< the peer id (e-mail from certificate) */
@@ -146,8 +166,6 @@ struct nabto_connect_s {
     uint8_t gatewayId[20]; /**< The Gateway Id is an unique key which
                             * both the client and server uses to
                             * establish a fallback connection. */
-    uint32_t cpnsi; /**< The clientpeer nsi which should be used for
-                     * this connection */
 
     bool relayIsActive; // data has been transmitted on relay, indicating client has chosen this type
 #endif
@@ -159,23 +177,38 @@ struct nabto_connect_s {
 };
 typedef struct nabto_connect_s nabto_connect;
 
+void unabto_connection_set_future_stamp(nabto_stamp_t* stamp, uint16_t future);
+
+nabto_connect* nabto_reserve_connection(void);
+
 /** Initialize the connection array (all values are zero). */
 void nabto_init_connections(void);
 
 /** Closes all connections in the connection array. */
 void nabto_terminate_connections(void);
 
+// reset a connection to a welldefined state
+void nabto_reset_connection(nabto_connect* con);
 
 /** Request to release the connection has been received. @param con the connection to be released */
 void nabto_release_connection_req(nabto_connect* con);
 
 
+uint16_t nabto_connection_get_fresh_sp_nsi(void);
+
 /** Release a connection. @param con the connection to be released */
 void nabto_release_connection(nabto_connect* con);
 
-
 /** Find the connection. @param spnsi  the identifier.  @return the connection (0 if not found). */
 nabto_connect* nabto_find_connection(uint32_t spnsi);
+
+/**
+ * Find a local connection based on the cpnsi value. In the first
+ * connect packets from the client on local connections the sp nsi
+ * value is zero. So we are using the cp nsi value for finding the
+ * connection.
+ */
+nabto_connect* nabto_find_local_connection_cp_nsi(uint32_t cpnsi);
 
 
 /** @return the connection index (for logging). @param  con the connection. */
@@ -186,6 +219,8 @@ int nabto_connection_index(nabto_connect* con);
  */
 void 
 nabto_connection_event(nabto_connect* con, message_event* event);
+
+void nabto_connection_client_aborted(nabto_connect* con);
 
 /**
  * Initialise a new connection.

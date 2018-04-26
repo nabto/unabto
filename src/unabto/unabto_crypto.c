@@ -32,6 +32,7 @@
 
 /******************************************************************************/
 
+
 #if NABTO_ENABLE_REMOTE_ACCESS || NABTO_ENABLE_UCRYPTO
 /**
  * Reset/initialise the Crypto context used in the attach sequence.
@@ -43,19 +44,7 @@ static void nabto_crypto_reset_a(nabto_crypto_context* cryptoContext)
     switch(nmc.nabtoMainSetup.cryptoSuite) {
     case CRYPT_W_AES_CBC_HMAC_SHA256: {
 #if NABTO_ENABLE_UCRYPTO
-        unabto_buffer nonces[1];
-        unabto_buffer seeds[1];
-        
-        unabto_buffer_init(&nonces[0], (uint8_t*)nmc.nabtoMainSetup.id, (uint16_t)strlen(nmc.nabtoMainSetup.id));
-        unabto_buffer_init(&seeds[0], nmc.nabtoMainSetup.presharedKey, PRE_SHARED_KEY_SIZE);
-
-        nabto_crypto_create_key_material(nonces, 1,
-                                         seeds, 1,
-                                         cryptoContext->key, KEY_MATERIAL_LENGTH);
-
-        cryptoContext->code = CRYPT_W_AES_CBC_HMAC_SHA256;
-        nabto_crypto_init_key(cryptoContext, false);
-
+        nabto_crypto_init_aes_128_hmac_sha256_psk_context(cryptoContext, nmc.nabtoMainSetup.presharedKey);
 #else
         NABTO_LOG_FATAL(("aes chosen but no support is present"));
 #endif
@@ -84,23 +73,9 @@ static void nabto_crypto_reset_c(nabto_crypto_context* cryptoContext, const uint
 #if NABTO_ENABLE_UCRYPTO
     switch(nmc.nabtoMainSetup.cryptoSuite) {
     case CRYPT_W_AES_CBC_HMAC_SHA256: {
-        unabto_buffer nonces[2];
-        unabto_buffer seeds[2];
-
-        unabto_buffer_init(&nonces[0], (uint8_t*)nonceGSP, NONCE_SIZE);
-        unabto_buffer_init(&nonces[1], (uint8_t*)nmc.context.nonceMicro, NONCE_SIZE);
-        
-        unabto_buffer_init(&seeds[0], (uint8_t*)seedGSP, SEED_SIZE);
-        unabto_buffer_init(&seeds[1], (uint8_t*)seedUD, SEED_SIZE);
-
-        nabto_crypto_create_key_material(
-            nonces, 2,
-            seeds, 2,
-            cryptoContext->key, KEY_MATERIAL_LENGTH);
-        cryptoContext->code = CRYPT_W_AES_CBC_HMAC_SHA256;
-//        NABTO_LOG_BUFFER(("shared gsp key"),cryptoContext->key, KEY_MATERIAL_LENGTH);
-        nabto_crypto_init_key(cryptoContext, false);
-
+        nabto_crypto_init_aes_128_hmac_sha256_psk_context_from_handshake_data(
+            cryptoContext, nonceGSP, nmc.context.nonceMicro,
+            seedGSP, seedUD);
         break;
     }
 
@@ -149,6 +124,54 @@ static void nabto_crypto_reset_d(nabto_crypto_context* cryptoContext, uint16_t c
 /******************************************************************************/
 
 #if NABTO_ENABLE_UCRYPTO
+
+
+void nabto_crypto_init_aes_128_hmac_sha256_psk_context(nabto_crypto_context* cryptoContext, const uint8_t* psk)
+{
+    unabto_buffer nonces[1];
+    unabto_buffer seeds[1];
+    
+    unabto_buffer_init(&nonces[0], (uint8_t*)nmc.nabtoMainSetup.id, (uint16_t)strlen(nmc.nabtoMainSetup.id));
+    unabto_buffer_init(&seeds[0], (uint8_t*)psk, PRE_SHARED_KEY_SIZE);
+    
+    nabto_crypto_create_key_material(nonces, 1,
+                                     seeds, 1,
+                                     cryptoContext->key, KEY_MATERIAL_LENGTH);
+    
+    cryptoContext->code = CRYPT_W_AES_CBC_HMAC_SHA256;
+    nabto_crypto_init_key(cryptoContext, false);
+}
+
+void nabto_crypto_init_aes_128_hmac_sha256_psk_context_from_handshake_data(
+    nabto_crypto_context* cryptoContext,
+    const uint8_t* initiatorNonce, const uint8_t* responderNonce,
+    const uint8_t* initiatorRandom, const uint8_t* responderRandom)
+{
+    unabto_buffer nonces[2];
+    unabto_buffer seeds[2];
+    
+    unabto_buffer_init(&nonces[0], (uint8_t*)initiatorNonce, NONCE_SIZE);
+    unabto_buffer_init(&nonces[1], (uint8_t*)responderNonce, NONCE_SIZE);
+    
+    unabto_buffer_init(&seeds[0], (uint8_t*)initiatorRandom, SEED_SIZE);
+    unabto_buffer_init(&seeds[1], (uint8_t*)responderRandom, SEED_SIZE);
+    
+    nabto_crypto_create_key_material(
+        nonces, 2,
+        seeds, 2,
+        cryptoContext->key, KEY_MATERIAL_LENGTH);
+    cryptoContext->code = CRYPT_W_AES_CBC_HMAC_SHA256;
+    nabto_crypto_init_key(cryptoContext, false);
+}
+
+
+void nabto_crypto_init_psk_handshake_data(struct shared_key_handshake_data* data)
+{
+    nabto_random(data->initiatorNonce, 32);
+    nabto_random(data->responderNonce, 32);
+    nabto_random(data->initiatorRandom, 32);
+    nabto_random(data->responderRandom, 32);
+}
 
 void nabto_crypto_create_key_material(const unabto_buffer nonces[], uint8_t nonces_size,
                                       const unabto_buffer seeds[],  uint8_t seeds_size,
@@ -527,7 +550,7 @@ bool unabto_insert_integrity(nabto_crypto_context* cryptoContext, uint8_t* start
     return res;
 }
 
-bool unabto_crypto_verify_and_decrypt(nabto_packet_header* hdr,
+bool unabto_crypto_verify_and_decrypt(const nabto_packet_header* hdr,
                                       nabto_crypto_context* cryptoContext,
                                       struct unabto_payload_crypto* crypto,
                                       uint8_t** decryptedDataBegin,

@@ -1,5 +1,9 @@
 #include "fp_acl.h"
 
+void fp_acl_init_user(struct fp_acl_user* user) {
+    memset(user, 0, sizeof(struct fp_acl_user));
+}
+
 bool fp_acl_check_system_permissions(struct fp_acl_settings* settings, uint32_t requiredPermissions)
 {
     if ((settings->systemPermissions & requiredPermissions) == requiredPermissions) {

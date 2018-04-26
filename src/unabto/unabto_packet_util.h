@@ -97,11 +97,32 @@ struct unabto_payload_crypto {
     uint16_t       dataLength;
 };
 
+struct unabto_payload_notify {
+    uint32_t code;
+};
+
 struct unabto_payload_push {
     uint32_t sequence;
     uint16_t pnsId;
     uint8_t flags;
 };
+
+// data which is read from a packet
+struct unabto_payload_capabilities_read {
+    uint8_t type;
+    uint32_t bits;
+    uint32_t mask;
+    uint16_t codesLength;
+    const uint8_t* codesStart;
+};
+
+// data to write to a packet. the individual encryption codes is needed to be inserted manually
+struct unabto_capabilities {
+    uint8_t type;
+    uint32_t bits;
+    uint32_t mask;
+};
+
 /** Packet and payload size and offset declarations. */
 enum {
     SIZE_HEADER         = NP_PACKET_HDR_MIN_BYTELENGTH, ///< the size of the fixed size header
@@ -132,7 +153,9 @@ typedef enum {
     U_PUSH     = NP_PACKET_HDR_TYPE_U_PUSH,
     U_ALIVE    = NP_PACKET_HDR_TYPE_U_ALIVE,
     U_CONNECT  = NP_PACKET_HDR_TYPE_U_CONNECT,
-    U_DEBUG    = NP_PACKET_HDR_TYPE_U_DEBUG
+    U_DEBUG    = NP_PACKET_HDR_TYPE_U_DEBUG,
+    U_CONNECT_PSK = NP_PACKET_HDR_TYPE_U_CONNECT_PSK,
+    U_VERIFY_PSK  = NP_PACKET_HDR_TYPE_U_VERIFY_PSK
 } nabto_header_type;
 
 
@@ -190,6 +213,15 @@ enum {
     NOTIFY_LAST_ERROR 
 };
 
+/**
+ * create a basic header
+ */
+void nabto_header_init(nabto_packet_header* header, uint8_t type, uint32_t cpnsi, uint32_t spnsi);
+
+/**
+ * add one or more flags
+ */
+void nabto_header_add_flags(nabto_packet_header* header, uint8_t flags);
 
 /**
  * Read a packet header
@@ -241,6 +273,7 @@ const uint8_t* unabto_read_payload(const uint8_t* begin, const uint8_t* end, str
 bool unabto_find_payload(const uint8_t* buf, const uint8_t* end, uint8_t type, struct unabto_payload_packet* payload);
 
 
+
 /**
  * Write the packet header (excl the length field)
  * @param buf    the start of the packet
@@ -284,7 +317,7 @@ uint8_t* insert_data_header(uint8_t* buf, uint32_t nsi, uint8_t* nsico, uint16_t
  * @param buf  (uint8_t*) the start of the packet
  * @param len  (size_t) the total length of the payload
  */
-#define insert_length(buf, len)     WRITE_U16((uint8_t*)(buf) + OFS_PACKET_LGT, (uint16_t)(len))
+void insert_length(uint8_t* buf, uint16_t length);
 
 /**
  * Write the Payload
@@ -296,6 +329,8 @@ uint8_t* insert_data_header(uint8_t* buf, uint32_t nsi, uint8_t* nsico, uint16_t
  * @return         the first byte after the payload
  */
 uint8_t* insert_payload(uint8_t* buf, uint8_t* end, uint8_t type, const uint8_t* content, size_t size);
+
+
 
 /**
  * Write the Payload with the OPTIONAL flag set
@@ -324,6 +359,20 @@ uint8_t* insert_sp_id_payload(uint8_t* ptr, uint8_t* end);
 uint8_t* insert_stats_payload(uint8_t* ptr, uint8_t* end, uint8_t stats_event_type);
 uint8_t* insert_notify_payload(uint8_t* buf, uint8_t* end, uint32_t notifyValue);
 uint8_t* insert_piggy_payload(uint8_t* ptr, uint8_t* end, uint8_t* piggyData, uint16_t piggySize);
+uint8_t* insert_nonce_payload(uint8_t* ptr, uint8_t* end, const uint8_t* nonceData, uint16_t nonceSize);
+uint8_t* insert_random_payload(uint8_t* ptr, uint8_t* end, uint8_t* randomData, uint16_t randomSize);
+
+/**
+ * insert type, bits, mask and codesLength but no encryption codes
+ */
+uint8_t* insert_capabilities_payload(uint8_t* ptr, uint8_t* end, struct unabto_capabilities* capabilities, uint16_t encryptionCodes);
+
+/**
+ * Return a pointer to the first byte after the code in the payload
+ * the payload has the bit set which says it has payloads within the
+ * packet.
+ */
+uint8_t* insert_crypto_payload_with_payloads(uint8_t* ptr, uint8_t* end);
 
 /**
  * read a payload, return true iff it succeedes
@@ -334,6 +383,12 @@ bool unabto_payload_read_typed_buffer(struct unabto_payload_packet* payload, str
 bool unabto_payload_read_gw(struct unabto_payload_packet* payload, struct unabto_payload_gw* gw);
 bool unabto_payload_read_ep(struct unabto_payload_packet* payload, struct unabto_payload_ep* ep);
 bool unabto_payload_read_crypto(struct unabto_payload_packet* payload, struct unabto_payload_crypto* crypto);
+bool unabto_payload_find_and_read_crypto(const uint8_t* buf, const uint8_t* end, struct unabto_payload_crypto* crypto);
+bool unabto_payload_read_notify(struct unabto_payload_packet* payload, struct unabto_payload_notify* notify);
+bool unabto_payload_read_capabilities(struct unabto_payload_packet* payload, struct unabto_payload_capabilities_read* capabilities);
+
+uint8_t* unabto_payloads_begin(uint8_t* packetBegin, const nabto_packet_header* header);
+uint8_t* unabto_payloads_end(uint8_t* packetBegin, const nabto_packet_header* header);
 
 #ifdef __cplusplus
 } //extern "C"
