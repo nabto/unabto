@@ -293,6 +293,8 @@ void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* st
         con->relayIsActive = 1;
     }
 #endif
+
+    nabtoSetFutureStamp(&con->stamp, con->timeOut);
     
     nqs = framework_event_query(con, hdr, &handle);
     switch (nqs) {
