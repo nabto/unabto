@@ -387,6 +387,7 @@ size_t nabto_stream_tcb_write(struct nabto_stream_s * stream, const uint8_t* buf
 
             xbuf->buf = unabto_stream_alloc_send_segment(tcb->cfg.xmitPacketSize);
             if (xbuf->buf == NULL) {
+                stream->stats.sendSegmentAllocFailures++;
                 stream->blockedOnMissingSendSegment = true;
                 break;
             }
@@ -426,10 +427,10 @@ size_t nabto_stream_tcb_can_write(struct nabto_stream_s * stream) {
     // same check as the while uses in send.
     if ((tcb->xmitSeq < (tcb->xmitFirst + tcb->cfg.xmitWinSize)) &&
         (tcb->xmitSeq < tcb->maxAdvertisedWindow) &&
-        congestion_control_accept_more_data(tcb) &&
-        unabto_stream_can_alloc_send_segment())
+        congestion_control_accept_more_data(tcb))
     {
         if (!unabto_stream_can_alloc_send_segment()) {
+            stream->stats.sendSegmentAllocFailures++;
             stream->blockedOnMissingSendSegment = true;
             return 0;
         } else {
