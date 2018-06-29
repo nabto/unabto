@@ -385,7 +385,7 @@ size_t nabto_stream_tcb_write(struct nabto_stream_s * stream, const uint8_t* buf
             sz = size > tcb->cfg.xmitPacketSize ? tcb->cfg.xmitPacketSize : (uint16_t)size;
             NABTO_LOG_TRACE(("-------- nabto_stream_write %i bytes, seq=%i into ix=%i", sz, tcb->xmitSeq, ix));
 
-            xbuf->buf = unabto_stream_alloc_send_segment();
+            xbuf->buf = unabto_stream_alloc_send_segment(tcb->cfg.xmitPacketSize);
             if (xbuf->buf == NULL) {
                 stream->blockedOnMissingSendSegment = true;
                 break;
