@@ -26,6 +26,22 @@ void stream_reset(struct nabto_stream_s* stream);
 void unabto_stream_init_buffers(struct nabto_stream_s* stream);
 bool unabto_stream_is_connection_reliable(struct nabto_stream_s* stream);
 
+/**
+ * return NULL if no send segment could be allocated.
+ * send segments does always have the size UNABTO_STREAM_SEND_SEGMENT_SIZE.
+ */
+uint8_t* unabto_stream_alloc_send_segment();
+
+/**
+ * Free a send segment
+ */
+void unabto_stream_free_send_segment(uint8_t* buffer);
+
+/**
+ * Return true iff a send segment can be allocated in the next call ti unabto_stream_alloc_send_segment.
+ */
+bool unabto_stream_can_alloc_send_segment();
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

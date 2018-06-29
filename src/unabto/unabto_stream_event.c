@@ -212,6 +212,11 @@ void unabto_time_event_stream(void)
                 unabto_stream_event(stream, UNABTO_STREAM_EVENT_TYPE_CLOSED);
                 stream->applicationEvents.closed = false;
             }
+
+            if (stream->blockedOnMissingSendSegment && unabto_stream_can_alloc_send_segment()) {
+                stream->blockedOnMissingSendSegment = false;
+                unabto_stream_event(stream, UNABTO_STREAM_EVENT_TYPE_SEND_SEGMENT_AVAILABLE);
+            }
         }
     }
 }

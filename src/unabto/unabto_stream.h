@@ -135,6 +135,13 @@ typedef enum {
      */
     UNABTO_STREAM_EVENT_TYPE_DATA_WRITTEN,
     /**
+     * The stream has previously been blocked in a send operation
+     * because there was no more send buffers available on the
+     * system. That condition has probably changed and the application
+     * should try to send the data again.
+     */
+    UNABTO_STREAM_EVENT_TYPE_SEND_SEGMENT_AVAILABLE,
+    /**
      * No more data can be written to the stream since the other peer
      * has closed for the transmission.
      */
