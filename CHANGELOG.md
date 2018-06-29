@@ -12,6 +12,20 @@ the release and a new unreleased section is added.
 
 ## 4.3.0 Unreleased
 
+### Changed
+- NABTO-1850: The streaming implementation now uses a pool of send
+  segments.
+
+### Added
+- NABTO-1850: The function `nabto_stream_event` can not be called with
+  an additional event.
+- NABOT-1850: The `unabto_config.h` has got an additional configuration
+  option to control the size of the streaming send segment
+  pool. `NABTO_STREAM_SEND_SEGMENT_POOL_SIZE`
+
+### Changed
+- NABTO-1850: `nabto_stream_event` has an 
+
 ## 4.2.0 2017-12-14
 
 ### Breaking Changes
