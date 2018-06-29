@@ -429,7 +429,12 @@ size_t nabto_stream_tcb_can_write(struct nabto_stream_s * stream) {
         congestion_control_accept_more_data(tcb) &&
         unabto_stream_can_alloc_send_segment())
     {
-        return tcb->cfg.xmitPacketSize;
+        if (!unabto_stream_can_alloc_send_segment()) {
+            stream->blockedOnMissingSendSegment = true;
+            return 0;
+        } else {
+            return tcb->cfg.xmitPacketSize;
+        }
     } else {
         return 0;
     }
