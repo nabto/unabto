@@ -57,15 +57,16 @@ typedef struct unabto_stream_stats_s {
     unsigned int flightSizeMin;
     unsigned int flightSizeMax;
     unsigned int flightSizeAvg;
+    unsigned int sendSegmentAllocFailures;
 
 } unabto_stream_stats;
 
 #ifndef UNABTO_STREAM_STATS_MAKE_PRINTABLE
-#define UNABTO_STREAM_STATS_MAKE_PRINTABLE(stats) (stats.sentPackets), (stats.sentBytes), (stats.sentResentPackets),(stats.receivedPackets), (stats.receivedBytes), (stats.receivedResentPackets), (stats.reorderedOrLostPackets), (stats.timeouts), (stats.rttAvg), (stats.cwndAvg), (stats.ssThresholdAvg), (stats.flightSizeAvg)
+#define UNABTO_STREAM_STATS_MAKE_PRINTABLE(stats) (stats.sentPackets), (stats.sentBytes), (stats.sentResentPackets),(stats.receivedPackets), (stats.receivedBytes), (stats.receivedResentPackets), (stats.reorderedOrLostPackets), (stats.timeouts), (stats.rttAvg), (stats.cwndAvg), (stats.ssThresholdAvg), (stats.flightSizeAvg), (stats.sendSegmentAllocFailures)
 #endif
 
 #ifndef UNABTO_STREAM_STATS_PRI
-#define UNABTO_STREAM_STATS_PRI "sentPackets: %u, sentBytes %u, sentResentPackets %u, receivedPackets %u, receivedBytes %u, receivedResentPackets %u, reorderedOrLostPackets %u, timeouts %u, rtt avg %u, cwnd avg %u, ssthreshold avg %u, flightSize avg %u"
+#define UNABTO_STREAM_STATS_PRI "sentPackets: %u, sentBytes %u, sentResentPackets %u, receivedPackets %u, receivedBytes %u, receivedResentPackets %u, reorderedOrLostPackets %u, timeouts %u, rtt avg %u, cwnd avg %u, ssthreshold avg %u, flightSize avg %u, sendSegmentAllocFailures %u"
 #endif
 
 typedef enum
@@ -134,6 +135,13 @@ typedef enum {
      * should be room for sending new data.
      */
     UNABTO_STREAM_EVENT_TYPE_DATA_WRITTEN,
+    /**
+     * The stream has previously been blocked in a send operation
+     * because there was no more send buffers available on the
+     * system. That condition has probably changed and the application
+     * should try to send the data again.
+     */
+    UNABTO_STREAM_EVENT_TYPE_SEND_SEGMENT_AVAILABLE,
     /**
      * No more data can be written to the stream since the other peer
      * has closed for the transmission.

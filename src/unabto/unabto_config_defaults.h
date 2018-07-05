@@ -324,6 +324,17 @@
 #define NABTO_STREAM_SEND_WINDOW_SIZE NABTO_STREAM_RECEIVE_WINDOW_SIZE
 #endif
 
+/**
+ * The streaming implementation is using a pool of send segments. If
+ * no more segments is available when one is trying to send data, the
+ * application will have to try again later sending the data. This
+ * will never happen if the allocated amount of send segments is equal
+ * to the maximum number of send segments for all the streams.
+ */
+#ifndef NABTO_STREAM_SEND_SEGMENT_POOL_SIZE
+#define NABTO_STREAM_SEND_SEGMENT_POOL_SIZE NABTO_STREAM_SEND_WINDOW_SIZE * NABTO_STREAM_MAX_STREAMS
+#endif
+
 /** Timeout before a new streaming packet is sent, value in ms. */
 #ifndef NABTO_STREAM_TIMEOUT
 #define NABTO_STREAM_TIMEOUT 1000 

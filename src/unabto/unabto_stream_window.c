@@ -250,9 +250,11 @@ void nabto_init_stream_state_initiator(struct nabto_stream_s* stream)
 }
 
 static void reset_xbuf(x_buffer* xbuf) {
-    uint8_t* buf = xbuf->buf;
+    if (xbuf->xstate != B_IDLE) {
+        unabto_stream_free_send_segment(xbuf->buf);
+        xbuf->buf = NULL;
+    }
     memset(xbuf, 0, sizeof(x_buffer));
-    xbuf->buf = buf;
 }
 
 /******************************************************************************/
@@ -383,6 +385,12 @@ size_t nabto_stream_tcb_write(struct nabto_stream_s * stream, const uint8_t* buf
             sz = size > tcb->cfg.xmitPacketSize ? tcb->cfg.xmitPacketSize : (uint16_t)size;
             NABTO_LOG_TRACE(("-------- nabto_stream_write %i bytes, seq=%i into ix=%i", sz, tcb->xmitSeq, ix));
 
+            xbuf->buf = unabto_stream_alloc_send_segment(tcb->cfg.xmitPacketSize);
+            if (xbuf->buf == NULL) {
+                stream->stats.sendSegmentAllocFailures++;
+                stream->blockedOnMissingSendSegment = true;
+                break;
+            }
             memcpy(xbuf->buf, (const void*) &buf[queued], sz);
             xbuf->size = sz;
             xbuf->seq = tcb->xmitSeq;
@@ -421,7 +429,13 @@ size_t nabto_stream_tcb_can_write(struct nabto_stream_s * stream) {
         (tcb->xmitSeq < tcb->maxAdvertisedWindow) &&
         congestion_control_accept_more_data(tcb))
     {
-        return tcb->cfg.xmitPacketSize;
+        if (!unabto_stream_can_alloc_send_segment()) {
+            stream->stats.sendSegmentAllocFailures++;
+            stream->blockedOnMissingSendSegment = true;
+            return 0;
+        } else {
+            return tcb->cfg.xmitPacketSize;
+        }
     } else {
         return 0;
     }
@@ -1006,6 +1020,8 @@ bool handle_ack(struct nabto_stream_s* stream, uint32_t ack_start, uint32_t ack_
                     tcb->cCtrl.flightSize--;
                     unabto_stream_stats_observe(&tcb->ccStats.flightSize, (double)tcb->cCtrl.flightSize);
                     xbuf->xstate = B_IDLE;
+                    unabto_stream_free_send_segment(xbuf->buf);
+                    xbuf->buf = NULL;
                     if (xbuf->shouldRetransmit) {
                         tcb->retransmitSegmentCount--;
                         xbuf->shouldRetransmit = false;
@@ -1568,8 +1584,20 @@ void nabto_stream_tcb_on_connection_released(struct nabto_stream_s * stream) {
 }
 
 void nabto_stream_tcb_release(struct nabto_stream_s * stream) {
+    size_t i;
+    struct nabto_stream_tcb * tcb;
     if (!nabto_stream_tcb_is_closed(stream)) {
         NABTO_LOG_TRACE(("Releasing stream in state %d - %" PRItext, stream->u.tcb.streamState, nabto_stream_tcb_state_name(&stream->u.tcb)));
+    }
+    // run through the stream send window and free all unfreed send
+    // segments.  there can be unfreed segments if the stream is
+    // closed without all the data being acked.
+    tcb = &stream->u.tcb;
+    for (i = 0; i < tcb->cfg.xmitWinSize; i++) {
+        if (tcb->xmit[i].xstate != B_IDLE) {
+            unabto_stream_free_send_segment(tcb->xmit[i].buf);
+            tcb->xmit[i].buf = NULL;
+        }
     }
 }
 

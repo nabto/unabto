@@ -57,6 +57,7 @@ typedef struct {
     uint16_t          streamMaxStreams;
     uint16_t          streamReceiveWindowSize;
     uint16_t          streamSendWindowSize;
+    uint16_t          streamSendSegmentPoolSize;
 #endif
 
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS

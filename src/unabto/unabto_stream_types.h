@@ -35,6 +35,7 @@ struct nabto_stream_s {
     uint16_t                          idCP;            /**< ID, client part             */
     uint16_t                          idSP;            /**< ID, serveer part            */
     nabto_stream_static_config        staticConfig;    /**< static configuration */
+    bool                              blockedOnMissingSendSegment; /**< set to true if a stream send operation has been blocked by a missing segment allocation. */
     struct {
         bool                          dataReady : 1;
         bool                          dataWritten : 1;
