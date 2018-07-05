@@ -4,8 +4,6 @@
 #include "unabto_unix_time.h"
 #include <unabto/unabto_memory.h>
 
-#include <asl.h>
-
 #ifdef __MACH__
 #include <mach/clock.h>
 #include <mach/mach.h>
