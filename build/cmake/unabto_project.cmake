@@ -205,6 +205,7 @@ endif()
 
 list(APPEND unabto_src ${unabto_module_dns_fallback_src})
 if(${CMAKE_SYSTEM} MATCHES Linux)
+  message("Linux system, Trying to use the appropriate modules")
 
   # Glibc 2.17 and newer dows not use -lrt and moxa does not have the lib at all.
   CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_RT_LIB)
@@ -240,6 +241,7 @@ if(${CMAKE_SYSTEM} MATCHES Linux)
 endif()
 
 if (WIN32)
+  message("Windows system, Trying to use the appropriate modules")
   list(APPEND unabto_include_directories
     ${unabto_platform_win32_include_directories}
     )
@@ -273,6 +275,7 @@ if (WIN32)
 endif()
 
 if (APPLE OR IOS)
+  message("Apple/iOS system, Trying to use the appropriate modules")
   list(APPEND unabto_include_directories
     ${unabto_platform_unix_include_directories}
     )

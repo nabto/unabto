@@ -4,10 +4,15 @@
 #include "unabto_unix_time.h"
 #include <unabto/unabto_memory.h>
 
+#include <asl.h>
+
 #ifdef __MACH__
 #include <mach/clock.h>
 #include <mach/mach.h>
 #endif
+
+#define NABTO_LOG_MODULE_CURRENT NABTO_LOG_MODULE_MODBUS
+
 
 void unabto_unix_timer_add_stamp(nabto_stamp_t* stamp, int msec) {
     stamp->milliseconds += msec;
@@ -45,7 +50,7 @@ void unabto_time_update_stamp() {
 }
 
 
-struct unabto_unix_time nabtoGetStamp() {
+struct unabto_unix_time unabto_unix_timer_get_stamp() {
     if (auto_update_enabled) {
         unabto_time_update_stamp();
     }
@@ -75,15 +80,15 @@ bool unabto_unix_timer_stamp_less_equal(nabto_stamp_t* s1, nabto_stamp_t* s2) {
 }
 
 
-bool nabtoIsStampPassed(nabto_stamp_t* stamp) {
+bool unabto_unix_timer_is_stamppassed(nabto_stamp_t* stamp) {
     nabto_stamp_t now = nabtoGetStamp();
     return unabto_unix_timer_stamp_less_equal(stamp, &now);
 }
 
-nabto_stamp_diff_t nabtoStampDiff(nabto_stamp_t * newest, nabto_stamp_t * oldest) {
+nabto_stamp_diff_t unabto_unix_timer_stampdiff(nabto_stamp_t * newest, nabto_stamp_t * oldest) {
     return newest->milliseconds - oldest->milliseconds;
 }
 
-int nabtoStampDiff2ms(nabto_stamp_diff_t diff) {
+int unabto_unix_timer_stampdiff2ms(nabto_stamp_diff_t diff) {
     return (int) (diff);
 }
