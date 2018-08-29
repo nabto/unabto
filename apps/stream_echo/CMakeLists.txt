@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 project(stream_echo)
 
+option(ENABLE_TCP_FALLBACK "enable tcp fallback" 0)
+
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../build/cmake/unabto_project.cmake)
 
 set(src
@@ -8,7 +10,18 @@ set(src
   ${unabto_module_cli_gopt_src}
   ${unabto_module_util_src}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/stream_echo.c
-)
+  )
+
+if (ENABLE_TCP_FALLBACK)
+  list(APPEND src ${unabto_module_tcp_fallback_src})
+  if (NOT MSVC)
+    list(APPEND src ${unabto_module_tcp_unix_src})
+  else()
+    list(APPEND src ${unabto_module_tcp_win32_src})
+  endif()
+  add_definitions("-DENABLE_TCP_FALLBACK")
+endif()
+
 
 set(src_tick
   ${src}

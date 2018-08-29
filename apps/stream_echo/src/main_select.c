@@ -81,6 +81,11 @@ void wait_event()
     NABTO_LOG_TRACE(("foobar %i", nfds));
     if (nfds < 0) NABTO_LOG_FATAL(("Error in epoll_wait: %d", errno));
     unabto_network_select_read_sockets(&read_fds);
+
+#if NABTO_ENABLE_TCP_FALLBACK
+    unabto_tcp_fallback_select_read_sockets(&read_fds);
+    unabto_tcp_fallback_select_write_sockets(&write_fds);
+#endif
     
     unabto_time_event();
 }

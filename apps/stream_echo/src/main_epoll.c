@@ -6,6 +6,7 @@
 #include <modules/timers/auto_update/unabto_time_auto_update.h>
 #include <modules/network/select/unabto_network_select_api.h>
 #include <modules/network/epoll/unabto_epoll.h>
+#include <modules/tcp_fallback/tcp_fallback_select.h>
 
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -85,7 +86,7 @@ void wait_event()
             unabto_read_socket(udpHandler->fd);
         }
 #if NABTO_ENABLE_TCP_FALLBACK
-        if (handler->type == UNABTO_EPOLL_TYPE_TCP_FALLBACK) {
+        if (handler->epollEventType == UNABTO_EPOLL_TYPE_TCP_FALLBACK) {
             nabto_connect* con = (nabto_connect*)handler;
             if (events[i].events & EPOLLIN) {
                 unabto_tcp_fallback_read_ready(con);
