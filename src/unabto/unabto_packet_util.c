@@ -415,11 +415,11 @@ uint8_t* insert_random_payload(uint8_t* ptr, uint8_t* end, uint8_t* randomData, 
 
 uint8_t* insert_capabilities_payload(uint8_t* ptr, uint8_t* end, struct unabto_capabilities* capabilities, uint16_t encryptionCodes)
 {
+    uint16_t dataLength = 9;
     if (end < ptr || ptr == NULL) {
         return NULL;
     }
 
-    uint16_t dataLength = 9;
     if (encryptionCodes > 0) {
         dataLength += 2 + encryptionCodes * 2;
     }
@@ -563,11 +563,11 @@ bool unabto_payload_read_crypto(struct unabto_payload_packet* payload, struct un
 
 bool unabto_payload_find_and_read_crypto(const uint8_t* buf, const uint8_t* end, struct unabto_payload_crypto* crypto)
 {
+    struct unabto_payload_packet payload;
     if (end < buf || buf == NULL) {
         return false;
     }
 
-    struct unabto_payload_packet payload;
     if (!unabto_find_payload(buf, end, NP_PAYLOAD_TYPE_CRYPTO, &payload)) {
         return false;
     }
@@ -591,11 +591,10 @@ bool unabto_payload_read_notify(struct unabto_payload_packet* payload, struct un
 
 bool unabto_payload_read_capabilities(struct unabto_payload_packet* payload, struct unabto_payload_capabilities_read* capabilities)
 {
+    const uint8_t* ptr = payload->dataBegin;
     if (payload->dataLength < 9) {
         return false;
     }
-
-    const uint8_t* ptr = payload->dataBegin;
 
     READ_FORWARD_U8(capabilities->type, ptr);
     READ_FORWARD_U32(capabilities->bits, ptr);

@@ -108,11 +108,12 @@ bool unabto_stream_is_connection_reliable(struct nabto_stream_s* stream)
 
 uint8_t* unabto_stream_alloc_send_segment(size_t required)
 {
+    size_t i;
     if (required > NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE) {
         NABTO_LOG_FATAL(("The stream segment size should never be that large"));
         return NULL;
     }
-    size_t i;
+    
     for (i = 0; i < NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE; i++) {
         if (!send_segment_pool[i]) {
             send_segment_pool[i] = true;

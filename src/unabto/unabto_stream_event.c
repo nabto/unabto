@@ -188,8 +188,8 @@ void unabto_time_event_stream(void)
     int i = nextStart;
     for (all = 0; all < NABTO_MEMORY_STREAM_MAX_STREAMS; ++all) {
         if (stream__[i].state != STREAM_IDLE) {
-            nextStart = i;
             struct nabto_stream_s* stream = &stream__[i];
+            nextStart = i;            
             nabto_stream_tcb_check_xmit(&stream__[i], true, false);
             if (stream->applicationEvents.dataReady) {
                 unabto_stream_event(stream, UNABTO_STREAM_EVENT_TYPE_DATA_READY);

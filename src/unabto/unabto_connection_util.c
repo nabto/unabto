@@ -15,12 +15,13 @@ bool unabto_connection_util_read_client_id(const nabto_packet_header* header, na
     
     uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
     uint8_t* payloadsEnd = unabto_payloads_end(nabtoCommunicationBuffer, header);
+    struct unabto_payload_typed_buffer cpId;
     
     if (!unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_CP_ID, &cpIdPayload)) {
         return false;
     }
 
-    struct unabto_payload_typed_buffer cpId;
+
     con->clientId[0] = 0;
     if (unabto_payload_read_typed_buffer(&cpIdPayload, &cpId)) {
         if (cpId.type == 1) { // 1 == EMAIL
@@ -155,7 +156,11 @@ bool unabto_connection_util_read_capabilities(const nabto_packet_header* header,
 bool unabto_connection_util_verify_capabilities(nabto_connect* connection, struct unabto_payload_capabilities_read* capabilities)
 {
     uint32_t requiredCapabilities = PEER_CAP_TAG | PEER_CAP_FRCTRL | PEER_CAP_ASYNC;
-
+    bool codeFound = false;
+    uint16_t i;
+    const uint8_t* ptr;
+    uint32_t supportedCapabilities;
+    
     if ((capabilities->mask & requiredCapabilities) != requiredCapabilities) {
         NABTO_LOG_WARN(("client does not provide enough capabilities in its capability mask"));
         return false;
@@ -165,9 +170,8 @@ bool unabto_connection_util_verify_capabilities(nabto_connect* connection, struc
         return false;
     }
 
-    bool codeFound = false;
-    uint16_t i;
-    const uint8_t* ptr = capabilities->codesStart;
+    ptr = capabilities->codesStart;
+    
     for (i = 0; i < capabilities->codesLength; i++) {
         uint16_t code;
         READ_FORWARD_U16(code, ptr);
@@ -181,7 +185,7 @@ bool unabto_connection_util_verify_capabilities(nabto_connect* connection, struc
         return false;
     }
 
-    uint32_t supportedCapabilities = requiredCapabilities | PEER_CAP_FP;
+    supportedCapabilities = requiredCapabilities | PEER_CAP_FP;
 
     connection->psk.capabilities.type = 0;
     // limit the mask to capabilities we understand
