@@ -81,6 +81,7 @@ ssize_t nabto_write(nabto_socket_t socket,
                     uint32_t       addr,
                     uint16_t       port);
 
+
 /**
  * Get the local ip address
  * This function is optional but is used if the
@@ -134,7 +135,7 @@ void nabto_dns_resolve(const char* id);
  * @param v4addr  pointer to output ipaddresses array
  * @return false if address is not resolved yet
  */
-nabto_dns_status_t nabto_dns_is_resolved(const char* id, uint32_t* v4addr);
+nabto_dns_status_t nabto_dns_is_resolved(const char* id, struct nabto_ip_address* addr);
 
 /*************** Time stamp related functions ********************************/
 /**

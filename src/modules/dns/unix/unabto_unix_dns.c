@@ -5,7 +5,7 @@
 
 typedef struct {
     const char* id;
-    uint32_t resolved_addrs[NABTO_DNS_RESOLVED_IPS_MAX];
+    struct nabto_ip_address resolved_addrs[NABTO_DNS_RESOLVED_IPS_MAX];
     nabto_dns_status_t status;
     pthread_t thread;
 } resolver_state_t;
@@ -69,7 +69,7 @@ void nabto_dns_resolve(const char* id) {
     }
 }
 
-nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addrs) {
+nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address* v4addrs) {
     if (resolver_is_running) {
         return NABTO_DNS_NOT_FINISHED;
     }

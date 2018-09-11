@@ -826,9 +826,9 @@ void handle_as_wait_dns(void) {
         {
             uint8_t i;
             for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
-                uint32_t ip = nmc.controllerAddresses[i];
-                if (ip != 0) {
-                    NABTO_LOG_INFO(("  Controller ip: " PRIip, MAKE_IP_PRINTABLE(ip)));
+                struct nabto_ip_address ip = nmc.controllerAddresses[i];
+                if (ip.type != NABTO_IP_NONE) {
+                    NABTO_LOG_INFO(("  Controller ip: " %s, nabto_context_ip_to_string(ip));
                 }
             }
         }
@@ -842,8 +842,8 @@ void handle_as_wait_dns(void) {
 /** timer event when waiting for the BS response to invite request. */
 void handle_as_wait_bs(void) {
     // cycle controller eps
-    uint32_t newip = nmc.controllerAddresses[nmc.context.counter % NABTO_DNS_RESOLVED_IPS_MAX];
-    if (newip != 0) {
+    struct nabto_ip_address newip = nmc.controllerAddresses[nmc.context.counter % NABTO_DNS_RESOLVED_IPS_MAX];
+    if (newip.type != NABTO_IP_NONE) {
         nmc.controllerEp.addr = newip;
     }
     
