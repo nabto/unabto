@@ -203,7 +203,7 @@ if (UNABTO_EXTERNAL_BUILD_ROOT)
   list(APPEND unabto_include_directories ${UNABTO_EXTERNAL_BUILD_ROOT}/include)
 endif()
 
-list(APPEND unabto_src ${unabto_module_dns_fallback_src})
+#list(APPEND unabto_src ${unabto_module_dns_fallback_src})
 if(${CMAKE_SYSTEM} MATCHES Linux)
   message("Linux system, Trying to use the appropriate modules")
 

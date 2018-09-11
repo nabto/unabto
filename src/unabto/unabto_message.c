@@ -192,7 +192,7 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
         header |= NP_LEGACY_PACKET_HDR_FLAG_RSP;
         WRITE_U32(buf, header);
         NABTO_LOG_TRACE(("local_discover_event -> sending rsp olen=%" PRIu16, olen));
-        nabto_write(nmc.socketLocal, nabtoCommunicationBuffer, olen, peer->addr, peer->port);
+        nabto_write(nmc.socketLocal, nabtoCommunicationBuffer, olen, &peer->addr, peer->port);
     } else {
         NABTO_LOG_TRACE(("Discover target: '%s' this device: '%s'", buf+sizeof(header), nmc.nabtoMainSetup.id));
     }
@@ -238,7 +238,7 @@ void nabto_message_local_legacy_application_event(uint16_t ilen, nabto_endpoint*
     header |= NP_LEGACY_PACKET_HDR_FLAG_RSP;
     WRITE_U32(buf, header);
 
-    nabto_write(nmc.socketLocal, nabtoCommunicationBuffer, olen, peer->addr, peer->port);
+    nabto_write(nmc.socketLocal, nabtoCommunicationBuffer, olen, &peer->addr, peer->port);
 }
 #endif
 

@@ -54,9 +54,9 @@ NABTO_THREAD_LOCAL_STORAGE nabto_main_context nmc;
 
 void unabto_init_default_values(nabto_main_setup* nms) {
     nms->controllerArg.port = 5566;
-    nms->controllerArg.addr = UNABTO_INADDR_NONE; // NONE==> use DNS, ANY ==> don't use BS/GSP, other ==> use option as BS address
+    nms->controllerArg.addr.type = NABTO_IP_NONE; // NONE==> use DNS, ANY ==> don't use BS/GSP, other ==> use option as BS address
     nms->localPort = 5570;
-    nms->ipAddress = UNABTO_INADDR_ANY; // If non zero, the client will use the address
+    nms->ipAddress.type = UNABTO_INADDR_ANY; // If non zero, the client will use the address
     nms->bufsize = NABTO_COMMUNICATION_BUFFER_SIZE;
     nms->id = 0;
     nms->version = 0;
@@ -66,6 +66,7 @@ void unabto_init_default_values(nabto_main_setup* nms) {
     nms->secureAttach = false;
     nms->secureData = false;
     nms->configuredForAttach = true;
+    nms->enableRemoteAccess = true;
 #if NABTO_ENABLE_CONNECTIONS
     nms->cryptoSuite = CRYPT_W_NULL_DATA;
 #endif
@@ -141,7 +142,7 @@ bool unabto_init(void) {
 #endif
 
 #if NABTO_ENABLE_LOCAL_ACCESS
-    if (!nabto_init_socket(nmc.nabtoMainSetup.ipAddress, &nmc.nabtoMainSetup.localPort, &nmc.socketLocal)) {
+    if (!nabto_init_socket(&nmc.nabtoMainSetup.ipAddress, &nmc.nabtoMainSetup.localPort, &nmc.socketLocal)) {
         NABTO_LOG_ERROR(("failed to initialize local socket continueing without local"));
         nmc.socketLocal = NABTO_INVALID_SOCKET;
     }
@@ -149,8 +150,8 @@ bool unabto_init(void) {
 
 #if NABTO_ENABLE_REMOTE_ACCESS
     nmc.socketGSPLocalEndpoint.port = 0;
-    if (nmc.nabtoMainSetup.controllerArg.addr != UNABTO_INADDR_ANY) {
-        if (!nabto_init_socket(nmc.nabtoMainSetup.ipAddress, &nmc.socketGSPLocalEndpoint.port, &nmc.socketGSP))
+    if (nmc.nabtoMainSetup.enableRemoteAccess) {
+        if (!nabto_init_socket(&nmc.nabtoMainSetup.ipAddress, &nmc.socketGSPLocalEndpoint.port, &nmc.socketGSP))
         {
             return false;
         }
@@ -245,7 +246,7 @@ void unabto_tick(void) {
 #endif
 
 #if NABTO_ENABLE_REMOTE_ACCESS
-    if (nmc.nabtoMainSetup.controllerArg.addr == UNABTO_INADDR_ANY) {
+    if (nmc.socketGSP == NABTO_INVALID_SOCKET) {
         return; // not ready to operate remote connections
     }
     if (unabto_read_socket(nmc.socketGSP)) {
@@ -377,8 +378,8 @@ nabto_main_context* unabto_get_main_context(void) {
 }
 
 #if NABTO_ENABLE_REMOTE_ACCESS
-void unabto_notify_ip_changed(uint32_t ip) {
-    nmc.socketGSPLocalEndpoint.addr = ip;
+void unabto_notify_ip_changed(struct nabto_ip_address* ip) {
+    nmc.socketGSPLocalEndpoint.addr = *ip;
     nabto_network_changed();
 }
 #endif

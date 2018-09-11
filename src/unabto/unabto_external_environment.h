@@ -14,6 +14,29 @@
 extern "C" {
 #endif
 
+struct nabto_ip_address {
+    enum {
+        NABTO_IP_NONE = 0,
+        NABTO_IP_V4,
+        NABTO_IP_V6
+    } type;
+
+    union {
+        uint32_t ipv4; ///< IP address
+        uint8_t  ipv6[16];
+    } addr;
+     
+};
+
+/** 
+ * The IP endpoint type.
+ */
+typedef struct {
+    uint16_t port; ///< port number
+    struct nabto_ip_address addr;
+        
+} nabto_endpoint;
+
 
 /********** Platform Random ***************************************************/
 /** 
@@ -36,7 +59,7 @@ void nabto_random(uint8_t* buf, size_t len);
  * @param socket       To return the created socket descriptor.
  * @return             true iff successfull
  */
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket);
+bool nabto_init_socket(struct nabto_ip_address* localAddr, uint16_t* localPort, nabto_socket_t* socket);
 
 /**
  * Close a socket. 
@@ -61,7 +84,7 @@ void nabto_close_socket(nabto_socket_t* socket);
 ssize_t nabto_read(nabto_socket_t socket,
                    uint8_t*       buf,
                    size_t         len,
-                   uint32_t*      addr,
+                   struct nabto_ip_address*  addr,
                    uint16_t*      port);
 
 /**
@@ -78,9 +101,15 @@ ssize_t nabto_read(nabto_socket_t socket,
 ssize_t nabto_write(nabto_socket_t socket,
                     const uint8_t* buf,
                     size_t         len,
-                    uint32_t       addr,
+                    const struct nabto_ip_address*  addr,
                     uint16_t       port);
 
+
+/**
+ * Resolve an ipv4 address to an nabto_ip_address. One some systems an
+ * ipv4 can be resolved to an ipv4 mapped nat64 address.
+ */
+void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip);
 
 /**
  * Get the local ip address
@@ -89,7 +118,7 @@ ssize_t nabto_write(nabto_socket_t socket,
  * @param ip      ip in host byte order.
  * @return true   iff ip is set to the local ip address.
  */
-bool nabto_get_local_ip(uint32_t* ip);
+bool nabto_get_local_ip(struct nabto_ip_address* ip);
 
 
 

@@ -313,15 +313,26 @@ uint8_t* insert_capabilities(uint8_t* buf, uint8_t* end, bool cap_encr_off) {
 
 
 uint8_t* insert_ipx_payload(uint8_t* ptr, uint8_t* end) {
+    uint32_t localAddr;
+    uint32_t globalAddr;
+
     UNABTO_ASSERT(ptr <= end);
     if (end-ptr < NP_PAYLOAD_IPX_BYTELENGTH) {
         return NULL;
     }
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_IPX, 0, 13);
+
+    if (nmc.socketGSPLocalEndpoint.addr.type == NABTO_IP_V4) {
+        localAddr = nmc.socketGSPLocalEndpoint.addr.addr.ipv4;
+    }
+
+    if (nmc.context.globalAddress.addr.type == NABTO_IP_V4) {
+        globalAddr = nmc.context.globalAddress.addr.addr.ipv4;
+    }
     
-    WRITE_FORWARD_U32(ptr, nmc.socketGSPLocalEndpoint.addr);
+    WRITE_FORWARD_U32(ptr, localAddr);
     WRITE_FORWARD_U16(ptr, nmc.socketGSPLocalEndpoint.port);
-    WRITE_FORWARD_U32(ptr, nmc.context.globalAddress.addr);
+    WRITE_FORWARD_U32(ptr, globalAddr);
     WRITE_FORWARD_U16(ptr, nmc.context.globalAddress.port);
     WRITE_FORWARD_U8(ptr, nmc.context.natType);
 

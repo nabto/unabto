@@ -138,7 +138,7 @@ nabto_main_context* unabto_get_main_context(void);
  * if we are currently in the initial connect to the gsp etc.
  * @param ip  Ip address in hostbyte order.
  */
-void unabto_notify_ip_changed(uint32_t ip);
+void unabto_notify_ip_changed(struct nabto_ip_address* ip);
 
 
 #if NABTO_ENABLE_NEXT_EVENT

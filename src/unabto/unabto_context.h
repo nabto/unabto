@@ -26,28 +26,6 @@ enum {
     SEED_SIZE      = 32
 };
 
-struct nabto_ip_address {
-    enum {
-        NABTO_IP_NONE = 0,
-        NABTO_IP_V4,
-        NABTO_IP_V6
-    } type;
-
-    union {
-        uint32_t ipv4; ///< IP address
-        uint8_t  ipv6[16];
-    } addr;
-     
-};
-
-/** 
- * The IP endpoint type.
- */
-typedef struct {
-    uint16_t port; ///< port number
-    struct nabto_ip_address addr;
-        
-} nabto_endpoint;
 
 /** A set of peer endpoints */
 typedef struct {
@@ -125,7 +103,7 @@ void nabto_context_reinit_crypto(void);
  */
 void nabto_context_release(void);
 
-const char* nabto_context_ip_to_string(struct nabto_ip_address* addr);
+const char* nabto_context_ip_to_string(const struct nabto_ip_address* addr);
 
 #ifdef __cplusplus
 } // extern "C"

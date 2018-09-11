@@ -58,9 +58,6 @@ int main(int argc, char* argv[])
     localEp.addr=nms->ipAddress;
     localEp.port=nms->localPort;
     
-    if (nms->ipAddress != INADDR_ANY) NABTO_LOG_INFO(("Own IP address: " PRIep, MAKE_EP_PRINTABLE(localEp)));
-    else NABTO_LOG_INFO(("Own IP address, local IP is set to INADDR_ANY: " PRIep, MAKE_EP_PRINTABLE(localEp)));
-
     while (true) {
         /*
          * Here the main application should do it's work

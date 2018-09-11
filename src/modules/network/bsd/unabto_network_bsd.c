@@ -53,14 +53,14 @@ static NABTO_THREAD_LOCAL_STORAGE struct socketListElement* socketList = 0;
 
 
 
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* sock) {
+bool nabto_init_socket(struct nabto_ip_address* localAddr, uint16_t* localPort, nabto_socket_t* sock) {
     
     nabto_socket_t sd;
     nabto_main_context* nmc;
     const char* interface;
     socketListElement* se;
     
-    NABTO_LOG_TRACE(("Open socket: ip=" PRIip ", port=%u", MAKE_IP_PRINTABLE(localAddr), (int)*localPort));
+    NABTO_LOG_TRACE(("Open socket: ip=%s" ", port=%u", nabto_context_ip_to_string(localAddr), (int)*localPort));
     
     sd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sd == -1) {
@@ -91,14 +91,26 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
     }
 #endif    
     {
-        struct sockaddr_in sa;
         int status;
-        memset(&sa, 0, sizeof(sa));
-        sa.sin_family = AF_INET;
-        sa.sin_addr.s_addr = htonl(localAddr);
-        sa.sin_port = htons(*localPort);
-        
-        status = bind(sd, (struct sockaddr*)&sa, sizeof(sa));
+        if (localAddr->type == NABTO_IP_V4) {
+            struct sockaddr_in sa;
+            memset(&sa, 0, sizeof(sa));
+            sa.sin_family = AF_INET;
+            sa.sin_addr.s_addr = htonl(localAddr->addr.ipv4);
+            sa.sin_port = htons(*localPort);
+            status = bind(sd, (struct sockaddr*)&sa, sizeof(sa));
+        } else if (localAddr->type == NABTO_IP_V6) {
+            struct sockaddr_in6 sa;
+            memset(&sa, 0, sizeof(sa));
+            sa.sin6_family = AF_INET6;
+            memcpy(sa.sin6_addr.s6_addr, localAddr->addr.ipv6, 16);
+            sa.sin6_port = htons(*localPort);
+            status = bind(sd, (struct sockaddr*)&sa, sizeof(sa));
+            
+        } else {
+            NABTO_LOG_TRACE(("unsupported ip type not opening socket."));
+            return false;
+        }
         
         if (status < 0) {
             NABTO_LOG_ERROR(("Unable to bind socket: (%i) '%s' localport %i", errno, strerror(errno), *localPort));
@@ -120,7 +132,7 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
         }
     }
     
-    NABTO_LOG_TRACE(("Socket opened: ip=" PRIip ", port=%u", MAKE_IP_PRINTABLE(localAddr), (int)*localPort));
+    NABTO_LOG_TRACE(("Socket opened: ip=%s" ", port=%u", nabto_context_ip_to_string(localAddr), (int)*localPort));
     
     
     se = (socketListElement*)malloc(sizeof(socketListElement));
@@ -181,26 +193,39 @@ void nabto_close_socket(nabto_socket_t* sock) {
 ssize_t nabto_read(nabto_socket_t sock,
                    uint8_t*       buf,
                    size_t         len,
-                   uint32_t*      addr,
+                   struct nabto_ip_address*      addr,
                    uint16_t*      port)
 {
-    struct sockaddr_in sa;
+    struct sockaddr_in6 saData;
+    struct sockaddr* sa = (struct sockaddr*)&saData;
     nabto_endpoint ep;
-    socklen_t addrlen = sizeof(sa);
+    socklen_t addrlen = sizeof(saData);
 
-    ssize_t recvLength = recvfrom(sock, buf, len, 0, (struct sockaddr*)&sa, &addrlen);
+    ssize_t recvLength = recvfrom(sock, buf, len, 0, sa, &addrlen);
 
     if (recvLength < 0 || recvLength == 0) {
         return 0;
     }
-    
-    *addr = ntohl(sa.sin_addr.s_addr);
-    *port = ntohs(sa.sin_port);
+
+    if (sa->sa_family == AF_INET) {
+        struct sockaddr_in* sa4 = (struct sockaddr_in*)(sa);
+        addr->type = NABTO_IP_V4;
+        addr->addr.ipv4 = ntohl(sa4->sin_addr.s_addr);
+        *port = ntohs(sa4->sin_port);
+    } else if (sa->sa_family == AF_INET6) {
+        struct sockaddr_in6* sa6 = (struct sockaddr_in6*)(sa);
+        addr->type = NABTO_IP_V6;
+        memcpy(addr->addr.ipv6, sa6->sin6_addr.s6_addr, 16);
+        *port = ntohs(sa6->sin6_port);
+    } else {
+        NABTO_LOG_TRACE(("unsupported ip scheme"));
+        return 0;
+    }
 
     ep.addr = *addr;
     ep.port = *port;
     NABTO_NOT_USED(ep);
-    NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_BUFFERS, ("nabto_read: " PRIep, MAKE_EP_PRINTABLE(ep)), buf, recvLength);
+    NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_BUFFERS, ("nabto_read: %s:%u", nabto_context_ip_to_string(addr), *port), buf, recvLength);
 
     return recvLength;
 }
@@ -209,21 +234,30 @@ ssize_t nabto_read(nabto_socket_t sock,
 ssize_t nabto_write(nabto_socket_t sock,
                     const uint8_t* buf,
                     size_t         len,
-                    uint32_t       addr,
+                    const struct nabto_ip_address* addr,
                     uint16_t       port)
 {
     int res;
-    struct sockaddr_in sa;
-    nabto_endpoint ep;
-    memset(&sa, 0, sizeof(sa));
-    sa.sin_family = AF_INET;
-    sa.sin_addr.s_addr = htonl(addr);
-    sa.sin_port = htons(port);
-    ep.addr = addr;
-    ep.port = port;
-    NABTO_NOT_USED(ep);
-    NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_BUFFERS, ("nabto_write size: %" PRIsize ", " PRIep, len, MAKE_EP_PRINTABLE(ep)),buf, len);
-    res = sendto(sock, buf, (int)len, 0, (struct sockaddr*)&sa, sizeof(sa));
+    if (addr->type == NABTO_IP_V4) {
+        struct sockaddr_in sa;
+        memset(&sa, 0, sizeof(sa));
+        sa.sin_family = AF_INET;
+        sa.sin_addr.s_addr = htonl(addr->addr.ipv4);
+        sa.sin_port = htons(port);
+        res = sendto(sock, buf, (int)len, 0, (struct sockaddr*)&sa, sizeof(sa));        
+    } else if (addr->type == NABTO_IP_V6) {
+        struct sockaddr_in6 sa;
+        memset(&sa, 0, sizeof(sa));
+        sa.sin6_family = AF_INET6;
+        memcpy(sa.sin6_addr.s6_addr, addr->addr.ipv6, 16);
+        sa.sin6_port = htons(port);
+        res = sendto(sock, buf, (int)len, 0, (struct sockaddr*)&sa, sizeof(sa));        
+    } else {
+        NABTO_LOG_TRACE(("invalid address type"));
+        return 0;
+    }
+    NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_BUFFERS, ("nabto_write size: %" PRIsize ", %s:%u", len, nabto_context_ip_to_string(addr), port) ,buf, len);
+
     if (res < 0) {
         int status = errno;
         NABTO_NOT_USED(status);
@@ -297,9 +331,11 @@ bool unabto_network_epoll_read_one(struct epoll_event* event)
 }
 #endif
 
-bool nabto_get_local_ip(uint32_t* ip) {
+bool nabto_get_local_ip(struct nabto_ip_address* ip) {
     struct sockaddr_in si_me, si_other;
     int s;
+
+    // TODO make ipv6 compatible
     
     if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1) {
         NABTO_LOG_ERROR(("Cannot create socket"));
@@ -329,8 +365,10 @@ bool nabto_get_local_ip(uint32_t* ip) {
             NABTO_LOG_ERROR(("getsockname failed"));
             return false;
         }
-        *ip = ntohl(my_addr.sin_addr.s_addr);
+        ip->type = NABTO_IP_V4;
+        ip->addr.ipv4 = ntohl(my_addr.sin_addr.s_addr);
     }
     close(s);
+
     return true;
 }

@@ -191,7 +191,8 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
             gopt_free(options);
             return false;
         }
-        nms->ipAddress = htonl(addr);
+        nms->ipAddress.type = NABTO_IP_V4;
+        nms->ipAddress.addr.ipv4 = htonl(addr);
     } 
 
     if( gopt_arg( options, 'p', &localPortStr) ){
@@ -209,7 +210,8 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
             gopt_free(options);
             return false;
         }
-        nms->controllerArg.addr = htonl(addr);
+        nms->controllerArg.addr.type = NABTO_IP_V4;
+        nms->controllerArg.addr.addr.ipv4 = htonl(addr);
     }
 
     if ( gopt_arg( options, 'k', &preSharedKey)) {

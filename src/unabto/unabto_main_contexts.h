@@ -22,7 +22,7 @@ enum {
 typedef struct {
     nabto_endpoint    controllerArg;      /**< Controller endpoint argument     */
     uint16_t          localPort;          /**< The port to use for local connections */
-    uint32_t          ipAddress;          /**< The IP address to bind to        */
+    struct nabto_ip_address  ipAddress;          /**< The IP address to bind to        */
     const char*       interfaceName;      /**< The interface to bind to, unix only */
     uint16_t          bufsize;            /**< Communication buffer size        */
     const char*       id;                 /**< Id for the nabto device          
@@ -36,7 +36,11 @@ typedef struct {
                                                gspPollTimeout*gspTimeOutCount   */
     bool              secureAttach;       /**< Attach using secure channel      */
     bool              secureData;         /**< Encrypt data                     */
-    bool              configuredForAttach; /**< Default true, but it can be set to false if cryptosetup ius delayed. */
+    bool              configuredForAttach; /**< Default true, but it
+                                            * can be set to false if
+    cryptosetup ius delayed. */
+    bool              enableRemoteAccess; /**< enable remote access
+                                           * default on*/
 #if NABTO_ENABLE_CONNECTIONS
     crypto_suite      cryptoSuite;        /**< Crypto mode, aes, bf or null     */
 #endif
