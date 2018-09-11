@@ -316,7 +316,7 @@ bool connect_event(message_event* event, nabto_packet_header* hdr)
                 NABTO_LOG_ERROR(("U_CONNECT out of resources in connect event."));
                 nabto_release_connection(con); // no resources available
             } else {
-                if (EP_EQUAL(*peer, nmc.context.gsp)) {
+                if (nabto_ep_is_equal(peer, &nmc.context.gsp)) {
                     send_to_basestation(nabtoCommunicationBuffer, olen, peer);
                 } else {
                     nabto_write(event->udpMessage.socket, nabtoCommunicationBuffer, olen, &peer->addr, peer->port);
@@ -540,7 +540,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
     con->cp.globalEndpoint.port = ipxData.globalIpPort;
     
     con->noRendezvous = (ipxData.flags & NP_PAYLOAD_IPX_FLAG_NO_RENDEZVOUS) ? 1 : 0;
-    con->cpEqual      = EP_EQUAL(con->cp.privateEndpoint, con->cp.globalEndpoint);
+    con->cpEqual      = nabto_ep_is_equal(&con->cp.privateEndpoint, &con->cp.globalEndpoint);
     con->cpAsync      = (ipxData.flags & NP_PAYLOAD_IPX_FLAG_CP_ASYNC) ? 1 : 0;
     con->clientNatType      = (ipxData.flags & NP_PAYLOAD_IPX_NAT_MASK);
     con->isLocal      = isLocal;
@@ -646,7 +646,7 @@ void nabto_connection_end_connecting(nabto_connect* con, message_event* event) {
         NABTO_LOG_TRACE(("Received data on socket %i", con->socket));
 
         con->peer = event->udpMessage.peer;
-        if (EP_EQUAL(event->udpMessage.peer, nmc.context.gsp)) {
+        if (nabto_ep_is_equal(&event->udpMessage.peer, &nmc.context.gsp)) {
             NABTO_LOG_INFO((PRInsi " UDP Fallback through the GSP ", MAKE_NSI_PRINTABLE(0, con->spnsi, 0)));
         } else {
             NABTO_LOG_INFO((PRInsi " Direct UDP connection", MAKE_NSI_PRINTABLE(0, con->spnsi, 0)));
@@ -949,7 +949,7 @@ nabto_connection_type get_connection_type(nabto_connect* con) {
         return NCT_REMOTE_RELAY_MICRO;
     }
 
-    if (EP_EQUAL(con->peer, nmc.context.gsp)) {
+    if (nabto_ep_is_equal(&con->peer, &nmc.context.gsp)) {
         return NCT_REMOTE_RELAY;
     }
     return NCT_REMOTE_P2P;
@@ -980,7 +980,7 @@ bool nabto_write_con(nabto_connect* con, uint8_t* buf, size_t len) {
 
 #if NABTO_ENABLE_DNS_FALLBACK
     if (nmc.nabtoMainSetup.enableDnsFallback) {
-        if (EP_EQUAL(con->peer, nmc.context.gsp) && con->socket == nmc.socketGSP && nmc.context.useDnsFallback) {
+        if (nabto_ep_is_equal(&con->peer, &nmc.context.gsp) && con->socket == nmc.socketGSP && nmc.context.useDnsFallback) {
             return (unabto_dns_fallback_send_to(buf, (uint16_t)len, con->peer.addr, con->peer.port) > 0);
         }
     }

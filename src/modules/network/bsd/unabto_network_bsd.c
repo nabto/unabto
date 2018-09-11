@@ -9,6 +9,7 @@
 #include <modules/network/poll/unabto_network_poll_api.h>
 #include <modules/network/epoll/unabto_epoll.h>
 #include <unabto/unabto_context.h>
+#include <unabto/unabto_message.h>
 #include <unabto/unabto_main_contexts.h>
 #include <unabto/unabto_common_main.h>
 
@@ -60,9 +61,9 @@ bool nabto_init_socket(struct nabto_ip_address* localAddr, uint16_t* localPort, 
     const char* interface;
     socketListElement* se;
     
-    NABTO_LOG_TRACE(("Open socket: ip=%s" ", port=%u", nabto_context_ip_to_string(localAddr), (int)*localPort));
+    NABTO_LOG_TRACE(("Open socket: ip=%s" ", port=%u", nabto_ip_to_string(localAddr), (int)*localPort));
     
-    sd = socket(AF_INET, SOCK_DGRAM, 0);
+    sd = socket(AF_INET6, SOCK_DGRAM, 0);
     if (sd == -1) {
         NABTO_LOG_ERROR(("Unable to create socket: (%i) '%s'.", errno, strerror(errno)));
         return false;
@@ -106,9 +107,15 @@ bool nabto_init_socket(struct nabto_ip_address* localAddr, uint16_t* localPort, 
             memcpy(sa.sin6_addr.s6_addr, localAddr->addr.ipv6, 16);
             sa.sin6_port = htons(*localPort);
             status = bind(sd, (struct sockaddr*)&sa, sizeof(sa));
-            
+        } else if (localAddr->type == NABTO_IP_ANY) {
+            struct sockaddr_in6 sa;
+            memset(&sa, 0, sizeof(sa));
+            sa.sin6_family = AF_INET6;
+            sa.sin6_addr = in6addr_any;
+            sa.sin6_port = htons(*localPort);
+            status = bind(sd, (struct sockaddr*)&sa, sizeof(sa));
         } else {
-            NABTO_LOG_TRACE(("unsupported ip type not opening socket."));
+            NABTO_LOG_ERROR(("unsupported ip type not opening socket."));
             return false;
         }
         
@@ -132,7 +139,7 @@ bool nabto_init_socket(struct nabto_ip_address* localAddr, uint16_t* localPort, 
         }
     }
     
-    NABTO_LOG_TRACE(("Socket opened: ip=%s" ", port=%u", nabto_context_ip_to_string(localAddr), (int)*localPort));
+    NABTO_LOG_TRACE(("Socket opened: ip=%s" ", port=%u", nabto_ip_to_string(localAddr), (int)*localPort));
     
     
     se = (socketListElement*)malloc(sizeof(socketListElement));
@@ -225,7 +232,7 @@ ssize_t nabto_read(nabto_socket_t sock,
     ep.addr = *addr;
     ep.port = *port;
     NABTO_NOT_USED(ep);
-    NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_BUFFERS, ("nabto_read: %s:%u", nabto_context_ip_to_string(addr), *port), buf, recvLength);
+    NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_BUFFERS, ("nabto_read: %s:%u", nabto_ip_to_string(addr), *port), buf, recvLength);
 
     return recvLength;
 }
@@ -256,7 +263,7 @@ ssize_t nabto_write(nabto_socket_t sock,
         NABTO_LOG_TRACE(("invalid address type"));
         return 0;
     }
-    NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_BUFFERS, ("nabto_write size: %" PRIsize ", %s:%u", len, nabto_context_ip_to_string(addr), port) ,buf, len);
+    NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_BUFFERS, ("nabto_write size: %" PRIsize ", %s:%u", len, nabto_ip_to_string(addr), port) ,buf, len);
 
     if (res < 0) {
         int status = errno;

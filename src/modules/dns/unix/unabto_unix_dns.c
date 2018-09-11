@@ -1,6 +1,6 @@
 #include <unabto/unabto_external_environment.h>
 #include <unabto/unabto_util.h>
-#include <unabto/unabto_context.h>
+#include <unabto/unabto_message.h>
 
 #include <pthread.h>
 
@@ -32,6 +32,7 @@ void* resolver_thread(void* ctx) {
     } else {
         struct addrinfo* rp;
         uint8_t i;
+        state->status = NABTO_DNS_OK;
         for (i = 0, rp = result; i < NABTO_DNS_RESOLVED_IPS_MAX && rp != NULL; rp = rp->ai_next) {
             struct nabto_ip_address* ip = &state->resolved_addrs[i];
             if (rp->ai_family == AF_INET) {
@@ -121,7 +122,7 @@ void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip)
     struct nabto_ip_address printIp;
     printIp.type = NABTO_IP_V4;
     printIp.addr.ipv4 = ipv4;
-    const char* ipv4String = nabto_context_ip_to_string(&printIp);
+    const char* ipv4String = nabto_ip_to_string(&printIp);
     
     int status = getaddrinfo(ipv4String, "4242", &hints, &result);
     if (status != 0 || result == NULL) {

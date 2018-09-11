@@ -17,6 +17,7 @@ extern "C" {
 struct nabto_ip_address {
     enum {
         NABTO_IP_NONE = 0,
+        NABTO_IP_ANY,
         NABTO_IP_V4,
         NABTO_IP_V6
     } type;

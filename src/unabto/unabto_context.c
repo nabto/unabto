@@ -74,20 +74,4 @@ void nabto_context_release(void)
     nabto_crypto_release(nmc.context.cryptoConnect);
 }
 
-const char* nabto_context_ip_to_string(const struct nabto_ip_address* addr)
-{
-    static char output[20]; //0000:1111:2222:3333:4444:5555:6666:7777:8888\0"
-    memset(output, 0, 20);
-    if (addr->type == NABTO_IP_NONE) {
-        sprintf(output, "NABTO_IP_NONE");
-    } else if (addr->type == NABTO_IP_V4) {
-        uint32_t ip = addr->addr.ipv4;
-        sprintf(output, "%" PRIu8 ".%" PRIu8 ".%" PRIu8 ".%" PRIu8, (uint8_t)(ip >> 24), (uint8_t)(ip >> 16), (uint8_t)(ip >> 8), (uint8_t)(ip));
-    } else {
-        const uint8_t* ip;
-        sprintf(output, "%02X%02X:" "%02X%02X:" "%02X%02X:" "%02X%02X:" "%02X%02X:" "%02X%02X:" "%02X%02X:" "%02X%02X", ip[0], ip[1], ip[2], ip[3], ip[4], ip[5], ip[6], ip[7], ip[8], ip[9], ip[10], ip[11], ip[12], ip[13], ip[14], ip[15]);
-    }
-    return output;
-}
-
 #endif

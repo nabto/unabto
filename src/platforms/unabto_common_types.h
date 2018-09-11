@@ -179,7 +179,7 @@ typedef __ROM char* text;
 
 
 #ifndef MAKE_EP_PRINTABLE
-#define MAKE_EP_PRINTABLE(ep) nabto_context_ip_to_string(&(ep).addr), (ep).port
+#define MAKE_EP_PRINTABLE(ep) nabto_ip_to_string(&(ep).addr), (ep).port
 #endif
 
 #ifndef PRIep

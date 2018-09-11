@@ -646,7 +646,7 @@ bool nabto_attach_event(nabto_packet_header* hdr)
                  * If the endpoint given from the attach differs from the endpoint address 
                  * the controller gave then, we are behind a symmetric nat.
                  */
-                if (!EP_EQUAL(ep, nmc.context.globalAddress)) {
+                if (!nabto_ep_is_equal(&ep, &nmc.context.globalAddress)) {
                     nmc.context.natType = NP_PAYLOAD_IPX_NAT_SYMMETRIC;
                 }
 
@@ -840,7 +840,7 @@ void handle_as_wait_dns(void) {
             for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
                 struct nabto_ip_address* ip = &nmc.controllerAddresses[i];
                 if (ip->type != NABTO_IP_NONE) {
-                    NABTO_LOG_INFO(("  Controller ip: %s", nabto_context_ip_to_string(ip)));
+                    NABTO_LOG_INFO(("  Controller ip: %s", nabto_ip_to_string(ip)));
                 }
             }
         }

@@ -103,8 +103,6 @@ void nabto_context_reinit_crypto(void);
  */
 void nabto_context_release(void);
 
-const char* nabto_context_ip_to_string(const struct nabto_ip_address* addr);
-
 #ifdef __cplusplus
 } // extern "C"
 #endif

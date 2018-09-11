@@ -56,7 +56,7 @@ void unabto_init_default_values(nabto_main_setup* nms) {
     nms->controllerArg.port = 5566;
     nms->controllerArg.addr.type = NABTO_IP_NONE; // NONE==> use DNS, ANY ==> don't use BS/GSP, other ==> use option as BS address
     nms->localPort = 5570;
-    nms->ipAddress.type = UNABTO_INADDR_ANY; // If non zero, the client will use the address
+    nms->ipAddress.type = NABTO_IP_ANY; // If non zero, the client will use the address
     nms->bufsize = NABTO_COMMUNICATION_BUFFER_SIZE;
     nms->id = 0;
     nms->version = 0;
