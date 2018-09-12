@@ -142,15 +142,30 @@ unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* epollDat
 
 unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpoint* ep){
     int status;
-    struct sockaddr_in host;
-
-    memset(&host,0,sizeof(struct sockaddr_in));
-    host.sin_family = AF_INET;
-    host.sin_addr.s_addr = htonl(ep->addr);
-    host.sin_port = htons(ep->port);
-    NABTO_LOG_TRACE(("Connecting to ", PRIep, MAKE_EP_PRINTABLE(*ep)));
+    if (ep->addr.type == NABTO_IP_V4) {
+        struct sockaddr_in host;
+        
+        memset(&host,0,sizeof(struct sockaddr_in));
+        host.sin_family = AF_INET;
+        host.sin_addr.s_addr = htonl(ep->addr.addr.ipv4);
+        host.sin_port = htons(ep->port);
+        NABTO_LOG_TRACE(("Connecting to ", PRIep, MAKE_EP_PRINTABLE(*ep)));
     
-    status = connect(sock->socket, (struct sockaddr*)&host, sizeof(struct sockaddr_in));
+        status = connect(sock->socket, (struct sockaddr*)&host, sizeof(struct sockaddr_in));
+    } else if (ep->addr.type == NABTO_IP_V6) {
+        struct sockaddr_in6 host;
+        
+        memset(&host,0,sizeof(struct sockaddr_in6));
+        host.sin6_family = AF_INET6;
+        memcpy(host.sin6_addr.s6_addr, ep->addr.addr.ipv6, 16);
+        host.sin6_port = htons(ep->port);
+        NABTO_LOG_TRACE(("Connecting to ", PRIep, MAKE_EP_PRINTABLE(*ep)));
+    
+        status = connect(sock->socket, (struct sockaddr*)&host, sizeof(struct sockaddr_in));
+        
+    } else {
+        return UTS_FAILED;
+    }
    
     if (status == 0) {
         return UTS_OK;
