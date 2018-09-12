@@ -31,6 +31,7 @@ set(src_tick
 set(src_select
   ${src}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main_select.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/select_impl.c
 )
 
 set(src_epoll
