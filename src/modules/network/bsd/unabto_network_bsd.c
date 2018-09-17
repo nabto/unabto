@@ -111,7 +111,7 @@ bool nabto_init_socket(struct nabto_ip_address* localAddr, uint16_t* localPort, 
             struct sockaddr_in6 sa;
             memset(&sa, 0, sizeof(sa));
             sa.sin6_family = AF_INET6;
-            sa.sin6_addr = in6addr_any;
+            memset(sa.sin6_addr.s6_addr, 0, 16);
             sa.sin6_port = htons(*localPort);
             status = bind(sd, (struct sockaddr*)&sa, sizeof(sa));
         } else {
