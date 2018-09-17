@@ -111,8 +111,9 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
     // write user records
     
     for (i = 0; i < users; i++) {
+        struct fp_acl_user* it;
         ptr = buffer;
-        struct fp_acl_user* it = &acl->users[i];
+        it = &acl->users[i];
         if (!fp_mem_is_slot_free(it)) {
 
             WRITE_FORWARD_MEM(ptr, it->fp.value.data, FINGERPRINT_LENGTH);
