@@ -64,6 +64,7 @@ void unabto_psk_connection_create_new_connection(nabto_socket_t socket, const na
 
 bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header, nabto_connect* connection)
 {
+    struct unabto_payload_capabilities_read capabilities;
     nabto_reset_connection(connection);
     connection->cpnsi = header->nsi_cp;
     connection->spnsi = nabto_connection_get_fresh_sp_nsi();
@@ -91,7 +92,6 @@ bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
     }
 
     // read capabilities and insert them into the connection
-    struct unabto_payload_capabilities_read capabilities;
     if (!unabto_connection_util_read_capabilities(header, &capabilities)) {
         return false;
     }
@@ -154,13 +154,13 @@ void unabto_psk_connection_handle_verify_request(nabto_socket_t socket, const na
 
     const uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
     const uint8_t* payloadsEnd = unabto_payloads_end(nabtoCommunicationBuffer, header);
+    uint8_t* decryptedDataBegin;
+    uint16_t decryptedDataLength;
 
     if (!unabto_payload_find_and_read_crypto(payloadsBegin, payloadsEnd, &cryptoPayload)) {
         NABTO_LOG_WARN(("expected a crypto payload, noone found."));
         return;
     }
-    uint8_t* decryptedDataBegin;
-    uint16_t decryptedDataLength;
     if (!unabto_crypto_verify_and_decrypt(header, &connection->cryptoctx, &cryptoPayload,
                                           &decryptedDataBegin,
                                           &decryptedDataLength))
@@ -236,13 +236,20 @@ void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const na
 
     // create header
     nabto_packet_header header;
+    uint8_t* ptr = nabtoCommunicationBuffer;
+    uint8_t* end;
+    uint8_t* cryptoPayloadStart;
+    uint8_t* plaintextStart;
+    uint8_t* plaintextEnd;
+    uint16_t plaintextLength;
+    uint16_t packetLength;
     nabto_header_init(&header, NP_PACKET_HDR_TYPE_U_CONNECT_PSK, connection->cpnsi, connection->spnsi);
 
     // set RSP bit
     nabto_header_add_flags(&header, NP_PACKET_HDR_FLAG_RESPONSE);
 
-    uint8_t* ptr = nabtoCommunicationBuffer;
-    uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
+
+    end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
 
     ptr = nabto_wr_header(ptr, end, &header);
 
@@ -254,13 +261,13 @@ void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const na
     ptr = insert_nonce_payload(ptr, end, connection->psk.handshakeData.responderNonce, 32);
 
     // pointer before crypto payload
-    uint8_t* cryptoPayloadStart = ptr;
+    cryptoPayloadStart = ptr;
 
     // insert encrypted payload header
     ptr = insert_crypto_payload_with_payloads(ptr, end);
 
     // start of plaintext
-    uint8_t* plaintextStart = ptr;
+    plaintextStart = ptr;
     
     // insert random_device
     ptr = insert_random_payload(ptr, end, connection->psk.handshakeData.responderRandom, 32);
@@ -268,13 +275,12 @@ void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const na
     // insert nonce_client
     ptr = insert_nonce_payload(ptr, end, connection->psk.handshakeData.initiatorNonce, 32);
 
-    uint8_t* plaintextEnd = ptr;
+    plaintextEnd = ptr;
 
-    uint16_t plaintextLength = plaintextEnd - plaintextStart;
+    plaintextLength = plaintextEnd - plaintextStart;
     
     // encrypt and send packet.
 
-    uint16_t packetLength;
     if (encrypt_packet(&connection->cryptoctx, nabtoCommunicationBuffer, end, plaintextStart, plaintextLength, cryptoPayloadStart, &packetLength)) {
         nabto_write(socket, nabtoCommunicationBuffer, packetLength, peer->addr, peer->port);
     } else {
@@ -293,6 +299,7 @@ void unabto_psk_connection_send_verify_response(nabto_socket_t socket, const nab
     // create header
    // create header
     nabto_packet_header header;
+    uint16_t packetLength;
     nabto_header_init(&header, NP_PACKET_HDR_TYPE_U_VERIFY_PSK, connection->cpnsi, connection->spnsi);
 
     // set RSP bit
@@ -308,7 +315,7 @@ void unabto_psk_connection_send_verify_response(nabto_socket_t socket, const nab
         return;
     }
 
-    uint16_t packetLength = ptr - nabtoCommunicationBuffer;
+    packetLength = ptr - nabtoCommunicationBuffer;
 
     insert_length(nabtoCommunicationBuffer, packetLength);
     // send packet
@@ -334,6 +341,7 @@ void unabto_psk_connection_send_error_response(nabto_socket_t socket, const nabt
     // create header
     // create header
     nabto_packet_header header;
+    uint16_t packetLength;
     nabto_header_init(&header, type, cpNsi, spNsi);
 
     // set RSP bit
@@ -350,7 +358,7 @@ void unabto_psk_connection_send_error_response(nabto_socket_t socket, const nabt
         return;
     }
 
-    uint16_t packetLength = ptr - nabtoCommunicationBuffer;
+    packetLength = ptr - nabtoCommunicationBuffer;
 
     insert_length(nabtoCommunicationBuffer, packetLength);
     // send packet
