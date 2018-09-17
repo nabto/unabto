@@ -9,9 +9,6 @@
 #include <mach/mach.h>
 #endif
 
-#define NABTO_LOG_MODULE_CURRENT NABTO_LOG_MODULE_MODBUS
-
-
 void unabto_unix_timer_add_stamp(nabto_stamp_t* stamp, int msec) {
     stamp->milliseconds += msec;
 }
