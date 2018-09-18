@@ -12,17 +12,15 @@
 
 typedef struct nabto_socket_t nabto_socket_t;
 
-enum nabto_ip_address_type {
-    NABTO_IP_NONE = 0,
-    NABTO_IP_ANY,
-    NABTO_IP_V4,
-    NABTO_IP_V6
+enum nabto_socket_type {
+    NABTO_SOCKET_IP_V4,
+    NABTO_SOCKET_IP_V6
 };
 
 //typedef int nabto_socket_t;
 struct nabto_socket_t {
     int sock;
-    enum nabto_ip_address_type type;
+    enum nabto_socket_type type;
 };
 
 

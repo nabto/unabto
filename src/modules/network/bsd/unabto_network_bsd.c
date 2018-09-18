@@ -79,7 +79,7 @@ bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* sock) {
             NABTO_LOG_ERROR(("Unable to create socket: (%i) '%s'.", errno, strerror(errno)));
             return false;
         }
-        sd.type = NABTO_IP_V4;
+        sd.type = NABTO_SOCKET_IP_V4;
     } else {
         int no = 0;
         if (setsockopt(sd.sock, IPPROTO_IPV6, IPV6_V6ONLY, (void*) &no, sizeof(no))) {
@@ -94,14 +94,14 @@ bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* sock) {
                     return false;
                 }
                 NABTO_LOG_TRACE(("created IPv6 socket"));
-                sd.type = NABTO_IP_V6;
+                sd.type = NABTO_SOCKET_IP_V6;
             } else {
                 NABTO_LOG_TRACE(("created IPv4 socket"));
-                sd.type = NABTO_IP_V4;
+                sd.type = NABTO_SOCKET_IP_V4;
             }
         } else {
             NABTO_LOG_TRACE(("created IPv6 socket for dual stack"));
-            sd.type = NABTO_IP_ANY;
+            sd.type = NABTO_SOCKET_IP_V6;
         }
     }
 
@@ -264,35 +264,34 @@ ssize_t nabto_write(nabto_socket_t sock,
 {
     int res;
     struct nabto_ip_address addrConv;
-    if (sock.type == NABTO_IP_V6 && addr->type == NABTO_IP_V4) {
-        struct sockaddr_in6 sa;
-        nabto_ip_convert_v4_to_v4_mapped(addr, &addrConv);
-        memset(&sa, 0, sizeof(sa));
-        sa.sin6_family = AF_INET6;
-        memcpy(sa.sin6_addr.s6_addr, addrConv.addr.ipv6, 16);
-        sa.sin6_port = htons(port);
-        res = sendto(sock.sock, buf, (int)len, 0, (struct sockaddr*)&sa, sizeof(sa));
-    } else if (sock.type == NABTO_IP_V4 && addr->type == NABTO_IP_V6 && nabto_ip_is_v4_mapped(addr)) {
-        nabto_ip_convert_v4_mapped_to_v4(addr, &addrConv);
-        struct sockaddr_in sa;
-        memset(&sa, 0, sizeof(sa));
-        sa.sin_family = AF_INET;
-        sa.sin_addr.s_addr = htonl(addrConv.addr.ipv4);
-        sa.sin_port = htons(port);
-        res = sendto(sock.sock, buf, (int)len, 0, (struct sockaddr*)&sa, sizeof(sa));
-    } else if (addr->type == NABTO_IP_V4) {
-        struct sockaddr_in sa;
-        memset(&sa, 0, sizeof(sa));
-        sa.sin_family = AF_INET;
-        sa.sin_addr.s_addr = htonl(addr->addr.ipv4);
-        sa.sin_port = htons(port);
-        res = sendto(sock.sock, buf, (int)len, 0, (struct sockaddr*)&sa, sizeof(sa));
-    } else if (addr->type == NABTO_IP_V6) {
+    if (sock.type == NABTO_SOCKET_IP_V6) {
         struct sockaddr_in6 sa;
         memset(&sa, 0, sizeof(sa));
         sa.sin6_family = AF_INET6;
-        memcpy(sa.sin6_addr.s6_addr, addr->addr.ipv6, 16);
+        if (addr->type == NABTO_IP_V4) {
+            nabto_ip_convert_v4_to_v4_mapped(addr, &addrConv);
+            memcpy(sa.sin6_addr.s6_addr, addrConv.addr.ipv6, 16);
+        } else {
+            memcpy(sa.sin6_addr.s6_addr, addr->addr.ipv6, 16);
+        }
         sa.sin6_port = htons(port);
+        res = sendto(sock.sock, buf, (int)len, 0, (struct sockaddr*)&sa, sizeof(sa));
+    } else if (sock.type == NABTO_SOCKET_IP_V4) {
+        struct sockaddr_in sa;
+        memset(&sa, 0, sizeof(sa));
+        if (addr->type == NABTO_IP_V6) {
+            if (nabto_ip_is_v4_mapped(addr)) {
+                nabto_ip_convert_v4_mapped_to_v4(addr, &addrConv);
+                sa.sin_addr.s_addr = htonl(addrConv.addr.ipv4);
+            } else {
+                NABTO_LOG_ERROR(("ERROR: Tried to write to IPv6 address on IPv4 socket"));
+                return 0;
+            }
+        } else {
+            sa.sin_addr.s_addr = htonl(addr->addr.ipv4);
+        }
+        sa.sin_family = AF_INET;
+        sa.sin_port = htons(port);
         res = sendto(sock.sock, buf, (int)len, 0, (struct sockaddr*)&sa, sizeof(sa));
     } else {
         NABTO_LOG_TRACE(("invalid address type"));

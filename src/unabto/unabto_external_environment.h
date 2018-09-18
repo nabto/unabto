@@ -14,6 +14,13 @@
 extern "C" {
 #endif
 
+enum nabto_ip_address_type {
+    NABTO_IP_NONE = 0,
+    NABTO_IP_ANY,
+    NABTO_IP_V4,
+    NABTO_IP_V6
+};
+
 struct nabto_ip_address {
     enum nabto_ip_address_type type;
 
