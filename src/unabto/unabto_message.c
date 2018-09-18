@@ -356,6 +356,14 @@ void nabto_ip_convert_v4_mapped_to_v4(const struct nabto_ip_address* a, struct n
     READ_U32(out->addr.ipv4, a->addr.ipv6+12);
 }
 
+void nabto_ip_convert_v4_to_v4_mapped(const struct nabto_ip_address* a, struct nabto_ip_address* out)
+{
+    uint8_t v4MappedPrefix[12] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF};
+    out->type = NABTO_IP_V6;
+    memcpy(out->addr.ipv6, v4MappedPrefix, 12);
+    WRITE_U32(out->addr.ipv6+12, a->addr.ipv4);
+}
+
 bool nabto_ip_is_v4_mapped(const struct nabto_ip_address* a)
 {
     uint8_t v4MappedPrefix[12] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF};

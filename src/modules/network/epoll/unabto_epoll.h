@@ -19,7 +19,7 @@ typedef struct {
 
 typedef struct {
     int epollEventType;
-    int fd;
+    nabto_socket_t fd;
 } unabto_epoll_event_handler_udp;
 
 void unabto_epoll_init();

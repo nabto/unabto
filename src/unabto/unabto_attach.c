@@ -783,7 +783,7 @@ void fix_for_broken_routers(void) {
         nabto_close_socket(&nmc.socketGSP);
         nmc.socketGSPLocalEndpoint.port = 0;
         if (!nabto_init_socket(&nmc.socketGSPLocalEndpoint.port, &nmc.socketGSP)) {
-            nmc.socketGSP = NABTO_INVALID_SOCKET;
+            nmc.socketGSP.sock = NABTO_INVALID_SOCKET;
         }
     }
 }
@@ -798,7 +798,7 @@ void handle_as_idle(void) {
     nabto_context_reinit_crypto();
 
 #if NABTO_ENABLE_GET_LOCAL_IP
-    nabto_get_local_ip(&nmc.socketGSPLocalEndpoint.addr);
+    nabto_get_local_ipv4(&nmc.socketGSPLocalEndpoint.addr);
 #endif
     
     fix_for_broken_routers();

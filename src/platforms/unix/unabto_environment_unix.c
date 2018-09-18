@@ -30,9 +30,9 @@
  */
 void nabto_bsd_set_nonblocking(nabto_socket_t* sd)
 {
-    int flags = fcntl(*sd, F_GETFL, 0);
+    int flags = fcntl(sd->sock, F_GETFL, 0);
     if (flags == -1) flags = 0;
-    fcntl(*sd, F_SETFL, flags | O_NONBLOCK);
+    fcntl(sd->sock, F_SETFL, flags | O_NONBLOCK);
 }
 
 bool nabto_init_platform() {

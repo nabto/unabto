@@ -247,7 +247,7 @@ void unabto_network_select_read_sockets(fd_set* readFds) {
     }
 }
 
-bool nabto_get_local_ip(uint32_t* ip) {
+bool nabto_get_local_ipv4(uint32_t* ip) {
     struct sockaddr_in si_me, si_other;
     int s;
     

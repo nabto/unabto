@@ -15,12 +15,7 @@ extern "C" {
 #endif
 
 struct nabto_ip_address {
-    enum {
-        NABTO_IP_NONE = 0,
-        NABTO_IP_ANY,
-        NABTO_IP_V4,
-        NABTO_IP_V6
-    } type;
+    enum nabto_ip_address_type type;
 
     union {
         uint32_t ipv4; ///< IP address
@@ -118,7 +113,7 @@ void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip);
  * @param ip      ip in host byte order.
  * @return true   iff ip is set to the local ip address.
  */
-bool nabto_get_local_ip(struct nabto_ip_address* ip);
+bool nabto_get_local_ipv4(struct nabto_ip_address* ip);
 
 
 

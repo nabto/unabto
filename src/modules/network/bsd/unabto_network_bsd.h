@@ -10,7 +10,22 @@
 #define UNABTO_NETWORK_BSD_NONBLOCKING 1
 #endif
 
-typedef int nabto_socket_t;
+typedef struct nabto_socket_t nabto_socket_t;
+
+enum nabto_ip_address_type {
+    NABTO_IP_NONE = 0,
+    NABTO_IP_ANY,
+    NABTO_IP_V4,
+    NABTO_IP_V6
+};
+
+//typedef int nabto_socket_t;
+struct nabto_socket_t {
+    int sock;
+    enum nabto_ip_address_type type;
+};
+
+
 #define NABTO_INVALID_SOCKET -1
 
 #ifdef __cplusplus

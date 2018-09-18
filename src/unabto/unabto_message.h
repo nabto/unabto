@@ -59,6 +59,8 @@ bool nabto_message_async_response_poll(void);
 
 void nabto_ip_convert_v4_mapped_to_v4(const struct nabto_ip_address* a, struct nabto_ip_address* out);
 
+void nabto_ip_convert_v4_to_v4_mapped(const struct nabto_ip_address* a, struct nabto_ip_address* out);
+
 bool nabto_ip_is_v4_mapped(const struct nabto_ip_address* a);
 
 bool nabto_ip_is_equal(const struct nabto_ip_address* a1, const struct nabto_ip_address* a2);
