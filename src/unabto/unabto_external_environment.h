@@ -53,14 +53,13 @@ void nabto_random(uint8_t* buf, size_t len);
  * uNabto creates, this will normally occur two times. One for local
  * connections and one for remote connections.
  *
- * @param localAddr    The local address to bind to.
  * @param localPort    The local port to bind to.
  *                     A port number of 0 gives a random port. The
  *                     pointer may not be NULL.
  * @param socket       To return the created socket descriptor.
  * @return             true iff successfull
  */
-bool nabto_init_socket(struct nabto_ip_address* localAddr, uint16_t* localPort, nabto_socket_t* socket);
+bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket);
 
 /**
  * Close a socket. 

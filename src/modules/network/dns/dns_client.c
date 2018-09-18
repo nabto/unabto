@@ -91,7 +91,7 @@ void dns_client_tick(void)
     case STATE_OPEN_SOCKET:
     {
       uint16_t localPort = 0;
-      if(nabto_init_socket(0, &localPort, &clientSocket))
+      if(nabto_init_socket(&localPort, &clientSocket))
       {
         state = STATE_RESOLVE;
         NABTO_LOG_TRACE(("Socket opened."));

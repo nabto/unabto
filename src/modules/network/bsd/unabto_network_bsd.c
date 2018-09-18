@@ -54,14 +54,24 @@ static NABTO_THREAD_LOCAL_STORAGE struct socketListElement* socketList = 0;
 
 
 
-bool nabto_init_socket(struct nabto_ip_address* localAddr, uint16_t* localPort, nabto_socket_t* sock) {
+bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* sock) {
     
     nabto_socket_t sd;
     nabto_main_context* nmc;
     const char* interface;
     socketListElement* se;
+    int status;
     
-    NABTO_LOG_TRACE(("Open socket: ip=%s" ", port=%u", nabto_ip_to_string(localAddr), (int)*localPort));
+    
+    NABTO_LOG_TRACE(("Open socket, port=%u", (int)*localPort));
+
+    
+    // try ipv6
+    //   test if ipv6 socket can ipv4
+    // if not then use ipv4
+    // if ipv4 does not work use ipv6 only.
+    // IPV6_V6ONLY
+    // see nabto4/src/util/udp_socket.hpp
     
     sd = socket(AF_INET6, SOCK_DGRAM, 0);
     if (sd == -1) {
@@ -90,35 +100,17 @@ bool nabto_init_socket(struct nabto_ip_address* localAddr, uint16_t* localPort, 
             return false;
         }
     }
-#endif    
+#endif
     {
         int status;
-        if (localAddr->type == NABTO_IP_V4) {
-            struct sockaddr_in sa;
-            memset(&sa, 0, sizeof(sa));
-            sa.sin_family = AF_INET;
-            sa.sin_addr.s_addr = htonl(localAddr->addr.ipv4);
-            sa.sin_port = htons(*localPort);
-            status = bind(sd, (struct sockaddr*)&sa, sizeof(sa));
-        } else if (localAddr->type == NABTO_IP_V6) {
-            struct sockaddr_in6 sa;
-            memset(&sa, 0, sizeof(sa));
-            sa.sin6_family = AF_INET6;
-            memcpy(sa.sin6_addr.s6_addr, localAddr->addr.ipv6, 16);
-            sa.sin6_port = htons(*localPort);
-            status = bind(sd, (struct sockaddr*)&sa, sizeof(sa));
-        } else if (localAddr->type == NABTO_IP_ANY) {
-            struct sockaddr_in6 sa;
-            memset(&sa, 0, sizeof(sa));
-            sa.sin6_family = AF_INET6;
-            memset(sa.sin6_addr.s6_addr, 0, 16);
-            sa.sin6_port = htons(*localPort);
-            status = bind(sd, (struct sockaddr*)&sa, sizeof(sa));
-        } else {
-            NABTO_LOG_ERROR(("unsupported ip type not opening socket."));
-            return false;
-        }
         
+        struct sockaddr_in6 sa;
+        memset(&sa, 0, sizeof(sa));
+        sa.sin6_family = AF_INET6;
+        memset(sa.sin6_addr.s6_addr, 0, 16);
+        sa.sin6_port = htons(*localPort);
+        status = bind(sd, (struct sockaddr*)&sa, sizeof(sa));
+                
         if (status < 0) {
             NABTO_LOG_ERROR(("Unable to bind socket: (%i) '%s' localport %i", errno, strerror(errno), *localPort));
             close(sd);
@@ -139,7 +131,7 @@ bool nabto_init_socket(struct nabto_ip_address* localAddr, uint16_t* localPort, 
         }
     }
     
-    NABTO_LOG_TRACE(("Socket opened: ip=%s" ", port=%u", nabto_ip_to_string(localAddr), (int)*localPort));
+    NABTO_LOG_TRACE(("Socket opened: port=%u", (int)*localPort));
     
     
     se = (socketListElement*)malloc(sizeof(socketListElement));

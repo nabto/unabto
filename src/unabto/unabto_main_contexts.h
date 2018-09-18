@@ -22,7 +22,6 @@ enum {
 typedef struct {
     nabto_endpoint    controllerArg;      /**< Controller endpoint argument     */
     uint16_t          localPort;          /**< The port to use for local connections */
-    struct nabto_ip_address  ipAddress;          /**< The IP address to bind to        */
     const char*       interfaceName;      /**< The interface to bind to, unix only */
     uint16_t          bufsize;            /**< Communication buffer size        */
     const char*       id;                 /**< Id for the nabto device          

@@ -184,17 +184,6 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
         return false;
     }
 
-    if( gopt_arg( options, 'a', & address ) ){
-        addr = inet_addr(address);
-        if (addr == INADDR_NONE) {
-            help("Illegal local address", progname);
-            gopt_free(options);
-            return false;
-        }
-        nms->ipAddress.type = NABTO_IP_V4;
-        nms->ipAddress.addr.ipv4 = htonl(addr);
-    } 
-
     if( gopt_arg( options, 'p', &localPortStr) ){
         nms->localPort = atoi(localPortStr);
     }

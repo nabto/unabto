@@ -59,7 +59,7 @@ bool unabto_syslog_init(const char* deviceId)
     bool ok;
     disableSyslog = true;
     
-    ok = nabto_init_socket(0, &localPort, &syslogSocket);
+    ok = nabto_init_socket(&localPort, &syslogSocket);
     disableSyslog = false;
     return ok;
 }

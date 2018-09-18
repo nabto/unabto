@@ -32,7 +32,7 @@ static struct socketListElement* socketList = 0;
 
 static void unabto_winsock_shutdown(void);
 
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* sock)
+bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* sock)
 {
     nabto_socket_t sd = INVALID_SOCKET;
     struct sockaddr_in sa;

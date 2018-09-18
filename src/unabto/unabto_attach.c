@@ -782,7 +782,7 @@ void fix_for_broken_routers(void) {
     if (unabto_count_active_connections() == 0) {
         nabto_close_socket(&nmc.socketGSP);
         nmc.socketGSPLocalEndpoint.port = 0;
-        if (!nabto_init_socket(&nmc.nabtoMainSetup.ipAddress, &nmc.socketGSPLocalEndpoint.port, &nmc.socketGSP)) {
+        if (!nabto_init_socket(&nmc.socketGSPLocalEndpoint.port, &nmc.socketGSP)) {
             nmc.socketGSP = NABTO_INVALID_SOCKET;
         }
     }
