@@ -126,14 +126,17 @@ ssize_t nabto_read( nabto_socket_t socket,
 ssize_t nabto_write( nabto_socket_t socket,
                      const uint8_t* buf,
                      size_t         len,
-                     uint32_t       addr,
+                     struct nabto_ip_address*       addr,
                      uint16_t       port )
 {
     int res;
     struct freertos_sockaddr xAddress;
+    if (addr->type != NABTO_IP_V4) {
+        return 0;
+    }
 
     memset( &xAddress, 0, sizeof( xAddress ) );
-    xAddress.sin_addr = FreeRTOS_htonl( addr );
+    xAddress.sin_addr = FreeRTOS_htonl( addr->addr.ipv4 );
     xAddress.sin_port = FreeRTOS_htons( port );
     res = FreeRTOS_sendto( socket, buf, ( int )len, 0, ( struct freertos_sockaddr * ) &xAddress, sizeof( xAddress ) );
     return res;

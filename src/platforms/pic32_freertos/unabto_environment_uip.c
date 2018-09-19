@@ -109,13 +109,16 @@ ssize_t nabto_read(nabto_socket_t socket,
 ssize_t nabto_write(nabto_socket_t socket,
                     const uint8_t* buf,
                     size_t         len,
-                    uint32_t       addr,
+                    struct nabto_ip_address*       addr,
                     uint16_t       port) {
     // Set the socket in uip to be this one.
+    if (addr->type != NABTO_IP_V4) {
+        return 0;
+    }
     opacket.socket = socket;
     memcpy(opacket.buffer, buf, len);
     opacket.len = len;
-    opacket.addr = addr;
+    opacket.addr = addr->addr.ipv4;
     opacket.port = port;
     return len;
 }

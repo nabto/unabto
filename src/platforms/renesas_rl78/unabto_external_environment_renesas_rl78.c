@@ -153,16 +153,19 @@ ssize_t nabto_read(nabto_socket_t socket,
 ssize_t nabto_write(nabto_socket_t socket,
                     const uint8_t* buf,
                     size_t         len,
-                    uint32_t       addr,
+                    struct nabto_ip_address       addr,
                     uint16_t       port)
 {
   char ip[4];
   char s_ip[17];
+  if (addr->type != NABTO_IP_V4) {
+      return 0;
+  }
   
-  ip[3] = (uint8_t)addr;
-  ip[2] = (uint8_t)(addr >> 8);
-  ip[1] = (uint8_t)(addr >> 16);
-  ip[0] = (uint8_t)(addr >> 24);
+  ip[3] = (uint8_t)addr->addr.ipv4;
+  ip[2] = (uint8_t)(addr->addr.ipv4 >> 8);
+  ip[1] = (uint8_t)(addr->addr.ipv4 >> 16);
+  ip[0] = (uint8_t)(addr->addr.ipv4 >> 24);
   sprintf(s_ip, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
   
   AtLibGs_BulkDataTrans(true);

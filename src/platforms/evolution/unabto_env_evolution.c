@@ -166,22 +166,26 @@ ssize_t nabto_read(nabto_socket_t socket,
 /******************************************************************************/
 
 ssize_t nabto_write(nabto_socket_t socket,
-                 const uint8_t* buf,
-                 size_t         len,
-                 uint32_t       addr,
-                 uint16_t       port)
+                    const uint8_t* buf,
+                    size_t         len,
+                    struct nabto_ip_address*       addr,
+                    uint16_t       port)
 {
     int res;
     struct sockaddr_in sa;
 #if NABTO_ENABLE_CONNECTION_ESTABLISHMENT_ACL_CHECK
     nabto_endpoint_t ep;
 #endif
+    if (addr->type != NABTO_IP_V4) {
+        return 0;
+    }
     memset(&sa, 0, sizeof(sa));
     sa.sin_family = AF_INET;
-    sa.sin_addr.s_addr = htonl(addr);
+    sa.sin_addr.s_addr = htonl(addr->addr.ipv4);
     sa.sin_port = htons(port);
 #if NABTO_ENABLE_CONNECTION_ESTABLISHMENT_ACL_CHECK
-    ep.addr = addr;
+    ep.addr.type = addr->type;
+    ep.addr.addr.ipv4 = addr->addr.ipv4;
     ep.port = port;
 #endif
     NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_USER1, ("nabto_write " PRIep, MAKE_EP_PRINTABLE(ep)),buf, len);

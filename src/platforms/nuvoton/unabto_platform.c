@@ -180,12 +180,14 @@ ssize_t nabto_read(nabto_socket_t socket,
 ssize_t nabto_write(nabto_socket_t socket,
                     const uint8_t* buf,
                     size_t         len,
-                    uint32_t       addr,
+                    struct nabto_ip_address*       addr,
                     uint16_t       port)
 {
-    NABTO_LOG_DEBUG(("nabto_write: %i.%i.%i.%i: port=%u length=%u", (addr >> 24) & 0xFF, (addr >> 16) & 0xFF, (addr >> 8) & 0xFF, addr & 0xFF, port, len));
-
-    rak_send_Data(socket, port, addr, (uint8_t *)buf, len);
+    NABTO_LOG_DEBUG(("nabto_write: %i.%i.%i.%i: port=%u length=%u", (addr->addr.ipv4 >> 24) & 0xFF, (addr->addr.ipv4 >> 16) & 0xFF, (addr->addr.ipv4 >> 8) & 0xFF, addr->addr.ipv4 & 0xFF, port, len));
+    if (addr->type != NABTO_IP_V4) {
+        return 0;
+    }
+    rak_send_Data(socket, port, addr->addr.ipv4, (uint8_t *)buf, len);
     return true;
 }
 

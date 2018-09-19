@@ -286,9 +286,9 @@ ssize_t nabto_read(nabto_socket_t socket,
 ssize_t nabto_write(nabto_socket_t socket,
                     const uint8_t* buf,
                     size_t len,
-                    uint32_t addr,
+                    struct nabto_ip_address* addr,
                     uint16_t port) {
-  if(addr == 0 || port == 0)
+  if(addr->type != NABTO_IP_V4 || port == 0)
   {
     return 0;
   }
@@ -316,9 +316,9 @@ ssize_t nabto_write(nabto_socket_t socket,
   ApiSocketAddrType sendTo;
   sendTo.Domain = ASD_AF_INET;
   sendTo.Port = port;
-  sendTo.Ip.V4.Addr = addr;
+  sendTo.Ip.V4.Addr = addr->addr.ipv4;
   SendApiSocketSendToReq(COLA_TASK, socket, fresh_buffer, len, 0, sendTo);
-  NABTO_LOG_TRACE(("Send packet length: %i %u:%u handle: %u", len, addr, port, socket));
+  NABTO_LOG_TRACE(("Send packet length: %i %u:%u handle: %u", len, addr->addr.ipv4, port, socket));
   return len;
 }
 

@@ -155,17 +155,21 @@ ssize_t nabto_read(nabto_socket_t sock, uint8_t* buf, size_t len, struct nabto_i
     return res;
 }
 
-ssize_t nabto_write(nabto_socket_t sock, const uint8_t* buf, size_t len, uint32_t addr, uint16_t port)
+ssize_t nabto_write(nabto_socket_t sock, const uint8_t* buf, size_t len, struct nabto_ip_address* addr, uint16_t port)
 {
     int res;
     struct sockaddr_in sa;
     nabto_endpoint ep;
 
+    if (addr->type != NABTO_IP_V4) {
+        return 0;
+    }
     memset(&sa, 0, sizeof(sa));
     sa.sin_family = AF_INET;
-    sa.sin_addr.s_addr = htonl(addr);
+    sa.sin_addr.s_addr = htonl(addr->addr.ipv4);
     sa.sin_port = htons(port);
-    ep.addr = addr;
+    ep.addr.type = addr->type;
+    ep.addr.addr.ipv4 = addr->addr.ipv4;
     ep.port = port;
     NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_TRACE, ("nabto_write " PRIep, MAKE_EP_PRINTABLE(ep)), buf, len);
     res = sendto(sock, (const char*) buf, (int)len, 0, (struct sockaddr*)&sa, sizeof(sa));

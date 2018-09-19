@@ -230,18 +230,18 @@ ssize_t nabto_read(nabto_socket_t socket, uint8_t* buffer, size_t length, struct
   return receiveBufferLength;
 }
 
-ssize_t nabto_write(nabto_socket_t socket, const uint8_t* buffer, size_t length, uint32_t address, uint16_t port)
+ssize_t nabto_write(nabto_socket_t socket, const uint8_t* buffer, size_t length, struct nabto_ip_address* address, uint16_t port)
 {
   int32_t result;
   
-  if(length > SEND_BUFFER_SIZE)
+  if(length > SEND_BUFFER_SIZE || address->type != NABTO_IP_V4)
   {
     return 0;
   }
   
   memcpy(sendBuffer, buffer, length);
   
-  result = RAK_SendData(socket, sendBuffer, length, address, port);
+  result = RAK_SendData(socket, sendBuffer, length, address->addr.ipv4, port);
   
   if(result != RAK_OK)
   {
@@ -249,7 +249,7 @@ ssize_t nabto_write(nabto_socket_t socket, const uint8_t* buffer, size_t length,
     return 0;
   }
   
-  NABTO_LOG_TRACE(("Sent UDP packet to " PRI_IP ":%u length=%u", PRI_IP_FORMAT(address), port, length));
+//  NABTO_LOG_TRACE(("Sent UDP packet to " PRI_IP ":%u length=%u", PRI_IP_FORMAT(address), port, length));
   
   return length;
 }

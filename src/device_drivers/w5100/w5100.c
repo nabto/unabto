@@ -385,11 +385,14 @@ void w5100_nabto_close_socket(nabto_socket_t* socket)
   w5100_udp_close(socket);
 }
 
-ssize_t w5100_nabto_write(nabto_socket_t socket, const uint8_t* buf, size_t len, uint32_t addr, uint16_t port)
+ssize_t w5100_nabto_write(nabto_socket_t socket, const uint8_t* buf, size_t len, struct nabto_ip_address* addr, uint16_t port)
 {
+  if (addr->type != NABTO_IP_V4) {
+    return 0;
+  }
   NABTO_LOG_TRACE(("w5100_nabto_udp_write socket=%u length=%u", (int) socket, (int) len));
 
-  if(w5100_udp_send(&socket, (uint8_t*) buf, len, addr, port))
+  if(w5100_udp_send(&socket, (uint8_t*) buf, len, addr->addr.ipv4, port))
   {
     return len;
   }

@@ -176,14 +176,14 @@ ssize_t nabto_read(nabto_socket_t socket,
 ssize_t nabto_write(nabto_socket_t socket,
                     const uint8_t* buf,
                     size_t         len,
-                    uint32_t       addr,
+                    struct nabto_ip_address*       addr,
                     uint16_t       port)
 {
     ssize_t res = -1;
     static struct pbuf *p=NULL;
     struct ip_addr ipAddr;
     
-    if (0 > socket || socket >= MAX_SOCKETS || NULL == buf || 0 == len)
+    if (0 > socket || socket >= MAX_SOCKETS || NULL == buf || 0 == len || addr->type != NABTO_IP_V4)
         return -1;
         
     p = pbuf_alloc(PBUF_TRANSPORT, (unsigned short)len, PBUF_RAM);
@@ -191,7 +191,7 @@ ssize_t nabto_write(nabto_socket_t socket,
         return -1;
     
     pbuf_take(p, buf, (unsigned short)len);
-    ipAddr.addr = htonl(addr);
+    ipAddr.addr = htonl(addr->addr.ipv4);
     if (ERR_OK == udp_sendto(sockets[socket].pcb, p, &ipAddr, port))
         res = (ssize_t)len;
     pbuf_free(p);

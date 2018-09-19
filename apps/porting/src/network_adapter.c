@@ -89,14 +89,18 @@ ssize_t nabto_read(nabto_socket_t sock,
 ssize_t nabto_write(nabto_socket_t sock,
                  const uint8_t* buf,
                  size_t         len,
-                 uint32_t       addr,
+                 struct nabto_ip_address*       addr,
                  uint16_t       port)
 {
     int res;
     struct sockaddr_in sa;
+    if (addr->type != NABTO_IP_V4) {
+        NABTO_LOG_ERROR(("ERROR: tried to write to non-IPv4 address"));
+        return 0;
+    }
     memset(&sa, 0, sizeof(sa));
     sa.sin_family = AF_INET;
-    sa.sin_addr.s_addr = htonl(addr);
+    sa.sin_addr.s_addr = htonl(addr->addr.ipv4);
     sa.sin_port = htons(port);
     res = sendto(sock, buf, (int)len, 0, (struct sockaddr*)&sa, sizeof(sa));
     if (res < 0) {

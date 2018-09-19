@@ -201,16 +201,19 @@ ssize_t nabto_read(nabto_socket_t socket,
 /******************************************************************************/
 
 ssize_t nabto_write(nabto_socket_t socket,
-                 const uint8_t* buf,
-                 size_t         len,
-                 uint32_t       addr,
-                 uint16_t       port)
+                    const uint8_t* buf,
+                    size_t         len,
+                    struct nabto_ip_address       addr,
+                    uint16_t       port)
 {
     int res;
     struct sockaddr_in sa;
+    if (addr->type != NABTO_IP_V4) {
+        return 0;
+    }
     memset(&sa, 0, sizeof(sa));
     sa.sin_family = AF_INET;
-    sa.sin_addr.s_addr = addr;
+    sa.sin_addr.s_addr = addr->addr.ipv4;
     sa.sin_port = port;
     res = sendto(socket, (void*)buf, (uint32_t)len, 0, &sa, sizeof(sa));
     if (res < 0) {

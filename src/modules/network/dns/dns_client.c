@@ -110,6 +110,7 @@ void dns_client_tick(void)
       uint8_t* p = packet->data;
       uint8_t* name = (uint8_t*) currentHost;
       uint8_t* labelLengthPointer;
+      struct nabto_ip_address ip;
 
       memset(nabtoCommunicationBuffer, 0, nabtoCommunicationBufferSize);
       WRITE_U16(&packet->transactionIdentifier, transactionIdentifier);
@@ -136,7 +137,9 @@ void dns_client_tick(void)
       WRITE_FORWARD_U16(p, TYPE_A);
       WRITE_FORWARD_U16(p, CLASS_IN);
 
-      nabto_write(clientSocket, nabtoCommunicationBuffer, p - nabtoCommunicationBuffer, serverIp, 53);
+      ip.type = NABTO_IP_V4;
+      ip.addr.ipv4 = serverIp;
+      nabto_write(clientSocket, nabtoCommunicationBuffer, p - nabtoCommunicationBuffer, &ip, 53);
 
       state = STATE_WAITING_FOR_RESPONSE;
       nabtoSetFutureStamp(&timer, TIMEOUT);

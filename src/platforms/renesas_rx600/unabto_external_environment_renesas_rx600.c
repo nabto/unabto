@@ -196,26 +196,26 @@ static void uipSend(const uint8_t* buf, size_t len, uint32_t addr, uint16_t port
 ssize_t nabto_write(nabto_socket_t socket,
                     const uint8_t* buf,
                     size_t         len,
-                    uint32_t       addr,
+                    struct nabto_ip_address*       addr,
                     uint16_t       port)
 {
     static int dropped=0;
     ssize_t res = -1;
     XmitBuffer *xmitBuf;
 
-    if (0 > socket || socket >= MAX_SOCKETS)
+    if (0 > socket || socket >= MAX_SOCKETS || addr->type != NABTO_IP_V4)
         return -1;
 
 
     if (0 == uip_sdatalen() && uip_udp_conn->appstate.unabto == socket)
     {
-        uipSend(buf, len, addr, port);
+        uipSend(buf, len, addr->addr.ipv4, port);
         res = len; //...
     }
     else if (NULL != (xmitBuf = socketPacketBufferNew(socket)))
     {
         // Keep until uip calls back
-        xmitBuf->addr = addr;
+        xmitBuf->addr = addr->addr.ipv4;
         xmitBuf->port = port;
         xmitBuf->len = len;
         memcpy(xmitBuf->buffer, buf, len);
