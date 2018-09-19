@@ -251,6 +251,11 @@ int nabtoStampDiff2ms(nabto_stamp_diff_t diff) {
     return (int) diff;
 }
 
+void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
+    ip->type = NABTO_IP_V4;
+    ip->addr.ipv4 = ipv4;
+}
+
 void nabto_dns_resolve(const char* id){
 }
 

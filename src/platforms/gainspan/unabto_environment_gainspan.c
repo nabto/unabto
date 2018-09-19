@@ -11,6 +11,11 @@ void nabto_bsd_set_nonblocking(nabto_socket_t* socketDescriptor) {
     tfBlockingState(*socketDescriptor, TM_BLOCKING_OFF);
 }
 
+void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
+    ip->type = NABTO_IP_V4;
+    ip->addr.ipv4 = ipv4;
+}
+
 void nabto_dns_resolve(const char* id) {
 
 }

@@ -153,6 +153,11 @@ void nabto_close_socket( nabto_socket_t* socketDescriptor )
 }
 /******************************************************************************/
 
+void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
+    ip->type = NABTO_IP_V4;
+    ip->addr.ipv4 = ipv4;
+}
+
 void nabto_dns_resolve(const char* id) 
 {
     ( void ) id;
