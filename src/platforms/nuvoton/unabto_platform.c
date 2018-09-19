@@ -109,7 +109,7 @@ void nabto_close_socket(nabto_socket_t* socket)
 ssize_t nabto_read(nabto_socket_t socket,
                    uint8_t*       buf,
                    size_t         len,
-                   uint32_t*      addr,
+                   struct nabto_ip_address*      addr,
                    uint16_t*      port)
 {
     int eff_data_len = 0;
@@ -131,7 +131,8 @@ ssize_t nabto_read(nabto_socket_t socket,
         *port = uCmdRspFrame.recvdataFrame.recvdata.destPort[0] |
                 uCmdRspFrame.recvdataFrame.recvdata.destPort[1]<<8;
 
-        *addr = uCmdRspFrame.recvdataFrame.recvdata.destIp[0] |
+        addr->type = NABTO_IP_V4;
+        addr->addr.ipv4 = uCmdRspFrame.recvdataFrame.recvdata.destIp[0] |
                 uCmdRspFrame.recvdataFrame.recvdata.destIp[1]<<8  |
                 uCmdRspFrame.recvdataFrame.recvdata.destIp[2]<<16 |
                 uCmdRspFrame.recvdataFrame.recvdata.destIp[3]<<24;
@@ -156,7 +157,7 @@ ssize_t nabto_read(nabto_socket_t socket,
 
         memcpy(buf, uCmdRspFrame.recvdataFrame.recvdata.recvdataBuf, recvLen);
 
-        NABTO_LOG_DEBUG(("Received UDP packet from %i.%i.%i.%i: port=%u length=%u", (*addr >> 24) & 0xFF, (*addr >> 16) & 0xFF, (*addr >> 8) & 0xFF, *addr & 0xFF, *port, recvLen));
+        NABTO_LOG_DEBUG(("Received UDP packet from %i.%i.%i.%i: port=%u length=%u", (addr->addr.ipv4 >> 24) & 0xFF, (addr->addr.ipv4 >> 16) & 0xFF, (addr->addr.ipv4 >> 8) & 0xFF, addr->addr.ipv4 & 0xFF, *port, recvLen));
     }
     while (0);
 

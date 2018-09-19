@@ -147,7 +147,7 @@ void dns_client_tick(void)
 
     case STATE_WAITING_FOR_RESPONSE:
     {
-      uint32_t sourceIp;
+      struct nabto_ip_address sourceIp;
       uint16_t sourcePort;
       dns_packet* dnsPacket = (dns_packet*) nabtoCommunicationBuffer;
       uint16_t length = (uint16_t) nabto_read(clientSocket, nabtoCommunicationBuffer, sizeof (nabtoCommunicationBuffer), &sourceIp, &sourcePort);

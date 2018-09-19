@@ -92,13 +92,14 @@ void dummy_packet_handler() {
 ssize_t nabto_read(nabto_socket_t socket,
                    uint8_t*       buf,
                    size_t         len,
-                   uint32_t*      addr,
+                   struct nabto_ip_address*      addr,
                    uint16_t*      port) {
     // will be handled when  newdata is called.
     if (ipacket.socket == socket) {
         ipacket.socket = NULL;
         memmove(buf, ipacket.buffer, MIN(ipacket.len, len));
-        *addr = ipacket.addr;
+        addr.type = NABTO_IP_V4;
+        addr.addr.ipv4 = ipacket.addr;
         *port = ipacket.port;
         return ipacket.len;
     }

@@ -145,11 +145,11 @@ static uint32_t loops=0;
 ssize_t nabto_read(nabto_socket_t socket,
                    uint8_t*       buf,
                    size_t         len,
-                   uint32_t*      addr,
+                   struct nabto_ip_address*      addr,
                    uint16_t*      port)
 {
     size_t res;
-    uint8_t *ap = (uint8_t*)addr;
+    uint8_t *ap = (uint8_t*)(&addr->addr.ipv4);
     if (0 > socket || MAX_SOCKETS <= socket  || uip_poll() || socket != uip_udp_conn->appstate.unabto)
         return 0;
 
@@ -158,6 +158,7 @@ ssize_t nabto_read(nabto_socket_t socket,
     {
         memcpy(buf, uip_appdata, res);
         // host order little endian
+        addr->type = NABTO_IP_V4;
         ap[3] = uip_ipaddr1(uip_udp_conn->srcipaddr);
         ap[2] = uip_ipaddr2(uip_udp_conn->srcipaddr);
         ap[1] = uip_ipaddr3(uip_udp_conn->srcipaddr);

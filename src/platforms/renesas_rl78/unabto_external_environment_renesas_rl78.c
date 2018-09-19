@@ -100,7 +100,7 @@ void nabto_close_socket(nabto_socket_t* socket)
 ssize_t nabto_read(nabto_socket_t socket,
                    uint8_t*       buf,
                    size_t         len,
-                   uint32_t*      addr,
+                   struct nabto_ip_address*      addr,
                    uint16_t*      port)
 {
   ATLIBGS_UDPMessage at_msg;
@@ -119,8 +119,9 @@ ssize_t nabto_read(nabto_socket_t socket,
                   (uint32_t)temp_ip[1] << 16 |
                   (uint32_t)temp_ip[2] << 8  |
                   (uint32_t)temp_ip[3];
-    
-    *addr = ip;
+
+    addr->type = NABTO_IP_V4;
+    addr->addr.ipv4 = ip;
     
     // Convert port, host order
     temp_port[0] = (uint8_t)(at_msg.port >> 8);

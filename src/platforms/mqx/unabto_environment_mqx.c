@@ -169,7 +169,7 @@ void nabto_close_socket(nabto_socket_t* socket)
 ssize_t nabto_read(nabto_socket_t socket,
                    uint8_t*       buf,
                    size_t         len,
-                   uint32_t*      addr,
+                   struct nabto_ip_address*      addr,
                    uint16_t*      port)
 {
     int res;
@@ -179,9 +179,11 @@ ssize_t nabto_read(nabto_socket_t socket,
     sa.sin_family = AF_INET;
     res = recvfrom(socket, buf, (uint32_t)len, 0, &sa, &salen);
     if (res > 0)
-        *addr = ntohl(sa.sin_addr.s_addr);
+        addr->type = NABTO_IP_V4;
+        addr->addr.ipv4 = ntohl(sa.sin_addr.s_addr);
     if (res >= 0) {
-        *addr = sa.sin_addr.s_addr;
+        addr->type = NABTO_IP_V4;
+        addr->addr.ipv4 = sa.sin_addr.s_addr;
         *port = sa.sin_port;
     } else if (res == -1) {
         return 0;

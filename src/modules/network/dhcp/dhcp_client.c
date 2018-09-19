@@ -130,7 +130,7 @@ void dhcp_client_tick(void)
 
     case STATE_WAITING_FOR_OFFER:
     {
-      uint32_t sourceIp;
+      struct nabto_ip_address sourceIp;
       uint16_t sourcePort;
       uint16_t length = nabto_read(socket, nabtoCommunicationBuffer, sizeof (nabtoCommunicationBuffer), &sourceIp, &sourcePort);
 
@@ -197,7 +197,7 @@ void dhcp_client_tick(void)
 
     case STATE_WAITING_FOR_ACKNOWLEDGE:
     {
-      uint32_t sourceIp;
+      struct nabto_ip_address sourceIp;
       uint16_t sourcePort;
       uint16_t length = nabto_read(socket, nabtoCommunicationBuffer, sizeof (nabtoCommunicationBuffer), &sourceIp, &sourcePort);
 

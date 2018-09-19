@@ -127,10 +127,10 @@ void nabto_close_socket(nabto_socket_t* socket)
 static uint32_t loops=0;
 
 ssize_t nabto_read(nabto_socket_t socket,
-                uint8_t*       buf,
-                size_t         len,
-                uint32_t*      addr,
-                uint16_t*      port)
+                   uint8_t*       buf,
+                   size_t         len,
+                   struct nabto_ip_address*      addr,
+                   uint16_t*      port)
 {
     ssize_t res = (ssize_t)len;
     if (0 > socket || socket >= MAX_SOCKETS)
@@ -150,7 +150,8 @@ ssize_t nabto_read(nabto_socket_t socket,
             p = p->next;
         }
         pbuf_free(pHead);
-        *addr = ntohl(rb->recvAddr);
+        addr->type = NABTO_IP_V4;
+        addr->addr.ipv4 = ntohl(rb->recvAddr);
     //          READ_U32(*addr, &rb->recvAddr);
 
         *port = rb->recvPort;

@@ -263,7 +263,7 @@ void nabto_close_socket(nabto_socket_t* socket) {
 
 ssize_t nabto_read(nabto_socket_t socket, 
                    uint8_t* buf, size_t buflen,
-                   uint32_t* addr,
+                   struct nabto_ip_address* addr,
                    uint16_t* port) {
   if(socket != 0)
   {
@@ -271,7 +271,8 @@ ssize_t nabto_read(nabto_socket_t socket,
     {
       int length = RSMIN(buflen, rx_buffer.bufferLength);
       memcpy(buf, rx_buffer.bufferPtr, length);
-      *addr = rx_buffer.remote_addr;
+      addr->type = NABTO_IP_V4;
+      addr->addr.ipv4 = rx_buffer.remote_addr;
       *port = rx_buffer.remote_port;
       SendApiSocketFreeBufferReq(COLA_TASK, rx_buffer.handle, (rsuint8*)rx_buffer.bufferPtr);
       rx_buffer.pending = false;

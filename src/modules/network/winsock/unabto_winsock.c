@@ -117,7 +117,7 @@ void nabto_close_socket(nabto_socket_t* sock)
     }
 }
 
-ssize_t nabto_read(nabto_socket_t sock, uint8_t* buf, size_t len, uint32_t* addr, uint16_t* port)
+ssize_t nabto_read(nabto_socket_t sock, uint8_t* buf, size_t len, struct nabto_ip_address* addr, uint16_t* port)
 {
     int res;
     struct sockaddr_in sa;
@@ -129,13 +129,15 @@ ssize_t nabto_read(nabto_socket_t sock, uint8_t* buf, size_t len, uint32_t* addr
     if (res >= 0)
     {
         nabto_endpoint ep;
-        *addr = ntohl(sa.sin_addr.s_addr);
+        addr->type = NABTO_IP_V4;
+        addr->addr.ipv4 = ntohl(sa.sin_addr.s_addr);
         *port = ntohs(sa.sin_port);
 
-        ep.addr = *addr;
+        ep.addr.type = NABTO_IP_V4;
+        ep.addr.addr.ipv4 = addr->addr.ipv4;
         ep.port = *port;
 
-        NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_TRACE, ("data from addr: " PRIep, MAKE_EP_PRINTABLE(ep)), buf, res);
+//        NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_TRACE, ("data from addr: " PRIep, MAKE_EP_PRINTABLE(ep)), buf, res);
     }
     else if (res == -1)
     {

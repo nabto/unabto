@@ -98,7 +98,7 @@ bool bReturn = true;
 ssize_t nabto_read( nabto_socket_t socket,
                     uint8_t*       buf,
                     size_t         len,
-                    uint32_t*      addr,
+                    struct nabto_ip_address*      addr,
                     uint16_t*      port )
 {
     int res;
@@ -110,7 +110,8 @@ ssize_t nabto_read( nabto_socket_t socket,
 
     if( res > 0 )
     {
-        *addr = FreeRTOS_htonl( xAddress.sin_addr );
+        addr->type = NABTO_IP_V4;
+        addr->addr.ipv4 = FreeRTOS_htonl( xAddress.sin_addr );
         *port = FreeRTOS_htons( xAddress.sin_port );
     }
     else

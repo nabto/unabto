@@ -174,13 +174,13 @@ void nabto_close_socket(nabto_socket_t* socket)
   //sockets[*socket].inUse = false;
 }
 
-ssize_t nabto_read(nabto_socket_t socket, uint8_t* buffer, size_t length, uint32_t* address, uint16_t* port)
+ssize_t nabto_read(nabto_socket_t socket, uint8_t* buffer, size_t length, struct nabto_ip_address* address, uint16_t* port)
 {
   OS_ERR osErr;
   uint8_t* receiveBuffer;
   uint16_t receiveBufferLength;
   RAK_SOCKET_ADDR socketInfo;
- 
+
   if(socket > NUMBER_OF_SOCKETS)
   {
     NABTO_LOG_FATAL(("Read on invalid socket!"));
@@ -221,10 +221,11 @@ ssize_t nabto_read(nabto_socket_t socket, uint8_t* buffer, size_t length, uint32
 
   RAK_GetSocketInfo(socket, &socketInfo);
 
-  *address = socketInfo.dest_addr;
+  address->type = NABTO_IP_V4;
+  address->addr.ipv4 = socketInfo.dest_addr;
   *port = socketInfo.dest_port;
   
-  NABTO_LOG_TRACE(("Received UDP packet from " PRI_IP ":%u length=%u", PRI_IP_FORMAT(*address), *port, receiveBufferLength));
+  NABTO_LOG_TRACE(("Received UDP packet from " PRI_IP ":%u length=%u", PRI_IP_FORMAT(address->addr.ipv4), *port, receiveBufferLength));
   
   return receiveBufferLength;
 }

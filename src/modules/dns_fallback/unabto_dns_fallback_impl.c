@@ -21,7 +21,7 @@ bool unabto_dns_fallback_close()
 }
 
 uint16_t unabto_dns_fallback_recv_socket(uint8_t* buffer, uint16_t bufferLength) {
-    uint32_t addr;
+    struct nabto_ip_address addr;
     uint16_t port;
     size_t ilen;
     int i;

@@ -399,16 +399,22 @@ ssize_t w5100_nabto_write(nabto_socket_t socket, const uint8_t* buf, size_t len,
   }
 }
 
-ssize_t w5100_nabto_read(nabto_socket_t socket, uint8_t* buf, size_t len, uint32_t* addr, uint16_t* port)
+ssize_t w5100_nabto_read(nabto_socket_t socket, uint8_t* buf, size_t len, struct nabto_ip_address* addr, uint16_t* port)
 {
-  uint16_t length = w5100_udp_receive(&socket, buf, len, addr, port);
-
-  if(length > 0)
-  {
-    NABTO_LOG_TRACE(("w5100_nabto_udp_read socket=%u length=%u", (int) socket, (int) length));
+  if (addr->type != NABTO_IP_V4) {
+    return 0;
   }
+  {
+    uint16_t length = w5100_udp_receive(&socket, buf, len, &addr->addr.ipv4, port);
+  
 
-  return length;
+    if(length > 0)
+    {
+      NABTO_LOG_TRACE(("w5100_nabto_udp_read socket=%u length=%u", (int) socket, (int) length));
+    }
+
+    return length;
+  }
 }
 
 // Helpers
