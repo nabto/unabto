@@ -267,7 +267,7 @@ void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
 void nabto_dns_resolve(const char* host)
 { }
 
-nabto_dns_status_t nabto_dns_is_resolved(const char* host, uint32_t* address)
+nabto_dns_status_t nabto_dns_is_resolved(const char* host, struct nabto_ip_address* address)
 {
   uint32_t result = RAK_DNSReq((char*)host, dnsServer);
   
@@ -275,8 +275,8 @@ nabto_dns_status_t nabto_dns_is_resolved(const char* host, uint32_t* address)
   {
     return NABTO_DNS_NOT_FINISHED;
   }
-  
-  *address = result;
+  address->type = NABTO_IP_V4;
+  address->addr.ipv4 = result;
   
   return NABTO_DNS_OK;
 }

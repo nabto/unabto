@@ -66,7 +66,7 @@ void nabto_dns_resolve(const char* id) {
     }
 }
 
-nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr) {
+nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address* v4addr) {
     if (resolver_is_running) {
         return NABTO_DNS_NOT_FINISHED;
     }
@@ -74,7 +74,8 @@ nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr) {
     if (resolver_state.status == NABTO_DNS_OK) {
         uint8_t i;
         for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
-            v4addr[i] = resolver_state.resolved_addr[i];
+            v4addr[i]->type = NABTO_IP_V4;
+            v4addr[i]->addr.ipv4 = resolver_state.resolved_addr[i];
         }
         return NABTO_DNS_OK;
     }

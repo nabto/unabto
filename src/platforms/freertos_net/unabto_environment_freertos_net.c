@@ -164,7 +164,7 @@ void nabto_dns_resolve(const char* id)
 }
 /******************************************************************************/
 
-nabto_dns_status_t nabto_dns_is_resolved( const char *id, uint32_t* v4addr )
+nabto_dns_status_t nabto_dns_is_resolved( const char *id, struct nabto_ip_address* v4addr )
 {
     uint32_t addr;
     nabto_dns_status_t status;
@@ -177,7 +177,8 @@ nabto_dns_status_t nabto_dns_is_resolved( const char *id, uint32_t* v4addr )
     }
     else
     {
-        *v4addr = FreeRTOS_htonl(addr);
+        v4addr->type = NABTO_IP_V4;
+        v4addr->addr.ipv4 = FreeRTOS_htonl(addr);
         status = NABTO_DNS_OK;
     }
 

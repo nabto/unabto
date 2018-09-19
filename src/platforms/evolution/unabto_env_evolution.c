@@ -55,7 +55,7 @@ void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
 void nabto_dns_resolve(const char* id) {
 }
 
-nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr) {
+nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address* v4addr) {
     struct hostent res;
     char buffer[2048];
     uint32_t addr;
@@ -64,7 +64,8 @@ nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr) {
         return NABTO_DNS_ERROR;
     }
     addr = *((uint32_t*)he->h_addr_list[0]);
-    *v4addr = htonl(addr);
+    v4addr->type = NABTO_IP_V4;
+    v4addr->addr.ipv4 = htonl(addr);
     return NABTO_DNS_OK;
 }
 

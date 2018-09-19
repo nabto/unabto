@@ -239,9 +239,10 @@ void nabto_dns_resolve(const char* id)
  * @param v4addr  pointer to ipaddress
  * @return false if address is not resolved yet
  */
-nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr)
+nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address* v4addr)
 {
     // FIXME: DNS resolve is not supported on RAK module yet
-    *v4addr = remote_addr;
+    v4addr->type = NABTO_IP_V4;
+    v4addr->addr.ipv4 = remote_addr;
     return NABTO_DNS_OK;
 }

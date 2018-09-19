@@ -260,7 +260,7 @@ void nabto_dns_resolve(const char* id)
 }
 
 //TBC
-nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr)
+nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address* v4addr)
 {
 //    static ip_addr_t bsAddr;
     uip_ipaddr_t *ipAddr;
@@ -268,7 +268,8 @@ nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr)
     if (NULL == (ipAddr = resolv_lookup(id)))
         return NABTO_DNS_ERROR;
 
-    uint8_t *ap = (uint8_t*)v4addr;
+    v4addr->type = NABTO_IP_V4;
+    uint8_t *ap = (uint8_t*)(&v4addr->addr.ipv4);
     // host order little endian
     ap[3] = uip_ipaddr1(ipAddr);
     ap[2] = uip_ipaddr2(ipAddr);

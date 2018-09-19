@@ -226,12 +226,13 @@ void nabto_dns_resolve(const char* id)
  * @param v4addr  pointer to ipaddress
  * @return false if address is not resolved yet
  */
-nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr)
+nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address* v4addr)
 {
 /* To use or not to use DNS response, that is the question */
 #if 1
   uint32_t c_ip = 0xC3F99F9F;  // static remote ip: 195.249.159.159
-  *v4addr = c_ip;
+  v4addr->type = NABTO_IP_V4;
+  v4addr->addr.ipv4 = c_ip;
   return NABTO_DNS_OK;
 #else
   char s_ip[17];
@@ -244,7 +245,8 @@ nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr)
                   (uint32_t)temp_ip[1] << 16 |
                   (uint32_t)temp_ip[2] << 8  |
                   (uint32_t)temp_ip[3];
-    *v4addr = ip;
+    v4addr->type = NABTO_IP_V4;
+    v4addr->addr.ipv4 = ip;
     return NABTO_DNS_OK;
   }
   return NABTO_DNS_NOT_FINISHED;

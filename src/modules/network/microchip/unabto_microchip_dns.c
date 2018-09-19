@@ -76,7 +76,7 @@ void nabto_dns_resolve(const char* id)
   state = STATE_START_RESOLVE;
 }
 
-nabto_dns_status_t nabto_dns_is_resolved(const char* id, uint32_t* addr)
+nabto_dns_status_t nabto_dns_is_resolved(const char* id, struct nabto_ip_address* addr)
 {
   if(id != devId)
   {
@@ -86,7 +86,8 @@ nabto_dns_status_t nabto_dns_is_resolved(const char* id, uint32_t* addr)
   else if(state == STATE_SUCCESS)
   {
     NABTO_LOG_INFO(("DNS: Success"));
-    *addr = address;
+    addr->type = NABTO_IP_V4;
+    addr->addr.ipv4 = address;
     return NABTO_DNS_OK;
   }
   else if(state == STATE_ERROR)

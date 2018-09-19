@@ -259,14 +259,15 @@ void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
 void nabto_dns_resolve(const char* id){
 }
 
-nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr)
+nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address* v4addr)
 {
     #define MAX_HOSTNAMESIZE     64
     char hostname[MAX_HOSTNAMESIZE];
  
     memset (hostname, 0, sizeof (hostname));
-    if (!RTCS_resolve_ip_address( (char*)id, v4addr, hostname, MAX_HOSTNAMESIZE ))
+    if (!RTCS_resolve_ip_address( (char*)id, &v4addr->addr.ipv4, hostname, MAX_HOSTNAMESIZE ))
         return NABTO_DNS_ERROR;
 
+    v4addr->type = NABTO_IP_V4;
     return NABTO_DNS_OK;
 }
