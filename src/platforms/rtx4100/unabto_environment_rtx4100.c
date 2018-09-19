@@ -231,7 +231,7 @@ socket_request_t* next_free_socket_request() {
 }
 
 
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket) {
+bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket) {
 
   if(*localPort == 0)
   {
@@ -247,7 +247,7 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
 
   n->socket = socket;
   n->port = *localPort;
-  n->addr = localAddr;
+  n->addr = INADDR_ANY;
   n->pending = true;
   *socket = NABTO_INVALID_SOCKET;
   return true;

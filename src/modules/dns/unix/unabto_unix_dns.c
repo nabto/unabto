@@ -1,6 +1,7 @@
 #include <unabto/unabto_external_environment.h>
 #include <unabto/unabto_util.h>
 #include <unabto/unabto_message.h>
+#include <unabto/unabto_endpoint.h>
 
 #include <pthread.h>
 #include <netdb.h>

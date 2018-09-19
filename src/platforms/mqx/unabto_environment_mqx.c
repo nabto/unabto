@@ -106,7 +106,7 @@ static bool initInf( void )
 #define INADDR_NONE 0xffffffffu
     //
 #define AF_INET         1
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket) {
+bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket) {
     nabto_socket_t sd = RTCS_SOCKET_ERROR;
 
     sd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -118,7 +118,7 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
         struct sockaddr_in sa;
         memset(&sa, 0, sizeof(sa));
         sa.sin_family = AF_INET;
-        sa.sin_addr.s_addr = localAddr;
+        sa.sin_addr.s_addr = INADDR_ANY;
         sa.sin_port = *localPort;
         setsockopt(sd, SOL_UDP, OPT_RECEIVE_NOWAIT, &optVal, sizeof(uint32_t));
         if (bind(sd, &sa, sizeof(sa)) != RTCS_OK) {

@@ -74,13 +74,12 @@ static void udpRecv(void *arg, struct udp_pcb *pcb, struct pbuf *p, struct ip_ad
 * uNabto creates, this will normally occur two times. One for local
 * connections and one for remote connections.
 *
-* @param localAddr    The local address to bind to.
 * @param localPort    The local port to bind to.
 *                     A port number of 0 gives a random port.
 * @param socket       To return the created socket descriptor.
 * @return             true iff successfull
 */
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket)
+bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket)
 {
     int i;
     struct ip_addr ipAddr;
@@ -96,8 +95,8 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
     sockets[i].pcb->so_options |= SOF_BROADCAST;
     
     udp_recv(sockets[i].pcb, udpRecv, &sockets[i]);
-    ipAddr.addr = localAddr; 
-    if (ERR_OK != udp_bind(sockets[i].pcb, (0 == localAddr)?IP_ADDR_ANY:&ipAddr , *localPort))
+    ipAddr.addr = IP_ADDR_ANY; 
+    if (ERR_OK != udp_bind(sockets[i].pcb, IP_ADDR_ANY , *localPort))
         return false;
     
     *socket = i;

@@ -58,7 +58,7 @@ unabto_dns_fallback_error_code unabto_dns_fallback_create_socket()
         int i;
         for (i = 0; i < DNS_CLIENT_SOCKETS; i++)  {
             uint16_t localPort = 0;
-            nabto_init_socket(INADDR_ANY, &localPort, &session.dnsClient.sockets[i]);
+            nabto_init_socket(&localPort, &session.dnsClient.sockets[i]);
         }
         unabto_dns_fallback_open(&session);
     }

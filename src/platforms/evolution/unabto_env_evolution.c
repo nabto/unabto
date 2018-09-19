@@ -78,7 +78,7 @@ void nabto_bsd_set_nonblocking(nabto_socket_t* sd)
     fcntlsocket(*sd, F_SETFL, flags | O_NDELAY);
 }
 
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket) {
+bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket) {
     nabto_socket_t sd = NABTO_INVALID_SOCKET;
     sd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sd == -1) {
@@ -90,7 +90,7 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
         int status;
         memset(&sa, 0, sizeof(sa));
         sa.sin_family = AF_INET;
-        sa.sin_addr.s_addr = htonl(localAddr);
+        sa.sin_addr.s_addr = INADDR_ANY;
         sa.sin_port = htons(*localPort);
         
         status = bind(sd, (struct sockaddr*)&sa, sizeof(sa));

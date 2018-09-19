@@ -367,11 +367,9 @@ uint16_t w5100_udp_receive(w5100_socket* socket, uint8_t* buffer, uint16_t maxim
 
 // Implement uNabto interface
 
-bool w5100_nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket)
+bool w5100_nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket)
 {
   bool result;
-
-  NABTO_NOT_USED(localAddr);
 
   result = w5100_udp_open(socket, localPort);
 

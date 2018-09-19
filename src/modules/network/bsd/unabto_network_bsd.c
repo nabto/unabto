@@ -9,6 +9,7 @@
 #include <modules/network/epoll/unabto_epoll.h>
 #include <unabto/unabto_context.h>
 #include <unabto/unabto_message.h>
+#include <unabto/unabto_endpoint.h>
 #include <unabto/unabto_main_contexts.h>
 #include <unabto/unabto_common_main.h>
 

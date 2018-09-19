@@ -18,6 +18,7 @@
 #include "unabto_attach.h"
 #include "unabto_push.h"
 #include "unabto_message.h"
+#include "unabto_endpoint.h"
 #include "unabto_logging.h"
 #include "unabto_env_base.h"
 #include "unabto_external_environment.h"

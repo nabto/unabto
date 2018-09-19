@@ -129,12 +129,10 @@ void platform_tick(void)
 
 // UDP
 
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket)
+bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket)
 {
   uint8_t i;
   OS_ERR osErr;
-  
-  NABTO_NOT_USED(localAddr);
   
   for(i = 0; i < lengthof(sockets); i++)
   {

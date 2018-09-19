@@ -11,7 +11,7 @@ void nabto_random(uint8_t* buf, size_t len) {
     // uninplemented.
 }
 
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket) {
+bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket) {
 
     /**
      * uip_udp_new returns a pointer to the array of connections in uip.
@@ -19,8 +19,6 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
      */
     uip_ipaddr_t addr;
     
-    if (localAddr) { /* make the compiler happy */ }
-
     uip_ipaddr(&addr, 0,0,0,0);
 
     *socket = uip_udp_new(&addr,0);

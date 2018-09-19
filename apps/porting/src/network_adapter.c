@@ -14,10 +14,8 @@
 #include <fcntl.h>
 
 
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* sock) {
+bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* sock) {
     nabto_socket_t sd;
-    
-    NABTO_LOG_TRACE(("Open socket: ip=" PRIip ", port=%u", MAKE_IP_PRINTABLE(localAddr), (int)*localPort));
     
     sd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sd == -1) {

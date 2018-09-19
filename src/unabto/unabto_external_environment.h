@@ -9,37 +9,11 @@
 #else
 #include <unabto/unabto_env_base.h>
 #endif
+#include <unabto/unabto_endpoint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-enum nabto_ip_address_type {
-    NABTO_IP_NONE = 0,
-    NABTO_IP_ANY,
-    NABTO_IP_V4,
-    NABTO_IP_V6
-};
-
-struct nabto_ip_address {
-    enum nabto_ip_address_type type;
-
-    union {
-        uint32_t ipv4; ///< IP address
-        uint8_t  ipv6[16];
-    } addr;
-     
-};
-
-/** 
- * The IP endpoint type.
- */
-typedef struct {
-    uint16_t port; ///< port number
-    struct nabto_ip_address addr;
-        
-} nabto_endpoint;
-
 
 /********** Platform Random ***************************************************/
 /** 

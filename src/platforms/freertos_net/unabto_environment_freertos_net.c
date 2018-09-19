@@ -47,7 +47,7 @@ nabto_socket_t *getActiveSockets(uint16_t *nS)
     return aS;
 }
 
-bool nabto_init_socket( uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socketDescriptor )
+bool nabto_init_socket( uint16_t* localPort, nabto_socket_t* socketDescriptor )
 {
 int to = 0;
 struct freertos_sockaddr xAddress, *pxAddressToUse;
@@ -68,7 +68,7 @@ bool bReturn = true;
         else
         {
             memset( &xAddress, 0, sizeof( xAddress ) );
-            xAddress.sin_addr = FreeRTOS_htonl( localAddr );
+            xAddress.sin_addr = INADDR_ANY;
             xAddress.sin_port = FreeRTOS_htons( *localPort );
 
 
