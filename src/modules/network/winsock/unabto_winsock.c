@@ -56,7 +56,7 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
 
     memset(&sa, 0, sizeof(sa));
     sa.sin_family = AF_INET;
-    sa.sin_addr.s_addr = htonl(localAddr);
+    sa.sin_addr.s_addr = htonl(INADDR_ANY);
     sa.sin_port = htons(*localPort);
     if (bind(sd, (struct sockaddr*)&sa, sizeof(sa)) < 0)
     {
