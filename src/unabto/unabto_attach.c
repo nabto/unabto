@@ -780,10 +780,10 @@ void fix_for_broken_routers(void) {
      * safe to refresh the remote communication socket.
      */
     if (unabto_count_active_connections() == 0) {
-        nabto_close_socket(&nmc.socketGSP);
+        nabto_socket_close(&nmc.socketGSP);
         nmc.socketGSPLocalEndpoint.port = 0;
-        nabto_set_invalid_socket(&nmc.socketGSP);
-        nabto_init_socket(&nmc.socketGSPLocalEndpoint.port, &nmc.socketGSP);
+        nabto_socket_set_invalid(&nmc.socketGSP);
+        nabto_socket_init(&nmc.socketGSPLocalEndpoint.port, &nmc.socketGSP);
     }
 }
 

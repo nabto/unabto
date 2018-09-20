@@ -58,7 +58,7 @@ unabto_dns_fallback_error_code unabto_dns_fallback_create_socket()
         int i;
         for (i = 0; i < DNS_CLIENT_SOCKETS; i++)  {
             uint16_t localPort = 0;
-            nabto_init_socket(&localPort, &session.dnsClient.sockets[i]);
+            nabto_socket_init(&localPort, &session.dnsClient.sockets[i]);
         }
         unabto_dns_fallback_open(&session);
     }
@@ -76,7 +76,7 @@ bool unabto_dns_fallback_close_socket()
     if (session.state != UDFS_IDLE) {
         int i;
         for (i = 0; i < DNS_CLIENT_SOCKETS; i++) {
-            nabto_close_socket(&session.dnsClient.sockets[i]);
+            nabto_socket_close(&session.dnsClient.sockets[i]);
         }
         unabto_dns_fallback_stop(&session);
     }

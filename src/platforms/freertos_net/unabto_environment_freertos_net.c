@@ -47,12 +47,12 @@ nabto_socket_t *getActiveSockets(uint16_t *nS)
     return aS;
 }
 
-void nabto_set_invalid_socket(nabto_socket_t* socket)
+void nabto_socket_set_invalid(nabto_socket_t* socket)
 {
     socket = NABTO_INVALID_SOCKET;
 }
 
-bool nabto_init_socket( uint16_t* localPort, nabto_socket_t* socketDescriptor )
+bool nabto_socket_init( uint16_t* localPort, nabto_socket_t* socketDescriptor )
 {
 int to = 0;
 struct freertos_sockaddr xAddress, *pxAddressToUse;
@@ -148,7 +148,12 @@ ssize_t nabto_write( nabto_socket_t socket,
 } 
 /******************************************************************************/
 
-void nabto_close_socket( nabto_socket_t* socketDescriptor )
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
+{
+    return *s1==*s2;
+}
+
+void nabto_socket_close( nabto_socket_t* socketDescriptor )
 {
     if (socketDescriptor) 
     {

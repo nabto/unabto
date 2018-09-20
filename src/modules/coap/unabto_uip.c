@@ -26,7 +26,7 @@ struct uip_udp_conn *udp_new(const uip_ipaddr_t *ripaddr, uint16_t rport, void *
 
 void udp_bind(struct uip_udp_conn *conn, uint16_t port)
 {
-    if (nabto_init_socket(&port, &udpConn.socket))
+    if (nabto_socket_init(&port, &udpConn.socket))
         udpConn.lport = port;
 }
 

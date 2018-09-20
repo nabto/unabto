@@ -47,7 +47,7 @@ void nabto_random(uint8_t* buf, size_t len)
   }
 }
 
-void nabto_set_invalid_socket(nabto_socket_t* socket)
+void nabto_socket_set_invalid(nabto_socket_t* socket)
 {
     socket = NABTO_INVALID_SOCKET;
 }
@@ -62,7 +62,7 @@ void nabto_set_invalid_socket(nabto_socket_t* socket)
  * @param socket       To return the created socket descriptor.
  * @return             true iff successfull
  */
-bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket)
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket)
 {
     uint8_t i;
 
@@ -80,12 +80,17 @@ bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket)
             *socket = (nabto_socket_t)i;
             sockets[i].isOpen = true;
 
-            NABTO_LOG_DEBUG(("nabto_init_socket %u: port=%u", *socket, port));
+            NABTO_LOG_DEBUG(("nabto_socket_init %u: port=%u", *socket, port));
 
             return true;
         }
     }
     return false;
+}
+
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
+{
+    return *s1==*s2;
 }
 
 /**
@@ -94,7 +99,7 @@ bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket)
  *
  * @param socket the socket to be closed
  */
-void nabto_close_socket(nabto_socket_t* socket)
+void nabto_socket_close(nabto_socket_t* socket)
 {
     NABTO_LOG_DEBUG(("nabto_close_socket %u", *socket));
     sockets[*socket].isOpen = false;

@@ -88,7 +88,7 @@ void nabto_reset_connection(nabto_connect* con)
     NABTO_LOG_TRACE((PRInsi " Reset connection", MAKE_NSI_PRINTABLE(0, con->spnsi, 0)));
     memset(con, 0, offsetof(nabto_connect, cryptoctx));
     con->stamp = tmp;
-    nabto_set_invalid_socket(&con->socket);
+    nabto_socket_set_invalid(&con->socket);
     con->stats.connectionStart = tmp;
 #if NABTO_ENABLE_TCP_FALLBACK
     unabto_tcp_fallback_init(con);
@@ -299,7 +299,7 @@ static size_t mk_connect_rsp(uint8_t* buf, uint8_t* end, uint16_t seq, uint32_t 
 bool connect_event(message_event* event, nabto_packet_header* hdr)
 {
     nabto_endpoint* peer = &event->udpMessage.peer;
-    bool isLocal = (event->udpMessage.socket.sock == nmc.socketLocal.sock);
+    bool isLocal = nabto_socket_is_equal(&event->udpMessage.socket, &nmc.socketLocal);
     
 
     NABTO_LOG_TRACE(("U_CONNECT: Searching for hdr->nsi_cp=%" PRIu32 " (should not be found)", hdr->nsi_cp));
@@ -980,7 +980,7 @@ bool nabto_write_con(nabto_connect* con, uint8_t* buf, size_t len) {
 
 #if NABTO_ENABLE_DNS_FALLBACK
     if (nmc.nabtoMainSetup.enableDnsFallback) {
-        if (nabto_ep_is_equal(&con->peer, &nmc.context.gsp) && con->socket == nmc.socketGSP && nmc.context.useDnsFallback) {
+        if (nabto_ep_is_equal(&con->peer, &nmc.context.gsp) && nabto_socket_is_equal(&con->socket, &nmc.socketGSP) && nmc.context.useDnsFallback) {
             return (unabto_dns_fallback_send_to(buf, (uint16_t)len, con->peer.addr, con->peer.port) > 0);
         }
     }

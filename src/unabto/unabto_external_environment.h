@@ -35,16 +35,25 @@ void nabto_random(uint8_t* buf, size_t len);
  * @param socket       To return the created socket descriptor.
  * @return             true iff successfull
  */
-bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket);
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket);
 
 /**
  * Set the value of the socket to invalid. If this function has been
- * called on a socket, nabto_read, nabto_write, and nabto_close_socket
+ * called on a socket, nabto_read, nabto_write, and nabto_socket_close
  * should all fail gracefully.
  *
  * @param socket  A reference to the socket to be set
  */
-void nabto_set_invalid_socket(nabto_socket_t* socket);
+void nabto_socket_set_invalid(nabto_socket_t* socket);
+
+/**
+ * Check if two sockets are equal.
+ * 
+ * @param s1  first socket to check
+ * @param s2  second socket to check
+ * @return    true iff the two sockets are equal
+ */
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2);
 
 /**
  * Close a socket. 
@@ -52,7 +61,7 @@ void nabto_set_invalid_socket(nabto_socket_t* socket);
  *
  * @param socket the socket to be closed
  */
-void nabto_close_socket(nabto_socket_t* socket);
+void nabto_socket_close(nabto_socket_t* socket);
 
 /***************** UDP Read/Write *********************************************/
 /**

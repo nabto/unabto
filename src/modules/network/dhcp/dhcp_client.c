@@ -108,7 +108,7 @@ void dhcp_client_tick(void)
     case STATE_INITIALIZING:
     {
       uint16_t localPort = 68;
-      if(nabto_init_socket(&localPort, &socket))
+      if(nabto_socket_init(&localPort, &socket))
       {
         state = STATE_UNBOUND;
         timeoutDuration = MINIMUM_TIMEOUT_DURATION;

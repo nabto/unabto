@@ -106,12 +106,12 @@ static bool initInf( void )
 #define INADDR_NONE 0xffffffffu
     //
 #define AF_INET         1
-void nabto_set_invalid_socket(nabto_socket_t* socket)
+void nabto_socket_set_invalid(nabto_socket_t* socket)
 {
     socket = NABTO_INVALID_SOCKET;
 }
 
-bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket) {
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket) {
     nabto_socket_t sd = RTCS_SOCKET_ERROR;
 
     sd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -158,9 +158,14 @@ void nabto_close_platform() {
 }
 
 
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
+{
+    return *s1==*s2;
+}
+
 /******************************************************************************/
 
-void nabto_close_socket(nabto_socket_t* socket)
+void nabto_socket_close(nabto_socket_t* socket)
 {
     if (socket && *socket != NABTO_INVALID_SOCKET) {
         shutdown(*socket, 0);

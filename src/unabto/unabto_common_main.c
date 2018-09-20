@@ -108,8 +108,8 @@ nabto_main_setup* unabto_init_context(void) {
     nmc.context.cryptoConnect = &cryptoContextConnection;
 #endif
 #endif
-    nabto_set_invalid_socket(&nmc.socketGSP);
-    nabto_set_invalid_socket(&nmc.socketLocal);
+    nabto_socket_set_invalid(&nmc.socketGSP);
+    nabto_socket_set_invalid(&nmc.socketLocal);
     unabto_init_default_values(&nmc.nabtoMainSetup);
     return &nmc.nabtoMainSetup;
 }
@@ -142,17 +142,17 @@ bool unabto_init(void) {
 #endif
 
 #if NABTO_ENABLE_LOCAL_ACCESS
-    nabto_set_invalid_socket(&nmc.socketLocal);
-    if (!nabto_init_socket(&nmc.nabtoMainSetup.localPort, &nmc.socketLocal)) {
+    nabto_socket_set_invalid(&nmc.socketLocal);
+    if (!nabto_socket_init(&nmc.nabtoMainSetup.localPort, &nmc.socketLocal)) {
         NABTO_LOG_ERROR(("failed to initialize local socket continueing without local"));
     }
 #endif
 
 #if NABTO_ENABLE_REMOTE_ACCESS
     nmc.socketGSPLocalEndpoint.port = 0;
-    nabto_set_invalid_socket(&nmc.socketGSP);
+    nabto_socket_set_invalid(&nmc.socketGSP);
     if (nmc.nabtoMainSetup.enableRemoteAccess) {
-        if (!nabto_init_socket(&nmc.socketGSPLocalEndpoint.port, &nmc.socketGSP))
+        if (!nabto_socket_init(&nmc.socketGSPLocalEndpoint.port, &nmc.socketGSP))
         {
             return false;
         }
@@ -208,10 +208,10 @@ void unabto_close(void) {
 #endif
 
 #if NABTO_ENABLE_LOCAL_ACCESS
-    nabto_close_socket(&nmc.socketLocal);
+    nabto_socket_close(&nmc.socketLocal);
 #endif
 #if NABTO_ENABLE_REMOTE_ACCESS
-    nabto_close_socket(&nmc.socketGSP);
+    nabto_socket_close(&nmc.socketGSP);
 #endif
 #if NABTO_ENABLE_REMOTE_ACCESS
     nabto_context_release();
@@ -318,7 +318,7 @@ bool unabto_read_socket(nabto_socket_t socket) {
         return false; /* no packets are sent for sure */
     }
 #if NABTO_ENABLE_LOCAL_ACCESS 
-    if (socket.sock == nmc.socketLocal.sock) {
+    if (nabto_socket_is_equal(&socket, &nmc.socketLocal)) {
         NABTO_LOG_TRACE(("Received local packet length %" PRIsize, ilen));
         
         nabto_message_local_event(&event, (uint16_t)ilen);
@@ -326,7 +326,7 @@ bool unabto_read_socket(nabto_socket_t socket) {
 #endif
 
 #if NABTO_ENABLE_REMOTE_ACCESS
-    if (socket.sock != nmc.socketLocal.sock) {
+    if (!nabto_socket_is_equal(&socket, &nmc.socketLocal)) {
         NABTO_LOG_TRACE(("Received remote packet length %" PRIsize, ilen));
         nabto_message_event(&event, (uint16_t)ilen);
     }

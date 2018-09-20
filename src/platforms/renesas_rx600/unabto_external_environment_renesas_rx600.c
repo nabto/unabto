@@ -77,7 +77,7 @@ void nabto_random(uint8_t* buf, size_t len)
 
 
 /******************************************************************************/
-void nabto_set_invalid_socket(nabto_socket_t* socket)
+void nabto_socket_set_invalid(nabto_socket_t* socket)
 {
     socket = NABTO_INVALID_SOCKET;
 }
@@ -92,7 +92,7 @@ void nabto_set_invalid_socket(nabto_socket_t* socket)
  * @param socket       To return the created socket descriptor.
  * @return             true iff successfull
  */
-bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket)
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket)
 {
     int i;
     uint32_t localAddr = INADDR_ANY;
@@ -126,13 +126,18 @@ bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket)
     return true;
 }
 
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
+{
+    return *s1==*s2;
+}
+
 /**
  * Close a socket. 
  * Close can be called on already closed sockets. And should tolerate this behavior.
  *
  * @param socket the socket to be closed
  */
-void nabto_close_socket(nabto_socket_t* socket)
+void nabto_socket_close(nabto_socket_t* socket)
 {
     if (NULL == socket)
         return; 
