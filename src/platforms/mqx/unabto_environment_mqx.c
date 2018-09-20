@@ -106,6 +106,11 @@ static bool initInf( void )
 #define INADDR_NONE 0xffffffffu
     //
 #define AF_INET         1
+void nabto_set_invalid_socket(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
 bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket) {
     nabto_socket_t sd = RTCS_SOCKET_ERROR;
 

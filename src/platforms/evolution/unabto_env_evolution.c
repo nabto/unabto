@@ -84,6 +84,11 @@ void nabto_bsd_set_nonblocking(nabto_socket_t* sd)
     fcntlsocket(*sd, F_SETFL, flags | O_NDELAY);
 }
 
+void nabto_set_invalid_socket(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
 bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket) {
     nabto_socket_t sd = NABTO_INVALID_SOCKET;
     sd = socket(AF_INET, SOCK_DGRAM, 0);

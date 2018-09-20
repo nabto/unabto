@@ -88,7 +88,7 @@ void nabto_reset_connection(nabto_connect* con)
     NABTO_LOG_TRACE((PRInsi " Reset connection", MAKE_NSI_PRINTABLE(0, con->spnsi, 0)));
     memset(con, 0, offsetof(nabto_connect, cryptoctx));
     con->stamp = tmp;
-    con->socket.sock = NABTO_INVALID_SOCKET;
+    nabto_set_invalid_socket(&con->socket);
     con->stats.connectionStart = tmp;
 #if NABTO_ENABLE_TCP_FALLBACK
     unabto_tcp_fallback_init(con);

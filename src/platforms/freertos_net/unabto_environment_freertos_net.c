@@ -47,6 +47,11 @@ nabto_socket_t *getActiveSockets(uint16_t *nS)
     return aS;
 }
 
+void nabto_set_invalid_socket(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
 bool nabto_init_socket( uint16_t* localPort, nabto_socket_t* socketDescriptor )
 {
 int to = 0;

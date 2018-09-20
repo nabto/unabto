@@ -11,6 +11,11 @@ void nabto_random(uint8_t* buf, size_t len) {
     // uninplemented.
 }
 
+void nabto_set_invalid_socket(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
 bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket) {
 
     /**

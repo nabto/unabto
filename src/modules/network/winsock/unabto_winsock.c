@@ -32,6 +32,11 @@ static struct socketListElement* socketList = 0;
 
 static void unabto_winsock_shutdown(void);
 
+void nabto_set_invalid_socket(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
 bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* sock)
 {
     nabto_socket_t sd = INVALID_SOCKET;

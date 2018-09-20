@@ -231,6 +231,11 @@ socket_request_t* next_free_socket_request() {
 }
 
 
+void nabto_set_invalid_socket(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
 bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket) {
 
   if(*localPort == 0)

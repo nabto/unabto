@@ -69,6 +69,11 @@ static void udpRecv(void *arg, struct udp_pcb *pcb, struct pbuf *p, struct ip_ad
 
 
 /******************************************************************************/
+void nabto_set_invalid_socket(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
 /**
 * Initialise a udp socket.  This function is called for every socket
 * uNabto creates, this will normally occur two times. One for local

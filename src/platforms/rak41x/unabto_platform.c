@@ -167,6 +167,11 @@ bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket)
   return false;
 }
 
+void nabto_set_invalid_socket(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
 void nabto_close_socket(nabto_socket_t* socket)
 {
   NABTO_LOG_FATAL(("Socket shutdown not supported!"));

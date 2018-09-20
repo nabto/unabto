@@ -34,6 +34,11 @@ typedef unsigned short uint16_t;
 /** for convenience and portability */
 typedef unsigned char uint8_t;
 
+void nabto_set_invalid_socket(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
 #define nabto_init_socket microchip_udp_open
 
 #define nabto_close_socket microchip_udp_close

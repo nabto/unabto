@@ -108,8 +108,8 @@ nabto_main_setup* unabto_init_context(void) {
     nmc.context.cryptoConnect = &cryptoContextConnection;
 #endif
 #endif
-    nmc.socketGSP.sock = NABTO_INVALID_SOCKET;
-    nmc.socketLocal.sock = NABTO_INVALID_SOCKET;
+    nabto_set_invalid_socket(&nmc.socketGSP);
+    nabto_set_invalid_socket(&nmc.socketLocal);
     unabto_init_default_values(&nmc.nabtoMainSetup);
     return &nmc.nabtoMainSetup;
 }
@@ -142,21 +142,20 @@ bool unabto_init(void) {
 #endif
 
 #if NABTO_ENABLE_LOCAL_ACCESS
+    nabto_set_invalid_socket(&nmc.socketLocal);
     if (!nabto_init_socket(&nmc.nabtoMainSetup.localPort, &nmc.socketLocal)) {
         NABTO_LOG_ERROR(("failed to initialize local socket continueing without local"));
-        nmc.socketLocal.sock = NABTO_INVALID_SOCKET;
     }
 #endif
 
 #if NABTO_ENABLE_REMOTE_ACCESS
     nmc.socketGSPLocalEndpoint.port = 0;
+    nabto_set_invalid_socket(&nmc.socketGSP);
     if (nmc.nabtoMainSetup.enableRemoteAccess) {
         if (!nabto_init_socket(&nmc.socketGSPLocalEndpoint.port, &nmc.socketGSP))
         {
             return false;
         }
-    } else {
-        nmc.socketGSP.sock = NABTO_INVALID_SOCKET;
     }
 #endif
 
@@ -209,14 +208,10 @@ void unabto_close(void) {
 #endif
 
 #if NABTO_ENABLE_LOCAL_ACCESS
-    if (nmc.socketLocal.sock != NABTO_INVALID_SOCKET) {
-        nabto_close_socket(&nmc.socketLocal);
-    }
+    nabto_close_socket(&nmc.socketLocal);
 #endif
 #if NABTO_ENABLE_REMOTE_ACCESS
-    if (nmc.socketGSP.sock != NABTO_INVALID_SOCKET) {
-        nabto_close_socket(&nmc.socketGSP);
-    }
+    nabto_close_socket(&nmc.socketGSP);
 #endif
 #if NABTO_ENABLE_REMOTE_ACCESS
     nabto_context_release();
@@ -246,9 +241,6 @@ void unabto_tick(void) {
 #endif
 
 #if NABTO_ENABLE_REMOTE_ACCESS
-    if (nmc.socketGSP.sock == NABTO_INVALID_SOCKET) {
-        return; // not ready to operate remote connections
-    }
     if (unabto_read_socket(nmc.socketGSP)) {
         return; // remote answer produced
     }

@@ -38,6 +38,15 @@ void nabto_random(uint8_t* buf, size_t len);
 bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket);
 
 /**
+ * Set the value of the socket to invalid. If this function has been
+ * called on a socket, nabto_read, nabto_write, and nabto_close_socket
+ * should all fail gracefully.
+ *
+ * @param socket  A reference to the socket to be set
+ */
+void nabto_set_invalid_socket(nabto_socket_t* socket);
+
+/**
  * Close a socket. 
  * Close can be called on already closed sockets. And should tolerate this behavior.
  *

@@ -188,6 +188,11 @@ bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* sock) {
     return true;
 }
 
+void nabto_set_invalid_socket(nabto_socket_t* sock) {
+    sock->sock = NABTO_INVALID_SOCKET;
+    sock->type = NABTO_SOCKET_IP_V6;
+}
+
 void nabto_close_socket(nabto_socket_t* sock) {
     if (sock && sock->sock != NABTO_INVALID_SOCKET) {
         socketListElement* se;

@@ -21,7 +21,7 @@ the release and a new unreleased section is added.
 - NABTO-1187: `nabto_init_socket` no longer takes the 
   `uint32_t localAddr` argument.
 - NABTO-1187: `nabto_get_local_ip` function renamed to `nabto_get_local_ipv4`
-- NABTO-1187: `nabto_resolve_ipv4` function added and must be implemented 
+- NABTO-1187: `nabto_resolve_ipv4`, `nabto_set_invalid_socket` functions added and must be implemented
   on all platforms
 
 ### Added

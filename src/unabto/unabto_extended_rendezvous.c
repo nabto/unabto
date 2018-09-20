@@ -52,9 +52,9 @@ void unabto_extended_rendezvous_init() {
         int i;
         for (i = 0; i < NABTO_EXTENDED_RENDEZVOUS_MAX_SOCKETS; i++) {
             uint16_t localport = 0;
+            nabto_set_invalid_socket(&extended_rendezvous_sockets[i]);
             if (!nabto_init_socket(&localport, &extended_rendezvous_sockets[i])) {
                 NABTO_LOG_ERROR(("Cannot initialize extended rendezvous socket %i", i));
-                extended_rendezvous_sockets[i].sock = NABTO_INVALID_SOCKET;
             }
         }
     }
