@@ -7,7 +7,7 @@
 #include <winsock2.h>
 #include <unabto_platform_types.h>
 /** The socket type. */
-typedef struct nabto_socket_t nabto_socket_t
+typedef struct nabto_socket_t nabto_socket_t;
 
 enum nabto_socket_type {
     NABTO_SOCKET_IP_V4,

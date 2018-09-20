@@ -24,7 +24,18 @@ typedef portTickType nabto_stamp_t;
 
 #define nabtoMsec2Stamp(ms) ((ms) / portTICK_RATE_MS)
 
-typedef UDP_SOCKET nabto_socket_t;
+//typedef UDP_SOCKET nabto_socket_t;
+typedef struct nabto_socket_t nabto_socket_t;
+
+enum nabto_socket_type {
+    NABTO_SOCKET_IP_V4,
+    NABTO_SOCKET_IP_V6
+};
+
+struct nabto_socket_t {
+    UDP_SOCKET sock;
+    enum nabto_socket_type type;
+};
 
 #define NABTO_INVALID_SOCKET INVALID_UDP_SOCKET
 
