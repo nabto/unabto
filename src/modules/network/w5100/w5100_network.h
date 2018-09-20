@@ -10,19 +10,7 @@
 extern "C" {
 #endif
 
-//typedef w5100_socket nabto_socket_t;
-typedef struct nabto_socket_t nabto_socket_t;
-
-enum nabto_socket_type {
-    NABTO_SOCKET_IP_V4,
-    NABTO_SOCKET_IP_V6
-};
-
-struct nabto_socket_t {
-    w5100_socket sock;
-    enum nabto_socket_type type;
-};
-
+typedef w5100_socket nabto_socket_t;
 #define NABTO_INVALID_SOCKET W5100_INVALID_SOCKET
 
 void network_initialize(const uint8_t* mac);

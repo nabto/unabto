@@ -7,18 +7,7 @@
 #include <winsock2.h>
 #include <unabto_platform_types.h>
 /** The socket type. */
-typedef struct nabto_socket_t nabto_socket_t;
-
-enum nabto_socket_type {
-    NABTO_SOCKET_IP_V4,
-    NABTO_SOCKET_IP_V6
-};
-
-struct nabto_socket_t {
-    SOCKET sock;
-    enum nabto_socket_type type;
-};
-//typedef SOCKET nabto_socket_t;
+typedef SOCKET nabto_socket_t;
 
 /** Denoting an invalid socket */
 #define NABTO_INVALID_SOCKET INVALID_SOCKET

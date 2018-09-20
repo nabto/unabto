@@ -8,18 +8,7 @@
 
 #define NABTO_INVALID_SOCKET        INVALID_UDP_SOCKET
 
-//typedef UDP_SOCKET nabto_socket_t;
-typedef struct nabto_socket_t nabto_socket_t;
-
-enum nabto_socket_type {
-    NABTO_SOCKET_IP_V4,
-    NABTO_SOCKET_IP_V6
-};
-
-struct nabto_socket_t {
-    UDP_SOCKET sock;
-    enum nabto_socket_type type;
-};
+typedef UDP_SOCKET nabto_socket_t;
 
 #define nabto_init_socket           microchip_udp_open
 #define nabto_close_socket          microchip_udp_close

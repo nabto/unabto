@@ -8,18 +8,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-//typedef int nabto_socket_t;
-typedef struct nabto_socket_t nabto_socket_t;
-
-enum nabto_socket_type {
-    NABTO_SOCKET_IP_V4,
-    NABTO_SOCKET_IP_V6
-};
-
-struct nabto_socket_t {
-    int sock;
-    enum nabto_socket_type type;
-};
+typedef int nabto_socket_t;
 typedef long ssize_t;
 typedef unsigned long size_t;
 

@@ -30,18 +30,7 @@
 //typedef int bool;
 
 
-//typedef xSocket_t nabto_socket_t;
-typedef struct nabto_socket_t nabto_socket_t;
-
-enum nabto_socket_type {
-    NABTO_SOCKET_IP_V4,
-    NABTO_SOCKET_IP_V6
-};
-
-struct nabto_socket_t {
-    xSocket_t sock;
-    enum nabto_socket_type type;
-};
+typedef xSocket_t nabto_socket_t;
 #define NABTO_INVALID_SOCKET NULL
 
 /************ The Time Handling basics (PC Device), Interface *************/

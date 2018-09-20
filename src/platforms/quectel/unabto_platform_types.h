@@ -14,18 +14,7 @@ typedef s16 int16_t;
 typedef u32 uint32_t;
 typedef s32 int32_t;
 typedef u64 ssize_t;
-//typedef u8 nabto_socket_t;
-typedef struct nabto_socket_t nabto_socket_t;
-
-enum nabto_socket_type {
-    NABTO_SOCKET_IP_V4,
-    NABTO_SOCKET_IP_V6
-};
-
-struct nabto_socket_t {
-    u8 sock;
-    enum nabto_socket_type type;
-};
+typedef u8 nabto_socket_t;
 typedef u64 nabto_stamp_t;
 typedef u64 nabto_stamp_diff_t;
 

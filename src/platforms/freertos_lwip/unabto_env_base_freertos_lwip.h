@@ -25,18 +25,7 @@ extern "C" {
  *  The lwIP socket library is a little overkill for our usage, so we start out by 
  * using a netconn for each socket
  */
-//typedef int nabto_socket_t;
-typedef struct nabto_socket_t nabto_socket_t;
-
-enum nabto_socket_type {
-    NABTO_SOCKET_IP_V4,
-    NABTO_SOCKET_IP_V6
-};
-
-struct nabto_socket_t {
-    int sock;
-    enum nabto_socket_type type;
-};
+typedef int nabto_socket_t;
 typedef int16_t ssize_t;
 
 #define NABTO_INVALID_SOCKET NULL
