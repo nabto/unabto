@@ -135,16 +135,14 @@ void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip)
     memset(&hints, 0, sizeof(hints));
     
     hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_flags = AI_NUMERICHOST;
     hints.ai_family = AF_UNSPEC;
     
     printIp.type = NABTO_IP_V4;
     printIp.addr.ipv4 = ipv4;
     ipv4String = nabto_ip_to_string(&printIp);
-    NABTO_LOG_TRACE(("getaddrinfo on %s", ipv4String));
     status = getaddrinfo(ipv4String, "4242", &hints, &result);
     if (status != 0 || result == NULL) {
-        NABTO_LOG_TRACE(("getaddrinfo failed unexpectedly"));
+        NABTO_LOG_ERROR(("getaddrinfo failed unexpectedly"));
         // not possible
         *ip = printIp;
     } else {
@@ -163,7 +161,7 @@ void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip)
         } else {
             // unknown family
             // probably not possible.
-            NABTO_LOG_TRACE(("getaddrinfo returned unknown family"));
+            NABTO_LOG_ERROR(("getaddrinfo returned unknown family"));
             *ip = printIp;
         }
     }
