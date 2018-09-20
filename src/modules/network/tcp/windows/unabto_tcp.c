@@ -97,7 +97,7 @@ unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpo
 
     memset(&host,0,sizeof(struct sockaddr_in));
     host.sin_family = AF_INET;
-    host.sin_addr.s_addr = htonl(ep->addr);
+    host.sin_addr.s_addr = htonl(ep->addr.addr.ipv4);
     host.sin_port = htons(ep->port);
     NABTO_LOG_TRACE(("Connecting to %d.%d.%d.%d:%d ", MAKE_EP_PRINTABLE(*ep)));
     
