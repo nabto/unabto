@@ -39,9 +39,6 @@ the release and a new unreleased section is added.
   option to control the size of the streaming send segment
   pool. `NABTO_STREAM_SEND_SEGMENT_POOL_SIZE`
 
-### Changed
-- NABTO-1850: `nabto_stream_event` has an 
-
 ## 4.2.0 2017-12-14
 
 ### Breaking Changes
