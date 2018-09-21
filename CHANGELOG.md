@@ -15,6 +15,8 @@ the release and a new unreleased section is added.
 ### Changed
 - NABTO-1850: The streaming implementation now uses a pool of send
   segments.
+  
+### Breaking Changes
 - NABTO-1187: all `uint32_t` ip addresses is now `struct
   nabto_ip_address` this affects the following function definitions:
   `nabto_read`, `nabto_write`, `nabto_get_local_ip`,
