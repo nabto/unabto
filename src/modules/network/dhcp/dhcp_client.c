@@ -108,7 +108,7 @@ void dhcp_client_tick(void)
     case STATE_INITIALIZING:
     {
       uint16_t localPort = 68;
-      if(nabto_init_socket(0, &localPort, &socket))
+      if(nabto_socket_init(&localPort, &socket))
       {
         state = STATE_UNBOUND;
         timeoutDuration = MINIMUM_TIMEOUT_DURATION;
@@ -130,7 +130,7 @@ void dhcp_client_tick(void)
 
     case STATE_WAITING_FOR_OFFER:
     {
-      uint32_t sourceIp;
+      struct nabto_ip_address sourceIp;
       uint16_t sourcePort;
       uint16_t length = nabto_read(socket, nabtoCommunicationBuffer, sizeof (nabtoCommunicationBuffer), &sourceIp, &sourcePort);
 
@@ -197,7 +197,7 @@ void dhcp_client_tick(void)
 
     case STATE_WAITING_FOR_ACKNOWLEDGE:
     {
-      uint32_t sourceIp;
+      struct nabto_ip_address sourceIp;
       uint16_t sourcePort;
       uint16_t length = nabto_read(socket, nabtoCommunicationBuffer, sizeof (nabtoCommunicationBuffer), &sourceIp, &sourcePort);
 

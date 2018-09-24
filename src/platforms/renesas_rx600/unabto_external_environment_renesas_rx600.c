@@ -77,20 +77,25 @@ void nabto_random(uint8_t* buf, size_t len)
 
 
 /******************************************************************************/
+void nabto_socket_set_invalid(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
 /**
  * Initialise a udp socket.  This function is called for every socket
  * uNabto creates, this will normally occur two times. One for local
  * connections and one for remote connections.
  *
- * @param localAddr    The local address to bind to.
  * @param localPort    The local port to bind to.
  *                     A port number of 0 gives a random port.
  * @param socket       To return the created socket descriptor.
  * @return             true iff successfull
  */
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket)
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket)
 {
     int i;
+    uint32_t localAddr = INADDR_ANY;
     uint8_t *ap = (uint8_t*)&localAddr;
     uip_ipaddr_t ipAddr;
     struct uip_udp_conn *newConnection;
@@ -121,13 +126,18 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
     return true;
 }
 
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
+{
+    return *s1==*s2;
+}
+
 /**
  * Close a socket. 
  * Close can be called on already closed sockets. And should tolerate this behavior.
  *
  * @param socket the socket to be closed
  */
-void nabto_close_socket(nabto_socket_t* socket)
+void nabto_socket_close(nabto_socket_t* socket)
 {
     if (NULL == socket)
         return; 
@@ -145,11 +155,11 @@ static uint32_t loops=0;
 ssize_t nabto_read(nabto_socket_t socket,
                    uint8_t*       buf,
                    size_t         len,
-                   uint32_t*      addr,
+                   struct nabto_ip_address*      addr,
                    uint16_t*      port)
 {
     size_t res;
-    uint8_t *ap = (uint8_t*)addr;
+    uint8_t *ap = (uint8_t*)(&addr->addr.ipv4);
     if (0 > socket || MAX_SOCKETS <= socket  || uip_poll() || socket != uip_udp_conn->appstate.unabto)
         return 0;
 
@@ -158,6 +168,7 @@ ssize_t nabto_read(nabto_socket_t socket,
     {
         memcpy(buf, uip_appdata, res);
         // host order little endian
+        addr->type = NABTO_IP_V4;
         ap[3] = uip_ipaddr1(uip_udp_conn->srcipaddr);
         ap[2] = uip_ipaddr2(uip_udp_conn->srcipaddr);
         ap[1] = uip_ipaddr3(uip_udp_conn->srcipaddr);
@@ -195,26 +206,26 @@ static void uipSend(const uint8_t* buf, size_t len, uint32_t addr, uint16_t port
 ssize_t nabto_write(nabto_socket_t socket,
                     const uint8_t* buf,
                     size_t         len,
-                    uint32_t       addr,
+                    struct nabto_ip_address*       addr,
                     uint16_t       port)
 {
     static int dropped=0;
     ssize_t res = -1;
     XmitBuffer *xmitBuf;
 
-    if (0 > socket || socket >= MAX_SOCKETS)
+    if (0 > socket || socket >= MAX_SOCKETS || addr->type != NABTO_IP_V4)
         return -1;
 
 
     if (0 == uip_sdatalen() && uip_udp_conn->appstate.unabto == socket)
     {
-        uipSend(buf, len, addr, port);
+        uipSend(buf, len, addr->addr.ipv4, port);
         res = len; //...
     }
     else if (NULL != (xmitBuf = socketPacketBufferNew(socket)))
     {
         // Keep until uip calls back
-        xmitBuf->addr = addr;
+        xmitBuf->addr = addr->addr.ipv4;
         xmitBuf->port = port;
         xmitBuf->len = len;
         memcpy(xmitBuf->buffer, buf, len);
@@ -247,6 +258,11 @@ void resolv_found (char *name, u16_t *ipaddr)
 {
 }
 
+void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
+    ip->type = NABTO_IP_V4;
+    ip->addr.ipv4 = ipv4;
+}
+
 void nabto_dns_resolve(const char* id)
 {
     if (NULL != id)
@@ -254,7 +270,7 @@ void nabto_dns_resolve(const char* id)
 }
 
 //TBC
-nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr)
+nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address* v4addr)
 {
 //    static ip_addr_t bsAddr;
     uip_ipaddr_t *ipAddr;
@@ -262,7 +278,8 @@ nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr)
     if (NULL == (ipAddr = resolv_lookup(id)))
         return NABTO_DNS_ERROR;
 
-    uint8_t *ap = (uint8_t*)v4addr;
+    v4addr->type = NABTO_IP_V4;
+    uint8_t *ap = (uint8_t*)(&v4addr->addr.ipv4);
     // host order little endian
     ap[3] = uip_ipaddr1(ipAddr);
     ap[2] = uip_ipaddr2(ipAddr);

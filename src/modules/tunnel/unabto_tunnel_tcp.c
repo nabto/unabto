@@ -2,6 +2,7 @@
 #include <unabto/unabto_stream.h>
 #include <unabto/unabto_memory.h>
 #include <unabto/unabto_util.h>
+#include <unabto/unabto_external_environment.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <modules/network/epoll/unabto_epoll.h>
@@ -164,6 +165,7 @@ bool opening_socket(tunnel* tunnel) {
 
 
 
+
 bool open_socket(tunnel* tunnel) {
     unabto_tcp_status status;
 
@@ -174,7 +176,8 @@ bool open_socket(tunnel* tunnel) {
     if(status == UTS_OK) {
         unabto_tcp_status conStat;
         nabto_endpoint ep;
-        ep.addr = ntohl(inet_addr(tunnel->staticMemory->stmu.tcp_sm.host));
+        ep.addr.type = NABTO_IP_V4;
+        ep.addr.addr.ipv4 = ntohl(inet_addr(tunnel->staticMemory->stmu.tcp_sm.host));
         ep.port = tunnel->tunnel_type_vars.tcp.port;
         conStat = unabto_tcp_connect(&tunnel->tunnel_type_vars.tcp.sock, &ep);
         if(conStat == UTS_CONNECTING) {

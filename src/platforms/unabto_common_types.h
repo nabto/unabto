@@ -160,18 +160,18 @@ typedef __ROM char* text;
 #endif
 
 // define default version of MAKE_IP_PRINTABLE (suitable for little endian platforms)
-#ifndef MAKE_IP_PRINTABLE
-#define MAKE_IP_PRINTABLE(ip) (uint8_t)(ip >> 24), (uint8_t)(ip >> 16), (uint8_t)(ip >> 8), (uint8_t)(ip)
-#endif
+//#ifndef MAKE_IP_PRINTABLE
+//#define MAKE_IP_PRINTABLE(ip) (uint8_t)(ip >> 24), (uint8_t)(ip >> 16), (uint8_t)(ip >> 8), (uint8_t)(ip)
+//#endif
 
 #ifndef MAKE_NSI_PRINTABLE
 #define MAKE_NSI_PRINTABLE(cp, sp, cont) (uint32_t)(cp), (uint32_t)(sp), (uint32_t)(cont)
 #endif
 
 
-#ifndef PRIip
-#define PRIip         "%" PRIu8 ".%" PRIu8 ".%" PRIu8 ".%" PRIu8
-#endif
+//#ifndef PRIip
+//#define PRIip         "%" PRIu8 ".%" PRIu8 ".%" PRIu8 ".%" PRIu8
+//#endif
 
 #ifndef PRInsi
 #define PRInsi        "(%" PRIu32 ".%" PRIu32 ".%" PRIu32 ")"
@@ -179,11 +179,11 @@ typedef __ROM char* text;
 
 
 #ifndef MAKE_EP_PRINTABLE
-#define MAKE_EP_PRINTABLE(ep) MAKE_IP_PRINTABLE((ep).addr), (ep).port
+#define MAKE_EP_PRINTABLE(ep) nabto_ip_to_string(&(ep).addr), (ep).port
 #endif
 
 #ifndef PRIep
-#define PRIep         PRIip ":%" PRIu16
+#define PRIep         "%s" ":%" PRIu16
 #endif
 
 #ifndef MAKE_FP_PRINTABLE

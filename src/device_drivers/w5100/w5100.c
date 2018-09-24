@@ -367,11 +367,9 @@ uint16_t w5100_udp_receive(w5100_socket* socket, uint8_t* buffer, uint16_t maxim
 
 // Implement uNabto interface
 
-bool w5100_nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket)
+bool w5100_nabto_init_socket(uint16_t* localPort, nabto_socket_t* socket)
 {
   bool result;
-
-  NABTO_NOT_USED(localAddr);
 
   result = w5100_udp_open(socket, localPort);
 
@@ -387,11 +385,14 @@ void w5100_nabto_close_socket(nabto_socket_t* socket)
   w5100_udp_close(socket);
 }
 
-ssize_t w5100_nabto_write(nabto_socket_t socket, const uint8_t* buf, size_t len, uint32_t addr, uint16_t port)
+ssize_t w5100_nabto_write(nabto_socket_t socket, const uint8_t* buf, size_t len, struct nabto_ip_address* addr, uint16_t port)
 {
+  if (addr->type != NABTO_IP_V4) {
+    return 0;
+  }
   NABTO_LOG_TRACE(("w5100_nabto_udp_write socket=%u length=%u", (int) socket, (int) len));
 
-  if(w5100_udp_send(&socket, (uint8_t*) buf, len, addr, port))
+  if(w5100_udp_send(&socket, (uint8_t*) buf, len, addr->addr.ipv4, port))
   {
     return len;
   }
@@ -401,16 +402,22 @@ ssize_t w5100_nabto_write(nabto_socket_t socket, const uint8_t* buf, size_t len,
   }
 }
 
-ssize_t w5100_nabto_read(nabto_socket_t socket, uint8_t* buf, size_t len, uint32_t* addr, uint16_t* port)
+ssize_t w5100_nabto_read(nabto_socket_t socket, uint8_t* buf, size_t len, struct nabto_ip_address* addr, uint16_t* port)
 {
-  uint16_t length = w5100_udp_receive(&socket, buf, len, addr, port);
-
-  if(length > 0)
-  {
-    NABTO_LOG_TRACE(("w5100_nabto_udp_read socket=%u length=%u", (int) socket, (int) length));
+  if (addr->type != NABTO_IP_V4) {
+    return 0;
   }
+  {
+    uint16_t length = w5100_udp_receive(&socket, buf, len, &addr->addr.ipv4, port);
+  
 
-  return length;
+    if(length > 0)
+    {
+      NABTO_LOG_TRACE(("w5100_nabto_udp_read socket=%u length=%u", (int) socket, (int) length));
+    }
+
+    return length;
+  }
 }
 
 // Helpers

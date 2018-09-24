@@ -342,13 +342,24 @@ static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uin
 
     bool res = false;
     uint8_t* ptr = insert_header(buf, 0, nmc.context.gspnsi, U_ATTACH, true, seq, 0, 0);
-
+    uint32_t localIpV4 = 0;
+    uint32_t globalIpV4 = 0;
     ptr = insert_capabilities(ptr, end, nmc.context.clearTextData);
 
     ptr = insert_payload(ptr, end,  NP_PAYLOAD_TYPE_IPX, 0, 13);
-    WRITE_U32(ptr, nmc.socketGSPLocalEndpoint.addr); ptr += 4;
+    
+    if (nmc.socketGSPLocalEndpoint.addr.type == NABTO_IP_V4) {
+        localIpV4 = nmc.socketGSPLocalEndpoint.addr.addr.ipv4;
+    }
+    if (nmc.context.globalAddress.addr.type == NABTO_IP_V4) {
+        globalIpV4 = nmc.context.globalAddress.addr.addr.ipv4;
+    }
+
+    
+    WRITE_U32(ptr, localIpV4); ptr += 4;
     WRITE_U16(ptr, nmc.socketGSPLocalEndpoint.port); ptr += 2;
-    WRITE_U32(ptr, nmc.context.globalAddress.addr); ptr += 4;
+    
+    WRITE_U32(ptr, globalIpV4); ptr += 4;
     WRITE_U16(ptr, nmc.context.globalAddress.port); ptr += 2;
     WRITE_U8(ptr, nmc.context.natType); ptr++;
 
@@ -464,9 +475,9 @@ bool nabto_invite_event(nabto_packet_header* hdr)
             if (!unabto_payload_read_ipx(&payload, &ipx)) {
                 NABTO_LOG_TRACE(("Cannot read ipx payload from packet"));
             }
-            nmc.context.gsp.addr = ipx.privateIpAddress;
+            nabto_resolve_ipv4(ipx.privateIpAddress, &nmc.context.gsp.addr);
             nmc.context.gsp.port = ipx.privateIpPort;
-            nmc.context.globalAddress.addr = ipx.globalIpAddress;
+            nabto_resolve_ipv4(ipx.globalIpAddress, &nmc.context.globalAddress.addr);
             nmc.context.globalAddress.port = ipx.globalIpPort;
             NABTO_LOG_TRACE(("Using GSP at " PRIep, MAKE_EP_PRINTABLE(nmc.context.gsp)));
             /* the next packet is not sent to the sender of this packet (BS),
@@ -625,16 +636,17 @@ bool nabto_attach_event(nabto_packet_header* hdr)
                 NABTO_LOG_TRACE(("Illegal payload in U_ATTACH request(6/%i): %i/%i", NP_PAYLOAD_TYPE_EP, res, (int)type));
             } else {
                 nabto_endpoint ep;
-
-                READ_U32(ep.addr, ptr); ptr += 4;
+                uint32_t ipv4;
+                READ_U32(ipv4, ptr); ptr += 4;
                 READ_U16(ep.port, ptr); ptr += 2;
+                nabto_resolve_ipv4(ipv4, &ep.addr);
                 NABTO_NOT_USED(ep); /* Needed to avoid warning -> error */
 
                 /**
                  * If the endpoint given from the attach differs from the endpoint address 
                  * the controller gave then, we are behind a symmetric nat.
                  */
-                if (!EP_EQUAL(ep, nmc.context.globalAddress)) {
+                if (!nabto_ep_is_equal(&ep, &nmc.context.globalAddress)) {
                     nmc.context.natType = NP_PAYLOAD_IPX_NAT_SYMMETRIC;
                 }
 
@@ -768,11 +780,10 @@ void fix_for_broken_routers(void) {
      * safe to refresh the remote communication socket.
      */
     if (unabto_count_active_connections() == 0) {
-        nabto_close_socket(&nmc.socketGSP);
+        nabto_socket_close(&nmc.socketGSP);
         nmc.socketGSPLocalEndpoint.port = 0;
-        if (!nabto_init_socket(nmc.nabtoMainSetup.ipAddress, &nmc.socketGSPLocalEndpoint.port, &nmc.socketGSP)) {
-            nmc.socketGSP = NABTO_INVALID_SOCKET;
-        }
+        nabto_socket_set_invalid(&nmc.socketGSP);
+        nabto_socket_init(&nmc.socketGSPLocalEndpoint.port, &nmc.socketGSP);
     }
 }
 
@@ -786,7 +797,7 @@ void handle_as_idle(void) {
     nabto_context_reinit_crypto();
 
 #if NABTO_ENABLE_GET_LOCAL_IP
-    nabto_get_local_ip(&nmc.socketGSPLocalEndpoint.addr);
+    nabto_get_local_ipv4(&nmc.socketGSPLocalEndpoint.addr);
 #endif
     
     fix_for_broken_routers();
@@ -798,7 +809,7 @@ void handle_as_idle(void) {
     }
 #endif
     nmc.controllerEp = nmc.nabtoMainSetup.controllerArg;
-    if (nmc.nabtoMainSetup.controllerArg.addr != UNABTO_INADDR_NONE) {
+    if (nmc.nabtoMainSetup.controllerArg.addr.type != NABTO_IP_NONE) {
         SET_CTX_STATE_STAMP(NABTO_AS_WAIT_BS, 0);
         return;
     }
@@ -826,9 +837,9 @@ void handle_as_wait_dns(void) {
         {
             uint8_t i;
             for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
-                uint32_t ip = nmc.controllerAddresses[i];
-                if (ip != 0) {
-                    NABTO_LOG_INFO(("  Controller ip: " PRIip, MAKE_IP_PRINTABLE(ip)));
+                struct nabto_ip_address* ip = &nmc.controllerAddresses[i];
+                if (ip->type != NABTO_IP_NONE) {
+                    NABTO_LOG_INFO(("  Controller ip: %s", nabto_ip_to_string(ip)));
                 }
             }
         }
@@ -842,8 +853,8 @@ void handle_as_wait_dns(void) {
 /** timer event when waiting for the BS response to invite request. */
 void handle_as_wait_bs(void) {
     // cycle controller eps
-    uint32_t newip = nmc.controllerAddresses[nmc.context.counter % NABTO_DNS_RESOLVED_IPS_MAX];
-    if (newip != 0) {
+    struct nabto_ip_address newip = nmc.controllerAddresses[nmc.context.counter % NABTO_DNS_RESOLVED_IPS_MAX];
+    if (newip.type != NABTO_IP_NONE) {
         nmc.controllerEp.addr = newip;
     }
     
@@ -1041,7 +1052,7 @@ void send_basestation_attach_failure(uint8_t statusCode) {
     length = ptr - nabtoCommunicationBuffer;
     insert_length(nabtoCommunicationBuffer, length);
 
-    if (nmc.controllerEp.addr == UNABTO_INADDR_NONE) {
+    if (nmc.controllerEp.addr.type == NABTO_IP_NONE) {
         NABTO_LOG_TRACE(("There is no valid address to send statistics packets to"));
     } else {
         send_to_basestation(nabtoCommunicationBuffer, length, &nmc.controllerEp);

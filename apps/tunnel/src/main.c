@@ -361,7 +361,8 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         if (addr == INADDR_NONE) {
             NABTO_LOG_FATAL(("Invalid basestation address"));
         }
-        nms->controllerArg.addr = htonl(addr);
+        nms->controllerArg.addr.type = NABTO_IP_V4;
+        nms->controllerArg.addr.addr.ipv4 = htonl(addr);
     }
 
     if (gopt(options, 'x')) {

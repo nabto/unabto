@@ -231,7 +231,12 @@ socket_request_t* next_free_socket_request() {
 }
 
 
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket) {
+void nabto_socket_set_invalid(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket) {
 
   if(*localPort == 0)
   {
@@ -247,13 +252,18 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
 
   n->socket = socket;
   n->port = *localPort;
-  n->addr = localAddr;
+  n->addr = INADDR_ANY;
   n->pending = true;
   *socket = NABTO_INVALID_SOCKET;
   return true;
 }
 
-void nabto_close_socket(nabto_socket_t* socket) {
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
+{
+    return *s1==*s2;
+}
+
+void nabto_socket_close(nabto_socket_t* socket) {
   if(socket != NULL)
   {
     SendApiSocketCloseReq(COLA_TASK, *socket);
@@ -263,7 +273,7 @@ void nabto_close_socket(nabto_socket_t* socket) {
 
 ssize_t nabto_read(nabto_socket_t socket, 
                    uint8_t* buf, size_t buflen,
-                   uint32_t* addr,
+                   struct nabto_ip_address* addr,
                    uint16_t* port) {
   if(socket != 0)
   {
@@ -271,7 +281,8 @@ ssize_t nabto_read(nabto_socket_t socket,
     {
       int length = RSMIN(buflen, rx_buffer.bufferLength);
       memcpy(buf, rx_buffer.bufferPtr, length);
-      *addr = rx_buffer.remote_addr;
+      addr->type = NABTO_IP_V4;
+      addr->addr.ipv4 = rx_buffer.remote_addr;
       *port = rx_buffer.remote_port;
       SendApiSocketFreeBufferReq(COLA_TASK, rx_buffer.handle, (rsuint8*)rx_buffer.bufferPtr);
       rx_buffer.pending = false;
@@ -285,9 +296,9 @@ ssize_t nabto_read(nabto_socket_t socket,
 ssize_t nabto_write(nabto_socket_t socket,
                     const uint8_t* buf,
                     size_t len,
-                    uint32_t addr,
+                    struct nabto_ip_address* addr,
                     uint16_t port) {
-  if(addr == 0 || port == 0)
+  if(addr->type != NABTO_IP_V4 || port == 0)
   {
     return 0;
   }
@@ -315,9 +326,9 @@ ssize_t nabto_write(nabto_socket_t socket,
   ApiSocketAddrType sendTo;
   sendTo.Domain = ASD_AF_INET;
   sendTo.Port = port;
-  sendTo.Ip.V4.Addr = addr;
+  sendTo.Ip.V4.Addr = addr->addr.ipv4;
   SendApiSocketSendToReq(COLA_TASK, socket, fresh_buffer, len, 0, sendTo);
-  NABTO_LOG_TRACE(("Send packet length: %i %u:%u handle: %u", len, addr, port, socket));
+  NABTO_LOG_TRACE(("Send packet length: %i %u:%u handle: %u", len, addr->addr.ipv4, port, socket));
   return len;
 }
 
@@ -351,6 +362,11 @@ void nabto_random(uint8_t* buf, size_t len) {
 
 }
 
+void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
+    ip->type = NABTO_IP_V4;
+    ip->addr.ipv4 = ipv4;
+}
+
 void nabto_dns_resolve(const char* id) {
   SendApiDnsClientResolveReq(COLA_TASK, false, strlen(id), (rsuint8*)id);
   //SendApiDnsClientResolveCnameReq(COLA_TASK, strlen(id), (rsuint8*)id);
@@ -358,10 +374,11 @@ void nabto_dns_resolve(const char* id) {
   dns_status = NABTO_DNS_NOT_FINISHED;
 }
 
-nabto_dns_status_t nabto_dns_is_resolved(const char* id, uint32_t* v4addr) {
+nabto_dns_status_t nabto_dns_is_resolved(const char* id, struct nabto_ip_address* v4addr) {
   if(dns_status == NABTO_DNS_OK)
   {
-    *v4addr = dns_addr;
+    v4addr->type = NABTO_IP_V4;
+    v4addr->addr.ipv4 = dns_addr;
     //NABTO_LOG_TRACE(("DNS resolved"));
   }
   return dns_status;

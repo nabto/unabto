@@ -26,13 +26,6 @@ enum {
     SEED_SIZE      = 32
 };
 
-/** 
- * The IP endpoint type.
- */
-typedef struct {
-    uint32_t addr; ///< IP address
-    uint16_t port; ///< port number
-} nabto_endpoint;
 
 /** A set of peer endpoints */
 typedef struct {

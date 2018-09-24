@@ -282,7 +282,7 @@ void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const na
     // encrypt and send packet.
 
     if (encrypt_packet(&connection->cryptoctx, nabtoCommunicationBuffer, end, plaintextStart, plaintextLength, cryptoPayloadStart, &packetLength)) {
-        nabto_write(socket, nabtoCommunicationBuffer, packetLength, peer->addr, peer->port);
+        nabto_write(socket, nabtoCommunicationBuffer, packetLength, &peer->addr, peer->port);
     } else {
         NABTO_LOG_WARN(("cannot encrypt packet"));
     }
@@ -319,7 +319,7 @@ void unabto_psk_connection_send_verify_response(nabto_socket_t socket, const nab
 
     insert_length(nabtoCommunicationBuffer, packetLength);
     // send packet
-    nabto_write(socket, nabtoCommunicationBuffer, packetLength, peer->addr, peer->port);
+    nabto_write(socket, nabtoCommunicationBuffer, packetLength, &peer->addr, peer->port);
 }
 
 void unabto_psk_connection_send_connect_error_response(nabto_socket_t socket, const nabto_endpoint* peer, uint32_t cpNsi, uint32_t spNsi, uint32_t errorCode)
@@ -362,7 +362,7 @@ void unabto_psk_connection_send_error_response(nabto_socket_t socket, const nabt
 
     insert_length(nabtoCommunicationBuffer, packetLength);
     // send packet
-    nabto_write(socket, nabtoCommunicationBuffer, packetLength, peer->addr, peer->port);
+    nabto_write(socket, nabtoCommunicationBuffer, packetLength, &peer->addr, peer->port);
 }
 
 #endif

@@ -52,9 +52,9 @@ void unabto_extended_rendezvous_init() {
         int i;
         for (i = 0; i < NABTO_EXTENDED_RENDEZVOUS_MAX_SOCKETS; i++) {
             uint16_t localport = 0;
-            if (!nabto_init_socket(0, &localport, &extended_rendezvous_sockets[i])) {
+            nabto_socket_set_invalid(&extended_rendezvous_sockets[i]);
+            if (!nabto_socket_init(&localport, &extended_rendezvous_sockets[i])) {
                 NABTO_LOG_ERROR(("Cannot initialize extended rendezvous socket %i", i));
-                extended_rendezvous_sockets[i] = NABTO_INVALID_SOCKET;
             }
         }
     }
@@ -64,7 +64,7 @@ void unabto_extended_rendezvous_close() {
     if (nmc.nabtoMainSetup.enableExtendedRendezvousMultipleSockets) {
         int i;
         for (i = 0; i < NABTO_EXTENDED_RENDEZVOUS_MAX_SOCKETS; i++) {
-            nabto_close_socket(&extended_rendezvous_sockets[i]);
+            nabto_socket_close(&extended_rendezvous_sockets[i]);
         }
     }
 }

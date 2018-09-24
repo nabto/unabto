@@ -17,6 +17,7 @@
 #include <errno.h>
 #include <unabto/unabto_memory.h>
 #include <unabto/unabto_message.h>
+#include <unabto/unabto_endpoint.h>
 #include <unabto/unabto_tcp_fallback.h>
 
 #if NABTO_ENABLE_EPOLL

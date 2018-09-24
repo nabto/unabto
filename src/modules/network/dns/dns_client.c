@@ -91,7 +91,7 @@ void dns_client_tick(void)
     case STATE_OPEN_SOCKET:
     {
       uint16_t localPort = 0;
-      if(nabto_init_socket(0, &localPort, &clientSocket))
+      if(nabto_socket_init(&localPort, &clientSocket))
       {
         state = STATE_RESOLVE;
         NABTO_LOG_TRACE(("Socket opened."));
@@ -110,6 +110,7 @@ void dns_client_tick(void)
       uint8_t* p = packet->data;
       uint8_t* name = (uint8_t*) currentHost;
       uint8_t* labelLengthPointer;
+      struct nabto_ip_address ip;
 
       memset(nabtoCommunicationBuffer, 0, nabtoCommunicationBufferSize);
       WRITE_U16(&packet->transactionIdentifier, transactionIdentifier);
@@ -136,7 +137,9 @@ void dns_client_tick(void)
       WRITE_FORWARD_U16(p, TYPE_A);
       WRITE_FORWARD_U16(p, CLASS_IN);
 
-      nabto_write(clientSocket, nabtoCommunicationBuffer, p - nabtoCommunicationBuffer, serverIp, 53);
+      ip.type = NABTO_IP_V4;
+      ip.addr.ipv4 = serverIp;
+      nabto_write(clientSocket, nabtoCommunicationBuffer, p - nabtoCommunicationBuffer, &ip, 53);
 
       state = STATE_WAITING_FOR_RESPONSE;
       nabtoSetFutureStamp(&timer, TIMEOUT);
@@ -147,7 +150,7 @@ void dns_client_tick(void)
 
     case STATE_WAITING_FOR_RESPONSE:
     {
-      uint32_t sourceIp;
+      struct nabto_ip_address sourceIp;
       uint16_t sourcePort;
       dns_packet* dnsPacket = (dns_packet*) nabtoCommunicationBuffer;
       uint16_t length = (uint16_t) nabto_read(clientSocket, nabtoCommunicationBuffer, sizeof (nabtoCommunicationBuffer), &sourceIp, &sourcePort);
@@ -273,7 +276,7 @@ nabto_dns_status_t dns_client_nabto_dns_is_resolved(const char* host, uint32_t* 
       return NABTO_DNS_ERROR;
   }
 
-  nabto_close_socket(&clientSocket);
+  nabto_socket_close(&clientSocket);
   state = STATE_IDLE;
 
   return status;

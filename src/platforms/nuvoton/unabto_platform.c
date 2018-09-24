@@ -47,18 +47,22 @@ void nabto_random(uint8_t* buf, size_t len)
   }
 }
 
+void nabto_socket_set_invalid(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
 /**
  * Initialise a udp socket.  This function is called for every socket
  * uNabto creates, this will normally occur two times. One for local
  * connections and one for remote connections.
  *
- * @param localAddr    The local address to bind to.
  * @param localPort    The local port to bind to.
  *                     A port number of 0 gives a random port.
  * @param socket       To return the created socket descriptor.
  * @return             true iff successfull
  */
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket)
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket)
 {
     uint8_t i;
 
@@ -76,12 +80,17 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
             *socket = (nabto_socket_t)i;
             sockets[i].isOpen = true;
 
-            NABTO_LOG_DEBUG(("nabto_init_socket %u: port=%u", *socket, port));
+            NABTO_LOG_DEBUG(("nabto_socket_init %u: port=%u", *socket, port));
 
             return true;
         }
     }
     return false;
+}
+
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
+{
+    return *s1==*s2;
 }
 
 /**
@@ -90,7 +99,7 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
  *
  * @param socket the socket to be closed
  */
-void nabto_close_socket(nabto_socket_t* socket)
+void nabto_socket_close(nabto_socket_t* socket)
 {
     NABTO_LOG_DEBUG(("nabto_close_socket %u", *socket));
     sockets[*socket].isOpen = false;
@@ -110,7 +119,7 @@ void nabto_close_socket(nabto_socket_t* socket)
 ssize_t nabto_read(nabto_socket_t socket,
                    uint8_t*       buf,
                    size_t         len,
-                   uint32_t*      addr,
+                   struct nabto_ip_address*      addr,
                    uint16_t*      port)
 {
     int eff_data_len = 0;
@@ -132,7 +141,8 @@ ssize_t nabto_read(nabto_socket_t socket,
         *port = uCmdRspFrame.recvdataFrame.recvdata.destPort[0] |
                 uCmdRspFrame.recvdataFrame.recvdata.destPort[1]<<8;
 
-        *addr = uCmdRspFrame.recvdataFrame.recvdata.destIp[0] |
+        addr->type = NABTO_IP_V4;
+        addr->addr.ipv4 = uCmdRspFrame.recvdataFrame.recvdata.destIp[0] |
                 uCmdRspFrame.recvdataFrame.recvdata.destIp[1]<<8  |
                 uCmdRspFrame.recvdataFrame.recvdata.destIp[2]<<16 |
                 uCmdRspFrame.recvdataFrame.recvdata.destIp[3]<<24;
@@ -157,7 +167,7 @@ ssize_t nabto_read(nabto_socket_t socket,
 
         memcpy(buf, uCmdRspFrame.recvdataFrame.recvdata.recvdataBuf, recvLen);
 
-        NABTO_LOG_DEBUG(("Received UDP packet from %i.%i.%i.%i: port=%u length=%u", (*addr >> 24) & 0xFF, (*addr >> 16) & 0xFF, (*addr >> 8) & 0xFF, *addr & 0xFF, *port, recvLen));
+        NABTO_LOG_DEBUG(("Received UDP packet from %i.%i.%i.%i: port=%u length=%u", (addr->addr.ipv4 >> 24) & 0xFF, (addr->addr.ipv4 >> 16) & 0xFF, (addr->addr.ipv4 >> 8) & 0xFF, addr->addr.ipv4 & 0xFF, *port, recvLen));
     }
     while (0);
 
@@ -180,12 +190,14 @@ ssize_t nabto_read(nabto_socket_t socket,
 ssize_t nabto_write(nabto_socket_t socket,
                     const uint8_t* buf,
                     size_t         len,
-                    uint32_t       addr,
+                    struct nabto_ip_address*       addr,
                     uint16_t       port)
 {
-    NABTO_LOG_DEBUG(("nabto_write: %i.%i.%i.%i: port=%u length=%u", (addr >> 24) & 0xFF, (addr >> 16) & 0xFF, (addr >> 8) & 0xFF, addr & 0xFF, port, len));
-
-    rak_send_Data(socket, port, addr, (uint8_t *)buf, len);
+    NABTO_LOG_DEBUG(("nabto_write: %i.%i.%i.%i: port=%u length=%u", (addr->addr.ipv4 >> 24) & 0xFF, (addr->addr.ipv4 >> 16) & 0xFF, (addr->addr.ipv4 >> 8) & 0xFF, addr->addr.ipv4 & 0xFF, port, len));
+    if (addr->type != NABTO_IP_V4) {
+        return 0;
+    }
+    rak_send_Data(socket, port, addr->addr.ipv4, (uint8_t *)buf, len);
     return true;
 }
 
@@ -213,6 +225,11 @@ int nabtoStampDiff2ms(nabto_stamp_diff_t diff)
     return (int) diff;
 }
 
+void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
+    ip->type = NABTO_IP_V4;
+    ip->addr.ipv4 = ipv4;
+}
+
 /**
  * start resolving an ip address
  * afterwards nabto_resolve_dns will be called until the address is resolved
@@ -232,9 +249,10 @@ void nabto_dns_resolve(const char* id)
  * @param v4addr  pointer to ipaddress
  * @return false if address is not resolved yet
  */
-nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr)
+nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address* v4addr)
 {
     // FIXME: DNS resolve is not supported on RAK module yet
-    *v4addr = remote_addr;
+    v4addr->type = NABTO_IP_V4;
+    v4addr->addr.ipv4 = remote_addr;
     return NABTO_DNS_OK;
 }
