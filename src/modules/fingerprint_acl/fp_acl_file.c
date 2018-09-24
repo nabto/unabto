@@ -148,6 +148,7 @@ fp_acl_db_status fp_acl_file_save_file(struct fp_mem_state* acl)
     status = fp_acl_file_save_file_temp(aclFile, acl);
     
     fflush(aclFile);
+    fsync(fileno(aclFile));
     fclose(aclFile);
 
     if (status == FP_ACL_DB_OK) {
