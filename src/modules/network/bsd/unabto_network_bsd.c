@@ -350,16 +350,21 @@ struct pollfd* unabto_network_poll_add_to_set(struct pollfd* begin, struct pollf
     return begin;
 }
 
-/*void unabto_network_poll_read_sockets(struct pollfd* begin, struct pollfd* end)
+void unabto_network_poll_read_sockets(struct pollfd* begin, struct pollfd* end)
 {
     while (begin != end) {
         if (begin->revents == POLLIN) {
-            unabto_read_socket(begin->fd);
+            socketListElement* se;
+            DL_FOREACH(socketList, se) {
+                if (se->socket.sock == begin->fd) {
+                    unabto_read_socket(se->socket);
+                }
+            }
         }
         begin++;
     }
 }
-*/
+
 #if NABTO_ENABLE_EPOLL
 void unabto_network_epoll_read(struct epoll_event* event)
 {
