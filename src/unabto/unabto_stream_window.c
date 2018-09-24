@@ -93,6 +93,12 @@ static bool unabto_stream_insert_sack_pair(uint32_t begin, uint32_t end, struct 
 
 void unabto_stream_dump_state(struct nabto_stream_s* stream);
 
+uint16_t unabto_cwnd_get(unabto_cwnd* cwnd);
+void unabto_cwnd_set(unabto_cwnd* cwnd, uint16_t value);
+void unabto_cwnd_add(unabto_cwnd* cwnd, uint16_t value);
+void unabto_cwnd_sub_one(unabto_cwnd* cwnd);
+void unabto_cwnd_flightsize_add(unabto_cwnd* cwnd, uint16_t flightSize);
+
 /**
  * Initialize state
  */
@@ -467,10 +473,10 @@ static bool send_data_packet(struct nabto_stream_s* stream, uint32_t seq, uint8_
 
     if (build_and_send_packet(stream, ACK, seq, 0, 0, data, size, &sackData)) {
         if (size) {
-            tcb->cCtrl.cwnd -= 1;
+            unabto_cwnd_sub_one(&tcb->cCtrl.cwnd);
         }
 
-        NABTO_LOG_DEBUG(("%" PRIu16 " <-- [%" PRIu32 ",%" PRIu32 "] DATA(isRetrans: %u), %" PRIu16 " bytes from ix=%i (xmitFirst/Count/flightSize = %" PRIu32 "/%" PRIu32 "/%i), advertisedWindow %" PRIu16, stream->streamTag, seq, ackNumber, retrans, size, ix, tcb->xmitFirst, tcb->xmitLastSent - tcb->xmitFirst, tcb->cCtrl.flightSize, unabto_stream_advertised_window_size(tcb)));
+        NABTO_LOG_DEBUG(("%" PRIu16 " <-- [%" PRIu32 ",%" PRIu32 "] DATA(isRetrans: %u), %" PRIu16 " bytes from ix=%i (xmitFirst/Count/flightSize = %" PRIu32 "/%" PRIu32 "/%" PRIu16 "), advertisedWindow %" PRIu16, stream->streamTag, seq, ackNumber, retrans, size, ix, tcb->xmitFirst, tcb->xmitLastSent - tcb->xmitFirst, tcb->cCtrl.flightSize, unabto_stream_advertised_window_size(tcb)));
 
         return true;
     } else {
@@ -548,7 +554,7 @@ static bool send_syn_or_syn_ack(struct nabto_stream_s* stream, uint8_t type)
         return false;
     }
 
-    NABTO_LOG_DEBUG(("%" PRIu16 " <-- [%" PRIu32 ",%" PRIu32 "] %" PRItext " (xmitFirst/Count/flightSize = %" PRIu32 "/%" PRIu32 "/%i), advertisedWindow %" PRIu16,
+    NABTO_LOG_DEBUG(("%" PRIu16 " <-- [%" PRIu32 ",%" PRIu32 "] %" PRItext " (xmitFirst/Count/flightSize = %" PRIu32 "/%" PRIu32 "/%" PRIu16 "), advertisedWindow %" PRIu16,
                      stream->streamTag,
                      tcb->xmitSeq,
                      unabto_stream_ack_number_to_send(tcb),
@@ -699,7 +705,7 @@ void nabto_stream_check_new_data_xmit(struct nabto_stream_s* stream) {
         {
             // flightSize is exactly the number of transmitbuffers in the state B_SENT!
             tcb->cCtrl.flightSize++;
-            unabto_stream_stats_observe(&tcb->ccStats.flightSize, (double)tcb->cCtrl.flightSize);
+            unabto_stream_stats_observe_uint16(&tcb->ccStats.flightSize, tcb->cCtrl.flightSize);
             xbuf->xstate = B_SENT;
         }
         xbuf->shouldRetransmit = false;
@@ -1018,7 +1024,7 @@ bool handle_ack(struct nabto_stream_s* stream, uint32_t ack_start, uint32_t ack_
                 {
                     // flightSize is exactly the number of transmitbuffers in the state B_SENT!
                     tcb->cCtrl.flightSize--;
-                    unabto_stream_stats_observe(&tcb->ccStats.flightSize, (double)tcb->cCtrl.flightSize);
+                    unabto_stream_stats_observe_uint16(&tcb->ccStats.flightSize, tcb->cCtrl.flightSize);
                     xbuf->xstate = B_IDLE;
                     unabto_stream_free_send_segment(xbuf->buf);
                     xbuf->buf = NULL;
@@ -1212,7 +1218,7 @@ void nabto_stream_tcb_event(struct nabto_stream_s* stream,
             stream->applicationEvents.dataWritten = true;
         }
         if (windowWasFull) {
-            tcb->cCtrl.cwnd += (tcb->maxAdvertisedWindow-oldAdvWindow);
+            unabto_cwnd_add(&tcb->cCtrl.cwnd, tcb->maxAdvertisedWindow-oldAdvWindow);
         }
     }
 
@@ -1738,17 +1744,17 @@ void unabto_stream_secondary_data_structure_init(struct nabto_stream_s* stream)
 void unabto_stream_congestion_control_init(struct nabto_stream_tcb* tcb)
 {
     tcb->cCtrl.isFirstAck = true;
-    tcb->cCtrl.cwnd = CWND_INITIAL_VALUE;
+    unabto_cwnd_set(&tcb->cCtrl.cwnd, CWND_INITIAL_VALUE);
     tcb->cCtrl.srtt = tcb->cfg.timeoutMsec;
     tcb->cCtrl.rto =  tcb->cfg.timeoutMsec;
     tcb->cCtrl.ssThreshold = tcb->cfg.xmitWinSize;
-    unabto_stream_stats_observe(&tcb->ccStats.ssThreshold, tcb->cCtrl.ssThreshold);
+    unabto_stream_stats_observe_uint16(&tcb->ccStats.ssThreshold, tcb->cCtrl.ssThreshold);
 }
 
 void unabto_stream_congestion_control_adjust_ssthresh_after_triple_ack(struct nabto_stream_tcb* tcb) {
     if (!tcb->cCtrl.lostSegment) {
-        tcb->cCtrl.ssThreshold = MAX(tcb->cCtrl.flightSize/2.0, SLOWSTART_MIN_VALUE);
-        unabto_stream_stats_observe(&tcb->ccStats.ssThreshold, tcb->cCtrl.ssThreshold);
+        tcb->cCtrl.ssThreshold = MAX(tcb->cCtrl.flightSize/2, SLOWSTART_MIN_VALUE);
+        unabto_stream_stats_observe_uint16(&tcb->ccStats.ssThreshold, tcb->cCtrl.ssThreshold);
         tcb->cCtrl.lostSegment = true;
     }
 }
@@ -1764,7 +1770,7 @@ void unabto_stream_congestion_control_timeout(struct nabto_stream_s * stream) {
     // in a previous resending.
 
     // After a timeout start with a fresh slow start
-    tcb->cCtrl.cwnd = CWND_INITIAL_VALUE;
+    unabto_cwnd_set(&tcb->cCtrl.cwnd, CWND_INITIAL_VALUE);
     tcb->cCtrl.ssThreshold = tcb->cfg.xmitWinSize;
 
     // A problem with karns algorithm is that a huge increase
@@ -1807,13 +1813,13 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
         }
 
         if (tcb->cCtrl.lostSegment) {
-            tcb->cCtrl.cwnd += 1;
+            unabto_cwnd_add(&tcb->cCtrl.cwnd, 1);
         } else if (use_slow_start(tcb)) {
-            NABTO_LOG_TRACE(("slow starting! %f", tcb->cCtrl.cwnd));
-            tcb->cCtrl.cwnd += 2;
+            NABTO_LOG_TRACE(("slow starting! %" PRIu32, unabto_cwnd_get(&tcb->cCtrl.cwnd)));
+            unabto_cwnd_add(&tcb->cCtrl.cwnd, 2);
         } else {
             // congestion avoidance
-            tcb->cCtrl.cwnd += 1 + (1.0/tcb->cCtrl.flightSize);
+            unabto_cwnd_flightsize_add(&tcb->cCtrl.cwnd, tcb->cCtrl.flightSize);
         }
         {
             // cwnd should not grow above the maximum possible data on
@@ -1822,15 +1828,15 @@ void unabto_stream_congestion_control_handle_ack(struct nabto_stream_tcb* tcb, u
             // some slow start situation when the window opens again.
             uint32_t maxData = tcb->maxAdvertisedWindow - tcb->xmitFirst;
 
-            if (tcb->cCtrl.cwnd > maxData) {
-                tcb->cCtrl.cwnd = maxData;
+            if (unabto_cwnd_get(&tcb->cCtrl.cwnd) > maxData) {
+                unabto_cwnd_set(&tcb->cCtrl.cwnd, maxData);
             }
         }
 
-        unabto_stream_stats_observe(&tcb->ccStats.cwnd, tcb->cCtrl.cwnd);
+        unabto_stream_stats_observe_time(&tcb->ccStats.cwnd, unabto_cwnd_get(&tcb->cCtrl.cwnd));
     }
 
-    NABTO_LOG_TRACE(("adjusting cwnd: %f, ssThreshold: %f, flightSize %i", tcb->cCtrl.cwnd, tcb->cCtrl.ssThreshold, tcb->cCtrl.flightSize));
+    NABTO_LOG_TRACE(("adjusting cwnd: %" PRIu32 ", ssThreshold: %" PRIu16 ", flightSize %" PRIu16, unabto_cwnd_get(&tcb->cCtrl.cwnd), tcb->cCtrl.ssThreshold, tcb->cCtrl.flightSize));
 }
 
 /**
@@ -1856,7 +1862,7 @@ void unabto_stream_mark_segment_for_retransmission(struct nabto_stream_tcb* tcb,
 bool unabto_stream_congestion_control_can_send(struct nabto_stream_tcb* tcb)
 {
     // is_in_cwnd(tcb);
-    return (tcb->cCtrl.cwnd > 0);
+    return (unabto_cwnd_get(&tcb->cCtrl.cwnd) > 0);
 }
 
 bool use_slow_start(struct nabto_stream_tcb* tcb) {
@@ -1874,15 +1880,15 @@ uint32_t unabto_stream_not_sent_segments(struct nabto_stream_tcb* tcb) {
 }
 
 bool congestion_control_accept_more_data(struct nabto_stream_tcb* tcb) {
-    bool status = (unabto_stream_not_sent_segments(tcb) <= tcb->cCtrl.cwnd);
+    bool status = (unabto_stream_not_sent_segments(tcb) <= unabto_cwnd_get(&tcb->cCtrl.cwnd));
     if (!status) {
-        NABTO_LOG_TRACE(("Stream  does not accept more data notSent: %" PRIu32 ", cwnd %f", unabto_stream_not_sent_segments(tcb), tcb->cCtrl.cwnd));
+        NABTO_LOG_TRACE(("Stream  does not accept more data notSent: %" PRIu32 ", cwnd %" PRIu32, unabto_stream_not_sent_segments(tcb), unabto_cwnd_get(&tcb->cCtrl.cwnd)));
     }
     return status;
 }
 
 void windowStatus(const char* str, struct nabto_stream_tcb* tcb) {
-    NABTO_LOG_TRACE(("%s, ssthres: %f, cwnd: %f, srtt: %f, rttVar: %f", str, tcb->cCtrl.ssThreshold, tcb->cCtrl.cwnd, tcb->cCtrl.srtt, tcb->cCtrl.rttVar));
+    NABTO_LOG_TRACE(("%s, ssthres: %" PRIu16 ", cwnd: %" PRIu32 ", srtt: %" PRIu32 ", rttVar: %" PRIu32, str, tcb->cCtrl.ssThreshold, unabto_cwnd_get(&tcb->cCtrl.cwnd), tcb->cCtrl.srtt, tcb->cCtrl.rttVar));
 }
 
 void unabto_stream_update_congestion_control_receive_stats(struct nabto_stream_s * stream, uint16_t ix) {
@@ -1892,7 +1898,7 @@ void unabto_stream_update_congestion_control_receive_stats(struct nabto_stream_s
         nabto_stamp_t sentTime = tcb->xmit[ix].sentStamp;
         nabto_stamp_t now = nabtoGetStamp();
         nabto_stamp_diff_t diff = nabtoStampDiff(&now, &sentTime); // now-sentTime
-        double time = nabtoStampDiff2ms(diff);
+        uint32_t time = nabtoStampDiff2ms(diff);
 
         if (tcb->cCtrl.isFirstAck) {
             /**
@@ -1913,15 +1919,13 @@ void unabto_stream_update_congestion_control_receive_stats(struct nabto_stream_s
              * SRTT <- (1-alpha) * SRTT + alpha * R'
              * alpha = 1/8, betal = 1/4
              */
-            double alpha = 1.0/8;
-            double beta = 1.0/4;
-            tcb->cCtrl.rttVar = (1.0-beta) * tcb->cCtrl.rttVar + beta * fabs(tcb->cCtrl.srtt - time);
-            tcb->cCtrl.srtt = (1.0-alpha) * tcb->cCtrl.srtt + alpha * time;
+            tcb->cCtrl.rttVar = ((3 * tcb->cCtrl.rttVar) + abs(tcb->cCtrl.srtt - time))/4;
+            tcb->cCtrl.srtt = ((7 * tcb->cCtrl.srtt) + time)/8 ;
         }
-        unabto_stream_stats_observe(&tcb->ccStats.rtt, time);
-        tcb->cCtrl.rto = tcb->cCtrl.srtt + 4.0*tcb->cCtrl.rttVar;
+        unabto_stream_stats_observe_time(&tcb->ccStats.rtt, time);
+        tcb->cCtrl.rto = tcb->cCtrl.srtt + (tcb->cCtrl.rttVar*4);
 
-        NABTO_LOG_TRACE(("packet time %f, tcb->srtt %f, tcb->rttVar %f, tcb->rto %" PRIu16, time, tcb->cCtrl.srtt, tcb->cCtrl.rttVar, tcb->cCtrl.rto));
+        NABTO_LOG_TRACE(("packet time %f, tcb->srtt %" PRIu32 ", tcb->rttVar %" PRIu32 ", tcb->rto %" PRIu16, time, tcb->cCtrl.srtt, tcb->cCtrl.rttVar, tcb->cCtrl.rto));
 
 
         /**
@@ -1964,12 +1968,12 @@ void unabto_stream_dump_state(struct nabto_stream_s* stream) {
     NABTO_LOG_TRACE(("  recvNext %i", tcb->recvNext));
     NABTO_LOG_TRACE(("  ackSent %i", tcb->ackSent));
     NABTO_LOG_TRACE((" congestion control"));
-    NABTO_LOG_TRACE(("  srtt %f", tcb->cCtrl.srtt));
-    NABTO_LOG_TRACE(("  rttVar %f", tcb->cCtrl.rttVar));
+    NABTO_LOG_TRACE(("  srtt %" PRIu32, tcb->cCtrl.srtt));
+    NABTO_LOG_TRACE(("  rttVar %" PRIu32, tcb->cCtrl.rttVar));
     NABTO_LOG_TRACE(("  rto %" PRIu16, tcb->cCtrl.rto));
-    NABTO_LOG_TRACE(("  cwnd %f", tcb->cCtrl.cwnd));
-    NABTO_LOG_TRACE(("  ssThreshold %f", tcb->cCtrl.ssThreshold));
-    NABTO_LOG_TRACE(("  flightSize %i", tcb->cCtrl.flightSize));
+    NABTO_LOG_TRACE(("  cwnd %" PRIu32, unabto_cwnd_get(&tcb->cCtrl.cwnd)));
+    NABTO_LOG_TRACE(("  ssThreshold %" PRIu16, tcb->cCtrl.ssThreshold));
+    NABTO_LOG_TRACE(("  flightSize %" PRIu16, tcb->cCtrl.flightSize));
 #endif
 }
 
@@ -1998,15 +2002,23 @@ static uint16_t nabto_stream_next_cp_id(void) {
    return idCP;
 }
 
-void unabto_stat_init(struct unabto_stats* stat)
+void unabto_stat_time_init(struct unabto_stats_time* stat)
 {
     stat->min = 0;
     stat->max = 0;
     stat->count = 0;
-    stat->avg = 0;
+    stat->sum = 0;
 }
 
-void unabto_stream_stats_observe(struct unabto_stats* stat, double value)
+void unabto_stat_uint16_init(struct unabto_stats_uint16* stat)
+{
+    stat->min = 0;
+    stat->max = 0;
+    stat->count = 0;
+    stat->sum = 0;
+}
+
+void unabto_stream_stats_observe_time(struct unabto_stats_time* stat, uint32_t value)
 {
     if (stat->min == 0 && stat->max == 0) {
         stat->min = stat->max = value;
@@ -2018,8 +2030,81 @@ void unabto_stream_stats_observe(struct unabto_stats* stat, double value)
     if (value > stat->max) {
         stat->max = value;
     }
+    if (stat->sum > 0x80000000 || stat->count == UINT32_MAX) {
+        stat->count = stat->count >> 1;
+        stat->sum = stat->sum >> 1;
+    }
     stat->count += 1;
-    stat->avg += (value - stat->avg) / stat->count;
+    stat->sum += value;
+}
+
+void unabto_stream_stats_observe_uint16(struct unabto_stats_uint16* stat, uint16_t value)
+{
+    if (stat->min == 0 && stat->max == 0) {
+        stat->min = stat->max = value;
+    }
+
+    if (value < stat->min) {
+        stat->min = value;
+    }
+    if (value > stat->max) {
+        stat->max = value;
+    }
+    if (stat->sum > 0x80000000 || stat->count == UINT32_MAX) {
+        stat->count = stat->count >> 1;
+        stat->sum = stat->sum >> 1;
+    }
+    stat->count += 1;
+    stat->sum += value;
+}
+
+/**
+ * get average of unabto_stat_time
+ */
+uint16_t unabto_stream_stats_get_time_avg(struct unabto_stats_time* stat)
+{
+    if (stat->count == 0) {
+        return 0;
+    } else {
+        return stat->sum/stat->count;
+    }
+}
+
+/**
+ * get average of unabto_stat_uint16
+ */
+uint16_t unabto_stream_stats_get_uint16_avg(struct unabto_stats_uint16* stat)
+{
+    if (stat->count == 0) {
+        return 0;
+    } else {
+        return stat->sum/stat->count;
+    }
+}
+
+uint16_t unabto_cwnd_get(unabto_cwnd* cwnd)
+{
+    return *cwnd >> 16;
+}
+
+void unabto_cwnd_set(unabto_cwnd* cwnd, uint16_t value)
+{
+    *cwnd = value << 16;
+}
+
+void unabto_cwnd_add(unabto_cwnd* cwnd, uint16_t value)
+{
+    *cwnd += value << 16;
+}
+
+void unabto_cwnd_sub_one(unabto_cwnd* cwnd)
+{
+    *cwnd -= 1 << 16;
+}
+
+void unabto_cwnd_flightsize_add(unabto_cwnd* cwnd, uint16_t flightSize)
+{
+    *cwnd += (1 << 16) + ((1 << 16)/(flightSize << 16));
 }
 
 uint32_t unabto_stream_get_duration(struct nabto_stream_s* stream)

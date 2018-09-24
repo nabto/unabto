@@ -109,30 +109,41 @@ typedef struct {
 } x_buffer;
 
 
-// structure which can tell some statistics about a double.
+/** structures which can tell some statistics about variable.
+ *  sum and count can be scaled, and must therefore never
+ *  be used for other puposes than calculation of averages.
+ */
+struct unabto_stats_time {
+    uint32_t min;
+    uint32_t max;
+    uint32_t sum;
+    uint32_t count;
+};
 
-struct unabto_stats {
-    double min;
-    double max;
-    double avg;
-    double count;
+struct unabto_stats_uint16 {
+    uint16_t min;
+    uint16_t max;
+    uint32_t sum;
+    uint32_t count;
 };
 
 typedef struct {
-    struct unabto_stats rtt; // rount trip time
-    struct unabto_stats cwnd; // congestion window size.
-    struct unabto_stats ssThreshold; // slow start threshold
-    struct unabto_stats flightSize; // data on the line
+    struct unabto_stats_time   rtt; // rount trip time
+    struct unabto_stats_time   cwnd; // congestion window size.
+    struct unabto_stats_uint16 ssThreshold; // slow start threshold
+    struct unabto_stats_uint16 flightSize; // data on the line
 } nabto_stream_congestion_control_stats;
 
+typedef uint32_t unabto_cwnd;
+
 typedef struct {
-    double        srtt;          ///< Smoothed round trip time.
-    double        rttVar;        ///< Round trip time variance.
+    uint32_t      srtt;          ///< Smoothed round trip time.
+    uint32_t      rttVar;        ///< Round trip time variance.
     uint16_t      rto;           ///< Retransmission timeout.
     bool          isFirstAck;    ///< True when the first ack has been received.
-    double        cwnd;          ///< Tokens available for sending data
-    double        ssThreshold;   ///< Slow start threshold
-    int           flightSize;    ///< Gauge of sent but not acked buffers. Aka flight size.
+    unabto_cwnd   cwnd;          ///< Tokens available for sending data
+    uint16_t      ssThreshold;   ///< Slow start threshold
+    uint16_t      flightSize;    ///< Gauge of sent but not acked buffers. Aka flight size.
     bool          lostSegment;   ///< True if a segment has been lost
                                  ///and we are running the fast
                                  ///retransmit / fast recovery
@@ -396,9 +407,24 @@ void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event);
 
 
 /**
- * observe a value.
+ * observe a time value. value must be <2^31
  */
-void unabto_stream_stats_observe(struct unabto_stats* stat, double value);
+void unabto_stream_stats_observe_time(struct unabto_stats_time* stat, uint32_t value);
+
+/**
+ * observe a uint16_t value. value must be <2^15
+ */
+void unabto_stream_stats_observe_uint16(struct unabto_stats_uint16* stat, uint16_t value);
+
+/**
+ * get average of unabto_stat_time
+ */
+uint16_t unabto_stream_stats_get_time_avg(struct unabto_stats_time* stat);
+
+/**
+ * get average of unabto_stat_uint16
+ */
+uint16_t unabto_stream_stats_get_uint16_avg(struct unabto_stats_uint16* stat);
 
 /**
  * get stream duration in ms
