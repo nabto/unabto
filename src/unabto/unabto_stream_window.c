@@ -1891,6 +1891,17 @@ void windowStatus(const char* str, struct nabto_stream_tcb* tcb) {
     NABTO_LOG_TRACE(("%s, ssthres: %" PRIu16 ", cwnd: %" PRIu32 ", srtt: %" PRIu32 ", rttVar: %" PRIu32, str, tcb->cCtrl.ssThreshold, unabto_cwnd_get(&tcb->cCtrl.cwnd), tcb->cCtrl.srtt, tcb->cCtrl.rttVar));
 }
 
+static uint32_t absSub(uint32_t lhs, uint32_t rhs)
+{
+    // return abs(lhs - rhs) without the unsigned negative overflow problem.
+    
+    if (lhs > rhs) {
+        return lhs - rhs;
+    } else {
+        return rhs - lhs;
+    }
+}
+
 void unabto_stream_update_congestion_control_receive_stats(struct nabto_stream_s * stream, uint16_t ix) {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
     // Update the rtt if the packet has been sent and but not resent
@@ -1919,13 +1930,13 @@ void unabto_stream_update_congestion_control_receive_stats(struct nabto_stream_s
              * SRTT <- (1-alpha) * SRTT + alpha * R'
              * alpha = 1/8, betal = 1/4
              */
-            tcb->cCtrl.rttVar = ((3 * tcb->cCtrl.rttVar) + abs(tcb->cCtrl.srtt - time))/4;
+            tcb->cCtrl.rttVar = ((3 * tcb->cCtrl.rttVar) + absSub(tcb->cCtrl.srtt, time))/4;
             tcb->cCtrl.srtt = ((7 * tcb->cCtrl.srtt) + time)/8 ;
         }
         unabto_stream_stats_observe_time(&tcb->ccStats.rtt, time);
         tcb->cCtrl.rto = tcb->cCtrl.srtt + (tcb->cCtrl.rttVar*4);
 
-        NABTO_LOG_TRACE(("packet time %f, tcb->srtt %" PRIu32 ", tcb->rttVar %" PRIu32 ", tcb->rto %" PRIu16, time, tcb->cCtrl.srtt, tcb->cCtrl.rttVar, tcb->cCtrl.rto));
+        NABTO_LOG_TRACE(("packet time %" PRIu32 ", tcb->srtt %" PRIu32 ", tcb->rttVar %" PRIu32 ", tcb->rto %" PRIu16, time, tcb->cCtrl.srtt, tcb->cCtrl.rttVar, tcb->cCtrl.rto));
 
 
         /**
