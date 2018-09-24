@@ -134,12 +134,14 @@ typedef struct {
     struct unabto_stats_uint16 flightSize; // data on the line
 } nabto_stream_congestion_control_stats;
 
+typedef uint32_t unabto_cwnd;
+
 typedef struct {
     uint32_t      srtt;          ///< Smoothed round trip time.
     uint32_t      rttVar;        ///< Round trip time variance.
     uint16_t      rto;           ///< Retransmission timeout.
     bool          isFirstAck;    ///< True when the first ack has been received.
-    uint32_t      cwnd;          ///< Tokens available for sending data
+    unabto_cwnd   cwnd;          ///< Tokens available for sending data
     uint16_t      ssThreshold;   ///< Slow start threshold
     uint16_t      flightSize;    ///< Gauge of sent but not acked buffers. Aka flight size.
     bool          lostSegment;   ///< True if a segment has been lost
@@ -413,6 +415,16 @@ void unabto_stream_stats_observe_time(struct unabto_stats_time* stat, uint32_t v
  * observe a uint16_t value. value must be <2^15
  */
 void unabto_stream_stats_observe_uint16(struct unabto_stats_uint16* stat, uint16_t value);
+
+/**
+ * get average of unabto_stat_time
+ */
+uint16_t unabto_stream_stats_get_time_avg(struct unabto_stats_time* stat);
+
+/**
+ * get average of unabto_stat_uint16
+ */
+uint16_t unabto_stream_stats_get_uint16_avg(struct unabto_stats_uint16* stat);
 
 /**
  * get stream duration in ms
