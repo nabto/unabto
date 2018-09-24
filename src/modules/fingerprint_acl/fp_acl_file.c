@@ -137,6 +137,17 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
     return FP_ACL_DB_OK;
 }
 
+/**
+ * Do the best possible to ensure a file is written to the disk.
+ */
+static void fp_acl_file_flush_and_sync_to_disk(FILE* file)
+{
+    fflush(file);
+#ifndef WIN32
+    fsync(fileno(file));
+#endif
+}
+
 fp_acl_db_status fp_acl_file_save_file(struct fp_mem_state* acl)
 {
     fp_acl_db_status status;
@@ -146,9 +157,9 @@ fp_acl_db_status fp_acl_file_save_file(struct fp_mem_state* acl)
         return FP_ACL_DB_SAVE_FAILED;
     }
     status = fp_acl_file_save_file_temp(aclFile, acl);
-    
-    fflush(aclFile);
-    fsync(fileno(aclFile));
+
+    fp_acl_file_flush_and_sync_to_disk(aclFile);
+
     fclose(aclFile);
 
     if (status == FP_ACL_DB_OK) {
