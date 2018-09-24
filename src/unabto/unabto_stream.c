@@ -179,16 +179,32 @@ int unabto_stream_get_stats(unabto_stream* stream, unabto_stream_stats* stats) {
 
     stream->stats.rttMin = (uint16_t)(stream->u.tcb.ccStats.rtt.min);
     stream->stats.rttMax = (uint16_t)(stream->u.tcb.ccStats.rtt.max);
-    stream->stats.rttAvg = (uint16_t)(stream->u.tcb.ccStats.rtt.sum/stream->u.tcb.ccStats.rtt.count);
+    if(stream->u.tcb.ccStats.rtt.count == 0) {
+        stream->stats.rttAvg = 0;
+    } else {
+        stream->stats.rttAvg = (uint16_t)(stream->u.tcb.ccStats.rtt.sum/stream->u.tcb.ccStats.rtt.count);
+    }
     stream->stats.cwndMin = (uint16_t)(stream->u.tcb.ccStats.cwnd.min);
     stream->stats.cwndMax = (uint16_t)(stream->u.tcb.ccStats.cwnd.max);
-    stream->stats.cwndAvg = (uint16_t)(stream->u.tcb.ccStats.cwnd.sum/stream->u.tcb.ccStats.cwnd.count);
+    if (stream->u.tcb.ccStats.cwnd.count == 0) {
+        stream->stats.cwndAvg = 0;
+    } else {
+        stream->stats.cwndAvg = (uint16_t)(stream->u.tcb.ccStats.cwnd.sum/stream->u.tcb.ccStats.cwnd.count);
+    }
     stream->stats.ssThresholdMin = (uint16_t)(stream->u.tcb.ccStats.ssThreshold.min);
     stream->stats.ssThresholdMax = (uint16_t)(stream->u.tcb.ccStats.ssThreshold.max);
-    stream->stats.ssThresholdAvg = (uint16_t)(stream->u.tcb.ccStats.ssThreshold.sum/stream->u.tcb.ccStats.ssThreshold.count);
+    if (stream->u.tcb.ccStats.ssThreshold.count == 0) {
+        stream->stats.ssThresholdAvg = 0;
+    } else {
+        stream->stats.ssThresholdAvg = (uint16_t)(stream->u.tcb.ccStats.ssThreshold.sum/stream->u.tcb.ccStats.ssThreshold.count);
+    }
     stream->stats.flightSizeMin = (uint16_t)(stream->u.tcb.ccStats.flightSize.min);
     stream->stats.flightSizeMax = (uint16_t)(stream->u.tcb.ccStats.flightSize.max);
-    stream->stats.flightSizeAvg = (uint16_t)(stream->u.tcb.ccStats.flightSize.sum/stream->u.tcb.ccStats.flightSize.count);
+    if (stream->u.tcb.ccStats.flightSize.count == 0) {
+        stream->stats.flightSizeAvg = 0;
+    } else {
+        stream->stats.flightSizeAvg = (uint16_t)(stream->u.tcb.ccStats.flightSize.sum/stream->u.tcb.ccStats.flightSize.count);
+    }
     *stats = stream->stats;
     return 0;
 }
