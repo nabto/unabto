@@ -64,9 +64,10 @@ void* resolver_thread(void* ctx) {
                 i++;
             }
         }
+        freeaddrinfo(result);
     }
 
-    freeaddrinfo(result);
+    
     
     resolver_is_running = false;
     return NULL;
@@ -164,6 +165,7 @@ void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip)
             NABTO_LOG_ERROR(("getaddrinfo returned unknown family"));
             *ip = printIp;
         }
+        freeaddrinfo(result);
     }
-    freeaddrinfo(result);
+    
 }
