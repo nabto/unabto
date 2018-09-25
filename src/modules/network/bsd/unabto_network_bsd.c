@@ -33,7 +33,6 @@
 #include <linux/if.h>
 #endif
 
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <poll.h>
 
@@ -53,58 +52,68 @@ typedef struct socketListElement {
 static NABTO_THREAD_LOCAL_STORAGE struct socketListElement* socketList = 0;
 
 
-
-bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock) {
-    
-    nabto_socket_t sd;
-    nabto_main_context* nmc;
-    const char* interface;
-    socketListElement* se;
-    int status;
-    
-    
-    NABTO_LOG_TRACE(("Open socket, port=%u", (int)*localPort));
-
-    
+static bool open_socket(nabto_socket_t* sd)
+{
     // try ipv6
     //   test if ipv6 socket can ipv4
     // if not then use ipv4
     // if ipv4 does not work use ipv6 only.
     // IPV6_V6ONLY
     // see nabto4/src/util/udp_socket.hpp
-    
-    sd.sock = socket(AF_INET6, SOCK_DGRAM, 0);
-    if (sd.sock == -1) {
-        sd.sock = socket(AF_INET, SOCK_DGRAM, 0);
-        if (sd.sock == -1) {
+
+    sd->sock = socket(AF_INET6, SOCK_DGRAM, 0);
+    if (sd->sock == -1) {
+        sd->sock = socket(AF_INET, SOCK_DGRAM, 0);
+        if (sd->sock == -1) {
             NABTO_LOG_ERROR(("Unable to create socket: (%i) '%s'.", errno, strerror(errno)));
             return false;
         }
-        sd.type = NABTO_SOCKET_IP_V4;
-    } else {
-        int no = 0;
-        if (setsockopt(sd.sock, IPPROTO_IPV6, IPV6_V6ONLY, (void*) &no, sizeof(no))) {
-            NABTO_LOG_TRACE(("setsocketopt failed to disable IPV6_V6ONLY trying IPv4 socket"));
-            close(sd.sock);
-            sd.sock = socket(AF_INET, SOCK_DGRAM, 0);
-            if (sd.sock == -1) {
-                NABTO_LOG_TRACE(("IPv4 socket creation failed, going back to IPv6 only"));
-                sd.sock = socket(AF_INET6, SOCK_DGRAM, 0);
-                if (sd.sock == -1) {
-                    NABTO_LOG_ERROR(("Failed to recreate IPv6 socket"));
-                    return false;
-                }
-                NABTO_LOG_TRACE(("created IPv6 socket"));
-                sd.type = NABTO_SOCKET_IP_V6;
-            } else {
-                NABTO_LOG_TRACE(("created IPv4 socket"));
-                sd.type = NABTO_SOCKET_IP_V4;
+        sd->type = NABTO_SOCKET_IP_V4;
+        return true;
+    }
+#if defined(IPV6_V6ONLY)
+    int no = 0;
+    if (setsockopt(sd.sock, IPPROTO_IPV6, IPV6_V6ONLY, (void*) &no, sizeof(no)) != 0) {
+        NABTO_LOG_TRACE(("setsocketopt failed to disable IPV6_V6ONLY trying IPv4 socket"));
+        close(sd->sock);
+        sd->sock = socket(AF_INET, SOCK_DGRAM, 0);
+        if (sd->sock == -1) {
+            NABTO_LOG_TRACE(("IPv4 socket creation failed, going back to IPv6 only"));
+            sd->sock = socket(AF_INET6, SOCK_DGRAM, 0);
+            if (sd->sock == -1) {
+                NABTO_LOG_ERROR(("Failed to recreate IPv6 socket"));
+                return false;
             }
+            NABTO_LOG_TRACE(("created IPv6 socket"));
+            sd->type = NABTO_SOCKET_IP_V6;
+            return true;
         } else {
-            NABTO_LOG_TRACE(("created IPv6 socket for dual stack"));
-            sd.type = NABTO_SOCKET_IP_V6;
+            NABTO_LOG_TRACE(("created IPv4 socket"));
+            sd->type = NABTO_SOCKET_IP_V4;
+            return true;
         }
     }
+#endif
+    NABTO_LOG_TRACE(("created IPv6 socket for dual stack"));
+    sd->type = NABTO_SOCKET_IP_V6;
+    return true;
+}
+
+
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
+{
+    nabto_socket_t sd;
+    nabto_main_context* nmc;
+    const char* interface;
+    socketListElement* se;
+    int status;
+
+    NABTO_LOG_TRACE(("Open socket, port=%u", (int)*localPort));
+
+    if (!open_socket(&sd)) {
+        return false;
+    }
+
 
 #ifdef SO_BINDTODEVICE
     // Used for multiple interfaces
@@ -390,8 +399,6 @@ bool unabto_network_epoll_read_one(struct epoll_event* event)
 bool nabto_get_local_ipv4(struct nabto_ip_address* ip) {
     struct sockaddr_in si_me, si_other;
     int s;
-
-    // TODO make ipv6 compatible
     
     if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1) {
         NABTO_LOG_ERROR(("Cannot create socket"));
