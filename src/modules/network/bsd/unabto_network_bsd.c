@@ -73,7 +73,7 @@ static bool open_socket(nabto_socket_t* sd)
     }
 #if defined(IPV6_V6ONLY)
     int no = 0;
-    if (setsockopt(sd.sock, IPPROTO_IPV6, IPV6_V6ONLY, (void*) &no, sizeof(no)) != 0) {
+    if (setsockopt(sd->sock, IPPROTO_IPV6, IPV6_V6ONLY, (void*) &no, sizeof(no)) != 0) {
         NABTO_LOG_TRACE(("setsocketopt failed to disable IPV6_V6ONLY trying IPv4 socket"));
         close(sd->sock);
         sd->sock = socket(AF_INET, SOCK_DGRAM, 0);
