@@ -55,11 +55,9 @@ static NABTO_THREAD_LOCAL_STORAGE struct socketListElement* socketList = 0;
 static bool open_socket(nabto_socket_t* sd)
 {
     // try ipv6
-    //   test if ipv6 socket can ipv4
+    // test if ipv6 socket is dual stack
     // if not then use ipv4
     // if ipv4 does not work use ipv6 only.
-    // IPV6_V6ONLY
-    // see nabto4/src/util/udp_socket.hpp
 
     sd->sock = socket(AF_INET6, SOCK_DGRAM, 0);
     if (sd->sock == -1) {
