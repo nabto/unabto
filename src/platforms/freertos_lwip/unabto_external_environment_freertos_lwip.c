@@ -69,18 +69,22 @@ static void udpRecv(void *arg, struct udp_pcb *pcb, struct pbuf *p, struct ip_ad
 
 
 /******************************************************************************/
+void nabto_socket_set_invalid(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
 /**
 * Initialise a udp socket.  This function is called for every socket
 * uNabto creates, this will normally occur two times. One for local
 * connections and one for remote connections.
 *
-* @param localAddr    The local address to bind to.
 * @param localPort    The local port to bind to.
 *                     A port number of 0 gives a random port.
 * @param socket       To return the created socket descriptor.
 * @return             true iff successfull
 */
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket)
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket)
 {
     int i;
     struct ip_addr ipAddr;
@@ -96,12 +100,17 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
     sockets[i].pcb->so_options |= SOF_BROADCAST;
     
     udp_recv(sockets[i].pcb, udpRecv, &sockets[i]);
-    ipAddr.addr = localAddr; 
-    if (ERR_OK != udp_bind(sockets[i].pcb, (0 == localAddr)?IP_ADDR_ANY:&ipAddr , *localPort))
+    ipAddr.addr = IP_ADDR_ANY; 
+    if (ERR_OK != udp_bind(sockets[i].pcb, IP_ADDR_ANY , *localPort))
         return false;
     
     *socket = i;
     return true;
+}
+
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
+{
+    return *s1==*s2;
 }
 
 /**
@@ -110,7 +119,7 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
 *
 * @param socket the socket to be closed
 */
-void nabto_close_socket(nabto_socket_t* socket)
+void nabto_socket_close(nabto_socket_t* socket)
 {
     if (NULL == socket)
         return; 
@@ -128,10 +137,10 @@ void nabto_close_socket(nabto_socket_t* socket)
 static uint32_t loops=0;
 
 ssize_t nabto_read(nabto_socket_t socket,
-                uint8_t*       buf,
-                size_t         len,
-                uint32_t*      addr,
-                uint16_t*      port)
+                   uint8_t*       buf,
+                   size_t         len,
+                   struct nabto_ip_address*      addr,
+                   uint16_t*      port)
 {
     ssize_t res = (ssize_t)len;
     if (0 > socket || socket >= MAX_SOCKETS)
@@ -151,7 +160,8 @@ ssize_t nabto_read(nabto_socket_t socket,
             p = p->next;
         }
         pbuf_free(pHead);
-        *addr = ntohl(rb->recvAddr);
+        addr->type = NABTO_IP_V4;
+        addr->addr.ipv4 = ntohl(rb->recvAddr);
     //          READ_U32(*addr, &rb->recvAddr);
 
         *port = rb->recvPort;
@@ -176,14 +186,14 @@ ssize_t nabto_read(nabto_socket_t socket,
 ssize_t nabto_write(nabto_socket_t socket,
                     const uint8_t* buf,
                     size_t         len,
-                    uint32_t       addr,
+                    struct nabto_ip_address*       addr,
                     uint16_t       port)
 {
     ssize_t res = -1;
     static struct pbuf *p=NULL;
     struct ip_addr ipAddr;
     
-    if (0 > socket || socket >= MAX_SOCKETS || NULL == buf || 0 == len)
+    if (0 > socket || socket >= MAX_SOCKETS || NULL == buf || 0 == len || addr->type != NABTO_IP_V4)
         return -1;
         
     p = pbuf_alloc(PBUF_TRANSPORT, (unsigned short)len, PBUF_RAM);
@@ -191,7 +201,7 @@ ssize_t nabto_write(nabto_socket_t socket,
         return -1;
     
     pbuf_take(p, buf, (unsigned short)len);
-    ipAddr.addr = htonl(addr);
+    ipAddr.addr = htonl(addr->addr.ipv4);
     if (ERR_OK == udp_sendto(sockets[socket].pcb, p, &ipAddr, port))
         res = (ssize_t)len;
     pbuf_free(p);
@@ -228,6 +238,11 @@ static void dns_callback(const char *name, struct ip_addr *ipAddr, void *dummy)
     }
 }
 
+void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
+    ip->type = NABTO_IP_V4;
+    ip->addr.ipv4 = ipv4;
+}
+
 void nabto_dns_resolve(const char* id)
 {
     struct ip_addr resolvedIp;
@@ -245,11 +260,12 @@ void nabto_dns_resolve(const char* id)
 }
 
 //TBC
-nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr)
+nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address* v4addr)
 {
     if (basestationIPV4)
     {
-        *v4addr = basestationIPV4;
+        v4addr->type = NABTO_IP_V4;
+        v4addr->addr.ipv4 = basestationIPV4;
         return NABTO_DNS_OK;
     }
     else

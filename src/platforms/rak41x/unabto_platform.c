@@ -129,12 +129,10 @@ void platform_tick(void)
 
 // UDP
 
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket)
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket)
 {
   uint8_t i;
   OS_ERR osErr;
-  
-  NABTO_NOT_USED(localAddr);
   
   for(i = 0; i < lengthof(sockets); i++)
   {
@@ -159,7 +157,7 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
         *localPort = port;
         *socket = (nabto_socket_t)i;
         
-        NABTO_LOG_TRACE(("nabto_init_socket %u: port=%u", *socket, *localPort));
+        NABTO_LOG_TRACE(("nabto_socket_init %u: port=%u", *socket, *localPort));
         
         return true;
       }
@@ -169,20 +167,30 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
   return false;
 }
 
-void nabto_close_socket(nabto_socket_t* socket)
+void nabto_socket_set_invalid(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
+{
+    return *s1==*s2;
+}
+
+void nabto_socket_close(nabto_socket_t* socket)
 {
   NABTO_LOG_FATAL(("Socket shutdown not supported!"));
   //printf("RAK_ShutDown(%u)=%u", *socket, RAK_ShutDown(*socket));
   //sockets[*socket].inUse = false;
 }
 
-ssize_t nabto_read(nabto_socket_t socket, uint8_t* buffer, size_t length, uint32_t* address, uint16_t* port)
+ssize_t nabto_read(nabto_socket_t socket, uint8_t* buffer, size_t length, struct nabto_ip_address* address, uint16_t* port)
 {
   OS_ERR osErr;
   uint8_t* receiveBuffer;
   uint16_t receiveBufferLength;
   RAK_SOCKET_ADDR socketInfo;
- 
+
   if(socket > NUMBER_OF_SOCKETS)
   {
     NABTO_LOG_FATAL(("Read on invalid socket!"));
@@ -223,26 +231,27 @@ ssize_t nabto_read(nabto_socket_t socket, uint8_t* buffer, size_t length, uint32
 
   RAK_GetSocketInfo(socket, &socketInfo);
 
-  *address = socketInfo.dest_addr;
+  address->type = NABTO_IP_V4;
+  address->addr.ipv4 = socketInfo.dest_addr;
   *port = socketInfo.dest_port;
   
-  NABTO_LOG_TRACE(("Received UDP packet from " PRI_IP ":%u length=%u", PRI_IP_FORMAT(*address), *port, receiveBufferLength));
+  NABTO_LOG_TRACE(("Received UDP packet from " PRI_IP ":%u length=%u", PRI_IP_FORMAT(address->addr.ipv4), *port, receiveBufferLength));
   
   return receiveBufferLength;
 }
 
-ssize_t nabto_write(nabto_socket_t socket, const uint8_t* buffer, size_t length, uint32_t address, uint16_t port)
+ssize_t nabto_write(nabto_socket_t socket, const uint8_t* buffer, size_t length, struct nabto_ip_address* address, uint16_t port)
 {
   int32_t result;
   
-  if(length > SEND_BUFFER_SIZE)
+  if(length > SEND_BUFFER_SIZE || address->type != NABTO_IP_V4)
   {
     return 0;
   }
   
   memcpy(sendBuffer, buffer, length);
   
-  result = RAK_SendData(socket, sendBuffer, length, address, port);
+  result = RAK_SendData(socket, sendBuffer, length, address->addr.ipv4, port);
   
   if(result != RAK_OK)
   {
@@ -250,7 +259,7 @@ ssize_t nabto_write(nabto_socket_t socket, const uint8_t* buffer, size_t length,
     return 0;
   }
   
-  NABTO_LOG_TRACE(("Sent UDP packet to " PRI_IP ":%u length=%u", PRI_IP_FORMAT(address), port, length));
+//  NABTO_LOG_TRACE(("Sent UDP packet to " PRI_IP ":%u length=%u", PRI_IP_FORMAT(address), port, length));
   
   return length;
 }
@@ -260,10 +269,15 @@ ssize_t nabto_write(nabto_socket_t socket, const uint8_t* buffer, size_t length,
 void nabto_dns_resolver(void)
 { }
 
+void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
+    ip->type = NABTO_IP_V4;
+    ip->addr.ipv4 = ipv4;
+}
+
 void nabto_dns_resolve(const char* host)
 { }
 
-nabto_dns_status_t nabto_dns_is_resolved(const char* host, uint32_t* address)
+nabto_dns_status_t nabto_dns_is_resolved(const char* host, struct nabto_ip_address* address)
 {
   uint32_t result = RAK_DNSReq((char*)host, dnsServer);
   
@@ -271,8 +285,8 @@ nabto_dns_status_t nabto_dns_is_resolved(const char* host, uint32_t* address)
   {
     return NABTO_DNS_NOT_FINISHED;
   }
-  
-  *address = result;
+  address->type = NABTO_IP_V4;
+  address->addr.ipv4 = result;
   
   return NABTO_DNS_OK;
 }

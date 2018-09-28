@@ -30,6 +30,7 @@ typedef struct {
     } udpMessage;
 } message_event;
 
+
 #if NABTO_ENABLE_LOCAL_ACCESS
 /**
  * To be called to handle packets on the local socket.
@@ -42,7 +43,7 @@ void nabto_message_local_event(message_event* event, uint16_t ilen);
 #if NABTO_ENABLE_CONNECTIONS
 /**
  * Handle a connection based packet.
- * @param ilen     the length of the received packet (in ctx->buf)
+s * @param ilen     the length of the received packet (in ctx->buf)
  * @param peer     the source endpoint
  */
 void nabto_message_event(message_event* event, uint16_t ilen);
@@ -55,6 +56,7 @@ void nabto_message_event(message_event* event, uint16_t ilen);
  */
 bool nabto_message_async_response_poll(void);
 #endif
+
 
 #ifdef __cplusplus
 } //extern "C"

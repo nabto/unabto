@@ -176,7 +176,8 @@ bool unabto_debug_syslog_config(bool enableSyslog, uint8_t facility,  uint32_t i
 {
     bool ret  = false;
     nabto_endpoint ep;
-    ep.addr = ip; ep.port = port;
+    ep.addr.type = NABTO_IP_V4;
+    ep.addr.addr.ipv4 = ip; ep.port = port;
 
     NABTO_LOG_INFO(("Enabling syslog " PRIep " %.*s expire %" PRIu32 " enabled %i", MAKE_EP_PRINTABLE(ep), configStrLength, configStr, expire, enableSyslog));
     

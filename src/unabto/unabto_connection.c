@@ -88,7 +88,7 @@ void nabto_reset_connection(nabto_connect* con)
     NABTO_LOG_TRACE((PRInsi " Reset connection", MAKE_NSI_PRINTABLE(0, con->spnsi, 0)));
     memset(con, 0, offsetof(nabto_connect, cryptoctx));
     con->stamp = tmp;
-    con->socket = NABTO_INVALID_SOCKET;
+    nabto_socket_set_invalid(&con->socket);
     con->stats.connectionStart = tmp;
 #if NABTO_ENABLE_TCP_FALLBACK
     unabto_tcp_fallback_init(con);
@@ -299,7 +299,7 @@ static size_t mk_connect_rsp(uint8_t* buf, uint8_t* end, uint16_t seq, uint32_t 
 bool connect_event(message_event* event, nabto_packet_header* hdr)
 {
     nabto_endpoint* peer = &event->udpMessage.peer;
-    bool isLocal = (event->udpMessage.socket == nmc.socketLocal);
+    bool isLocal = nabto_socket_is_equal(&event->udpMessage.socket, &nmc.socketLocal);
     
 
     NABTO_LOG_TRACE(("U_CONNECT: Searching for hdr->nsi_cp=%" PRIu32 " (should not be found)", hdr->nsi_cp));
@@ -316,10 +316,10 @@ bool connect_event(message_event* event, nabto_packet_header* hdr)
                 NABTO_LOG_ERROR(("U_CONNECT out of resources in connect event."));
                 nabto_release_connection(con); // no resources available
             } else {
-                if (EP_EQUAL(*peer, nmc.context.gsp)) {
+                if (nabto_ep_is_equal(peer, &nmc.context.gsp)) {
                     send_to_basestation(nabtoCommunicationBuffer, olen, peer);
                 } else {
-                    nabto_write(event->udpMessage.socket, nabtoCommunicationBuffer, olen, peer->addr, peer->port);
+                    nabto_write(event->udpMessage.socket, nabtoCommunicationBuffer, olen, &peer->addr, peer->port);
                 }
                 
                 con->state = CS_CONNECTING;
@@ -338,7 +338,7 @@ bool connect_event(message_event* event, nabto_packet_header* hdr)
             // build negative answer
             size_t olen = mk_connect_rsp(nabtoCommunicationBuffer, nabtoCommunicationBuffer + nabtoCommunicationBufferSize, hdr->seq, ec, nsi, hdr->nsi_cp, hdr->nsi_sp, isLocal);
             NABTO_LOG_TRACE((PRInsi " Deny connection, result: %" PRIu32, MAKE_NSI_PRINTABLE(0, nsi, 0), ec));
-            nabto_write(event->udpMessage.socket, nabtoCommunicationBuffer, olen, peer->addr, peer->port);
+            nabto_write(event->udpMessage.socket, nabtoCommunicationBuffer, olen, &peer->addr, peer->port);
             return true;
         } else {
             NABTO_LOG_ERROR(("U_CONNECT was a malformed connect event."));
@@ -352,18 +352,25 @@ static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, ui
     uint8_t* ptr;
     uint8_t* buf = nabtoCommunicationBuffer;
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
+    uint32_t destIpV4 = 0;
+
     
     ptr = insert_header(buf, 0, con->spnsi, U_CONNECT, false, seq, 0, 0);
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_EP, 0, 6);
-    WRITE_U32(ptr, dest->addr); ptr += 4;
+
+    if (dest->addr.type == NABTO_IP_V4) {
+        destIpV4 = dest->addr.addr.ipv4;
+    }
+    
+    WRITE_U32(ptr, destIpV4); ptr += 4;
     WRITE_U16(ptr, dest->port); ptr += 2;
     if (seq > 0) {
-        if (!myAddress) {
+        if (!myAddress || myAddress->addr.type != NABTO_IP_V4) {
             NABTO_LOG_ERROR(("Send rendezvous called with an invalid address"));
             return;
         } else {
             ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_EP, 0, 6);
-            WRITE_U32(ptr, myAddress->addr); ptr += 4;
+            WRITE_U32(ptr, myAddress->addr.addr.ipv4); ptr += 4;
             WRITE_U16(ptr, myAddress->port); ptr += 2;
         }
     }
@@ -377,8 +384,8 @@ static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, ui
         } else {
             NABTO_LOG_DEBUG((PRInsi " RENDEZVOUS Send to " PRIep ": seq=0", MAKE_NSI_PRINTABLE(0, con->spnsi, 0), MAKE_EP_PRINTABLE(*dest)));
         }
-        if (dest->addr != 0 && dest->port != 0) {
-            nabto_write(socket, buf, len, dest->addr, dest->port);
+        if (dest->addr.type != NABTO_IP_NONE && dest->port != 0) {
+            nabto_write(socket, buf, len, &dest->addr, dest->port);
         } else {
             NABTO_LOG_TRACE(("invalid rendezvous packet thrown away"));
         }
@@ -527,13 +534,13 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
 
     NABTO_LOG_DEBUG((PRInsi " U_CONNECT: Connecting using record %i", MAKE_NSI_PRINTABLE(0, *nsi, 0), nabto_connection_index(con)));
 
-    con->cp.privateEndpoint.addr = ipxData.privateIpAddress;
+    nabto_resolve_ipv4(ipxData.privateIpAddress, &con->cp.privateEndpoint.addr);
     con->cp.privateEndpoint.port = ipxData.privateIpPort;
-    con->cp.globalEndpoint.addr = ipxData.globalIpAddress;
+    nabto_resolve_ipv4(ipxData.globalIpAddress, &con->cp.globalEndpoint.addr);
     con->cp.globalEndpoint.port = ipxData.globalIpPort;
     
     con->noRendezvous = (ipxData.flags & NP_PAYLOAD_IPX_FLAG_NO_RENDEZVOUS) ? 1 : 0;
-    con->cpEqual      = EP_EQUAL(con->cp.privateEndpoint, con->cp.globalEndpoint);
+    con->cpEqual      = nabto_ep_is_equal(&con->cp.privateEndpoint, &con->cp.globalEndpoint);
     con->cpAsync      = (ipxData.flags & NP_PAYLOAD_IPX_FLAG_CP_ASYNC) ? 1 : 0;
     con->clientNatType      = (ipxData.flags & NP_PAYLOAD_IPX_NAT_MASK);
     con->isLocal      = isLocal;
@@ -561,7 +568,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
                 if (gw.gwIdLength != 20) {
                     NABTO_LOG_ERROR(("Gw id should be 20 bytes long."));
                 } else {
-                    con->fallbackHost.addr = gw.ipAddress;
+                    nabto_resolve_ipv4(gw.ipAddress, &con->fallbackHost.addr);
                     con->fallbackHost.port = gw.port;
                     memcpy(con->gatewayId, gw.gwId, 20);
                     con->hasTcpFallbackCapabilities = true;
@@ -639,7 +646,7 @@ void nabto_connection_end_connecting(nabto_connect* con, message_event* event) {
         NABTO_LOG_TRACE(("Received data on socket %i", con->socket));
 
         con->peer = event->udpMessage.peer;
-        if (EP_EQUAL(event->udpMessage.peer, nmc.context.gsp)) {
+        if (nabto_ep_is_equal(&event->udpMessage.peer, &nmc.context.gsp)) {
             NABTO_LOG_INFO((PRInsi " UDP Fallback through the GSP ", MAKE_NSI_PRINTABLE(0, con->spnsi, 0)));
         } else {
             NABTO_LOG_INFO((PRInsi " Direct UDP connection", MAKE_NSI_PRINTABLE(0, con->spnsi, 0)));
@@ -751,7 +758,7 @@ bool rendezvous_event(message_event* event, nabto_packet_header* hdr)
             NABTO_LOG_TRACE(("Can't read first ep payload"));
             return false;
         }
-        epUD.addr = ep.address;
+        nabto_resolve_ipv4(ep.address, &epUD.addr);
         epUD.port = ep.port;
     }
 
@@ -942,7 +949,7 @@ nabto_connection_type get_connection_type(nabto_connect* con) {
         return NCT_REMOTE_RELAY_MICRO;
     }
 
-    if (EP_EQUAL(con->peer, nmc.context.gsp)) {
+    if (nabto_ep_is_equal(&con->peer, &nmc.context.gsp)) {
         return NCT_REMOTE_RELAY;
     }
     return NCT_REMOTE_P2P;
@@ -973,14 +980,14 @@ bool nabto_write_con(nabto_connect* con, uint8_t* buf, size_t len) {
 
 #if NABTO_ENABLE_DNS_FALLBACK
     if (nmc.nabtoMainSetup.enableDnsFallback) {
-        if (EP_EQUAL(con->peer, nmc.context.gsp) && con->socket == nmc.socketGSP && nmc.context.useDnsFallback) {
+        if (nabto_ep_is_equal(&con->peer, &nmc.context.gsp) && nabto_socket_is_equal(&con->socket, &nmc.socketGSP) && nmc.context.useDnsFallback) {
             return (unabto_dns_fallback_send_to(buf, (uint16_t)len, con->peer.addr, con->peer.port) > 0);
         }
     }
 #endif
     
     if (con->type == NCT_REMOTE_RELAY || con->type == NCT_REMOTE_P2P || con->type == NCT_LOCAL) {
-        return (nabto_write(con->socket, buf, len, con->peer.addr, con->peer.port) > 0);
+        return (nabto_write(con->socket, buf, len, &con->peer.addr, con->peer.port) > 0);
     }
     return false;
 }
@@ -1050,8 +1057,8 @@ uint8_t* insert_connection_info_payload(uint8_t* ptr, uint8_t* end, nabto_connec
     ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_RECEIVED_PACKETS, con->stats.packetsReceived);
     ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_RECEIVED_BYTES, con->stats.bytesReceived);
 
-    if (con->cp.globalEndpoint.addr != 0x00000000) {
-        ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_CLIENT_IP, con->cp.globalEndpoint.addr);
+    if (con->cp.globalEndpoint.addr.type == NABTO_IP_V4) {
+        ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_CONNECTION_INFO_CLIENT_IP, con->cp.globalEndpoint.addr.addr.ipv4);
     }
 
     if (ptr != NULL) {

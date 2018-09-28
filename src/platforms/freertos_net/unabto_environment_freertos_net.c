@@ -47,7 +47,12 @@ nabto_socket_t *getActiveSockets(uint16_t *nS)
     return aS;
 }
 
-bool nabto_init_socket( uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socketDescriptor )
+void nabto_socket_set_invalid(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
+bool nabto_socket_init( uint16_t* localPort, nabto_socket_t* socketDescriptor )
 {
 int to = 0;
 struct freertos_sockaddr xAddress, *pxAddressToUse;
@@ -68,7 +73,7 @@ bool bReturn = true;
         else
         {
             memset( &xAddress, 0, sizeof( xAddress ) );
-            xAddress.sin_addr = FreeRTOS_htonl( localAddr );
+            xAddress.sin_addr = INADDR_ANY;
             xAddress.sin_port = FreeRTOS_htons( *localPort );
 
 
@@ -98,7 +103,7 @@ bool bReturn = true;
 ssize_t nabto_read( nabto_socket_t socket,
                     uint8_t*       buf,
                     size_t         len,
-                    uint32_t*      addr,
+                    struct nabto_ip_address*      addr,
                     uint16_t*      port )
 {
     int res;
@@ -110,7 +115,8 @@ ssize_t nabto_read( nabto_socket_t socket,
 
     if( res > 0 )
     {
-        *addr = FreeRTOS_htonl( xAddress.sin_addr );
+        addr->type = NABTO_IP_V4;
+        addr->addr.ipv4 = FreeRTOS_htonl( xAddress.sin_addr );
         *port = FreeRTOS_htons( xAddress.sin_port );
     }
     else
@@ -125,21 +131,29 @@ ssize_t nabto_read( nabto_socket_t socket,
 ssize_t nabto_write( nabto_socket_t socket,
                      const uint8_t* buf,
                      size_t         len,
-                     uint32_t       addr,
+                     struct nabto_ip_address*       addr,
                      uint16_t       port )
 {
     int res;
     struct freertos_sockaddr xAddress;
+    if (addr->type != NABTO_IP_V4) {
+        return 0;
+    }
 
     memset( &xAddress, 0, sizeof( xAddress ) );
-    xAddress.sin_addr = FreeRTOS_htonl( addr );
+    xAddress.sin_addr = FreeRTOS_htonl( addr->addr.ipv4 );
     xAddress.sin_port = FreeRTOS_htons( port );
     res = FreeRTOS_sendto( socket, buf, ( int )len, 0, ( struct freertos_sockaddr * ) &xAddress, sizeof( xAddress ) );
     return res;
 } 
 /******************************************************************************/
 
-void nabto_close_socket( nabto_socket_t* socketDescriptor )
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
+{
+    return *s1==*s2;
+}
+
+void nabto_socket_close( nabto_socket_t* socketDescriptor )
 {
     if (socketDescriptor) 
     {
@@ -149,13 +163,18 @@ void nabto_close_socket( nabto_socket_t* socketDescriptor )
 }
 /******************************************************************************/
 
+void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
+    ip->type = NABTO_IP_V4;
+    ip->addr.ipv4 = ipv4;
+}
+
 void nabto_dns_resolve(const char* id) 
 {
     ( void ) id;
 }
 /******************************************************************************/
 
-nabto_dns_status_t nabto_dns_is_resolved( const char *id, uint32_t* v4addr )
+nabto_dns_status_t nabto_dns_is_resolved( const char *id, struct nabto_ip_address* v4addr )
 {
     uint32_t addr;
     nabto_dns_status_t status;
@@ -168,7 +187,8 @@ nabto_dns_status_t nabto_dns_is_resolved( const char *id, uint32_t* v4addr )
     }
     else
     {
-        *v4addr = FreeRTOS_htonl(addr);
+        v4addr->type = NABTO_IP_V4;
+        v4addr->addr.ipv4 = FreeRTOS_htonl(addr);
         status = NABTO_DNS_OK;
     }
 

@@ -26,14 +26,16 @@ struct uip_udp_conn *udp_new(const uip_ipaddr_t *ripaddr, uint16_t rport, void *
 
 void udp_bind(struct uip_udp_conn *conn, uint16_t port)
 {
-    if (nabto_init_socket(udpConn.ripaddr, &port, &udpConn.socket))
+    if (nabto_socket_init(&port, &udpConn.socket))
         udpConn.lport = port;
 }
 
 bool uip_newdata( void )
 {
     ssize_t datalen;
-    datalen = nabto_read(udpConn.socket, uip_appdata, UNABTO_COMMUNICATION_BUFFER_SIZE, &_uip_ip_hdr.srcipaddr, &_uip_udp_hdr.srcport);
+    struct nabto_ip_address sourceIpAddr;
+    datalen = nabto_read(udpConn.socket, uip_appdata, UNABTO_COMMUNICATION_BUFFER_SIZE, &sourceIpAddr, &_uip_udp_hdr.srcport);
+    _uip_ip_hdr.srcipaddr = soucrIpAddr.addr.ipv4;
     if (0 < datalen)
         _uip_udp_hdr.datalen = datalen;
     return (0 < datalen);

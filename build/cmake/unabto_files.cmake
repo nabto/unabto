@@ -37,6 +37,7 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_crypto.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_push.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_message.c
+  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_endpoint.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_packet.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_packet_util.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/util/unabto_queue.c

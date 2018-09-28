@@ -184,16 +184,6 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
         return false;
     }
 
-    if( gopt_arg( options, 'a', & address ) ){
-        addr = inet_addr(address);
-        if (addr == INADDR_NONE) {
-            help("Illegal local address", progname);
-            gopt_free(options);
-            return false;
-        }
-        nms->ipAddress = htonl(addr);
-    } 
-
     if( gopt_arg( options, 'p', &localPortStr) ){
         nms->localPort = atoi(localPortStr);
     }
@@ -209,7 +199,8 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
             gopt_free(options);
             return false;
         }
-        nms->controllerArg.addr = htonl(addr);
+        nms->controllerArg.addr.type = NABTO_IP_V4;
+        nms->controllerArg.addr.addr.ipv4 = htonl(addr);
     }
 
     if ( gopt_arg( options, 'k', &preSharedKey)) {

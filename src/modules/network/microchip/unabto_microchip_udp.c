@@ -88,7 +88,7 @@ void microchip_udp_close(UDP_SOCKET* socketDescriptor) {
     }
 }
 
-bool microchip_udp_open(uint32_t localAddr, uint16_t* localPort, UDP_SOCKET* socketDescriptor) {
+bool microchip_udp_open(uint16_t* localPort, UDP_SOCKET* socketDescriptor) {
     UDP_SOCKET sd;
     sd = UDPOpenEx(0, UDP_OPEN_SERVER, *localPort, 0);
 

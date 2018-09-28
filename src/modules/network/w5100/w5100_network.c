@@ -64,12 +64,18 @@ bool network_get_current_ip_address(uint32_t* ip)
   }
 }
 
+void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
+    ip->type = NABTO_IP_V4;
+    ip->addr.ipv4 = ipv4;
+}
+
 void nabto_dns_resolve(const char* id)
 {
   dns_client_nabto_dns_resolve(id);
 }
 
-nabto_dns_status_t nabto_dns_is_resolved(const char* id, uint32_t* v4addr)
+nabto_dns_status_t nabto_dns_is_resolved(const char* id, struct nabto_ip_address* v4addr)
 {
-  return dns_client_nabto_dns_is_resolved(id, v4addr);
+  v4addr->type = NABTO_IP_V4;
+  return dns_client_nabto_dns_is_resolved(id, &v4addr->addr.ipv4);
 }

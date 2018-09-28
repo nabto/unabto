@@ -15,6 +15,22 @@ the release and a new unreleased section is added.
 ### Changed
 - NABTO-1850: The streaming implementation now uses a pool of send
   segments.
+  
+### Breaking Changes
+- NABTO-1187: all `uint32_t` ip addresses is now `struct
+  nabto_ip_address` this affects the following function definitions:
+  `nabto_read`, `nabto_write`, `nabto_get_local_ip`,
+  `nabto_dns_is_resolved`
+- NABTO-1187: `nabto_init_socket` no longer takes the `uint32_t
+  localAddr` argument.
+- NABTO-1187: function renamed:
+  `nabto_init_socket`->`nabto_socket_init`
+  `nabto_close_socket`->`nabto_socket_close`
+- NABTO-1187: `nabto_get_local_ip` function renamed to
+  `nabto_get_local_ipv4`
+- NABTO-1187: `nabto_resolve_ipv4`, `nabto_socket_set_invalid`,
+  `nabto_socket_is_equal` functions added and must be implemented on
+  all platforms
 
 ### Added
 - NABTO-1850: The function `nabto_stream_event` can not be called with
@@ -22,9 +38,6 @@ the release and a new unreleased section is added.
 - NABOT-1850: The `unabto_config.h` has got an additional configuration
   option to control the size of the streaming send segment
   pool. `NABTO_STREAM_SEND_SEGMENT_POOL_SIZE`
-
-### Changed
-- NABTO-1850: `nabto_stream_event` has an 
 
 ## 4.2.0 2017-12-14
 

@@ -28,10 +28,10 @@ bool w5100_udp_send(w5100_socket* socket, const uint8_t* buffer, uint16_t length
 uint16_t w5100_udp_receive(w5100_socket* socket, uint8_t* buffer, uint16_t maximumLength, uint32_t* sourceIp, uint16_t* sourcePort);
 
 // uNabto compatible UDP socket operations
-bool w5100_nabto_init_socket(uint32_t localAddr, uint16_t* localPort, w5100_socket* socket);
+bool w5100_nabto_init_socket(uint16_t* localPort, w5100_socket* socket);
 void w5100_nabto_close_socket(w5100_socket* socket);
-ssize_t w5100_nabto_write(w5100_socket socket, const uint8_t* buf, size_t len, uint32_t addr, uint16_t port);
-ssize_t w5100_nabto_read(w5100_socket socket, uint8_t* buf, size_t len, uint32_t* addr, uint16_t* port);
+ssize_t w5100_nabto_write(w5100_socket socket, const uint8_t* buf, size_t len, struct nabto_ip_address* addr, uint16_t port);
+ssize_t w5100_nabto_read(w5100_socket socket, uint8_t* buf, size_t len, struct nabto_ip_address* addr, uint16_t* port);
 
 
 #ifdef __cplusplus

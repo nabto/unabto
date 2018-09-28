@@ -106,7 +106,12 @@ static bool initInf( void )
 #define INADDR_NONE 0xffffffffu
     //
 #define AF_INET         1
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket) {
+void nabto_socket_set_invalid(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket) {
     nabto_socket_t sd = RTCS_SOCKET_ERROR;
 
     sd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -118,7 +123,7 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
         struct sockaddr_in sa;
         memset(&sa, 0, sizeof(sa));
         sa.sin_family = AF_INET;
-        sa.sin_addr.s_addr = localAddr;
+        sa.sin_addr.s_addr = INADDR_ANY;
         sa.sin_port = *localPort;
         setsockopt(sd, SOL_UDP, OPT_RECEIVE_NOWAIT, &optVal, sizeof(uint32_t));
         if (bind(sd, &sa, sizeof(sa)) != RTCS_OK) {
@@ -153,9 +158,14 @@ void nabto_close_platform() {
 }
 
 
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
+{
+    return *s1==*s2;
+}
+
 /******************************************************************************/
 
-void nabto_close_socket(nabto_socket_t* socket)
+void nabto_socket_close(nabto_socket_t* socket)
 {
     if (socket && *socket != NABTO_INVALID_SOCKET) {
         shutdown(*socket, 0);
@@ -169,7 +179,7 @@ void nabto_close_socket(nabto_socket_t* socket)
 ssize_t nabto_read(nabto_socket_t socket,
                    uint8_t*       buf,
                    size_t         len,
-                   uint32_t*      addr,
+                   struct nabto_ip_address*      addr,
                    uint16_t*      port)
 {
     int res;
@@ -179,9 +189,11 @@ ssize_t nabto_read(nabto_socket_t socket,
     sa.sin_family = AF_INET;
     res = recvfrom(socket, buf, (uint32_t)len, 0, &sa, &salen);
     if (res > 0)
-        *addr = ntohl(sa.sin_addr.s_addr);
+        addr->type = NABTO_IP_V4;
+        addr->addr.ipv4 = ntohl(sa.sin_addr.s_addr);
     if (res >= 0) {
-        *addr = sa.sin_addr.s_addr;
+        addr->type = NABTO_IP_V4;
+        addr->addr.ipv4 = sa.sin_addr.s_addr;
         *port = sa.sin_port;
     } else if (res == -1) {
         return 0;
@@ -199,16 +211,19 @@ ssize_t nabto_read(nabto_socket_t socket,
 /******************************************************************************/
 
 ssize_t nabto_write(nabto_socket_t socket,
-                 const uint8_t* buf,
-                 size_t         len,
-                 uint32_t       addr,
-                 uint16_t       port)
+                    const uint8_t* buf,
+                    size_t         len,
+                    struct nabto_ip_address       addr,
+                    uint16_t       port)
 {
     int res;
     struct sockaddr_in sa;
+    if (addr->type != NABTO_IP_V4) {
+        return 0;
+    }
     memset(&sa, 0, sizeof(sa));
     sa.sin_family = AF_INET;
-    sa.sin_addr.s_addr = addr;
+    sa.sin_addr.s_addr = addr->addr.ipv4;
     sa.sin_port = port;
     res = sendto(socket, (void*)buf, (uint32_t)len, 0, &sa, sizeof(sa));
     if (res < 0) {
@@ -246,17 +261,23 @@ int nabtoStampDiff2ms(nabto_stamp_diff_t diff) {
     return (int) diff;
 }
 
+void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
+    ip->type = NABTO_IP_V4;
+    ip->addr.ipv4 = ipv4;
+}
+
 void nabto_dns_resolve(const char* id){
 }
 
-nabto_dns_status_t nabto_dns_is_resolved(const char *id, uint32_t* v4addr)
+nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address* v4addr)
 {
     #define MAX_HOSTNAMESIZE     64
     char hostname[MAX_HOSTNAMESIZE];
  
     memset (hostname, 0, sizeof (hostname));
-    if (!RTCS_resolve_ip_address( (char*)id, v4addr, hostname, MAX_HOSTNAMESIZE ))
+    if (!RTCS_resolve_ip_address( (char*)id, &v4addr->addr.ipv4, hostname, MAX_HOSTNAMESIZE ))
         return NABTO_DNS_ERROR;
 
+    v4addr->type = NABTO_IP_V4;
     return NABTO_DNS_OK;
 }

@@ -12,8 +12,9 @@ include(${UNABTO_ROOT}/build/cmake/unabto_project.cmake)
 INCLUDE (CheckIncludeFiles)
 # usage: CHECK_INCLUDE_FILES (<header> <RESULT_VARIABLE> )
 
+CHECK_LIBRARY_EXISTS(c getifaddrs "" HAVE_GETIFADDRS_SYMBOL)
 CHECK_INCLUDE_FILES (ifaddrs.h HAVE_IFADDRS_H)
-if (HAVE_IFADDRS_H)
+if (HAVE_IFADDRS_H AND HAVE_GETIFADDRS_SYMBOL)
   add_definitions(-DHAVE_IFADDRS_H)
 endif()
 

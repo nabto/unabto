@@ -14,10 +14,8 @@
 #include <fcntl.h>
 
 
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* sock) {
+bool nabto_init_socket(uint16_t* localPort, nabto_socket_t* sock) {
     nabto_socket_t sd;
-    
-    NABTO_LOG_TRACE(("Open socket: ip=" PRIip ", port=%u", MAKE_IP_PRINTABLE(localAddr), (int)*localPort));
     
     sd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sd == -1) {
@@ -70,7 +68,7 @@ void nabto_close_socket(nabto_socket_t* sock) {
 ssize_t nabto_read(nabto_socket_t sock,
                    uint8_t*       buf,
                    size_t         len,
-                   uint32_t*      addr,
+                   struct nabto_ip_address* addr,
                    uint16_t*      port)
 {
     int res;
@@ -81,7 +79,8 @@ ssize_t nabto_read(nabto_socket_t sock,
     res = recvfrom(sock, (char*) buf, (int)len, 0, (struct sockaddr*)&sa, &salen);
     
     if (res >= 0) {
-        *addr = ntohl(sa.sin_addr.s_addr);
+        addr->type = NABTO_IP_V4;
+        addr->addr.ipv4 = ntohl(sa.sin_addr.s_addr);
         *port = ntohs(sa.sin_port);
     }
     return res;
@@ -90,14 +89,18 @@ ssize_t nabto_read(nabto_socket_t sock,
 ssize_t nabto_write(nabto_socket_t sock,
                  const uint8_t* buf,
                  size_t         len,
-                 uint32_t       addr,
+                 struct nabto_ip_address*       addr,
                  uint16_t       port)
 {
     int res;
     struct sockaddr_in sa;
+    if (addr->type != NABTO_IP_V4) {
+        NABTO_LOG_ERROR(("ERROR: tried to write to non-IPv4 address"));
+        return 0;
+    }
     memset(&sa, 0, sizeof(sa));
     sa.sin_family = AF_INET;
-    sa.sin_addr.s_addr = htonl(addr);
+    sa.sin_addr.s_addr = htonl(addr->addr.ipv4);
     sa.sin_port = htons(port);
     res = sendto(sock, buf, (int)len, 0, (struct sockaddr*)&sa, sizeof(sa));
     if (res < 0) {

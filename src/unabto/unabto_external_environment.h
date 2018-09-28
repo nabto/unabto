@@ -9,11 +9,11 @@
 #else
 #include <unabto/unabto_env_base.h>
 #endif
+#include <unabto/unabto_endpoint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 /********** Platform Random ***************************************************/
 /** 
@@ -29,14 +29,31 @@ void nabto_random(uint8_t* buf, size_t len);
  * uNabto creates, this will normally occur two times. One for local
  * connections and one for remote connections.
  *
- * @param localAddr    The local address to bind to.
  * @param localPort    The local port to bind to.
  *                     A port number of 0 gives a random port. The
  *                     pointer may not be NULL.
  * @param socket       To return the created socket descriptor.
  * @return             true iff successfull
  */
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket);
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket);
+
+/**
+ * Set the value of the socket to invalid. If this function has been
+ * called on a socket, nabto_read, nabto_write, and nabto_socket_close
+ * should all fail gracefully.
+ *
+ * @param socket  A reference to the socket to be set
+ */
+void nabto_socket_set_invalid(nabto_socket_t* socket);
+
+/**
+ * Check if two sockets are equal.
+ * 
+ * @param s1  first socket to check
+ * @param s2  second socket to check
+ * @return    true iff the two sockets are equal
+ */
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2);
 
 /**
  * Close a socket. 
@@ -44,7 +61,7 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
  *
  * @param socket the socket to be closed
  */
-void nabto_close_socket(nabto_socket_t* socket);
+void nabto_socket_close(nabto_socket_t* socket);
 
 /***************** UDP Read/Write *********************************************/
 /**
@@ -61,7 +78,7 @@ void nabto_close_socket(nabto_socket_t* socket);
 ssize_t nabto_read(nabto_socket_t socket,
                    uint8_t*       buf,
                    size_t         len,
-                   uint32_t*      addr,
+                   struct nabto_ip_address*  addr,
                    uint16_t*      port);
 
 /**
@@ -78,8 +95,15 @@ ssize_t nabto_read(nabto_socket_t socket,
 ssize_t nabto_write(nabto_socket_t socket,
                     const uint8_t* buf,
                     size_t         len,
-                    uint32_t       addr,
+                    const struct nabto_ip_address*  addr,
                     uint16_t       port);
+
+
+/**
+ * Resolve an ipv4 address to an nabto_ip_address. One some systems an
+ * ipv4 can be resolved to an ipv4 mapped nat64 address.
+ */
+void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip);
 
 /**
  * Get the local ip address
@@ -88,7 +112,7 @@ ssize_t nabto_write(nabto_socket_t socket,
  * @param ip      ip in host byte order.
  * @return true   iff ip is set to the local ip address.
  */
-bool nabto_get_local_ip(uint32_t* ip);
+bool nabto_get_local_ipv4(struct nabto_ip_address* ip);
 
 
 
@@ -134,7 +158,7 @@ void nabto_dns_resolve(const char* id);
  * @param v4addr  pointer to output ipaddresses array
  * @return false if address is not resolved yet
  */
-nabto_dns_status_t nabto_dns_is_resolved(const char* id, uint32_t* v4addr);
+nabto_dns_status_t nabto_dns_is_resolved(const char* id, struct nabto_ip_address* addr);
 
 /*************** Time stamp related functions ********************************/
 /**

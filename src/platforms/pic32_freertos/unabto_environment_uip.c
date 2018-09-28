@@ -11,7 +11,12 @@ void nabto_random(uint8_t* buf, size_t len) {
     // uninplemented.
 }
 
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* socket) {
+void nabto_socket_set_invalid(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket) {
 
     /**
      * uip_udp_new returns a pointer to the array of connections in uip.
@@ -19,8 +24,6 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
      */
     uip_ipaddr_t addr;
     
-    if (localAddr) { /* make the compiler happy */ }
-
     uip_ipaddr(&addr, 0,0,0,0);
 
     *socket = uip_udp_new(&addr,0);
@@ -33,7 +36,12 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
     return true;
 }
 
-void nabto_close_socket(nabto_socket_t* socket) {
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
+{
+    return *s1==*s2;
+}
+
+void nabto_socket_close(nabto_socket_t* socket) {
     uip_udp_remove(*socket);
     *socket = NULL;
 }
@@ -94,13 +102,14 @@ void dummy_packet_handler() {
 ssize_t nabto_read(nabto_socket_t socket,
                    uint8_t*       buf,
                    size_t         len,
-                   uint32_t*      addr,
+                   struct nabto_ip_address*      addr,
                    uint16_t*      port) {
     // will be handled when  newdata is called.
     if (ipacket.socket == socket) {
         ipacket.socket = NULL;
         memmove(buf, ipacket.buffer, MIN(ipacket.len, len));
-        *addr = ipacket.addr;
+        addr.type = NABTO_IP_V4;
+        addr.addr.ipv4 = ipacket.addr;
         *port = ipacket.port;
         return ipacket.len;
     }
@@ -110,13 +119,16 @@ ssize_t nabto_read(nabto_socket_t socket,
 ssize_t nabto_write(nabto_socket_t socket,
                     const uint8_t* buf,
                     size_t         len,
-                    uint32_t       addr,
+                    struct nabto_ip_address*       addr,
                     uint16_t       port) {
     // Set the socket in uip to be this one.
+    if (addr->type != NABTO_IP_V4) {
+        return 0;
+    }
     opacket.socket = socket;
     memcpy(opacket.buffer, buf, len);
     opacket.len = len;
-    opacket.addr = addr;
+    opacket.addr = addr->addr.ipv4;
     opacket.port = port;
     return len;
 }

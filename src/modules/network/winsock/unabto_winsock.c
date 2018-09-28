@@ -32,7 +32,12 @@ static struct socketListElement* socketList = 0;
 
 static void unabto_winsock_shutdown(void);
 
-bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* sock)
+void nabto_socket_set_invalid(nabto_socket_t* socket)
+{
+    socket = NABTO_INVALID_SOCKET;
+}
+
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
 {
     nabto_socket_t sd = INVALID_SOCKET;
     struct sockaddr_in sa;
@@ -51,7 +56,7 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
 
     memset(&sa, 0, sizeof(sa));
     sa.sin_family = AF_INET;
-    sa.sin_addr.s_addr = htonl(localAddr);
+    sa.sin_addr.s_addr = htonl(INADDR_ANY);
     sa.sin_port = htons(*localPort);
     if (bind(sd, (struct sockaddr*)&sa, sizeof(sa)) < 0)
     {
@@ -93,7 +98,12 @@ bool nabto_init_socket(uint32_t localAddr, uint16_t* localPort, nabto_socket_t* 
     return true;
 }
 
-void nabto_close_socket(nabto_socket_t* sock)
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
+{
+    return *s1==*s2;
+}
+
+void nabto_socket_close(nabto_socket_t* sock)
 {
     if (sock && *sock != INVALID_SOCKET)
     {
@@ -117,7 +127,7 @@ void nabto_close_socket(nabto_socket_t* sock)
     }
 }
 
-ssize_t nabto_read(nabto_socket_t sock, uint8_t* buf, size_t len, uint32_t* addr, uint16_t* port)
+ssize_t nabto_read(nabto_socket_t sock, uint8_t* buf, size_t len, struct nabto_ip_address* addr, uint16_t* port)
 {
     int res;
     struct sockaddr_in sa;
@@ -129,13 +139,15 @@ ssize_t nabto_read(nabto_socket_t sock, uint8_t* buf, size_t len, uint32_t* addr
     if (res >= 0)
     {
         nabto_endpoint ep;
-        *addr = ntohl(sa.sin_addr.s_addr);
+        addr->type = NABTO_IP_V4;
+        addr->addr.ipv4 = ntohl(sa.sin_addr.s_addr);
         *port = ntohs(sa.sin_port);
 
-        ep.addr = *addr;
+        ep.addr.type = NABTO_IP_V4;
+        ep.addr.addr.ipv4 = addr->addr.ipv4;
         ep.port = *port;
 
-        NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_TRACE, ("data from addr: " PRIep, MAKE_EP_PRINTABLE(ep)), buf, res);
+//        NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_TRACE, ("data from addr: " PRIep, MAKE_EP_PRINTABLE(ep)), buf, res);
     }
     else if (res == -1)
     {
@@ -153,17 +165,21 @@ ssize_t nabto_read(nabto_socket_t sock, uint8_t* buf, size_t len, uint32_t* addr
     return res;
 }
 
-ssize_t nabto_write(nabto_socket_t sock, const uint8_t* buf, size_t len, uint32_t addr, uint16_t port)
+ssize_t nabto_write(nabto_socket_t sock, const uint8_t* buf, size_t len, struct nabto_ip_address* addr, uint16_t port)
 {
     int res;
     struct sockaddr_in sa;
     nabto_endpoint ep;
 
+    if (addr->type != NABTO_IP_V4) {
+        return 0;
+    }
     memset(&sa, 0, sizeof(sa));
     sa.sin_family = AF_INET;
-    sa.sin_addr.s_addr = htonl(addr);
+    sa.sin_addr.s_addr = htonl(addr->addr.ipv4);
     sa.sin_port = htons(port);
-    ep.addr = addr;
+    ep.addr.type = addr->type;
+    ep.addr.addr.ipv4 = addr->addr.ipv4;
     ep.port = port;
     NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_TRACE, ("nabto_write " PRIep, MAKE_EP_PRINTABLE(ep)), buf, len);
     res = sendto(sock, (const char*) buf, (int)len, 0, (struct sockaddr*)&sa, sizeof(sa));
@@ -247,7 +263,7 @@ void unabto_network_select_read_sockets(fd_set* readFds) {
     }
 }
 
-bool nabto_get_local_ip(uint32_t* ip) {
+bool nabto_get_local_ipv4(struct nabto_ip_address* ip) {
     struct sockaddr_in si_me, si_other;
     int s;
     
@@ -279,7 +295,8 @@ bool nabto_get_local_ip(uint32_t* ip) {
             NABTO_LOG_ERROR(("getsockname failed"));
             return false;
         }
-        *ip = ntohl(my_addr.sin_addr.s_addr);
+        ip->addr.ipv4 = ntohl(my_addr.sin_addr.s_addr);
+        ip->type = NABTO_IP_V4;
     }
     closesocket(s);
     return true;

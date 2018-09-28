@@ -59,7 +59,7 @@ bool unabto_syslog_init(const char* deviceId)
     bool ok;
     disableSyslog = true;
     
-    ok = nabto_init_socket(0, &localPort, &syslogSocket);
+    ok = nabto_socket_init(&localPort, &syslogSocket);
     disableSyslog = false;
     return ok;
 }
@@ -112,6 +112,7 @@ void unabto_syslog(uint32_t module, uint32_t severity, const char* file, unsigne
 {
     char msg[SYSLOG_MESSAGE_SIZE];
     size_t used;
+    struct nabto_ip_address serverAddr;
     if (disableSyslog) {
         return;
     }
@@ -129,7 +130,9 @@ void unabto_syslog(uint32_t module, uint32_t severity, const char* file, unsigne
     used = unabto_strnlen(msg,SYSLOG_MESSAGE_SIZE);
 
     disableSyslog = true;
-    nabto_write(syslogSocket, (const uint8_t*)msg, used, syslogServer, syslogPort);
+    serverAddr.type = NABTO_IP_V4;
+    serverAddr.addr.ipv4 = syslogServer;
+    nabto_write(syslogSocket, (const uint8_t*)msg, used, &serverAddr, syslogPort);
     disableSyslog = false;
 }
 
@@ -139,7 +142,7 @@ void unabto_syslog_buffer(uint32_t module, uint32_t severity, const char* file, 
     char msg[SYSLOG_MESSAGE_SIZE];
     size_t i, j;
     size_t linenums;
-    
+    struct nabto_ip_address serverAddr;
     if (disableSyslog) {
         return;
     }
@@ -176,7 +179,9 @@ void unabto_syslog_buffer(uint32_t module, uint32_t severity, const char* file, 
     }
 
     disableSyslog = true;
-    nabto_write(syslogSocket, (const uint8_t*)msg, used, syslogServer, syslogPort);
+    serverAddr.type = NABTO_IP_V4;
+    serverAddr.addr.ipv4 = syslogServer;
+    nabto_write(syslogSocket, (const uint8_t*)msg, used, &serverAddr, syslogPort);
     disableSyslog = false;
 }
 
