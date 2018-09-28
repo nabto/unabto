@@ -213,3 +213,10 @@ static void initialize(void)
     sprintf(tempSettingsFile + strlen(tempSettingsFile), ".%u", getpid());
 #endif
 }
+void initialize_settings(const char *file)
+{
+    strcpy(settingsFile, file);
+    strcpy(tempSettingsFile, file);
+    sprintf(tempSettingsFile + strlen(tempSettingsFile), ".%u", getpid());
+    initialized = true;
+}

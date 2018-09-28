@@ -19,6 +19,7 @@ bool settings_write_int(const char* key, int value);
 bool settings_read_bool(const char* key, bool* value);
 bool settings_write_bool(const char* key, bool value);
 
+void initialize_settings(const char* file);
 
 #ifdef __cplusplus
 } //extern "C"
