@@ -25,7 +25,6 @@
 #include "unabto_crypto.h"
 #include "unabto_memory.h"
 #include "unabto_packet.h"
-#include "unabto_dns_fallback.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -49,7 +48,6 @@ enum {
     INTERVAL_INITIAL_CONFIGURATION_CHECK = 10000,
     INTERVAL_BS_INVITE   = 2000,
     INTERVAL_GSP_INVITE  = 2000,
-    INTERVAL_DNS_FALLBACK = 2000,
     INTERVAL_DNS_RESOLVE = 100,
     INTERVAL_ERROR_RETRY_BASE = 2000 // base time from an error occurs to we retry.
 };
@@ -73,9 +71,6 @@ text stName(nabto_state state)
         case NABTO_AS_IDLE     :                      return "IDLE";
         case NABTO_AS_WAIT_DNS :                      return "WAIT_DNS";
         case NABTO_AS_WAIT_BS  :                      return "WAIT_BS";
-        case NABTO_AS_WAIT_DNS_FALLBACK_OPEN_SOCKET : return "WAIT_DNS_FALLBACK_OPEN_SOCKET";
-        case NABTO_AS_WAIT_DNS_FALLBACK_BS:           return "WAIT_DNS_FALLBACK_BS";
-        case NABTO_AS_WAIT_DNS_FALLBACK_UDP_BS:       return "WAIT_DNS_FALLBACK_UDP_BS";
         case NABTO_AS_WAIT_GSP :                      return "WAIT_GSP";
         case NABTO_AS_ATTACHED :                      return "ATTACHED";
     }
@@ -439,24 +434,11 @@ static void send_gsp_alive_poll(void) {
     send_to_basestation(nabtoCommunicationBuffer, olen, &nmc.context.gsp);
 } 
 
-#if NABTO_ENABLE_DNS_FALLBACK
-static void make_dns_fallback(void) {
-    unabto_dns_fallback_error_code ec = unabto_dns_fallback_create_socket();
-    if (ec == UDF_OK) {
-        nmc.context.hasDnsFallbackSocket = true;
-        nmc.context.useDnsFallback = true;
-        SET_CTX_STATE_STAMP(NABTO_AS_WAIT_DNS_FALLBACK_BS, 0);
-    }
-}
-#endif
-
 /******************************************************************************/
 
 bool nabto_invite_event(nabto_packet_header* hdr)
 {
-    if (nmc.context.state != NABTO_AS_WAIT_BS &&
-        nmc.context.state != NABTO_AS_WAIT_DNS_FALLBACK_BS &&
-        nmc.context.state != NABTO_AS_WAIT_DNS_FALLBACK_UDP_BS) {
+    if (nmc.context.state != NABTO_AS_WAIT_BS) {
         NABTO_LOG_TRACE(("Received an invite response from the basestation but we are not waiting in any invite responses."));
         return false;
     }
@@ -495,27 +477,6 @@ void handle_ok_invite_event(void)
 {
     
     if (nmc.context.state == NABTO_AS_WAIT_BS) {
-        SET_CTX_STATE_STAMP(NABTO_AS_WAIT_GSP, 0);
-        NABTO_LOG_INFO(("GSP address: " PRIep, MAKE_EP_PRINTABLE(nmc.context.gsp)));
-        return;
-    }
-    if (nmc.context.state == NABTO_AS_WAIT_DNS_FALLBACK_BS) {
-#if NABTO_ENABLE_DNS_FALLBACK
-        if (nmc.nabtoMainSetup.enableDnsFallback) {
-            if (nmc.nabtoMainSetup.forceDnsFallback) {
-                // force dns fallback
-                SET_CTX_STATE_STAMP(NABTO_AS_WAIT_GSP, 0);
-                NABTO_LOG_INFO(("GSP address: " PRIep, MAKE_EP_PRINTABLE(nmc.context.gsp)));
-                return;
-            }
-        }
-#endif
-        nmc.context.useDnsFallback = false;
-        SET_CTX_STATE_STAMP(NABTO_AS_WAIT_DNS_FALLBACK_UDP_BS, 0);
-        return;
-    }
-    if (nmc.context.state == NABTO_AS_WAIT_DNS_FALLBACK_UDP_BS) {
-        nmc.context.useDnsFallback = false;
         SET_CTX_STATE_STAMP(NABTO_AS_WAIT_GSP, 0);
         NABTO_LOG_INFO(("GSP address: " PRIep, MAKE_EP_PRINTABLE(nmc.context.gsp)));
         return;
@@ -801,13 +762,6 @@ void handle_as_idle(void) {
 #endif
     
     fix_for_broken_routers();
-#if NABTO_ENABLE_DNS_FALLBACK
-    if (nmc.nabtoMainSetup.enableDnsFallback) {
-        if (nmc.context.hasDnsFallbackSocket) {
-            unabto_dns_fallback_close_socket();
-        }
-    }
-#endif
     nmc.controllerEp = nmc.nabtoMainSetup.controllerArg;
     if (nmc.nabtoMainSetup.controllerArg.addr.type != NABTO_IP_NONE) {
         SET_CTX_STATE_STAMP(NABTO_AS_WAIT_BS, 0);
@@ -858,73 +812,14 @@ void handle_as_wait_bs(void) {
         nmc.controllerEp.addr = newip;
     }
     
-#if NABTO_ENABLE_DNS_FALLBACK
-    if (nmc.nabtoMainSetup.enableDnsFallback) {
-        if (nmc.nabtoMainSetup.forceDnsFallback) {
-            // force dns fallback.
-            SET_CTX_STATE_STAMP(NABTO_AS_WAIT_DNS_FALLBACK_OPEN_SOCKET, 0);
-            return;
-        }
-    }
-#endif
-
     SET_CTX_STATE_STAMP(NABTO_AS_WAIT_BS, EXP_WAIT(INTERVAL_BS_INVITE, nmc.context.counter));
     if(++nmc.context.counter > 6) {
         NABTO_LOG_INFO(("No answer from BS, trying with fallback via dns"));
         nmc.context.errorCount = 0;
-#if NABTO_ENABLE_DNS_FALLBACK
-        if (nmc.nabtoMainSetup.enableDnsFallback) {
-            SET_CTX_STATE_STAMP(NABTO_AS_WAIT_DNS_FALLBACK_OPEN_SOCKET, INTERVAL_ERROR_RETRY_BASE);
-            return;
-        }
-#endif
         // If dns fallback is not enabled then we end here.
         NABTO_LOG_INFO(("Could not connect to controller, retrying from beginning"));
         send_basestation_attach_failure(NP_PAYLOAD_ATTACH_STATS_STATUS_CONTROLLER_INVITE_FAILED);
         SET_CTX_STATE_STAMP(NABTO_AS_IDLE, INTERVAL_ERROR_RETRY_BASE);
-        return;
-    }
-    
-    send_controller_invite();
-}
-
-void handle_as_wait_dns_fallback_open_socket(void)
-{
-#if NABTO_ENABLE_DNS_FALLBACK
-    SET_CTX_STATE_STAMP(NABTO_AS_WAIT_DNS_FALLBACK_OPEN_SOCKET, EXP_WAIT(INTERVAL_DNS_FALLBACK, nmc.context.counter));
-    if(++nmc.context.counter > 6) {
-        NABTO_LOG_INFO(("Dns fallback creation failed. Retrying from beginning"));
-        send_basestation_attach_failure(NP_PAYLOAD_ATTACH_STATS_STATUS_CONTROLLER_INVITE_FAILED);
-        SET_CTX_STATE_STAMP(NABTO_AS_IDLE, INTERVAL_ERROR_RETRY_BASE);
-        return;
-    }
-    make_dns_fallback();
-#endif
-}
-
-void handle_as_wait_dns_fallback_bs(void)
-{
-    SET_CTX_STATE_STAMP(NABTO_AS_WAIT_DNS_FALLBACK_BS, EXP_WAIT(INTERVAL_BS_INVITE, nmc.context.counter));
-    if(++nmc.context.counter > 6) {
-        NABTO_LOG_INFO(("No answer from BS via dns fallback, retrying from beginning"));
-        nmc.context.errorCount = 0;
-        send_basestation_attach_failure(NP_PAYLOAD_ATTACH_STATS_STATUS_CONTROLLER_INVITE_FAILED);
-        SET_CTX_STATE_STAMP(NABTO_AS_IDLE, INTERVAL_ERROR_RETRY_BASE);
-        return;
-    }
-    
-    send_controller_invite();
-}
-
-void handle_as_wait_dns_fallback_udp_bs(void)
-{
-    SET_CTX_STATE_STAMP(NABTO_AS_WAIT_DNS_FALLBACK_UDP_BS, EXP_WAIT(INTERVAL_BS_INVITE, nmc.context.counter));
-    if(++nmc.context.counter > 3) {
-        NABTO_LOG_INFO(("No answer from BS via udp, deciding to use dns fallback"));
-        nmc.context.errorCount = 0;
-        nmc.context.counter = 0;
-        nmc.context.useDnsFallback = true;
-        SET_CTX_STATE_STAMP(NABTO_AS_WAIT_GSP, INTERVAL_ERROR_RETRY_BASE);
         return;
     }
     
@@ -951,13 +846,6 @@ void handle_as_attached(void) {
         if (!nmc.context.keepAliveReceived) {
             send_basestation_attach_failure(NP_PAYLOAD_ATTACH_STATS_STATUS_ATTACH_TIMED_OUT);
         }
-#if NABTO_ENABLE_DNS_FALLBACK
-        if (nmc.nabtoMainSetup.enableDnsFallback) {
-            if (nmc.context.hasDnsFallbackSocket) {
-                unabto_dns_fallback_close_socket();
-            }
-        }
-#endif
         nabto_context_reinit();
     } else {
         send_gsp_alive_poll();
@@ -974,9 +862,6 @@ void nabto_attach_time_event(void)
     case NABTO_AS_IDLE:     handle_as_idle();     break;
     case NABTO_AS_WAIT_DNS: handle_as_wait_dns(); break;
     case NABTO_AS_WAIT_BS:  handle_as_wait_bs();  break;
-    case NABTO_AS_WAIT_DNS_FALLBACK_OPEN_SOCKET: handle_as_wait_dns_fallback_open_socket(); break;
-    case NABTO_AS_WAIT_DNS_FALLBACK_BS:          handle_as_wait_dns_fallback_bs();          break;
-    case NABTO_AS_WAIT_DNS_FALLBACK_UDP_BS:      handle_as_wait_dns_fallback_udp_bs();      break;
     case NABTO_AS_WAIT_GSP: handle_as_wait_gsp(); break;
     case NABTO_AS_ATTACHED: handle_as_attached(); break;
     }
@@ -987,9 +872,6 @@ void nabto_network_changed(void) {
     case NABTO_AS_IDLE:
     case NABTO_AS_WAIT_DNS:
     case NABTO_AS_WAIT_BS:
-    case NABTO_AS_WAIT_DNS_FALLBACK_OPEN_SOCKET:
-    case NABTO_AS_WAIT_DNS_FALLBACK_BS:
-    case NABTO_AS_WAIT_DNS_FALLBACK_UDP_BS:
     case NABTO_AS_WAIT_GSP:
         SET_CTX_STATE_STAMP(NABTO_AS_IDLE, 0);
         break;

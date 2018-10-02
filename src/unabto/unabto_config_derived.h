@@ -107,14 +107,6 @@
 #endif
 #endif
 
-#if NABTO_ENABLE_DNS_FALLBACK
-#define DNS_FALLBACK_COMMUNICATION_BUFFER_SIZE 1500
-#if UNABTO_COMMUNICATION_BUFFER_SIZE < DNS_FALLBACK_COMMUNICATION_BUFFER_SIZE
-#   undef UNABTO_COMMUNICATION_BUFFER_SIZE
-#   define UNABTO_COMMUNICATION_BUFFER_SIZE    DNS_FALLBACK_COMMUNICATION_BUFFER_SIZE
-#endif
-#endif
-
 #ifdef NABTO_COMMUNICATION_BUFFER_SIZE
 #   pragma message("The configuration parameter NABTO_COMMUNICATION_BUFFER_SIZE is deprecated and no longer used")
 #   pragma message("Use the set of new parameters found in unabto_config_defaults")

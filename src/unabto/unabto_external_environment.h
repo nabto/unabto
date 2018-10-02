@@ -195,9 +195,6 @@ typedef enum {
     NABTO_AS_IDLE,      /**< initial state                                          */
     NABTO_AS_WAIT_DNS,  /**< waiting for dns resolving                              */
     NABTO_AS_WAIT_BS,   /**< UINVITE request sent to Base Station(BS)               */
-    NABTO_AS_WAIT_DNS_FALLBACK_OPEN_SOCKET, /**< try to make a dns fallback socket              */
-    NABTO_AS_WAIT_DNS_FALLBACK_BS, /**< try to send an invite to the basestation via dns fallback */
-    NABTO_AS_WAIT_DNS_FALLBACK_UDP_BS, /**< try to send an invite to the basestation via udp after the dns fallback invite has succeded. */
     NABTO_AS_WAIT_GSP,  /**< UINVITE request sent to GSP                            */
     NABTO_AS_ATTACHED   /**< UATTACH request received from and response sent to GSP */
 } nabto_state;

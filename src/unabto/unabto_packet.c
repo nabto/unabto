@@ -26,7 +26,6 @@
 #include "unabto_external_environment.h"
 
 #include <unabto/unabto_tcp_fallback.h>
-#include <unabto/unabto_dns_fallback.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -378,19 +377,13 @@ bool send_and_encrypt_packet(nabto_endpoint* peer, nabto_crypto_context* cryptoC
     return send_to_basestation(packetStart, len, peer);
 }
 
-bool send_to_basestation(uint8_t* buffer, size_t buflen, nabto_endpoint* peer) {
-#if NABTO_ENABLE_DNS_FALLBACK
-    if (nmc.context.useDnsFallback) {
-        return (unabto_dns_fallback_send_to(buffer, (uint16_t)buflen, peer->addr, peer->port) > 0);
-    }
-#endif
-
+bool send_to_basestation(uint8_t* buffer, size_t buflen, nabto_endpoint* peer)
+{
     if (peer->addr.type != NABTO_IP_NONE && peer->port != 0) {
         return (nabto_write(nmc.socketGSP, buffer, buflen, &peer->addr, peer->port) > 0);
     } else {
         return false;
     }
-    
 }
 
 uint8_t* unabto_stats_write_u32(uint8_t* ptr, uint8_t* end, uint8_t type, uint32_t value)

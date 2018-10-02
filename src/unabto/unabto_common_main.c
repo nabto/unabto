@@ -22,7 +22,6 @@
 #include "unabto_logging.h"
 #include "unabto_env_base.h"
 #include "unabto_external_environment.h"
-#include "unabto_dns_fallback.h"
 #include "unabto_version.h"
 #include "unabto_util.h"
 
@@ -47,9 +46,6 @@ NABTO_THREAD_LOCAL_STORAGE nabto_crypto_context cryptoContextConnection;        
 
 static ssize_t read_event_socket(nabto_socket_t socket, message_event* event);
 static void ensureValidDeviceId(const char* id);
-#if NABTO_ENABLE_DNS_FALLBACK
-static bool unabto_read_dns_fallback();
-#endif
 
 NABTO_THREAD_LOCAL_STORAGE nabto_main_context nmc;
 
@@ -73,11 +69,6 @@ void unabto_init_default_values(nabto_main_setup* nms) {
     memset(nms->presharedKey, 0, PRE_SHARED_KEY_SIZE);
 #if NABTO_ENABLE_TCP_FALLBACK
     nms->enableTcpFallback = true;
-#endif
-#if NABTO_ENABLE_DNS_FALLBACK
-    nms->enableDnsFallback = false;
-    nms->forceDnsFallback = false;
-    nms->dnsAddress = UNABTO_INADDR_NONE;
 #endif
 
 #if NABTO_ENABLE_DYNAMIC_MEMORY
@@ -185,15 +176,6 @@ bool unabto_init(void) {
     }
 #endif
 
-#if NABTO_ENABLE_DNS_FALLBACK
-    if (nmc.nabtoMainSetup.enableDnsFallback) {
-        if (!unabto_dns_fallback_init()) {
-            NABTO_LOG_ERROR(("Failed to initialize dns fallback"));
-            return false;
-        }
-    }
-#endif
-
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
     unabto_extended_rendezvous_init();
 #endif
@@ -244,13 +226,6 @@ void unabto_tick(void) {
     if (unabto_read_socket(nmc.socketGSP)) {
         return; // remote answer produced
     }
-#if NABTO_ENABLE_DNS_FALLBACK
-    if (nmc.nabtoMainSetup.enableDnsFallback) {
-        if (unabto_read_dns_fallback()) {
-            return; // dns answer produced
-        }
-    }
-#endif
 #endif
 
     unabto_time_event();
@@ -273,12 +248,6 @@ void unabto_time_event(void) {
 #if NABTO_ENABLE_PUSH
     if(nmc.context.state == NABTO_AS_ATTACHED){
         nabto_time_event_push();
-    }
-#endif
-
-#if NABTO_ENABLE_DNS_FALLBACK
-    if (nmc.nabtoMainSetup.enableDnsFallback) {
-        unabto_dns_fallback_handle_timeout();
     }
 #endif
 
@@ -333,33 +302,6 @@ bool unabto_read_socket(nabto_socket_t socket) {
 #endif
     return true;
 }
-
-#if NABTO_ENABLE_DNS_FALLBACK
-bool unabto_read_dns_fallback() {
-    {
-        uint16_t ilen = unabto_dns_fallback_recv_socket(nabtoCommunicationBuffer, nabtoCommunicationBufferSize);
-        if (ilen > 0) {
-            unabto_dns_fallback_handle_packet(nabtoCommunicationBuffer, ilen);
-        }
-    }
-    if (nmc.context.useDnsFallback) {
-        size_t ilen;
-        uint32_t addr;
-        uint16_t port;
-        ilen = unabto_dns_fallback_recv_from(nabtoCommunicationBuffer, nabtoCommunicationBufferSize, &addr, &port);
-        if (ilen > 0) {
-            message_event event;
-            event.type = MT_UDP;
-            event.udpMessage.socket = nmc.socketGSP;
-            event.udpMessage.peer.addr = addr;
-            event.udpMessage.peer.port = port;
-            nabto_message_event(&event, (uint16_t)ilen);
-            return true;
-        }
-    }
-    return false;
-}
-#endif
 
 bool unabto_is_connected_to_gsp(void) {
     return nmc.context.state == NABTO_AS_ATTACHED;

@@ -72,7 +72,6 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_crypto.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_push.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_debug_packet.h
-  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_dns_fallback.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_env_base.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_environment.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_extended_rendezvous.h
@@ -261,29 +260,6 @@ source_group(modules\\dns\\unix FILES ${unabto_module_unix_dns_src})
 set(unabto_module_dns_win32_src
   ${UNABTO_MODULES_SRC_DIR}/dns/win32/unabto_win32_dns.c)
 source_group(modules\\dns\\win32 FILES ${unabto_module_dns_win32_src})
-
-
-# modules/dns_fallback
-
-set(unabto_module_dns_fallback_src
-  ${UNABTO_MODULES_SRC_DIR}/dns_fallback/unabto_dns_fallback_protocol.c
-  ${UNABTO_MODULES_SRC_DIR}/dns_fallback/unabto_dns_fallback_session.c
-  ${UNABTO_MODULES_SRC_DIR}/dns_fallback/unabto_dns_fallback_data.c
-  ${UNABTO_MODULES_SRC_DIR}/dns_fallback/unabto_dns_fallback_probe.c
-  ${UNABTO_MODULES_SRC_DIR}/dns_fallback/unabto_dns_client.c
-  ${UNABTO_MODULES_SRC_DIR}/dns_fallback/unabto_dns_fallback_impl.c
-  ${UNABTO_MODULES_SRC_DIR}/util/unabto_base32.c
-  ${UNABTO_MODULES_SRC_DIR}/dns_fallback/unabto_dns_client.h
-  ${UNABTO_MODULES_SRC_DIR}/dns_fallback/unabto_dns_fallback_data.h
-  ${UNABTO_MODULES_SRC_DIR}/dns_fallback/unabto_dns_fallback_probe.h
-  ${UNABTO_MODULES_SRC_DIR}/dns_fallback/unabto_dns_fallback_protocol.h
-  ${UNABTO_MODULES_SRC_DIR}/dns_fallback/unabto_dns_fallback_select.h
-  ${UNABTO_MODULES_SRC_DIR}/dns_fallback/unabto_dns_fallback_session.h
-  ${UNABTO_MODULES_SRC_DIR}/dns_fallback/unabto_dns_fallback_socket.h)
-
-source_group(modules\\dns_fallback FILES ${unabto_module_dns_fallback_src})
-
-
 
 
 # modules/log

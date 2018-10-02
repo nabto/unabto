@@ -22,4 +22,3 @@ tcp_fallback
 timers
 list
 util
-dns_fallback
