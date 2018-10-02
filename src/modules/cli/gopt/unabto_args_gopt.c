@@ -62,13 +62,6 @@ static void help(const char* errmsg, const char *progname)
 
 } /* help(const char* errmsg) */
 
-enum {
-    FORCE_DNS_FALLBACK = 127,
-    ENABLE_DNS_FALLBACK,
-    DNS_ADDRESS,
-    DNS_FALLBACK_DOMAIN,
-};
-
 #if NABTO_ENABLE_PROVISIONING
 #define UNABTO_PROVISION_GOPT_START_ENUM 255
 #endif
@@ -87,11 +80,6 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
     const char *progname;
 #ifdef WIN32
     char modulename[MAX_PATH];
-#endif
-
-#if NABTO_ENABLE_DNS_FALLBACK
-    const char *dnsAddress;
-    const char *dnsFallbackDomain;
 #endif
 
     uint8_t psk[16] = { 0 };
@@ -133,11 +121,7 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
         { 'V', GOPT_NOARG,  x12s, x12l },
         { 'C', GOPT_NOARG,  x13s, x13l },
         { 'S', GOPT_NOARG,  x14s, x14l },
-        { FORCE_DNS_FALLBACK, GOPT_NOARG, x15s, x15l },
-        { DNS_ADDRESS, GOPT_ARG, x16s, x16l },
-        { DNS_FALLBACK_DOMAIN, GOPT_ARG, x17s, x17l },
         { 'P', GOPT_NOARG,    x18s, x18l },
-        { ENABLE_DNS_FALLBACK, GOPT_NOARG, x19s, x19l },
 
 #if NABTO_ENABLE_PROVISIONING
     UNABTO_PROVISION_GOPT_ARGS()
@@ -246,30 +230,6 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms)
             return false;
         }
     }
-    
-#if NABTO_ENABLE_DNS_FALLBACK
-    if (gopt(options, FORCE_DNS_FALLBACK)) {
-        nms->forceDnsFallback = true;
-    }
-
-    if(gopt(options, ENABLE_DNS_FALLBACK)) {
-        nms->enableDnsFallback = true;
-    }
-
-    if (gopt_arg(options, DNS_ADDRESS, &dnsAddress)) {
-        addr = inet_addr(dnsAddress);
-        if (addr == INADDR_NONE) {
-            help("Illegal dns address", progname);
-            gopt_free(options);
-            return false;
-        }
-        nms->dnsAddress = htonl(addr);
-    }
-
-    if (gopt_arg(options, DNS_FALLBACK_DOMAIN, &dnsFallbackDomain)) {
-        nms->dnsFallbackDomain = strdup(dnsFallbackDomain);
-    }
-#endif
 
     gopt_free(options);
     

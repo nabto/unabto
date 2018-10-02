@@ -22,5 +22,4 @@
 
 #define NABTO_SDK                                   1
 
-#define NABTO_ENABLE_DNS_FALLBACK                   0
 #endif

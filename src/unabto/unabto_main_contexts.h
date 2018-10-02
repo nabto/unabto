@@ -48,12 +48,6 @@ typedef struct {
 #if NABTO_ENABLE_TCP_FALLBACK
     bool              enableTcpFallback;  /**< Enable tcp fallback. This is enabled by default if TCP Fallback is compiled into the executable. */
 #endif
-#if NABTO_ENABLE_DNS_FALLBACK
-    bool              enableDnsFallback;  /**< As long as the dns fallback feature is in beta it's neccessary to explicitly enable it on runtime */
-    bool              forceDnsFallback;   /**< Force unabto to use dns fallback */
-    uint32_t          dnsAddress;         /**< Force a specific dns server address */
-    const char*       dnsFallbackDomain;  /**< Force a specific dns fallback node */
-#endif
 
 #if NABTO_ENABLE_DYNAMIC_MEMORY
     uint16_t          connectionsSize;

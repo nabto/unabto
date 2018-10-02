@@ -27,7 +27,6 @@
 #include "unabto_connection_util.h"
 
 #include <unabto/unabto_tcp_fallback.h>
-#include <unabto/unabto_dns_fallback.h>
 
 #include <unabto/unabto_extended_rendezvous.h>
 
@@ -978,14 +977,6 @@ bool nabto_write_con(nabto_connect* con, uint8_t* buf, size_t len) {
     }
 #endif
 
-#if NABTO_ENABLE_DNS_FALLBACK
-    if (nmc.nabtoMainSetup.enableDnsFallback) {
-        if (nabto_ep_is_equal(&con->peer, &nmc.context.gsp) && nabto_socket_is_equal(&con->socket, &nmc.socketGSP) && nmc.context.useDnsFallback) {
-            return (unabto_dns_fallback_send_to(buf, (uint16_t)len, con->peer.addr, con->peer.port) > 0);
-        }
-    }
-#endif
-    
     if (con->type == NCT_REMOTE_RELAY || con->type == NCT_REMOTE_P2P || con->type == NCT_LOCAL) {
         return (nabto_write(con->socket, buf, len, &con->peer.addr, con->peer.port) > 0);
     }
