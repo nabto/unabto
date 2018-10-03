@@ -642,7 +642,7 @@ void nabto_connection_end_connecting(nabto_connect* con, message_event* event) {
         con->conAttr = CON_ATTR_DEFAULT;
 
         con->socket = event->udpMessage.socket;
-        NABTO_LOG_TRACE(("Received data on socket %i", con->socket));
+        NABTO_LOG_TRACE(("Received first data message"));
 
         con->peer = event->udpMessage.peer;
         if (nabto_ep_is_equal(&event->udpMessage.peer, &nmc.context.gsp)) {
