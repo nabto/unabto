@@ -10,7 +10,11 @@ Guide: always keep an unreleased section which keeps track of current
 changes. When a release is made the unreleased section is renamed to
 the release and a new unreleased section is added.
 
-## 4.3.0 Unreleased
+## 4.4.0 Unreleased
+
+
+
+## 4.3.0 2018-10-02
 
 ### Changed
 - NABTO-1850: The streaming implementation now uses a pool of send
