@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<unabto_queries
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://www.nabto.com/unabto/query_model.xsd">
+
+  <query name="ok.json" description="Login using username and password" id="0">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="status" type="uint8"/>
+    </response>
+  </query>
+  
+  <query name="err_no_access.json" description="Invoke HTTP query" id="10">
+    <request>
+    </request>
+    <response format="json">
+    </response>
+  </query>
+
+  <query name="err_res.json" description="Invoke HTTP query" id="20">
+    <request>
+    </request>
+    <response format="json">
+    </response>
+  </query>
+
+</unabto_queries>
