@@ -65,6 +65,7 @@ void unabto_psk_connection_create_new_connection(nabto_socket_t socket, const na
 bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header, nabto_connect* connection)
 {
     struct unabto_payload_capabilities_read capabilities;
+    bool isLocal = nabto_socket_is_equal(&socket, &nmc.socketLocal);
     nabto_reset_connection(connection);
     connection->cpnsi = header->nsi_cp;
     connection->spnsi = nabto_connection_get_fresh_sp_nsi();
@@ -74,6 +75,8 @@ bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
     unabto_connection_set_future_stamp(&connection->stamp, 20000);
     connection->rendezvousConnectState.state = RS_DONE;
     connection->noRendezvous = true;
+    connection->isLocal = isLocal;
+    
     
     // read client id and insert it into the connection
     unabto_connection_util_read_client_id(header, connection);
