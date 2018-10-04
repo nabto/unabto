@@ -170,6 +170,8 @@ bool unabto_connection_util_verify_capabilities(nabto_connect* connection, struc
         return false;
     }
 
+    connection->cpAsync = true;
+
     ptr = capabilities->codesStart;
     
     for (i = 0; i < capabilities->codesLength; i++) {
