@@ -168,7 +168,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 #endif
 
     const char x26s[] = "";      const char* x26l[] = { "tunnels", 0 };
-    const char x27s[] = "";      const char* x27l[] = { "stream-window-recv-size", 0 };
+    const char x27s[] = "";      const char* x27l[] = { "stream-recv-window-size", 0 };
     const char x28s[] = "";      const char* x28l[] = { "connections", 0 };
     const char x29s[] = "";      const char* x29l[] = { "disable-extended-rendezvous-multiple-sockets", 0 };
     const char x30s[] = "";      const char* x30l[] = { "allow-all-hosts", 0};
@@ -176,7 +176,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x32s[] = "";      const char* x32l[] = { "no-crypto", 0};
     const char x33s[] = "";      const char* x33l[] = { "uart-device", 0 };
     const char x34s[] = "";      const char* x34l[] = { "stream-send-segment-pool-size", 0 };
-    const char x35s[] = "";      const char* x35l[] = { "stream-window-send-size", 0 };
+    const char x35s[] = "";      const char* x35l[] = { "stream-send-window-size", 0 };
     const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
         { 'h', GOPT_NOARG,   x1s, x1l },
         { 'V', GOPT_NOARG,   x2s, x2l },
