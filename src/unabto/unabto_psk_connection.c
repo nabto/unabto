@@ -108,6 +108,7 @@ bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
         
     // verify the integrity of the packet if ok accept the connection request else discard the connection
     if (!unabto_psk_connection_util_verify_connect(header, connection)) {
+        unabto_psk_connection_send_connect_error_response(socket, peer, connection->cpnsi, connection->spnsi, NP_PAYLOAD_NOTIFY_ERROR_BAD_KEY);
         return false;
     }
 
