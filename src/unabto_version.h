@@ -38,7 +38,7 @@
  * development, rc and beta releases. Set this string to "" for a
  * final release. Remember to include the first dash.
  */
-#define UNABTO_VERSION_PRERELEASE "-alpha.2"
+#define UNABTO_VERSION_PRERELEASE "-alpha.4"
 
 /**
  * Build info is used to distinguish builds, it could for example be
