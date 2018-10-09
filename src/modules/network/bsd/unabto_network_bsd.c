@@ -137,13 +137,22 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
 #endif
     {
         int status;
-        
-        struct sockaddr_in6 sa;
-        memset(&sa, 0, sizeof(sa));
-        sa.sin6_family = AF_INET6;
-        memset(sa.sin6_addr.s6_addr, 0, 16);
-        sa.sin6_port = htons(*localPort);
-        status = bind(sd.sock, (struct sockaddr*)&sa, sizeof(sa));
+
+        if (sd.type == NABTO_IP_V6) {
+            struct sockaddr_in6 sa;
+            memset(&sa, 0, sizeof(sa));
+            sa.sin6_family = AF_INET6;
+            memset(sa.sin6_addr.s6_addr, 0, 16);
+            sa.sin6_port = htons(*localPort);
+            status = bind(sd.sock, (struct sockaddr*)&sa, sizeof(sa));
+        } else {
+            struct sockaddr_in sa;
+            memset(&sa, 0, sizeof(sa));
+            sa.sin_family = AF_INET;
+            sa.sin_addr.s_addr = 0;
+            sa.sin_port = htons(*localPort);
+            status = bind(sd.sock, (struct sockaddr*)&sa, sizeof(sa));
+        }
                 
         if (status < 0) {
             NABTO_LOG_ERROR(("Unable to bind socket: (%i) '%s' localport %i", errno, strerror(errno), *localPort));
