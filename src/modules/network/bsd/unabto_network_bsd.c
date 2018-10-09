@@ -51,16 +51,81 @@ typedef struct socketListElement {
 
 static NABTO_THREAD_LOCAL_STORAGE struct socketListElement* socketList = 0;
 
-
-static bool open_socket(nabto_socket_t* sd)
+static int nabto_socket_domain()
 {
     // try ipv6
     // test if ipv6 socket is dual stack
     // if not then use ipv4
     // if ipv4 does not work use ipv6 only.
+    int sock;
+    static int domain = 0;
+    if (domain != 0) {
+        return domain;
+    }
+    sock = socket(AF_INET6, SOCK_DGRAM, 0);
+    if (sock == -1) {
+        sock = socket(AF_INET, SOCK_DGRAM, 0);
+        if (sock == -1) {
+            NABTO_LOG_ERROR(("Unable to create socket: (%i) '%s'.", errno, strerror(errno)));
+            domain = -1;
+            return domain;
+        }
+        close(sock);
+        domain = AF_INET;
+        return domain;
+    }
+#if defined(IPV6_V6ONLY)
+    int no = 0;
+    if (setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (void*) &no, sizeof(no)) != 0) {
+        NABTO_LOG_TRACE(("setsocketopt failed to disable IPV6_V6ONLY trying IPv4 socket"));
+        close(sock);
+        sock = socket(AF_INET, SOCK_DGRAM, 0);
+        if (sock == -1) {
+            NABTO_LOG_TRACE(("IPv4 socket creation failed, going back to IPv6 only"));
+            sock = socket(AF_INET6, SOCK_DGRAM, 0);
+            if (sock == -1) {
+                NABTO_LOG_ERROR(("Failed to recreate IPv6 socket"));
+                domain = -1;
+                return domain;
+            }
+            NABTO_LOG_TRACE(("created IPv6 socket"));
+            close(sock);
+            domain = AF_INET6;
+            return domain;
+        } else {
+            NABTO_LOG_TRACE(("created IPv4 socket"));
+            close(sock);
+            domain = AF_INET;
+            return domain;
+        }
+    }
+#endif
+    NABTO_LOG_TRACE(("created IPv6 socket for dual stack"));
+    close(sock);
+    domain = AF_INET6;
+    return domain;
+}
 
-    sd->sock = socket(AF_INET6, SOCK_DGRAM, 0);
-    if (sd->sock == -1) {
+static bool open_socket(nabto_socket_t* sd)
+{
+    int domain = nabto_socket_domain();
+
+    if(domain == -1) {
+        NABTO_LOG_ERROR(("Failed to open socket, invalid domain"));
+        return false;
+    } else if (domain == AF_INET6) {
+        sd->sock = socket(AF_INET6, SOCK_DGRAM, 0);
+        if (sd->sock == -1) {
+            NABTO_LOG_ERROR(("Unable to create socket: (%i) '%s'.", errno, strerror(errno)));
+            return false;
+        }
+        sd->type = NABTO_SOCKET_IP_V6;
+#if defined(IPV6_V6ONLY)
+        int no = 0;
+        setsockopt(sd->sock, IPPROTO_IPV6, IPV6_V6ONLY, (void*) &no, sizeof(no));
+#endif
+        return true;
+    } else if (domain == AF_INET) {
         sd->sock = socket(AF_INET, SOCK_DGRAM, 0);
         if (sd->sock == -1) {
             NABTO_LOG_ERROR(("Unable to create socket: (%i) '%s'.", errno, strerror(errno)));
@@ -68,33 +133,10 @@ static bool open_socket(nabto_socket_t* sd)
         }
         sd->type = NABTO_SOCKET_IP_V4;
         return true;
+    } else {
+        NABTO_LOG_ERROR(("Failed to open socket, unknown domain"));
+        return false;
     }
-#if defined(IPV6_V6ONLY)
-    int no = 0;
-    if (setsockopt(sd->sock, IPPROTO_IPV6, IPV6_V6ONLY, (void*) &no, sizeof(no)) != 0) {
-        NABTO_LOG_TRACE(("setsocketopt failed to disable IPV6_V6ONLY trying IPv4 socket"));
-        close(sd->sock);
-        sd->sock = socket(AF_INET, SOCK_DGRAM, 0);
-        if (sd->sock == -1) {
-            NABTO_LOG_TRACE(("IPv4 socket creation failed, going back to IPv6 only"));
-            sd->sock = socket(AF_INET6, SOCK_DGRAM, 0);
-            if (sd->sock == -1) {
-                NABTO_LOG_ERROR(("Failed to recreate IPv6 socket"));
-                return false;
-            }
-            NABTO_LOG_TRACE(("created IPv6 socket"));
-            sd->type = NABTO_SOCKET_IP_V6;
-            return true;
-        } else {
-            NABTO_LOG_TRACE(("created IPv4 socket"));
-            sd->type = NABTO_SOCKET_IP_V4;
-            return true;
-        }
-    }
-#endif
-    NABTO_LOG_TRACE(("created IPv6 socket for dual stack"));
-    sd->type = NABTO_SOCKET_IP_V6;
-    return true;
 }
 
 
@@ -153,7 +195,7 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
             sa.sin_port = htons(*localPort);
             status = bind(sd.sock, (struct sockaddr*)&sa, sizeof(sa));
         }
-                
+
         if (status < 0) {
             NABTO_LOG_ERROR(("Unable to bind socket: (%i) '%s' localport %i", errno, strerror(errno), *localPort));
             close(sd.sock);
