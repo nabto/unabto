@@ -1599,10 +1599,12 @@ void nabto_stream_tcb_release(struct nabto_stream_s * stream) {
     // segments.  there can be unfreed segments if the stream is
     // closed without all the data being acked.
     tcb = &stream->u.tcb;
-    for (i = 0; i < tcb->cfg.xmitWinSize; i++) {
-        if (tcb->xmit[i].xstate != B_IDLE) {
-            unabto_stream_free_send_segment(tcb->xmit[i].buf);
-            tcb->xmit[i].buf = NULL;
+    if (tcb->xmit != NULL) {
+        for (i = 0; i < tcb->cfg.xmitWinSize; i++) {
+            if (tcb->xmit[i].xstate != B_IDLE) {
+                unabto_stream_free_send_segment(tcb->xmit[i].buf);
+                tcb->xmit[i].buf = NULL;
+            }
         }
     }
 }
