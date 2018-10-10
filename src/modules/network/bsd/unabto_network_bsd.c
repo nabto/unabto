@@ -64,13 +64,6 @@ static int nabto_socket_domain()
     }
     sock = socket(AF_INET6, SOCK_DGRAM, 0);
     if (sock == -1) {
-        sock = socket(AF_INET, SOCK_DGRAM, 0);
-        if (sock == -1) {
-            NABTO_LOG_ERROR(("Unable to create socket: (%i) '%s'.", errno, strerror(errno)));
-            domain = -1;
-            return domain;
-        }
-        close(sock);
         domain = AF_INET;
         return domain;
     }
@@ -82,14 +75,6 @@ static int nabto_socket_domain()
         sock = socket(AF_INET, SOCK_DGRAM, 0);
         if (sock == -1) {
             NABTO_LOG_TRACE(("IPv4 socket creation failed, going back to IPv6 only"));
-            sock = socket(AF_INET6, SOCK_DGRAM, 0);
-            if (sock == -1) {
-                NABTO_LOG_ERROR(("Failed to recreate IPv6 socket"));
-                domain = -1;
-                return domain;
-            }
-            NABTO_LOG_TRACE(("created IPv6 socket"));
-            close(sock);
             domain = AF_INET6;
             return domain;
         } else {
@@ -110,10 +95,7 @@ static bool open_socket(nabto_socket_t* sd)
 {
     int domain = nabto_socket_domain();
 
-    if(domain == -1) {
-        NABTO_LOG_ERROR(("Failed to open socket, invalid domain"));
-        return false;
-    } else if (domain == AF_INET6) {
+    if (domain == AF_INET6) {
         sd->sock = socket(AF_INET6, SOCK_DGRAM, 0);
         if (sd->sock == -1) {
             NABTO_LOG_ERROR(("Unable to create socket: (%i) '%s'.", errno, strerror(errno)));
@@ -180,20 +162,23 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
     {
         int status;
 
-        if (sd.type == NABTO_IP_V6) {
+        if (sd.type == NABTO_SOCKET_IP_V6) {
             struct sockaddr_in6 sa;
             memset(&sa, 0, sizeof(sa));
             sa.sin6_family = AF_INET6;
             memset(sa.sin6_addr.s6_addr, 0, 16);
             sa.sin6_port = htons(*localPort);
             status = bind(sd.sock, (struct sockaddr*)&sa, sizeof(sa));
-        } else {
+        } else if (sd.type == NABTO_SOCKET_IP_V4) {
             struct sockaddr_in sa;
             memset(&sa, 0, sizeof(sa));
             sa.sin_family = AF_INET;
             sa.sin_addr.s_addr = 0;
             sa.sin_port = htons(*localPort);
             status = bind(sd.sock, (struct sockaddr*)&sa, sizeof(sa));
+        } else {
+            NABTO_LOG_ERROR(("socket was of unknown type"));
+            return false;
         }
 
         if (status < 0) {
