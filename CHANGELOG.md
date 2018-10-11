@@ -10,12 +10,21 @@ Guide: always keep an unreleased section which keeps track of current
 changes. When a release is made the unreleased section is renamed to
 the release and a new unreleased section is added.
 
-## 4.3.0
+## 4.3.0 2018-10-XX
 
+### Added
+- NABTO-1850: The `unabto_config.h` has got an additional configuration
+  option to control the size of the streaming send segment
+  pool. `NABTO_STREAM_SEND_SEGMENT_POOL_SIZE`
+
+### Removed
+- Nabto-over-DNS (DNS fallback) - not useful for practical purposes
+	
 ### Changed
 - NABTO-1850: The streaming implementation now uses a pool of send
   segments.
-  
+- NABTO-1865: Convert doubles in unabto to something which is faster on architectures without an fpu
+
 ### Breaking Changes
 - NABTO-1187: all `uint32_t` ip addresses is now `struct
   nabto_ip_address` this affects the following function definitions:
@@ -23,9 +32,7 @@ the release and a new unreleased section is added.
   `nabto_dns_is_resolved`
 - NABTO-1187: `nabto_init_socket` no longer takes the `uint32_t
   localAddr` argument.
-- NABTO-1187: function renamed:
-  `nabto_init_socket`->`nabto_socket_init`
-  `nabto_close_socket`->`nabto_socket_close`
+- NABTO-1187: functions renamed: `nabto_init_socket`->`nabto_socket_init`, `nabto_close_socket`->`nabto_socket_close`
 - NABTO-1187: `nabto_get_local_ip` function renamed to
   `nabto_get_local_ipv4`
 - NABTO-1187: `nabto_resolve_ipv4`, `nabto_socket_set_invalid`,
@@ -33,13 +40,9 @@ the release and a new unreleased section is added.
   all platforms
 - `aes128_cbc_encrypt` and `aes128_cbc_decrypt` renamed to
   `unabto_aes128_cbc_encrypt` and `unabto_aes128_cbc_decrypt`
-
-### Added
 - NABTO-1850: The function `nabto_stream_event` can not be called with
   an additional event.
-- NABTO-1850: The `unabto_config.h` has got an additional configuration
-  option to control the size of the streaming send segment
-  pool. `NABTO_STREAM_SEND_SEGMENT_POOL_SIZE`
+
 
 ## 4.2.0 2017-12-14
 
