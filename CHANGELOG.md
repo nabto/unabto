@@ -35,11 +35,13 @@ the release and a new unreleased section is added.
 - NABTO-1187: `nabto_resolve_ipv4`, `nabto_socket_set_invalid`,
   `nabto_socket_is_equal` functions added and must be implemented on
   all platforms
+- `aes128_cbc_encrypt` and `aes128_cbc_decrypt` renamed to
+  `unabto_aes128_cbc_encrypt` and `unabto_aes128_cbc_decrypt`
 
 ### Added
 - NABTO-1850: The function `nabto_stream_event` can not be called with
   an additional event.
-- NABOT-1850: The `unabto_config.h` has got an additional configuration
+- NABTO-1850: The `unabto_config.h` has got an additional configuration
   option to control the size of the streaming send segment
   pool. `NABTO_STREAM_SEND_SEGMENT_POOL_SIZE`
 
