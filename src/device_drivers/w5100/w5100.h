@@ -33,7 +33,8 @@ bool w5100_nabto_init_socket(uint16_t* localPort, w5100_socket* socket);
 void w5100_nabto_close_socket(w5100_socket* socket);
 ssize_t w5100_nabto_write(nabto_socket_t socket, const uint8_t* buf, size_t len, const struct nabto_ip_address* addr, uint16_t port);
 ssize_t w5100_nabto_read(nabto_socket_t socket, uint8_t* buf, size_t len, struct nabto_ip_address* addr, uint16_t* port);
-
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2);
+void nabto_socket_set_invalid(nabto_socket_t* sock);
 
 #ifdef __cplusplus
 } //extern "C"

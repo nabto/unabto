@@ -420,6 +420,15 @@ ssize_t w5100_nabto_read(w5100_socket socket, uint8_t* buf, size_t len, struct n
   }
 }
 
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2) {
+    return (*s1 == *s2);
+}
+
+void nabto_socket_set_invalid(nabto_socket_t* sock) {
+    sock = NABTO_INVALID_SOCKET;
+}
+
+
 // Helpers
 
 #define LOWEST_UDP_PORT                                             51000
