@@ -5,6 +5,7 @@
 #define _W5100_H_
 
 #include <unabto_platform_types.h>
+#include <unabto/unabto_endpoint.h>
 
 #include "w5100_types.h"
 
