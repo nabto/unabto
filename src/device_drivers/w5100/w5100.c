@@ -385,7 +385,7 @@ void w5100_nabto_close_socket(nabto_socket_t* socket)
   w5100_udp_close(socket);
 }
 
-ssize_t w5100_nabto_write(w5100_socket socket, const uint8_t* buf, size_t len, struct nabto_ip_address* addr, uint16_t port)
+ssize_t w5100_nabto_write(w5100_socket socket, const uint8_t* buf, size_t len, const struct nabto_ip_address* addr, uint16_t port)
 {
   if (addr->type != NABTO_IP_V4) {
     return 0;

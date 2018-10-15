@@ -31,7 +31,7 @@ uint16_t w5100_udp_receive(w5100_socket* socket, uint8_t* buffer, uint16_t maxim
 // uNabto compatible UDP socket operations
 bool w5100_nabto_init_socket(uint16_t* localPort, w5100_socket* socket);
 void w5100_nabto_close_socket(w5100_socket* socket);
-ssize_t w5100_nabto_write(nabto_socket_t socket, const uint8_t* buf, size_t len, struct nabto_ip_address* addr, uint16_t port);
+ssize_t w5100_nabto_write(nabto_socket_t socket, const uint8_t* buf, size_t len, const struct nabto_ip_address* addr, uint16_t port);
 ssize_t w5100_nabto_read(nabto_socket_t socket, uint8_t* buf, size_t len, struct nabto_ip_address* addr, uint16_t* port);
 
 
