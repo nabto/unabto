@@ -413,7 +413,7 @@ nabto_connect* nabto_get_new_connection(uint32_t nsi)
 /// Retrieve the next NSI. @return the NSI
 uint16_t nabto_connection_get_fresh_sp_nsi(void) {
     uint16_t i;
-    static uint16_t nsiStore = 0;  ///< the micoro device's very persistant NSI part:)
+    static NABTO_THREAD_LOCAL_STORAGE uint16_t nsiStore = 0;  ///< the micoro device's very persistant NSI part:)
 
     if (nsiStore == 0) {
         // Make a random value in the range [100..1000]

@@ -63,7 +63,7 @@ bool nabto_ep_is_equal(const nabto_endpoint* ep1, const nabto_endpoint* ep2)
 
 const char* nabto_ip_to_string(const struct nabto_ip_address* addr)
 {
-    static char output[40]; //0000:1111:2222:3333:4444:5555:6666:7777:8888\0"
+    static NABTO_THREAD_LOCAL_STORAGE char output[40]; //0000:1111:2222:3333:4444:5555:6666:7777:8888\0"
     memset(output, 0, 40);
     if (addr->type == NABTO_IP_NONE) {
         sprintf(output, "NABTO_IP_NONE");

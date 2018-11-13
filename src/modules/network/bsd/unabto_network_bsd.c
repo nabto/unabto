@@ -58,7 +58,7 @@ static int nabto_socket_domain()
     // if not then use ipv4
     // if ipv4 does not work use ipv6 only.
     int sock;
-    static int domain = 0;
+    static NABTO_THREAD_LOCAL_STORAGE int domain = 0;
     if (domain != 0) {
         return domain;
     }
