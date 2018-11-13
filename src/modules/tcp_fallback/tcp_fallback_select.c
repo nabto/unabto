@@ -1,3 +1,7 @@
+#include <unabto/unabto_tcp_fallback.h>
+
+#if NABTO_ENABLE_TCP_FALLBACK
+
 #ifdef WIN32
 #include <winsock2.h>
 #include <windows.h>
@@ -381,3 +385,5 @@ unabto_tcp_fallback_error unabto_tcp_fallback_write(nabto_connect* con, uint8_t*
 
     return status;
 }
+
+#endif
