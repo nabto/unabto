@@ -379,7 +379,7 @@ static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, ui
         insert_length(buf, len);
 
         if (seq) {
-            NABTO_LOG_DEBUG((PRInsi " RENDEZVOUS Send to " PRIep ": seq=%" PRIu16 "  " PRIep, MAKE_NSI_PRINTABLE(0, con->spnsi, 0), MAKE_EP_PRINTABLE(*dest), seq, MAKE_EP_PRINTABLE(*myAddress)));
+            NABTO_LOG_DEBUG((PRInsi " RENDEZVOUS Send to " PRIep ": seq=%" PRIu16, MAKE_NSI_PRINTABLE(0, con->spnsi, 0), MAKE_EP_PRINTABLE(*dest), seq));
         } else {
             NABTO_LOG_DEBUG((PRInsi " RENDEZVOUS Send to " PRIep ": seq=0", MAKE_NSI_PRINTABLE(0, con->spnsi, 0), MAKE_EP_PRINTABLE(*dest)));
         }
@@ -543,7 +543,9 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
     con->cpAsync      = (ipxData.flags & NP_PAYLOAD_IPX_FLAG_CP_ASYNC) ? 1 : 0;
     con->clientNatType      = (ipxData.flags & NP_PAYLOAD_IPX_NAT_MASK);
     con->isLocal      = isLocal;
-    NABTO_LOG_INFO((PRInsi " U_CONNECT: cp.private: " PRIep " cp.global: " PRIep ", noRdv=%" PRIu8 ", cpeq=%" PRIu8 ", asy=%" PRIu8 ", NATType: %" PRIu8 , MAKE_NSI_PRINTABLE(0, *nsi, 0), MAKE_EP_PRINTABLE(con->cp.privateEndpoint), MAKE_EP_PRINTABLE(con->cp.globalEndpoint), con->noRendezvous, con->cpEqual, con->cpAsync, con->clientNatType));
+    NABTO_LOG_INFO((PRInsi " U_CONNECT: noRdv=%" PRIu8 ", cpeq=%" PRIu8 ", asy=%" PRIu8 ", NATType: %" PRIu8 , MAKE_NSI_PRINTABLE(0, *nsi, 0), con->noRendezvous, con->cpEqual, con->cpAsync, con->clientNatType));
+    NABTO_LOG_INFO((PRInsi "   cp.private: " PRIep, MAKE_NSI_PRINTABLE(0, *nsi, 0), MAKE_EP_PRINTABLE(con->cp.privateEndpoint)));
+    NABTO_LOG_INFO((PRInsi "   cp.global:  " PRIep, MAKE_NSI_PRINTABLE(0, *nsi, 0), MAKE_EP_PRINTABLE(con->cp.globalEndpoint)));
 
 #if NABTO_ENABLE_TCP_FALLBACK
     if (ipxData.haveFullNsi) {
@@ -612,7 +614,9 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
     if (con->cpEqual) {
         NABTO_LOG_DEBUG((PRInsi " U_CONNECT: addr:" PRIep " rendezvous:%" PRIu8, MAKE_NSI_PRINTABLE(0, *nsi, 0), MAKE_EP_PRINTABLE(con->cp.privateEndpoint), (uint8_t)(!con->noRendezvous)));
     } else {
-        NABTO_LOG_DEBUG((PRInsi " U_CONNECT: private:" PRIep ", global:" PRIep " rendezvous:%" PRIu8, MAKE_NSI_PRINTABLE(0, *nsi, 0), MAKE_EP_PRINTABLE(con->cp.privateEndpoint), MAKE_EP_PRINTABLE(con->cp.globalEndpoint), (uint8_t)(!con->noRendezvous)));
+        NABTO_LOG_DEBUG((PRInsi " U_CONNECT: rendezvous:%" PRIu8, MAKE_NSI_PRINTABLE(0, *nsi, 0), (uint8_t)(!con->noRendezvous)));
+        NABTO_LOG_DEBUG((PRInsi "   private ep: " PRIep, MAKE_NSI_PRINTABLE(0, *nsi, 0), MAKE_EP_PRINTABLE(con->cp.privateEndpoint)));
+        NABTO_LOG_DEBUG((PRInsi "   global ep:  " PRIep, MAKE_NSI_PRINTABLE(0, *nsi, 0), MAKE_EP_PRINTABLE(con->cp.globalEndpoint)));
     }
 
     NABTO_LOG_INFO(("Connection opened from '%s' (to %s). Encryption code %i. Fingerprint " PRIfp, con->clientId, nmc.nabtoMainSetup.id, con->cryptoctx.code, MAKE_FP_PRINTABLE(con->fingerprint.value)));
