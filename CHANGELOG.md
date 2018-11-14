@@ -28,8 +28,7 @@ the release and a new unreleased section is added.
   segments.
   
 ### Added
-- NABTO-1891: configuration options
-  `NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_FRACTION_ONE_STREAM` and
+- NABTO-1891: added configuration option
   `NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS`
 
 ## 4.3.0 2018-10-02

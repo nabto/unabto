@@ -100,7 +100,7 @@ bool unabto_stream_init_buffers(struct nabto_stream_s* stream)
         memset(&tcb->recv[i], 0, sizeof(r_buffer));
     }
     
-    uint16_t maxRecvBuffersToUse = (NABTO_MEMORY_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS - segment_pool_used_for_receive_windows) / NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_FRACTION_ONE_STREAM;
+    uint16_t maxRecvBuffersToUse = (NABTO_MEMORY_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS - segment_pool_used_for_receive_windows);
     
     // allocate recv buffers or as many as possible.
     for (i = 0; i < recvWinSize && i < maxRecvBuffersToUse; i++)

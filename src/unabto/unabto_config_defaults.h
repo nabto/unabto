@@ -356,17 +356,6 @@
 #error Leave atleast one segment for recv buffers. Change NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS to something lower.
 #endif
 
-/**
- * max fraction of the rest receive segments to use for one
- * stream. Setting this to 1 allows a single stream to use all recv
- * segments. Setting the value to `n` allows each new stream to use
- * `1/n` of the rest recv segments for this specific stream.
- */
-#ifndef NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_FRACTION_ONE_STREAM
-#define NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_FRACTION_ONE_STREAM 2
-#endif
-
-
 /** Timeout before a new streaming packet is sent, value in ms. */
 #ifndef NABTO_STREAM_TIMEOUT
 #define NABTO_STREAM_TIMEOUT 1000 
