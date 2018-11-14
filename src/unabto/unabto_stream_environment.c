@@ -82,6 +82,7 @@ bool build_and_send_packet(struct nabto_stream_s* stream, uint8_t type, uint32_t
 bool unabto_stream_init_buffers(struct nabto_stream_s* stream)
 {
     int i;
+    uint16_t maxRecvBuffersToUse;
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
 
     uint16_t recvWinSize = tcb->cfg.recvWinSize;
@@ -100,7 +101,7 @@ bool unabto_stream_init_buffers(struct nabto_stream_s* stream)
         memset(&tcb->recv[i], 0, sizeof(r_buffer));
     }
     
-    uint16_t maxRecvBuffersToUse = (NABTO_MEMORY_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS - segment_pool_used_for_receive_windows);
+    maxRecvBuffersToUse = (NABTO_MEMORY_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS - segment_pool_used_for_receive_windows);
     
     // allocate recv buffers or as many as possible.
     for (i = 0; i < recvWinSize && i < maxRecvBuffersToUse; i++)
@@ -186,12 +187,12 @@ bool unabto_stream_can_alloc_send_segment()
 
 uint8_t* unabto_stream_alloc_recv_segment(size_t required)
 {
+    size_t i;
     if (segment_pool_used_for_receive_windows >= NABTO_MEMORY_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS)
     {
         return NULL;
     }
 
-    size_t i;
     if (required > NABTO_MEMORY_STREAM_SEGMENT_SIZE) {
         NABTO_LOG_FATAL(("The stream segment size should never be that large"));
         return NULL;
