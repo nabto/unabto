@@ -175,7 +175,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x31s[] = "";      const char* x31l[] = { "no-access-control", 0};
     const char x32s[] = "";      const char* x32l[] = { "no-crypto", 0};
     const char x33s[] = "";      const char* x33l[] = { "uart-device", 0 };
-    const char x34s[] = "";      const char* x34l[] = { "stream-send-segment-pool-size", 0 };
+    const char x34s[] = "";      const char* x34l[] = { "stream-segment-pool-size", 0 };
     const char x35s[] = "";      const char* x35l[] = { "stream-send-window-size", 0 };
     const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
         { 'h', GOPT_NOARG,   x1s, x1l },

@@ -30,8 +30,8 @@ extern NABTO_THREAD_LOCAL_STORAGE nabto_connect* connections;
 #if NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM
 extern NABTO_THREAD_LOCAL_STORAGE unabto_stream* stream__;
 extern NABTO_THREAD_LOCAL_STORAGE uint8_t* r_buffer_data;
-extern NABTO_THREAD_LOCAL_STORAGE bool* send_segment_pool;
-extern NABTO_THREAD_LOCAL_STORAGE uint8_t* x_buffer_data;
+extern NABTO_THREAD_LOCAL_STORAGE bool* stream_segment_pool;
+extern NABTO_THREAD_LOCAL_STORAGE uint8_t* stream_buffer_data;
 extern NABTO_THREAD_LOCAL_STORAGE x_buffer* x_buffers;
 extern NABTO_THREAD_LOCAL_STORAGE r_buffer* r_buffers;
 #endif
@@ -41,6 +41,8 @@ extern NABTO_THREAD_LOCAL_STORAGE r_buffer* r_buffers;
 #define NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE nmc.nabtoMainSetup.streamReceiveWindowSize
 #define NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE nmc.nabtoMainSetup.streamSendWindowSize
 #define NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE nmc.nabtoMainSetup.streamSegmentPoolSize
+// use at most half the memory for recv windows.
+#define NABTO_MEMORY_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS (nmc.nabtoMainSetup.streamSegmentPoolSize / 2)
 
 
 bool unabto_allocate_memory(nabto_main_setup* nms);
@@ -65,7 +67,7 @@ extern NABTO_THREAD_LOCAL_STORAGE nabto_connect connections[NABTO_MEMORY_CONNECT
 #define NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE NABTO_STREAM_RECEIVE_WINDOW_SIZE
 #define NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE NABTO_STREAM_SEND_WINDOW_SIZE
 #define NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE NABTO_STREAM_SEGMENT_POOL_SIZE
-
+#define NABTO_MEMORY_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS
 #endif
 
 

@@ -45,6 +45,9 @@
 
 typedef struct socketListElement {
     nabto_socket_t socket;
+#if NABTO_ENABLE_EPOLL
+    unabto_epoll_event_handler_udp* eventHandler;
+#endif
     struct socketListElement *prev;
     struct socketListElement *next;
 } socketListElement;
@@ -218,6 +221,7 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
 #if NABTO_ENABLE_EPOLL
     {
         unabto_epoll_event_handler_udp* eh = (unabto_epoll_event_handler_udp*) malloc(sizeof(unabto_epoll_event_handler_udp));
+        se->eventHandler = eh;
         eh->epollEventType = UNABTO_EPOLL_TYPE_UDP;
         eh->fd = sd;
         struct epoll_event ev;
@@ -254,6 +258,12 @@ void nabto_socket_close(nabto_socket_t* sock) {
             NABTO_LOG_ERROR(("Socket %i Not found in socket list", sock->sock));
         } else {
             DL_DELETE(socketList, se);
+#if NABTO_ENABLE_EPOLL
+            if (se->eventHandler != NULL) {
+                free(se->eventHandler);
+                se->eventHandler = NULL;
+            }
+#endif
             free(se);
         }
 

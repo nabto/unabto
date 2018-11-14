@@ -348,12 +348,24 @@
  * receive windows. Use this option to ensure that there are segments
  * left over for the send windows.
  */
-#ifndef NABTO_STREAM_MAX_SEGMENTS_ALLOCATED_FOR_RECEIVE_WINDOWS
-#define NABTO_STREAM_MAX_SEGMENTS_ALLOCATED_FOR_RECEIVE_WINDOWS NABTO_STREAM_RECEIVE_WINDOW_SIZE * NABTO_STREAM_MAX_STREAMS
+#ifndef NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS
+#define NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS NABTO_STREAM_RECEIVE_WINDOW_SIZE * NABTO_STREAM_MAX_STREAMS
+#endif
+
+#if NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS > (NABTO_STREAM_SEGMENT_POOL_SIZE - 1)
+#error Leave atleast one segment for recv buffers. Change NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS to something lower.
 #endif
 
 /**
- * 
+ * max fraction of the rest receive segments to use for one
+ * stream. Setting this to 1 allows a single stream to use all recv
+ * segments. Setting the value to `n` allows each new stream to use
+ * `1/n` of the rest recv segments for this specific stream.
+ */
+#ifndef NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_FRACTION_ONE_STREAM
+#define NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_FRACTION_ONE_STREAM 2
+#endif
+
 
 /** Timeout before a new streaming packet is sent, value in ms. */
 #ifndef NABTO_STREAM_TIMEOUT

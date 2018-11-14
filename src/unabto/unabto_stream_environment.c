@@ -14,12 +14,15 @@ NABTO_THREAD_LOCAL_STORAGE unabto_stream stream__[NABTO_MEMORY_STREAM_MAX_STREAM
 
 NABTO_THREAD_LOCAL_STORAGE uint8_t r_buffer_data[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEGMENT_SIZE * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE];
 
-NABTO_THREAD_LOCAL_STORAGE bool send_segment_pool[NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE];
-NABTO_THREAD_LOCAL_STORAGE uint8_t x_buffer_data[NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE ];
+NABTO_THREAD_LOCAL_STORAGE bool stream_segment_pool[NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE];
+NABTO_THREAD_LOCAL_STORAGE uint8_t stream_buffer_data[NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE ];
 
 NABTO_THREAD_LOCAL_STORAGE x_buffer x_buffers[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE];
 NABTO_THREAD_LOCAL_STORAGE r_buffer r_buffers[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE];
 #endif
+
+NABTO_THREAD_LOCAL_STORAGE int segment_pool_used_for_send_windows = 0;
+NABTO_THREAD_LOCAL_STORAGE int segment_pool_used_for_receive_windows = 0;
 
 bool build_and_send_packet(struct nabto_stream_s* stream, uint8_t type, uint32_t seq, const uint8_t* winInfoData, size_t winInfoSize, uint8_t* data, uint16_t size, struct nabto_stream_sack_data* sackData)
 {
@@ -76,26 +79,45 @@ bool build_and_send_packet(struct nabto_stream_s* stream, uint8_t type, uint32_t
     }
 }
 
-void unabto_stream_init_buffers(struct nabto_stream_s* stream)
+bool unabto_stream_init_buffers(struct nabto_stream_s* stream)
 {
     int i;
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
 
-    uint8_t* recvBase = r_buffer_data + (unabto_stream_index(stream) * NABTO_MEMORY_STREAM_SEGMENT_SIZE * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE);
+    uint16_t recvWinSize = tcb->cfg.recvWinSize;
+    uint16_t recvSegmentSize = tcb->cfg.recvPacketSize;
 
     tcb->xmit = &x_buffers[unabto_stream_index(stream) * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE];
     tcb->recv = &r_buffers[unabto_stream_index(stream) * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE];
 
-    for (i=0;i< NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE; i++)
+    for (i = 0; i < NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE; i++)
     {
         memset(&tcb->xmit[i], 0, sizeof(x_buffer));
-        //tcb->xmit[i].buf = unabto_alloc_x_buffer();
     }
 
-    for (i=0;i< NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE; i++)
+    for (i = 0; i < NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE; i++)
     {
         memset(&tcb->recv[i], 0, sizeof(r_buffer));
-        tcb->recv[i].buf = recvBase + (i * NABTO_MEMORY_STREAM_SEGMENT_SIZE);
+    }
+    
+    uint16_t maxRecvBuffersToUse = (NABTO_MEMORY_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS - segment_pool_used_for_receive_windows) / NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_FRACTION_ONE_STREAM;
+    
+    // allocate recv buffers or as many as possible.
+    for (i = 0; i < recvWinSize && i < maxRecvBuffersToUse; i++)
+    {
+        uint8_t* buf = unabto_stream_alloc_recv_segment(recvSegmentSize);
+        if (!buf) {
+            break;
+        }
+        tcb->recv[i].buf = buf;
+    }
+    
+    tcb->cfg.recvWinSize = i;
+    if (i == 0) {
+        // we need atleast one.
+        return false;
+    } else {
+        return true;
     }
 }
 
@@ -116,45 +138,99 @@ uint8_t* unabto_stream_alloc_send_segment(size_t required)
     }
     
     for (i = 0; i < NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE; i++) {
-        if (!send_segment_pool[i]) {
-            send_segment_pool[i] = true;
-            return x_buffer_data + (i * NABTO_MEMORY_STREAM_SEGMENT_SIZE);
+        if (!stream_segment_pool[i]) {
+            stream_segment_pool[i] = true;
+            segment_pool_used_for_send_windows++;
+            return stream_buffer_data + (i * NABTO_MEMORY_STREAM_SEGMENT_SIZE);
         }
     }
+    NABTO_LOG_TRACE(("Cannot allocate send segment, segment pool is empty"));
     return NULL;
 }
+
 void unabto_stream_free_send_segment(uint8_t* buffer)
 {
     size_t idx;
     if (buffer == NULL) {
         NABTO_LOG_FATAL(("invalid free, pointer should be non NULL"));
     }
-    if (x_buffer_data > buffer) {
+    if (stream_buffer_data > buffer) {
         NABTO_LOG_FATAL(("invalid free pointer is before pool"));
     }
 
-    if (buffer > (x_buffer_data + (NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE))) {
+    if (buffer > (stream_buffer_data + (NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE))) {
         NABTO_LOG_FATAL(("invalid free pointer is outside of pool area"));
     }
 
-    idx = (buffer - x_buffer_data)/NABTO_MEMORY_STREAM_SEGMENT_SIZE;
+    idx = (buffer - stream_buffer_data)/NABTO_MEMORY_STREAM_SEGMENT_SIZE;
 
-    if (!send_segment_pool[idx]) {
+    if (!stream_segment_pool[idx]) {
         NABTO_LOG_ERROR(("invalid free segment is not allocated"));
         return;
     }
-    send_segment_pool[idx] = false;
+    stream_segment_pool[idx] = false;
+    segment_pool_used_for_send_windows--;
 }
 
 bool unabto_stream_can_alloc_send_segment()
 {
     size_t i;
     for (i = 0; i < NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE; i++) {
-        if (!send_segment_pool[i]) {
+        if (!stream_segment_pool[i]) {
             return true;
         }
     }
+    NABTO_LOG_TRACE(("Cannot allocate send segment, segment pool is empty"));
     return false;
 }
+
+uint8_t* unabto_stream_alloc_recv_segment(size_t required)
+{
+    if (segment_pool_used_for_receive_windows >= NABTO_MEMORY_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS)
+    {
+        return NULL;
+    }
+
+    size_t i;
+    if (required > NABTO_MEMORY_STREAM_SEGMENT_SIZE) {
+        NABTO_LOG_FATAL(("The stream segment size should never be that large"));
+        return NULL;
+    }
+    
+    for (i = 0; i < NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE; i++) {
+        if (!stream_segment_pool[i]) {
+            stream_segment_pool[i] = true;
+            segment_pool_used_for_receive_windows++;
+            return stream_buffer_data + (i * NABTO_MEMORY_STREAM_SEGMENT_SIZE);
+        }
+    }
+    return NULL;
+}
+
+void unabto_stream_free_recv_segment(uint8_t* buffer)
+{
+    size_t idx;
+    if (buffer == NULL) {
+        NABTO_LOG_FATAL(("invalid free, pointer should be non NULL"));
+    }
+    if (stream_buffer_data > buffer) {
+        NABTO_LOG_FATAL(("invalid free pointer is before pool"));
+    }
+
+    if (buffer > (stream_buffer_data + (NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE))) {
+        NABTO_LOG_FATAL(("invalid free pointer is outside of pool area"));
+    }
+
+    idx = (buffer - stream_buffer_data)/NABTO_MEMORY_STREAM_SEGMENT_SIZE;
+
+    if (!stream_segment_pool[idx]) {
+        NABTO_LOG_ERROR(("invalid free segment is not allocated"));
+        return;
+    }
+    stream_segment_pool[idx] = false;
+    segment_pool_used_for_receive_windows--;
+    
+}
+
 
 #endif
