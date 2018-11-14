@@ -139,7 +139,7 @@ void framework_event(struct naf_handle_s* handle,
     req->clientId = (const char *) con->clientId;
     req->queryId = query_id;
 
-    NABTO_LOG_TRACE(("APPREQ application_event: %" PRIu16, query_id));
+    NABTO_LOG_TRACE(("APPREQ application_event: %" PRIu32, query_id));
     res = application_event(req, &queryRequest, &queryResponse);
     NABTO_LOG_TRACE(("APPREQ application_event: result=%" PRItext, result_s(res)));
 
