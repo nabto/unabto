@@ -49,7 +49,7 @@ bool unabto_allocate_memory(nabto_main_setup* nms)
 
 
     {
-        size_t sendSegmentPoolSize = sizeof(bool) * NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE;
+        size_t sendSegmentPoolSize = sizeof(bool) * NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE;
         send_segment_pool = (bool*)malloc(sendSegmentPoolSize);
         if (send_segment_pool == NULL) {
             NABTO_LOG_FATAL(("Cannot initialize send segment pool. Send segment pool size %" PRIsize, sendSegmentPoolSize));
@@ -59,7 +59,7 @@ bool unabto_allocate_memory(nabto_main_setup* nms)
     }
 
     {
-        size_t sendBuffersSize = (size_t)NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE;
+        size_t sendBuffersSize = (size_t)NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE;
         x_buffer_data = (uint8_t*)malloc(sendBuffersSize);
         if (x_buffer_data == NULL) {
             NABTO_LOG_FATAL(("Cannot initialize stream send buffers. Send buffers total size: %" PRIsize, sendBuffersSize));

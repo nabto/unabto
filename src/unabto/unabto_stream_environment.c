@@ -14,8 +14,8 @@ NABTO_THREAD_LOCAL_STORAGE unabto_stream stream__[NABTO_MEMORY_STREAM_MAX_STREAM
 
 NABTO_THREAD_LOCAL_STORAGE uint8_t r_buffer_data[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEGMENT_SIZE * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE];
 
-NABTO_THREAD_LOCAL_STORAGE bool send_segment_pool[NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE];
-NABTO_THREAD_LOCAL_STORAGE uint8_t x_buffer_data[NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE ];
+NABTO_THREAD_LOCAL_STORAGE bool send_segment_pool[NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE];
+NABTO_THREAD_LOCAL_STORAGE uint8_t x_buffer_data[NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE ];
 
 NABTO_THREAD_LOCAL_STORAGE x_buffer x_buffers[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE];
 NABTO_THREAD_LOCAL_STORAGE r_buffer r_buffers[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE];
@@ -115,7 +115,7 @@ uint8_t* unabto_stream_alloc_send_segment(size_t required)
         return NULL;
     }
     
-    for (i = 0; i < NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE; i++) {
+    for (i = 0; i < NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE; i++) {
         if (!send_segment_pool[i]) {
             send_segment_pool[i] = true;
             return x_buffer_data + (i * NABTO_MEMORY_STREAM_SEGMENT_SIZE);
@@ -133,7 +133,7 @@ void unabto_stream_free_send_segment(uint8_t* buffer)
         NABTO_LOG_FATAL(("invalid free pointer is before pool"));
     }
 
-    if (buffer > (x_buffer_data + (NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE))) {
+    if (buffer > (x_buffer_data + (NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE))) {
         NABTO_LOG_FATAL(("invalid free pointer is outside of pool area"));
     }
 
@@ -149,7 +149,7 @@ void unabto_stream_free_send_segment(uint8_t* buffer)
 bool unabto_stream_can_alloc_send_segment()
 {
     size_t i;
-    for (i = 0; i < NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE; i++) {
+    for (i = 0; i < NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE; i++) {
         if (!send_segment_pool[i]) {
             return true;
         }

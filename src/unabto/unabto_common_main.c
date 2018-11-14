@@ -76,7 +76,7 @@ void unabto_init_default_values(nabto_main_setup* nms) {
     nms->streamMaxStreams = NABTO_STREAM_MAX_STREAMS;
     nms->streamReceiveWindowSize = NABTO_STREAM_RECEIVE_WINDOW_SIZE;
     nms->streamSendWindowSize = NABTO_STREAM_SEND_WINDOW_SIZE;
-    nms->streamSendSegmentPoolSize = NABTO_STREAM_SEND_SEGMENT_POOL_SIZE;
+    nms->streamSegmentPoolSize = NABTO_STREAM_SEGMENT_POOL_SIZE;
 #endif
 
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS

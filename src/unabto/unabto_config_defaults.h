@@ -324,15 +324,36 @@
 #endif
 
 /**
- * The streaming implementation is using a pool of send segments. If
- * no more segments is available when one is trying to send data, the
- * application will have to try again later sending the data. This
- * will never happen if the allocated amount of send segments is equal
- * to the maximum number of send segments for all the streams.
+ * The streaming implementation is using a pool of send and receive
+ * segments. 
+ *
+ * If no more segments is available when one is trying to send data,
+ * the application will have to try again later sending the data. This
+ * will never happen if the allocated amount of segments is equal to
+ * the maximum number of send and receive segments for all the streams.
+ *
+ * If not enough recv segments is available when opening a stream. The
+ * opening fails.
  */
-#ifndef NABTO_STREAM_SEND_SEGMENT_POOL_SIZE
-#define NABTO_STREAM_SEND_SEGMENT_POOL_SIZE NABTO_STREAM_SEND_WINDOW_SIZE * NABTO_STREAM_MAX_STREAMS
+#ifndef NABTO_STREAM_SEGMENT_POOL_SIZE
+#define NABTO_STREAM_SEGMENT_POOL_SIZE NABTO_STREAM_SEND_WINDOW_SIZE * NABTO_STREAM_MAX_STREAMS + NABTO_STREAM_RECEIVE_WINDOW_SIZE * NABTO_STREAM_MAX_STREAMS
 #endif
+
+#if NABTO_STREAM_SEGMENT_POOL_SIZE < NABTO_STREAM_MAX_STREAMS
+#error NABTO_STREAM_SEGMENT_POOL_SIZE < NABTO_STREAM_MAX_STREAMS increase the pool size so there is atleast 1 segments available pr stream.
+#endif
+
+/**
+ * Maximum number across all streams of the segments allocated for
+ * receive windows. Use this option to ensure that there are segments
+ * left over for the send windows.
+ */
+#ifndef NABTO_STREAM_MAX_SEGMENTS_ALLOCATED_FOR_RECEIVE_WINDOWS
+#define NABTO_STREAM_MAX_SEGMENTS_ALLOCATED_FOR_RECEIVE_WINDOWS NABTO_STREAM_RECEIVE_WINDOW_SIZE * NABTO_STREAM_MAX_STREAMS
+#endif
+
+/**
+ * 
 
 /** Timeout before a new streaming packet is sent, value in ms. */
 #ifndef NABTO_STREAM_TIMEOUT
