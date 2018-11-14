@@ -276,8 +276,8 @@
  * 
  * The memory usage for streaming can be calculated as follow
  * mem = NABTO_STREAM_MAX_STREAMS * 
- *       ((NABTO_STREAM_RECEIVE_SEGMENT_SIZE*NABTO_STREAM_RECEIVE_WINDOW_SIZE) +
- *        (NABTO_STREAM_SEND_SEGMENT_SIZE*NABTO_STREAM_SEND_WINDOW_SIZE))
+ *       ((NABTO_STREAM_SEGMENT_SIZE*NABTO_STREAM_RECEIVE_WINDOW_SIZE) +
+ *        (NABTO_STREAM_SEGMENT_SIZE*NABTO_STREAM_SEND_WINDOW_SIZE))
  *
  * The default memory requirement is 4*((1400*4)+(1400*4)) = 44800 bytes.
  */
@@ -301,18 +301,21 @@
  * at least in one network it has been observed that 1311 bytes is a
  * problem (NABTO-1117), this is why the value ends at 1247 bytes.
  */
-#ifndef NABTO_STREAM_RECEIVE_SEGMENT_SIZE
-#define NABTO_STREAM_RECEIVE_SEGMENT_SIZE 1247
+#ifndef NABTO_STREAM_SEGMENT_SIZE
+#define NABTO_STREAM_SEGMENT_SIZE 1247
+#endif
+
+#ifdef NABTO_STREAM_SEND_SEGMENT_SIZE
+#warning NABTO_STREAM_SEND_SEGMENT_SIZE option is deprecated use NABTO_STREAM_SEGMENT_SIZE instead
+#endif
+
+#ifdef NABTO_STREAM_RECEIVE_SEGMENT_SIZE
+#warning NABTO_STREAM_RECEIVE_SEGMENT_SIZE option is deprecated use NABTO_STREAM_SEGMENT_SIZE instead
 #endif
 
 /** The size of the receive window */
 #ifndef NABTO_STREAM_RECEIVE_WINDOW_SIZE
 #define NABTO_STREAM_RECEIVE_WINDOW_SIZE 4
-#endif
-
-/** The maximum send segment size */
-#ifndef NABTO_STREAM_SEND_SEGMENT_SIZE
-#define NABTO_STREAM_SEND_SEGMENT_SIZE NABTO_STREAM_RECEIVE_SEGMENT_SIZE
 #endif
 
 /** The size of the send window size */

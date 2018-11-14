@@ -53,7 +53,7 @@ typedef struct uart_tunnel_static_memory {
 
 typedef struct tcp_tunnel_static_memory {
     char host[MAX_HOST_LENGTH];
-    //~ uint8_t tcpReadBuffer[NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE];
+    //~ uint8_t tcpReadBuffer[NABTO_MEMORY_STREAM_SEGMENT_SIZE];
 } tcp_tunnel_static_memory;
 
 union tunnel_static_memory_union{

@@ -120,8 +120,8 @@ void tcp_forward(tunnel* tunnel) {
         {
             unabto_tcp_status status;
             size_t readen;
-            uint8_t readBuffer[NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE];
-            size_t maxRead = MIN(NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE, canWriteToStreamBytes);
+            uint8_t readBuffer[NABTO_MEMORY_STREAM_SEGMENT_SIZE];
+            size_t maxRead = MIN(NABTO_MEMORY_STREAM_SEGMENT_SIZE, canWriteToStreamBytes);
 
             status = unabto_tcp_read(&tunnel->tunnel_type_vars.tcp.sock, readBuffer, maxRead, &readen);
             if (status == UTS_EOF) {

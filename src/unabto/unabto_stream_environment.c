@@ -11,10 +11,11 @@
 
 #else
 NABTO_THREAD_LOCAL_STORAGE unabto_stream stream__[NABTO_MEMORY_STREAM_MAX_STREAMS];  /**< a pool of streams */
-NABTO_THREAD_LOCAL_STORAGE uint8_t r_buffer_data[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE];
+
+NABTO_THREAD_LOCAL_STORAGE uint8_t r_buffer_data[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEGMENT_SIZE * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE];
 
 NABTO_THREAD_LOCAL_STORAGE bool send_segment_pool[NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE];
-NABTO_THREAD_LOCAL_STORAGE uint8_t x_buffer_data[NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE ];
+NABTO_THREAD_LOCAL_STORAGE uint8_t x_buffer_data[NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE ];
 
 NABTO_THREAD_LOCAL_STORAGE x_buffer x_buffers[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE];
 NABTO_THREAD_LOCAL_STORAGE r_buffer r_buffers[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE];
@@ -80,7 +81,7 @@ void unabto_stream_init_buffers(struct nabto_stream_s* stream)
     int i;
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
 
-    uint8_t* recvBase = r_buffer_data + (unabto_stream_index(stream) * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE);
+    uint8_t* recvBase = r_buffer_data + (unabto_stream_index(stream) * NABTO_MEMORY_STREAM_SEGMENT_SIZE * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE);
 
     tcb->xmit = &x_buffers[unabto_stream_index(stream) * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE];
     tcb->recv = &r_buffers[unabto_stream_index(stream) * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE];
@@ -94,7 +95,7 @@ void unabto_stream_init_buffers(struct nabto_stream_s* stream)
     for (i=0;i< NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE; i++)
     {
         memset(&tcb->recv[i], 0, sizeof(r_buffer));
-        tcb->recv[i].buf = recvBase + (i * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE);
+        tcb->recv[i].buf = recvBase + (i * NABTO_MEMORY_STREAM_SEGMENT_SIZE);
     }
 }
 
@@ -109,7 +110,7 @@ bool unabto_stream_is_connection_reliable(struct nabto_stream_s* stream)
 uint8_t* unabto_stream_alloc_send_segment(size_t required)
 {
     size_t i;
-    if (required > NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE) {
+    if (required > NABTO_MEMORY_STREAM_SEGMENT_SIZE) {
         NABTO_LOG_FATAL(("The stream segment size should never be that large"));
         return NULL;
     }
@@ -117,7 +118,7 @@ uint8_t* unabto_stream_alloc_send_segment(size_t required)
     for (i = 0; i < NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE; i++) {
         if (!send_segment_pool[i]) {
             send_segment_pool[i] = true;
-            return x_buffer_data + (i * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE);
+            return x_buffer_data + (i * NABTO_MEMORY_STREAM_SEGMENT_SIZE);
         }
     }
     return NULL;
@@ -132,11 +133,11 @@ void unabto_stream_free_send_segment(uint8_t* buffer)
         NABTO_LOG_FATAL(("invalid free pointer is before pool"));
     }
 
-    if (buffer > (x_buffer_data + (NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE))) {
+    if (buffer > (x_buffer_data + (NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE))) {
         NABTO_LOG_FATAL(("invalid free pointer is outside of pool area"));
     }
 
-    idx = (buffer - x_buffer_data)/NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE;
+    idx = (buffer - x_buffer_data)/NABTO_MEMORY_STREAM_SEGMENT_SIZE;
 
     if (!send_segment_pool[idx]) {
         NABTO_LOG_ERROR(("invalid free segment is not allocated"));

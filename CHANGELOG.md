@@ -12,6 +12,12 @@ the release and a new unreleased section is added.
 
 ## 4.4.0 Unreleased
 
+### Breaking Changes
+- NABTO-1891: replaced configuration options
+  `NABTO_STREAM_SEND_SEGMENT_SIZE` and
+  `NABTO_STREAM_RECEIVE_SEGMENT_SIZE` with the option
+  `NABTO_STREAM_SEGMENT_SIZE` to simplify configuration of the
+  streaming.
 
 
 ## 4.3.0 2018-10-02

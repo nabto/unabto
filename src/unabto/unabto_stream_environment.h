@@ -28,7 +28,7 @@ bool unabto_stream_is_connection_reliable(struct nabto_stream_s* stream);
 
 /**
  * Return NULL if no send segment could be allocated.
- * send segments does always have the size UNABTO_STREAM_SEND_SEGMENT_SIZE.
+ * send segments does always have the size UNABTO_STREAM_SEGMENT_SIZE.
  *
  * @param required  the size required, can be used if there is no system wide default size.
  * @return non null iff the allocation succeded

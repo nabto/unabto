@@ -39,7 +39,7 @@ bool unabto_allocate_memory(nabto_main_setup* nms)
     }
 
     {
-        size_t receiveBuffersSize = (size_t)NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE;
+        size_t receiveBuffersSize = (size_t)NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEGMENT_SIZE * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE;
         r_buffer_data = (uint8_t*)malloc(receiveBuffersSize);
         if (r_buffer_data == NULL) {
             NABTO_LOG_FATAL(("Cannot initialize stream receive buffers. Receive buffers total size: %" PRIsize, receiveBuffersSize));
@@ -59,7 +59,7 @@ bool unabto_allocate_memory(nabto_main_setup* nms)
     }
 
     {
-        size_t sendBuffersSize = (size_t)NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE;
+        size_t sendBuffersSize = (size_t)NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE;
         x_buffer_data = (uint8_t*)malloc(sendBuffersSize);
         if (x_buffer_data == NULL) {
             NABTO_LOG_FATAL(("Cannot initialize stream send buffers. Send buffers total size: %" PRIsize, sendBuffersSize));

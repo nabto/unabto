@@ -241,9 +241,9 @@ void unabto_stream_init(void)
 void stream_initial_config(struct nabto_stream_s* stream)
 {
     nabto_stream_tcb_config* cfg = &stream->u.tcb.initialConfig;
-    cfg->recvPacketSize = NABTO_MEMORY_STREAM_RECEIVE_SEGMENT_SIZE;
+    cfg->recvPacketSize = NABTO_MEMORY_STREAM_SEGMENT_SIZE;
     cfg->recvWinSize = NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE;
-    cfg->xmitPacketSize = NABTO_MEMORY_STREAM_SEND_SEGMENT_SIZE;
+    cfg->xmitPacketSize = NABTO_MEMORY_STREAM_SEGMENT_SIZE;
     cfg->xmitWinSize = NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE;
     cfg->maxRetrans = NABTO_STREAM_MAX_RETRANS;
     cfg->timeoutMsec = NABTO_STREAM_TIMEOUT;

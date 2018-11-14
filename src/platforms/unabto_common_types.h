@@ -168,7 +168,6 @@ typedef __ROM char* text;
 #define MAKE_NSI_PRINTABLE(cp, sp, cont) (uint32_t)(cp), (uint32_t)(sp), (uint32_t)(cont)
 #endif
 
-
 //#ifndef PRIip
 //#define PRIip         "%" PRIu8 ".%" PRIu8 ".%" PRIu8 ".%" PRIu8
 //#endif
@@ -176,7 +175,6 @@ typedef __ROM char* text;
 #ifndef PRInsi
 #define PRInsi        "(%" PRIu32 ".%" PRIu32 ".%" PRIu32 ")"
 #endif
-
 
 #ifndef MAKE_EP_PRINTABLE
 #define MAKE_EP_PRINTABLE(ep) nabto_ip_to_string(&(ep).addr), (ep).port
@@ -193,7 +191,5 @@ typedef __ROM char* text;
 #ifndef PRIfp
 #define PRIfp         "%x:%x:%x:%x..."
 #endif
-
-
 
 #endif
