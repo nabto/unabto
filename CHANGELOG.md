@@ -12,13 +12,25 @@ the release and a new unreleased section is added.
 
 ## 4.4.0 Unreleased
 
+### Changed
+- In streaming is the segment pool concept changed to also include
+  recv segments. This has some configuration implications.
+
 ### Breaking Changes
 - NABTO-1891: replaced configuration options
   `NABTO_STREAM_SEND_SEGMENT_SIZE` and
   `NABTO_STREAM_RECEIVE_SEGMENT_SIZE` with the option
   `NABTO_STREAM_SEGMENT_SIZE` to simplify configuration of the
   streaming.
-
+- NABTO-1891: configuration option
+  `NABTO_STREAM_SEND_SEGMENT_POOL_SIZE` is renamed to
+  `NABTO_STREAM_SEGMENT_POOL_SIZE` and does now also include recv
+  segments.
+  
+### Added
+- NABTO-1891: configuration options
+  `NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_FRACTION_ONE_STREAM` and
+  `NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS`
 
 ## 4.3.0 2018-10-02
 
