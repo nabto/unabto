@@ -112,7 +112,7 @@ enum {
     CONNECTIONS_SIZE_OPTION,
     DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS,
     UART_DEVICE_OPTION,
-    STREAM_SEND_SEGMENT_POOL_SIZE_OPTION
+    STREAM_SEGMENT_POOL_SIZE_OPTION
 };
 
 #if HANDLE_SIGNALS
@@ -175,7 +175,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x31s[] = "";      const char* x31l[] = { "no-access-control", 0};
     const char x32s[] = "";      const char* x32l[] = { "no-crypto", 0};
     const char x33s[] = "";      const char* x33l[] = { "uart-device", 0 };
-    const char x34s[] = "";      const char* x34l[] = { "stream-send-segment-pool-size", 0 };
+    const char x34s[] = "";      const char* x34l[] = { "stream-segment-pool-size", 0 };
     const char x35s[] = "";      const char* x35l[] = { "stream-send-window-size", 0 };
     const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
         { 'h', GOPT_NOARG,   x1s, x1l },
@@ -205,7 +205,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         { STREAM_WINDOW_RECV_SIZE_OPTION, GOPT_ARG, x27s, x27l },
         { STREAM_WINDOW_SEND_SIZE_OPTION, GOPT_ARG, x35s, x35l },
         { CONNECTIONS_SIZE_OPTION, GOPT_ARG, x28s, x28l },
-        { STREAM_SEND_SEGMENT_POOL_SIZE_OPTION, GOPT_ARG, x34s, x34l },
+        { STREAM_SEGMENT_POOL_SIZE_OPTION, GOPT_ARG, x34s, x34l },
 #endif
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
         { DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS, GOPT_NOARG, x29s, x29l },
@@ -227,7 +227,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char* tunnelsOption;
     const char* streamWindowRecvSizeOption;
     const char* streamWindowSendSizeOption;
-    const char* streamSendSegmentPoolSizeOption;
+    const char* streamSegmentPoolSizeOption;
     const char* connectionsOption;
     const char* uartDevice = 0;
     const char* preSharedKey;
@@ -271,7 +271,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("      --stream-recv-window-size    Specify the stream recv window size, the larger the value the more memory the aplication will use, but higher throughput will be possible.\n");
         printf("      --stream-send-window-size    Specify the stream send window size, the larger the value the more memory the aplication will use, but higher throughput will be possible. The memory required can be limited by the send segment pool size option.\n");
         printf("      --connections           Specify the maximum number of allowed concurrent connections.\n");
-        printf("      --stream-send-segment-pool-size  Specify the size of the pool for streaming send segments.\n");
+        printf("      --stream-segment-pool-size  Specify the size of the pool for streaming send segments.\n");
 #endif
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
         printf("      --disable-extended-rendezvous-multiple-sockets     Disable multiple sockets in extended rendezvous.\n");
@@ -449,9 +449,9 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         nms->connectionsSize = atoi(connectionsOption);
     }
 
-    if (gopt_arg(options, STREAM_SEND_SEGMENT_POOL_SIZE_OPTION, &streamSendSegmentPoolSizeOption)) {
-        uint16_t poolSize = atoi(streamSendSegmentPoolSizeOption);
-        nms->streamSendSegmentPoolSize = poolSize;
+    if (gopt_arg(options, STREAM_SEGMENT_POOL_SIZE_OPTION, &streamSegmentPoolSizeOption)) {
+        uint16_t poolSize = atoi(streamSegmentPoolSizeOption);
+        nms->streamSegmentPoolSize = poolSize;
     }
     
 #endif

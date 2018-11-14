@@ -14,8 +14,8 @@ NABTO_THREAD_LOCAL_STORAGE nabto_connect* connections = 0;
 #if NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM
 NABTO_THREAD_LOCAL_STORAGE unabto_stream* stream__ = 0;
 NABTO_THREAD_LOCAL_STORAGE uint8_t* r_buffer_data = 0;
-NABTO_THREAD_LOCAL_STORAGE bool* send_segment_pool = 0;
-NABTO_THREAD_LOCAL_STORAGE uint8_t* x_buffer_data = 0;
+NABTO_THREAD_LOCAL_STORAGE bool* stream_segment_pool = 0;
+NABTO_THREAD_LOCAL_STORAGE uint8_t* stream_buffer_data = 0;
 NABTO_THREAD_LOCAL_STORAGE r_buffer* r_buffers = 0;
 NABTO_THREAD_LOCAL_STORAGE x_buffer* x_buffers = 0;
 
@@ -49,19 +49,19 @@ bool unabto_allocate_memory(nabto_main_setup* nms)
 
 
     {
-        size_t sendSegmentPoolSize = sizeof(bool) * NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE;
-        send_segment_pool = (bool*)malloc(sendSegmentPoolSize);
-        if (send_segment_pool == NULL) {
+        size_t sendSegmentPoolSize = sizeof(bool) * NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE;
+        stream_segment_pool = (bool*)malloc(sendSegmentPoolSize);
+        if (stream_segment_pool == NULL) {
             NABTO_LOG_FATAL(("Cannot initialize send segment pool. Send segment pool size %" PRIsize, sendSegmentPoolSize));
             return false;
         }
-        memset(send_segment_pool, 0, sendSegmentPoolSize);
+        memset(stream_segment_pool, 0, sendSegmentPoolSize);
     }
 
     {
-        size_t sendBuffersSize = (size_t)NABTO_MEMORY_STREAM_SEND_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE;
-        x_buffer_data = (uint8_t*)malloc(sendBuffersSize);
-        if (x_buffer_data == NULL) {
+        size_t sendBuffersSize = (size_t)NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE;
+        stream_buffer_data = (uint8_t*)malloc(sendBuffersSize);
+        if (stream_buffer_data == NULL) {
             NABTO_LOG_FATAL(("Cannot initialize stream send buffers. Send buffers total size: %" PRIsize, sendBuffersSize));
             return false;
         }
@@ -93,8 +93,8 @@ void unabto_free_memory()
     free(connections); connections = 0;
     free(stream__); stream__ = 0;
     free(r_buffer_data); r_buffer_data = 0;
-    free(send_segment_pool); send_segment_pool = 0;
-    free(x_buffer_data); x_buffer_data = 0;
+    free(stream_segment_pool); stream_segment_pool = 0;
+    free(stream_buffer_data); stream_buffer_data = 0;
     free(r_buffers); r_buffers = 0;
     free(x_buffers); x_buffers = 0;
 }

@@ -359,7 +359,7 @@ bool nabto_stream_tcb_ack(struct nabto_stream_s * stream, const uint8_t* buf, si
             rbuf->size = rbuf->used = 0;
             tcb->recvNext++;  /* rolling the receive window because the slot has become idle */
             NABTO_LOG_TRACE(("slot %i is now empty, next slot %i, tcb->recvNext %u", ix, tcb->recvNext % tcb->cfg.recvWinSize, tcb->recvNext));
-            windowHasOpened = tcb->cfg.enableWSRF && (tcb->cfg.xmitWinSize - ((tcb->recvTop - tcb->recvNext)) == 1);
+            windowHasOpened = tcb->cfg.enableWSRF && (tcb->cfg.recvWinSize - ((tcb->recvTop - tcb->recvNext)) == 1);
             nabto_stream_tcb_check_xmit(stream, false, windowHasOpened);
         }
         return true;
@@ -1238,7 +1238,13 @@ void nabto_stream_tcb_event(struct nabto_stream_s* stream,
         case ST_IDLE:
             if (win->type == SYN) {
                 nabto_init_stream_state(stream, win); // calls nabto_init_stream_tcb_state
-                SET_STATE(stream, ST_SYN_RCVD);
+                if (!unabto_stream_init_buffers(stream)) {
+                    // release the stream as we cannot allocate buffers for the stream.
+                    send_rst(stream);
+                    unabto_stream_release(stream);
+                    return;
+                }
+                SET_STATE(stream, ST_SYN_RCVD);                    
             } else {
                 nabto_stream_tcb_event_error(stream, win);
             }
@@ -1248,12 +1254,16 @@ void nabto_stream_tcb_event(struct nabto_stream_s* stream,
             // This state is only possible for an initiator.
             if (win->type == (SYN|ACK)) {
                 nabto_limit_stream_config_syn_ack(stream, win);
-                unabto_stream_init_buffers(stream);
-                SET_STATE(stream, ST_ESTABLISHED);
-                // Due to earlier design desisions an ack needs to be
-                // sent without data such that the receiver will
-                // change state to ST_ESTABLISHED
-                send_data_packet(stream, tcb->xmitSeq, 0, 0, 0, 0);
+                if (!unabto_stream_init_buffers(stream)) {
+                    SET_STATE(stream, ST_CLOSED_ABORTED);
+                    send_rst(stream);
+                } else {
+                    SET_STATE(stream, ST_ESTABLISHED);
+                    // Due to earlier design desisions an ack needs to be
+                    // sent without data such that the receiver will
+                    // change state to ST_ESTABLISHED
+                    send_data_packet(stream, tcb->xmitSeq, 0, 0, 0, 0);
+                }
             }
             break;
 
@@ -1261,7 +1271,6 @@ void nabto_stream_tcb_event(struct nabto_stream_s* stream,
             // This state is only possible for an !initiator
             if (win->type == ACK || win->type == (SYN|ACK)) {
                 if (win->seq == tcb->recvNext && win->ack == tcb->xmitSeq) {
-                    unabto_stream_init_buffers(stream);
                     SET_STATE(stream, ST_ESTABLISHED);
                 }
             } else if (win->type == (FIN | ACK)) {
@@ -1604,6 +1613,15 @@ void nabto_stream_tcb_release(struct nabto_stream_s * stream) {
             if (tcb->xmit[i].xstate != B_IDLE) {
                 unabto_stream_free_send_segment(tcb->xmit[i].buf);
                 tcb->xmit[i].buf = NULL;
+            }
+        }
+    }
+
+    if (tcb->recv != NULL) {
+        for (i = 0; i < tcb->cfg.recvWinSize; i++) {
+            if (tcb->recv[i].buf != NULL) {
+                unabto_stream_free_recv_segment(tcb->recv[i].buf);
+                tcb->recv[i].buf = NULL;
             }
         }
     }

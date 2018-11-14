@@ -266,7 +266,6 @@ void stream_reset(struct nabto_stream_s* stream)
     unabto_stream_init_data_structure(stream);
     stream_initial_config(stream);
     stream_init_static_config(stream);
-    unabto_stream_init_buffers(stream);
 }
 
 /**
