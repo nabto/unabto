@@ -189,6 +189,10 @@ int unabto_stream_get_stats(unabto_stream* stream, unabto_stream_stats* stats) {
     stream->stats.flightSizeMin = (uint16_t)(stream->u.tcb.ccStats.flightSize.min);
     stream->stats.flightSizeMax = (uint16_t)(stream->u.tcb.ccStats.flightSize.max);
     stream->stats.flightSizeAvg = unabto_stream_stats_get_uint16_avg(&stream->u.tcb.ccStats.flightSize);
+    stream->stats.recvWindowSize = stream->u.tcb.cfg.recvWinSize;
+    stream->stats.recvSegmentSize = stream->u.tcb.cfg.recvPacketSize;
+    stream->stats.sendWindowSize = stream->u.tcb.cfg.xmitWinSize;
+    stream->stats.sendSegmentSize = stream->u.tcb.cfg.xmitPacketSize;
     *stats = stream->stats;
     return 0;
 }
