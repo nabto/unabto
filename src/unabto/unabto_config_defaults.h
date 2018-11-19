@@ -332,8 +332,10 @@
  * will never happen if the allocated amount of segments is equal to
  * the maximum number of send and receive segments for all the streams.
  *
- * If not enough recv segments is available when opening a stream. The
- * opening fails.
+ * If there is not enough recv segments available when opening a
+ * stream, the recv window is limited to the number of segments
+ * available. If there's 0 available recv segments the opening og the
+ * stream fails.
  */
 #ifndef NABTO_STREAM_SEGMENT_POOL_SIZE
 #define NABTO_STREAM_SEGMENT_POOL_SIZE NABTO_STREAM_SEND_WINDOW_SIZE * NABTO_STREAM_MAX_STREAMS + NABTO_STREAM_RECEIVE_WINDOW_SIZE * NABTO_STREAM_MAX_STREAMS
@@ -344,9 +346,10 @@
 #endif
 
 /**
- * Maximum number across all streams of the segments allocated for
- * receive windows. Use this option to ensure that there are segments
- * left over for the send windows.
+ * This is the maximum number across all streams of the segments in
+ * the segment pool allocated for receive windows across all open
+ * streams. This option is used to ensure that there are segments
+ * available for the send windows.
  */
 #ifndef NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS
 #define NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS NABTO_STREAM_RECEIVE_WINDOW_SIZE * NABTO_STREAM_MAX_STREAMS
