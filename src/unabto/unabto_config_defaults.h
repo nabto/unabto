@@ -313,7 +313,12 @@
 #warning NABTO_STREAM_RECEIVE_SEGMENT_SIZE option is deprecated use NABTO_STREAM_SEGMENT_SIZE instead
 #endif
 
-/** The size of the receive window */
+/** 
+ * The size of the receive window. This is an upper limit of the size
+ * of the receive window. The actual size is the minimum of the available
+ * receive segments, this configuration parameter and the client
+ * proposed receive window size.
+ */
 #ifndef NABTO_STREAM_RECEIVE_WINDOW_SIZE
 #define NABTO_STREAM_RECEIVE_WINDOW_SIZE 4
 #endif
