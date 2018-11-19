@@ -13,7 +13,6 @@ NABTO_THREAD_LOCAL_STORAGE nabto_connect* connections = 0;
 
 #if NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM
 NABTO_THREAD_LOCAL_STORAGE unabto_stream* stream__ = 0;
-NABTO_THREAD_LOCAL_STORAGE uint8_t* r_buffer_data = 0;
 NABTO_THREAD_LOCAL_STORAGE bool* stream_segment_pool = 0;
 NABTO_THREAD_LOCAL_STORAGE uint8_t* stream_buffer_data = 0;
 NABTO_THREAD_LOCAL_STORAGE r_buffer* r_buffers = 0;
@@ -37,16 +36,6 @@ bool unabto_allocate_memory(nabto_main_setup* nms)
         NABTO_LOG_FATAL(("Cannot initialize stream structure. Number of streams: %" PRIu16, NABTO_MEMORY_STREAM_MAX_STREAMS));
         return false;
     }
-
-    {
-        size_t receiveBuffersSize = (size_t)NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEGMENT_SIZE * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE;
-        r_buffer_data = (uint8_t*)malloc(receiveBuffersSize);
-        if (r_buffer_data == NULL) {
-            NABTO_LOG_FATAL(("Cannot initialize stream receive buffers. Receive buffers total size: %" PRIsize, receiveBuffersSize));
-            return false;
-        }
-    }
-
 
     {
         size_t sendSegmentPoolSize = sizeof(bool) * NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE;
@@ -92,7 +81,6 @@ void unabto_free_memory()
 {
     free(connections); connections = 0;
     free(stream__); stream__ = 0;
-    free(r_buffer_data); r_buffer_data = 0;
     free(stream_segment_pool); stream_segment_pool = 0;
     free(stream_buffer_data); stream_buffer_data = 0;
     free(r_buffers); r_buffers = 0;

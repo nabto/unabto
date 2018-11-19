@@ -29,7 +29,6 @@ extern NABTO_THREAD_LOCAL_STORAGE nabto_connect* connections;
 
 #if NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM
 extern NABTO_THREAD_LOCAL_STORAGE unabto_stream* stream__;
-extern NABTO_THREAD_LOCAL_STORAGE uint8_t* r_buffer_data;
 extern NABTO_THREAD_LOCAL_STORAGE bool* stream_segment_pool;
 extern NABTO_THREAD_LOCAL_STORAGE uint8_t* stream_buffer_data;
 extern NABTO_THREAD_LOCAL_STORAGE x_buffer* x_buffers;
