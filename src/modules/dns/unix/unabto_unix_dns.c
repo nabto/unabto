@@ -45,6 +45,7 @@ void* resolver_thread(void* ctx) {
                 ip->type = NABTO_IP_V4;
                 sa4 = (struct sockaddr_in*)(rp->ai_addr);
                 READ_U32(ip->addr.ipv4, &sa4->sin_addr.s_addr);
+                NABTO_LOG_TRACE(("resolver_thread: getaddrinfo returned IPv4 address: %s", nabto_ip_to_string(ip)));
                 i++;
             }
         }
@@ -61,6 +62,7 @@ void* resolver_thread(void* ctx) {
                 ip->type = NABTO_IP_V6;
                 sa6 = (struct sockaddr_in6*)(rp->ai_addr);
                 memcpy(ip->addr.ipv6, sa6->sin6_addr.s6_addr, 16);
+                NABTO_LOG_TRACE(("resolver_thread: getaddrinfo returned IPv6 address: %s", nabto_ip_to_string(ip)));
                 i++;
             }
         }
