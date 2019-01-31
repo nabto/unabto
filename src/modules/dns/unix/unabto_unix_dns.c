@@ -154,13 +154,13 @@ void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip)
             ip->type = NABTO_IP_V4;
             sa4 = (struct sockaddr_in*)(result->ai_addr);
             READ_U32(ip->addr.ipv4, &sa4->sin_addr.s_addr);
-            NABTO_LOG_TRACE(("getaddrinfo returned IPv4 address: %s", nabto_ip_to_string(ip)));
+            NABTO_LOG_TRACE(("resolve ipv4: getaddrinfo returned IPv4 address: %s", nabto_ip_to_string(ip)));
         } else if (result->ai_family == AF_INET6) {
             struct sockaddr_in6* sa6;
             ip->type = NABTO_IP_V6;
             sa6 = (struct sockaddr_in6*)(result->ai_addr);
             memcpy(ip->addr.ipv6, sa6->sin6_addr.s6_addr, 16);
-            NABTO_LOG_TRACE(("getaddrinfo returned IPv6 address: %s", nabto_ip_to_string(ip)));
+            NABTO_LOG_TRACE(("resolve ipv4: getaddrinfo returned IPv6 address: %s", nabto_ip_to_string(ip)));
         } else {
             // unknown family
             // probably not possible.
