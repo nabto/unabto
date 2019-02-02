@@ -17,6 +17,53 @@ static resolver_state_t resolver_state;
 
 static bool resolver_is_running = false;
 
+struct addrinfo* create_addr_stub() {
+    struct addrinfo* res0 = (struct addrinfo*)malloc(sizeof(struct addrinfo));
+    memset(res0, 0, sizeof(struct addrinfo));
+    res0->ai_flags = 0;
+    res0->ai_family = AF_INET;
+    res0->ai_socktype = SOCK_DGRAM;
+    res0->ai_protocol = 0;
+    res0->ai_addrlen = INET_ADDRSTRLEN;
+    res0->ai_addr = (struct sockaddr*)malloc(sizeof(struct sockaddr*));
+    inet_pton(AF_INET, "54.72.234.99", &((struct sockaddr_in *)res0->ai_addr)->sin_addr);
+
+    struct addrinfo* res1 = (struct addrinfo*)malloc(sizeof(struct addrinfo));
+    res0->ai_next = res1;
+    memset(res1, 0, sizeof(struct addrinfo));
+
+    res1->ai_flags = 0;
+    res1->ai_family = AF_INET;
+    res1->ai_socktype = SOCK_DGRAM;
+    res1->ai_protocol = 0;
+    res1->ai_addrlen = INET_ADDRSTRLEN;
+    res1->ai_addr = (struct sockaddr*)malloc(sizeof(struct sockaddr*));
+    inet_pton(AF_INET, "54.72.234.98", &((struct sockaddr_in *)res1->ai_addr)->sin_addr);
+
+    struct addrinfo* res2 = (struct addrinfo*)malloc(sizeof(struct addrinfo));    
+    res1->ai_next = res2;
+    memset(res2, 0, sizeof(struct addrinfo));
+#if 0
+    res2->ai_flags = 0;
+    res2->ai_family = AF_INET6;
+    res2->ai_socktype = SOCK_DGRAM;
+    res2->ai_protocol = 0;
+    res2->ai_addrlen = INET6_ADDRSTRLEN;
+    res2->ai_addr = (struct sockaddr*)malloc(sizeof(struct sockaddr*));
+    inet_pton(AF_INET6, "2001:0002:0000:1BAA:0000:0000:341F:E53E", &((struct sockaddr_in6 *)res2->ai_addr)->sin6_addr);
+#else
+    res2->ai_flags = 0;
+    res2->ai_family = AF_INET;
+    res2->ai_socktype = SOCK_DGRAM;
+    res2->ai_protocol = 0;
+    res2->ai_addrlen = INET_ADDRSTRLEN;
+    res2->ai_addr = (struct sockaddr*)malloc(sizeof(struct sockaddr*));
+    inet_pton(AF_INET, "54.72.234.97", &((struct sockaddr_in *)res2->ai_addr)->sin_addr);
+#endif
+    
+    res2->ai_next = 0;
+    return res0;
+}
 
 void* resolver_thread(void* ctx) {
     resolver_state_t* state = (resolver_state_t*)ctx;
@@ -31,6 +78,9 @@ void* resolver_thread(void* ctx) {
 
     
     status = getaddrinfo(state->id, "4242", &hints, &result);
+//    result = create_addr_stub();
+//    status = 0;
+    
     if (status != 0) {
         state->status = NABTO_DNS_ERROR;
     } else {
@@ -45,7 +95,7 @@ void* resolver_thread(void* ctx) {
                 ip->type = NABTO_IP_V4;
                 sa4 = (struct sockaddr_in*)(rp->ai_addr);
                 READ_U32(ip->addr.ipv4, &sa4->sin_addr.s_addr);
-                NABTO_LOG_TRACE(("resolver_thread: getaddrinfo returned IPv4 address: %s", nabto_ip_to_string(ip)));
+                NABTO_LOG_TRACE(("resolver_thread: getaddrinfo returned IPv4 address for %s, i=%d, len=%d: %s", state->id, i, rp->ai_addrlen, nabto_ip_to_string(ip)));
                 i++;
             }
         }
@@ -62,7 +112,7 @@ void* resolver_thread(void* ctx) {
                 ip->type = NABTO_IP_V6;
                 sa6 = (struct sockaddr_in6*)(rp->ai_addr);
                 memcpy(ip->addr.ipv6, sa6->sin6_addr.s6_addr, 16);
-                NABTO_LOG_TRACE(("resolver_thread: getaddrinfo returned IPv6 address: %s", nabto_ip_to_string(ip)));
+                NABTO_LOG_TRACE(("resolver_thread: getaddrinfo returned IPv6 address, i=%d, len=%d: %s", i, rp->ai_addrlen, nabto_ip_to_string(ip)));
                 i++;
             }
         }
@@ -116,7 +166,7 @@ nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address
     
     if (resolver_state.status == NABTO_DNS_OK) {
         uint8_t i;
-        for (i = 0; i < 2; i++) {
+        for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
             addrs[i] = resolver_state.resolved_addrs[i];
         }
         

@@ -793,7 +793,9 @@ void handle_as_wait_dns(void) {
             for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
                 struct nabto_ip_address* ip = &nmc.controllerAddresses[i];
                 if (ip->type != NABTO_IP_NONE) {
-                    NABTO_LOG_INFO(("  Controller ip: %s", nabto_ip_to_string(ip)));
+                    NABTO_LOG_INFO(("  Controller ip: %s (%d of %d)", nabto_ip_to_string(ip), i+1, NABTO_DNS_RESOLVED_IPS_MAX));
+                } else {
+                    NABTO_LOG_INFO(("  Controller ip: (NABTO_IP_NONE)"));
                 }
             }
         }
