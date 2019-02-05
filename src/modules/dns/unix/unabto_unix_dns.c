@@ -114,7 +114,7 @@ nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address
     
     if (resolver_state.status == NABTO_DNS_OK) {
         uint8_t i;
-        for (i = 0; i < 2; i++) {
+        for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
             addrs[i] = resolver_state.resolved_addrs[i];
         }
         
