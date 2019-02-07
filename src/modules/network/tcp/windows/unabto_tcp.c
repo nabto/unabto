@@ -79,7 +79,10 @@ unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, enum nabto_ip_
     if (addressType == NABTO_IP_V4) {
         sock->socket = socket(AF_INET, SOCK_STREAM, 0);
     } else if (addressType == NABTO_IP_V6) {
-        sock->socket = socket(AF_INET6, SOCK_STREAM, 0);
+        // TODO
+        NABTO_LOG_ERROR(("ipv6 tcp not supported on windows"));
+        return UTS_FAILED;
+        //sock->socket = socket(AF_INET6, SOCK_STREAM, 0);
     } else {
         NABTO_LOG_ERROR(("invalid address type"));
         return UTS_FAILED;
