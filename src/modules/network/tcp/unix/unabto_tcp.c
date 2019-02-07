@@ -161,7 +161,7 @@ unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpo
         host.sin6_port = htons(ep->port);
         NABTO_LOG_TRACE(("Connecting to ", PRIep, MAKE_EP_PRINTABLE(*ep)));
     
-        status = connect(sock->socket, (struct sockaddr*)&host, sizeof(struct sockaddr_in));
+        status = connect(sock->socket, (struct sockaddr*)&host, sizeof(struct sockaddr_in6));
         
     } else {
         return UTS_FAILED;
