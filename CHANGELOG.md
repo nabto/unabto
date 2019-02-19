@@ -10,7 +10,7 @@ Guide: always keep an unreleased section which keeps track of current
 changes. When a release is made the unreleased section is renamed to
 the release and a new unreleased section is added.
 
-## 4.4.0 Unreleased
+## 4.4.0 2018-10-21
 
 ### Changed
 - In streaming is the segment pool concept changed to also include
