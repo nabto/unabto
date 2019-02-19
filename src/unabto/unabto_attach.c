@@ -297,7 +297,19 @@ static void send_controller_invite(void) {
 
     bytes = mk_invite(nabtoCommunicationBuffer, nabtoCommunicationBuffer + nabtoCommunicationBufferSize, false); /* Send Packet (1) */
     if (bytes) {
-        send_to_basestation(nabtoCommunicationBuffer, bytes, &nmc.controllerEp);
+        int retries = nmc.context.counter;
+        nabto_endpoint ep;
+        ep.port = nmc.controllerPort;
+
+        if (nmc.controllerAddressesV4Resolved > 0) {
+            ep.addr = nmc.controllerAddressesV4[retries % nmc.controllerAddressesV4Resolved];
+            send_to_basestation(nabtoCommunicationBuffer, bytes, &ep);
+        }
+
+        if (nmc.controllerAddressesV6Resolved > 0) {
+            ep.addr = nmc.controllerAddressesV6[retries % nmc.controllerAddressesV6Resolved];
+            send_to_basestation(nabtoCommunicationBuffer, bytes, &ep); 
+        }
     }
 }
 
@@ -436,7 +448,7 @@ static void send_gsp_alive_poll(void) {
 
 /******************************************************************************/
 
-bool nabto_invite_event(nabto_packet_header* hdr)
+bool nabto_invite_event(nabto_packet_header* hdr, nabto_endpoint* ep)
 {
     if (nmc.context.state != NABTO_AS_WAIT_BS) {
         NABTO_LOG_TRACE(("Received an invite response from the basestation but we are not waiting in any invite responses."));
@@ -467,6 +479,7 @@ bool nabto_invite_event(nabto_packet_header* hdr)
              * will send the next packet.
              */
             handle_ok_invite_event();
+            nmc.controllerEp = *ep;
             return true;
         }
     }
@@ -763,7 +776,17 @@ void handle_as_idle(void) {
     
     fix_for_broken_routers();
     nmc.controllerEp = nmc.nabtoMainSetup.controllerArg;
+    nmc.controllerPort = nmc.nabtoMainSetup.controllerArg.port;
     if (nmc.nabtoMainSetup.controllerArg.addr.type != NABTO_IP_NONE) {
+        nmc.controllerAddressesV4Resolved = 0;
+        nmc.controllerAddressesV6Resolved = 0;
+        if (nmc.nabtoMainSetup.controllerArg.addr.type == NABTO_IP_V4) {
+            nmc.controllerAddressesV4[0] = nmc.nabtoMainSetup.controllerArg.addr;
+            nmc.controllerAddressesV4Resolved = 1;
+        } else {
+            nmc.controllerAddressesV6[0] = nmc.nabtoMainSetup.controllerArg.addr;
+            nmc.controllerAddressesV6Resolved = 1;
+        }
         SET_CTX_STATE_STAMP(NABTO_AS_WAIT_BS, 0);
         return;
     }
@@ -775,7 +798,11 @@ void handle_as_idle(void) {
 
 /** timer event when waiting for response to the DNS request. */
 void handle_as_wait_dns(void) {
-    nabto_dns_status_t dns_status = nabto_dns_is_resolved(nmc.nabtoMainSetup.id, nmc.controllerAddresses);
+    nmc.controllerAddressesV4Resolved = 0;
+    nmc.controllerAddressesV6Resolved = 0;
+    memset(nmc.controllerAddressesV4, 0, sizeof(struct nabto_ip_address) * NABTO_DNS_RESOLVED_IPS_MAX);
+    memset(nmc.controllerAddressesV6, 0, sizeof(struct nabto_ip_address) * NABTO_DNS_RESOLVED_IPS_MAX);
+    nabto_dns_status_t dns_status = nabto_dns_is_resolved(nmc.nabtoMainSetup.id, nmc.controllerAddressesV4, nmc.controllerAddressesV6);
     switch (dns_status) {
     case NABTO_DNS_NOT_FINISHED:
         SET_CTX_STAMP(INTERVAL_DNS_RESOLVE);
@@ -791,11 +818,23 @@ void handle_as_wait_dns(void) {
         {
             uint8_t i;
             for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
-                struct nabto_ip_address* ip = &nmc.controllerAddresses[i];
+                struct nabto_ip_address* ip = &nmc.controllerAddressesV4[i];
                 if (ip->type != NABTO_IP_NONE) {
                     NABTO_LOG_INFO(("  Controller ip: %s", nabto_ip_to_string(ip)));
+                } else {
+                    break;
                 }
             }
+            nmc.controllerAddressesV4Resolved = i;
+            for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
+                struct nabto_ip_address* ip = &nmc.controllerAddressesV6[i];
+                if (ip->type != NABTO_IP_NONE) {
+                    NABTO_LOG_INFO(("  Controller ip: %s", nabto_ip_to_string(ip)));
+                } else {
+                    break;
+                }
+            }
+            nmc.controllerAddressesV6Resolved = i;
         }
 
         nmc.context.errorCount = 0;
@@ -806,12 +845,6 @@ void handle_as_wait_dns(void) {
 
 /** timer event when waiting for the BS response to invite request. */
 void handle_as_wait_bs(void) {
-    // cycle controller eps
-    struct nabto_ip_address newip = nmc.controllerAddresses[nmc.context.counter % NABTO_DNS_RESOLVED_IPS_MAX];
-    if (newip.type != NABTO_IP_NONE) {
-        nmc.controllerEp.addr = newip;
-    }
-    
     SET_CTX_STATE_STAMP(NABTO_AS_WAIT_BS, EXP_WAIT(INTERVAL_BS_INVITE, nmc.context.counter));
     if(++nmc.context.counter > 6) {
         NABTO_LOG_INFO(("No answer from BS, trying with fallback via dns"));

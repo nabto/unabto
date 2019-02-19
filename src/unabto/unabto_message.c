@@ -264,16 +264,16 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
         } else if (fromGSP) {
             NABTO_LOG_TRACE(("Received from GSP: %" PRIu16 " bytes", ilen));
         } else {
-            NABTO_LOG_TRACE(("Received from Client: %" PRIu16 " bytes", ilen));
+            NABTO_LOG_TRACE(("Received packet from Client, Controller or GSP: %" PRIu16 " bytes", ilen));
         }
 
         switch (hdr.type) {
 #if NABTO_ENABLE_REMOTE_ACCESS
         case U_INVITE:
-            if (fromBS && nabto_invite_event(&hdr)) return;
+            if (nabto_invite_event(&hdr, &event->udpMessage.peer)) return;
             break;
         case U_ATTACH:
-            if (fromGSP && nabto_attach_event(&hdr)) return;
+            if (nabto_attach_event(&hdr)) return;
             NABTO_LOG_TRACE(("failed to handle U_ATTACH from GSP"));
             break;
 #if NABTO_ENABLE_PUSH

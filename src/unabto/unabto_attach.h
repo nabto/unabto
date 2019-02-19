@@ -25,7 +25,7 @@ extern "C" {
  * @param ctx the context @param hdr the decoded packet header
  * @return true iff fully treated
  */
-bool nabto_invite_event(nabto_packet_header* hdr);
+bool nabto_invite_event(nabto_packet_header* hdr, nabto_endpoint* ep);
 
 /******************************************************************************/
 /**

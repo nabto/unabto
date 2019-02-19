@@ -141,13 +141,13 @@ void nabto_dns_resolver(void);
 void nabto_dns_resolve(const char* id);
 
 /**
- * resolve an ipv4 dns address
+ * resolve a hostname to ip addresses
  * if resolving fails in first attempt we call the function later to 
  * see if the address is resolved. The id is always constant for a device
  * meaning the address could be hardcoded but then devices will fail if 
  * the basestation gets a new ip address.
  *
- * The v4addr parameter is an array of size
+ * The v4addr and v6addr parameter is an array of size
  * NABTO_DNS_RESOLVED_IPS_MAX. The caller has allocated this array,
  * and the callee should fill up to NABTO_DNS_RESOLVED_IPS_MAX
  * addresses into the array. The minimum size of this array is 1.
@@ -156,9 +156,13 @@ void nabto_dns_resolve(const char* id);
  *
  * @param id      name controller hostname
  * @param v4addr  pointer to output ipaddresses array
- * @return false if address is not resolved yet
+ * @param v6addr  pointer to output ipaddresses array
+ * @return 
+ *    NABTO_DNS_OK  if dns is resolved and addresses is returned.
+ *    NABTO_DNS_NOT_FINISHED if address is not resolved yet 
+ *    NABTO_DNS_ERROR  if dns resolving failed.
  */
-nabto_dns_status_t nabto_dns_is_resolved(const char* id, struct nabto_ip_address* addr);
+nabto_dns_status_t nabto_dns_is_resolved(const char* id, struct nabto_ip_address* v4Addrs, struct nabto_ip_address* v6Addrs);
 
 /*************** Time stamp related functions ********************************/
 /**

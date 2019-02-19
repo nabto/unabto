@@ -70,7 +70,11 @@ typedef struct {
 typedef struct nabto_main_context {
     nabto_socket_t        socketLocal;    /**< socket for local traffic  */
     nabto_socket_t        socketGSP;      /**< socket for remote traffic */
-    struct nabto_ip_address  controllerAddresses[NABTO_DNS_RESOLVED_IPS_MAX]; /* array of resolved ips */
+    uint8_t                  controllerAddressesV4Resolved;
+    struct nabto_ip_address  controllerAddressesV4[NABTO_DNS_RESOLVED_IPS_MAX]; /* array of resolved ips */
+    uint8_t                  controllerAddressesV6Resolved;
+    struct nabto_ip_address  controllerAddressesV6[NABTO_DNS_RESOLVED_IPS_MAX]; /* array of resolved ips */
+    uint16_t                 controllerPort;
     nabto_endpoint        controllerEp;   /**< controller endpoint       */
     nabto_context         context;        /**< Communication context     */
     nabto_main_setup      nabtoMainSetup; /**< Main setup for uNabto     */
