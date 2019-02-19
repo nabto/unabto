@@ -268,7 +268,7 @@ void unabto_tcp_fallback_read_packets(nabto_connect* con) {
 static bool unabto_tcp_fallback_create_socket(unabto_tcp_fallback_connection* fbConn, nabto_connect* con)
 {
     unabto_tcp_status status;
-    status = unabto_tcp_open(&fbConn->socket, (void*) con);
+    status = unabto_tcp_open(&fbConn->socket, con->fallbackHost.addr.type, (void*) con);
     if(status == UTS_OK) {
         return true;
     } else {

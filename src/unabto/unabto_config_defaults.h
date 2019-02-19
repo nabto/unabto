@@ -76,7 +76,7 @@
  * after a successfull resolution.
  */
 #ifndef NABTO_DNS_RESOLVED_IPS_MAX
-#define NABTO_DNS_RESOLVED_IPS_MAX 3
+#define NABTO_DNS_RESOLVED_IPS_MAX 6
 #endif
 
 /****************************/

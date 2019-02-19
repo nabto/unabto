@@ -68,7 +68,7 @@ void wait_event()
 
     nfds = epoll_wait(unabto_epoll_fd, events, MAX_EVENTS, timeout);
 
-    NABTO_LOG_TRACE(("foobar %i", nfds));
+    NABTO_LOG_TRACE(("Select returned %i", nfds));
     if (nfds < 0) {
         if (errno == EINTR) {
             

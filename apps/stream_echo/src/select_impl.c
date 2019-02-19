@@ -5,6 +5,10 @@
 #include <modules/timers/auto_update/unabto_time_auto_update.h>
 #include <modules/network/select/unabto_network_select_api.h>
 
+#if NABTO_ENABLE_TCP_FALLBACK
+#include <modules/tcp_fallback/tcp_fallback_select.h>
+#endif
+
 #ifdef WIN32
 #include <windows.h>
 #else
@@ -72,7 +76,7 @@ void wait_event()
 
     nfds = select(MAX(max_read_fd+1, max_write_fd+1), &read_fds, &write_fds, NULL, &timeout_val);
 
-    NABTO_LOG_TRACE(("foobar %i", nfds));
+    NABTO_LOG_TRACE(("Select returned %i", nfds));
     if (nfds < 0) NABTO_LOG_FATAL(("Error in epoll_wait: %d", errno));
     unabto_network_select_read_sockets(&read_fds);
 

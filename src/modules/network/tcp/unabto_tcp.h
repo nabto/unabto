@@ -47,7 +47,7 @@ unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock);
  * Open a tcp socket. epollDataPtr is a pointer to some data such that
  * it's possible to find who should handle the epoll event.
  */
-unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sockfd, void* epollDataPtr);
+unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sockfd, enum nabto_ip_address_type addressType, void* epollDataPtr);
 
 unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpoint* ep);
 

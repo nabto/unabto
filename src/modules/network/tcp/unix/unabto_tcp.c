@@ -79,8 +79,15 @@ unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock){
     return UTS_OK;
 }
 
-unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, void* epollDataPtr){
-    sock->socket = socket(AF_INET, SOCK_STREAM, 0);
+unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, enum nabto_ip_address_type addressType, void* epollDataPtr){
+    if (addressType == NABTO_IP_V4) {
+        sock->socket = socket(AF_INET, SOCK_STREAM, 0);
+    } else if (addressType == NABTO_IP_V6) {
+        sock->socket = socket(AF_INET6, SOCK_STREAM, 0);
+    } else {
+        NABTO_LOG_ERROR(("invalid address type"));
+        return UTS_FAILED;
+    }
     if (sock->socket < 0) {
         NABTO_LOG_ERROR(("Could not create socket for TCP"));
         return UTS_FAILED;
@@ -161,7 +168,7 @@ unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpo
         host.sin6_port = htons(ep->port);
         NABTO_LOG_TRACE(("Connecting to ", PRIep, MAKE_EP_PRINTABLE(*ep)));
     
-        status = connect(sock->socket, (struct sockaddr*)&host, sizeof(struct sockaddr_in));
+        status = connect(sock->socket, (struct sockaddr*)&host, sizeof(struct sockaddr_in6));
         
     } else {
         return UTS_FAILED;

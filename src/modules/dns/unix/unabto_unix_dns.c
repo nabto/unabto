@@ -38,6 +38,7 @@ void* resolver_thread(void* ctx) {
         uint8_t i;
         state->status = NABTO_DNS_OK;
         // read ipv4 addresses
+
         for (i = 0, rp = result; i < NABTO_DNS_RESOLVED_IPS_MAX && rp != NULL; rp = rp->ai_next) {
             struct nabto_ip_address* ip = &state->resolved_addrs[i];
             if (rp->ai_family == AF_INET) {
@@ -46,17 +47,7 @@ void* resolver_thread(void* ctx) {
                 sa4 = (struct sockaddr_in*)(rp->ai_addr);
                 READ_U32(ip->addr.ipv4, &sa4->sin_addr.s_addr);
                 i++;
-            }
-        }
-
-        if (i == NABTO_DNS_RESOLVED_IPS_MAX && NABTO_DNS_RESOLVED_IPS_MAX >= 2) {
-            // make room for atleast one ipv6 address
-            i--;
-        }
-        // read ipv6 addresses
-        for (rp = result; i < NABTO_DNS_RESOLVED_IPS_MAX && rp != NULL; rp = rp->ai_next) {
-            struct nabto_ip_address* ip = &state->resolved_addrs[i];
-            if (rp->ai_family == AF_INET6) {
+            } else if (rp->ai_family == AF_INET6) {
                 struct sockaddr_in6* sa6;
                 ip->type = NABTO_IP_V6;
                 sa6 = (struct sockaddr_in6*)(rp->ai_addr);
@@ -66,8 +57,6 @@ void* resolver_thread(void* ctx) {
         }
         freeaddrinfo(result);
     }
-
-    
     
     resolver_is_running = false;
     return NULL;
@@ -114,7 +103,7 @@ nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address
     
     if (resolver_state.status == NABTO_DNS_OK) {
         uint8_t i;
-        for (i = 0; i < 2; i++) {
+        for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
             addrs[i] = resolver_state.resolved_addrs[i];
         }
         
