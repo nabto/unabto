@@ -37,7 +37,7 @@ void unabto_time_update_stamp() {
 #else
     clock_gettime(CLOCK_REALTIME, &res);
 #endif
-    milliseconds = res.tv_sec*1000 + (res.tv_nsec/1000000);
+    milliseconds = res.tv_sec*1000l + (res.tv_nsec/1000000l);
     if (cachedTime.milliseconds != milliseconds) {
         cachedTime.milliseconds = milliseconds;
         cachedTime.count = 0;
