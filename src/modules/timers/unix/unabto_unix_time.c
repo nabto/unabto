@@ -21,7 +21,9 @@ void unabto_time_auto_update(bool enabled) {
 }
 
 void unabto_time_update_stamp() {
+    uint64_t tmp64;
     uint64_t milliseconds;
+
     struct timespec res;
 // OS X does not have clock_gettime, use clock_get_time
 #ifdef __MACH__
@@ -37,7 +39,16 @@ void unabto_time_update_stamp() {
 #else
     clock_gettime(CLOCK_REALTIME, &res);
 #endif
-    milliseconds = res.tv_sec*1000l + (res.tv_nsec/1000000l);
+
+    // use temporary 64 bit var to make overflow prevention explicit (vs 1000ll notation)
+    tmp64 = res.tv_sec;
+    tmp64 *= 1000;
+    milliseconds = tmp64;
+
+    tmp64 = res.tv_nsec;
+    tmp64 /= 1000000;
+    milliseconds += tmp64;
+
     if (cachedTime.milliseconds != milliseconds) {
         cachedTime.milliseconds = milliseconds;
         cachedTime.count = 0;
