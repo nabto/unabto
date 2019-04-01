@@ -10,6 +10,11 @@ Guide: always keep an unreleased section which keeps track of current
 changes. When a release is made the unreleased section is renamed to
 the release and a new unreleased section is added.
 
+## 4.4.2 2019-04-01
+
+### Changed
+- NABTO-1925: Fixed timestamp overflow causing devices to not be reachable after having been attached for 49 days to the basestation.
+
 ## 4.4.0 2018-10-21
 
 ### Changed
