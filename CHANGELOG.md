@@ -12,6 +12,11 @@ the release and a new unreleased section is added.
 
 ## 4.3.0 Unreleased
 
+## 4.2.5 2019-04-01
+
+### Changed
+- NABTO-1925: fixed timestamp overflow causing devices to not be reachable after having been attached for 49 days to the basestation
+
 ## 4.2.4 2018-02-23
 
 ### Changed
