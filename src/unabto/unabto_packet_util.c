@@ -313,8 +313,8 @@ uint8_t* insert_capabilities(uint8_t* buf, uint8_t* end, bool cap_encr_off) {
 
 
 uint8_t* insert_ipx_payload(uint8_t* ptr, uint8_t* end) {
-    uint32_t localAddr;
-    uint32_t globalAddr;
+    uint32_t localAddr = 0;
+    uint32_t globalAddr = 0;
 
     UNABTO_ASSERT(ptr <= end);
     if (end-ptr < NP_PAYLOAD_IPX_BYTELENGTH) {
