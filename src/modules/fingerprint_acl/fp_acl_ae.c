@@ -20,7 +20,7 @@ static bool read_fingerprint(unabto_query_request* read_buffer, struct unabto_fi
     if (length != FINGERPRINT_LENGTH) {
         return false;
     }
-    
+
     memcpy(fp->data, list, FINGERPRINT_LENGTH);
     return true;
 }
@@ -35,7 +35,7 @@ static bool read_string_null_terminated(unabto_query_request* read_buffer, char*
     }
 
     memset(out, 0, outlen);
-    
+
     memcpy(out, list, MIN(length, outlen-1));
     return true;
 }
@@ -60,7 +60,7 @@ application_event_result write_user(unabto_query_response* write_buffer, uint8_t
         return AER_REQ_RESPONSE_READY;
     } else {
         return AER_REQ_TOO_LARGE;
-    } 
+    }
 }
 
 application_event_result write_empty_user(unabto_query_response* write_buffer, uint8_t status)
@@ -86,7 +86,7 @@ application_event_result write_settings(unabto_query_response* response, struct 
     } else {
         return AER_REQ_TOO_LARGE;
     }
-    
+
 }
 
 // getUsers.json?count=nn&start=nn
@@ -118,7 +118,7 @@ application_event_result fp_acl_ae_users_get(application_request* request,
 
     // rough max extimate of the size of an encoded user.
     aclResponseSize = 2 + FP_ACL_USERNAME_MAX_LENGTH + 2 + FP_ACL_FP_LENGTH + 4 + 4;
-    
+
     it = aclDb.first();
 
     offset = 0;
@@ -126,7 +126,7 @@ application_event_result fp_acl_ae_users_get(application_request* request,
     while (it != NULL && offset < start) {
         it = aclDb.next(it);
         offset++;
-    } 
+    }
 
     {
         unabto_list_ctx listCtx;
@@ -134,7 +134,7 @@ application_event_result fp_acl_ae_users_get(application_request* request,
         if (!unabto_query_write_list_start(write_buffer, &listCtx)) {
             return AER_REQ_TOO_LARGE;
         }
-        
+
         while (it != NULL &&
                elements < count &&
                (unabto_query_write_free_bytes(write_buffer) > aclResponseSize))
@@ -165,9 +165,9 @@ application_event_result fp_acl_ae_users_get(application_request* request,
             return AER_REQ_TOO_LARGE;
         }
     }
-    
+
     return AER_REQ_RESPONSE_READY;
-    
+
 }
 
 
@@ -184,7 +184,7 @@ application_event_result fp_acl_ae_user_get(application_request* request,
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_NONE)) {
         return AER_REQ_NO_ACCESS;
     }
-    
+
     if (!read_fingerprint(read_buffer, &fp)) {
         return AER_REQ_TOO_SMALL;
     }
@@ -212,7 +212,7 @@ application_event_result fp_acl_ae_user_me(application_request* request,
         return write_empty_user(write_buffer, FP_ACL_STATUS_NO_SUCH_USER);
     }
 
-    return write_user(write_buffer, FP_ACL_STATUS_OK, &user);    
+    return write_user(write_buffer, FP_ACL_STATUS_OK, &user);
 }
 
 application_event_result fp_acl_ae_user_remove(application_request* request,
@@ -258,7 +258,7 @@ application_event_result fp_acl_ae_user_set_name(application_request* request,
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ADMIN)) {
         return AER_REQ_NO_ACCESS;
     }
-    
+
     if (!read_fingerprint(read_buffer, &fp)) {
         return AER_REQ_TOO_SMALL;
     }
@@ -267,11 +267,11 @@ application_event_result fp_acl_ae_user_set_name(application_request* request,
     if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return write_empty_user(write_buffer, FP_ACL_STATUS_NO_SUCH_USER);
     }
-        
+
     if (!read_string_null_terminated(read_buffer, user.name, FP_ACL_USERNAME_MAX_LENGTH)) {
         return AER_REQ_TOO_SMALL;
     }
-    
+
     status = FP_ACL_STATUS_OK;
     if (aclDb.save(&user) != FP_ACL_DB_OK) {
         status = FP_ACL_STATUS_SAVE_FAILED;
@@ -298,7 +298,7 @@ application_event_result fp_acl_ae_user_alter_permissions(application_request* r
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ADMIN)) {
         return AER_REQ_NO_ACCESS;
     }
-    
+
     if (!read_fingerprint(read_buffer, &fp)) {
         return AER_REQ_TOO_SMALL;
     }
@@ -308,7 +308,7 @@ application_event_result fp_acl_ae_user_alter_permissions(application_request* r
     }
 
     it = aclDb.find(&fp);
-    
+
     if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return write_empty_user(write_buffer, FP_ACL_STATUS_NO_SUCH_USER);
     }
@@ -316,7 +316,7 @@ application_event_result fp_acl_ae_user_alter_permissions(application_request* r
     alterPermissionsFunction(&user, permissions);
 
     status = FP_ACL_STATUS_OK;
-    
+
     if (aclDb.save(&user) != FP_ACL_DB_OK) {
         status = FP_ACL_STATUS_SAVE_FAILED;
     }
@@ -357,7 +357,7 @@ application_event_result fp_acl_add_user_no_check(unabto_query_response* write_b
     struct fp_acl_user existingUser;
     fp_acl_db_status status;
     void* it;
-    
+
     if (aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
         return AER_REQ_SYSTEM_ERROR;
     }
@@ -373,7 +373,7 @@ application_event_result fp_acl_add_user_no_check(unabto_query_response* write_b
             return AER_REQ_SYSTEM_ERROR;
         }
     }
-    
+
     if (aclDb.first() == NULL) {
         user->permissions = aclSettings.firstUserPermissions;
     } else {
@@ -386,7 +386,7 @@ application_event_result fp_acl_add_user_no_check(unabto_query_response* write_b
         return write_user(write_buffer, FP_ACL_STATUS_OK, user);
     } else {
         return write_empty_user(write_buffer, FP_ACL_STATUS_USER_DB_FULL);
-    } 
+    }
 }
 
 
@@ -398,7 +398,7 @@ application_event_result fp_acl_ae_user_add(application_request* request,
     struct fp_acl_user user;
 
     fp_acl_init_user(&user);
-    
+
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ADMIN)) {
         return AER_REQ_NO_ACCESS;
     }
@@ -406,6 +406,7 @@ application_event_result fp_acl_ae_user_add(application_request* request,
     if (!read_fingerprint(read_buffer, &(user.fp.value))) {
         return AER_REQ_TOO_SMALL;
     }
+    user.fp.hasValue = 1;
     if (!read_string_null_terminated(read_buffer, user.name, FP_ACL_USERNAME_MAX_LENGTH)) {
         return AER_REQ_TOO_SMALL;
     }
@@ -465,7 +466,7 @@ application_event_result fp_acl_ae_system_set_acl_settings(application_request* 
     if (aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
         return AER_REQ_SYSTEM_ERROR;
     }
-    
+
     if (! (unabto_query_read_uint32(read_buffer, &aclSettings.systemPermissions) &&
            unabto_query_read_uint32(read_buffer, &aclSettings.defaultUserPermissions)))
     {
@@ -475,7 +476,7 @@ application_event_result fp_acl_ae_system_set_acl_settings(application_request* 
     if (aclDb.save_settings(&aclSettings) != FP_ACL_DB_OK) {
         return AER_REQ_SYSTEM_ERROR;
     }
-    
+
     if (aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
         return AER_REQ_SYSTEM_ERROR;
     }
@@ -495,7 +496,7 @@ bool fp_acl_is_user_allowed(nabto_connect* connection, uint32_t requiredPermissi
     if (! (connection && connection->fingerprint.hasValue)) {
         return false;
     }
-    
+
     it = aclDb.find(&(connection->fingerprint.value));
     if (it == NULL || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return false;
@@ -524,7 +525,7 @@ bool fp_acl_is_pair_allowed(application_request* request)
     if (aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
         return false;
     }
-    
+
     if (request->connection->isLocal) {
         if (fp_acl_check_system_permissions(&aclSettings, FP_ACL_SYSTEM_PERMISSION_PAIRING)) {
             return true;
@@ -566,7 +567,7 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
 
     requiredSystemPermissions = FP_ACL_SYSTEM_PERMISSION_NONE;
     requiredUserPermissions = FP_ACL_PERMISSION_NONE;
-    
+
     if (connection->isLocal) {
         requiredSystemPermissions |= FP_ACL_SYSTEM_PERMISSION_LOCAL_ACCESS;
     } else {
@@ -590,7 +591,7 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
 bool fp_acl_is_user_owner(application_request* request)
 {
     void* it;
-    struct fp_acl_user user;    
+    struct fp_acl_user user;
     if (! (request->connection && request->connection->fingerprint.hasValue)) {
         return false;
     }
@@ -625,14 +626,14 @@ application_event_result fp_acl_ae_dispatch(uint32_t query_id_base,
     case 0:
         // get_users.json
         return fp_acl_ae_users_get(request, read_buffer, write_buffer); // implied admin priv check
-        
-    case 10: 
+
+    case 10:
         // pair_with_device.json
-        return fp_acl_ae_pair_with_device(request, read_buffer, write_buffer); 
+        return fp_acl_ae_pair_with_device(request, read_buffer, write_buffer);
 
     case 20:
         // get_current_user.json
-        return fp_acl_ae_user_me(request, read_buffer, write_buffer); 
+        return fp_acl_ae_user_me(request, read_buffer, write_buffer);
 
     case 30:
         // get_system_security_settings.json
@@ -663,4 +664,3 @@ application_event_result fp_acl_ae_dispatch(uint32_t query_id_base,
         return AER_REQ_INV_QUERY_ID;
     }
 }
-
