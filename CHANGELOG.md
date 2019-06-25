@@ -10,6 +10,18 @@ Guide: always keep an unreleased section which keeps track of current
 changes. When a release is made the unreleased section is renamed to
 the release and a new unreleased section is added.
 
+## 4.5 UNRELEASED
+
+## 4.4.3 2019-06-25
+
+- NABTO-1947: Fixed overflow in streaming buffer calculations.
+
+## 4.4.2 2019-04-01
+
+### Changed
+- NABTO-1925: Fixed timestamp overflow causing devices to not be reachable after having been attached for 49 days to the basestation.
+
+
 ## 4.4.0 2018-10-21
 
 ### Changed
@@ -26,7 +38,7 @@ the release and a new unreleased section is added.
   `NABTO_STREAM_SEND_SEGMENT_POOL_SIZE` is renamed to
   `NABTO_STREAM_SEGMENT_POOL_SIZE` and does now also include recv
   segments.
-  
+
 ### Added
 - NABTO-1891: added configuration option
   `NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS`
@@ -36,7 +48,7 @@ the release and a new unreleased section is added.
 ### Changed
 - NABTO-1850: The streaming implementation now uses a pool of send
   segments.
-  
+
 ### Breaking Changes
 - NABTO-1187: all `uint32_t` ip addresses is now `struct
   nabto_ip_address` this affects the following function definitions:
@@ -120,4 +132,3 @@ the release and a new unreleased section is added.
 ### Breaking Changes
 - Tunnel module has been changed. Read readme in the `src/modules/tunnel`
 - The deprecated `buffer_read_t` and `buffer_write_t` type definitions in the `application_event()` callback have been replaced with `unabto_query_request` and `unabto_query_response`, respectively. This means that calls to `buffer_read_<TYPE>` and `buffer_write_<TYPE>` must be replaced with `unabto_query_read_<TYPE>` and `unabto_query_write_<TYPE>`, respectively.
-
