@@ -30,10 +30,10 @@ extern "C" {
 
 #else
 extern NABTO_THREAD_LOCAL_STORAGE struct nabto_stream_s stream__[NABTO_MEMORY_STREAM_MAX_STREAMS];
-extern NABTO_THREAD_LOCAL_STORAGE uint8_t stream_buffer_data[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEGMENT_SIZE * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE];
+extern NABTO_THREAD_LOCAL_STORAGE uint8_t stream_buffer_data[(size_t)(NABTO_MEMORY_STREAM_MAX_STREAMS) * (size_t)(NABTO_MEMORY_STREAM_SEGMENT_SIZE) * (size_t)(NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE)];
 
-extern NABTO_THREAD_LOCAL_STORAGE x_buffer x_buffers[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE];
-extern NABTO_THREAD_LOCAL_STORAGE r_buffer r_buffers[NABTO_MEMORY_STREAM_MAX_STREAMS * NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE];
+extern NABTO_THREAD_LOCAL_STORAGE x_buffer x_buffers[(size_t)(NABTO_MEMORY_STREAM_MAX_STREAMS) * (size_t)(NABTO_MEMORY_STREAM_SEND_WINDOW_SIZE)];
+extern NABTO_THREAD_LOCAL_STORAGE r_buffer r_buffers[(size_t)(NABTO_MEMORY_STREAM_MAX_STREAMS) * (size_t)(NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE)];
 #endif
 
 
@@ -62,7 +62,7 @@ void nabto_stream_event(nabto_connect*       con,
 
 /**
  * Return human readable name of state
- * @param stream  the stream 
+ * @param stream  the stream
  */
 text nabto_stream_state_name(unabto_stream* stream);
 
