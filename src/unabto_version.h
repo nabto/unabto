@@ -31,7 +31,7 @@
  */
 #define UNABTO_VERSION_MAJOR            4
 #define UNABTO_VERSION_MINOR            4
-#define UNABTO_VERSION_PATCH            2
+#define UNABTO_VERSION_PATCH            3
 
 /**
  * Prerelease identifiers are used to distinguish real releases from
