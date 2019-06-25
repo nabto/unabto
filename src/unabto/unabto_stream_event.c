@@ -55,7 +55,7 @@ void handle_stream_packet(nabto_connect* con, nabto_packet_header* hdr,
 
     uint8_t* sackStart = 0;
     uint16_t sackLength = 0;
-         
+
     NABTO_NOT_USED(userData);
 
 #if NABTO_ENABLE_TCP_FALLBACK
@@ -100,7 +100,7 @@ void nabto_stream_event(nabto_connect*       con,
         NABTO_LOG_ERROR(("Stream %i, Packet has no WINDOW payload!", hdr->tag));
         return;
     }
-    
+
     READ_U16(len, info + 2);
     if (!nabto_stream_read_window(info + SIZE_PAYLOAD_HEADER, len - SIZE_PAYLOAD_HEADER, &win)) {
         NABTO_LOG_DEBUG(("ReadWin failure"));
@@ -125,7 +125,7 @@ void nabto_stream_event(nabto_connect*       con,
         }
         return;
     }
-    
+
     if (!nabto_stream_validate_win(&win, stream)) {
         NABTO_LOG_ERROR(("Cannot validate received stream window."));
         return;
@@ -134,17 +134,17 @@ void nabto_stream_event(nabto_connect*       con,
     NABTO_LOG_TRACE(("(.%i.) Stream with tag %i accepted, slot=%i", con->spnsi, hdr->tag, unabto_stream_index(stream)));
 
     stream->stats.receivedPackets++;
- 
+
     memset(&sackData, 0, sizeof(sackData));
     {
         uint8_t* ptr = sackStart;
         while(sackLength >= 8 && sackData.nPairs < NP_PAYLOAD_SACK_MAX_PAIRS) {
-            uint32_t sackSeqStart; // start of sack 
+            uint32_t sackSeqStart; // start of sack
             uint32_t sackSeqEnd; // end of sack one larger than actual acked window.
             READ_FORWARD_U32(sackSeqStart, ptr);
             READ_FORWARD_U32(sackSeqEnd, ptr);
             sackLength -= 8;
-            
+
             sackData.pairs[sackData.nPairs].start = sackSeqStart;
             sackData.pairs[sackData.nPairs].end = sackSeqEnd;
             sackData.nPairs++;
@@ -163,7 +163,7 @@ bool build_and_send_rst_packet(nabto_connect* con, uint16_t tag, struct nabto_wi
     uint8_t*       buf   = nabtoCommunicationBuffer;
     uint8_t*       end   = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
     memset(&rst, 0, sizeof( struct nabto_win_info));
-    
+
     nabto_stream_make_rst_response_window(win, &rst);
     winLength = nabto_stream_window_payload_length(&rst);
 
@@ -177,7 +177,7 @@ bool build_and_send_rst_packet(nabto_connect* con, uint16_t tag, struct nabto_wi
     }
 
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
-    
+
     return send_and_encrypt_packet_con(con, buf, end, 0, 0, ptr - NP_PAYLOAD_HDR_BYTELENGTH);
 }
 
@@ -189,7 +189,7 @@ void unabto_time_event_stream(void)
     for (all = 0; all < NABTO_MEMORY_STREAM_MAX_STREAMS; ++all) {
         if (stream__[i].state != STREAM_IDLE) {
             struct nabto_stream_s* stream = &stream__[i];
-            nextStart = i;            
+            nextStart = i;
             nabto_stream_tcb_check_xmit(&stream__[i], true, false);
             if (stream->applicationEvents.dataReady) {
                 unabto_stream_event(stream, UNABTO_STREAM_EVENT_TYPE_DATA_READY);
@@ -230,10 +230,10 @@ void unabto_time_event_stream(void)
 
 void unabto_stream_init(void)
 {
-    memset(stream__, 0, sizeof(struct nabto_stream_s) * NABTO_MEMORY_STREAM_MAX_STREAMS);
-    
-    NABTO_LOG_INFO(("sizeof(stream__)=%" PRIsize, sizeof(struct nabto_stream_s) * NABTO_MEMORY_STREAM_MAX_STREAMS));
-    
+    memset(stream__, 0, sizeof(struct nabto_stream_s) * (size_t)(NABTO_MEMORY_STREAM_MAX_STREAMS));
+
+    NABTO_LOG_INFO(("sizeof(stream__)=%" PRIsize, sizeof(struct nabto_stream_s) * (size_t)(NABTO_MEMORY_STREAM_MAX_STREAMS)));
+
     unabto_packet_set_handler(NP_PACKET_HDR_TAG_STREAM_MIN, NP_PACKET_HDR_TAG_STREAM_MAX,
                               handle_stream_packet, 0);
 }
@@ -279,7 +279,7 @@ struct nabto_stream_s* find_stream(uint16_t tag, nabto_connect* con)
     int i;
     for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS; ++i) {
         if (stream__[i].state != STREAM_IDLE) {
-            if (stream__[i].streamTag == tag && 
+            if (stream__[i].streamTag == tag &&
                 stream__[i].connection == con) {
                 return stream__ + i; // return stream in use
             }
@@ -288,7 +288,7 @@ struct nabto_stream_s* find_stream(uint16_t tag, nabto_connect* con)
     return NULL;
 }
 
-struct nabto_stream_s* find_free_stream(uint16_t tag, nabto_connect* con) 
+struct nabto_stream_s* find_free_stream(uint16_t tag, nabto_connect* con)
 {
     int i;
     for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS; ++i) {
@@ -358,7 +358,7 @@ void nabto_stream_update_next_event(nabto_stamp_t* current_min_stamp)
     for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS; i++) {
         struct nabto_stream_s* stream = &stream__[i];
         if (stream->state != STREAM_IDLE) {
-            if (stream->applicationEvents.dataReady || 
+            if (stream->applicationEvents.dataReady ||
                 stream->applicationEvents.dataWritten ||
                 stream->applicationEvents.readClosed ||
                 stream->applicationEvents.writeClosed ||
@@ -404,7 +404,7 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
         } else if (stream->u.tcb.streamState == ST_CLOSED) {
             streamState = NP_PAYLOAD_STREAM_STATS_STATUS_CLOSED;
         } else {
-            streamState = NP_PAYLOAD_STREAM_STATS_STATUS_OPEN;  
+            streamState = NP_PAYLOAD_STREAM_STATS_STATUS_OPEN;
         }
         ptr = unabto_stats_write_u8(ptr, end, NP_PAYLOAD_STREAM_STATS_STATUS, streamState);
     }
@@ -425,23 +425,23 @@ uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct na
         ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_REORDERED_OR_LOST_PACKETS,   stats.reorderedOrLostPackets);
         ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_USER_WRITE,                  stats.userWrite);
         ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_USER_READ,                   stats.userRead);
-                                                                                                    
+
         ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_MIN,                     stats.rttMin);
         ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_MAX,                     stats.rttMax);
         ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_RTT_AVG,                     stats.rttAvg);
-                                                                                                    
+
         ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_MIN,                    stats.cwndMin);
         ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_MAX,                    stats.cwndMax);
         ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_CWND_AVG,                    stats.cwndAvg);
-                                                                                                    
+
         ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MIN,            stats.ssThresholdMin);
         ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_MAX,            stats.ssThresholdMax);
         ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_SS_THRESHOLD_AVG,            stats.ssThresholdAvg);
-                                                                                                    
+
         ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_FLIGHT_SIZE_MIN,             stats.flightSizeMin);
         ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_FLIGHT_SIZE_MAX,             stats.flightSizeMax);
         ptr = unabto_stats_write_u16(ptr, end, NP_PAYLOAD_STREAM_STATS_FLIGHT_SIZE_AVG,             stats.flightSizeAvg);
-                                                                                                    
+
         ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_TIMEOUTS,                    stats.timeouts);
         ptr = unabto_stats_write_u32(ptr, end, NP_PAYLOAD_STREAM_STATS_SEND_SEGMENT_ALLOC_FAILURES, stats.sendSegmentAllocFailures);
     }
@@ -467,12 +467,12 @@ void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
     if (stream->state == STREAM_IDLE) {
         return;
     }
-    
+
     ptr = insert_stats_payload(ptr, end, event);
     if (ptr == NULL) {
         return;
     }
-    
+
     ptr = insert_version_payload(ptr, end);
     if (ptr == NULL) {
         return;

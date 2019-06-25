@@ -92,7 +92,7 @@ void nabto_reset_connection(nabto_connect* con)
 #if NABTO_ENABLE_TCP_FALLBACK
     unabto_tcp_fallback_init(con);
     con->tcpFallbackConnectionStamp = tmp;
-#endif                
+#endif
 
     nabto_crypto_reset(&con->cryptoctx);
 }
@@ -101,7 +101,7 @@ void nabto_reset_connection(nabto_connect* con)
 void nabto_init_connections(void)
 {
     NABTO_LOG_TRACE(("Init connections"));
-    memset(connections, 0, sizeof(struct nabto_connect_s) * NABTO_MEMORY_CONNECTIONS_SIZE);
+    memset(connections, 0, sizeof(struct nabto_connect_s) * (size_t)(NABTO_MEMORY_CONNECTIONS_SIZE));
 }
 
 nabto_connect* nabto_reserve_connection(void)
@@ -114,7 +114,7 @@ nabto_connect* nabto_reserve_connection(void)
             return con;
         }
     }
-    
+
     return 0;
 }
 
@@ -154,7 +154,7 @@ void nabto_release_connection(nabto_connect* con)
 
         // in case the rendezvous state is still active.
         nabto_rendezvous_end(con);
-        
+
 #if NABTO_ENABLE_TCP_FALLBACK
         if (con->hasTcpFallbackCapabilities) {
             unabto_tcp_fallback_close(con);
@@ -206,13 +206,13 @@ nabto_connect* nabto_find_local_connection_cp_nsi(uint32_t cpnsi)
         NABTO_LOG_WARN(("cpnsi should not be 0"));
         return NULL;
     }
-    
+
     for (con = connections; con < connections + NABTO_MEMORY_CONNECTIONS_SIZE; ++con) {
         if (con->cpnsi == cpnsi && con->state != CS_IDLE && con->spnsi <= 1000) {
             return con;
         }
     }
-    
+
     NABTO_LOG_TRACE(("Connection not found (probably a good thing) (CPNSI=%" PRIu32 ")", cpnsi));
     return NULL;
 }
@@ -248,12 +248,12 @@ bool nabto_connect_event(message_event* event, nabto_packet_header* hdr)
 
     if (payload.type == NP_PAYLOAD_TYPE_EP) {
         return rendezvous_event(event, hdr);
-    } 
-    
+    }
+
     if (payload.type == NP_PAYLOAD_TYPE_IPX) {
         return connect_event(event, hdr);
     }
-    
+
     NABTO_LOG_ERROR(("U_CONNECT was neither a rendezvous nor a connect event."));
     return false;
 }
@@ -276,7 +276,7 @@ bool nabto_connect_event_from_gsp(message_event* event, nabto_packet_header* hdr
  * @param nsi                the nsi value of the connection
  * @param cpnsi              the nsi of the clientpeer to put into the packet.
  * @param spnsi              the nsi of the serverpeer to put into the packet.
- * @param isLocalConnectRsp  true if a capabilities packet 
+ * @param isLocalConnectRsp  true if a capabilities packet
  * @return                   the size of the response
  */
 static size_t mk_connect_rsp(uint8_t* buf, uint8_t* end, uint16_t seq, uint32_t notif, uint32_t nsi, uint32_t cpnsi, uint32_t spnsi, bool isLocalConnectRsp)
@@ -285,7 +285,7 @@ static size_t mk_connect_rsp(uint8_t* buf, uint8_t* end, uint16_t seq, uint32_t 
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_NOTIFY, 0, 8);
     WRITE_U32(ptr, notif); ptr += 4;
     WRITE_U32(ptr, nsi);   ptr += 4;
-    
+
     if (isLocalConnectRsp) {
         ptr = insert_capabilities(ptr, end, 1 /*unenc*/);
     }
@@ -299,7 +299,7 @@ bool connect_event(message_event* event, nabto_packet_header* hdr)
 {
     nabto_endpoint* peer = &event->udpMessage.peer;
     bool isLocal = nabto_socket_is_equal(&event->udpMessage.socket, &nmc.socketLocal);
-    
+
 
     NABTO_LOG_TRACE(("U_CONNECT: Searching for hdr->nsi_cp=%" PRIu32 " (should not be found)", hdr->nsi_cp));
     if (nabto_find_connection(hdr->nsi_cp) == NULL) {
@@ -310,7 +310,7 @@ bool connect_event(message_event* event, nabto_packet_header* hdr)
             size_t olen;
             NABTO_LOG_TRACE(("Couldn't find connection (good!). Created a new connection (nsi=%" PRIu32 ") con->spnsi=%" PRIu32, nsi, con->spnsi));
             olen = mk_connect_rsp(nabtoCommunicationBuffer, nabtoCommunicationBuffer + nabtoCommunicationBufferSize, hdr->seq, NOTIFY_CONNECT_OK, con->spnsi, hdr->nsi_cp, hdr->nsi_sp, isLocal);
-            
+
             if (olen == 0) {
                 NABTO_LOG_ERROR(("U_CONNECT out of resources in connect event."));
                 nabto_release_connection(con); // no resources available
@@ -320,7 +320,7 @@ bool connect_event(message_event* event, nabto_packet_header* hdr)
                 } else {
                     nabto_write(event->udpMessage.socket, nabtoCommunicationBuffer, olen, &peer->addr, peer->port);
                 }
-                
+
                 con->state = CS_CONNECTING;
 
                 if (!con->noRendezvous) {
@@ -353,14 +353,14 @@ static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, ui
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
     uint32_t destIpV4 = 0;
 
-    
+
     ptr = insert_header(buf, 0, con->spnsi, U_CONNECT, false, seq, 0, 0);
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_EP, 0, 6);
 
     if (dest->addr.type == NABTO_IP_V4) {
         destIpV4 = dest->addr.addr.ipv4;
     }
-    
+
     WRITE_U32(ptr, destIpV4); ptr += 4;
     WRITE_U16(ptr, dest->port); ptr += 2;
     if (seq > 0) {
@@ -431,7 +431,7 @@ uint16_t nabto_connection_get_fresh_sp_nsi(void) {
         }
         i++;
     } while((i <= 900) && (nabto_find_connection(nsiStore) != NULL));
-    
+
     return nsiStore;
 }
 
@@ -459,7 +459,7 @@ bool unabto_connection_verify_and_decrypt_connect_packet(nabto_packet_header* hd
         }
     }
 
-    if (!unabto_crypto_verify_and_decrypt(hdr, nmc.context.cryptoConnect, &crypto, decryptedDataStart, decryptedDataLength)) 
+    if (!unabto_crypto_verify_and_decrypt(hdr, nmc.context.cryptoConnect, &crypto, decryptedDataStart, decryptedDataLength))
     {
         NABTO_LOG_TRACE(("U_CONNECT verify or decryption failed"));
         return false;
@@ -482,12 +482,12 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
 
     struct unabto_payload_ipx ipxData;
     {
-        struct unabto_payload_packet ipxPayload;   
+        struct unabto_payload_packet ipxPayload;
         if (!unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_IPX, &ipxPayload)) {
             NABTO_LOG_ERROR(("Missing ipx payload in connect"));
             return 0;
         }
-        
+
         *nsi = 0;
         *ec  = 0;
 
@@ -537,7 +537,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
     con->cp.privateEndpoint.port = ipxData.privateIpPort;
     nabto_resolve_ipv4(ipxData.globalIpAddress, &con->cp.globalEndpoint.addr);
     con->cp.globalEndpoint.port = ipxData.globalIpPort;
-    
+
     con->noRendezvous = (ipxData.flags & NP_PAYLOAD_IPX_FLAG_NO_RENDEZVOUS) ? 1 : 0;
     con->cpEqual      = nabto_ep_is_equal(&con->cp.privateEndpoint, &con->cp.globalEndpoint);
     con->cpAsync      = (ipxData.flags & NP_PAYLOAD_IPX_FLAG_CP_ASYNC) ? 1 : 0;
@@ -656,7 +656,7 @@ void nabto_connection_end_connecting(nabto_connect* con, message_event* event) {
         }
     }
 
-#if NABTO_ENABLE_TCP_FALLBACK    
+#if NABTO_ENABLE_TCP_FALLBACK
     if (event->type == MT_TCP_FALLBACK) {
         con->state = CS_CONNECTED;
         con->type = NCT_REMOTE_RELAY_MICRO;
@@ -670,7 +670,7 @@ void nabto_connection_end_connecting(nabto_connect* con, message_event* event) {
     con->sendConnectStatistics = true;
     // trigger recalculation of timeout such that statistics can be sent.
     connection_timeout_cache_cached = false;
-} 
+}
 
 void nabto_connection_event(nabto_connect* con, message_event* event) {
     /**
@@ -698,7 +698,7 @@ void nabto_connection_client_aborted(nabto_connect* con)
 
 void nabto_rendezvous_stop(nabto_connect* con) {
     nabto_rendezvous_connect_state* rcs = &con->rendezvousConnectState;
-    
+
     if (rcs->state == RS_CONNECTING) {
         NABTO_LOG_INFO(("Extended rendezvous ports opened: %i, 0 is perfectly fine.", rcs->portsOpened));
         rcs->state = RS_DONE;
@@ -710,7 +710,7 @@ void nabto_rendezvous_end(nabto_connect* con) {
 }
 
 
-void nabto_rendezvous_start(nabto_connect* con) 
+void nabto_rendezvous_start(nabto_connect* con)
 {
     nabto_rendezvous_connect_state* rcs = &con->rendezvousConnectState;
     rcs->state = RS_CONNECTING;
@@ -727,7 +727,7 @@ void nabto_rendezvous_start(nabto_connect* con)
 
     if (con->clientNatType == NP_PAYLOAD_IPX_NAT_SYMMETRIC) {
         unabto_extended_rendezvous_init_port_sequence(&con->rendezvousConnectState.portSequence, con->cp.globalEndpoint.port);
-        con->rendezvousConnectState.openManyPorts = true; 
+        con->rendezvousConnectState.openManyPorts = true;
         unabto_connection_set_future_stamp(&con->rendezvousConnectState.openManyPortsStamp, 0);
     }
     send_rendezvous_to_all(con);
@@ -821,16 +821,16 @@ void send_rendezvous_to_all(nabto_connect* con) {
     unabto_connection_set_future_stamp(&con->rendezvousConnectState.timestamp, 1000);
 }
 
-void rendezvous_time_event(nabto_connect* con) 
+void rendezvous_time_event(nabto_connect* con)
 {
     nabto_rendezvous_connect_state* rcs = &con->rendezvousConnectState;
     if (rcs->state == RS_CONNECTING) {
-        if (nabtoIsStampPassed(&rcs->timestamp)) 
+        if (nabtoIsStampPassed(&rcs->timestamp))
         {
             send_rendezvous_to_all(con);
         }
 
-#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS         
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
         if (rcs->openManySockets &&
             nabtoIsStampPassed(&rcs->openManySocketsStamp))
         {
@@ -855,10 +855,10 @@ void rendezvous_time_event(nabto_connect* con)
             for (i = 0; i < 10; i++) {
                 nabto_endpoint newEp;
                 uint16_t newPort = unabto_extended_rendezvous_next_port(&rcs->portSequence, rcs->portsOpened);
-                
+
                 newEp.addr = con->cp.globalEndpoint.addr;
                 newEp.port = newPort;
-                
+
                 send_rendezvous(con, 0, &newEp, 0);
                 rcs->portsOpened++;
             }
@@ -872,7 +872,7 @@ void rendezvous_time_event(nabto_connect* con)
             nabto_rendezvous_stop(con);
         }
     }
-} 
+}
 
 void statistics_time_event(nabto_connect* con) {
     if (con->sendConnectStatistics) {
@@ -896,7 +896,7 @@ void nabto_time_event_connection(void)
     } else {
         nabto_connect* con;
         connection_timeout_cache_cached = false;
-        
+
         for (con = connections; con < connections + NABTO_MEMORY_CONNECTIONS_SIZE; ++con) {
             if (con->state != CS_IDLE) {
                 rendezvous_time_event(con);
@@ -905,7 +905,7 @@ void nabto_time_event_connection(void)
                     unabto_tcp_fallback_time_event(con);
                 }
 #endif
-                
+
                 if (nabto_connection_has_keep_alive(con) && nabtoIsStampPassed(&con->stamp)) {
                     NABTO_LOG_DEBUG((PRInsi " Connection timeout", MAKE_NSI_PRINTABLE(0, con->spnsi, 0))); //, Stamp value is: %ul", con->spnsi, con->stamp));
                     nabto_release_connection(con);
@@ -921,8 +921,8 @@ bool verify_connection_encryption(nabto_connect* con) {
     // Local connections can use whatever crypto they like.
     if (con->isLocal) {
         return true;
-    } 
-    
+    }
+
     // If we don't want encryption it's ok.
     if (!nmc.nabtoMainSetup.secureData) {
         return true;
@@ -993,7 +993,7 @@ uint8_t* insert_rendezvous_stats_payload(uint8_t* ptr, uint8_t* end, nabto_conne
         return NULL;
     }
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_RENDEZVOUS_STATS, 0, 7);
-    
+
     WRITE_FORWARD_U8(ptr, NP_PAYLOAD_RENDEZVOUS_STATS_VERSION);
     WRITE_FORWARD_U8(ptr, con->clientNatType);
     WRITE_FORWARD_U8(ptr, nmc.context.natType);
@@ -1015,7 +1015,7 @@ uint8_t* insert_cp_id_payload(uint8_t* ptr, uint8_t* end, nabto_connect* con) {
 
     WRITE_FORWARD_U8(ptr, NP_PAYLOAD_CP_ID_TYPE_MAIL);
     memcpy(ptr, (const void*) con->clientId, cpIdLength);
-    
+
     ptr += cpIdLength;
 
     return ptr;
@@ -1042,7 +1042,7 @@ uint8_t* insert_connection_info_payload(uint8_t* ptr, uint8_t* end, nabto_connec
     if (ptr == NULL) {
         return NULL;
     }
-    
+
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CONNECTION_INFO, 0, 0);
 
     ptr = unabto_stats_write_u8(ptr, end, NP_PAYLOAD_CONNECTION_INFO_TYPE, connectionType);
@@ -1059,7 +1059,7 @@ uint8_t* insert_connection_info_payload(uint8_t* ptr, uint8_t* end, nabto_connec
     if (ptr != NULL) {
         WRITE_U16(payloadBegin + 2, ptr - payloadBegin);
     }
-    
+
     return ptr;
 }
 
@@ -1067,7 +1067,7 @@ void send_connection_statistics(nabto_connect* con, uint8_t event) {
     size_t length;
     uint8_t* ptr = insert_header(nabtoCommunicationBuffer, 0, con->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
-    
+
 
 
     ptr = insert_stats_payload(ptr, end, event);
@@ -1146,7 +1146,7 @@ void send_connection_ended_statistics(nabto_connect* con) {
 
     length = ptr - nabtoCommunicationBuffer;
     insert_length(nabtoCommunicationBuffer, length);
-    
+
     send_to_basestation(nabtoCommunicationBuffer, length, &nmc.context.gsp);
 }
 

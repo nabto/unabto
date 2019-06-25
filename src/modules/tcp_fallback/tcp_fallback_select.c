@@ -47,7 +47,7 @@ void close_tcp_socket(nabto_connect* con);
 bool unabto_tcp_fallback_module_init()
 {
 #if NABTO_ENABLE_DYNAMIC_MEMORY
-    fbConns = (unabto_tcp_fallback_connection*)malloc(sizeof(unabto_tcp_fallback_connection) * NABTO_MEMORY_CONNECTIONS_SIZE);
+    fbConns = (unabto_tcp_fallback_connection*)malloc(sizeof(unabto_tcp_fallback_connection) * (size_t)(NABTO_MEMORY_CONNECTIONS_SIZE));
     if (fbConns == 0) {
         NABTO_LOG_FATAL(("Could not allocate memory for fallback connections"));
         return false;
@@ -96,7 +96,7 @@ void unabto_tcp_fallback_select_add_to_write_fd_set(fd_set* writeFds, int* maxWr
     }
 }
 
-void unabto_tcp_fallback_read_ready(nabto_connect* con) { 
+void unabto_tcp_fallback_read_ready(nabto_connect* con) {
     if (con->state != CS_IDLE) {
         unabto_tcp_fallback_state st = con->tcpFallbackConnectionState;
         unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
@@ -140,7 +140,7 @@ void unabto_tcp_fallback_select_write_sockets(fd_set* writeFds) {
                     } else if (st >= UTFS_CONNECTED) {
                         unabto_tcp_fallback_handle_write(con);
                     }
-                } 
+                }
             }
         }
     }
@@ -151,7 +151,7 @@ void unabto_tcp_fallback_write_ready(nabto_connect* con) {
         unabto_tcp_fallback_state st = con->tcpFallbackConnectionState;
         unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
         if (st > UTFS_IDLE && st < UTFS_CLOSED && fbConn->socket.socket != INVALID_SOCKET) {
-            
+
             if (st == UTFS_CONNECTING) {
                 unabto_tcp_fallback_handle_connect(con);
             }
@@ -160,7 +160,7 @@ void unabto_tcp_fallback_write_ready(nabto_connect* con) {
                 do {
                     status = unabto_tcp_fallback_handle_write(con);
                 } while (status);
-            } 
+            }
         }
     }
 }
@@ -246,18 +246,18 @@ void unabto_tcp_fallback_read_packets(nabto_connect* con) {
                 NABTO_LOG_ERROR((PRI_tcp_fb "Tcp read failed", TCP_FB_ARGS(con)));
                 return;
             }
-            
+
             if (fbConn->recvBufferLength == packetLength) {
                 message_event event;
                 event.type = MT_TCP_FALLBACK;
-                
+
                 memcpy(nabtoCommunicationBuffer, fbConn->recvBuffer, fbConn->recvBufferLength);
-                
+
                 NABTO_LOG_TRACE((PRI_tcp_fb "Received fallback packet length %" PRIsize, TCP_FB_ARGS(con), fbConn->recvBufferLength));
-                
+
                 nabto_message_event(&event, (uint16_t)(fbConn->recvBufferLength));
                 NABTO_LOG_TRACE((PRI_tcp_fb "fallback packet done\n==================================================", TCP_FB_ARGS(con)));
-                
+
                 fbConn->recvBufferLength = 0;
             }
         }
@@ -285,7 +285,7 @@ bool unabto_tcp_fallback_connect(nabto_connect* con) {
         NABTO_LOG_ERROR((PRI_tcp_fb "Could not create socket for tcp fallback.", TCP_FB_ARGS(con)));
         return false;
     }
-    
+
     status = unabto_tcp_connect(&fbConn->socket, &con->fallbackHost);
 
     NABTO_LOG_INFO((PRI_tcp_fb "Ep. " PRIep, TCP_FB_ARGS(con), MAKE_EP_PRINTABLE(con->fallbackHost)));
@@ -328,13 +328,13 @@ bool unabto_tcp_fallback_handle_write(nabto_connect* con) {
     int dataToSend;
     bool canMaybeSendMoreData = false;
     unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
-    UNABTO_ASSERT(fbConn->sendBufferSent <= fbConn->sendBufferLength); 
+    UNABTO_ASSERT(fbConn->sendBufferSent <= fbConn->sendBufferLength);
     dataToSend = fbConn->sendBufferLength - fbConn->sendBufferSent;
 
     if (dataToSend == 0) {
         return false;
     }
-    
+
     NABTO_LOG_TRACE(("data to send %i, sendBufferLength %i, sendBufferSent %i", dataToSend, fbConn->sendBufferLength, fbConn->sendBufferSent));
 
     status = unabto_tcp_write(&fbConn->socket, fbConn->sendBuffer + fbConn->sendBufferSent, dataToSend, &written);
@@ -361,7 +361,7 @@ bool unabto_tcp_fallback_handle_write(nabto_connect* con) {
     }
 
     NABTO_LOG_TRACE(("state after send, sendBufferLength %i, sendBufferSent %i", fbConn->sendBufferLength, fbConn->sendBufferSent));
-    
+
     return canMaybeSendMoreData;
 }
 

@@ -35,12 +35,12 @@ const char* uart_tunnel_get_default_device() {
 bool unabto_tunnel_init_tunnels()
 {
     int i;
-    tunnels = (tunnel*)malloc(sizeof(struct tunnel) * NABTO_MEMORY_STREAM_MAX_STREAMS);
+    tunnels = (tunnel*)malloc(sizeof(struct tunnel) * (size_t)(NABTO_MEMORY_STREAM_MAX_STREAMS));
     if (tunnels == NULL) {
         return false;
     }
 
-    tunnels_static_memory = (tunnel_static_memory*)malloc(sizeof(struct tunnel_static_memory) * NABTO_MEMORY_STREAM_MAX_STREAMS);
+    tunnels_static_memory = (tunnel_static_memory*)malloc(sizeof(struct tunnel_static_memory) * (size_t)(NABTO_MEMORY_STREAM_MAX_STREAMS));
     if (tunnels_static_memory == NULL) {
         return false;
     }
@@ -106,7 +106,7 @@ void unabto_tunnel_event(tunnel* tunnel, tunnel_event_source event_source)
     if (tunnel->state == TS_FAILED_COMMAND) {
         unabto_tunnel_closing(tunnel, event_source);
     }
-    
+
     if (tunnel->state >= TS_PARSE_COMMAND) {
         unabto_tunnel_event_dispatch(tunnel, event_source);
     }
@@ -133,15 +133,15 @@ void unabto_tunnel_read_command(tunnel* tunnel, tunnel_event_source event_source
                     tunnel->staticMemory->command[tunnel->commandLength] = buf[i];
                     tunnel->commandLength++;
                 }
-                
+
                 if (tunnel->commandLength > MAX_COMMAND_LENGTH) {
                     NABTO_LOG_ERROR(("Tunnel command too long"));
                     tunnel->state = TS_CLOSING;
                 }
             }
-            
+
             unabto_stream_ack(tunnel->stream, buf, i, &hint);
-            
+
             if (hint != UNABTO_STREAM_HINT_OK) {
                 NABTO_LOG_ERROR(("Failed to ack on stream."));
                 tunnel->state = TS_CLOSING;
@@ -173,7 +173,7 @@ bool unabto_tunnel_has_uart(){
 void unabto_tunnel_parse_command(tunnel* tunnel, tunnel_event_source tunnel_event)
 {
 #if NABTO_ENABLE_TUNNEL_UART
-    if (uart_tunnel_get_default_device() != 0){ 
+    if (uart_tunnel_get_default_device() != 0){
        if (strncmp((const char*)tunnel->staticMemory->command, UART_TXT, strlen(UART_TXT)) == 0) {
            unabto_tunnel_uart_parse_command(tunnel, tunnel_event, tunnels, NABTO_MEMORY_STREAM_MAX_STREAMS);
            return;
@@ -206,21 +206,21 @@ void unabto_tunnel_closing(tunnel* tunnel, tunnel_event_source tunnel_event)
         const uint8_t* buf;
         unabto_stream_hint hint;
         size_t readen;
-        
+
         do {
             readen = unabto_stream_read(tunnel->stream, &buf, &hint);
             if (readen > 0) {
                 unabto_stream_ack(tunnel->stream, buf, readen, &hint);
             }
         } while (readen > 0);
-        
+
         if (unabto_stream_close(tunnel->stream)) {
             unabto_stream_stats info;
             unabto_stream_get_stats(tunnel->stream, &info);
-            
+
             NABTO_LOG_TRACE(("Closed tunnel successfully"));
             NABTO_LOG_INFO(("Tunnel(%i) closed, " UNABTO_STREAM_STATS_PRI, tunnel->tunnelId, UNABTO_STREAM_STATS_MAKE_PRINTABLE(info)));
-            
+
             unabto_stream_release(tunnel->stream);
             unabto_tunnel_reset_tunnel_struct(tunnel);
         }
@@ -272,7 +272,7 @@ void unabto_tunnel_select_add_to_fd_set(fd_set* readFds, int* maxReadFd, fd_set*
 #if NABTO_ENABLE_TUNNEL_UART
             if (tunnels[i].tunnelType == TUNNEL_TYPE_UART){
                 if (tunnels[i].state == TS_FORWARD && tunnels[i].extReadState == FS_READ && tunnels[i].tunnel_type_vars.uart.fd != -1) {
-                    
+
                     FD_SET(tunnels[i].tunnel_type_vars.uart.fd, readFds);
                     *maxReadFd = MAX(*maxReadFd, tunnels[i].tunnel_type_vars.uart.fd);
                 }
@@ -293,7 +293,7 @@ void unabto_tunnel_select_add_to_fd_set(fd_set* readFds, int* maxReadFd, fd_set*
                     tunnels[i].state == TS_OPENING_SOCKET) {
                     FD_SET(tunnels[i].tunnel_type_vars.tcp.sock.socket, writeFds);
                     *maxWriteFd = MAX(*maxWriteFd, (int)(tunnels[i].tunnel_type_vars.tcp.sock.socket));
-                }                    
+                }
             }
 #endif
         }
