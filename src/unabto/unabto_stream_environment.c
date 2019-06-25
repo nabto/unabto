@@ -36,7 +36,7 @@ bool build_and_send_packet(struct nabto_stream_s* stream, uint8_t type, uint32_t
     if (con == NULL) {
         return false;
     }
-    
+
     nabtoSetFutureStamp(&tcb->ackStamp, 2*tcb->cfg.timeoutMsec);
 
     ptr = insert_data_header(buf, con->spnsi, con->nsico, stream->streamTag);
@@ -54,7 +54,7 @@ bool build_and_send_packet(struct nabto_stream_s* stream, uint8_t type, uint32_t
     if (winInfoSize) {
         memcpy(ptr, (const void*) winInfoData, winInfoSize); ptr += winInfoSize;
     }
-    
+
     if (sackData && sackData->nPairs > 0) {
         uint8_t i;
         ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_SACK, 0, 8 * sackData->nPairs);
@@ -67,7 +67,7 @@ bool build_and_send_packet(struct nabto_stream_s* stream, uint8_t type, uint32_t
 
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
 
-    
+
     if (send_and_encrypt_packet_con(con, buf, end, data, size, ptr - NP_PAYLOAD_HDR_BYTELENGTH)) {
         tcb->ackSent = ackToSend;
         stream->stats.sentPackets++;
@@ -98,9 +98,9 @@ bool unabto_stream_init_buffers(struct nabto_stream_s* stream)
     {
         memset(&tcb->recv[i], 0, sizeof(r_buffer));
     }
-    
+
     maxRecvBuffersToUse = (NABTO_MEMORY_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS - segment_pool_used_for_receive_windows);
-    
+
     // allocate recv buffers or as many as possible.
     for (i = 0; i < recvWinSize && i < maxRecvBuffersToUse; i++)
     {
@@ -110,7 +110,7 @@ bool unabto_stream_init_buffers(struct nabto_stream_s* stream)
         }
         tcb->recv[i].buf = buf;
     }
-    
+
     tcb->cfg.recvWinSize = i;
     if (i == 0) {
         // we need atleast one.
@@ -135,7 +135,7 @@ uint8_t* unabto_stream_alloc_send_segment(size_t required)
         NABTO_LOG_FATAL(("The stream segment size should never be that large"));
         return NULL;
     }
-    
+
     for (i = 0; i < NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE; i++) {
         if (!stream_segment_pool[i]) {
             stream_segment_pool[i] = true;
@@ -158,7 +158,7 @@ void unabto_stream_free_send_segment(uint8_t* buffer)
     }
 
     if (buffer > (stream_buffer_data + (NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE * NABTO_MEMORY_STREAM_SEGMENT_SIZE))) {
-        NABTO_LOG_FATAL(("invalid free pointer is outside of pool area"));
+        NABTO_LOG_FATAL(("invalid free pointer is outside of pool area. buffer: %p, stream_buffer_data: %p, segment_pool_size: %d, segment_size: %d", buffer, stream_buffer_data, NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE, NABTO_MEMORY_STREAM_SEGMENT_SIZE));
     }
 
     idx = (buffer - stream_buffer_data)/NABTO_MEMORY_STREAM_SEGMENT_SIZE;
@@ -195,7 +195,7 @@ uint8_t* unabto_stream_alloc_recv_segment(size_t required)
         NABTO_LOG_FATAL(("The stream segment size should never be that large"));
         return NULL;
     }
-    
+
     for (i = 0; i < NABTO_MEMORY_STREAM_SEGMENT_POOL_SIZE; i++) {
         if (!stream_segment_pool[i]) {
             stream_segment_pool[i] = true;
@@ -228,7 +228,7 @@ void unabto_stream_free_recv_segment(uint8_t* buffer)
     }
     stream_segment_pool[idx] = false;
     segment_pool_used_for_receive_windows--;
-    
+
 }
 
 
