@@ -549,6 +549,7 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
     }
 
     if (aclDb.load_settings(&aclSettings) != FP_ACL_DB_OK) {
+        NABTO_LOG_ERROR(("User rejected as settings could not be loaded"));
         return false;
     }
 
@@ -589,6 +590,7 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
     {
         struct fp_acl_user u;
         if (aclDb.load(user, &u) != FP_ACL_DB_OK) {
+            NABTO_LOG_ERROR(("User rejected as database could not be read"));
             return false;
         }
         allow = fp_acl_check_user_permissions(&u, connection->isLocal, requiredUserPermissions);

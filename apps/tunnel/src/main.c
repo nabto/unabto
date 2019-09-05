@@ -293,8 +293,8 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         unabto_printf_memory_sizes(stdout, "unabto_tunnel");
         exit(0);
     }
-    
-    { 
+
+    {
         size_t optionsLength = gopt(options, 'l');
         size_t i;
         if (optionsLength > 0) {
@@ -307,9 +307,9 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         } else {
             unabto_log_system_enable_stdout_pattern("*.info");
         }
-        
-    } 
-    
+
+    }
+
 
     if (!gopt_arg( options, 'd', &nms->id)) {
         NABTO_LOG_FATAL(("Specify a serverId with -d. Try -h for help."));
@@ -326,7 +326,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
             unabto_tunnel_tcp_set_default_port(p);
         }
     }
-     
+
     if( gopt_arg( options, 'p', &localPortStr) ){
         int localPort = atoi(localPortStr);
         nms->localPort = localPort;
@@ -369,7 +369,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         nice_exit = true;
     }
 
-    
+
     hosts_length = gopt(options, ALLOW_HOST_OPTION);
     if (hosts_length > 0) {
         size_t i;
@@ -396,7 +396,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         }
         fatalPortError = false;
     }
-    
+
     if (gopt(options, ALLOW_ALL_HOSTS_OPTION)) {
         allow_all_hosts = true;
     }
@@ -453,7 +453,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         uint16_t poolSize = atoi(streamSegmentPoolSizeOption);
         nms->streamSegmentPoolSize = poolSize;
     }
-    
+
 #endif
 
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
@@ -485,7 +485,7 @@ void acl_init() {
     NABTO_LOG_WARN(("Please review default access permissions and just remove this warning if acceptable"));
 
     // master switch: system allows both local and remote access to
-    // users with the right privileges and is open for pairing with new users 
+    // users with the right privileges and is open for pairing with new users
     default_settings.systemPermissions =
         FP_ACL_SYSTEM_PERMISSION_PAIRING |
         FP_ACL_SYSTEM_PERMISSION_LOCAL_ACCESS |
@@ -506,7 +506,9 @@ void acl_init() {
         NABTO_LOG_ERROR(("cannot prepare acl file"));
         exit(1);
     }
-    fp_mem_init(&fp_acl_db, &default_settings, &fp_persistence_file);
+    if (fp_mem_init(&fp_acl_db, &default_settings, &fp_persistence_file) != FP_ACL_DB_OK) {
+        NABTO_LOG_FATAL(("Could not read persistence database file"));
+    }
     fp_acl_ae_init(&fp_acl_db);
 }
 
@@ -538,7 +540,7 @@ int main(int argc, char** argv)
     platform_checks();
     acl_init();
     snprintf(device_name, sizeof(device_name), AMP_DEVICE_NAME_DEFAULT);
-    
+
 #if NABTO_ENABLE_EPOLL
     unabto_epoll_init();
 #endif
@@ -608,11 +610,11 @@ bool is_default_host(const char* host) {
 
 bool tunnel_allow_connection(const char* host, int port) {
     size_t i;
-    
+
     bool allow;
     bool portFound = false;
     bool hostFound = false;
-    
+
     if (allow_all_ports) {
         portFound = true;
     } else {
@@ -632,9 +634,9 @@ bool tunnel_allow_connection(const char* host, int port) {
             }
         }
     }
-    
+
     allow = hostFound && portFound;
-    
+
     if (!allow) {
         NABTO_LOG_INFO(("Current host/port access config has disallowed access to %s:%i", host, port));
     }
@@ -680,17 +682,17 @@ application_event_result application_event(application_request* request,
         if (!unabto_query_write_uint16(query_response, device_interface_version_major_)) return AER_REQ_RSP_TOO_LARGE;
         if (!unabto_query_write_uint16(query_response, device_interface_version_minor_)) return AER_REQ_RSP_TOO_LARGE;
         return AER_REQ_RESPONSE_READY;
-    
+
     } else if (request->queryId == 10000) {
         // AMP get_public_device_info.json
         if (!write_string(query_response, device_name)) return AER_REQ_RSP_TOO_LARGE;
         if (!write_string(query_response, device_product)) return AER_REQ_RSP_TOO_LARGE;
         if (!write_string(query_response, device_icon)) return AER_REQ_RSP_TOO_LARGE;
         if (!unabto_query_write_uint8(query_response, fp_acl_is_pair_allowed(request))) return AER_REQ_RSP_TOO_LARGE;
-        if (!unabto_query_write_uint8(query_response, fp_acl_is_user_paired(request))) return AER_REQ_RSP_TOO_LARGE; 
+        if (!unabto_query_write_uint8(query_response, fp_acl_is_user_paired(request))) return AER_REQ_RSP_TOO_LARGE;
         if (!unabto_query_write_uint8(query_response, fp_acl_is_user_owner(request))) return AER_REQ_RSP_TOO_LARGE;
         return AER_REQ_RESPONSE_READY;
-        
+
     } else if (request->queryId == 10010) {
         int res;
         // AMP set_device_info.json
@@ -699,11 +701,11 @@ application_event_result application_event(application_request* request,
         if (res != AER_REQ_RESPONSE_READY) return res;
         if (!write_string(query_response, device_name)) return AER_REQ_RSP_TOO_LARGE;
         return AER_REQ_RESPONSE_READY;
-        
+
     } else if (request->queryId >= 11000 && request->queryId < 12000) {
         // PPKA access control
         return fp_acl_ae_dispatch(11000, request, query_request, query_response);
-        
+
     } else {
         NABTO_LOG_WARN(("Unhandled query id: %u", request->queryId));
         return AER_REQ_INV_QUERY_ID;
@@ -739,7 +741,7 @@ bool unabto_local_psk_connection_get_key(const struct unabto_psk_id* keyId, cons
     if (!pkFp->hasValue) {
         return false;
     }
-    
+
     it = fp_acl_db.find(&pkFp->value);
 
     if (it && fp_acl_db.load(it, &user) == FP_ACL_DB_OK && user.pskId.hasValue && user.psk.hasValue) {
@@ -748,7 +750,7 @@ bool unabto_local_psk_connection_get_key(const struct unabto_psk_id* keyId, cons
             return true;
         }
     }
-    
+
     NABTO_LOG_WARN(("User with fingerprint [%2x:%2x:%2x:...] is not configured with key [%2x:%2x:%2x:...]",
                     pkFp->value.data[0], pkFp->value.data[1], pkFp->value.data[2],
                     keyId->data[0], keyId->data[1], keyId->data[2]));
