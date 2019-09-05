@@ -50,6 +50,7 @@ the release and a new unreleased section is added.
   segments.
 
 ### Breaking Changes
+- The ACL database (persistence.bin) has changed format and is incompatible with previous versions (ie, migration or deletion of previous file is necessary)
 - NABTO-1187: all `uint32_t` ip addresses is now `struct
   nabto_ip_address` this affects the following function definitions:
   `nabto_read`, `nabto_write`, `nabto_get_local_ip`,
