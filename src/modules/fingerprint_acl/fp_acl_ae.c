@@ -540,9 +540,11 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
     void* user;
     uint32_t requiredSystemPermissions;
     uint32_t requiredUserPermissions;
+    bool allow;
 
     // require that it's a fingerprint based connection!
     if (! (connection && connection->fingerprint.hasValue)) {
+        NABTO_LOG_INFO(("User rejected as it is not a fingerprint based connection"));
         return false;
     }
 
@@ -559,8 +561,13 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
         // access is disabled.)
         if (connection->isLocal) {
             requiredSystemPermissions = FP_ACL_SYSTEM_PERMISSION_NONE | FP_ACL_SYSTEM_PERMISSION_LOCAL_ACCESS;
-            return fp_acl_check_system_permissions(&aclSettings, requiredSystemPermissions);
+            allow = fp_acl_check_system_permissions(&aclSettings, requiredSystemPermissions);
+            if (!allow) {
+                NABTO_LOG_INFO(("Local user rejected as pairing and/or local connections are disabled"));
+            }
+            return allow;
         } else {
+            NABTO_LOG_INFO(("Unpaired user is not allowed remote access"));
             return false;
         }
     }
@@ -575,6 +582,7 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
     }
 
     if (!fp_acl_check_system_permissions(&aclSettings, requiredSystemPermissions)) {
+        NABTO_LOG_INFO(("User is paired but does not match system permissions"));
         return false;
     }
 
@@ -583,7 +591,11 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
         if (aclDb.load(user, &u) != FP_ACL_DB_OK) {
             return false;
         }
-        return fp_acl_check_user_permissions(&u, connection->isLocal, requiredUserPermissions);
+        allow = fp_acl_check_user_permissions(&u, connection->isLocal, requiredUserPermissions);
+        if (!allow) {
+            NABTO_LOG_INFO(("User is paired but does not match required user permissions"));
+        }
+        return allow;
     }
 }
 
