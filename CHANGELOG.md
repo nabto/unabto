@@ -24,13 +24,14 @@ the release and a new unreleased section is added.
 
 ### Removed
 - Nabto-over-DNS (DNS fallback) - not useful for practical purposes
-	
+
 ### Changed
 - NABTO-1850: The streaming implementation now uses a pool of send
   segments.
 - NABTO-1865: Convert doubles in unabto to something which is faster on architectures without an fpu
 
 ### Breaking Changes
+- The ACL database (persistence.bin) has changed format and is incompatible with previous versions (ie, migration or deletion of previous version is necessary)
 - NABTO-1187: all `uint32_t` ip addresses is now `struct
   nabto_ip_address` this affects the following function definitions:
   `nabto_read`, `nabto_write`, `nabto_get_local_ip`,
@@ -107,4 +108,3 @@ the release and a new unreleased section is added.
 ### Breaking Changes
 - Tunnel module has been changed. Read readme in the `src/modules/tunnel`
 - The deprecated `buffer_read_t` and `buffer_write_t` type definitions in the `application_event()` callback have been replaced with `unabto_query_request` and `unabto_query_response`, respectively. This means that calls to `buffer_read_<TYPE>` and `buffer_write_<TYPE>` must be replaced with `unabto_query_read_<TYPE>` and `unabto_query_write_<TYPE>`, respectively.
-
