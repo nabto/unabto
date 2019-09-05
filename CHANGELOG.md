@@ -31,7 +31,7 @@ the release and a new unreleased section is added.
   `NABTO_STREAM_SEND_SEGMENT_POOL_SIZE` is renamed to
   `NABTO_STREAM_SEGMENT_POOL_SIZE` and does now also include recv
   segments.
-  
+
 ### Added
 - NABTO-1891: added configuration option
   `NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS`
@@ -41,8 +41,9 @@ the release and a new unreleased section is added.
 ### Changed
 - NABTO-1850: The streaming implementation now uses a pool of send
   segments.
-  
+
 ### Breaking Changes
+- The ACL database (persistence.bin) has changed format and is incompatible with previous versions (ie, migration or deletion of previous file is necessary)
 - NABTO-1187: all `uint32_t` ip addresses is now `struct
   nabto_ip_address` this affects the following function definitions:
   `nabto_read`, `nabto_write`, `nabto_get_local_ip`,
@@ -125,4 +126,3 @@ the release and a new unreleased section is added.
 ### Breaking Changes
 - Tunnel module has been changed. Read readme in the `src/modules/tunnel`
 - The deprecated `buffer_read_t` and `buffer_write_t` type definitions in the `application_event()` callback have been replaced with `unabto_query_request` and `unabto_query_response`, respectively. This means that calls to `buffer_read_<TYPE>` and `buffer_write_<TYPE>` must be replaced with `unabto_query_read_<TYPE>` and `unabto_query_write_<TYPE>`, respectively.
-
