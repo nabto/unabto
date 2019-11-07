@@ -81,11 +81,12 @@ uint8_t obscurity_key[] = {
 };
 
 // AMP video client
+#define AMP_MAX_NAME_LENGTH 50
 #define AMP_DEVICE_NAME_DEFAULT "Tunnel"
-#define AMP_MAX_DEVICE_NAME_LENGTH 50
-static char device_name[AMP_MAX_DEVICE_NAME_LENGTH];
-static const char* device_product = "uNabto Video";
-static const char* device_icon = "video.png";
+#define AMP_PRODUCT_NAME_DEFAULT "uNabto Video"
+static char device_name[AMP_MAX_NAME_LENGTH];
+static char product_name[AMP_MAX_NAME_LENGTH];
+static const char* device_icon = "chip.png";
 static const char* device_interface_id_ = "8eee78e7-8f22-4019-8cee-4dcbc1c8186c";
 static uint16_t device_interface_version_major_ = 1;
 static uint16_t device_interface_version_minor_ = 0;
@@ -144,6 +145,7 @@ void handle_signal(int signum) {
 static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 
     const char *tunnel_port_str;
+    const char *display_name_str;
 
     const char x1s[] = "h";      const char* x1l[] = { "help", 0 };
     const char x2s[] = "V";      const char* x2l[] = { "version", 0 };
@@ -177,6 +179,8 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x33s[] = "";      const char* x33l[] = { "uart-device", 0 };
     const char x34s[] = "";      const char* x34l[] = { "stream-segment-pool-size", 0 };
     const char x35s[] = "";      const char* x35l[] = { "stream-send-window-size", 0 };
+    const char x36s[] = "N";     const char* x36l[] = { "display-name", 0 };
+    const char x37s[] = "R";     const char* x37l[] = { "product-name", 0 };
     const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
         { 'h', GOPT_NOARG,   x1s, x1l },
         { 'V', GOPT_NOARG,   x2s, x2l },
@@ -213,6 +217,8 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         { ALLOW_ALL_HOSTS_OPTION, GOPT_NOARG, x30s, x30l },
         { NO_ACCESS_CONTROL_OPTION, GOPT_NOARG, x31s, x31l },
         { UART_DEVICE_OPTION, GOPT_ARG, x33s, x33l },
+        { 'N', GOPT_ARG, x36s, x36l },
+        { 'R', GOPT_ARG, x37s, x37l },
         { 0,0,0,0 }
     };
 
@@ -242,7 +248,9 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("  -C, --config                Print configuration (unabto_config.h).\n");
         printf("  -S, --size                  Print size (in bytes) of memory usage.\n");
         printf("  -l, --nabtolog              Speficy log level such as *.trace.\n");
-        printf("  -d, --device-name           Specify name of this device.\n");
+        printf("  -d, --device-name           Specify Nabto device id of this device.\n");
+        printf("  -N, --display-name          Specify display name of this device (retrieved by clients with RPC).\n");
+        printf("  -R, --product-name          Specify display product name of this device (retrieved by clients with RPC).\n");
         printf("  -H, --tunnel-default-host   Set default host name for tunnel (%s).\n", UNABTO_TUNNEL_TCP_DEFAULT_HOST);
         printf("  -P, --tunnel-default-port   Set default port for tunnel (%u).\n", UNABTO_TUNNEL_TCP_DEFAULT_PORT);
         printf("  -k, --encryption-key        Specify encryption key.\n");
@@ -313,6 +321,18 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 
     if (!gopt_arg( options, 'd', &nms->id)) {
         NABTO_LOG_FATAL(("Specify a serverId with -d. Try -h for help."));
+    }
+
+    if (gopt_arg( options, 'N', &display_name_str)) {
+        snprintf(device_name, sizeof(device_name), display_name_str);
+    } else {
+        snprintf(device_name, sizeof(device_name), AMP_DEVICE_NAME_DEFAULT);
+    }
+
+    if (gopt_arg( options, 'R', &display_name_str)) {
+        snprintf(product_name, sizeof(product_name), display_name_str);
+    } else {
+        snprintf(product_name, sizeof(product_name), AMP_PRODUCT_NAME_DEFAULT);
     }
 
     if(gopt_arg(options, 'H', &h)) {
@@ -539,7 +559,6 @@ int main(int argc, char** argv)
     educate_user();
     platform_checks();
     acl_init();
-    snprintf(device_name, sizeof(device_name), AMP_DEVICE_NAME_DEFAULT);
 
 #if NABTO_ENABLE_EPOLL
     unabto_epoll_init();
@@ -686,7 +705,7 @@ application_event_result application_event(application_request* request,
     } else if (request->queryId == 10000) {
         // AMP get_public_device_info.json
         if (!write_string(query_response, device_name)) return AER_REQ_RSP_TOO_LARGE;
-        if (!write_string(query_response, device_product)) return AER_REQ_RSP_TOO_LARGE;
+        if (!write_string(query_response, product_name)) return AER_REQ_RSP_TOO_LARGE;
         if (!write_string(query_response, device_icon)) return AER_REQ_RSP_TOO_LARGE;
         if (!unabto_query_write_uint8(query_response, fp_acl_is_pair_allowed(request))) return AER_REQ_RSP_TOO_LARGE;
         if (!unabto_query_write_uint8(query_response, fp_acl_is_user_paired(request))) return AER_REQ_RSP_TOO_LARGE;
