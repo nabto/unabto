@@ -48,6 +48,17 @@ bool fp_acl_is_user_owner(application_request* request);
  */
 bool fp_acl_is_user_paired(application_request* request);
 
+/**
+ * call this function to set a user's FCM token.
+ * @token a byte buffer of length 255 that will be set as the token.
+ */
+bool fp_acl_set_user_fcm_token(application_request* request, int8_t* token);
+
+/**
+ * call this function to get a user's FCM token
+ * @outBuffer a byte buffer of length 255 that will receive the token contents.
+ */
+bool fp_acl_get_user_fcm_token(application_request* request, int8_t* outBuffer);
 
 /**
  * This function should be called from the allow_client_access(...)

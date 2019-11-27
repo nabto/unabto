@@ -38,11 +38,19 @@
 
 #define FP_ACL_FILE_VERSION 3
 
-#define FP_ACL_RECORD_SIZE FINGERPRINT_LENGTH +           \
+#define FP_ACL_RECORD_SIZE__   FINGERPRINT_LENGTH +       \
                              1 + PSK_ID_LENGTH +          \
                              1 + PSK_LENGTH +             \
                              FP_ACL_USERNAME_MAX_LENGTH + \
                              sizeof(uint32_t)
+
+
+#if NABTO_ENABLE_FCM_TOKEN_STORAGE
+    #define FP_ACL_RECORD_SIZE FP_ACL_RECORD_SIZE__ + 1 + FCM_TOKEN_LENGTH
+#else
+    #define FP_ACL_RECORD_SIZE FP_ACL_RECORD_SIZE__
+#endif
+
 
 #if FP_ACL_USERNAME_MAX_LENGTH != FP_ACL_FILE_USERNAME_LENGTH
 #error incompatible user name length with current acl file format

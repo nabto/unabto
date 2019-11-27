@@ -48,6 +48,9 @@ struct fp_acl_user {
     struct unabto_optional_fingerprint fp;
     struct unabto_optional_psk_id pskId;
     struct unabto_optional_psk psk;
+#if NABTO_ENABLE_FCM_TOKEN_STORAGE
+    struct unabto_optional_fcm_token fcmTok;
+#endif
     username name;
     uint32_t permissions;
 };

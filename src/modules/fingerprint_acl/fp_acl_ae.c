@@ -631,6 +631,44 @@ bool fp_acl_is_user_paired(application_request* request)
     return false;
 }
 
+bool fp_acl_set_user_fcm_token(application_request* request, int8_t* token)
+{
+    #if NABTO_ENABLE_FCM_TOKEN_STORAGE
+    void* it;
+    if (!(request->connection && request->connection->fingerprint.hasValue)) {
+        return false;
+    }
+    it = aclDb.find(&(request->connection->fingerprint.value));
+    struct fp_acl_user user;
+    if (it != NULL && aclDb.load(it, &user) == FP_ACL_DB_OK) {
+        memcpy(user.fcmTok.value.data, token, FCM_TOKEN_LENGTH);
+        if (aclDb.save(&user) != FP_ACL_DB_OK) {
+            return false;
+        }
+        user.fcmTok.hasValue = true;
+        return true;
+    }
+    #endif
+    return false;
+}
+
+bool fp_acl_get_user_fcm_token(application_request* request, int8_t* outBuffer)
+{
+    #if NABTO_ENABLE_FCM_TOKEN_STORAGE
+    void* it;
+    if (!(request->connection && request->connection->fingerprint.hasValue)) {
+        return false;
+    }
+    it = aclDb.find(&(request->connection->fingerprint.value));
+    struct fp_acl_user user;
+    if (it != NULL && aclDb.load(it, &user) == FP_ACL_DB_OK && user.fcmTok.hasValue) {
+        memcpy(outBuffer, user.fcmTok.value.data, FCM_TOKEN_LENGTH);
+        return true;
+    }
+    #endif
+    return false;
+}
+
 application_event_result fp_acl_ae_dispatch(uint32_t query_id_base,
                                             application_request* request,
                                             unabto_query_request* read_buffer,

@@ -6,7 +6,8 @@
 enum {
     FINGERPRINT_LENGTH = 16,
     PSK_ID_LENGTH = 16,
-    PSK_LENGTH = 16
+    PSK_LENGTH = 16,
+    FCM_TOKEN_LENGTH = 255
 };
 
 struct unabto_fingerprint {
@@ -36,6 +37,15 @@ struct unabto_psk {
 
 struct unabto_optional_psk {
     struct unabto_psk value;
+    bool hasValue;
+};
+
+struct unabto_fcm_token {
+    char data[FCM_TOKEN_LENGTH];
+};
+
+struct unabto_optional_fcm_token {
+    struct unabto_fcm_token value;
     bool hasValue;
 };
 
