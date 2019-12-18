@@ -9,7 +9,7 @@
 /**
  * The fp acl file saves the fingerprint config in the following format
  * 
- * Version 3 of the file format is as follows:
+ * Version 4 of the file format is as follows:
  * 
  * uint32_t version
  * settings { uint32_t systemPermissions, uint32_t defaultUserPermissions, uint32_t firstUserPermissions}
@@ -23,6 +23,10 @@
  *    psk: {
  *         hasValue: uint8_t, 
  *         value: uint8_t[16]
+ *    }
+ *    fcmTok: {
+ *         hasValue: uint8_t, 
+ *         value: uint8_t[255]
  *    }
  *    name: char[64], 
  *    permissions: uint32_t}
