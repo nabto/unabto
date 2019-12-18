@@ -500,6 +500,30 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     return true;
 }
 
+void debug_dump_acl() {
+    void* it = fp_acl_db.first();
+    if (!it) {
+        NABTO_LOG_INFO(("ACL is empty (no paired users)"));
+    } else {
+        NABTO_LOG_INFO(("ACL entries:"));
+        while (it != NULL) {
+            struct fp_acl_user user;
+            fp_acl_db_status res = fp_acl_db.load(it, &user);
+            if (res != FP_ACL_DB_OK) {
+                NABTO_LOG_WARN(("ACL error %d\n", res));
+                return;
+            }
+            if (user.fp.hasValue) {
+                NABTO_LOG_INFO((" - %s [%02x:%02x:%02x:%02x:...]: %04x",
+                                user.name,
+                                user.fp.value.data[0], user.fp.value.data[1], user.fp.value.data[2], user.fp.value.data[3],
+                                user.permissions));
+            }
+            it = fp_acl_db.next(it);
+        }
+    }
+}
+
 void acl_init() {
     struct fp_acl_settings default_settings;
     NABTO_LOG_WARN(("Please review default access permissions and just remove this warning if acceptable"));
@@ -559,6 +583,7 @@ int main(int argc, char** argv)
     educate_user();
     platform_checks();
     acl_init();
+    snprintf(device_name, sizeof(device_name), AMP_DEVICE_NAME_DEFAULT);
 
 #if NABTO_ENABLE_EPOLL
     unabto_epoll_init();
@@ -594,6 +619,7 @@ bool allow_client_access(nabto_connect* connection) {
     } else {
         bool allow = fp_acl_is_connection_allowed(connection);
         NABTO_LOG_INFO(("Allowing %s connect request: %s", (connection->isLocal ? "local" : "remote"), (allow ? "yes" : "no")));
+        debug_dump_acl();
         return allow;
     }
 }
@@ -604,6 +630,7 @@ bool unabto_tunnel_allow_client_access(nabto_connect* connection) {
     } else {
         bool allow = fp_acl_is_tunnel_allowed(connection, FP_ACL_PERMISSION_NONE);
         NABTO_LOG_INFO(("Allowing %s tunnel open request: %s", (connection->isLocal ? "local" : "remote"), (allow ? "yes" : "no")));
+        debug_dump_acl();
         return allow;
     }
 }
@@ -694,6 +721,7 @@ application_event_result application_event(application_request* request,
                                            unabto_query_response* query_response)
 {
     NABTO_LOG_INFO(("Nabto application_event: %u", request->queryId));
+    debug_dump_acl();
 
     if (request->queryId == 0) {
         // AMP get_interface_info.json
