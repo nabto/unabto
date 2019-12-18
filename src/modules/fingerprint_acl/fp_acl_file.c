@@ -156,7 +156,6 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
 static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uint32_t from_version)
 {
     struct fp_mem_state temp_acl = {0};
-    memset(&temp_acl, 0, sizeof(struct fp_mem_state));
 
     uint8_t buffer[FP_ACL_RECORD_SIZE];
     size_t nread;
