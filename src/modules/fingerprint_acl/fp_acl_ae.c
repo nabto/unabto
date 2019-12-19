@@ -367,7 +367,7 @@ application_event_result fp_acl_add_user_no_check(unabto_query_response* write_b
         if (aclDb.load(it, &existingUser) == FP_ACL_DB_OK) {
             NABTO_LOG_TRACE(("User with fingerprint [%02x:%02x:%02x:%02x:...] already exists in acl with name [%s], returning existing user",
                              user->fp.value.data[0], user->fp.value.data[1], user->fp.value.data[2], user->fp.value.data[3],
-                             existingUser.name));
+                             user->name));
             return write_user(write_buffer, FP_ACL_STATUS_USER_EXISTS, &existingUser);
         } else {
             return AER_REQ_SYSTEM_ERROR;
@@ -385,7 +385,7 @@ application_event_result fp_acl_add_user_no_check(unabto_query_response* write_b
     if (status == FP_ACL_DB_OK) {
         NABTO_LOG_INFO(("User with fingerprint [%02x:%02x:%02x:%02x:...] with name [%s] successfully added to acl",
                          user->fp.value.data[0], user->fp.value.data[1], user->fp.value.data[2], user->fp.value.data[3],
-                         existingUser.name));
+                         user->name));
         return write_user(write_buffer, FP_ACL_STATUS_OK, user);
     } else {
         return write_empty_user(write_buffer, FP_ACL_STATUS_USER_DB_FULL);
@@ -412,6 +412,7 @@ application_event_result fp_acl_ae_user_add(application_request* request,
     if (!read_string_null_terminated(read_buffer, user.name, FP_ACL_USERNAME_MAX_LENGTH)) {
         return AER_REQ_TOO_SMALL;
     }
+    user.fp.hasValue = 1;
 
     return fp_acl_add_user_no_check(write_buffer, &user);
 }

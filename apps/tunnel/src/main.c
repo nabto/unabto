@@ -699,7 +699,6 @@ application_event_result application_event(application_request* request,
                                            unabto_query_response* query_response)
 {
     NABTO_LOG_INFO(("Nabto application_event: %u", request->queryId));
-    debug_dump_acl();
 
     if (request->queryId == 0) {
         // AMP get_interface_info.json
@@ -728,8 +727,15 @@ application_event_result application_event(application_request* request,
         return AER_REQ_RESPONSE_READY;
 
     } else if (request->queryId >= 11000 && request->queryId < 12000) {
+        NABTO_LOG_INFO(("ACL before handling ACL event:"));
+        debug_dump_acl();
+
         // PPKA access control
-        return fp_acl_ae_dispatch(11000, request, query_request, query_response);
+        int res = fp_acl_ae_dispatch(11000, request, query_request, query_response);
+        NABTO_LOG_INFO(("ACL after handling ACL event:"));
+        debug_dump_acl();
+
+        return res;
 
     } else {
         NABTO_LOG_WARN(("Unhandled query id: %u", request->queryId));

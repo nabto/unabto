@@ -22,7 +22,7 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
     }
 
     READ_U32(version, buffer);
-    if (version != FP_ACL_FILE_VERSION) {
+    if (version != FP_ACL_FILE_VERSION && version != FP_ACL_FILE_VERSION_OLD) {
         return FP_ACL_DB_LOAD_FAILED;
     }
 
@@ -33,14 +33,18 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
     }
 
     ptr = buffer;
-    
+
     READ_FORWARD_U32(acl->settings.systemPermissions, ptr);
     READ_FORWARD_U32(acl->settings.defaultUserPermissions, ptr);
     READ_FORWARD_U32(acl->settings.firstUserPermissions, ptr);
     READ_FORWARD_U32(numUsers, ptr);
 
     for (i = 0; i < numUsers && i < FP_MEM_ACL_ENTRIES; i++) {
-        nread = fread(buffer, FP_ACL_RECORD_SIZE, 1, aclFile);
+        if (version == FP_ACL_FILE_VERSION_OLD) {
+            nread = fread(buffer, FP_ACL_RECORD_SIZE-(1+PSK_ID_LENGTH)-(1+PSK_LENGTH), 1, aclFile);
+        } else {
+            nread = fread(buffer, FP_ACL_RECORD_SIZE, 1, aclFile);
+        }
         ptr = buffer;
         if (nread != 1) {
             return FP_ACL_DB_LOAD_FAILED;
@@ -48,15 +52,17 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
         acl->users[i].fp.hasValue = 1;
 
         READ_FORWARD_MEM(acl->users[i].fp.value.data, ptr, FINGERPRINT_LENGTH);
-        
-        READ_FORWARD_U8(acl->users[i].pskId.hasValue, ptr);
-        READ_FORWARD_MEM(acl->users[i].pskId.value.data, ptr, PSK_ID_LENGTH);
-        
-        READ_FORWARD_U8(acl->users[i].psk.hasValue, ptr);
-        READ_FORWARD_MEM(acl->users[i].psk.value.data, ptr, PSK_LENGTH);
 
-        READ_FORWARD_MEM(acl->users[i].name, ptr, FP_ACL_FILE_USERNAME_LENGTH); 
-        
+        if (version != FP_ACL_FILE_VERSION_OLD) {
+            READ_FORWARD_U8(acl->users[i].pskId.hasValue, ptr);
+            READ_FORWARD_MEM(acl->users[i].pskId.value.data, ptr, PSK_ID_LENGTH);
+
+            READ_FORWARD_U8(acl->users[i].psk.hasValue, ptr);
+            READ_FORWARD_MEM(acl->users[i].psk.value.data, ptr, PSK_LENGTH);
+        }
+
+        READ_FORWARD_MEM(acl->users[i].name, ptr, FP_ACL_FILE_USERNAME_LENGTH);
+
         READ_FORWARD_U32(acl->users[i].permissions, ptr);
     }
 
@@ -109,7 +115,7 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
     }
 
     // write user records
-    
+
     for (i = 0; i < users; i++) {
         struct fp_acl_user* it;
         ptr = buffer;
@@ -117,7 +123,7 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
         if (!fp_mem_is_slot_free(it)) {
 
             WRITE_FORWARD_MEM(ptr, it->fp.value.data, FINGERPRINT_LENGTH);
-            
+
             WRITE_FORWARD_U8(ptr, it->pskId.hasValue);
             WRITE_FORWARD_MEM(ptr, it->pskId.value.data, PSK_ID_LENGTH);
 
@@ -127,7 +133,7 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
             WRITE_FORWARD_MEM(ptr, it->name, FP_ACL_FILE_USERNAME_LENGTH);
 
             WRITE_FORWARD_U32(ptr, it->permissions);
-            
+
             written = fwrite(buffer, ptr-buffer, 1, aclFile);
             if (written != 1) {
                 return FP_ACL_DB_SAVE_FAILED;
@@ -163,12 +169,12 @@ fp_acl_db_status fp_acl_file_save_file(struct fp_mem_state* acl)
     fclose(aclFile);
 
     if (status == FP_ACL_DB_OK) {
-        // remove destination file, otherwise rename() might throw an error 
+        // remove destination file, otherwise rename() might throw an error
         remove(filename);
-        
+
         if (rename(tempFilename, filename) != 0) {
             return FP_ACL_DB_SAVE_FAILED;
-        } 
+        }
     }
 
     return status;
