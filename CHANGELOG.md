@@ -10,6 +10,11 @@ Guide: always keep an unreleased section which keeps track of current
 changes. When a release is made the unreleased section is renamed to
 the release and a new unreleased section is added.
 
+## 4.4.4 2019-12-20
+
+### Changed
+- fix ACL explicit add_user issue where operation was reported to complete successfully but nothing was actually stored
+
 ## 4.4.2 2019-04-01
 
 ### Changed
