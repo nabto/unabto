@@ -1,4 +1,4 @@
-#if defined(_MSC_VER)
+p#if defined(_MSC_VER)
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif
@@ -483,18 +483,18 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 void debug_dump_acl() {
     void* it = fp_acl_db.first();
     if (!it) {
-        NABTO_LOG_INFO(("ACL is empty (no paired users)"));
+        NABTO_LOG_DEBUG(("ACL is empty (no paired users)"));
     } else {
-        NABTO_LOG_INFO(("ACL entries:"));
+        NABTO_LOG_DEBUG(("ACL entries:"));
         while (it != NULL) {
             struct fp_acl_user user;
             fp_acl_db_status res = fp_acl_db.load(it, &user);
             if (res != FP_ACL_DB_OK) {
-                NABTO_LOG_WARN(("ACL error %d\n", res));
+                NABTO_LOG_DEBUG(("ACL error %d\n", res));
                 return;
             }
             if (user.fp.hasValue) {
-                NABTO_LOG_INFO((" - %s [%02x:%02x:%02x:%02x:...]: %04x",
+                NABTO_LOG_DEBUG((" - %s [%02x:%02x:%02x:%02x:...]: %04x",
                                 user.name,
                                 user.fp.value.data[0], user.fp.value.data[1], user.fp.value.data[2], user.fp.value.data[3],
                                 user.permissions));
@@ -727,12 +727,12 @@ application_event_result application_event(application_request* request,
         return AER_REQ_RESPONSE_READY;
 
     } else if (request->queryId >= 11000 && request->queryId < 12000) {
-        NABTO_LOG_INFO(("ACL before handling ACL event:"));
+        // PPKA access control
+        NABTO_LOG_DEBUG(("ACL before handling ACL event:"));
         debug_dump_acl();
 
-        // PPKA access control
         int res = fp_acl_ae_dispatch(11000, request, query_request, query_response);
-        NABTO_LOG_INFO(("ACL after handling ACL event:"));
+        NABTO_LOG_DEBUG(("ACL after handling ACL event:"));
         debug_dump_acl();
 
         return res;
