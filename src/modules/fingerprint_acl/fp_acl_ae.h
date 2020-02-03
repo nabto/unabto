@@ -49,18 +49,6 @@ bool fp_acl_is_user_owner(application_request* request);
 bool fp_acl_is_user_paired(application_request* request);
 
 /**
- * call this function to set a user's FCM token.
- * @token a byte buffer of length 255 that will be set as the token.
- */
-bool fp_acl_set_user_fcm_token(application_request* request, int8_t* token);
-
-/**
- * call this function to get a user's FCM token
- * @outBuffer a byte buffer of length 255 that will receive the token contents.
- */
-bool fp_acl_get_user_fcm_token(application_request* request, int8_t* outBuffer);
-
-/**
  * This function should be called from the allow_client_access(...)
  * function. This will reject connections early in the connect
  * phase. Some connections can be accepted in this function e.g. local
@@ -111,6 +99,30 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
 application_event_result fp_acl_ae_user_set_name(application_request* request,
                                                  unabto_query_request* read_buffer,
                                                  unabto_query_response* write_buffer);
+
+// request: get_user_fcm_token.json?fingerprint=<hex>
+// response: status, fcm_token 
+application_event_result fp_acl_ae_user_get_fcm_token(application_request* request,
+                                                      unabto_query_request* read_buffer,
+                                                      unabto_query_response* write_buffer);
+
+// request: get_my_fcm_token.json
+// response: status, fcm_token 
+application_event_result fp_acl_ae_user_get_my_fcm_token(application_request* request,
+                                                         unabto_query_request* read_buffer,
+                                                         unabto_query_response* write_buffer);
+
+// request: set_user_fcm_token.json?fingerprint=<hex>&fcm_token=<string>
+// response: status
+application_event_result fp_acl_ae_user_set_fcm_token(application_request* request,
+                                                      unabto_query_request* read_buffer,
+                                                      unabto_query_response* write_buffer);
+
+// request: set_my_fcm_token.json?fcm_token=<string>
+// response: status
+application_event_result fp_acl_ae_user_set_my_fcm_token(application_request* request,
+                                                         unabto_query_request* read_buffer,
+                                                         unabto_query_response* write_buffer);
 
 // request addPermissions.json?fingerprint=<hex>&permissions=<mask>
 // response status, fingerprint, username, permissions
