@@ -306,8 +306,9 @@ application_event_result fp_acl_ae_get_fcm_token(application_request* request,
             return AER_REQ_TOO_LARGE;
         }
     }
-#endif
     return AER_REQ_RESPONSE_READY;
+#endif
+    return AER_REQ_SYSTEM_ERROR;
 }
 
 application_event_result fp_acl_ae_user_get_fcm_token(application_request* request,
@@ -363,8 +364,9 @@ application_event_result fp_acl_ae_set_fcm_token(application_request* request,
             return AER_REQ_TOO_LARGE;
         }
     }
-#endif
     return AER_REQ_RESPONSE_READY;
+#endif
+    return AER_REQ_SYSTEM_ERROR;
 }
 
 application_event_result fp_acl_ae_user_set_fcm_token(application_request* request,
