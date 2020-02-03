@@ -153,6 +153,32 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
     return FP_ACL_DB_OK;
 }
 
+static fp_acl_db_status convert_users_from_early_versions(FILE* aclFile, uint8_t* buffer, uint8_t* ptr, struct fp_mem_state* temp_acl, uint32_t numUsers)
+{
+    for (uint32_t i = 0; i < numUsers && i < FP_MEM_ACL_ENTRIES; i++) {
+        uint32_t fp_size = 16;
+        uint32_t name_size = 64;
+        uint32_t size = fp_size + name_size;
+        size_t nread;
+
+        nread = fread(buffer, size, 1, aclFile);
+        ptr = buffer;
+        if (nread != 1) {
+            return FP_ACL_DB_LOAD_FAILED;
+        }
+
+        temp_acl->users[i].fp.hasValue = 1;
+        READ_FORWARD_MEM(temp_acl->users[i].fp.value.data, ptr, fp_size);
+
+        temp_acl->users[i].pskId.hasValue = 0;
+        temp_acl->users[i].psk.hasValue = 0;
+
+        READ_FORWARD_MEM(temp_acl->users[i].name, ptr, name_size);
+
+        READ_FORWARD_U32(temp_acl->users[i].permissions, ptr);
+    }
+}
+
 static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uint32_t from_version)
 {
     struct fp_mem_state temp_acl = {0};
@@ -176,27 +202,7 @@ static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uin
             READ_FORWARD_U32(numUsers, ptr);
             temp_acl.settings.firstUserPermissions = 0;
 
-            for (uint32_t i = 0; i < numUsers && i < FP_MEM_ACL_ENTRIES; i++) {
-                uint32_t fp_size = 16;
-                uint32_t name_size = 64;
-                uint32_t size = fp_size + name_size;
-
-                nread = fread(buffer, size, 1, aclFile);
-                ptr = buffer;
-                if (nread != 1) {
-                    return FP_ACL_DB_LOAD_FAILED;
-                }
-
-                temp_acl.users[i].fp.hasValue = 1;
-                READ_FORWARD_MEM(temp_acl.users[i].fp.value.data, ptr, fp_size);
-
-                temp_acl.users[i].pskId.hasValue = 0;
-                temp_acl.users[i].psk.hasValue = 0;
-
-                READ_FORWARD_MEM(temp_acl.users[i].name, ptr, name_size);
-
-                READ_FORWARD_U32(temp_acl.users[i].permissions, ptr);
-            }
+            convert_users_from_early_versions(aclFile, buffer, ptr, &temp_acl, numUsers);
             break;
         }
 
@@ -213,27 +219,7 @@ static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uin
             READ_FORWARD_U32(temp_acl.settings.firstUserPermissions, ptr);
             READ_FORWARD_U32(numUsers, ptr);
 
-            for (uint32_t i = 0; i < numUsers && i < FP_MEM_ACL_ENTRIES; i++) {
-                uint32_t fp_size = 16;
-                uint32_t name_size = 64;
-                uint32_t size = fp_size + name_size;
-
-                nread = fread(buffer, size, 1, aclFile);
-                ptr = buffer;
-                if (nread != 1) {
-                    return FP_ACL_DB_LOAD_FAILED;
-                }
-
-                temp_acl.users[i].fp.hasValue = 1;
-                READ_FORWARD_MEM(temp_acl.users[i].fp.value.data, ptr, fp_size);
-
-                temp_acl.users[i].pskId.hasValue = 0;
-                temp_acl.users[i].psk.hasValue = 0;
-
-                READ_FORWARD_MEM(temp_acl.users[i].name, ptr, name_size);
-
-                READ_FORWARD_U32(temp_acl.users[i].permissions, ptr);
-            }
+            convert_users_from_early_versions(aclFile, buffer, ptr, &temp_acl, numUsers);
             break;
         }
 
