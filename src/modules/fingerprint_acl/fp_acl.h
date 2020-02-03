@@ -5,6 +5,7 @@
 #include <unabto/unabto_types.h>
 
 #define FP_ACL_FP_LENGTH FINGERPRINT_LENGTH
+#define FCM_TOKEN_LENGTH 255
 #define FP_ACL_USERNAME_MAX_LENGTH 64
 #define FP_ACL_PSK_ID_LENGTH 16
 #define FP_ACL_PSK_KEY_LENGTH 16
@@ -43,6 +44,15 @@
 #define FP_ACL_SYSTEM_PERMISSION_PAIRING                            0x20000000ul
 
 typedef char username[FP_ACL_USERNAME_MAX_LENGTH];
+
+struct unabto_fcm_token {
+    char data[FCM_TOKEN_LENGTH];
+};
+
+struct unabto_optional_fcm_token {
+    struct unabto_fcm_token value;
+    bool hasValue;
+};
 
 struct fp_acl_user {
     struct unabto_optional_fingerprint fp;
