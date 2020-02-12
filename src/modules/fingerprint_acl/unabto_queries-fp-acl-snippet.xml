@@ -122,4 +122,46 @@
     </response>
   </query>
 
+  <!-- get user's fcm token (requires NABTO_ENABLE_FCM_TOKEN) -->
+  <query name="get_user_fcm_token.json" id="11075">
+    <request>
+      <parameter name="fingerprint" type="raw" representation="hex"/>
+    </request>
+    <response format="json">
+      <parameter name="status" type="uint8"/>
+      <parameter name="fcm_token" type="raw"/>
+    </response>
+  </query>
+
+  <!-- get current user's fcm token (requires NABTO_ENABLE_FCM_TOKEN) -->
+  <query name="get_my_fcm_token.json" id="11080">
+    <request>
+    </request>
+    <response format="json">
+      <parameter name="status" type="uint8"/>
+      <parameter name="fcm_token" type="raw"/>
+    </response>
+  </query>
+
+  <!-- set user's fcm token (requires NABTO_ENABLE_FCM_TOKEN) -->
+  <query name="set_user_fcm_token.json" id="11085">
+    <request>
+      <parameter name="fingerprint" type="raw" representation="hex"/>
+      <parameter name="fcm_token" type="raw"/>
+    </request>
+    <response format="json">
+      <parameter name="status" type="uint8"/>
+    </response>
+  </query>
+
+  <!-- get current user's fcm token (requires NABTO_ENABLE_FCM_TOKEN) -->
+  <query name="set_my_fcm_token.json" id="11090">
+    <request>
+      <parameter name="fcm_token" type="raw"/>
+    </request>
+    <response format="json">
+      <parameter name="status" type="uint8"/>
+    </response>
+  </query>
+
 </unabto_queries>
