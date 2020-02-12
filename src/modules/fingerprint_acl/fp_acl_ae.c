@@ -302,7 +302,7 @@ application_event_result fp_acl_ae_get_fcm_token(application_request* request,
             return AER_REQ_TOO_LARGE;
         }
 
-        if (!write_string(write_buffer, user.fcmTok.value.data)) {
+        if (!write_string(write_buffer, user.fcmTok)) {
             return AER_REQ_TOO_LARGE;
         }
     }
@@ -352,7 +352,7 @@ application_event_result fp_acl_ae_set_fcm_token(application_request* request,
     if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         status = FP_ACL_STATUS_NO_SUCH_USER;
     } else {
-        if (!read_string_null_terminated(read_buffer, user.fcmTok.value.data, FCM_TOKEN_LENGTH)) {
+        if (!read_string_null_terminated(read_buffer, user.fcmTok, FP_ACL_FCM_TOKEN_MAX_LENGTH)) {
             return AER_REQ_TOO_SMALL;
         }
 

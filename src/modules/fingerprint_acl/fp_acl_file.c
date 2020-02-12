@@ -56,11 +56,11 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
         READ_FORWARD_MEM(acl->users[i].psk.value.data, ptr, PSK_LENGTH);
 
 #if NABTO_ENABLE_FCM_TOKEN_STORAGE
-        READ_FORWARD_U8(acl->users[i].fcmTok.hasValue, ptr);
-        READ_FORWARD_MEM(acl->users[i].fcmTok.value.data, ptr, FCM_TOKEN_LENGTH);
+        READ_FORWARD_MEM(acl->users[i].fcmTok, ptr, FP_ACL_FCM_TOKEN_MAX_LENGTH);
+        NABTO_LOG_WARN(("%s", acl->users[i].fcmTok));
 #else
         // Skip
-        ptr += 1 + FCM_TOKEN_LENGTH;
+        ptr += FP_ACL_FCM_TOKEN_MAX_LENGTH;
 #endif
 
         READ_FORWARD_MEM(acl->users[i].name, ptr, FP_ACL_FILE_USERNAME_LENGTH); 
@@ -133,11 +133,10 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
             WRITE_FORWARD_MEM(ptr, it->psk.value.data, PSK_LENGTH);
 
 #if NABTO_ENABLE_FCM_TOKEN_STORAGE
-            WRITE_FORWARD_U8(ptr, it->fcmTok.hasValue);
-            WRITE_FORWARD_MEM(ptr, it->fcmTok.value.data, FCM_TOKEN_LENGTH);
+            WRITE_FORWARD_MEM(ptr, it->fcmTok, FP_ACL_FCM_TOKEN_MAX_LENGTH);
 #else
             // Skip
-            ptr += 1 + FCM_TOKEN_LENGTH;
+            ptr += FP_ACL_FCM_TOKEN_MAX_LENGTH;
 #endif
 
             WRITE_FORWARD_MEM(ptr, it->name, FP_ACL_FILE_USERNAME_LENGTH);
