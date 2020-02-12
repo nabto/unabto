@@ -6,7 +6,7 @@
 enum {
     FINGERPRINT_LENGTH = 16,
     PSK_ID_LENGTH = 16,
-    PSK_LENGTH = 16,
+    PSK_LENGTH = 16
 };
 
 struct unabto_fingerprint {
