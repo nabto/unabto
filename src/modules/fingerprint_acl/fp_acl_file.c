@@ -336,6 +336,7 @@ fp_acl_db_status fp_acl_file_init(const char* file, const char* tempFile, struct
         size_t nread;
         uint32_t version;
 
+        status = FP_ACL_DB_OK;
         nread = fread(&buffer, 4, 1, aclFile);
         if (nread == 1) {
             READ_U32(version, buffer);
@@ -346,7 +347,7 @@ fp_acl_db_status fp_acl_file_init(const char* file, const char* tempFile, struct
         fclose(aclFile);
         return status;
     } else {
-        return FP_ACL_DB_LOAD_FAILED;
+        return FP_ACL_DB_OK;
     }
 
 }
