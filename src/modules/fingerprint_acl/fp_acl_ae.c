@@ -390,11 +390,12 @@ application_event_result fp_acl_ae_user_set_my_fcm_token(application_request* re
                                                          unabto_query_request* read_buffer,
                                                          unabto_query_response* write_buffer)
 {
+    struct unabto_fingerprint fp;
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_NONE)) {
         return AER_REQ_NO_ACCESS;
     }
 
-    struct unabto_fingerprint fp = request->connection->fingerprint.value;
+    fp = request->connection->fingerprint.value;
     return fp_acl_ae_set_fcm_token(request, read_buffer, write_buffer, &fp);
 }
 
