@@ -24,7 +24,7 @@
  *         hasValue: uint8_t, 
  *         value: uint8_t[16]
  *    }
- *    fcmTok: char[255]
+ *    pushToken: char[255]
  *    name: char[64], 
  *    permissions: uint32_t}
  *
@@ -37,7 +37,7 @@
 
 #define FP_ACL_FILE_USERNAME_LENGTH 64
 
-#define FP_ACL_FILE_FCM_TOKEN_LENGTH 256
+#define FP_ACL_FILE_PUSH_TOKEN_LENGTH 256
 
 #define FP_ACL_FILE_VERSION 4
 
@@ -45,15 +45,15 @@
                              1 + PSK_ID_LENGTH +           \
                              1 + PSK_LENGTH +              \
                              FP_ACL_USERNAME_MAX_LENGTH +  \
-                             FP_ACL_FCM_TOKEN_MAX_LENGTH + \
+                             FP_ACL_PUSH_TOKEN_MAX_LENGTH + \
                              sizeof(uint32_t)
 
 #if FP_ACL_USERNAME_MAX_LENGTH != FP_ACL_FILE_USERNAME_LENGTH
 #error incompatible user name length with current acl file format
 #endif
 
-#if FP_ACL_FCM_TOKEN_MAX_LENGTH != FP_ACL_FILE_FCM_TOKEN_LENGTH
-#error incompatible FCM token length with current acl file format
+#if FP_ACL_PUSH_TOKEN_MAX_LENGTH != FP_ACL_FILE_PUSH_TOKEN_LENGTH
+#error incompatible push token length with current acl file format
 #endif
 
 int fd;

@@ -285,12 +285,11 @@ application_event_result fp_acl_ae_user_set_name(application_request* request,
     return write_user(write_buffer, status, &user);
 }
 
-application_event_result fp_acl_ae_get_fcm_token(application_request* request,
+application_event_result fp_acl_ae_get_push_token(application_request* request,
                                                  unabto_query_request* read_buffer,
                                                  unabto_query_response* write_buffer,
                                                  struct unabto_fingerprint* fp)
 {
-#if NABTO_ENABLE_FCM_TOKEN_STORAGE
     void* it = aclDb.find(fp);
     struct fp_acl_user user;
     uint8_t status;
@@ -302,16 +301,14 @@ application_event_result fp_acl_ae_get_fcm_token(application_request* request,
             return AER_REQ_TOO_LARGE;
         }
 
-        if (!write_string(write_buffer, user.fcmTok)) {
+        if (!write_string(write_buffer, user.pushToken)) {
             return AER_REQ_TOO_LARGE;
         }
     }
     return AER_REQ_RESPONSE_READY;
-#endif
-    return AER_REQ_SYSTEM_ERROR;
 }
 
-application_event_result fp_acl_ae_user_get_fcm_token(application_request* request,
+application_event_result fp_acl_ae_user_get_push_token(application_request* request,
                                                       unabto_query_request* read_buffer,
                                                       unabto_query_response* write_buffer)
 {
@@ -325,10 +322,10 @@ application_event_result fp_acl_ae_user_get_fcm_token(application_request* reque
         return AER_REQ_TOO_SMALL;
     }
 
-    return fp_acl_ae_get_fcm_token(request, read_buffer, write_buffer, &fp);
+    return fp_acl_ae_get_push_token(request, read_buffer, write_buffer, &fp);
 }
 
-application_event_result fp_acl_ae_user_get_my_fcm_token(application_request* request,
+application_event_result fp_acl_ae_user_get_my_push_token(application_request* request,
                                                          unabto_query_request* read_buffer,
                                                          unabto_query_response* write_buffer)
 {
@@ -337,22 +334,21 @@ application_event_result fp_acl_ae_user_get_my_fcm_token(application_request* re
     }
 
     struct unabto_fingerprint fp = request->connection->fingerprint.value;
-    return fp_acl_ae_get_fcm_token(request, read_buffer, write_buffer, &fp);
+    return fp_acl_ae_get_push_token(request, read_buffer, write_buffer, &fp);
 }
 
-application_event_result fp_acl_ae_set_fcm_token(application_request* request,
+application_event_result fp_acl_ae_set_push_token(application_request* request,
                                                  unabto_query_request* read_buffer,
                                                  unabto_query_response* write_buffer,
                                                  struct unabto_fingerprint *fp)
 {
-#if NABTO_ENABLE_FCM_TOKEN_STORAGE
     void* it = aclDb.find(fp);
     struct fp_acl_user user;
     uint8_t status = FP_ACL_STATUS_OK;
     if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         status = FP_ACL_STATUS_NO_SUCH_USER;
     } else {
-        if (!read_string_null_terminated(read_buffer, user.fcmTok, FP_ACL_FCM_TOKEN_MAX_LENGTH)) {
+        if (!read_string_null_terminated(read_buffer, user.pushToken, FP_ACL_PUSH_TOKEN_MAX_LENGTH)) {
             return AER_REQ_TOO_SMALL;
         }
 
@@ -365,11 +361,9 @@ application_event_result fp_acl_ae_set_fcm_token(application_request* request,
         }
     }
     return AER_REQ_RESPONSE_READY;
-#endif
-    return AER_REQ_SYSTEM_ERROR;
 }
 
-application_event_result fp_acl_ae_user_set_fcm_token(application_request* request,
+application_event_result fp_acl_ae_user_set_push_token(application_request* request,
                                                       unabto_query_request* read_buffer,
                                                       unabto_query_response* write_buffer)
 {
@@ -383,10 +377,10 @@ application_event_result fp_acl_ae_user_set_fcm_token(application_request* reque
         return AER_REQ_TOO_SMALL;
     }
 
-    return fp_acl_ae_set_fcm_token(request, read_buffer, write_buffer, &fp);
+    return fp_acl_ae_set_push_token(request, read_buffer, write_buffer, &fp);
 }
 
-application_event_result fp_acl_ae_user_set_my_fcm_token(application_request* request,
+application_event_result fp_acl_ae_user_set_my_push_token(application_request* request,
                                                          unabto_query_request* read_buffer,
                                                          unabto_query_response* write_buffer)
 {
@@ -395,7 +389,7 @@ application_event_result fp_acl_ae_user_set_my_fcm_token(application_request* re
     }
 
     struct unabto_fingerprint fp = request->connection->fingerprint.value;
-    return fp_acl_ae_set_fcm_token(request, read_buffer, write_buffer, &fp);
+    return fp_acl_ae_set_push_token(request, read_buffer, write_buffer, &fp);
 }
 
 application_event_result fp_acl_ae_user_alter_permissions(application_request* request,
@@ -787,20 +781,20 @@ application_event_result fp_acl_ae_dispatch(uint32_t query_id_base,
         return fp_acl_ae_user_remove(request, read_buffer, write_buffer); // implied admin priv check
         
     case 75:
-        // get_user_fcm_token.json
-        return fp_acl_ae_user_get_fcm_token(request, read_buffer, write_buffer);
+        // get_user_push_token.json
+        return fp_acl_ae_user_get_push_token(request, read_buffer, write_buffer);
         
     case 80:
-        // get_my_fcm_token.json
-        return fp_acl_ae_user_get_my_fcm_token(request, read_buffer, write_buffer);
+        // get_my_push_token.json
+        return fp_acl_ae_user_get_my_push_token(request, read_buffer, write_buffer);
 
     case 85:
-        // set_user_fcm_token.json
-        return fp_acl_ae_user_set_fcm_token(request, read_buffer, write_buffer);
+        // set_user_push_token.json
+        return fp_acl_ae_user_set_push_token(request, read_buffer, write_buffer);
         
     case 90:
-        // set_my_fcm_token.json
-        return fp_acl_ae_user_set_my_fcm_token(request, read_buffer, write_buffer);
+        // set_my_push_token.json
+        return fp_acl_ae_user_set_my_push_token(request, read_buffer, write_buffer);
 
     default:
         NABTO_LOG_WARN(("Unhandled query id: %u", request->queryId));
