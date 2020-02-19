@@ -329,11 +329,11 @@ application_event_result fp_acl_ae_user_get_my_push_token(application_request* r
                                                          unabto_query_request* read_buffer,
                                                          unabto_query_response* write_buffer)
 {
+    struct unabto_fingerprint fp = request->connection->fingerprint.value;
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_NONE)) {
         return AER_REQ_NO_ACCESS;
     }
 
-    struct unabto_fingerprint fp = request->connection->fingerprint.value;
     return fp_acl_ae_get_push_token(request, read_buffer, write_buffer, &fp);
 }
 
@@ -384,11 +384,11 @@ application_event_result fp_acl_ae_user_set_my_push_token(application_request* r
                                                          unabto_query_request* read_buffer,
                                                          unabto_query_response* write_buffer)
 {
+    struct unabto_fingerprint fp = request->connection->fingerprint.value;
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_NONE)) {
         return AER_REQ_NO_ACCESS;
     }
 
-    struct unabto_fingerprint fp = request->connection->fingerprint.value;
     return fp_acl_ae_set_push_token(request, read_buffer, write_buffer, &fp);
 }
 
