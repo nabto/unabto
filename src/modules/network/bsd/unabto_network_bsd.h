@@ -10,6 +10,10 @@
 #define UNABTO_NETWORK_BSD_NONBLOCKING 1
 #endif
 
+#ifndef NABTO_NETWORK_LOOPBACK_ONLY
+#define NABTO_NETWORK_LOOPBACK_ONLY 0
+#endif
+
 typedef struct nabto_socket_t nabto_socket_t;
 
 enum nabto_socket_type {
