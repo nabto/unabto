@@ -12,13 +12,13 @@
 
 /**
  * This option can be set such that the module binds its sockets to
- * the loopback interface only.  This can be used for some special
+ * the ipv4 loopback interface only.  This can be used for some special
  * deployments where the device and client runs on the same machine
  * and the communication should not go through the local network, only
- * through the loopback interface.
+ * through the ipv4 loopback interface.
  */
-#ifndef NABTO_NETWORK_LOOPBACK_ONLY
-#define NABTO_NETWORK_LOOPBACK_ONLY 0
+#ifndef NABTO_NETWORK_IPV4_LOOPBACK_ONLY
+#define NABTO_NETWORK_IPV4_LOOPBACK_ONLY 0
 #endif
 
 typedef struct nabto_socket_t nabto_socket_t;
