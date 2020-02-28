@@ -10,6 +10,13 @@
 #define UNABTO_NETWORK_BSD_NONBLOCKING 1
 #endif
 
+/**
+ * This option can be set such that the module binds its sockets to
+ * the loopback interface only.  This can be used for some special
+ * deployments where the device and client runs on the same machine
+ * and the communication should not go through the local network, only
+ * through the loopback interface.
+ */
 #ifndef NABTO_NETWORK_LOOPBACK_ONLY
 #define NABTO_NETWORK_LOOPBACK_ONLY 0
 #endif
