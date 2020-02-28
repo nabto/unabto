@@ -153,6 +153,7 @@ static bool bind_to_inaddr_any(uint16_t* localPort, nabto_socket_t* sock)
         NABTO_LOG_ERROR(("Unable to bind socket: (%i) '%s' localport %i to inaddrany", errno, strerror(errno), *localPort));
         return false;
     }
+    return true;
 }
 
 // Special case for some systems where we only want to expose the
