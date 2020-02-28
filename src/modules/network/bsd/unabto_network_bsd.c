@@ -94,6 +94,8 @@ static int nabto_socket_domain()
     return domain;
 }
 
+
+
 static bool open_socket(nabto_socket_t* sd)
 {
     int domain = nabto_socket_domain();
@@ -124,6 +126,69 @@ static bool open_socket(nabto_socket_t* sd)
     }
 }
 
+static bool bind_to_inaddr_any(uint16_t* localPort, nabto_socket_t* sock)
+{
+    int status;
+
+    if (sock->type == NABTO_SOCKET_IP_V6) {
+        struct sockaddr_in6 sa;
+        memset(&sa, 0, sizeof(sa));
+        sa.sin6_family = AF_INET6;
+        memset(sa.sin6_addr.s6_addr, 0, 16);
+        sa.sin6_port = htons(*localPort);
+        status = bind(sock->sock, (struct sockaddr*)&sa, sizeof(sa));
+    } else if (sock->type == NABTO_SOCKET_IP_V4) {
+        struct sockaddr_in sa;
+        memset(&sa, 0, sizeof(sa));
+        sa.sin_family = AF_INET;
+        sa.sin_addr.s_addr = 0;
+        sa.sin_port = htons(*localPort);
+        status = bind(sock->sock, (struct sockaddr*)&sa, sizeof(sa));
+    } else {
+        NABTO_LOG_ERROR(("socket was of unknown type"));
+        return false;
+    }
+
+    if (status < 0) {
+        NABTO_LOG_ERROR(("Unable to bind socket: (%i) '%s' localport %i to inaddrany", errno, strerror(errno), *localPort));
+        return false;
+    }
+}
+
+// Special case for some systems where we only want to expose the
+// device on the loopback interface.
+static bool bind_to_loopback(uint16_t* localPort, nabto_socket_t* sock)
+{
+    int status;
+
+    if (sock->type == NABTO_SOCKET_IP_V6) {
+        struct sockaddr_in6 sa;
+        memset(&sa, 0, sizeof(sa));
+        sa.sin6_family = AF_INET6;
+        // the ipv6 loopback address is 0000::0001
+        memset(sa.sin6_addr.s6_addr, 0, 15);
+        sa.sin6_addr.s6_addr[15] = 1;
+        sa.sin6_port = htons(*localPort);
+        status = bind(sock->sock, (struct sockaddr*)&sa, sizeof(sa));
+    } else if (sock->type == NABTO_SOCKET_IP_V4) {
+        struct sockaddr_in sa;
+        memset(&sa, 0, sizeof(sa));
+        sa.sin_family = AF_INET;
+        sa.sin_addr.s_addr = INADDR_LOOPBACK;
+        sa.sin_port = htons(*localPort);
+        status = bind(sock->sock, (struct sockaddr*)&sa, sizeof(sa));
+    } else {
+        NABTO_LOG_ERROR(("socket was of unknown type"));
+        return false;
+    }
+
+    if (status < 0) {
+        NABTO_LOG_ERROR(("Unable to bind socket: (%i) '%s' localport %i to the loopback interface", errno, strerror(errno), *localPort));
+        return false;
+    }
+    return true;
+}
+
 
 bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
 {
@@ -143,7 +208,7 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
 #ifdef SO_BINDTODEVICE
     // Used for multiple interfaces
     nmc = unabto_get_main_context();
-    interface = nmc->nabtoMainSetup.interfaceName;                
+    interface = nmc->nabtoMainSetup.interfaceName;
     if (interface != NULL) {
         if (setsockopt(sd.sock, SOL_SOCKET, SO_BINDTODEVICE, (void *)interface, strlen(interface)+1) < 0) {
             NABTO_LOG_FATAL(("Unable to bind to interface: %s, '%s'.", interface, strerror(errno)));
@@ -162,38 +227,25 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
         }
     }
 #endif
-    {
-        int status;
 
-        if (sd.type == NABTO_SOCKET_IP_V6) {
-            struct sockaddr_in6 sa;
-            memset(&sa, 0, sizeof(sa));
-            sa.sin6_family = AF_INET6;
-            memset(sa.sin6_addr.s6_addr, 0, 16);
-            sa.sin6_port = htons(*localPort);
-            status = bind(sd.sock, (struct sockaddr*)&sa, sizeof(sa));
-        } else if (sd.type == NABTO_SOCKET_IP_V4) {
-            struct sockaddr_in sa;
-            memset(&sa, 0, sizeof(sa));
-            sa.sin_family = AF_INET;
-            sa.sin_addr.s_addr = 0;
-            sa.sin_port = htons(*localPort);
-            status = bind(sd.sock, (struct sockaddr*)&sa, sizeof(sa));
-        } else {
-            NABTO_LOG_ERROR(("socket was of unknown type"));
-            return false;
-        }
-
-        if (status < 0) {
-            NABTO_LOG_ERROR(("Unable to bind socket: (%i) '%s' localport %i", errno, strerror(errno), *localPort));
-            close(sd.sock);
-            return false;
-        }
-#if UNABTO_NETWORK_BSD_NONBLOCKING
-        nabto_bsd_set_nonblocking(&sd);
-#endif
-        *sock = sd;
+#if NABTO_NETWORK_LOOPBACK_ONLY
+    // Special case
+    if (!bind_to_loopback(localPort, &sd)) {
+        close(sd.sock);
+        return false;
     }
+#else
+    if (!bind_to_inaddr_any(localPort, &sd)) {
+        close(sd.sock);
+        return false;
+    }
+#endif
+
+#if UNABTO_NETWORK_BSD_NONBLOCKING
+    nabto_bsd_set_nonblocking(&sd);
+#endif
+    *sock = sd;
+
     {
         struct sockaddr_in sao;
         socklen_t len = sizeof(sao);
@@ -203,12 +255,12 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
             NABTO_LOG_ERROR(("Unable to get local port of socket: (%i) '%s'.", errno, strerror(errno)));
         }
     }
-    
+
     NABTO_LOG_TRACE(("Socket opened: port=%u", (int)*localPort));
-    
-    
+
+
     se = (socketListElement*)malloc(sizeof(socketListElement));
-    
+
     if (!se) {
         NABTO_LOG_FATAL(("Malloc of a single small list element should not fail!"));
         close(sd.sock);
@@ -443,12 +495,12 @@ bool unabto_network_epoll_read_one(struct epoll_event* event)
 bool nabto_get_local_ipv4(struct nabto_ip_address* ip) {
     struct sockaddr_in si_me, si_other;
     int s;
-    
+
     if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1) {
         NABTO_LOG_ERROR(("Cannot create socket"));
         return false;
     }
-    
+
     memset(&si_me, 0, sizeof(si_me));
     memset(&si_other, 0, sizeof(si_me));
     //bind to local port 4567
