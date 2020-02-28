@@ -165,7 +165,7 @@ static bool bind_to_loopback(uint16_t* localPort, nabto_socket_t* sock)
         struct sockaddr_in6 sa;
         memset(&sa, 0, sizeof(sa));
         sa.sin6_family = AF_INET6;
-        // 00::01
+        // the ipv6 loopback address is 0000::0001
         memset(sa.sin6_addr.s6_addr, 0, 15);
         sa.sin6_addr.s6_addr[15] = 1;
         sa.sin6_port = htons(*localPort);
@@ -229,6 +229,7 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
 #endif
 
 #if NABTO_NETWORK_LOOPBACK_ONLY
+    // Special case
     if (!bind_to_loopback(localPort, &sd)) {
         close(sd.sock);
         return false;
