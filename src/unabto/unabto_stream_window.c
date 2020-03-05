@@ -165,6 +165,7 @@ void nabto_stream_state_transition(struct nabto_stream_s* stream, nabto_stream_t
             break;
         case ST_CLOSE_WAIT:
             stream->applicationEvents.readClosed = true;
+            break;
         case ST_LAST_ACK:
             stream->u.tcb.retransCount = 0;
             nabtoSetFutureStamp(&stream->u.tcb.timeoutStamp, 0);
