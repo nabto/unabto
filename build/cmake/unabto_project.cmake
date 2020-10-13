@@ -6,7 +6,7 @@
 
 
 # UNABTO_RANDOM_MODULE
-# possibilities: dummy openssl libtomcrypt openssl_armv4 openssl_mips openssl_x86_64 none 
+# possibilities: dummy openssl libtomcrypt openssl_armv4 openssl_mips openssl_x86_64 none
 
 # UNABTO_CRYPTO_MODULE
 # possibilities: generic openssl libtomcrypt openssl_armv4 openssl_mips openssl_x86_64 none
@@ -136,7 +136,7 @@ elseif(UNABTO_RANDOM_MODULE MATCHES openssl_x86_64)
   set(unabto_use_asm 1)
 elseif(UNABTO_RANDOM_MODULE MATCHES openssl)
   list(APPEND unabto_src ${unabto_module_openssl_random_src})
-  
+
   list(APPEND unabto_link_libraries ${OPENSSL_CRYPTO_LIBRARY})
 
   list(APPEND unabto_link_libraries dl)
@@ -203,7 +203,7 @@ if (UNABTO_EXTERNAL_BUILD_ROOT)
   list(APPEND unabto_include_directories ${UNABTO_EXTERNAL_BUILD_ROOT}/include)
 endif()
 
-if(${CMAKE_SYSTEM} MATCHES Linux)
+if(${CMAKE_SYSTEM} MATCHES Linux OR ${CMAKE_SYSTEM} MATCHES Android)
   message("Linux system, Trying to use the appropriate modules")
 
   # Glibc 2.17 and newer dows not use -lrt and moxa does not have the lib at all.
@@ -236,7 +236,7 @@ if(${CMAKE_SYSTEM} MATCHES Linux)
   if (UNABTO_HAVE_EPOLL)
     list(APPEND unabto_src ${unabto_module_network_epoll_src})
   endif()
-  
+
 endif()
 
 if (WIN32)
