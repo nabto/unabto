@@ -1,16 +1,14 @@
-<!-- the following queries are implemented by the fp_acl_ae module's fp_acl_ae_dispatch function -->
-
-<unabto_queries 
+<unabto_queries
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://www.nabto.com/unabto/query_model.xsd">
 
-  <!-- ... -->
-  
+  <!-- the following queries are implemented by the fp_acl_ae module's fp_acl_ae_dispatch function -->
+
   <!-- get all users that have access to device -->
   <query name="get_users.json" id="11000">
     <request>
-      <parameter name="count" type="uint8"/> 
-      <parameter name="start" type="uint32"/> 
+      <parameter name="count" type="uint8"/>
+      <parameter name="start" type="uint32"/>
     </request>
     <response format="json">
       <list name="users">
@@ -33,7 +31,7 @@
       <parameter name="permissions" type="uint32"/>
     </response>
   </query>
-  
+
   <!-- get current user -->
   <query name="get_current_user.json" id="11020">
     <request>
@@ -45,14 +43,14 @@
       <parameter name="permissions" type="uint32"/>
     </response>
   </query>
-  
+
   <!-- get system security settings -->
   <query name="get_system_security_settings.json" id="11030">
     <request>
     </request>
     <response format="json">
-      <parameter name="status" type="uint8"/> 
-      <parameter name="permissions" type="uint32"/> 
+      <parameter name="status" type="uint8"/>
+      <parameter name="permissions" type="uint32"/>
       <parameter name="default_user_permissions_after_pairing" type="uint32"/>
     </response>
   </query>
@@ -60,12 +58,12 @@
   <!-- set system security settings -->
   <query name="set_system_security_settings.json" id="11040">
     <request>
-      <parameter name="permissions" type="uint32"/> 
+      <parameter name="permissions" type="uint32"/>
       <parameter name="default_user_permissions_after_pairing" type="uint32"/>
     </request>
     <response format="json">
-      <parameter name="status" type="uint8"/> 
-      <parameter name="permissions" type="uint32"/> 
+      <parameter name="status" type="uint8"/>
+      <parameter name="permissions" type="uint32"/>
       <parameter name="default_user_permissions_after_pairing" type="uint32"/>
     </response>
   </query>
@@ -74,7 +72,7 @@
   <query name="set_user_permissions.json" id="11050">
     <request>
       <parameter name="fingerprint" type="raw" representation="hex"/>
-      <parameter name="permissions" type="uint32"/> 
+      <parameter name="permissions" type="uint32"/>
     </request>
     <response format="json">
       <parameter name="status" type="uint8"/>
