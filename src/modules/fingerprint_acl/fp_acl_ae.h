@@ -100,27 +100,27 @@ application_event_result fp_acl_ae_user_set_name(application_request* request,
                                                  unabto_query_request* read_buffer,
                                                  unabto_query_response* write_buffer);
 
-// request: get_user_fcm_token.json?fingerprint=<hex>
-// response: status, fcm_token 
-application_event_result fp_acl_ae_user_get_fcm_token(application_request* request,
+// request: get_user_push_token.json?fingerprint=<hex>
+// response: status, push_token 
+application_event_result fp_acl_ae_user_get_push_token(application_request* request,
                                                       unabto_query_request* read_buffer,
                                                       unabto_query_response* write_buffer);
 
-// request: get_my_fcm_token.json
-// response: status, fcm_token 
-application_event_result fp_acl_ae_user_get_my_fcm_token(application_request* request,
+// request: get_my_push_token.json
+// response: status, push_token 
+application_event_result fp_acl_ae_user_get_my_push_token(application_request* request,
                                                          unabto_query_request* read_buffer,
                                                          unabto_query_response* write_buffer);
 
-// request: set_user_fcm_token.json?fingerprint=<hex>&fcm_token=<string>
+// request: set_user_push_token.json?fingerprint=<hex>&push_token=<string>
 // response: status
-application_event_result fp_acl_ae_user_set_fcm_token(application_request* request,
+application_event_result fp_acl_ae_user_set_push_token(application_request* request,
                                                       unabto_query_request* read_buffer,
                                                       unabto_query_response* write_buffer);
 
-// request: set_my_fcm_token.json?fcm_token=<string>
+// request: set_my_push_token.json?push_token=<string>
 // response: status
-application_event_result fp_acl_ae_user_set_my_fcm_token(application_request* request,
+application_event_result fp_acl_ae_user_set_my_push_token(application_request* request,
                                                          unabto_query_request* read_buffer,
                                                          unabto_query_response* write_buffer);
 
