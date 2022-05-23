@@ -56,8 +56,6 @@
 #error incompatible FCM token length with current acl file format
 #endif
 
-int fd;
-
 fp_acl_db_status fp_acl_file_save_file(struct fp_mem_state* acl);
 
 fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl);
