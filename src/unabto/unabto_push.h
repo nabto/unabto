@@ -47,16 +47,18 @@ typedef struct unabto_push_element{
     unabto_push_hint hint;
 }unabto_push_element;
 
-struct{
+typedef struct unabto_push_context{
     unabto_push_element* nextPushEvent;
     int pushSeqQHead;
     uint32_t nextSeq;
     nabto_stamp_t lastSent;
     nabto_stamp_t backOffLimit;
     bool reattachNeeded;
-}pushCtx;
+}unabto_push_context;
 
-    
+extern struct unabto_push_context pushCtx;
+
+
 /* ------------------------------------------------------------- *
  * These next two functions must be implemented by the developer *
  * ------------------------------------------------------------- */
@@ -77,7 +79,7 @@ void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint);
 
 
 /**
- * Send a Push notification. If this function return UNABTO_PUSH_HINT_OK, the 
+ * Send a Push notification. If this function return UNABTO_PUSH_HINT_OK, the
  * unabto_push_notification_callback function will call once and only once, and always from a new
  * context. If this function returns any other unabto_push_hint, the callback will not be called.
  * @param  pnsId    The ID of the used push notification service as configured in the basestation
@@ -101,7 +103,7 @@ uint16_t unabto_push_notification_data_size(void);
 
 /**
  * Initialization function for push notifications called by the core.
- * Should never be called from the application. 
+ * Should never be called from the application.
  */
 void unabto_push_init(void);
 
