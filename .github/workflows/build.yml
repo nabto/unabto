@@ -8,7 +8,7 @@ on:
 jobs:
   build-and-test:
     name: build
-    runs-on: ${{matrix}}
+    runs-on: ${{matrix.os}}
     strategy:
       matrix:
         os: [windows-2019, ubuntu-18.04, macos-10.15]
@@ -17,14 +17,14 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: configure cmake
-      run: mkdir build-dir && cd build-dir && cmake -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/artifacts .. 
-    
+      run: mkdir build-dir && cd build-dir && cmake -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/artifacts ..
+
     - name: build
       run: cmake --build build-dir --parallel
-      
+
     - name: install
       run: cmake --build build-dir --target install
-      
+
     - if: matrix.os == 'windows-2019'
       name: Test run
       run: |
@@ -119,4 +119,3 @@ jobs:
           asset_path: macos/bin/${{ matrix.binary}}
           asset_name: ${{ matrix.binary}}_macos
           asset_content_type: application/octet-stream
-          
