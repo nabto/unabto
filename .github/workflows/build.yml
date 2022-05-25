@@ -1,0 +1,122 @@
+name: C/C++ CI
+
+on:
+  push:
+  release:
+    types: [ published ]
+
+jobs:
+  build-and-test:
+    name: build
+    runs-on: ${{matrix}}
+    strategy:
+      matrix:
+        os: [windows-2019, ubuntu-18.04, macos-10.15]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: configure cmake
+      run: mkdir build-dir && cd build-dir && cmake -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/artifacts .. 
+    
+    - name: build
+      run: cmake --build build-dir --parallel
+      
+    - name: install
+      run: cmake --build build-dir --target install
+      
+    - if: matrix.os == 'windows-2019'
+      name: Test run
+      run: |
+        netsh advfirewall firewall add rule name="unabto_unittest" dir=in action=allow program="${{ github.workspace }}\artifacts\bin\unabto_unittest.exe" enable=yes
+        ${{ github.workspace }}/artifacts/bin/unabto_unittest --log_format=JUNIT --detect_memory_leaks=0 | tee -filepath unit_test_${{matrix.os}}.xml
+    - if: matrix.os != 'windows-2019'
+      name: Test run
+      run: ${{ github.workspace }}/artifacts/bin/unabto_unittest --log_format=JUNIT --log_sink=unit_test_${{matrix.os}}.xml --detect_memory_leaks=0
+
+    - name: Upload test reports
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: unit_test_${{matrix.os}}
+        path: ${{ github.workspace }}/unit_test_${{matrix.os}}.xml
+        if-no-files-found: warn
+    - name: Upload artifacts
+      if: ${{ success() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: artifacts_${{matrix.os}}
+        path: ${{ github.workspace }}/artifacts
+        if-no-files-found: warn
+
+  publish-test-results:
+    name: "Publish Unit Tests Results"
+    needs: build-and-test
+    runs-on: ubuntu-18.04
+    # the build-and-test job might be skipped, we don't need to run this job then
+    if: github.event_name != 'release' && (success() || failure())
+
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: test_reports
+
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1.15
+        with:
+          check_name: Unit Test Results
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          files: test_reports/**/*.xml
+
+  release-assets:
+    name: Release Assets
+    needs: build-and-test
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        binary: [unabto_tunnel]
+    if: github.event_name == 'release' && success()
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: artifacts_ubuntu-18.04
+          path: linux
+      - uses: actions/download-artifact@v2
+        with:
+          name: artifacts_windows-2019
+          path: windows
+      - uses: actions/download-artifact@v2
+        with:
+          name: artifacts_macos-10.15
+          path: macos
+      - name: List assets
+        run: ls -R
+      - name: Upload linux asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: linux/bin/${{ matrix.binary}}
+          asset_name: ${{ matrix.binary}}_linux
+          asset_content_type: application/octet-stream
+      - name: Upload windows asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: windows/bin/${{ matrix.binary}}.exe
+          asset_name: ${{ matrix.binary}}_windows.exe
+          asset_content_type: application/octet-stream
+      - name: Upload mac asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: macos/bin/${{ matrix.binary}}
+          asset_name: ${{ matrix.binary}}_macos
+          asset_content_type: application/octet-stream
+          
