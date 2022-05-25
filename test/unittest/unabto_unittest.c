@@ -8,13 +8,13 @@
 #include <unabto/unabto_payload_test.h>
 
 
-nabto_main_context nmc;
+extern nabto_main_context nmc;
 
 int main() {
     bool ret = true;
     bool r;
     NABTO_LOG_INFO(("Running the uNabto test suites"));
-    
+
     r = unabto_test_all();
     if (!r) {
         NABTO_LOG_ERROR(("Test all failed"));
@@ -44,7 +44,7 @@ int main() {
         NABTO_LOG_ERROR(("test of acl failed"));
         ret = false;
     }
-    
+
     if (ret) {
         NABTO_LOG_INFO(("All tests passed"));
         exit(0);
@@ -53,5 +53,5 @@ int main() {
         exit(1);
     }
 
-    
+
 }
