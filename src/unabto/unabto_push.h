@@ -56,7 +56,7 @@ typedef struct unabto_push_context{
     bool reattachNeeded;
 }unabto_push_context;
 
-static struct unabto_push_context pushCtx;
+extern struct unabto_push_context pushCtx;
 
 
 /* ------------------------------------------------------------- *

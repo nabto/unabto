@@ -29,22 +29,11 @@ jobs:
       name: Test run
       run: |
         netsh advfirewall firewall add rule name="unabto_unittest" dir=in action=allow program="${{ github.workspace }}\artifacts\bin\unabto_unittest.exe" enable=yes
-        ${{ github.workspace }}/artifacts/bin/unabto_unittest --log_format=JUNIT --detect_memory_leaks=0 | tee -filepath unit_test_${{matrix.os}}.xml
+        ${{ github.workspace }}/artifacts/bin/unabto_unittest
     - if: matrix.os != 'windows-2019'
       name: Test run
-      run: ${{ github.workspace }}/artifacts/bin/unabto_unittest --log_format=JUNIT --log_sink=unit_test_${{matrix.os}}.xml --detect_memory_leaks=0
+      run: ${{ github.workspace }}/artifacts/bin/unabto_unittest
 
-    - name: debug log
-      if: always()
-      run: ls -R
-
-    - name: Upload test reports
-      if: always()
-      uses: actions/upload-artifact@v2
-      with:
-        name: unit_test_${{matrix.os}}
-        path: ${{ github.workspace }}/unit_test_${{matrix.os}}.xml
-        if-no-files-found: warn
     - name: Upload artifacts
       if: ${{ success() }}
       uses: actions/upload-artifact@v2
@@ -52,26 +41,6 @@ jobs:
         name: artifacts_${{matrix.os}}
         path: ${{ github.workspace }}/artifacts
         if-no-files-found: warn
-
-  publish-test-results:
-    name: "Publish Unit Tests Results"
-    needs: build-and-test
-    runs-on: ubuntu-18.04
-    # the build-and-test job might be skipped, we don't need to run this job then
-    if: github.event_name != 'release' && (success() || failure())
-
-    steps:
-      - name: Download Artifacts
-        uses: actions/download-artifact@v2
-        with:
-          path: test_reports
-
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1.15
-        with:
-          check_name: Unit Test Results
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: test_reports/**/*.xml
 
   release-assets:
     name: Release Assets

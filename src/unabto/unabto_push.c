@@ -17,6 +17,8 @@
 #define UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF 60000ul //ms (1 minute)
 #endif
 
+struct unabto_push_context pushCtx;
+
 /* ---------------------------------------------------- *
  * Help function definitions                            *
  * ---------------------------------------------------- */
@@ -77,7 +79,7 @@ unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq){
         pushSeqQ[pushCtx.pushSeqQHead].stamp = pushCtx.backOffLimit;
     } else {
         pushSeqQ[pushCtx.pushSeqQHead].stamp = now;
-    }        
+    }
     pushSeqQ[pushCtx.pushSeqQHead].pnsId = pnsId;
 
     pushCtx.pushSeqQHead++;
@@ -98,7 +100,7 @@ bool unabto_push_notification_remove(uint32_t seq)
         }
     }
     return false;
-    
+
 }
 
 uint16_t unabto_push_notification_data_size()
@@ -122,7 +124,7 @@ void nabto_time_event_push(void)
         unabto_push_create_and_send_packet(pushCtx.nextPushEvent);
         unabto_push_set_next_event();
     }
-    
+
 }
 
 bool nabto_push_event(nabto_packet_header* hdr){
@@ -158,7 +160,7 @@ bool nabto_push_event(nabto_packet_header* hdr){
     if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_FAIL){
         hint = UNABTO_PUSH_HINT_FAILED;
     }
-    
+
     if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_QUOTA_EXCEEDED){
         int i;
         for (i = 0; i<pushCtx.pushSeqQHead; i++){
@@ -166,13 +168,13 @@ bool nabto_push_event(nabto_packet_header* hdr){
         }
         nabtoSetFutureStamp(&pushCtx.backOffLimit,UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF);
     }
-    
+
     if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_QUOTA_EXCEEDED_REATTACH){
         pushCtx.reattachNeeded = true;
     }
     unabto_push_notification_callback(pushData.sequence, &hint);
     unabto_push_notification_remove(pushData.sequence);
-    
+
     return true;
 }
 
@@ -212,8 +214,8 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         unabto_push_notification_remove(elem->seq);
         return;
     }
-        
-    
+
+
     uint8_t* ptr = insert_header(buf,0, nmc.context.gspnsi, U_PUSH, false, 0, 0, NULL);
     uint8_t* cryptoPayloadStart;
     uint8_t* cryptDataStart;
@@ -245,7 +247,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         unabto_push_notification_callback(elem->seq,&hint);
         unabto_push_notification_remove(elem->seq);
         return;
-    }        
+    }
 
     pushCtx.lastSent = nabtoGetStamp();
     elem->retrans++;
