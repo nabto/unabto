@@ -7,9 +7,6 @@
 
 #include <unabto/unabto_payload_test.h>
 
-
-extern nabto_main_context nmc;
-
 int main() {
     bool ret = true;
     bool r;
