@@ -34,6 +34,9 @@ jobs:
       name: Test run
       run: ${{ github.workspace }}/artifacts/bin/unabto_unittest --log_format=JUNIT --log_sink=unit_test_${{matrix.os}}.xml --detect_memory_leaks=0
 
+    - name: debug log
+      run: ls -R
+
     - name: Upload test reports
       if: always()
       uses: actions/upload-artifact@v2
