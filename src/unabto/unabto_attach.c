@@ -814,9 +814,7 @@ void handle_as_wait_bs(void) {
     
     SET_CTX_STATE_STAMP(NABTO_AS_WAIT_BS, EXP_WAIT(INTERVAL_BS_INVITE, nmc.context.counter));
     if(++nmc.context.counter > 6) {
-        NABTO_LOG_INFO(("No answer from BS, trying with fallback via dns"));
         nmc.context.errorCount = 0;
-        // If dns fallback is not enabled then we end here.
         NABTO_LOG_INFO(("Could not connect to controller, retrying from beginning"));
         send_basestation_attach_failure(NP_PAYLOAD_ATTACH_STATS_STATUS_CONTROLLER_INVITE_FAILED);
         SET_CTX_STATE_STAMP(NABTO_AS_IDLE, INTERVAL_ERROR_RETRY_BASE);
