@@ -499,7 +499,7 @@ application_event_result fp_acl_add_user_no_check(unabto_query_response* write_b
     if (status == FP_ACL_DB_OK) {
         NABTO_LOG_INFO(("User with fingerprint [%02x:%02x:%02x:%02x:...] and name [%s] successfully added to acl",
                          user->fp.value.data[0], user->fp.value.data[1], user->fp.value.data[2], user->fp.value.data[3],
-                         existingUser.name));
+                         user->name));
         return write_user(write_buffer, FP_ACL_STATUS_OK, user);
     } else {
         return write_empty_user(write_buffer, FP_ACL_STATUS_USER_DB_FULL);
