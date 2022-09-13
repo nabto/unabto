@@ -49,6 +49,17 @@
 #endif
 
 /**
+ * Enable usage of multiple ports in extended rencezvous. This gives a device
+ * behind port restricted nat a chance for connecting to a client behind
+ * symmetric nat. The client needs to have enable extended rendezvous with
+ * multiple sockets.
+ */
+#ifndef NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS
+#define NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS 1
+#endif
+
+
+/**
  * Enable usage of multiple sockets for extended rendezvous, this
  * makes p2p connections possible from a device behind symmetric nat
  * to clients behind port restricted nat and firewalls.
@@ -88,7 +99,7 @@
 #define NABTO_CONNECTIONS_SIZE 10
 #endif
 
-/** 
+/**
  * Define behavior if connection size is exceeded. If enabled, the
  *  application will exit, otherwise MICROSERVER_BUSY is reported to
  *  client
@@ -97,7 +108,7 @@
 #define NABTO_ENABLE_DEVICE_BUSY_AS_FATAL 0
 #endif
 
-/** 
+/**
  * Enable support for EVENTCHANNEL (piggyback data) functionality.
  * If enabled, events can be sent to the base station by
  * implementing the get_event_buffer2 function described in
@@ -209,7 +220,7 @@
 
 // Deprecated option
 #ifdef NABTO_APPLICATION_EVENT_APPLICATION_SAVES_PARAMETERS
-#error "NABTO_APPLICATION_EVENT_APPLICATION_SAVES_PARAMETERS is removed. An application is now forced to save the parameters when it first sees the request or return AER_REQ_OUT_OF_RESOURCES if it is not possible." 
+#error "NABTO_APPLICATION_EVENT_APPLICATION_SAVES_PARAMETERS is removed. An application is now forced to save the parameters when it first sees the request or return AER_REQ_OUT_OF_RESOURCES if it is not possible."
 #endif
 
 /*************************************/
@@ -221,7 +232,7 @@
 /* Logging configuration */
 /*************************/
 
-/** 
+/**
  * Enable logging by default.
  */
 #ifndef NABTO_ENABLE_LOGGING
@@ -241,9 +252,9 @@
 /****************************/
 
 
-/** 
- * Define default inclusion of STREAM related functionality. 
- * If NABTO_ENABLE_STREAM is 0 then all streaming functionality is 
+/**
+ * Define default inclusion of STREAM related functionality.
+ * If NABTO_ENABLE_STREAM is 0 then all streaming functionality is
  * disabled and the memory requirement will be 0 bytes.
  */
 #ifndef NABTO_ENABLE_STREAM
@@ -273,9 +284,9 @@
  * * Number of simultaneous streams
  * * The send/receive segment size
  * * The send/receive window size
- * 
+ *
  * The memory usage for streaming can be calculated as follow
- * mem = NABTO_STREAM_MAX_STREAMS * 
+ * mem = NABTO_STREAM_MAX_STREAMS *
  *       ((NABTO_STREAM_SEGMENT_SIZE*NABTO_STREAM_RECEIVE_WINDOW_SIZE) +
  *        (NABTO_STREAM_SEGMENT_SIZE*NABTO_STREAM_SEND_WINDOW_SIZE))
  *
@@ -288,8 +299,8 @@
 #define NABTO_STREAM_MAX_STREAMS 4
 #endif
 
-/** The maximum segment size the streaming can receive. 
- * 1391 bytes buffers is the largest possible buffers we can use 
+/** The maximum segment size the streaming can receive.
+ * 1391 bytes buffers is the largest possible buffers we can use
  * when encryption is enables, this results in 1468 bytes nabto packets
  * then add 8 bytes of udp headers and 12 bytes of ip headers and the ip
  * packet has size 1488bytes. Because padding is often 16 bytes choosing
@@ -313,7 +324,7 @@
 #warning NABTO_STREAM_RECEIVE_SEGMENT_SIZE option is deprecated use NABTO_STREAM_SEGMENT_SIZE instead
 #endif
 
-/** 
+/**
  * The size of the receive window. This is an upper limit of the size
  * of the receive window. The actual size is the minimum of the available
  * receive segments, this configuration parameter and the client
@@ -330,7 +341,7 @@
 
 /**
  * The streaming implementation is using a pool of send and receive
- * segments. 
+ * segments.
  *
  * If no more segments is available when one is trying to send data,
  * the application will have to try again later sending the data. This
@@ -366,7 +377,7 @@
 
 /** Timeout before a new streaming packet is sent, value in ms. */
 #ifndef NABTO_STREAM_TIMEOUT
-#define NABTO_STREAM_TIMEOUT 1000 
+#define NABTO_STREAM_TIMEOUT 1000
 #endif
 
 /** Max number of retransmissions of a packet. */
@@ -394,7 +405,7 @@
 /**
  * Time to delay sending advertised window data in case the receiver
  * blocks for consuming of received data.
- * 
+ *
  * 10 ms seems like a good value, it gives the receiver time to
  * consume the data while also makes the feedback sufficient rapid.
  */
@@ -473,7 +484,7 @@
 /**
  * By defining the NABTO_THREAD_LOCAL_STORAGE to the platforms thread
  * local storage option enables that all static variables are in the
- * threads local storage 
+ * threads local storage
  */
 #ifndef NABTO_THREAD_LOCAL_STORAGE
 #define NABTO_THREAD_LOCAL_STORAGE

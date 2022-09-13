@@ -725,11 +725,13 @@ void nabto_rendezvous_start(nabto_connect* con)
     }
 #endif
 
-    if (con->clientNatType == NP_PAYLOAD_IPX_NAT_SYMMETRIC) {
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS
+    if (con->clientNatType == NP_PAYLOAD_IPX_NAT_SYMMETRIC && nmc.nabtoMainSetup.enableExtendedRendezvousMultiplePorts) {
         unabto_extended_rendezvous_init_port_sequence(&con->rendezvousConnectState.portSequence, con->cp.globalEndpoint.port);
         con->rendezvousConnectState.openManyPorts = true;
         unabto_connection_set_future_stamp(&con->rendezvousConnectState.openManyPortsStamp, 0);
     }
+#endif
     send_rendezvous_to_all(con);
 }
 
@@ -848,6 +850,7 @@ void rendezvous_time_event(nabto_connect* con)
         }
 #endif
 
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS
         if (rcs->openManyPorts &&
             nabtoIsStampPassed(&rcs->openManyPortsStamp))
         {
@@ -864,6 +867,7 @@ void rendezvous_time_event(nabto_connect* con)
             }
             unabto_connection_set_future_stamp(&rcs->openManyPortsStamp, 50);
         }
+#endif
 
         if(nabtoIsStampPassed(&rcs->timeout)) {
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS

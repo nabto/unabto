@@ -21,11 +21,11 @@ static void nabto_connection_update_next_event(nabto_stamp_t* current_min_stamp)
 void unabto_next_event(nabto_stamp_t* stamp) {
     // return the smallest of context.stamp, connection.stamp, stream.stamp
     *stamp = nmc.context.timestamp;
-   
+
 #if NABTO_ENABLE_CONNECTIONS
     nabto_connection_update_next_event(stamp);
 #endif
-   
+
 #if NABTO_ENABLE_STREAM
     nabto_stream_update_next_event(stamp);
 #endif
@@ -46,7 +46,7 @@ static void nabto_connection_update_next_event(nabto_stamp_t* current_min_stamp)
         for (con = connections; con < connections + NABTO_MEMORY_CONNECTIONS_SIZE; con++) {
             if (con->state != CS_IDLE) {
                 nabto_rendezvous_connect_state* rcs = &con->rendezvousConnectState;
-                
+
                 if (con->sendConnectStatistics || con->sendConnectionEndedStatistics) {
                     connection_timeout_cache_stamp = nabtoGetStamp();
                 }
@@ -56,18 +56,19 @@ static void nabto_connection_update_next_event(nabto_stamp_t* current_min_stamp)
                     nabto_update_min_stamp(&connection_timeout_cache_stamp, &con->tcpFallbackConnectionStamp);
                 }
 #endif
-                
+
                 if (nabto_connection_has_keep_alive(con)) {
                     nabto_update_min_stamp(&connection_timeout_cache_stamp, &con->stamp);
                 }
-                
+
                 if (rcs->state == RS_CONNECTING) {
                     nabto_update_min_stamp(&connection_timeout_cache_stamp, &rcs->timestamp);
-                    
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS
                     if (rcs->openManyPorts) {
                         nabto_update_min_stamp(&connection_timeout_cache_stamp, &rcs->openManyPortsStamp);
                     }
-                    
+#endif
+
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
                     if (rcs->openManySockets) {
                         nabto_update_min_stamp(&connection_timeout_cache_stamp, &rcs->openManySocketsStamp);
