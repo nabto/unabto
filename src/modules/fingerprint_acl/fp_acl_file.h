@@ -47,7 +47,6 @@
  *         hasValue: uint8_t,
  *         value: uint8_t[16]
  *    }
- *    fcmTok: char[255]
  *    name: char[64],
  *    permissions: uint32_t
  * }
