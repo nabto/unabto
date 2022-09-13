@@ -121,6 +121,7 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
     for (i = 0; i < users; i++) {
         struct fp_acl_user* it;
         ptr = buffer;
+        memset(buffer, 0, FP_ACL_RECORD_SIZE);
         it = &acl->users[i];
         if (!fp_mem_is_slot_free(it)) {
 

@@ -114,7 +114,7 @@ void fp_acl_init_user(struct fp_acl_user* user);
  * Check if the system is allowed to do what the permission bits
  * requests. It could be asking if the system is allowed to accept
  * remote connections.
- */ 
+ */
 bool fp_acl_check_system_permissions(struct fp_acl_settings* settings, uint32_t requiredPermissions);
 
 /**
