@@ -112,6 +112,7 @@ enum {
     STREAM_WINDOW_SEND_SIZE_OPTION,
     CONNECTIONS_SIZE_OPTION,
     DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS,
+    DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS,
     UART_DEVICE_OPTION,
     STREAM_SEGMENT_POOL_SIZE_OPTION
 };
@@ -173,6 +174,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char x27s[] = "";      const char* x27l[] = { "stream-recv-window-size", 0 };
     const char x28s[] = "";      const char* x28l[] = { "connections", 0 };
     const char x29s[] = "";      const char* x29l[] = { "disable-extended-rendezvous-multiple-sockets", 0 };
+    const char x29_1s[] = "";    const char* x29_1l[] = { "disable-extended-rendezvous-multiple-ports", 0 };
     const char x30s[] = "";      const char* x30l[] = { "allow-all-hosts", 0};
     const char x31s[] = "";      const char* x31l[] = { "no-access-control", 0};
     const char x32s[] = "";      const char* x32l[] = { "no-crypto", 0};
@@ -214,6 +216,10 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
         { DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS, GOPT_NOARG, x29s, x29l },
 #endif
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS
+        { DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS, GOPT_NOARG, x29_1s, x29_1l },
+#endif
+
         { ALLOW_ALL_HOSTS_OPTION, GOPT_NOARG, x30s, x30l },
         { NO_ACCESS_CONTROL_OPTION, GOPT_NOARG, x31s, x31l },
         { UART_DEVICE_OPTION, GOPT_ARG, x33s, x33l },
@@ -284,6 +290,10 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
         printf("      --disable-extended-rendezvous-multiple-sockets     Disable multiple sockets in extended rendezvous.\n");
 #endif
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS
+        printf("      --disable-extended-rendezvous-multiple-ports       Disable multiple ports in extended rendezvous.\n");
+#endif
+
         exit(0);
     }
 
@@ -492,6 +502,11 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
             NABTO_LOG_ERROR(("Disabling extended rendezvous with multiple sockets since the platform cannot give the required number of file descriptors"));
             nms->enableExtendedRendezvousMultipleSockets = false;
         }
+    }
+#endif
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS
+    if (gopt(options, DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS)) {
+        nms->enableExtendedRendezvousMultiplePorts = false;
     }
 #endif
     if(fatalPortError == true) {

@@ -40,7 +40,7 @@ typedef enum {
     RS_CONNECTING,
     RS_DONE
 } rendezvous_state;
- 
+
 typedef enum {
     CS_IDLE,            /* The connection is idle and free. */
     CS_CONNECTING,      /* We are still in the connecting state. */
@@ -62,14 +62,16 @@ typedef struct {
 
 typedef struct {
     nabto_stamp_t timeout;
-    nabto_stamp_t timestamp; 
+    nabto_stamp_t timestamp;
     rendezvous_state state;
 
     /**
      * Extended rendezvous state
-     */ 
+     */
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS
     bool openManyPorts;
     nabto_stamp_t openManyPortsStamp;
+#endif
     uint16_t portsOpened;
     uint16_t socketsOpened;
 
@@ -103,7 +105,7 @@ struct nabto_connect_s {
 #if NABTO_ENABLE_EPOLL
     int epollEventType;
 #endif
-    
+
     nabto_rendezvous_connect_state rendezvousConnectState;
     connection_state state; /**< The connection state it's used for
                              * determining both if the connection is
@@ -115,8 +117,8 @@ struct nabto_connect_s {
     /**
      * psk handshake state
      */
-    unabto_connection_psk_connection psk; 
-    
+    unabto_connection_psk_connection psk;
+
     uint32_t spnsi; /**< Serverpeer connection identifier. For local
                      * connections this identifier is between 100 and
                      * 1000 and assigned by uNabto. If the connection
@@ -138,7 +140,7 @@ struct nabto_connect_s {
     ipxdata                   cp;           /**< the peer endpoints                       */
     nabto_socket_t            socket;       /**< UDP Socket to use                        */
     nabto_endpoint            peer;         /**< the peer endpoint                        */
-    
+
     connectionStats           stats;        /**< connection stats                         */
     bool                      sendConnectStatistics;
     bool                      sendConnectionEndedStatistics;
@@ -217,7 +219,7 @@ int nabto_connection_index(nabto_connect* con);
 /**
  * Update a connection with a verified event on the connection.
  */
-void 
+void
 nabto_connection_event(nabto_connect* con, message_event* event);
 
 void nabto_connection_client_aborted(nabto_connect* con);
@@ -277,7 +279,7 @@ bool verify_connection_encryption(nabto_connect* con);
 nabto_connection_type get_connection_type(nabto_connect* con);
 
 uint16_t unabto_count_active_connections(void);
-    
+
 bool nabto_write_con(nabto_connect* con, uint8_t* buf, size_t len);
 
 #define nabto_connection_has_keep_alive(con) (((con)->conAttr & CON_ATTR_NO_KEEP_ALIVE) == 0)

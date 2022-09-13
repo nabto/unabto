@@ -15,7 +15,7 @@ enum {
     PRE_SHARED_KEY_SIZE = 16
 };
 
-/** 
+/**
  * The Main Setup struct.
  * The content is never changed during execution.
  */
@@ -24,14 +24,14 @@ typedef struct {
     uint16_t          localPort;          /**< The port to use for local connections */
     const char*       interfaceName;      /**< The interface to bind to, unix only */
     uint16_t          bufsize;            /**< Communication buffer size        */
-    const char*       id;                 /**< Id for the nabto device          
-                                           * The id should be a valid url, 
+    const char*       id;                 /**< Id for the nabto device
+                                           * The id should be a valid url,
                                            * all lowercase, and no special
                                            * characters like spaces etc.        */
     const char*       version;            /**< version string (given to clients)*/
     const char*       url;                /**< URL string (given to clients)    */
     uint32_t          gspPollTimeout;     /**< GSP poll timeout in ms           */
-    int               gspTimeoutCount;    /**< GSP keep alive times out after 
+    int               gspTimeoutCount;    /**< GSP keep alive times out after
                                                gspPollTimeout*gspTimeOutCount   */
     bool              secureAttach;       /**< Attach using secure channel      */
     bool              secureData;         /**< Encrypt data                     */
@@ -60,7 +60,11 @@ typedef struct {
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
     bool              enableExtendedRendezvousMultipleSockets; /**< enabled by default */
 #endif
-    
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS
+    bool              enableExtendedRendezvousMultiplePorts; /**< enabled by default */
+#endif
+
+
 } nabto_main_setup;
 
 /**
@@ -74,7 +78,7 @@ typedef struct nabto_main_context {
     nabto_endpoint        controllerEp;   /**< controller endpoint       */
     nabto_context         context;        /**< Communication context     */
     nabto_main_setup      nabtoMainSetup; /**< Main setup for uNabto     */
-    nabto_endpoint        socketGSPLocalEndpoint;  /**< The local endpoint for the gsp socket. 
+    nabto_endpoint        socketGSPLocalEndpoint;  /**< The local endpoint for the gsp socket.
                                                       This is the local ip and port the socket is boudnd to. */
 } nabto_main_context;
 

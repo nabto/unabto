@@ -82,7 +82,10 @@ void unabto_init_default_values(nabto_main_setup* nms) {
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
     nms->enableExtendedRendezvousMultipleSockets = true;
 #endif
-    
+
+#if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS
+    nms->enableExtendedRendezvousMultiplePorts = true;
+#endif
 }
 
 /**
@@ -127,7 +130,7 @@ bool unabto_init(void) {
         NABTO_LOG_FATAL(("Could not initialize tcp fallback module"));
     }
 #endif
-    
+
 #if NABTO_ENABLE_CONNECTIONS
     nabto_init_connections();
 #endif
@@ -179,7 +182,7 @@ bool unabto_init(void) {
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
     unabto_extended_rendezvous_init();
 #endif
-    
+
     NABTO_LOG_INFO(("Nabto was successfully initialized"));
     return true;
 }
@@ -210,7 +213,7 @@ void unabto_close(void) {
 #if NABTO_ENABLE_DYNAMIC_MEMORY
     unabto_free_memory();
 #endif
-        
+
 }
 
 /***************************************/
@@ -240,7 +243,7 @@ void unabto_time_event(void) {
 #if NABTO_ENABLE_STREAM
     unabto_time_event_stream();
 #endif
-    
+
 #if NABTO_ENABLE_REMOTE_ACCESS
     nabto_attach_time_event();
 #endif
@@ -280,16 +283,16 @@ static ssize_t read_event_socket(nabto_socket_t socket, message_event* event) {
 
 bool unabto_read_socket(nabto_socket_t socket) {
     message_event event;
-    ssize_t ilen;    
+    ssize_t ilen;
     ilen = read_event_socket(socket, &event);
 
     if (ilen <= 0) {
         return false; /* no packets are sent for sure */
     }
-#if NABTO_ENABLE_LOCAL_ACCESS 
+#if NABTO_ENABLE_LOCAL_ACCESS
     if (nabto_socket_is_equal(&socket, &nmc.socketLocal)) {
         NABTO_LOG_TRACE(("Received local packet length %" PRIsize, ilen));
-        
+
         nabto_message_local_event(&event, (uint16_t)ilen);
     }
 #endif
@@ -324,7 +327,7 @@ static void ensureValidDeviceId(const char* id) {
     }
     while(*id)
     {
-        if(!((*id >= 'a' && *id <= 'z') || (*id >= '0' && *id <= '9') || *id == '-' || *id == '.')) 
+        if(!((*id >= 'a' && *id <= 'z') || (*id >= '0' && *id <= '9') || *id == '-' || *id == '.'))
         {
             NABTO_LOG_FATAL(("%s is not a valid device id, only \"a\" to \"z\", \"0\" to \"9\", hyphen (\"-\") and period (\".\") are allowed in a device id.", nmc.nabtoMainSetup.id));
         }
