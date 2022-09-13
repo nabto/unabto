@@ -479,7 +479,7 @@ application_event_result fp_acl_add_user_no_check(unabto_query_response* write_b
     it = aclDb.find(&(user->fp.value));
     if (it) {
         if (aclDb.load(it, &existingUser) == FP_ACL_DB_OK) {
-            NABTO_LOG_TRACE(("User with fingerprint [%02x:%02x:%02x:%02x:...] already exists in acl with name [%s], returning existing user",
+            NABTO_LOG_INFO(("User with fingerprint [%02x:%02x:%02x:%02x:...] already exists in acl with name [%s], returning existing user",
                              user->fp.value.data[0], user->fp.value.data[1], user->fp.value.data[2], user->fp.value.data[3],
                              existingUser.name));
             return write_user(write_buffer, FP_ACL_STATUS_USER_EXISTS, &existingUser);
@@ -497,6 +497,9 @@ application_event_result fp_acl_add_user_no_check(unabto_query_response* write_b
     status = aclDb.save(user);
 
     if (status == FP_ACL_DB_OK) {
+        NABTO_LOG_INFO(("User with fingerprint [%02x:%02x:%02x:%02x:...] and name [%s] successfully added to acl",
+                         user->fp.value.data[0], user->fp.value.data[1], user->fp.value.data[2], user->fp.value.data[3],
+                         existingUser.name));
         return write_user(write_buffer, FP_ACL_STATUS_OK, user);
     } else {
         return write_empty_user(write_buffer, FP_ACL_STATUS_USER_DB_FULL);
@@ -682,7 +685,8 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
             }
             return allow;
         } else {
-            NABTO_LOG_INFO(("Unpaired user is not allowed remote access"));
+            NABTO_LOG_INFO(("Unpaired user with fingerprint [%02x:%02x:%02x:%02x:...] is not allowed remote access",
+                            connection->fingerprint.value.data[0], connection->fingerprint.value.data[1], connection->fingerprint.value.data[2], connection->fingerprint.value.data[3]));
             return false;
         }
     }

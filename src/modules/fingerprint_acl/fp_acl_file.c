@@ -121,6 +121,7 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
     for (i = 0; i < users; i++) {
         struct fp_acl_user* it;
         ptr = buffer;
+        memset(buffer, 0, FP_ACL_RECORD_SIZE);
         it = &acl->users[i];
         if (!fp_mem_is_slot_free(it)) {
 
@@ -152,13 +153,14 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
     return FP_ACL_DB_OK;
 }
 
-static fp_acl_db_status convert_users_from_early_versions(FILE* aclFile, uint8_t* buffer, uint8_t* ptr, struct fp_mem_state* temp_acl, uint32_t numUsers)
+// Read users from version 1 and version 2 of the acl file format.
+static fp_acl_db_status convert_users_from_version_1_2(FILE* aclFile, uint8_t* buffer, uint8_t* ptr, struct fp_mem_state* temp_acl, uint32_t numUsers)
 {
     uint32_t i;
     for (i = 0; i < numUsers && i < FP_MEM_ACL_ENTRIES; i++) {
         uint32_t fp_size = 16;
         uint32_t name_size = 64;
-        uint32_t size = fp_size + name_size;
+        uint32_t size = fp_size + name_size + 4;
         size_t nread;
 
         nread = fread(buffer, size, 1, aclFile);
@@ -204,7 +206,7 @@ static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uin
             READ_FORWARD_U32(numUsers, ptr);
             temp_acl.settings.firstUserPermissions = 0;
 
-            status = convert_users_from_early_versions(aclFile, buffer, ptr, &temp_acl, numUsers);
+            status = convert_users_from_version_1_2(aclFile, buffer, ptr, &temp_acl, numUsers);
             if (status != FP_ACL_DB_OK) {
                 return status;
             }
@@ -212,7 +214,7 @@ static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uin
         }
 
         case 2: {
-            nread = fread(buffer, 12, 1, aclFile);
+            nread = fread(buffer, 16, 1, aclFile);
             if (nread != 1) {
                 return FP_ACL_DB_LOAD_FAILED;
             }
@@ -224,7 +226,7 @@ static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uin
             READ_FORWARD_U32(temp_acl.settings.firstUserPermissions, ptr);
             READ_FORWARD_U32(numUsers, ptr);
 
-            status = convert_users_from_early_versions(aclFile, buffer, ptr, &temp_acl, numUsers);
+            status = convert_users_from_version_1_2(aclFile, buffer, ptr, &temp_acl, numUsers);
             if (status != FP_ACL_DB_OK) {
                 return status;
             }
@@ -251,7 +253,7 @@ static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uin
                 uint32_t psk_id_size = 16;
                 uint32_t psk_size = 16;
                 uint32_t name_size = 64;
-                uint32_t size = fp_size + psk_id_size + psk_size + name_size + 6;
+                uint32_t size = fp_size + 1 + psk_id_size + 1 + psk_size + name_size + 4;
 
                 nread = fread(buffer, size, 1, aclFile);
                 ptr = buffer;

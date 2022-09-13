@@ -8,31 +8,71 @@
 
 /**
  * The fp acl file saves the fingerprint config in the following format
- * 
- * Version 4 of the file format is as follows:
- * 
- * uint32_t version
+ *
+ * saving rewrites the full file.
+ */
+
+/**
+ * Version 1 format:
+ *
+ * uint32_t version == 1
+ * settings { uint32_t systemPermissions, uint32_t defaultPermissions}
+ * number of users: uint32_t,
+ * [users] user = {fingerprint: uint8_t[16], name: char[64], permissions: uint32_t}
+ *
+ */
+
+/**
+ * Version 2 format:
+ *
+ * uint32_t version == 2
+ * settings { uint32_t systemPermissions, uint32_t defaultUserPermissions, uint32_t firstUserPermissions}
+ * number of users: uint32_t,
+ * [users] user = {fingerprint: uint8_t[16], name: char[64], permissions: uint32_t}
+ */
+
+/**
+ * Version 3 format:
+ *
+ * uint32_t version == 3
  * settings { uint32_t systemPermissions, uint32_t defaultUserPermissions, uint32_t firstUserPermissions}
  * number of users: uint32_t,
  * [users] user = {
  *    fingerprint: uint8_t[16]
  *    pskId: {
- *         hasValue: uint8_t, 
+ *         hasValue: uint8_t,
  *         value: uint8_t[16]
  *    }
  *    psk: {
- *         hasValue: uint8_t, 
+ *         hasValue: uint8_t,
  *         value: uint8_t[16]
  *    }
- *    fcmTok: char[255]
- *    name: char[64], 
- *    permissions: uint32_t}
+ *    name: char[64],
+ *    permissions: uint32_t
+ * }
  *
- * saving rewrites the full file.
- * 
- * init loads the file the first time it
- * 
- * in version 1 the name is always 64 bytes long
+ */
+
+/*
+ * Version 4 of the file format is as follows:
+ *
+ * uint32_t version == 4
+ * settings { uint32_t systemPermissions, uint32_t defaultUserPermissions, uint32_t firstUserPermissions}
+ * number of users: uint32_t,
+ * [users] user = {
+ *    fingerprint: uint8_t[16]
+ *    pskId: {
+ *         hasValue: uint8_t,
+ *         value: uint8_t[16]
+ *    }
+ *    psk: {
+ *         hasValue: uint8_t,
+ *         value: uint8_t[16]
+ *    }
+ *    fcmTok: char[256]
+ *    name: char[64],
+ *    permissions: uint32_t
+ * }
  */
 
 #define FP_ACL_FILE_USERNAME_LENGTH 64
