@@ -10,7 +10,14 @@ Guide: always keep an unreleased section which keeps track of current
 changes. When a release is made the unreleased section is renamed to
 the release and a new unreleased section is added.
 
-## 4.5 UNRELEASED
+## 4.6 [Unreleased]
+
+## 4.5 2022-09-14
+
+### Added
+- SC-1426: Extended rendezvous with multiple ports has been made configurable. It can be disabled at compile time or at runtime.
+- The fingerprint ACL module has been updated such that it can also store FCM tokens.
+- The fingerprint ACL module has got automatic version upgrades of the underlying state files.
 
 ## 4.4.3 2019-06-25
 
