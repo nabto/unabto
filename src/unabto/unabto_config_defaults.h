@@ -83,8 +83,20 @@
 
 
 /**
- * Limit how many addresses the dns resolver can return to unabto
- * after a successfull resolution.
+ * Limit how many addresses the dns resolver can return to unabto after a
+ * successfull resolution. This limitation is available such that the memory
+ * requirement can be lowered.
+ *
+ * The DNS resolver will resolve some ipv4 and ipv6 addresses. We take this
+ * amount of addresses and give it to the code which attaches to the
+ * basestation. When this value is set to a small value is it important that the
+ * dns resolver returns randomized addresses. When this value is set to a small
+ * value the time for an attach can also be increased if some servers in the
+ * resolved set does not respond.
+ *
+ * Setting this value to 6 gives the basestation attacher some addresses to try
+ * from and it fixes a problem where some dns resolvers always returns the same
+ * set of addresses.
  */
 #ifndef NABTO_DNS_RESOLVED_IPS_MAX
 #define NABTO_DNS_RESOLVED_IPS_MAX 6
