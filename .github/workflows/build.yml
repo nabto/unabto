@@ -46,6 +46,9 @@ jobs:
     name: Release Assets
     needs: build-and-test
     runs-on: ubuntu-22.04
+    permissions:
+      # allow assets to be uploaded to a release
+      contents: write
     strategy:
       matrix:
         binary: [unabto_tunnel]
