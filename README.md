@@ -1,3 +1,6 @@
+> **Warning**
+> Deprecation notice: This SDK is for Nabto 4/Micro (uNabto). For new projects, the next generation Nabto 5/Edge should be used instead. Read about the differences [here](https://docs.nabto.com/developer/guides/concepts/overview/edge-vs-micro.html).
+
 # uNabto SDK
 
 [![Build Status][1]][2] [![Windows Build Status][3]][4]
