@@ -54,15 +54,15 @@ jobs:
         binary: [unabto_tunnel]
     if: github.event_name == 'release' && success()
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: artifacts_ubuntu-22.04
           path: linux
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: artifacts_windows-2022
           path: windows
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: artifacts_macos-12
           path: macos
