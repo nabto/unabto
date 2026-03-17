@@ -5,7 +5,7 @@
 #include <unabto/unabto_hmac_sha256.h>
 #include <unabto/unabto_util.h>
 #include <openssl/evp.h>
-#include <openssl/hmac.h>
+#include <openssl/core_names.h>
 
 #include <string.h>
 
@@ -15,7 +15,6 @@ bool unabto_aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t inpu
     if (ctx == NULL) {
         NABTO_LOG_ERROR(("cannot allocate cipher ctx"));
     }
-    EVP_CIPHER_CTX_init(ctx);
     if (EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, key, input /* first 16 bytes of the input is the iv */) == 0) {
         NABTO_LOG_ERROR(("EVP_EncryptInit_ex should return 1"));
     }
@@ -32,9 +31,6 @@ bool unabto_aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t inpu
         NABTO_LOG_ERROR(("EVP_EncryptFinal_ex should return 1"));
     }
 
-    if(EVP_CIPHER_CTX_cleanup(ctx) != 1) {
-        NABTO_LOG_ERROR(("EVP_CIPHER_CTX_cleanup should return 1"));
-    }
     EVP_CIPHER_CTX_free(ctx);
     return true;
 }
@@ -45,7 +41,6 @@ bool unabto_aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t inpu
     if (ctx == NULL) {
         NABTO_LOG_ERROR(("cannot allocate cipher ctx"));
     }
-    EVP_CIPHER_CTX_init(ctx);
     if (EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, key, input /* iv is the first 16 bytes*/) != 1) {
         NABTO_LOG_ERROR(("EVP_DecryptInit_ex should return 1"));
     }
@@ -62,9 +57,6 @@ bool unabto_aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t inpu
         NABTO_LOG_ERROR(("EVP_EncryptFinal_ex should return 1"));
     }
 
-    if (EVP_CIPHER_CTX_cleanup(ctx) != 1) {
-        NABTO_LOG_ERROR(("EVP_CIPHER_CTX_cleanup should return 1"));
-    }
     EVP_CIPHER_CTX_free(ctx);
     return true;
 }
@@ -96,37 +88,37 @@ void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keys_size,
 
     uint8_t hash[EVP_MAX_MD_SIZE];
 
-    HMAC_CTX* ctx;
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-    HMAC_CTX ctxData;
-    ctx = &ctxData;
-    HMAC_CTX_init(ctx);
-#else
-    ctx = HMAC_CTX_new();
-#endif
-    if (ctx == NULL) {
-        NABTO_LOG_ERROR(("cannot allocate hmac ctx"));
+    EVP_MAC *mac_alg = EVP_MAC_fetch(NULL, "HMAC", NULL);
+    if (mac_alg == NULL) {
+        NABTO_LOG_ERROR(("EVP_MAC_fetch failed"));
     }
-    
-    if (HMAC_Init_ex(ctx, key, key_size, EVP_sha256(), NULL) != 1) {
-        NABTO_LOG_ERROR(("HMAC_Init_ex should return 1"));
+
+    EVP_MAC_CTX *ctx = EVP_MAC_CTX_new(mac_alg);
+    if (ctx == NULL) {
+        NABTO_LOG_ERROR(("EVP_MAC_CTX_new failed"));
+    }
+
+    OSSL_PARAM params[] = {
+        OSSL_PARAM_construct_utf8_string(OSSL_MAC_PARAM_DIGEST, "SHA256", 0),
+        OSSL_PARAM_construct_end()
+    };
+
+    if (EVP_MAC_init(ctx, key, key_size, params) != 1) {
+        NABTO_LOG_ERROR(("EVP_MAC_init failed"));
     }
 
     for (i = 0; i < messages_size; i++) {
-        if (HMAC_Update(ctx, messages[i].data, messages[i].size) != 1) {
-            NABTO_LOG_ERROR(("HMAC_Update should return 1"));
+        if (EVP_MAC_update(ctx, messages[i].data, messages[i].size) != 1) {
+            NABTO_LOG_ERROR(("EVP_MAC_update failed"));
         }
     }
 
-    unsigned int hash_size;
-    if (HMAC_Final(ctx, hash, &hash_size) != 1) {
-        NABTO_LOG_ERROR(("HMAC_Final should return 1"));
+    size_t hash_size;
+    if (EVP_MAC_final(ctx, hash, &hash_size, sizeof(hash)) != 1) {
+        NABTO_LOG_ERROR(("EVP_MAC_final failed"));
     }
 
     memcpy(mac, hash, MIN(mac_size, hash_size));
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-    HMAC_CTX_cleanup(ctx);
-#else
-    HMAC_CTX_free(ctx);
-#endif
+    EVP_MAC_CTX_free(ctx);
+    EVP_MAC_free(mac_alg);
 }
