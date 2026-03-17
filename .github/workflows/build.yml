@@ -11,10 +11,10 @@ jobs:
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        os: [windows-2022, ubuntu-22.04, macos-12]
+        os: [windows-2025, ubuntu-24.04, macos-15]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
 
     - name: configure cmake
       run: mkdir build-dir && cd build-dir && cmake -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/artifacts ..
@@ -25,18 +25,18 @@ jobs:
     - name: install
       run: cmake --build build-dir --target install
 
-    - if: matrix.os == 'windows-2022'
+    - if: matrix.os == 'windows-2025'
       name: Test run
       run: |
         netsh advfirewall firewall add rule name="unabto_unittest" dir=in action=allow program="${{ github.workspace }}\artifacts\bin\unabto_unittest.exe" enable=yes
         ${{ github.workspace }}/artifacts/bin/unabto_unittest
-    - if: matrix.os != 'windows-2022'
+    - if: matrix.os != 'windows-2025'
       name: Test run
       run: ${{ github.workspace }}/artifacts/bin/unabto_unittest
 
     - name: Upload artifacts
       if: ${{ success() }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v7
       with:
         name: artifacts_${{matrix.os}}
         path: ${{ github.workspace }}/artifacts
@@ -45,7 +45,7 @@ jobs:
   release-assets:
     name: Release Assets
     needs: build-and-test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       # allow assets to be uploaded to a release
       contents: write
@@ -54,44 +54,24 @@ jobs:
         binary: [unabto_tunnel]
     if: github.event_name == 'release' && success()
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v8
         with:
-          name: artifacts_ubuntu-22.04
+          name: artifacts_ubuntu-24.04
           path: linux
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v8
         with:
-          name: artifacts_windows-2022
+          name: artifacts_windows-2025
           path: windows
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v8
         with:
-          name: artifacts_macos-12
+          name: artifacts_macos-15
           path: macos
       - name: List assets
         run: ls -R
-      - name: Upload linux asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: linux/bin/${{ matrix.binary}}
-          asset_name: ${{ matrix.binary}}_linux
-          asset_content_type: application/octet-stream
-      - name: Upload windows asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: windows/bin/${{ matrix.binary}}.exe
-          asset_name: ${{ matrix.binary}}_windows.exe
-          asset_content_type: application/octet-stream
-      - name: Upload mac asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: macos/bin/${{ matrix.binary}}
-          asset_name: ${{ matrix.binary}}_macos
-          asset_content_type: application/octet-stream
+          files: |
+            linux/bin/${{ matrix.binary }}
+            windows/bin/${{ matrix.binary }}.exe
+            macos/bin/${{ matrix.binary }}
