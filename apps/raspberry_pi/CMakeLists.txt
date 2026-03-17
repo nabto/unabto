@@ -4,7 +4,7 @@ project(unabto_raspberrypi)
 option(using_piface
         "set true if using PiFace" OFF)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/../../build/cmake/unabto_project.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/unabto_project.cmake)
 
 if(using_piface)
   message("Making makefiles to raspberry pi with piface demo")

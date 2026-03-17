@@ -3,7 +3,7 @@ project(openssl_minimal_test C ASM)
 
 set(UNABTO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../..)
 
-include(${UNABTO_ROOT}/build/cmake/unabto_files.cmake)
+include(${UNABTO_ROOT}/cmake/unabto_files.cmake)
 
 set(src
   ${unabto_crypto_openssl_minimal_armv4_src}

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(weather_station)
 include (CheckIncludeFiles)
-include(${CMAKE_CURRENT_SOURCE_DIR}/../../build/cmake/unabto_project.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/unabto_project.cmake)
 
 CHECK_INCLUDE_FILES(curl/curl.h HAVE_CURL_H)
 

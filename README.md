@@ -57,13 +57,13 @@ The `src/platforms` folder includes various modules and implementation
 which together forms as a platform adapter for some specific
 platforms.
 
-### build/cmake/unabto_files.cmake
+### cmake/unabto_files.cmake
 
-The build/cmake/unabto_files.cmake is a file which lists all the source code in the repository which is used together with cmake projects. The file does not have any logic included it is only a list of variables assigned to specific files or definitions.
+The cmake/unabto_files.cmake is a file which lists all the source code in the repository which is used together with cmake projects. The file does not have any logic included it is only a list of variables assigned to specific files or definitions.
 
-### build/cmake/unabto_project.cmake
+### cmake/unabto_project.cmake
 
-The build/cmake/unabto_project.cmake is a cmake project definition file which is used to simply create unabto projects for Windows, Linux and Mac.
+The cmake/unabto_project.cmake is a cmake project definition file which is used to simply create unabto projects for Windows, Linux and Mac.
 
 A simple unabto static library project based on unabto_project.cmake
 is created as follows:
@@ -71,7 +71,7 @@ is created as follows:
 ```
 cmake_minimum_required(VERSION 2.8)
 project(example)
-include(${CMAKE_CURRENT_SOURCE_DIR}/ ... /build/cmake/unabto_project.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/ ... /cmake/unabto_project.cmake)
 
 add_definitions(${unabto_definitions})
 add_library(example ${unabto_src})
@@ -84,8 +84,8 @@ target_link_libraries(example ${unabto_link_libraries})
 
 ```
 clone repository
-mkdir builddir
-cd builddir
+mkdir build
+cd build
 cmake ..
 make
 ```
@@ -98,8 +98,8 @@ Prerequisities:
 
 ```
 clone repository
-mkdir builddir
-cd builddir
+mkdir build
+cd build
 cmake -DCMAKE_GENERATOR_TOOLSET=v140_xp ..
 cmake --build .
 ```

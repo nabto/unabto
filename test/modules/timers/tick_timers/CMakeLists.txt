@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.0)
 project(tick_timer_test)
 
 set(UNABTO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../..)
-include(${UNABTO_ROOT}/build/cmake/unabto_files.cmake)
+include(${UNABTO_ROOT}/cmake/unabto_files.cmake)
 
 set(src 
   ${UNABTO_MODULES_SRC_DIR}/timers/tick_timer/unabto_tick_timer.c

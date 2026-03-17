@@ -4,7 +4,7 @@ project(unabto_unittest)
 
 
 set(UNABTO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
-include(${UNABTO_ROOT}/build/cmake/unabto_files.cmake)
+include(${UNABTO_ROOT}/cmake/unabto_files.cmake)
 
 include_directories(
   ${unabto_core_include_directories}
