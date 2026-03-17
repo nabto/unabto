@@ -14,7 +14,7 @@ added which initializes unabto and calls void
 ```tunnel_loop_select()``` or void ```tunnel_loop_epoll()```
 
 ```
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 project(tunnel C)
 set(UNABTO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 set(ENABLE_TUNNEL_TCP 1)

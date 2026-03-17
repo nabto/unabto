@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.0)
+cmake_minimum_required(VERSION 3.5)
 project(tick_timer_test)
 
 set(UNABTO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../..)
