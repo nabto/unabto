@@ -84,7 +84,7 @@ unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq){
 
     pushCtx.pushSeqQHead++;
     unabto_push_set_next_event();
-    return pushSeqQ[pushCtx.pushSeqQHead].hint;
+    return pushSeqQ[pushCtx.pushSeqQHead - 1].hint;
 }
 
 bool unabto_push_notification_remove(uint32_t seq)
@@ -251,7 +251,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
 
     pushCtx.lastSent = nabtoGetStamp();
     elem->retrans++;
-    nabtoSetFutureStamp(&elem->stamp,(2^elem->retrans)*1000);
+    nabtoSetFutureStamp(&elem->stamp,(1 << elem->retrans)*1000);
     unabto_push_set_next_event();
 }
 
