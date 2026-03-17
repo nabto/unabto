@@ -156,24 +156,6 @@ set (unabto_module_tcp_win32_src
   ${UNABTO_MODULES_SRC_DIR}/network/tcp/windows/unabto_tcp.c)
 source_group(modules\\tcp FILES ${unabto_module_tcp_win32_src})
 
-# modules/coap
-set (unabto_module_coap_src
-  ${UNABTO_MODULES_SRC_DIR}/coap/er-coap-13/er-coap-13-engine.c
-  ${UNABTO_MODULES_SRC_DIR}/coap/er-coap-13/er-coap-13-observing.c
-  ${UNABTO_MODULES_SRC_DIR}/coap/er-coap-13/er-coap-13-separate.c
-  ${UNABTO_MODULES_SRC_DIR}/coap/er-coap-13/er-coap-13-transactions.c
-  ${UNABTO_MODULES_SRC_DIR}/coap/er-coap-13/er-coap-13.c
-  ${UNABTO_MODULES_SRC_DIR}/coap/etimer.c
-  ${UNABTO_MODULES_SRC_DIR}/coap/unabto_uip.c
-  ${UNABTO_MODULES_SRC_DIR}/coap/list.c
-  ${UNABTO_MODULES_SRC_DIR}/coap/erbium/erbium.c
-  ${UNABTO_MODULES_SRC_DIR}/coap/er_coap_nabto.c)
-
-set (unabto_module_coap_includes
-  ${UNABTO_MODULES_SRC_DIR}/coap
-  ${UNABTO_MODULES_SRC_DIR}/coap/er-coap-13
-  ${UNABTO_MODULES_SRC_DIR}/coap/erbium)
-
 
 # modules/crypto
 set(unabto_module_crypto_generic_src
