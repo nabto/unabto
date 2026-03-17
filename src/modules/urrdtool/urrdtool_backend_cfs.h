@@ -1,4 +1,0 @@
-#ifndef _URRDTOOL_BACKEND_CFS_H_
-#define _URRDTOOL_BACKEND_CFS_H_
-
-#endif
