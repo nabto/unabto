@@ -20,9 +20,9 @@
 # An external library dir can be added such that e.g. an openssl library can be found there
 # Specify the cmake option UNABTO_EXTERNAL_BUILD_DIR to give a hint about the library location.
 
-set(UNABTO_ROOT ${CMAKE_CURRENT_LIST_DIR}/../..)
+set(UNABTO_ROOT ${CMAKE_CURRENT_LIST_DIR}/..)
 
-include(${UNABTO_ROOT}/build/cmake/unabto_files.cmake)
+include(${UNABTO_ROOT}/cmake/unabto_files.cmake)
 include (CheckIncludeFiles)
 include (CheckFunctionExists)
 INCLUDE (CheckLibraryExists)

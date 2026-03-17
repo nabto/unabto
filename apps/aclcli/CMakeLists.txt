@@ -6,7 +6,7 @@ set(UNABTO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 
 option(LOG_ALL "Print all unabto log statements" OFF)
 
-include(${UNABTO_ROOT}/build/cmake/unabto_project.cmake)
+include(${UNABTO_ROOT}/cmake/unabto_project.cmake)
 
 include_directories(
   # make it possible to override unabto_config.h with a supplied file

@@ -215,7 +215,7 @@ If not feasible to repeat the test until complete ressource exhaustion, an alter
 
 A suite of unit tests are supplied to verify that basic operations such as cryptographic calculations and buffer manipulation are performed as expected with the vendor's chosen toolchain on the target architecture.
 
-To execute the unit test suite, include the unit test source files as listed in the `unabto_server_common_src_test` definition in `./build/cmake/unabto_files.cmake` in your project or a dedicated test application. In the latter case, it is of utmost importance that the separate application is compiled with exactly the same tools, options and `unabto_config.h` as the target application. On high level platforms with cmake support, an example of the latter standalone test runner is provided in in `unabto/test/runners`. 
+To execute the unit test suite, include the unit test source files as listed in the `unabto_server_common_src_test` definition in `./cmake/unabto_files.cmake` in your project or a dedicated test application. In the latter case, it is of utmost importance that the separate application is compiled with exactly the same tools, options and `unabto_config.h` as the target application. On high level platforms with cmake support, an example of the latter standalone test runner is provided in in `unabto/test/runners`. 
 
 
 ## Advanced connection type tests

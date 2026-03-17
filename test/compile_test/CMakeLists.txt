@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(unabto_unittest)
 
 set(UNABTO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
-include(${UNABTO_ROOT}/build/cmake/unabto_project.cmake)
+include(${UNABTO_ROOT}/cmake/unabto_project.cmake)
 
 option(USE_DUMMY_RANDOM "Link without crypto.so" OFF)
 

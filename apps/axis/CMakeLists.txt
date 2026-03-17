@@ -10,7 +10,7 @@ include_directories(SYSTEM
 
 
 set(UNABTO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
-include(${UNABTO_ROOT}/build/cmake/unabto_project.cmake)
+include(${UNABTO_ROOT}/cmake/unabto_project.cmake)
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/src

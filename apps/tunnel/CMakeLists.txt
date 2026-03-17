@@ -7,7 +7,7 @@ set(UNABTO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 option(USE_LIB_PROFILER "Link executables with libprofiler.so" OFF)
 option(LOG_ALL "Print all unabto log statements" OFF)
 
-include(${UNABTO_ROOT}/build/cmake/unabto_project.cmake)
+include(${UNABTO_ROOT}/cmake/unabto_project.cmake)
 
 INCLUDE (CheckIncludeFiles)
 # usage: CHECK_INCLUDE_FILES (<header> <RESULT_VARIABLE> )

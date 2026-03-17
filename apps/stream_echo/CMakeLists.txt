@@ -3,7 +3,7 @@ project(stream_echo)
 
 option(ENABLE_TCP_FALLBACK "enable tcp fallback" 0)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/../../build/cmake/unabto_project.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/unabto_project.cmake)
 
 set(src
   ${unabto_src}

@@ -3,7 +3,7 @@ project(unabto_tunnel_library C)
 
 set(UNABTO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 
-include(${UNABTO_ROOT}/build/cmake/unabto_project.cmake)
+include(${UNABTO_ROOT}/cmake/unabto_project.cmake)
 
 set(unabto_server_unabto_tunneling_src ${CMAKE_CURRENT_SOURCE_DIR})
 
