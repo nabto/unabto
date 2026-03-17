@@ -7,17 +7,35 @@ on:
 
 jobs:
   build-and-test:
-    name: build
+    name: build (${{ matrix.name }})
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        os: [windows-2025, ubuntu-24.04, macos-15]
+        include:
+          - name: linux-gcc
+            os: ubuntu-24.04
+            cc: gcc
+            cflags: "-std=gnu99"
+          - name: linux-clang
+            os: ubuntu-24.04
+            cc: clang
+            cflags: "-std=gnu99"
+          - name: linux-clang-c89
+            os: ubuntu-24.04
+            cc: clang
+            cflags: "-std=c89 -Wno-endif-labels -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE -D_BSD_SOURCE -Wno-comment"
+          - name: windows
+            os: windows-2025
+          - name: macos
+            os: macos-15
+    env:
+      CC: ${{ matrix.cc }}
 
     steps:
     - uses: actions/checkout@v6
 
     - name: configure cmake
-      run: mkdir build-dir && cd build-dir && cmake -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/artifacts ..
+      run: mkdir build-dir && cd build-dir && cmake -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/artifacts ${{ matrix.cflags && format('-DCMAKE_C_FLAGS="{0}"', matrix.cflags) }} ..
 
     - name: build
       run: cmake --build build-dir --parallel
@@ -38,7 +56,7 @@ jobs:
       if: ${{ success() }}
       uses: actions/upload-artifact@v7
       with:
-        name: artifacts_${{matrix.os}}
+        name: artifacts_${{matrix.name}}
         path: ${{ github.workspace }}/artifacts
         if-no-files-found: warn
 
@@ -56,15 +74,15 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: artifacts_ubuntu-24.04
+          name: artifacts_linux-gcc
           path: linux
       - uses: actions/download-artifact@v8
         with:
-          name: artifacts_windows-2025
+          name: artifacts_windows
           path: windows
       - uses: actions/download-artifact@v8
         with:
-          name: artifacts_macos-15
+          name: artifacts_macos
           path: macos
       - name: List assets
         run: ls -R
