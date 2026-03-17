@@ -1,6 +1,0 @@
-     11 /home/mkm/sandbox/unabto2/src/modules/crypto/openssl/unabto_crypto_openssl.c:130:5: warning: ‘HMAC_CTX_free’ is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
-     11 /home/mkm/sandbox/unabto2/src/modules/crypto/openssl/unabto_crypto_openssl.c:122:5: warning: ‘HMAC_Final’ is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
-     11 /home/mkm/sandbox/unabto2/src/modules/crypto/openssl/unabto_crypto_openssl.c:116:9: warning: ‘HMAC_Update’ is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
-     11 /home/mkm/sandbox/unabto2/src/modules/crypto/openssl/unabto_crypto_openssl.c:111:5: warning: ‘HMAC_Init_ex’ is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
-     11 /home/mkm/sandbox/unabto2/src/modules/crypto/openssl/unabto_crypto_openssl.c:105:5: warning: ‘HMAC_CTX_new’ is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
-      1 /home/mkm/sandbox/unabto2/src/modules/random/dummy/unabto_random_dummy.c:16:9: note: ‘#pragma message: WARNING: Using an incomplete random implementation. Please use a real random implementation.’
