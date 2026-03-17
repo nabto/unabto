@@ -38,7 +38,7 @@ jobs:
       run: mkdir build-dir && cd build-dir && cmake -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/artifacts ${{ matrix.cflags && format('-DCMAKE_C_FLAGS="{0}"', matrix.cflags) }} ..
 
     - name: build
-      run: cmake --build build-dir --parallel
+      run: cmake --build build-dir --parallel 4
 
     - name: install
       run: cmake --build build-dir --target install
