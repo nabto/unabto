@@ -69,7 +69,7 @@ A simple unabto static library project based on unabto_project.cmake
 is created as follows:
 
 ```
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 project(example)
 include(${CMAKE_CURRENT_SOURCE_DIR}/ ... /build/cmake/unabto_project.cmake)
 

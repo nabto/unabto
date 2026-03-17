@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 project(axistunnel)
 
 set(axis_sdk_dir $ENV{AXIS_SDK})
