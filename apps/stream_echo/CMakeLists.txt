@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 project(stream_echo)
 
 option(ENABLE_TCP_FALLBACK "enable tcp fallback" 0)
