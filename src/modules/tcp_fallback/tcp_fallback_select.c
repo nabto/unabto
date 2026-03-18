@@ -325,7 +325,7 @@ void close_tcp_socket(nabto_connect* con) {
 bool unabto_tcp_fallback_handle_write(nabto_connect* con) {
     unabto_tcp_status status;
     size_t written;
-    int dataToSend;
+    size_t dataToSend;
     bool canMaybeSendMoreData = false;
     unabto_tcp_fallback_connection* fbConn = &fbConns[nabto_connection_index(con)];
     UNABTO_ASSERT(fbConn->sendBufferSent <= fbConn->sendBufferLength);
@@ -335,7 +335,7 @@ bool unabto_tcp_fallback_handle_write(nabto_connect* con) {
         return false;
     }
 
-    NABTO_LOG_TRACE(("data to send %i, sendBufferLength %i, sendBufferSent %i", dataToSend, fbConn->sendBufferLength, fbConn->sendBufferSent));
+    NABTO_LOG_TRACE(("data to send %" PRIsize ", sendBufferLength %" PRIsize ", sendBufferSent %" PRIsize, dataToSend, fbConn->sendBufferLength, fbConn->sendBufferSent));
 
     status = unabto_tcp_write(&fbConn->socket, fbConn->sendBuffer + fbConn->sendBufferSent, dataToSend, &written);
 

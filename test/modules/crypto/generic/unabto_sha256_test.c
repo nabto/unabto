@@ -12,7 +12,7 @@ void unabto_sha256(const uint8_t* message, size_t len, unsigned char *digest)
     sha256_ctx ctx;
     
     unabto_sha256_init(&ctx);
-    unabto_sha256_update(&ctx, message, len);
+    unabto_sha256_update(&ctx, message, (uint16_t)len);
     unabto_sha256_final(&ctx, digest);
 }
 
@@ -25,7 +25,7 @@ bool sha2_test_test(const char *vector, unsigned char *digest,
     output[2 * digest_size] = '\0';
 
     for (i = 0; i < (int) digest_size ; i++) {
-       sprintf(output + 2 * i, "%02x", digest[i]);
+       snprintf(output + 2 * i, 3, "%02x", digest[i]);
     }
 
 

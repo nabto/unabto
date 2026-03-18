@@ -34,7 +34,7 @@ static void unabto_winsock_shutdown(void);
 
 void nabto_socket_set_invalid(nabto_socket_t* socket)
 {
-    socket = NABTO_INVALID_SOCKET;
+    *socket = NABTO_INVALID_SOCKET;
 }
 
 bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
@@ -116,7 +116,7 @@ void nabto_socket_close(nabto_socket_t* sock)
             }
         }
         if (!found) {
-            NABTO_LOG_ERROR(("Socket %i Not found in socket list", *sock));
+            NABTO_LOG_ERROR(("Socket %d Not found in socket list", (int)*sock));
         } else {
             DL_DELETE(socketList, se);
             free(se);
@@ -165,7 +165,7 @@ ssize_t nabto_read(nabto_socket_t sock, uint8_t* buf, size_t len, struct nabto_i
     return res;
 }
 
-ssize_t nabto_write(nabto_socket_t sock, const uint8_t* buf, size_t len, struct nabto_ip_address* addr, uint16_t port)
+ssize_t nabto_write(nabto_socket_t sock, const uint8_t* buf, size_t len, const struct nabto_ip_address* addr, uint16_t port)
 {
     int res;
     struct sockaddr_in sa;
@@ -250,7 +250,7 @@ void unabto_network_select_add_to_read_fd_set(fd_set* readFds, int* maxReadFd) {
     DL_FOREACH(socketList, se) {
         FD_SET(se->socket, readFds);
         if (se->socket != INVALID_SOCKET && ((int)se->socket) > *maxReadFd)
-           *maxReadFd = se->socket;
+           *maxReadFd = (int)se->socket;
     }
 }
 
@@ -265,9 +265,9 @@ void unabto_network_select_read_sockets(fd_set* readFds) {
 
 bool nabto_get_local_ipv4(struct nabto_ip_address* ip) {
     struct sockaddr_in si_me, si_other;
-    int s;
-    
-    if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1) {
+    SOCKET s;
+
+    if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==INVALID_SOCKET) {
         NABTO_LOG_ERROR(("Cannot create socket"));
         return false;
     }

@@ -47,7 +47,11 @@ static bool write_fingerprint(unabto_query_response* write_buffer, struct unabto
 
 static bool write_string(unabto_query_response* write_buffer, const char* string)
 {
-    return unabto_query_write_uint8_list(write_buffer, (uint8_t*)string, strlen(string));
+    size_t len = strlen(string);
+    if (len > UINT16_MAX) {
+        return false;
+    }
+    return unabto_query_write_uint8_list(write_buffer, (uint8_t*)string, (uint16_t)len);
 }
 
 application_event_result write_user(unabto_query_response* write_buffer, uint8_t status, struct fp_acl_user* user)

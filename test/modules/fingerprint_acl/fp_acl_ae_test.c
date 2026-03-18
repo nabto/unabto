@@ -274,7 +274,7 @@ bool fp_acl_pair(struct unabto_fingerprint* fp, const char* name, struct fp_acl_
         // write test data to input
         unabto_query_response writer;
         unabto_query_response_init(&writer, &inout);
-        unabto_query_write_uint8_list(&writer, (uint8_t*)name, strlen(name));
+        unabto_query_write_uint8_list(&writer, (uint8_t*)name, (uint16_t)strlen(name));
     }
 
     unabto_query_request queryRequest;
@@ -392,9 +392,9 @@ bool fp_acl_test_set_name()
         unabto_query_response writer;
         unabto_query_response_init(&writer, &inout);
         unabto_query_write_uint8_list(&writer, fp, 16);
-        unabto_query_write_uint8_list(&writer, (uint8_t*)name, strlen(name));
+        unabto_query_write_uint8_list(&writer, (uint8_t*)name, (uint16_t)strlen(name));
     }
-    
+
 
     unabto_query_request queryRequest;
     unabto_query_response queryResponse;

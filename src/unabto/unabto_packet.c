@@ -184,7 +184,7 @@ static void send_ack(nabto_connect* con, nabto_packet_header* hdr)
 
     ptr = insert_notify_payload(ptr, end, NOTIFY_MICRO_ACK);
     
-    insert_length(buf, ptr-buf);
+    insert_length(buf, (uint16_t)(ptr-buf));
 
     add_flags(buf, NP_PACKET_HDR_FLAG_RESPONSE); // | NP_PACKET_HDR_FLAG_EXCEPTION);
     NABTO_LOG_TRACE(("(." PRInsi ".) send Dialogue-Ack to client, seq: %" PRIu16, MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), hdr->seq));

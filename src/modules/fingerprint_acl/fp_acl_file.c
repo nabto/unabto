@@ -1,3 +1,7 @@
+#ifdef _MSC_VER
+#pragma warning(disable: 4996) /* fopen: consider using fopen_s */
+#endif
+
 #include "fp_acl_file.h"
 
 #include <unabto/unabto_util.h>
@@ -96,7 +100,7 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
     uint8_t buffer[FP_ACL_RECORD_SIZE];
     uint8_t* ptr = buffer;
     uint32_t users = 0;
-    int i;
+    uint32_t i;
     size_t written;
     for (i = 0; i < FP_MEM_ACL_ENTRIES; i++) {
         struct fp_acl_user* it = &acl->users[i];
@@ -327,8 +331,13 @@ fp_acl_db_status fp_acl_file_init(const char* file, const char* tempFile, struct
     p->load = &fp_acl_file_load_file;
     p->save = &fp_acl_file_save_file;
 
+#if defined(_MSC_VER)
+    filename = _strdup(file);
+    tempFilename = _strdup(tempFile);
+#else
     filename = strdup(file);
     tempFilename = strdup(tempFile);
+#endif
 
     // Check the file version, convert to new format if need be.
     aclFile = fopen(filename, "rb+");

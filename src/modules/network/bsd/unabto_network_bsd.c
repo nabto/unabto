@@ -126,6 +126,7 @@ static bool open_socket(nabto_socket_t* sd)
     }
 }
 
+#if NABTO_NETWORK_IPV4_LOOPBACK_ONLY
 static bool open_ipv4_socket(nabto_socket_t* sd)
 {
     sd->sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -136,6 +137,7 @@ static bool open_ipv4_socket(nabto_socket_t* sd)
     sd->type = NABTO_SOCKET_IP_V4;
     return true;
 }
+#endif
 
 static bool bind_to_inaddr_any(uint16_t* localPort, nabto_socket_t* sock)
 {
@@ -167,6 +169,7 @@ static bool bind_to_inaddr_any(uint16_t* localPort, nabto_socket_t* sock)
     return true;
 }
 
+#if NABTO_NETWORK_IPV4_LOOPBACK_ONLY
 // Special case for some systems where we only want to expose the
 // device on the loopback interface.
 static bool bind_to_ipv4_loopback(uint16_t* localPort, nabto_socket_t* sock)
@@ -186,15 +189,13 @@ static bool bind_to_ipv4_loopback(uint16_t* localPort, nabto_socket_t* sock)
     }
     return true;
 }
+#endif
 
 
 bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
 {
     nabto_socket_t sd;
-    nabto_main_context* nmc;
-    const char* interface;
     socketListElement* se;
-    int status;
 
     NABTO_LOG_TRACE(("Open socket, port=%u", (int)*localPort));
 
@@ -211,24 +212,26 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
 
 
 #ifdef SO_BINDTODEVICE
-    // Used for multiple interfaces
-    nmc = unabto_get_main_context();
-    interface = nmc->nabtoMainSetup.interfaceName;
-    if (interface != NULL) {
-        if (setsockopt(sd.sock, SOL_SOCKET, SO_BINDTODEVICE, (void *)interface, strlen(interface)+1) < 0) {
-            NABTO_LOG_FATAL(("Unable to bind to interface: %s, '%s'.", interface, strerror(errno)));
-        }
-        NABTO_LOG_TRACE(("Bound to device '%s'.", interface));
-    }
-
     {
-        // only reuse when user has explicitly set local port and bound to a specific device as this indicates user
-        // knows what he is doing...
-        int allowReuse = (localPort && *localPort != 0 && interface != NULL);
-        if (setsockopt(sd.sock, SOL_SOCKET, SO_REUSEADDR, (void *) &allowReuse, sizeof(int)))
+        // Used for multiple interfaces
+        nabto_main_context* nmc = unabto_get_main_context();
+        const char* interface = nmc->nabtoMainSetup.interfaceName;
+        if (interface != NULL) {
+            if (setsockopt(sd.sock, SOL_SOCKET, SO_BINDTODEVICE, (void *)interface, strlen(interface)+1) < 0) {
+                NABTO_LOG_FATAL(("Unable to bind to interface: %s, '%s'.", interface, strerror(errno)));
+            }
+            NABTO_LOG_TRACE(("Bound to device '%s'.", interface));
+        }
+
         {
-            NABTO_LOG_FATAL(("Unable to set option: (%i) '%s'.", errno, strerror(errno)));
-            return false;
+            // only reuse when user has explicitly set local port and bound to a specific device as this indicates user
+            // knows what he is doing...
+            int allowReuse = (localPort && *localPort != 0 && interface != NULL);
+            if (setsockopt(sd.sock, SOL_SOCKET, SO_REUSEADDR, (void *) &allowReuse, sizeof(int)))
+            {
+                NABTO_LOG_FATAL(("Unable to set option: (%i) '%s'.", errno, strerror(errno)));
+                return false;
+            }
         }
     }
 #endif

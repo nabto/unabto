@@ -14,7 +14,7 @@ struct nabto_main_context;
 extern "C" {
 #endif
 
-bool unabto_syslog_init();
+bool unabto_syslog_init(void);
 void unabto_syslog(uint32_t module, uint32_t severity, const char* file, unsigned int line, uint32_t syslogServer, uint16_t syslogPort, const char* format, va_list ap);
 
 void unabto_syslog_buffer(uint32_t module, uint32_t severity, const char* file, unsigned int line, uint32_t syslogServer, uint16_t syslogPort, const uint8_t* buffer, size_t buflen, const char* format, va_list ap);

@@ -278,17 +278,24 @@ void unabto_tunnel_tcp_parse_command(tunnel* tunnel, tunnel_event_source event_s
     if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, HOST_KW_TXT)))
     {
         char *sp;
-        int length;
+        size_t length;
         s += strlen(HOST_KW_TXT);
         sp = strchr(s, ' ');
-        
+
         if (sp != NULL) {
-            length = sp-s;
+            length = (size_t)(sp-s);
         } else {
             length = strlen(s);
         }
-        
-        strncpy(tunnel->staticMemory->stmu.tcp_sm.host, s, MIN(length, MAX_COMMAND_LENGTH-1));
+
+        if (length >= MAX_HOST_LENGTH) {
+            NABTO_LOG_ERROR(("host name too long"));
+            tunnel->state = TS_FAILED_COMMAND;
+            return;
+        }
+
+        memcpy(tunnel->staticMemory->stmu.tcp_sm.host, s, length);
+        tunnel->staticMemory->stmu.tcp_sm.host[length] = '\0';
     } else {
         strncpy(tunnel->staticMemory->stmu.tcp_sm.host, unabto_tunnel_tcp_get_default_host(), MAX_HOST_LENGTH);
     }

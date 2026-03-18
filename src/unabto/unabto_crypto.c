@@ -565,7 +565,7 @@ bool unabto_crypto_verify_and_decrypt(const nabto_packet_header* hdr,
     }
 
     
-    if (!unabto_decrypt(cryptoContext, (uint8_t*)crypto->dataBegin, ((crypto->dataEnd - crypto->dataBegin) - verifSize), &dlen)) {
+    if (!unabto_decrypt(cryptoContext, (uint8_t*)crypto->dataBegin, (uint16_t)((crypto->dataEnd - crypto->dataBegin) - verifSize), &dlen)) {
         NABTO_LOG_TRACE(("Decryption fail in packet type %i", hdr->type));
         return false;
     }

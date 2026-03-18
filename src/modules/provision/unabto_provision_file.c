@@ -66,7 +66,7 @@ bool unabto_provision_read_file(const char* path, char *text, size_t size)
         NABTO_LOG_TRACE(("Provisioning file not found at '%s'", path));
         return false;
     }
-    bool ok = fgets(text, size, fp) > 0;
+    bool ok = fgets(text, (int)size, fp) != NULL;
     if (!ok) {
         NABTO_LOG_TRACE(("Empty provisioning file found at '%s'", path));
     }

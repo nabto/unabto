@@ -8,13 +8,14 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <limits.h>
 
 #define MSG_NOSIGNAL 0
 
 unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, const size_t len, size_t* read) {
     int status;
-
-    status = recv(sock->socket, buf, len, 0);
+    int recv_len = (len > INT_MAX) ? INT_MAX : (int)len;
+    status = recv(sock->socket, buf, recv_len, 0);
     if (status < 0) {
         if (WSAGetLastError() == WSAEWOULDBLOCK) {
             return UTS_WOULD_BLOCK;
@@ -35,8 +36,9 @@ unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, con
 
 unabto_tcp_status unabto_tcp_write(struct unabto_tcp_socket* sock, const void* buf, const size_t len, size_t* written) {
     int status;
-    NABTO_LOG_TRACE(("Writing %i bytes to tcp socket", len));
-    status = send(sock->socket, (const char*)buf, len, MSG_NOSIGNAL);
+    int send_len = (len > INT_MAX) ? INT_MAX : (int)len;
+    NABTO_LOG_TRACE(("Writing %i bytes to tcp socket", send_len));
+    status = send(sock->socket, (const char*)buf, send_len, MSG_NOSIGNAL);
     NABTO_LOG_TRACE(("tcp send status: %i", status));
     if (status < 0) {
         if (WSAGetLastError() == WSAEWOULDBLOCK) {
@@ -117,7 +119,7 @@ unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpo
         int flags = 1;
         if (ioctlsocket(sock->socket, FIONBIO, &flags) != 0) {
             NABTO_LOG_ERROR(("Cannot set unblocking mode"));
-            return false;
+            return UTS_FAILED;
         }
         return UTS_OK;
     } else {

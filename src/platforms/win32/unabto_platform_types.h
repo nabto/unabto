@@ -34,8 +34,8 @@ typedef unsigned char bool;
 
 #endif
 
-#define PRIptrdiff "i"
-#define PRIsize "i"
+#define PRIptrdiff "Id"
+#define PRIsize "Iu"
 
 #include <platforms/unabto_common_types.h>
 

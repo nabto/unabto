@@ -6,7 +6,7 @@ bool unabto_buffer_test(void)
 {
     char * raw_test_string = "asjdhc#21?(!?(92814skzjbcasa";
 
-    int data_length = 7 + 2 + strlen(raw_test_string);
+    size_t data_length = 7 + 2 + strlen(raw_test_string);
     uint8_t* data = (uint8_t*)malloc(data_length);
     unabto_buffer buf, raw_string_buf;
     buffer_write_t w_buf;
@@ -15,12 +15,12 @@ bool unabto_buffer_test(void)
     uint32_t t32;
     uint16_t t16;
     uint8_t  t8;
-    int raw_string_data_length = strlen(raw_test_string) + 1;
+    size_t raw_string_data_length = strlen(raw_test_string) + 1;
     uint8_t* raw_string_data = (uint8_t*)malloc(raw_string_data_length);
 
-    buffer_init(&raw_string_buf, (uint8_t*)raw_test_string, strlen(raw_test_string));
-    
-    buffer_init(&buf, data, data_length);
+    buffer_init(&raw_string_buf, (uint8_t*)raw_test_string, (uint16_t)strlen(raw_test_string));
+
+    buffer_init(&buf, data, (uint16_t)data_length);
     
     buffer_write_init(&w_buf, &buf);
 
@@ -35,7 +35,7 @@ bool unabto_buffer_test(void)
     buffer_read_init(&r_buf, &buf);
     
     memset(raw_string_data, 0, raw_string_data_length);
-    buffer_init(&raw_string_buf, raw_string_data, raw_string_data_length);
+    buffer_init(&raw_string_buf, raw_string_data, (uint16_t)raw_string_data_length);
     bool t = false;    
     if (! ( buffer_read_uint32(&r_buf, &t32) && t32 == 0x12345678 &&
             buffer_read_uint16(&r_buf, &t16) && t16 == 0x1234 &&

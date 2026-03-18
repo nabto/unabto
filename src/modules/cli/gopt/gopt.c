@@ -211,7 +211,7 @@ void *gopt_sort( int *argc, const char **argv, const void *opt_specs ){
 
     next_option-> key= 0;
     *next_operand= NULL;
-    *argc= next_operand - argv;
+    *argc= (int)(next_operand - argv);
   }
   return opts;
 }
