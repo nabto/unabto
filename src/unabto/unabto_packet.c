@@ -239,6 +239,10 @@ void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, ui
             case FRAMING_KEEP_ALIVE:
             {
                 uint32_t no;
+                if (dlen < 8) {
+                    NABTO_LOG_TRACE((PRInsi " FRAMING CTRL KEEPALIVE short dlen=%i", MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), dlen));
+                    return;
+                }
                 READ_U32(no, dataStart + 4l);
                 NABTO_NOT_USED(no); /* Only used for logging */
                 NABTO_LOG_TRACE(("packet_event: spnsi=%" PRIu32, con->spnsi));
