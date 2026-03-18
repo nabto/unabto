@@ -184,7 +184,7 @@ static void send_ack(nabto_connect* con, nabto_packet_header* hdr)
 
     ptr = insert_notify_payload(ptr, end, NOTIFY_MICRO_ACK);
     
-    insert_length(buf, end, (uint16_t)(ptr-buf));
+    if (!insert_packet_length_from_cursor(buf, ptr)) { return; }
 
     add_flags(buf, NP_PACKET_HDR_FLAG_RESPONSE); // | NP_PACKET_HDR_FLAG_EXCEPTION);
     NABTO_LOG_TRACE(("(." PRInsi ".) send Dialogue-Ack to client, seq: %" PRIu16, MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), hdr->seq));
@@ -346,8 +346,8 @@ bool encrypt_packet(nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8
     }
     
     {
+        if (!insert_packet_length_from_cursor(packetStart, cryptoPayloadEnd)) { return false; }
         *len = (uint16_t)(cryptoPayloadEnd - packetStart);
-        insert_length(packetStart, packetEnd, *len);
         if (!unabto_insert_integrity(cryptoCtx, packetStart, *len)) {
             NABTO_LOG_ERROR(("Integrity insertion failing"));
             return false;

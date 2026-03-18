@@ -210,7 +210,7 @@ enum {
     NOTIFY_ERROR_BUSY_MICRO        = NP_PAYLOAD_NOTIFY_ERROR_BUSY_MICRO,        ///< See #NP_PAYLOAD_NOTIFY_ERROR_BUSY_MICRO
     NOTIFY_ERROR_MICRO_REQ_ERR     = NP_PAYLOAD_NOTIFY_ERROR_MICRO_REQ_ERR,     ///< See #NP_PAYLOAD_NOTIFY_ERROR_MICRO_REQ_ERR
     NOTIFY_ERROR_MICRO_REATTACHING = NP_PAYLOAD_NOTIFY_ERROR_MICRO_REATTACHING, ///< See #NP_PAYLOAD_NOTIFY_ERROR_MICRO_REATTACHING
-    NOTIFY_LAST_ERROR 
+    NOTIFY_LAST_ERROR
 };
 
 /**
@@ -237,7 +237,7 @@ uint16_t nabto_rd_header(const uint8_t* buf, const uint8_t* end, nabto_packet_he
  * @param buf  databuffer
  * @param end  databuffer end
  * @param hdr  header
- * @return ptr to end of written header or NULL if the header could not be written.   
+ * @return ptr to end of written header or NULL if the header could not be written.
  */
 uint8_t* nabto_wr_header(uint8_t* buf, const uint8_t* end, const nabto_packet_header* hdr);
 
@@ -321,7 +321,15 @@ uint8_t* insert_data_header(uint8_t* buf, const uint8_t* end, uint32_t nsi, uint
  * @param len  (size_t) the total length of the payload
  * @return     true if length was written, false if buffer too small
  */
-bool insert_length(uint8_t* buf, const uint8_t* end, uint16_t length);
+bool insert_packet_length(uint8_t* buf, const uint8_t* end, uint16_t length);
+
+/**
+ * Compute packet length from the start and end of the packet and write it into the header.
+ * @param packetBegin  the start of the packet
+ * @param packetEnd    the end of the packet
+ * @return             true if length was written, false on NULL/range/overflow error
+ */
+bool insert_packet_length_from_cursor(uint8_t* packetBegin, const uint8_t* packetEnd);
 
 /**
  * Write the Payload
@@ -346,7 +354,7 @@ uint8_t* insert_payload(uint8_t* buf, uint8_t* end, uint8_t type, const uint8_t*
  */
 uint8_t* insert_optional_payload(uint8_t* buf, uint8_t* end, uint8_t type, const uint8_t* content, size_t size);
 
-/** 
+/**
  * insert a capabilities packet
  * @param buf           the buffer
  * @param cap_encr_off  true if we accept unencrypted connections

@@ -292,7 +292,7 @@ static size_t mk_connect_rsp(uint8_t* buf, uint8_t* end, uint16_t seq, uint32_t 
         ptr = insert_capabilities(ptr, end, 1 /*unenc*/);
     }
 
-    insert_length(buf, end, (uint16_t)(ptr - buf));
+    if (!insert_packet_length_from_cursor(buf, ptr)) { return 0; }
     return ptr - buf;
 }
 
@@ -379,9 +379,10 @@ static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, ui
         }
     }
     {
-        size_t len = ptr - buf;
+        size_t len;
 
-        insert_length(buf, end, (uint16_t)len);
+        if (!insert_packet_length_from_cursor(buf, ptr)) { return; }
+        len = ptr - buf;
 
         if (seq) {
             NABTO_LOG_DEBUG((PRInsi " RENDEZVOUS Send to " PRIep ": seq=%" PRIu16, MAKE_NSI_PRINTABLE(0, con->spnsi, 0), MAKE_EP_PRINTABLE(*dest), seq));
@@ -1116,8 +1117,8 @@ void send_connection_statistics(nabto_connect* con, uint8_t event) {
         return;
     }
 
+    if (!insert_packet_length_from_cursor(nabtoCommunicationBuffer, ptr)) { return; }
     length = ptr - nabtoCommunicationBuffer;
-    insert_length(nabtoCommunicationBuffer, end, (uint16_t)length);
     send_to_basestation(nabtoCommunicationBuffer, length, &nmc.context.gsp);
 }
 
@@ -1155,8 +1156,8 @@ void send_connection_ended_statistics(nabto_connect* con) {
         return;
     }
 
+    if (!insert_packet_length_from_cursor(nabtoCommunicationBuffer, ptr)) { return; }
     length = ptr - nabtoCommunicationBuffer;
-    insert_length(nabtoCommunicationBuffer, end, (uint16_t)length);
 
     send_to_basestation(nabtoCommunicationBuffer, length, &nmc.context.gsp);
 }

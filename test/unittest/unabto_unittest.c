@@ -48,6 +48,12 @@ int main() {
         ret = false;
     }
 
+    r = test_insert_length_from_cursor();
+    if (!r) {
+        NABTO_LOG_ERROR(("test insert_length_from_cursor failed"));
+        ret = false;
+    }
+
     r = fp_acl_mem_test();
     if (!r) {
         NABTO_LOG_ERROR(("test of acl memory state failed"));

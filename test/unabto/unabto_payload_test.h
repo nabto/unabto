@@ -6,5 +6,6 @@ int test_read_payload(void);
 int test_insert_header_bounds(void);
 int test_insert_optional_payload_null(void);
 int test_insert_length_bounds(void);
+int test_insert_length_from_cursor(void);
 
 #endif

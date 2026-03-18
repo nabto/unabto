@@ -248,10 +248,19 @@ uint8_t* insert_data_header(uint8_t* buf, const uint8_t* end, uint32_t nsi, uint
     return insert_header(buf, end, 0, nsi, DATA, false, 0, tag, nsico);
 }
 
-bool insert_length(uint8_t* buf, const uint8_t* end, uint16_t length) {
+bool insert_packet_length(uint8_t* buf, const uint8_t* end, uint16_t length) {
     if (buf == NULL || (size_t)(end - buf) < OFS_PACKET_LGT + 2) return false;
     WRITE_U16((uint8_t*)(buf) + OFS_PACKET_LGT, (uint16_t)(length));
     return true;
+}
+
+bool insert_packet_length_from_cursor(uint8_t* packetBegin, const uint8_t* packetEnd) {
+    ptrdiff_t length;
+    if (packetBegin == NULL || packetEnd == NULL) return false;
+    if (packetEnd < packetBegin) return false;
+    length = packetEnd - packetBegin;
+    if (length > UINT16_MAX) return false;
+    return insert_packet_length(packetBegin, packetEnd, (uint16_t)length);
 }
 
 /******************************************************************************/

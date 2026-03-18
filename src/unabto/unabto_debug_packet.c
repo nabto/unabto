@@ -123,8 +123,9 @@ void send_debug_packet_response(nabto_packet_header* header, uint32_t notificati
     }
 
     {
-        uint16_t length = (uint16_t)(ptr - buf);
-        insert_length(buf, end, length);
+        uint16_t length;
+        if (!insert_packet_length_from_cursor(buf, ptr)) { return; }
+        length = (uint16_t)(ptr - buf);
         send_to_basestation(buf, length, &nmc.context.gsp);
     }
 

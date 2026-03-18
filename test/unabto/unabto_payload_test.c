@@ -96,15 +96,39 @@ int test_insert_length_bounds(void)
     bool ok;
 
     /* Normal case */
-    ok = insert_length(buf, buf + sizeof(buf), 42);
+    ok = insert_packet_length(buf, buf + sizeof(buf), 42);
     if (!ok) return false;
 
     /* Buffer too short */
-    ok = insert_length(buf, buf + OFS_PACKET_LGT + 1, 42);
+    ok = insert_packet_length(buf, buf + OFS_PACKET_LGT + 1, 42);
     if (ok) return false;
 
     /* NULL buf */
-    ok = insert_length(NULL, buf + sizeof(buf), 42);
+    ok = insert_packet_length(NULL, buf + sizeof(buf), 42);
+    if (ok) return false;
+
+    return true;
+}
+
+int test_insert_length_from_cursor(void)
+{
+    uint8_t buf[NP_PACKET_HDR_MIN_BYTELENGTH + 10];
+    bool ok;
+
+    /* Normal case: packetEnd within buffer */
+    ok = insert_packet_length_from_cursor(buf, buf + 20);
+    if (!ok) return false;
+
+    /* NULL packetEnd */
+    ok = insert_packet_length_from_cursor(buf, NULL);
+    if (ok) return false;
+
+    /* NULL packetBegin */
+    ok = insert_packet_length_from_cursor(NULL, buf + 10);
+    if (ok) return false;
+
+    /* packetEnd before packetBegin */
+    ok = insert_packet_length_from_cursor(buf + 5, buf);
     if (ok) return false;
 
     return true;
