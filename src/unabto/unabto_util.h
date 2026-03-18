@@ -135,6 +135,36 @@
 #define WRITE_FORWARD_U32(pointer, value) do { WRITE_U32(pointer, value); pointer += 4; } while (0)
 #define WRITE_FORWARD_MEM(pointer, value, len) do {memcpy(pointer, value, len); pointer += len; } while(0)
 
+/******************************************************************************/
+/* Bounds-checked write helpers. Each returns the advanced pointer, or NULL  */
+/* if the write would exceed the buffer. A NULL input pointer propagates.    */
+
+#include <string.h> /* memcpy */
+
+static inline uint8_t* write_forward_u8(uint8_t* ptr, const uint8_t* end, uint8_t val) {
+    if (ptr == NULL || end - ptr < 1) return NULL;
+    WRITE_U8(ptr, val);
+    return ptr + 1;
+}
+
+static inline uint8_t* write_forward_u16(uint8_t* ptr, const uint8_t* end, uint16_t val) {
+    if (ptr == NULL || end - ptr < 2) return NULL;
+    WRITE_U16(ptr, val);
+    return ptr + 2;
+}
+
+static inline uint8_t* write_forward_u32(uint8_t* ptr, const uint8_t* end, uint32_t val) {
+    if (ptr == NULL || end - ptr < 4) return NULL;
+    WRITE_U32(ptr, val);
+    return ptr + 4;
+}
+
+static inline uint8_t* write_forward_mem(uint8_t* ptr, const uint8_t* end, const void* src, size_t len) {
+    if (ptr == NULL || (size_t)(end - ptr) < len) return NULL;
+    memcpy(ptr, src, len);
+    return ptr + len;
+}
+
 /** @return max of two values. @param x first value @param y second value */
 #define MAX(x, y)                   (((x) > (y)) ? (x) : (y))
 #define MAX3(a, b, c)               MAX(MAX(a, b), c)

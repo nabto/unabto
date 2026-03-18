@@ -246,6 +246,7 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
         uint16_t code;
         code = nmc.nabtoMainSetup.cryptoSuite;
         ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_NONCE, nmc.context.nonceMicro, nmc.context.nonceSize);
+        if (ptr == NULL) return 0;
 
         if (nmc.nabtoMainSetup.version) {
             version = nmc.nabtoMainSetup.version;
@@ -255,6 +256,7 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
             sz = 1;
         }
         ptr = insert_optional_payload(ptr, end, NP_PAYLOAD_TYPE_DESCR, 0, sz + 1);
+        if (ptr == NULL) return 0;
         WRITE_U8(ptr, NP_PAYLOAD_DESCR_TYPE_VERSION); ptr += 1;
         memcpy(ptr, version, sz); ptr += sz;
 
@@ -262,6 +264,7 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
             url = nmc.nabtoMainSetup.url;
             sz = strlen(url);
             ptr = insert_optional_payload(ptr, end, NP_PAYLOAD_TYPE_DESCR, 0, sz + 1);
+            if (ptr == NULL) return 0;
             WRITE_U8(ptr, NP_PAYLOAD_DESCR_TYPE_URL); ptr += 1;
             memcpy(ptr, url, sz); ptr += sz;
         } else {
@@ -271,6 +274,7 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
 
         // send encryption capabilities
         ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CAPABILITY, 0, 9 + 2*2);
+        if (ptr == NULL) return 0;
         *ptr++ = 0; /* type */
         WRITE_U32(ptr,   0l); ptr += 4; // mask
         WRITE_U32(ptr,   0l); ptr += 4; // bits
@@ -278,6 +282,7 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
         WRITE_U16(ptr, code); ptr += 2;
     }
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_SP_ID, 0, sid_len + 1);
+    if (ptr == NULL) return 0;
     *ptr++ = NP_PAYLOAD_SP_ID_TYPE_URL; /* SPID_URL */
     memcpy(ptr, nmc.nabtoMainSetup.id, sid_len);
     
@@ -339,10 +344,13 @@ static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uin
     uint8_t* ptr = insert_header(buf, end, 0, nmc.context.gspnsi, U_ATTACH, true, seq, 0, 0);
     uint32_t localIpV4 = 0;
     uint32_t globalIpV4 = 0;
+    if (ptr == NULL) return false;
     ptr = insert_capabilities(ptr, end, nmc.context.clearTextData);
+    if (ptr == NULL) return false;
 
     ptr = insert_payload(ptr, end,  NP_PAYLOAD_TYPE_IPX, 0, 13);
-    
+    if (ptr == NULL) return false;
+
     if (nmc.socketGSPLocalEndpoint.addr.type == NABTO_IP_V4) {
         localIpV4 = nmc.socketGSPLocalEndpoint.addr.addr.ipv4;
     }

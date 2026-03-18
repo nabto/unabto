@@ -373,6 +373,7 @@ static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, ui
             return;
         } else {
             ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_EP, 0, 6);
+            if (ptr == NULL) return;
             WRITE_U32(ptr, myAddress->addr.addr.ipv4); ptr += 4;
             WRITE_U16(ptr, myAddress->port); ptr += 2;
         }

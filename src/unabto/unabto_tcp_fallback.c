@@ -60,7 +60,8 @@ bool build_handshake_packet(nabto_connect* con, uint8_t* buffer, size_t bufferLe
     memcpy(noncePtr, con->gatewayId, 20);
 
     packetPtr = insert_payload(packetPtr, bufferEnd, NP_PAYLOAD_TYPE_NONCE, nonce, nonceLength);
-    
+    if (packetPtr == NULL) return false;
+
     *packetLength = packetPtr - buffer;
 
     insert_length(buffer, bufferEnd, (uint16_t)*packetLength);
