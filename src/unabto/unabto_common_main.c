@@ -120,6 +120,7 @@ bool unabto_init(void) {
 #if NABTO_ENABLE_DYNAMIC_MEMORY
     if (!unabto_allocate_memory(&nmc.nabtoMainSetup))
     {
+        unabto_free_memory();
         NABTO_LOG_FATAL(("Could not initialize memory"));
         return false;
     }
