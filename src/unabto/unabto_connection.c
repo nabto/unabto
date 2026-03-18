@@ -285,8 +285,8 @@ static size_t mk_connect_rsp(uint8_t* buf, uint8_t* end, uint16_t seq, uint32_t 
     if (ptr == NULL) return 0;
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_NOTIFY, 0, 8);
     if (ptr == NULL) return 0;
-    WRITE_U32(ptr, notif); ptr += 4;
-    WRITE_U32(ptr, nsi);   ptr += 4;
+    ptr = write_forward_u32(ptr, end, notif);
+    ptr = write_forward_u32(ptr, end, nsi);
 
     if (isLocalConnectRsp) {
         ptr = insert_capabilities(ptr, end, 1 /*unenc*/);
@@ -365,8 +365,8 @@ static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, ui
         destIpV4 = dest->addr.addr.ipv4;
     }
 
-    WRITE_U32(ptr, destIpV4); ptr += 4;
-    WRITE_U16(ptr, dest->port); ptr += 2;
+    ptr = write_forward_u32(ptr, end, destIpV4);
+    ptr = write_forward_u16(ptr, end, dest->port);
     if (seq > 0) {
         if (!myAddress || myAddress->addr.type != NABTO_IP_V4) {
             NABTO_LOG_ERROR(("Send rendezvous called with an invalid address"));
@@ -374,8 +374,8 @@ static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, ui
         } else {
             ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_EP, 0, 6);
             if (ptr == NULL) return;
-            WRITE_U32(ptr, myAddress->addr.addr.ipv4); ptr += 4;
-            WRITE_U16(ptr, myAddress->port); ptr += 2;
+            ptr = write_forward_u32(ptr, end, myAddress->addr.addr.ipv4);
+            ptr = write_forward_u16(ptr, end, myAddress->port);
         }
     }
     {
@@ -1003,11 +1003,11 @@ uint8_t* insert_rendezvous_stats_payload(uint8_t* ptr, uint8_t* end, nabto_conne
     }
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_RENDEZVOUS_STATS, 0, 7);
 
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_RENDEZVOUS_STATS_VERSION);
-    WRITE_FORWARD_U8(ptr, con->clientNatType);
-    WRITE_FORWARD_U8(ptr, nmc.context.natType);
-    WRITE_FORWARD_U16(ptr, con->rendezvousConnectState.portsOpened);
-    WRITE_FORWARD_U16(ptr, con->rendezvousConnectState.socketsOpened);
+    ptr = write_forward_u8(ptr, end, NP_PAYLOAD_RENDEZVOUS_STATS_VERSION);
+    ptr = write_forward_u8(ptr, end, con->clientNatType);
+    ptr = write_forward_u8(ptr, end, nmc.context.natType);
+    ptr = write_forward_u16(ptr, end, con->rendezvousConnectState.portsOpened);
+    ptr = write_forward_u16(ptr, end, con->rendezvousConnectState.socketsOpened);
 
     return ptr;
 }
@@ -1022,10 +1022,8 @@ uint8_t* insert_cp_id_payload(uint8_t* ptr, uint8_t* end, nabto_connect* con) {
 
     ptr = insert_payload(ptr, end,  NP_PAYLOAD_TYPE_CP_ID, 0, 1+cpIdLength);
 
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_CP_ID_TYPE_MAIL);
-    memcpy(ptr, (const void*) con->clientId, cpIdLength);
-
-    ptr += cpIdLength;
+    ptr = write_forward_u8(ptr, end, NP_PAYLOAD_CP_ID_TYPE_MAIL);
+    ptr = write_forward_mem(ptr, end, (const void*) con->clientId, cpIdLength);
 
     return ptr;
 }

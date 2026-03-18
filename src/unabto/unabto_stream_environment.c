@@ -42,26 +42,26 @@ bool build_and_send_packet(struct nabto_stream_s* stream, uint8_t type, uint32_t
     ptr = insert_data_header(buf, end, con->spnsi, con->nsico, stream->streamTag);
     if (ptr == NULL) return false;
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_WINDOW, 0, l_win + winInfoSize + (type == NP_PAYLOAD_WINDOW_FLAG_ACK ? 2 : 0));
-    WRITE_FORWARD_U8 (ptr, type);
-    WRITE_FORWARD_U8 (ptr, NP_STREAM_VERSION);
-    WRITE_FORWARD_U16(ptr, stream->idCP);
-    WRITE_FORWARD_U16(ptr, stream->idSP);
-    WRITE_FORWARD_U32(ptr, seq);
-    WRITE_FORWARD_U32(ptr, ackToSend);
+    ptr = write_forward_u8(ptr, end, type);
+    ptr = write_forward_u8(ptr, end, NP_STREAM_VERSION);
+    ptr = write_forward_u16(ptr, end, stream->idCP);
+    ptr = write_forward_u16(ptr, end, stream->idSP);
+    ptr = write_forward_u32(ptr, end, seq);
+    ptr = write_forward_u32(ptr, end, ackToSend);
     if (type == NP_PAYLOAD_WINDOW_FLAG_ACK) {
-        WRITE_FORWARD_U16(ptr, recvWinSize);
+        ptr = write_forward_u16(ptr, end, recvWinSize);
     }
 
     if (winInfoSize) {
-        memcpy(ptr, (const void*) winInfoData, winInfoSize); ptr += winInfoSize;
+        ptr = write_forward_mem(ptr, end, (const void*) winInfoData, winInfoSize);
     }
 
     if (sackData && sackData->nPairs > 0) {
         uint8_t i;
         ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_SACK, 0, 8 * sackData->nPairs);
         for (i = 0; i < sackData->nPairs; i++) {
-            WRITE_FORWARD_U32(ptr, sackData->pairs[i].start);
-            WRITE_FORWARD_U32(ptr, sackData->pairs[i].end);
+            ptr = write_forward_u32(ptr, end, sackData->pairs[i].start);
+            ptr = write_forward_u32(ptr, end, sackData->pairs[i].end);
         }
     }
 

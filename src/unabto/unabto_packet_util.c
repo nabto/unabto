@@ -343,11 +343,11 @@ uint8_t* insert_ipx_payload(uint8_t* ptr, uint8_t* end) {
         globalAddr = nmc.context.globalAddress.addr.addr.ipv4;
     }
     
-    WRITE_FORWARD_U32(ptr, localAddr);
-    WRITE_FORWARD_U16(ptr, nmc.socketGSPLocalEndpoint.port);
-    WRITE_FORWARD_U32(ptr, globalAddr);
-    WRITE_FORWARD_U16(ptr, nmc.context.globalAddress.port);
-    WRITE_FORWARD_U8(ptr, nmc.context.natType);
+    ptr = write_forward_u32(ptr, end, localAddr);
+    ptr = write_forward_u16(ptr, end, nmc.socketGSPLocalEndpoint.port);
+    ptr = write_forward_u32(ptr, end, globalAddr);
+    ptr = write_forward_u16(ptr, end, nmc.context.globalAddress.port);
+    ptr = write_forward_u8(ptr, end, nmc.context.natType);
 
     return ptr;
 }
@@ -363,12 +363,12 @@ uint8_t* insert_version_payload(uint8_t* ptr, uint8_t* end)
     
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_VERSION, 0, (14+prereleaseLength+buildLength));
 
-    WRITE_FORWARD_U16(ptr, NP_PAYLOAD_VERSION_TYPE_UD);
-    WRITE_FORWARD_U32(ptr, UNABTO_VERSION_MAJOR);
-    WRITE_FORWARD_U32(ptr, UNABTO_VERSION_MINOR);
-    WRITE_FORWARD_U32(ptr, UNABTO_VERSION_PATCH);
-    memcpy(ptr, UNABTO_VERSION_PRERELEASE, prereleaseLength); ptr += prereleaseLength;
-    memcpy(ptr, UNABTO_VERSION_BUILD, buildLength); ptr += buildLength;
+    ptr = write_forward_u16(ptr, end, NP_PAYLOAD_VERSION_TYPE_UD);
+    ptr = write_forward_u32(ptr, end, UNABTO_VERSION_MAJOR);
+    ptr = write_forward_u32(ptr, end, UNABTO_VERSION_MINOR);
+    ptr = write_forward_u32(ptr, end, UNABTO_VERSION_PATCH);
+    ptr = write_forward_mem(ptr, end, UNABTO_VERSION_PRERELEASE, prereleaseLength);
+    ptr = write_forward_mem(ptr, end, UNABTO_VERSION_BUILD, buildLength);
     return ptr;
 }
 
@@ -383,10 +383,8 @@ uint8_t* insert_sp_id_payload(uint8_t* ptr, uint8_t* end) {
 
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_SP_ID, 0, 1+spIdLength);
 
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_CP_ID_TYPE_URL);
-    memcpy(ptr, nmc.nabtoMainSetup.id, spIdLength);
-    
-    ptr += spIdLength;
+    ptr = write_forward_u8(ptr, end, NP_PAYLOAD_CP_ID_TYPE_URL);
+    ptr = write_forward_mem(ptr, end, nmc.nabtoMainSetup.id, spIdLength);
 
     return ptr;
 }
@@ -397,7 +395,7 @@ uint8_t* insert_stats_payload(uint8_t* ptr, uint8_t* end, uint8_t stats_event_ty
         return NULL;
     }
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_STATS, 0, 1);
-    WRITE_FORWARD_U8(ptr, stats_event_type);
+    ptr = write_forward_u8(ptr, end, stats_event_type);
     return ptr;
 }
 
@@ -409,7 +407,7 @@ uint8_t* insert_notify_payload(uint8_t* ptr, uint8_t* end, uint32_t notifyValue)
     }
     
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_NOTIFY, 0, 4);
-    WRITE_FORWARD_U32(ptr, notifyValue);
+    ptr = write_forward_u32(ptr, end, notifyValue);
     return ptr;
 }
 
@@ -420,9 +418,8 @@ uint8_t* insert_piggy_payload(uint8_t* ptr, uint8_t* end, uint8_t* piggyData, ui
     }
     
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PIGGY, 0, 4 + piggySize);
-    WRITE_FORWARD_U32(ptr, 0);
-    memcpy(ptr, (const void*) piggyData, piggySize);
-    ptr += piggySize;
+    ptr = write_forward_u32(ptr, end, 0);
+    ptr = write_forward_mem(ptr, end, (const void*) piggyData, piggySize);
     
     return ptr;
 }
@@ -457,12 +454,12 @@ uint8_t* insert_capabilities_payload(uint8_t* ptr, uint8_t* end, struct unabto_c
         return NULL;
     }
 
-    WRITE_FORWARD_U8(ptr, capabilities->type);
-    WRITE_FORWARD_U32(ptr, capabilities->bits);
-    WRITE_FORWARD_U32(ptr, capabilities->mask);
+    ptr = write_forward_u8(ptr, end, capabilities->type);
+    ptr = write_forward_u32(ptr, end, capabilities->bits);
+    ptr = write_forward_u32(ptr, end, capabilities->mask);
 
     if (encryptionCodes > 0) {
-        WRITE_FORWARD_U16(ptr, encryptionCodes);
+        ptr = write_forward_u16(ptr, end, encryptionCodes);
     }
     // the caller needs to insert the encryption codes
     return ptr;

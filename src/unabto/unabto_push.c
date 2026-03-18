@@ -227,15 +227,15 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
     }
 
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PUSH, 0, NP_PAYLOAD_PUSH_BYTELENGTH-NP_PAYLOAD_HDR_BYTELENGTH);
+    ptr = write_forward_u32(ptr, end, elem->seq);
+    ptr = write_forward_u16(ptr, end, elem->pnsId);
+    ptr = write_forward_u8(ptr, end, NP_PAYLOAD_PUSH_FLAG_SEND);
     if (ptr == NULL) {
         unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
         unabto_push_notification_callback(elem->seq,&hint);
         unabto_push_notification_remove(elem->seq);
         return;
     }
-    WRITE_FORWARD_U32(ptr, elem->seq);
-    WRITE_FORWARD_U16(ptr, elem->pnsId);
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_PUSH_FLAG_SEND);
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
     if (ptr == NULL) {
         unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;

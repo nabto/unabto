@@ -212,7 +212,7 @@ bool send_exception(nabto_connect* con, nabto_packet_header* hdr, uint32_t aer)
     ptr += SIZE_CODE; // make room for crypto suite code
     dataStart = ptr;
     // write exception value
-    WRITE_FORWARD_U32(ptr, (uint32_t)aer);
+    ptr = write_forward_u32(ptr, end, (uint32_t)aer);
     
     return send_and_encrypt_packet_con(con, buf, end, dataStart, sizeof(uint32_t), cryptoPayloadStart);
 }
@@ -392,43 +392,25 @@ bool send_to_basestation(uint8_t* buffer, size_t buflen, nabto_endpoint* peer)
 
 uint8_t* unabto_stats_write_u32(uint8_t* ptr, uint8_t* end, uint8_t type, uint32_t value)
 {
-    if (ptr == NULL) {
-        return NULL;
-    }
-    if (end - ptr < sizeof(uint32_t) + 2) {
-        return NULL;
-    }
-    WRITE_FORWARD_U8(ptr, type);
-    WRITE_FORWARD_U8(ptr, 6);
-    WRITE_FORWARD_U32(ptr, value);
+    ptr = write_forward_u8(ptr, end, type);
+    ptr = write_forward_u8(ptr, end, 6);
+    ptr = write_forward_u32(ptr, end, value);
     return ptr;
 }
 
 uint8_t* unabto_stats_write_u16(uint8_t* ptr, uint8_t* end, uint8_t type, uint16_t value)
 {
-    if (ptr == NULL) {
-        return ptr;
-    }
-    if (end - ptr < sizeof(uint16_t) + 2) {
-        return NULL;
-    }
-    WRITE_FORWARD_U8(ptr, type);
-    WRITE_FORWARD_U8(ptr, 4);
-    WRITE_FORWARD_U16(ptr, value);
+    ptr = write_forward_u8(ptr, end, type);
+    ptr = write_forward_u8(ptr, end, 4);
+    ptr = write_forward_u16(ptr, end, value);
     return ptr;
 }
 
 uint8_t* unabto_stats_write_u8(uint8_t* ptr, uint8_t* end, uint8_t type, uint8_t value)
 {
-    if (ptr == NULL) {
-        return NULL;
-    }
-    if (end - ptr < sizeof(uint8_t) + 2) {
-        return NULL;
-    }
-    WRITE_FORWARD_U8(ptr, type);
-    WRITE_FORWARD_U8(ptr, 3);
-    WRITE_FORWARD_U8(ptr, value);
+    ptr = write_forward_u8(ptr, end, type);
+    ptr = write_forward_u8(ptr, end, 3);
+    ptr = write_forward_u8(ptr, end, value);
     return ptr;
 }
 

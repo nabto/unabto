@@ -268,11 +268,11 @@ void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const na
 
     // insert capabilities
     ptr = insert_capabilities_payload(ptr, end, &connection->psk.capabilities, 1);
+    ptr = write_forward_u16(ptr, end, CRYPT_W_AES_CBC_HMAC_SHA256);
     if (ptr == NULL) {
         NABTO_LOG_WARN(("packet encoding failed"));
         return;
     }
-    WRITE_FORWARD_U16(ptr, CRYPT_W_AES_CBC_HMAC_SHA256);
 
     // insert nonce from device
     ptr = insert_nonce_payload(ptr, end, connection->psk.handshakeData.responderNonce, 32);

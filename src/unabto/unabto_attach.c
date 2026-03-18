@@ -256,17 +256,17 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
             sz = 1;
         }
         ptr = insert_optional_payload(ptr, end, NP_PAYLOAD_TYPE_DESCR, 0, sz + 1);
+        ptr = write_forward_u8(ptr, end, NP_PAYLOAD_DESCR_TYPE_VERSION);
+        ptr = write_forward_mem(ptr, end, version, sz);
         if (ptr == NULL) return 0;
-        WRITE_U8(ptr, NP_PAYLOAD_DESCR_TYPE_VERSION); ptr += 1;
-        memcpy(ptr, version, sz); ptr += sz;
 
         if (nmc.nabtoMainSetup.url) {
             url = nmc.nabtoMainSetup.url;
             sz = strlen(url);
             ptr = insert_optional_payload(ptr, end, NP_PAYLOAD_TYPE_DESCR, 0, sz + 1);
+            ptr = write_forward_u8(ptr, end, NP_PAYLOAD_DESCR_TYPE_URL);
+            ptr = write_forward_mem(ptr, end, url, sz);
             if (ptr == NULL) return 0;
-            WRITE_U8(ptr, NP_PAYLOAD_DESCR_TYPE_URL); ptr += 1;
-            memcpy(ptr, url, sz); ptr += sz;
         } else {
             url = dummy;
         }
@@ -275,18 +275,15 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
         // send encryption capabilities
         ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CAPABILITY, 0, 9 + 2*2);
         if (ptr == NULL) return 0;
-        *ptr++ = 0; /* type */
-        WRITE_U32(ptr,   0l); ptr += 4; // mask
-        WRITE_U32(ptr,   0l); ptr += 4; // bits
-        WRITE_U16(ptr,    1); ptr += 2; // number of codes
-        WRITE_U16(ptr, code); ptr += 2;
+        ptr = write_forward_u8(ptr, end, 0); /* type */
+        ptr = write_forward_u32(ptr, end, 0l); // mask
+        ptr = write_forward_u32(ptr, end, 0l); // bits
+        ptr = write_forward_u16(ptr, end, 1); // number of codes
+        ptr = write_forward_u16(ptr, end, code);
     }
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_SP_ID, 0, sid_len + 1);
-    if (ptr == NULL) return 0;
-    *ptr++ = NP_PAYLOAD_SP_ID_TYPE_URL; /* SPID_URL */
-    memcpy(ptr, nmc.nabtoMainSetup.id, sid_len);
-    
-    ptr += sid_len;
+    ptr = write_forward_u8(ptr, end, NP_PAYLOAD_SP_ID_TYPE_URL); /* SPID_URL */
+    ptr = write_forward_mem(ptr, end, nmc.nabtoMainSetup.id, sid_len);
     
     len = ptr - buf;
 
@@ -358,13 +355,11 @@ static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uin
         globalIpV4 = nmc.context.globalAddress.addr.addr.ipv4;
     }
 
-    
-    WRITE_U32(ptr, localIpV4); ptr += 4;
-    WRITE_U16(ptr, nmc.socketGSPLocalEndpoint.port); ptr += 2;
-    
-    WRITE_U32(ptr, globalIpV4); ptr += 4;
-    WRITE_U16(ptr, nmc.context.globalAddress.port); ptr += 2;
-    WRITE_U8(ptr, nmc.context.natType); ptr++;
+    ptr = write_forward_u32(ptr, end, localIpV4);
+    ptr = write_forward_u16(ptr, end, nmc.socketGSPLocalEndpoint.port);
+    ptr = write_forward_u32(ptr, end, globalIpV4);
+    ptr = write_forward_u16(ptr, end, nmc.context.globalAddress.port);
+    ptr = write_forward_u8(ptr, end, nmc.context.natType);
 
     ptr = insert_notify_payload(ptr, end, NP_PAYLOAD_NOTIFY_ATTACH_OK);
 
@@ -903,9 +898,9 @@ uint8_t* insert_attach_stats_payload(uint8_t* ptr, uint8_t* end, uint8_t statusC
 
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_ATTACH_STATS, 0, 3);
 
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_ATTACH_STATS_VERSION);
+    ptr = write_forward_u8(ptr, end, NP_PAYLOAD_ATTACH_STATS_VERSION);
 
-    WRITE_FORWARD_U8(ptr, statusCode);
+    ptr = write_forward_u8(ptr, end, statusCode);
 
     flags = 0;
 
@@ -913,7 +908,7 @@ uint8_t* insert_attach_stats_payload(uint8_t* ptr, uint8_t* end, uint8_t statusC
         flags |= NP_PAYLOAD_ATTACH_STATS_FLAGS_SECURE_ATTACH;
     }
 
-    WRITE_FORWARD_U8(ptr, flags);
+    ptr = write_forward_u8(ptr, end, flags);
 
     return ptr;
 }
