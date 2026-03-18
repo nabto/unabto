@@ -323,6 +323,9 @@ void unabto_notify_ip_changed(struct nabto_ip_address* ip) {
 #endif
 
 static void ensureValidDeviceId(const char* id) {
+    if (id == NULL || *id == '\0') {
+        NABTO_LOG_FATAL(("Device id must be set before calling unabto_init"));
+    }
     if (strlen(id) > NABTO_DEVICE_NAME_MAX_SIZE) {
         NABTO_LOG_FATAL(("Device id exceeds NABTO_DEVICE_NAME_MAX_SIZE (%d characters)", NABTO_DEVICE_NAME_MAX_SIZE));
     }
