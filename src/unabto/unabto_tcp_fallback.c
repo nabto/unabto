@@ -46,7 +46,8 @@ bool build_handshake_packet(nabto_connect* con, uint8_t* buffer, size_t bufferLe
     uint8_t nonce[38];
     uint8_t* noncePtr = nonce;
     
-    packetPtr = insert_header(buffer, con->cpnsi, con->spnsi, NP_PACKET_HDR_TYPE_GW_CONN_U, false, 0, 0, con->consi);
+    packetPtr = insert_header(buffer, bufferEnd, con->cpnsi, con->spnsi, NP_PACKET_HDR_TYPE_GW_CONN_U, false, 0, 0, con->consi);
+    if (packetPtr == NULL) return false;
 
     //NOTE: These type and flags must match the connection attributes set
     //in the unabto_tcp_fallback_connect_thread when a connection is
@@ -62,7 +63,7 @@ bool build_handshake_packet(nabto_connect* con, uint8_t* buffer, size_t bufferLe
     
     *packetLength = packetPtr - buffer;
 
-    insert_length(buffer, (uint16_t)*packetLength);
+    insert_length(buffer, bufferEnd, (uint16_t)*packetLength);
     return true;
 }
 

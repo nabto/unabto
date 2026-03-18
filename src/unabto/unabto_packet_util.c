@@ -198,16 +198,25 @@ bool unabto_find_payload(const uint8_t* begin, const uint8_t* end, uint8_t type,
 /******************************************************************************/
 /******************************************************************************/
 
-uint8_t* insert_header(uint8_t* buf, uint32_t cpnsi, uint32_t spnsi, uint8_t type, bool rsp, uint16_t seq, uint16_t tag, uint8_t* nsico)
+uint8_t* insert_header(uint8_t* buf, const uint8_t* end, uint32_t cpnsi, uint32_t spnsi, uint8_t type, bool rsp, uint16_t seq, uint16_t tag, uint8_t* nsico)
 {
     uint8_t flags = NP_PACKET_HDR_FLAG_NONE;
-    
+    size_t required = NP_PACKET_HDR_MIN_BYTELENGTH;
+
+    if (buf == NULL) return NULL;
+
     if (rsp)
         flags |= NP_PACKET_HDR_FLAG_RESPONSE;
-    if (tag)
+    if (tag) {
         flags |= NP_PACKET_HDR_FLAG_TAG;
-    if (nsico)
+        required += 2;
+    }
+    if (nsico) {
         flags |= NP_PACKET_HDR_FLAG_NSI_CO;
+        required += 8;
+    }
+
+    if ((size_t)(end - buf) < required) return NULL;
 
     /* Write fixed part of packet header */
     WRITE_U32(buf,       cpnsi);   buf += 4; /* NSI.cp              */
@@ -234,13 +243,15 @@ uint8_t* insert_header(uint8_t* buf, uint32_t cpnsi, uint32_t spnsi, uint8_t typ
 
 /******************************************************************************/
 
-uint8_t* insert_data_header(uint8_t* buf, uint32_t nsi, uint8_t* nsico, uint16_t tag)
+uint8_t* insert_data_header(uint8_t* buf, const uint8_t* end, uint32_t nsi, uint8_t* nsico, uint16_t tag)
 {
-    return insert_header(buf, 0, nsi, DATA, false, 0, tag, nsico);
+    return insert_header(buf, end, 0, nsi, DATA, false, 0, tag, nsico);
 }
 
-void insert_length(uint8_t* buf, uint16_t length) {
+bool insert_length(uint8_t* buf, const uint8_t* end, uint16_t length) {
+    if (buf == NULL || (size_t)(end - buf) < OFS_PACKET_LGT + 2) return false;
     WRITE_U16((uint8_t*)(buf) + OFS_PACKET_LGT, (uint16_t)(length));
+    return true;
 }
 
 /******************************************************************************/
@@ -274,9 +285,11 @@ uint8_t* insert_payload(uint8_t* buf, uint8_t* end, uint8_t type, const uint8_t*
 
 uint8_t* insert_optional_payload(uint8_t* buf, uint8_t* end, uint8_t type, const uint8_t* content, size_t size)
 {
-    uint8_t* ptr = buf + 1; // to set optional bit
-    uint8_t* res = insert_payload(buf, end, type, content, size);
-    *ptr |= NP_PAYLOAD_HDR_FLAG_OPTIONAL; /* modify payload header flags */
+    uint8_t* res;
+    if (buf == NULL) return NULL;
+    res = insert_payload(buf, end, type, content, size);
+    if (res == NULL) return NULL;
+    *(buf + 1) |= NP_PAYLOAD_HDR_FLAG_OPTIONAL; /* modify payload header flags */
 
     return res; /* return end of payload */
 }

@@ -277,26 +277,28 @@ bool unabto_find_payload(const uint8_t* buf, const uint8_t* end, uint8_t type, s
 /**
  * Write the packet header (excl the length field)
  * @param buf    the start of the packet
+ * @param end    the end of the buffer
  * @param cpnsi  the stream ID, cp part
  * @param spnsi  the stream ID, sp part
  * @param type   the packet type
  * @param rsp    response flag
  * @param seq    the sequence number
  * @param tag    tag
- * @return       the first byte after the header
+ * @return       the first byte after the header, or NULL if buffer too small
  */
-uint8_t* insert_header(uint8_t* buf, uint32_t cpnsi, uint32_t spnsi, uint8_t type, bool rsp, uint16_t seq, uint16_t tag, uint8_t* nsico);
+uint8_t* insert_header(uint8_t* buf, const uint8_t* end, uint32_t cpnsi, uint32_t spnsi, uint8_t type, bool rsp, uint16_t seq, uint16_t tag, uint8_t* nsico);
 
 
 /**
  * Write the packet header of a DATA packet (excl the length field)
  * @param buf    the start of the packet
+ * @param end    the end of the buffer
  * @param nsi    the stream ID
  * @param nsico  the nsi.co to be inserted or zero to exclude it from the header
  * @param tag    tag
- * @return       the first byte after the header
+ * @return       the first byte after the header, or NULL if buffer too small
  */
-uint8_t* insert_data_header(uint8_t* buf, uint32_t nsi, uint8_t* nsico, uint16_t tag);
+uint8_t* insert_data_header(uint8_t* buf, const uint8_t* end, uint32_t nsi, uint8_t* nsico, uint16_t tag);
 
 /**
  * Write packet flags.
@@ -315,9 +317,11 @@ uint8_t* insert_data_header(uint8_t* buf, uint32_t nsi, uint8_t* nsico, uint16_t
 /**
  * Write packet length.
  * @param buf  (uint8_t*) the start of the packet
+ * @param end  the end of the buffer
  * @param len  (size_t) the total length of the payload
+ * @return     true if length was written, false if buffer too small
  */
-void insert_length(uint8_t* buf, uint16_t length);
+bool insert_length(uint8_t* buf, const uint8_t* end, uint16_t length);
 
 /**
  * Write the Payload

@@ -109,8 +109,8 @@ void send_debug_packet_response(nabto_packet_header* header, uint32_t notificati
     uint8_t* ptr = nabtoCommunicationBuffer;
     uint8_t* end = nabtoCommunicationBuffer+nabtoCommunicationBufferSize;
     
-    ptr = insert_header(ptr, header->nsi_cp, header->nsi_sp, U_DEBUG, true, header->seq, 0, NULL);
-    
+    ptr = insert_header(ptr, end, header->nsi_cp, header->nsi_sp, U_DEBUG, true, header->seq, 0, NULL);
+
     if (ptr == NULL) {
         NABTO_LOG_ERROR(("Could not insert debug packet header"));
         return;
@@ -124,7 +124,7 @@ void send_debug_packet_response(nabto_packet_header* header, uint32_t notificati
 
     {
         uint16_t length = (uint16_t)(ptr - buf);
-        insert_length(buf, length);
+        insert_length(buf, end, length);
         send_to_basestation(buf, length, &nmc.context.gsp);
     }
 

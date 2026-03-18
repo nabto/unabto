@@ -167,8 +167,10 @@ bool build_and_send_rst_packet(nabto_connect* con, uint16_t tag, struct nabto_wi
     nabto_stream_make_rst_response_window(win, &rst);
     winLength = nabto_stream_window_payload_length(&rst);
 
-    ptr = insert_data_header(buf, con->spnsi, con->nsico, tag);
+    ptr = insert_data_header(buf, end, con->spnsi, con->nsico, tag);
+    if (ptr == NULL) return false;
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_WINDOW, 0, winLength);
+    if (ptr == NULL) return false;
 
     if (nabto_stream_encode_window(&rst, ptr, &encodeLength)) {
         ptr += encodeLength;
@@ -462,7 +464,10 @@ void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
         return;
     }
 
-    ptr = insert_header(nabtoCommunicationBuffer, 0, stream->connection->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
+    ptr = insert_header(nabtoCommunicationBuffer, end, 0, stream->connection->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
+    if (ptr == NULL) {
+        return;
+    }
 
     if (stream->state == STREAM_IDLE) {
         return;
@@ -494,7 +499,7 @@ void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
     }
 
     length = ptr - nabtoCommunicationBuffer;
-    insert_length(nabtoCommunicationBuffer, (uint16_t)length);
+    insert_length(nabtoCommunicationBuffer, end, (uint16_t)length);
     send_to_basestation(nabtoCommunicationBuffer, length, &nmc.context.gsp);
 }
 

@@ -215,7 +215,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
     }
 
 
-    uint8_t* ptr = insert_header(buf,0, nmc.context.gspnsi, U_PUSH, false, 0, 0, NULL);
+    uint8_t* ptr = insert_header(buf, end, 0, nmc.context.gspnsi, U_PUSH, false, 0, 0, NULL);
     uint8_t* cryptoPayloadStart;
     uint8_t* cryptDataStart;
 

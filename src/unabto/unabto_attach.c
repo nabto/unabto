@@ -178,7 +178,7 @@ static size_t verification_complete(verification_t* verif, uint8_t* buf, uint8_t
 
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_VERIFY, 0, sizeof(data));
     len = ptr - buf + sizeof(data);
-    insert_length(buf, (uint16_t)len);
+    insert_length(buf, end, (uint16_t)len);
     verification_add(verif, buf, ptr);
     sum = verif->sum;
     ix = sizeof(data);
@@ -227,7 +227,7 @@ bool verification_check(verification_t* verif, const uint8_t* buf, const uint8_t
 static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
 {
     size_t len;
-    uint8_t* ptr = insert_header(buf, 0, 0, U_INVITE, false, 0, 0, 0);
+    uint8_t* ptr = insert_header(buf, end, 0, 0, U_INVITE, false, 0, 0, 0);
     size_t sid_len = strlen(nmc.nabtoMainSetup.id);
 
     NABTO_LOG_TRACE(("len=%" PRIsize, sid_len));
@@ -285,7 +285,7 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
     
     len = ptr - buf;
 
-    insert_length(buf, (uint16_t)len);
+    insert_length(buf, end, (uint16_t)len);
 
     return len;
 }
@@ -336,7 +336,7 @@ static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uin
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
 
     bool res = false;
-    uint8_t* ptr = insert_header(buf, 0, nmc.context.gspnsi, U_ATTACH, true, seq, 0, 0);
+    uint8_t* ptr = insert_header(buf, end, 0, nmc.context.gspnsi, U_ATTACH, true, seq, 0, 0);
     uint32_t localIpV4 = 0;
     uint32_t globalIpV4 = 0;
     ptr = insert_capabilities(ptr, end, nmc.context.clearTextData);
@@ -408,7 +408,10 @@ static size_t mk_gsp_alive_rsp(uint16_t seq, size_t piggySize, uint8_t* piggyDat
       return 0;
     }
 
-    ptr = insert_header(buf, 0, nmc.context.gspnsi, U_ALIVE, true, seq, 0, 0);
+    ptr = insert_header(buf, end, 0, nmc.context.gspnsi, U_ALIVE, true, seq, 0, 0);
+    if (ptr == NULL) {
+        return 0;
+    }
 
     ptr = insert_notify_payload(ptr, end, NP_PAYLOAD_NOTIFY_ALIVE_OK);
     if (ptr == NULL) {
@@ -422,7 +425,7 @@ static size_t mk_gsp_alive_rsp(uint16_t seq, size_t piggySize, uint8_t* piggyDat
         }
     }
     len = ptr - buf;
-    insert_length(buf, (uint16_t)len);
+    insert_length(buf, end, (uint16_t)len);
     return len;
 }
 
@@ -909,8 +912,11 @@ uint8_t* insert_attach_stats_payload(uint8_t* ptr, uint8_t* end, uint8_t statusC
 
 void send_basestation_attach_failure(uint8_t statusCode) {
     uint16_t length;
-    uint8_t* ptr = insert_header(nabtoCommunicationBuffer, 0, 0, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
+    uint8_t* ptr = insert_header(nabtoCommunicationBuffer, end, 0, 0, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
+    if (ptr == NULL) {
+        return;
+    }
 
     ptr = insert_stats_payload(ptr, end, NP_PAYLOAD_STATS_TYPE_DEVICE_ATTACH_FAIL);
     if (ptr == NULL) {
@@ -930,7 +936,7 @@ void send_basestation_attach_failure(uint8_t statusCode) {
     ptr = insert_attach_stats_payload(ptr, end, statusCode);
 
     length = (uint16_t)(ptr - nabtoCommunicationBuffer);
-    insert_length(nabtoCommunicationBuffer, length);
+    insert_length(nabtoCommunicationBuffer, end, length);
 
     if (nmc.controllerEp.addr.type == NABTO_IP_NONE) {
         NABTO_LOG_TRACE(("There is no valid address to send statistics packets to"));

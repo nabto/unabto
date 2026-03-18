@@ -330,7 +330,7 @@ void unabto_psk_connection_send_verify_response(nabto_socket_t socket, const nab
 
     packetLength = (uint16_t)(ptr - nabtoCommunicationBuffer);
 
-    insert_length(nabtoCommunicationBuffer, packetLength);
+    insert_length(nabtoCommunicationBuffer, end, packetLength);
     // send packet
     nabto_write(socket, nabtoCommunicationBuffer, packetLength, &peer->addr, peer->port);
 }
@@ -373,7 +373,7 @@ void unabto_psk_connection_send_error_response(nabto_socket_t socket, const nabt
 
     packetLength = (uint16_t)(ptr - nabtoCommunicationBuffer);
 
-    insert_length(nabtoCommunicationBuffer, packetLength);
+    insert_length(nabtoCommunicationBuffer, end, packetLength);
     // send packet
     nabto_write(socket, nabtoCommunicationBuffer, packetLength, &peer->addr, peer->port);
 }
