@@ -66,65 +66,38 @@ bool init_push_message(push_message* msg, uint16_t pnsid, const char* staticData
     msg->dynamicData.len = 0;
     return true;
 }
-bool add_title(push_message* msg, const char* title){
+static bool add_tlv(push_message* msg, uint8_t type, const char* value){
+    size_t len = strlen(value);
     uint8_t* ptr = msg->dynamicData.data + msg->dynamicData.len;
-    if((msg->dynamicData.len += strlen(title)+2) > NABTO_PUSH_BUFFER_ELEMENT_SIZE){
+    if(len + 2 > 255){
         return false;
     }
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_PUSH_DATA_VALUE_TITLE);
-    WRITE_FORWARD_U8(ptr, strlen(title)+2);
-    strcpy((char *)ptr,title);
+    if(msg->dynamicData.len + len + 2 > NABTO_PUSH_BUFFER_ELEMENT_SIZE){
+        return false;
+    }
+    WRITE_FORWARD_U8(ptr, type);
+    WRITE_FORWARD_U8(ptr, len+2);
+    memcpy(ptr, value, len);
+    msg->dynamicData.len += len + 2;
     return true;
+}
+bool add_title(push_message* msg, const char* title){
+    return add_tlv(msg, NP_PAYLOAD_PUSH_DATA_VALUE_TITLE, title);
 }
 bool add_body(push_message* msg, const char* body){
-    uint8_t* ptr = msg->dynamicData.data + msg->dynamicData.len;
-    if((msg->dynamicData.len += strlen(body)+2) > NABTO_PUSH_BUFFER_ELEMENT_SIZE){
-        return false;
-    }
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_PUSH_DATA_VALUE_BODY);
-    WRITE_FORWARD_U8(ptr, strlen(body)+2);
-    strcpy((char *)ptr,body);
-    return true;
+    return add_tlv(msg, NP_PAYLOAD_PUSH_DATA_VALUE_BODY, body);
 }
 bool add_title_loc_key(push_message* msg, const char* titleKey){
-    uint8_t* ptr = msg->dynamicData.data + msg->dynamicData.len;
-    if((msg->dynamicData.len += strlen(titleKey)+2) > NABTO_PUSH_BUFFER_ELEMENT_SIZE){
-        return false;
-    }
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_KEY);
-    WRITE_FORWARD_U8(ptr, strlen(titleKey)+2);
-    strcpy((char *)ptr,titleKey);
-    return true;
+    return add_tlv(msg, NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_KEY, titleKey);
 }
 bool add_title_loc_string_arg(push_message* msg, const char* titleArg){
-    uint8_t* ptr = msg->dynamicData.data + msg->dynamicData.len;
-    if((msg->dynamicData.len += strlen(titleArg)+2) > NABTO_PUSH_BUFFER_ELEMENT_SIZE){
-        return false;
-    }
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_STRING_ARG);
-    WRITE_FORWARD_U8(ptr, strlen(titleArg)+2);
-    strcpy((char *)ptr,titleArg);
-    return true;
+    return add_tlv(msg, NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_STRING_ARG, titleArg);
 }
 bool add_body_loc_key(push_message* msg, const char* bodyKey){
-    uint8_t* ptr = msg->dynamicData.data + msg->dynamicData.len;
-    if((msg->dynamicData.len += strlen(bodyKey)+2) > NABTO_PUSH_BUFFER_ELEMENT_SIZE){
-        return false;
-    }
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_KEY);
-    WRITE_FORWARD_U8(ptr, strlen(bodyKey)+2);
-    strcpy((char *)ptr,bodyKey);
-    return true;
+    return add_tlv(msg, NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_KEY, bodyKey);
 }
 bool add_body_loc_string_arg(push_message* msg, const char* bodyArg){
-    uint8_t* ptr = msg->dynamicData.data + msg->dynamicData.len;
-    if((msg->dynamicData.len += strlen(bodyArg)+2) > NABTO_PUSH_BUFFER_ELEMENT_SIZE){
-        return false;
-    }
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_STRING_ARG);
-    WRITE_FORWARD_U8(ptr, strlen(bodyArg)+2);
-    strcpy((char *)ptr,bodyArg);
-    return true;
+    return add_tlv(msg, NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_STRING_ARG, bodyArg);
 }
 
 
