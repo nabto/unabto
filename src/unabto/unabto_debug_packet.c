@@ -22,9 +22,9 @@ void unabto_debug_packet(message_event* event, nabto_packet_header* header) {
 }
 
 bool handle_debug_packet(message_event* event, nabto_packet_header* header) {
-    
+
     uint8_t* buf = nabtoCommunicationBuffer;
-    uint8_t* end = nabtoCommunicationBuffer+nabtoCommunicationBufferSize;
+    uint8_t* end = nabtoCommunicationBuffer+header->len;
     struct unabto_payload_crypto crypto;
 
     buf += header->hlen;
@@ -116,7 +116,7 @@ void send_debug_packet_response(nabto_packet_header* header, uint32_t notificati
         return;
     }
 
-    ptr = insert_notify_payload(ptr, end, NP_PAYLOAD_NOTIFY_DEBUG_OK);
+    ptr = insert_notify_payload(ptr, end, notification);
     if (ptr == NULL) {
         NABTO_LOG_ERROR(("Could not insert notify payload"));
         return;

@@ -120,6 +120,7 @@ bool unabto_init(void) {
 #if NABTO_ENABLE_DYNAMIC_MEMORY
     if (!unabto_allocate_memory(&nmc.nabtoMainSetup))
     {
+        unabto_free_memory();
         NABTO_LOG_FATAL(("Could not initialize memory"));
         return false;
     }
@@ -322,6 +323,9 @@ void unabto_notify_ip_changed(struct nabto_ip_address* ip) {
 #endif
 
 static void ensureValidDeviceId(const char* id) {
+    if (id == NULL || *id == '\0') {
+        NABTO_LOG_FATAL(("Device id must be set before calling unabto_init"));
+    }
     if (strlen(id) > NABTO_DEVICE_NAME_MAX_SIZE) {
         NABTO_LOG_FATAL(("Device id exceeds NABTO_DEVICE_NAME_MAX_SIZE (%d characters)", NABTO_DEVICE_NAME_MAX_SIZE));
     }

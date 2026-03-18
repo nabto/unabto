@@ -17,12 +17,13 @@ size_t curl_writer_cb(char* contents, size_t size, size_t nmemb, void* userp) {
     size_t realsize = size * nmemb;
     struct memory_struct *mem = (struct memory_struct *)userp;
  
-    mem->memory = realloc(mem->memory, mem->size + realsize + 1);
-    if(mem->memory == NULL) {
-        /* out of memory! */ 
+    char *tmp = realloc(mem->memory, mem->size + realsize + 1);
+    if(tmp == NULL) {
+        /* out of memory! */
         printf("not enough memory (realloc returned NULL)\n");
         return 0;
     }
+    mem->memory = tmp;
     
     memcpy(&(mem->memory[mem->size]), contents, realsize);
     mem->size += realsize;
@@ -83,7 +84,13 @@ unabto_provision_status_t unabto_provision_http_invoke_curl(const char* url, uin
     unabto_provision_status_t status = UPS_OK;
 
     if (res == CURLE_OK) {
-        chunk.memory = realloc(chunk.memory, chunk.size+1);
+        char *tmp = realloc(chunk.memory, chunk.size+1);
+        if (tmp == NULL) {
+            free(chunk.memory);
+            curl_easy_cleanup(curl);
+            return UPS_HTTP_OTHER;
+        }
+        chunk.memory = tmp;
         chunk.memory[chunk.size] = 0;
         *response = strdup(chunk.memory);
         long curlHttpStatus = 0;

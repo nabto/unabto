@@ -53,10 +53,9 @@ void unabto_push_init(void){
 
 void unabto_push_stop(void){
     unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
-    size_t i;
-    for (i = 0; i<pushCtx.pushSeqQHead; i++){
-        unabto_push_notification_callback(pushSeqQ[i].seq, &hint);
-        unabto_push_notification_remove(pushSeqQ[i].seq);
+    while (pushCtx.pushSeqQHead > 0){
+        unabto_push_notification_callback(pushSeqQ[0].seq, &hint);
+        unabto_push_notification_remove(pushSeqQ[0].seq);
     }
 }
 
@@ -84,7 +83,7 @@ unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq){
 
     pushCtx.pushSeqQHead++;
     unabto_push_set_next_event();
-    return pushSeqQ[pushCtx.pushSeqQHead].hint;
+    return pushSeqQ[pushCtx.pushSeqQHead - 1].hint;
 }
 
 bool unabto_push_notification_remove(uint32_t seq)
@@ -131,7 +130,7 @@ bool nabto_push_event(nabto_packet_header* hdr){
     const uint8_t* begin = nabtoCommunicationBuffer + hdr->hlen;
     const uint8_t* end = nabtoCommunicationBuffer + hdr->len;
     struct unabto_payload_push pushData;
-    unabto_push_hint hint;
+    unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
 
     if(!unabto_push_verify_integrity(hdr)){
         return false;
@@ -251,7 +250,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
 
     pushCtx.lastSent = nabtoGetStamp();
     elem->retrans++;
-    nabtoSetFutureStamp(&elem->stamp,(2^elem->retrans)*1000);
+    nabtoSetFutureStamp(&elem->stamp,(1 << elem->retrans)*1000);
     unabto_push_set_next_event();
 }
 

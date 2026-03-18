@@ -465,7 +465,7 @@ bool unabto_connection_verify_and_decrypt_connect_packet(nabto_packet_header* hd
         return false;
     }
 
-    if (decryptedDataLength == 0) {
+    if (*decryptedDataLength == 0) {
         NABTO_LOG_TRACE(("U_CONNECT Decryption fail, no data"));
         return false;
     }

@@ -27,7 +27,7 @@ static bool set_unabto_id(nabto_main_setup *nms, char *id)
     return true;
 }
 
-bool unabto_provision_parse_data(nabto_main_setup *nms, char *data, char *key)
+bool unabto_provision_parse_data(nabto_main_setup *nms, char *data, char *key, size_t key_size)
 {
     NABTO_LOG_TRACE(("Parsing provision data: [%s]", data));
     char* tok;
@@ -37,19 +37,25 @@ bool unabto_provision_parse_data(nabto_main_setup *nms, char *data, char *key)
     }
 
     char delim[16];
-    snprintf(delim, sizeof(16), "%c\n\r\t ", UNABTO_PROVISION_FILE_DELIMITER);
+    snprintf(delim, sizeof(delim), "%c\n\r\t ", UNABTO_PROVISION_FILE_DELIMITER);
     tok = strtok(data, delim);
     if (!set_unabto_id(nms, tok)) {
         return false;
     }
 
     tok = strtok(NULL, delim);
-    if (strlen(tok) != PRE_SHARED_KEY_SIZE * 2) {
+    size_t tok_len = strlen(tok);
+    if (tok_len != PRE_SHARED_KEY_SIZE * 2) {
         NABTO_LOG_ERROR(("Invalid key in provision string: %s", tok));
         return false;
     }
 
-    strcpy(key, tok);
+    if (tok_len + 1 > key_size) {
+        NABTO_LOG_ERROR(("Key buffer too small"));
+        return false;
+    }
+    memcpy(key, tok, tok_len);
+    key[tok_len] = '\0';
     return true;
 }
 
