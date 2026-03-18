@@ -129,14 +129,12 @@ void unabto_tunnel_read_command(tunnel* tunnel, tunnel_event_source event_source
             for (i = 0; i < readen; i++) {
                 if (buf[i] == '\n') {
                     tunnel->state = TS_PARSE_COMMAND;
+                } else if (tunnel->commandLength >= MAX_COMMAND_LENGTH) {
+                    NABTO_LOG_ERROR(("Tunnel command too long"));
+                    tunnel->state = TS_CLOSING;
                 } else {
                     tunnel->staticMemory->command[tunnel->commandLength] = buf[i];
                     tunnel->commandLength++;
-                }
-
-                if (tunnel->commandLength > MAX_COMMAND_LENGTH) {
-                    NABTO_LOG_ERROR(("Tunnel command too long"));
-                    tunnel->state = TS_CLOSING;
                 }
             }
 
