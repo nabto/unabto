@@ -11,11 +11,14 @@
 void unabto_psk_connection_dispatch_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
 {
     if (header->type == NP_PACKET_HDR_TYPE_U_CONNECT_PSK && (header->flags & NP_PACKET_HDR_FLAG_EXCEPTION)) {
-        return unabto_psk_connection_handle_exception_request(header);
+        unabto_psk_connection_handle_exception_request(header);
+        return;
     } else if (header->type == NP_PACKET_HDR_TYPE_U_CONNECT_PSK) {
-        return unabto_psk_connection_dispatch_connect_request(socket, peer, header);
+        unabto_psk_connection_dispatch_connect_request(socket, peer, header);
+        return;
     } else if (header->type == NP_PACKET_HDR_TYPE_U_VERIFY_PSK) {
-        return unabto_psk_connection_dispatch_verify_request(socket, peer, header);
+        unabto_psk_connection_dispatch_verify_request(socket, peer, header);
+        return;
     }
 }
 
@@ -40,7 +43,8 @@ void unabto_psk_connection_handle_exception_request(const nabto_packet_header* h
         nabto_connect* connection;
         connection = nabto_find_connection(header->nsi_sp);
         if (connection) {
-            return nabto_connection_client_aborted(connection);
+            nabto_connection_client_aborted(connection);
+            return;
         }
     } else {
         NABTO_LOG_WARN(("unknown notification"));
@@ -53,7 +57,8 @@ void unabto_psk_connection_create_new_connection(nabto_socket_t socket, const na
     nabto_connect* connection;
     connection = nabto_reserve_connection();
     if (!connection) {
-        return unabto_psk_connection_send_connect_error_response(socket, peer, header->nsi_cp, header->nsi_sp, NP_PAYLOAD_NOTIFY_ERROR_BUSY_MICRO);
+        unabto_psk_connection_send_connect_error_response(socket, peer, header->nsi_cp, header->nsi_sp, NP_PAYLOAD_NOTIFY_ERROR_BUSY_MICRO);
+        return;
     }
 
     if (!unabto_psk_connection_handle_connect_request(socket, peer, header, connection)) {
@@ -137,7 +142,8 @@ void unabto_psk_connection_dispatch_connect_request(nabto_socket_t socket, const
     connection = nabto_find_local_connection_cp_nsi(header->nsi_cp);
 
     if (!connection) {
-        return unabto_psk_connection_create_new_connection(socket, peer, header);
+        unabto_psk_connection_create_new_connection(socket, peer, header);
+        return;
     }
 
     if (connection &&
@@ -146,7 +152,8 @@ void unabto_psk_connection_dispatch_connect_request(nabto_socket_t socket, const
     {
         // there is a connection this is a retransmission the CONNECT
         // response is either lost or still on the line. Resend response.
-        return unabto_psk_connection_send_connect_response(socket, peer, connection);
+        unabto_psk_connection_send_connect_response(socket, peer, connection);
+        return;
     }
 }
 
@@ -224,10 +231,12 @@ void unabto_psk_connection_dispatch_verify_request(nabto_socket_t socket, const 
     connection = nabto_find_connection(header->nsi_sp);
     if (connection && connection->state == CS_CONNECTING && connection->psk.state == WAIT_VERIFY) {
         // This is a new unhandled packet for the state.
-        return unabto_psk_connection_handle_verify_request(socket, peer, header, connection);
+        unabto_psk_connection_handle_verify_request(socket, peer, header, connection);
+        return;
     } else  if (connection && connection->state > CS_CONNECTING && connection->psk.state == CONNECTED) {
         // Probably a retransmission since the old response got lost.
-        return unabto_psk_connection_send_verify_response(socket, peer, connection);
+        unabto_psk_connection_send_verify_response(socket, peer, connection);
+        return;
     }
 
 }

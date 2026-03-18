@@ -12,7 +12,7 @@ void unabto_sha256(const uint8_t* message, size_t len, unsigned char *digest)
     sha256_ctx ctx;
     
     unabto_sha256_init(&ctx);
-    unabto_sha256_update(&ctx, message, len);
+    unabto_sha256_update(&ctx, message, (uint16_t)len);
     unabto_sha256_final(&ctx, digest);
 }
 

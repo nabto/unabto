@@ -178,7 +178,7 @@ static size_t verification_complete(verification_t* verif, uint8_t* buf, uint8_t
 
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_VERIFY, 0, sizeof(data));
     len = ptr - buf + sizeof(data);
-    insert_length(buf, len);
+    insert_length(buf, (uint16_t)len);
     verification_add(verif, buf, ptr);
     sum = verif->sum;
     ix = sizeof(data);
