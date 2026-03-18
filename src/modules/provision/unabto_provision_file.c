@@ -37,7 +37,7 @@ bool unabto_provision_parse_data(nabto_main_setup *nms, char *data, char *key)
     }
 
     char delim[16];
-    snprintf(delim, sizeof(16), "%c\n\r\t ", UNABTO_PROVISION_FILE_DELIMITER);
+    snprintf(delim, sizeof(delim), "%c\n\r\t ", UNABTO_PROVISION_FILE_DELIMITER);
     tok = strtok(data, delim);
     if (!set_unabto_id(nms, tok)) {
         return false;
