@@ -14,7 +14,9 @@
 #endif
 
 #ifdef __MACH__
+#ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
+#endif
 #endif
 
 unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, const size_t len, size_t* read) {

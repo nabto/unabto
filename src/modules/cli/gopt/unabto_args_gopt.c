@@ -68,7 +68,6 @@ static void help(const char* errmsg, const char *progname)
 
 bool check_args(int argc, char* argv[], nabto_main_setup *nms)
 {
-    const char *address;
     const char *basestationAddress;
     const char *preSharedKey;
     const char *localPortStr;

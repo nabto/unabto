@@ -419,7 +419,7 @@ size_t nabto_stream_tcb_write(struct nabto_stream_s * stream, const uint8_t* buf
         }
     }
 
-    stream->stats.sentBytes += queued;
+    stream->stats.sentBytes += (uint32_t)queued;
     if (stream->stats.timeFirstMBSent == 0 && stream->stats.sentBytes >= 1048576) {
         stream->stats.timeFirstMBSent = unabto_stream_get_duration(stream);
     }

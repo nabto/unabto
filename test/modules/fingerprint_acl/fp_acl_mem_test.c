@@ -134,8 +134,13 @@ bool fp_acl_mem_test() {
     }
 
     {
+#if defined(_MSC_VER)
+        _unlink("persistence.bin");
+        _unlink("persistence2.bin");
+#else
         unlink("persistence.bin");
         unlink("persistence2.bin");
+#endif
     }
     
     return true;

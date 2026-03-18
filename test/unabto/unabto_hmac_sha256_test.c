@@ -18,7 +18,7 @@ bool test(const char *vector, unsigned char *digest,
     output[2 * digest_size] = '\0';
 
     for (i = 0; i < (int) digest_size ; i++) {
-       sprintf(output + 2*i, "%02x", digest[i]);
+       snprintf(output + 2*i, 3, "%02x", digest[i]);
     }
 
     NABTO_LOG_INFO(("H: %s", output));
@@ -136,12 +136,12 @@ bool hmac_sha256_test(void)
         unabto_buffer ks[1];
         unabto_buffer ms[1];
 
-        unabto_buffer_init(ks, (uint8_t*)keys[i], keys_len[i]);
-        unabto_buffer_init(ms, (uint8_t*)messages[i], msg_len);
+        unabto_buffer_init(ks, (uint8_t*)keys[i], (uint16_t)keys_len[i]);
+        unabto_buffer_init(ms, (uint8_t*)messages[i], (uint16_t)msg_len);
 
         unabto_hmac_sha256_buffers(ks,1, 
                                    ms, 1,
-                                   mac, mac_size);
+                                   mac, (uint16_t)mac_size);
         unabto_sha256(messages[i], msg_len, digest2);
         r = memcmp((const void*)digest,(const void*)digest2,UNABTO_SHA256_DIGEST_LENGTH);
         if (r != 0) {
@@ -150,7 +150,7 @@ bool hmac_sha256_test(void)
            break;
         }
         
-        if(!test(vectors[i], mac, mac_size)) {
+        if(!test(vectors[i], mac, (unsigned int)mac_size)) {
             ret = false;
             break;
         }

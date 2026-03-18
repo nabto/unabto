@@ -53,7 +53,7 @@ static nabto_socket_t syslogSocket;
 
 int syslog_severity_from_severity(uint32_t severity);
 
-bool unabto_syslog_init(const char* deviceId) 
+bool unabto_syslog_init(void)
 {
     uint16_t localPort = 0;
     bool ok;

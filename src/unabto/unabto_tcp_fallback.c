@@ -62,7 +62,7 @@ bool build_handshake_packet(nabto_connect* con, uint8_t* buffer, size_t bufferLe
     
     *packetLength = packetPtr - buffer;
 
-    insert_length(buffer, *packetLength);
+    insert_length(buffer, (uint16_t)*packetLength);
     return true;
 }
 

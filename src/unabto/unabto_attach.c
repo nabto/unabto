@@ -285,7 +285,7 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
     
     len = ptr - buf;
 
-    insert_length(buf, len);
+    insert_length(buf, (uint16_t)len);
 
     return len;
 }
@@ -422,7 +422,7 @@ static size_t mk_gsp_alive_rsp(uint16_t seq, size_t piggySize, uint8_t* piggyDat
         }
     }
     len = ptr - buf;
-    insert_length(buf, len);
+    insert_length(buf, (uint16_t)len);
     return len;
 }
 
@@ -929,7 +929,7 @@ void send_basestation_attach_failure(uint8_t statusCode) {
 
     ptr = insert_attach_stats_payload(ptr, end, statusCode);
 
-    length = ptr - nabtoCommunicationBuffer;
+    length = (uint16_t)(ptr - nabtoCommunicationBuffer);
     insert_length(nabtoCommunicationBuffer, length);
 
     if (nmc.controllerEp.addr.type == NABTO_IP_NONE) {

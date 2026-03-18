@@ -25,7 +25,7 @@ bool sha2_test_test(const char *vector, unsigned char *digest,
     output[2 * digest_size] = '\0';
 
     for (i = 0; i < (int) digest_size ; i++) {
-       sprintf(output + 2 * i, "%02x", digest[i]);
+       snprintf(output + 2 * i, 3, "%02x", digest[i]);
     }
 
 

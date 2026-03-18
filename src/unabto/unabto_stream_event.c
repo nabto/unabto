@@ -376,7 +376,7 @@ void nabto_stream_update_next_event(nabto_stamp_t* current_min_stamp)
 #endif
 
 int unabto_stream_index(unabto_stream* stream) {
-    return stream - stream__;
+    return (int)(stream - stream__);
 }
 
 uint8_t* unabto_stream_insert_stream_stats(uint8_t* ptr, uint8_t* end, struct nabto_stream_s* stream)
@@ -494,7 +494,7 @@ void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
     }
 
     length = ptr - nabtoCommunicationBuffer;
-    insert_length(nabtoCommunicationBuffer, length);
+    insert_length(nabtoCommunicationBuffer, (uint16_t)length);
     send_to_basestation(nabtoCommunicationBuffer, length, &nmc.context.gsp);
 }
 

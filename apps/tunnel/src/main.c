@@ -334,13 +334,13 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     }
 
     if (gopt_arg( options, 'N', &display_name_str)) {
-        snprintf(device_name, sizeof(device_name), display_name_str);
+        snprintf(device_name, sizeof(device_name), "%s", display_name_str);
     } else {
         snprintf(device_name, sizeof(device_name), AMP_DEVICE_NAME_DEFAULT);
     }
 
     if (gopt_arg( options, 'R', &display_name_str)) {
-        snprintf(product_name, sizeof(product_name), display_name_str);
+        snprintf(product_name, sizeof(product_name), "%s", display_name_str);
     } else {
         snprintf(product_name, sizeof(product_name), AMP_PRODUCT_NAME_DEFAULT);
     }
@@ -728,7 +728,11 @@ int copy_string(unabto_query_request* read_buffer, char* dest, uint16_t destSize
 }
 
 int write_string(unabto_query_response* write_buffer, const char* string) {
-    return unabto_query_write_uint8_list(write_buffer, (uint8_t *)string, strlen(string));
+    size_t len = strlen(string);
+    if (len > UINT16_MAX) {
+        return 0;
+    }
+    return unabto_query_write_uint8_list(write_buffer, (uint8_t *)string, (uint16_t)len);
 }
 
 application_event_result application_event(application_request* request,

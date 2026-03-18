@@ -19,7 +19,7 @@ void nabto_random(uint8_t* buf, size_t len) {
         }
         isInitialized = true;
     }
-    bytes = fortuna_desc.read(buf, len, &unabto_prng_state);
+    bytes = fortuna_desc.read(buf, (unsigned long)len, &unabto_prng_state);
 
     if (bytes != len) {
         NABTO_LOG_FATAL(("Random function did not give required bytes"));
