@@ -165,7 +165,7 @@ ssize_t nabto_read(nabto_socket_t sock, uint8_t* buf, size_t len, struct nabto_i
     return res;
 }
 
-ssize_t nabto_write(nabto_socket_t sock, const uint8_t* buf, size_t len, struct nabto_ip_address* addr, uint16_t port)
+ssize_t nabto_write(nabto_socket_t sock, const uint8_t* buf, size_t len, const struct nabto_ip_address* addr, uint16_t port)
 {
     int res;
     struct sockaddr_in sa;
@@ -265,9 +265,9 @@ void unabto_network_select_read_sockets(fd_set* readFds) {
 
 bool nabto_get_local_ipv4(struct nabto_ip_address* ip) {
     struct sockaddr_in si_me, si_other;
-    int s;
-    
-    if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1) {
+    SOCKET s;
+
+    if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==INVALID_SOCKET) {
         NABTO_LOG_ERROR(("Cannot create socket"));
         return false;
     }

@@ -1,3 +1,7 @@
+#ifdef _MSC_VER
+#pragma warning(disable: 4996) /* fopen: consider using fopen_s */
+#endif
+
 #include "fp_acl_file.h"
 
 #include <unabto/unabto_util.h>
