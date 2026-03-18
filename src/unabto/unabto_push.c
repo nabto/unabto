@@ -130,7 +130,7 @@ bool nabto_push_event(nabto_packet_header* hdr){
     const uint8_t* begin = nabtoCommunicationBuffer + hdr->hlen;
     const uint8_t* end = nabtoCommunicationBuffer + hdr->len;
     struct unabto_payload_push pushData;
-    unabto_push_hint hint;
+    unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
 
     if(!unabto_push_verify_integrity(hdr)){
         return false;
