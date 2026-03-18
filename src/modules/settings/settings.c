@@ -15,16 +15,16 @@ static char tempSettingsFile[1024];
 
 static void initialize(void);
 
-bool settings_read_string(const char* key, char* value)
+bool settings_read_string(const char* key, char* value, size_t value_size)
 {
     bool keyFound = false;
     FILE* file;
-    
+
     if(initialized == false)
     {
         initialize();
     }
-    
+
     file = fopen(settingsFile, "r");
 
     if(file != NULL)
@@ -38,10 +38,10 @@ bool settings_read_string(const char* key, char* value)
             {
                 int valueLength;
 
-                strcpy(value, line + keyLength + 1);
+                snprintf(value, value_size, "%s", line + keyLength + 1);
 
                 valueLength = strlen(value);
-                if(value[valueLength - 1] == '\n')
+                if(valueLength > 0 && value[valueLength - 1] == '\n')
                 {
                     value[valueLength - 1] = 0;
                 }
@@ -161,7 +161,7 @@ bool settings_read_int(const char* key, int* value)
 {
     char rawValue[100];
 
-    if(settings_read_string(key, rawValue) == false)
+    if(settings_read_string(key, rawValue, sizeof(rawValue)) == false)
     {
         return false;
     }
@@ -184,11 +184,11 @@ bool settings_read_bool(const char* key, bool* value)
 {
     char rawValue[100];
 
-    if(settings_read_string(key, rawValue) == false)
+    if(settings_read_string(key, rawValue, sizeof(rawValue)) == false)
     {
         return false;
     }
-    
+
     *value = strcmp(rawValue, "true") == 0;
 
     return true;
@@ -204,19 +204,20 @@ static void initialize(void)
     initialized = true;
 
 #if WIN32
-    strcpy(settingsFile, "c:/settings.txt");
-    strcpy(tempSettingsFile, "c:/settings.txt");
-    sprintf(tempSettingsFile + strlen(tempSettingsFile), ".%u", GetCurrentProcessId());
+    snprintf(settingsFile, sizeof(settingsFile), "c:/settings.txt");
+    snprintf(tempSettingsFile, sizeof(tempSettingsFile), "c:/settings.txt.%u", GetCurrentProcessId());
 #else
-    strcpy(settingsFile, "settings.txt");
-    strcpy(tempSettingsFile, "settings.txt");
-    sprintf(tempSettingsFile + strlen(tempSettingsFile), ".%u", getpid());
+    snprintf(settingsFile, sizeof(settingsFile), "settings.txt");
+    snprintf(tempSettingsFile, sizeof(tempSettingsFile), "settings.txt.%u", getpid());
 #endif
 }
 void initialize_settings(const char *file)
 {
-    strcpy(settingsFile, file);
-    strcpy(tempSettingsFile, file);
-    sprintf(tempSettingsFile + strlen(tempSettingsFile), ".%u", getpid());
+    if (snprintf(settingsFile, sizeof(settingsFile), "%s", file) >= (int)sizeof(settingsFile)) {
+        return;
+    }
+    if (snprintf(tempSettingsFile, sizeof(tempSettingsFile), "%s.%u", file, getpid()) >= (int)sizeof(tempSettingsFile)) {
+        return;
+    }
     initialized = true;
 }

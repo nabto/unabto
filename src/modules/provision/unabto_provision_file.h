@@ -10,7 +10,7 @@
 /**
  * Parse provision data, write id to nms struct and crypto key to key parameter.
  */
-bool unabto_provision_parse_data(nabto_main_setup *nms, char *data, char *key);
+bool unabto_provision_parse_data(nabto_main_setup *nms, char *data, char *key, size_t key_size);
 
 /**
  * Test that it is possible to create a file. 

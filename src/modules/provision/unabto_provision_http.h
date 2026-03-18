@@ -54,7 +54,7 @@ typedef enum {
  * @returns UPS_HTTP_SSL_PROBLEM if an https specific problem occurred
  * @returns UPS_HTTP_OTHER if another http related error occured
  */
-unabto_provision_status_t unabto_provision_http(nabto_main_setup* nms, provision_context_t* context, char* key);
+unabto_provision_status_t unabto_provision_http(nabto_main_setup* nms, provision_context_t* context, char* key, size_t key_size);
 
 /**
  * Invoke provisioning webservice as specified in context to validate specified key.

@@ -158,7 +158,7 @@ static unabto_provision_status_t invoke_provision_service(const char* url, const
     }
 }
 
-unabto_provision_status_t unabto_provision_http(nabto_main_setup* nms, provision_context_t* context, char* key)
+unabto_provision_status_t unabto_provision_http(nabto_main_setup* nms, provision_context_t* context, char* key, size_t key_size)
 {
     char url[SERVICE_URL_MAX_LENGTH];
     if (!write_provision_url(url, sizeof(url), context)) {
@@ -179,7 +179,7 @@ unabto_provision_status_t unabto_provision_http(nabto_main_setup* nms, provision
     }
 
     // parse response
-    if (unabto_provision_parse_data(nms, (char*)response, key)) {
+    if (unabto_provision_parse_data(nms, (char*)response, key, key_size)) {
         status = UPS_OK;
     } else {
         NABTO_LOG_ERROR(("Invalid web service response: [%s]", response));

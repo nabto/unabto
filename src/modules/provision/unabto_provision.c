@@ -23,7 +23,7 @@ bool unabto_provision_new(nabto_main_setup* nms, provision_context_t* context) {
     }
     
     char key[KEY_BUFFER_SIZE];
-    unabto_provision_status_t status = unabto_provision_http(nms, context, key);
+    unabto_provision_status_t status = unabto_provision_http(nms, context, key, sizeof(key));
     if (status == UPS_OK) {
         return unabto_provision_set_key(nms, key) &&
             unabto_provision_write_file(context->file_, nms);
@@ -68,8 +68,8 @@ bool unabto_provision_try_existing(nabto_main_setup *nms, provision_context_t* c
     if (!unabto_provision_read_file(context->file_, text, sizeof(text))) {
         return false;
     }
-    char key[PRE_SHARED_KEY_SIZE * 2];
-    if (!unabto_provision_parse_data(nms, text, key)) {
+    char key[PRE_SHARED_KEY_SIZE * 2 + 1];
+    if (!unabto_provision_parse_data(nms, text, key, sizeof(key))) {
         return false;
     }
     if (context->id_ && strcmp(nms->id, context->id_) != 0) {

@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-bool settings_read_string(const char* key, char* value);
+bool settings_read_string(const char* key, char* value, size_t value_size);
 bool settings_write_string(const char* key, const char* value);
 
 bool settings_read_int(const char* key, int* value);
