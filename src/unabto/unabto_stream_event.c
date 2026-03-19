@@ -137,13 +137,16 @@ void nabto_stream_event(nabto_connect*       con,
 
     memset(&sackData, 0, sizeof(sackData));
     {
-        uint8_t* ptr = sackStart;
-        while(sackLength >= 8 && sackData.nPairs < NP_PAYLOAD_SACK_MAX_PAIRS) {
-            uint32_t sackSeqStart; // start of sack
-            uint32_t sackSeqEnd; // end of sack one larger than actual acked window.
-            READ_FORWARD_U32(sackSeqStart, ptr);
-            READ_FORWARD_U32(sackSeqEnd, ptr);
-            sackLength -= 8;
+        const uint8_t* ptr = sackStart;
+        const uint8_t* end = sackStart + sackLength;
+        while(sackData.nPairs < NP_PAYLOAD_SACK_MAX_PAIRS) {
+            uint32_t sackSeqStart;
+            uint32_t sackSeqEnd;
+            ptr = read_forward_u32(&sackSeqStart, ptr, end);
+            ptr = read_forward_u32(&sackSeqEnd, ptr, end);
+            if (ptr == NULL) {
+                break;
+            }
 
             sackData.pairs[sackData.nPairs].start = sackSeqStart;
             sackData.pairs[sackData.nPairs].end = sackSeqEnd;

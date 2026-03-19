@@ -124,18 +124,39 @@
 #define WRITE_32(dst, s32)      WRITE_U32(dst, (uint32_t)(s32))
 #endif
 
-// Macros for performing sequential read/write operations on a buffer.
-#define READ_FORWARD(dst, pointer, size) do { READ(dst, pointer, size); pointer += size; } while(0)
-#define READ_FORWARD_U8(value, pointer) do { READ_U8(value, pointer); pointer += 1; } while(0)
-#define READ_FORWARD_U16(value, pointer) do { READ_U16(value, pointer); pointer += 2; } while(0)
-#define READ_FORWARD_U32(value, pointer) do { READ_U32(value, pointer); pointer += 4; } while(0)
-#define READ_FORWARD_MEM(value, pointer, len) do { memcpy(value, pointer, len); pointer += len; } while(0)
+#include <string.h> /* memcpy */
+
+/******************************************************************************/
+/* Bounds-checked read helpers. Each returns the advanced pointer, or NULL   */
+/* if the read would exceed the buffer. A NULL input pointer propagates.     */
+
+static const uint8_t* read_forward_u8(uint8_t* value, const uint8_t* ptr, const uint8_t* end) {
+    if (ptr == NULL || end - ptr < 1) return NULL;
+    READ_U8(*value, ptr);
+    return ptr + 1;
+}
+
+static const uint8_t* read_forward_u16(uint16_t* value, const uint8_t* ptr, const uint8_t* end) {
+    if (ptr == NULL || end - ptr < 2) return NULL;
+    READ_U16(*value, ptr);
+    return ptr + 2;
+}
+
+static const uint8_t* read_forward_u32(uint32_t* value, const uint8_t* ptr, const uint8_t* end) {
+    if (ptr == NULL || end - ptr < 4) return NULL;
+    READ_U32(*value, ptr);
+    return ptr + 4;
+}
+
+static const uint8_t* read_forward_mem(void* dst, const uint8_t* ptr, const uint8_t* end, size_t len) {
+    if (ptr == NULL || (size_t)(end - ptr) < len) return NULL;
+    memcpy(dst, ptr, len);
+    return ptr + len;
+}
 
 /******************************************************************************/
 /* Bounds-checked write helpers. Each returns the advanced pointer, or NULL  */
 /* if the write would exceed the buffer. A NULL input pointer propagates.    */
-
-#include <string.h> /* memcpy */
 
 static uint8_t* write_forward_u8(uint8_t* ptr, const uint8_t* end, uint8_t val) {
     if (ptr == NULL || end - ptr < 1) return NULL;

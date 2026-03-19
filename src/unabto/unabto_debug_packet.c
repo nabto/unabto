@@ -74,23 +74,22 @@ bool handle_syslog_config(struct unabto_payload_packet* payload) {
     uint8_t* pattern;
     uint16_t patternLength;
     bool enabled;
-    const uint8_t* ptr;
-    if (payload->length < (NP_PAYLOAD_SYSLOG_CONFIG_SIZE_WO_STRINGS + 2)) {
+    const uint8_t* end = payload->dataBegin + payload->dataLength;
+    const uint8_t* ptr = payload->dataBegin;
+
+    ptr = read_forward_u8(&flags, ptr, end);
+    ptr = read_forward_u8(&facility, ptr, end);
+    ptr = read_forward_u16(&port, ptr, end);
+    ptr = read_forward_u32(&ip, ptr, end);
+    ptr = read_forward_u32(&expire, ptr, end);
+    ptr = read_forward_u16(&patternLength, ptr, end);
+    if (ptr == NULL) {
         NABTO_LOG_ERROR(("Syslog config packet too short"));
         return false;
     }
-
-    ptr = payload->dataBegin;
-
-    READ_FORWARD_U8(flags, ptr);
-    READ_FORWARD_U8(facility, ptr);
-    READ_FORWARD_U16(port, ptr);
-    READ_FORWARD_U32(ip, ptr);
-    READ_FORWARD_U32(expire, ptr);
-    READ_FORWARD_U16(patternLength, ptr);
     pattern = (uint8_t*)ptr;
-    
-    if (payload->length < (NP_PAYLOAD_SYSLOG_CONFIG_SIZE_WO_STRINGS + 2 + patternLength)) {
+
+    if (ptr + patternLength > end) {
         NABTO_LOG_ERROR(("syslog packet log settings string too long"));
         return false;
     }

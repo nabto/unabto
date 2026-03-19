@@ -155,9 +155,13 @@ const uint8_t* unabto_read_payload(const uint8_t* begin, const uint8_t* end, str
         return NULL;
     }
     payload->begin = begin;
-    READ_FORWARD_U8(payload->type, ptr);
-    READ_FORWARD_U8(payload->flags, ptr);
-    READ_FORWARD_U16(payload->length, ptr);
+    ptr = read_forward_u8(&payload->type, ptr, end);
+    ptr = read_forward_u8(&payload->flags, ptr, end);
+    ptr = read_forward_u16(&payload->length, ptr, end);
+    if (ptr == NULL) {
+        NABTO_LOG_ERROR(("unexpected end of payloads"));
+        return NULL;
+    }
 
     // check that the payload length is not greater than the buffer.
     if (payload->length > bufferLength) {
@@ -476,46 +480,50 @@ uint8_t* insert_crypto_payload_with_payloads(uint8_t* ptr, uint8_t* end)
 }
 
 bool unabto_payload_read_push(struct unabto_payload_packet* payload, struct unabto_payload_push* push){
+    const uint8_t* end = payload->dataBegin + payload->dataLength;
     const uint8_t* ptr = payload->dataBegin;
     if (payload->type != NP_PAYLOAD_TYPE_PUSH) {
         return false;
     }
-    if (payload->length < NP_PAYLOAD_PUSH_BYTELENGTH){
-        return false;
-    }
-    READ_FORWARD_U32(push->sequence,ptr);
-    READ_FORWARD_U16(push->pnsId,ptr);
-    READ_FORWARD_U8(push->flags,ptr);
-    return true;
+    ptr = read_forward_u32(&push->sequence, ptr, end);
+    ptr = read_forward_u16(&push->pnsId, ptr, end);
+    ptr = read_forward_u8(&push->flags, ptr, end);
+    return ptr != NULL;
 }
 bool unabto_payload_read_ipx(struct unabto_payload_packet* payload, struct unabto_payload_ipx* ipx)
 {
+    const uint8_t* end = payload->dataBegin + payload->dataLength;
     const uint8_t* ptr = payload->dataBegin;
     if (payload->type != NP_PAYLOAD_TYPE_IPX) {
-        return false;
-    }
-
-    if (payload->length < NP_PAYLOAD_IPX_BYTELENGTH) {
         return false;
     }
 
     ipx->haveSpNsi = false;
     ipx->haveFullNsi = false;
 
-    READ_FORWARD_U32(ipx->privateIpAddress, ptr);
-    READ_FORWARD_U16(ipx->privateIpPort, ptr);
-    READ_FORWARD_U32(ipx->globalIpAddress, ptr);
-    READ_FORWARD_U16(ipx->globalIpPort, ptr);
-    READ_FORWARD_U8(ipx->flags, ptr);
+    ptr = read_forward_u32(&ipx->privateIpAddress, ptr, end);
+    ptr = read_forward_u16(&ipx->privateIpPort, ptr, end);
+    ptr = read_forward_u32(&ipx->globalIpAddress, ptr, end);
+    ptr = read_forward_u16(&ipx->globalIpPort, ptr, end);
+    ptr = read_forward_u8(&ipx->flags, ptr, end);
+    if (ptr == NULL) {
+        return false;
+    }
 
     if (payload->length >=  NP_PAYLOAD_IPX_NSI_BYTELENGTH) {
-        READ_FORWARD_U32(ipx->spNsi, ptr);
+        ptr = read_forward_u32(&ipx->spNsi, ptr, end);
+        if (ptr == NULL) {
+            return false;
+        }
         ipx->haveSpNsi = true;
     }
 
     if (payload->length >= NP_PAYLOAD_IPX_FULL_NSI_BYTELENGTH) {
-        READ_FORWARD(ipx->coNsi, ptr, 8);
-        READ_FORWARD_U32(ipx->cpNsi, ptr);
+        ptr = read_forward_mem(ipx->coNsi, ptr, end, 8);
+        ptr = read_forward_u32(&ipx->cpNsi, ptr, end);
+        if (ptr == NULL) {
+            return false;
+        }
         ipx->haveFullNsi = true;
     }
     return true;
@@ -523,11 +531,12 @@ bool unabto_payload_read_ipx(struct unabto_payload_packet* payload, struct unabt
 
 bool unabto_payload_read_typed_buffer(struct unabto_payload_packet* payload, struct unabto_payload_typed_buffer* buffer)
 {
+    const uint8_t* end = payload->dataBegin + payload->dataLength;
     const uint8_t* ptr = payload->dataBegin;
-    if (payload->length < NP_PAYLOAD_HDR_BYTELENGTH + 1) {
+    ptr = read_forward_u8(&buffer->type, ptr, end);
+    if (ptr == NULL) {
         return false;
     }
-    READ_FORWARD_U8(buffer->type, ptr);
     buffer->dataBegin = ptr;
     buffer->dataEnd = payload->dataEnd;
     buffer->dataLength = payload->length - (NP_PAYLOAD_HDR_BYTELENGTH + 1);
@@ -536,39 +545,40 @@ bool unabto_payload_read_typed_buffer(struct unabto_payload_packet* payload, str
 
 bool unabto_payload_read_gw(struct unabto_payload_packet* payload, struct unabto_payload_gw* gw)
 {
+    const uint8_t* end = payload->dataBegin + payload->dataLength;
     const uint8_t* ptr = payload->dataBegin;
-    if (payload->length < NP_PAYLOAD_GW_MIN_BYTELENGTH) {
+
+    ptr = read_forward_u32(&gw->ipAddress, ptr, end);
+    ptr = read_forward_u16(&gw->port, ptr, end);
+    ptr = read_forward_u32(&gw->nsi, ptr, end);
+    if (ptr == NULL) {
         return false;
     }
-
-    READ_FORWARD_U32(gw->ipAddress, ptr);
-    READ_FORWARD_U16(gw->port, ptr);
-    READ_FORWARD_U32(gw->nsi, ptr);
     gw->gwIdLength = payload->length - NP_PAYLOAD_GW_MIN_BYTELENGTH;
     gw->gwId = ptr;
-    
+
     return true;
 }
 
 bool unabto_payload_read_ep(struct unabto_payload_packet* payload, struct unabto_payload_ep* ep)
 {
+    const uint8_t* end = payload->dataBegin + payload->dataLength;
     const uint8_t* ptr = payload->dataBegin;
-    if (payload->length < NP_PAYLOAD_EP_BYTELENGTH) {
-        return false;
-    }
 
-    READ_FORWARD_U32(ep->address, ptr);
-    READ_FORWARD_U16(ep->port, ptr);
-    return true;
+    ptr = read_forward_u32(&ep->address, ptr, end);
+    ptr = read_forward_u16(&ep->port, ptr, end);
+    return ptr != NULL;
 }
 
 bool unabto_payload_read_crypto(struct unabto_payload_packet* payload, struct unabto_payload_crypto* crypto)
 {
+    const uint8_t* end = payload->dataBegin + payload->dataLength;
     const uint8_t* ptr = payload->dataBegin;
-    if (payload->length < NP_PAYLOAD_CRYPTO_BYTELENGTH) {
+
+    ptr = read_forward_u16(&crypto->code, ptr, end);
+    if (ptr == NULL) {
         return false;
     }
-    READ_FORWARD_U16(crypto->code, ptr);
     crypto->dataBegin = ptr;
     crypto->dataEnd = payload->dataEnd;
     crypto->dataLength = payload->length - NP_PAYLOAD_CRYPTO_BYTELENGTH;
@@ -605,17 +615,21 @@ bool unabto_payload_read_notify(struct unabto_payload_packet* payload, struct un
 
 bool unabto_payload_read_capabilities(struct unabto_payload_packet* payload, struct unabto_payload_capabilities_read* capabilities)
 {
+    const uint8_t* end = payload->dataBegin + payload->dataLength;
     const uint8_t* ptr = payload->dataBegin;
-    if (payload->dataLength < 9) {
+
+    ptr = read_forward_u8(&capabilities->type, ptr, end);
+    ptr = read_forward_u32(&capabilities->bits, ptr, end);
+    ptr = read_forward_u32(&capabilities->mask, ptr, end);
+    if (ptr == NULL) {
         return false;
     }
 
-    READ_FORWARD_U8(capabilities->type, ptr);
-    READ_FORWARD_U32(capabilities->bits, ptr);
-    READ_FORWARD_U32(capabilities->mask, ptr);
-    
     if (payload->dataLength >= 11) {
-        READ_FORWARD_U16(capabilities->codesLength, ptr);
+        ptr = read_forward_u16(&capabilities->codesLength, ptr, end);
+        if (ptr == NULL) {
+            return false;
+        }
         if(capabilities->codesLength > ((payload->dataLength - 11)/2)) {
             NABTO_LOG_WARN(("more encryption codes said than possibly"));
             return false;

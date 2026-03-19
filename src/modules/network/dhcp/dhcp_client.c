@@ -139,34 +139,62 @@ void dhcp_client_tick(void)
         uint8_t dhcpMessageType;
         uint32_t offeredIp;
         dhcp_message* message = (dhcp_message*) nabtoCommunicationBuffer;
-        uint8_t* p = message->options;
+        const uint8_t* end = nabtoCommunicationBuffer + length;
+        const uint8_t* p = message->options;
+        uint8_t optionCode;
 
         READ_U32(offeredIp, &message->yourIpAddress);
 
-        while(p < (message->options + sizeof (message->options))) // go through entire options block
+        while(p < end) /* go through options up to received length */
         {
-          switch(*p++)
+          p = read_forward_u8(&optionCode, p, end);
+          if (p == NULL) {
+            break;
+          }
+          switch(optionCode)
           {
-            case BOOTP_OPTION_PADDING: // ignoring padding bytes
+            case BOOTP_OPTION_PADDING: /* ignoring padding bytes */
               break;
 
             case BOOTP_OPTION_DHCP_MESSAGE_TYPE:
-              p++;
+              if (p + 1 >= end) {
+                p = NULL;
+                break;
+              }
+              p++; /* skip length byte */
               dhcpMessageType = *p++;
               break;
 
             case BOOTP_OPTION_DHCP_SERVER_IDENTIFIER:
-              p++;
-              READ_FORWARD_U32(dhcpClientInformation.serverAddress, p);
+              if (p >= end) {
+                p = NULL;
+                break;
+              }
+              p++; /* skip length byte */
+              p = read_forward_u32(&dhcpClientInformation.serverAddress, p, end);
               break;
 
             case BOOTP_OPTION_END:
-              p = message->options + sizeof (message->options);
+              p = end;
               break;
 
-            default: // ignoring unneeded options
-              p += 1 + *p;
+            default: /* ignoring unneeded options */
+              if (p >= end) {
+                p = NULL;
+                break;
+              }
+              {
+                uint8_t optLen = *p++;
+                if (p + optLen > end) {
+                  p = NULL;
+                  break;
+                }
+                p += optLen;
+              }
               break;
+          }
+          if (p == NULL) {
+            break;
           }
         }
 
@@ -206,31 +234,45 @@ void dhcp_client_tick(void)
         bool success = true;
         uint8_t dhcpMessageType;
         dhcp_message* message = (dhcp_message*) nabtoCommunicationBuffer;
-        uint8_t* p = message->options;
+        const uint8_t* end = nabtoCommunicationBuffer + length;
+        const uint8_t* p = message->options;
         dhcp_client_information offer;
+        uint8_t optionCode;
 
         memcpy(&offer, (const void*) &dhcpClientInformation, sizeof (offer));
 
         READ_U32(offer.localAddress, &message->yourIpAddress);
 
-        while(success && p < (message->options + sizeof (message->options))) // go through entire options block
+        while(success && p < end) /* go through options up to received length */
         {
-          switch(*p++)
+          p = read_forward_u8(&optionCode, p, end);
+          if (p == NULL) {
+            break;
+          }
+          switch(optionCode)
           {
             case BOOTP_OPTION_PADDING:
               break;
 
             case BOOTP_OPTION_DHCP_MESSAGE_TYPE:
-              p++;
+              if (p + 1 >= end) {
+                p = NULL;
+                break;
+              }
+              p++; /* skip length byte */
               dhcpMessageType = *p++;
               break;
 
-            case BOOTP_OPTION_DHCP_SERVER_IDENTIFIER: // verify that we are talking to the correct DHCP server
+            case BOOTP_OPTION_DHCP_SERVER_IDENTIFIER: /* verify that we are talking to the correct DHCP server */
             {
               uint32_t serverAddress;
-              p++;
-              READ_FORWARD_U32(serverAddress, p);
-              if(serverAddress != dhcpClientInformation.serverAddress)
+              if (p >= end) {
+                p = NULL;
+                break;
+              }
+              p++; /* skip length byte */
+              p = read_forward_u32(&serverAddress, p, end);
+              if(p != NULL && serverAddress != dhcpClientInformation.serverAddress)
               {
                 success = false;
               }
@@ -238,32 +280,62 @@ void dhcp_client_tick(void)
               break;
 
             case BOOTP_OPTION_SUBNET_MASK:
-              p++;
-              READ_FORWARD_U32(offer.netmask, p);
+              if (p >= end) {
+                p = NULL;
+                break;
+              }
+              p++; /* skip length byte */
+              p = read_forward_u32(&offer.netmask, p, end);
               break;
 
             case BOOTP_OPTION_ROUTER:
-              p++;
-              READ_FORWARD_U32(offer.routerAddress, p);
+              if (p >= end) {
+                p = NULL;
+                break;
+              }
+              p++; /* skip length byte */
+              p = read_forward_u32(&offer.routerAddress, p, end);
               break;
 
             case BOOTP_OPTION_DOMAIN_NAME_SERVER:
-              p++;
-              READ_FORWARD_U32(offer.dnsAddress, p);
+              if (p >= end) {
+                p = NULL;
+                break;
+              }
+              p++; /* skip length byte */
+              p = read_forward_u32(&offer.dnsAddress, p, end);
               break;
 
             case BOOTP_OPTION_IP_ADDRESS_LEASE_TIME:
-              p++;
-              READ_FORWARD_U32(offer.leaseTime, p);
+              if (p >= end) {
+                p = NULL;
+                break;
+              }
+              p++; /* skip length byte */
+              p = read_forward_u32(&offer.leaseTime, p, end);
               break;
 
             case BOOTP_OPTION_END:
-              p = message->options + sizeof (message->options);
+              p = end;
               break;
 
             default:
-              p += 1 + *p;
+              if (p >= end) {
+                p = NULL;
+                break;
+              }
+              {
+                uint8_t optLen = *p++;
+                if (p + optLen > end) {
+                  p = NULL;
+                  break;
+                }
+                p += optLen;
+              }
               break;
+          }
+          if (p == NULL) {
+            break;
           }
         }
 

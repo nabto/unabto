@@ -1650,15 +1650,21 @@ void nabto_stream_tcb_update_next_event(struct nabto_stream_s * stream, nabto_st
 
 bool nabto_stream_read_window(const uint8_t* ptr, uint16_t len, struct nabto_win_info* info)
 {
-    if (len < NP_PAYLOAD_WINDOW_BYTELENGTH - NP_PAYLOAD_HDR_BYTELENGTH) return 0;
-    READ_FORWARD_U8(info->type,    ptr);
-    READ_FORWARD_U8(info->version, ptr);
-    READ_FORWARD_U16(info->idCP,   ptr);
-    READ_FORWARD_U16(info->idSP,   ptr);
-    READ_FORWARD_U32(info->seq,    ptr);
-    READ_FORWARD_U32(info->ack,    ptr);
+    const uint8_t* end = ptr + len;
+    ptr = read_forward_u8(&info->type,    ptr, end);
+    ptr = read_forward_u8(&info->version, ptr, end);
+    ptr = read_forward_u16(&info->idCP,   ptr, end);
+    ptr = read_forward_u16(&info->idSP,   ptr, end);
+    ptr = read_forward_u32(&info->seq,    ptr, end);
+    ptr = read_forward_u32(&info->ack,    ptr, end);
+    if (ptr == NULL) {
+        return false;
+    }
     if (info->type == NP_PAYLOAD_WINDOW_FLAG_ACK) {
-        READ_FORWARD_U16(info->advertisedWindow, ptr);
+        ptr = read_forward_u16(&info->advertisedWindow, ptr, end);
+        if (ptr == NULL) {
+            return false;
+        }
     }
     if (info->type == NP_PAYLOAD_WINDOW_FLAG_NON) {
         NABTO_LOG_ERROR(("failed to read window"));
@@ -1666,9 +1672,10 @@ bool nabto_stream_read_window(const uint8_t* ptr, uint16_t len, struct nabto_win
     }
     if (info->type & NP_PAYLOAD_WINDOW_FLAG_SYN) {
         uint16_t options;
-        if (len < NP_PAYLOAD_WINDOW_SYN_BYTELENGTH - NP_PAYLOAD_HDR_BYTELENGTH) return 0;
-
-        READ_FORWARD_U16(options,            ptr);
+        ptr = read_forward_u16(&options,            ptr, end);
+        if (ptr == NULL) {
+            return false;
+        }
         if (options & NP_PAYLOAD_STREAM_FLAG_WSRF) {
             NABTO_LOG_TRACE(("WSRF: Enabled by peer"));
             info->u.syn.cfg.enableWSRF = true;
@@ -1682,12 +1689,15 @@ bool nabto_stream_read_window(const uint8_t* ptr, uint16_t len, struct nabto_win
             info->u.syn.cfg.enableSACK = false;
         }
         /* we swap xmit and recv when reading because we are "the other end" */
-        READ_FORWARD_U16(info->u.syn.cfg.xmitPacketSize, ptr);
-        READ_FORWARD_U16(info->u.syn.cfg.xmitWinSize,    ptr);
-        READ_FORWARD_U16(info->u.syn.cfg.recvPacketSize, ptr);
-        READ_FORWARD_U16(info->u.syn.cfg.recvWinSize,    ptr);
-        READ_FORWARD_U16(info->u.syn.cfg.maxRetrans,     ptr);
-        READ_FORWARD_U16(info->u.syn.cfg.timeoutMsec,    ptr);
+        ptr = read_forward_u16(&info->u.syn.cfg.xmitPacketSize, ptr, end);
+        ptr = read_forward_u16(&info->u.syn.cfg.xmitWinSize,    ptr, end);
+        ptr = read_forward_u16(&info->u.syn.cfg.recvPacketSize, ptr, end);
+        ptr = read_forward_u16(&info->u.syn.cfg.recvWinSize,    ptr, end);
+        ptr = read_forward_u16(&info->u.syn.cfg.maxRetrans,     ptr, end);
+        ptr = read_forward_u16(&info->u.syn.cfg.timeoutMsec,    ptr, end);
+        if (ptr == NULL) {
+            return false;
+        }
     }
     return true;
 }
