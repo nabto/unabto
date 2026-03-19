@@ -380,13 +380,6 @@ uint8_t* insert_random_payload(uint8_t* ptr, uint8_t* end, uint8_t* randomData, 
 uint8_t* insert_capabilities_payload(uint8_t* ptr, uint8_t* end, struct unabto_capabilities* capabilities, uint16_t encryptionCodes);
 
 /**
- * Return a pointer to the first byte after the code in the payload
- * the payload has the bit set which says it has payloads within the
- * packet.
- */
-uint8_t* insert_crypto_payload_with_payloads(uint8_t* ptr, uint8_t* end);
-
-/**
  * read a payload, return true iff it succeedes
  */
 bool unabto_payload_read_push(struct unabto_payload_packet* payload, struct unabto_payload_push* push);

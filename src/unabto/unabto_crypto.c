@@ -454,23 +454,18 @@ bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, uin
              break;
          }
          *encryptedEnd = dst + encryptedSize;
-         // Write length to payload header   
-         WRITE_U16(dst - SIZE_CODE - 2, (uint16_t)(SIZE_PAYLOAD_HEADER + SIZE_CODE + encryptedSize)); // 2 is packet length field
-            
+
          // First move the data because src and dst may overlap
          ptr += 16; // iv length
-         memmove(ptr, src, size); ptr += size;        
-            
-         // Write crypto code to payload
-         WRITE_U16(dst - SIZE_CODE, cryptoContext->code);
-         
+         memmove(ptr, src, size); ptr += size;
+
          // put the iv into the start of the buffer
          nabto_random(dst, 16);
-            
+
          paddingSize = (size/16+1)*16 - size;
          // insert the padding length on all the padding bytes
          memset(ptr, (int)paddingSize, paddingSize); ptr += paddingSize;
-            
+
          UNABTO_ASSERT(ptr - dst <= 0xFFFF);
          res = unabto_aes128_cbc_encrypt(cryptoContext->encryptkey, dst, (uint16_t)(ptr-dst));
         }
@@ -488,13 +483,9 @@ bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, uin
         }
         else
         {
-            // Write payload length
-            WRITE_U16(dst - 4, (uint16_t)(SIZE_PAYLOAD_HEADER + SIZE_CODE + encryptedSize)); // add 2 for integrity
             if (size && src != dst) {
                 memmove(dst, src, size);
             }
-            // Write crypto code to payload
-            WRITE_U16(dst - 2, CRYPT_W_NULL_DATA);
             pad = (uint8_t)((encryptedSize-2) - size);
             memset(dst + size, pad, pad);
             res = true;

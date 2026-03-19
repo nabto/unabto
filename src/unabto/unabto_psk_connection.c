@@ -280,10 +280,7 @@ void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const na
     // pointer before crypto payload
     cryptoPayloadStart = ptr;
 
-    // insert encrypted payload header
-    ptr = insert_crypto_payload_with_payloads(ptr, end);
-
-    // start of plaintext
+    // write plaintext payloads at cryptoPayloadStart; encrypt_packet will relocate
     plaintextStart = ptr;
 
     // insert random_device
@@ -298,7 +295,7 @@ void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const na
 
     // encrypt and send packet.
 
-    if (encrypt_packet(&connection->cryptoctx, nabtoCommunicationBuffer, end, plaintextStart, plaintextLength, cryptoPayloadStart, &packetLength)) {
+    if (encrypt_packet(&connection->cryptoctx, nabtoCommunicationBuffer, end, plaintextStart, plaintextLength, cryptoPayloadStart, NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS, &packetLength)) {
         nabto_write(socket, nabtoCommunicationBuffer, packetLength, &peer->addr, peer->port);
     } else {
         NABTO_LOG_WARN(("cannot encrypt packet"));

@@ -204,8 +204,8 @@ bool unabto_crypto_verify_and_decrypt(const nabto_packet_header* hdr,
  * @param cryptoContext   the cryptocontext
  * @param src         the clear text data
  * @param size        the size of the clear text data
- * @param dst         the location to put the encrypted data this is the pointer to the data in the crypto payload ie. cryptoPayloadStart + 4 (payload header) + 2 (crypto code).
- * @param dstsize     the size of the destination buffer (must be large enough to the later appended verification)
+ * @param dst         the location to put the encrypted data
+ * @param dstEnd      the end of the destination buffer (must be large enough to the later appended verification)
  * @param encryptedEnd the end of the encrypted data including the integrity value.
  * @return            true if successfully
  */

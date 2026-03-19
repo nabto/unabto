@@ -198,23 +198,19 @@ bool send_exception(nabto_connect* con, nabto_packet_header* hdr, uint32_t aer)
 {
     uint8_t  buf[SIZE_HEADER_MAX + SIZE_PAYLOAD_HEADER + SIZE_CODE + 48]; // maximum length cryptosuites implemented as of aug 2012
     uint8_t* end = buf + sizeof(buf);
-    uint8_t* dataStart;
     uint8_t* cryptoPayloadStart;
     uint8_t* ptr = buf;
-    
+
     ptr = nabto_wr_header(buf, end, hdr);
-    
+
     add_flags(buf, NP_PACKET_HDR_FLAG_RESPONSE);
     add_flags(buf, NP_PACKET_HDR_FLAG_EXCEPTION);
-    
+
     cryptoPayloadStart = ptr;
-    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
-    ptr += SIZE_CODE; // make room for crypto suite code
-    dataStart = ptr;
-    // write exception value
-    ptr = write_forward_u32(ptr, end, (uint32_t)aer);
-    
-    return send_and_encrypt_packet_con(con, buf, end, dataStart, sizeof(uint32_t), cryptoPayloadStart);
+    // write exception value at cryptoPayloadStart; encrypt_packet will relocate it
+    WRITE_U32(ptr, (uint32_t)aer);
+
+    return send_and_encrypt_packet_con(con, buf, end, cryptoPayloadStart, sizeof(uint32_t), cryptoPayloadStart, NP_PAYLOAD_HDR_FLAG_NONE);
 }
 
 void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* dataStart, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, message_event* event, void* userData) {
@@ -280,7 +276,7 @@ void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, ui
     hdr->flags |= NP_PACKET_HDR_FLAG_RESPONSE;
     insert_flags(packetStart, hdr->flags);
     
-    send_and_encrypt_packet_con(con, packetStart, packetBufferEnd, dataStart, olen, dataStart-SIZE_CODE-NP_PAYLOAD_HDR_BYTELENGTH);
+    send_and_encrypt_packet_con(con, packetStart, packetBufferEnd, dataStart, olen, dataStart-SIZE_CODE-NP_PAYLOAD_HDR_BYTELENGTH, NP_PAYLOAD_HDR_FLAG_NONE);
 }
 
 
@@ -336,15 +332,21 @@ void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* st
  * @param len  length of encrypted packet
  * @return true iff the packet was encrypted.
  */
-bool encrypt_packet(nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadStart, uint16_t* len) {
-    // Encrypt the data and insert the length and encryption code into
-    // the packet
+bool encrypt_packet(nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadStart, uint8_t cryptoFlags, uint16_t* len) {
     uint8_t* cryptoPayloadEnd;
-    if (!unabto_encrypt(cryptoCtx, plaintextStart, plaintextLength, cryptoPayloadStart+4+SIZE_CODE, packetEnd, &cryptoPayloadEnd)) {
+    uint8_t* encryptDst = cryptoPayloadStart + NP_PAYLOAD_HDR_BYTELENGTH + SIZE_CODE;
+
+    if (!unabto_encrypt(cryptoCtx, plaintextStart, plaintextLength, encryptDst, packetEnd, &cryptoPayloadEnd)) {
         NABTO_LOG_ERROR(("failed to encrypt data"));
         return false;
     }
-    
+
+    /* Write crypto payload header (forward writes) */
+    WRITE_U8(cryptoPayloadStart,     NP_PAYLOAD_TYPE_CRYPTO);
+    WRITE_U8(cryptoPayloadStart + 1, cryptoFlags);
+    WRITE_U16(cryptoPayloadStart + 2, (uint16_t)(cryptoPayloadEnd - cryptoPayloadStart));
+    WRITE_U16(cryptoPayloadStart + NP_PAYLOAD_HDR_BYTELENGTH, cryptoCtx->code);
+
     {
         if (!insert_packet_length_from_cursor(packetStart, cryptoPayloadEnd)) { return false; }
         *len = (uint16_t)(cryptoPayloadEnd - packetStart);
@@ -358,10 +360,10 @@ bool encrypt_packet(nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8
 }
 
 
-bool send_and_encrypt_packet_con(nabto_connect* con, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadStart) {
+bool send_and_encrypt_packet_con(nabto_connect* con, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadStart, uint8_t cryptoFlags) {
     uint16_t len;
 
-    if (!encrypt_packet(&con->cryptoctx, packetStart, packetEnd, plaintextStart, plaintextLength, cryptoPayloadStart, &len)) {
+    if (!encrypt_packet(&con->cryptoctx, packetStart, packetEnd, plaintextStart, plaintextLength, cryptoPayloadStart, cryptoFlags, &len)) {
         return false;
     }
 
@@ -371,10 +373,10 @@ bool send_and_encrypt_packet_con(nabto_connect* con, uint8_t* packetStart, uint8
  * Send a packet where the header etc is setup correctly but the data
  * needs to be encrypted and an integrity has to be added.
  */
-bool send_and_encrypt_packet(nabto_endpoint* peer, nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadStart) {
+bool send_and_encrypt_packet(nabto_endpoint* peer, nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadStart, uint8_t cryptoFlags) {
     uint16_t len;
 
-    if (!encrypt_packet(cryptoCtx, packetStart, packetEnd, plaintextStart, plaintextLength, cryptoPayloadStart, &len)) {
+    if (!encrypt_packet(cryptoCtx, packetStart, packetEnd, plaintextStart, plaintextLength, cryptoPayloadStart, cryptoFlags, &len)) {
         return false;
     }
 

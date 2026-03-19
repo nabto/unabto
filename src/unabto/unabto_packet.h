@@ -60,17 +60,19 @@ void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, ui
 void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* start, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, message_event* event, void* userData);
 
 /**
- * Encrypt a packet
+ * Encrypt a packet. Plaintext may start at cryptoPayloadStart since
+ * the encryption uses memmove and will relocate the data.
  * @param cryptoCtx crypto context
- * @param bufferStart start of packet buffer
- * @param bufferEnd   end of packet buffer
- * @param plaintextStart  start of plaintext
+ * @param packetStart start of packet buffer
+ * @param packetEnd   end of packet buffer
+ * @param plaintextStart  start of plaintext (may overlap cryptoPayloadStart)
  * @param plaintextLength length of plaintext
  * @param cryptoPayloadStart start of crypto payload before payload header and crypto code.
+ * @param cryptoFlags  flags byte for the crypto payload header
  * @param len  length of encrypted packet
  * @return true iff the packet was encrypted.
  */
-bool encrypt_packet(nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadStart, uint16_t* len);
+bool encrypt_packet(nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadStart, uint8_t cryptoFlags, uint16_t* len);
 
 /**
  * @param peer peer to send to
@@ -82,7 +84,7 @@ bool encrypt_packet(nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8
  * @param cryptoPayloadStart start of the crypto payload, the first byte in the payload.
  * @return true iff the packet was sent.
  */
-bool send_and_encrypt_packet(nabto_endpoint* peer, nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadStart);
+bool send_and_encrypt_packet(nabto_endpoint* peer, nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint16_t plaintextLength, uint8_t* cryptoPayloadStart, uint8_t cryptoFlags);
 
 /**
  * Send an exception notification to the client.
@@ -114,7 +116,8 @@ bool send_and_encrypt_packet_con(nabto_connect* con,
                                  uint8_t* packetBufferEnd,
                                  uint8_t* plaintextStart,
                                  uint16_t plaintextLength,
-                                 uint8_t* cryptoPayloadStart);
+                                 uint8_t* cryptoPayloadStart,
+                                 uint8_t cryptoFlags);
 
 bool send_to_basestation(uint8_t* buffer, size_t buflen, nabto_endpoint* peer);
 

@@ -463,22 +463,6 @@ uint8_t* insert_capabilities_payload(uint8_t* ptr, uint8_t* end, struct unabto_c
 }
 
 
-uint8_t* insert_crypto_payload_with_payloads(uint8_t* ptr, uint8_t* end)
-{
-    if (end < ptr || ptr == NULL) {
-        return NULL;
-    }
-    
-    if ((uint16_t)(end - ptr) < 4+2) {
-        return NULL;
-    }
-
-    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
-    WRITE_U8(ptr - 3, NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS);
-    ptr += 2;
-    return ptr;
-}
-
 bool unabto_payload_read_push(struct unabto_payload_packet* payload, struct unabto_payload_push* push){
     const uint8_t* end = payload->dataBegin + payload->dataLength;
     const uint8_t* ptr = payload->dataBegin;
