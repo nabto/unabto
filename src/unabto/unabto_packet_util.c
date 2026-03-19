@@ -93,31 +93,21 @@ uint16_t nabto_rd_header(const uint8_t* buf, const uint8_t* end, nabto_packet_he
 uint8_t* nabto_wr_header(uint8_t* buf, const uint8_t* end, const nabto_packet_header* hdr)
 {
     uint8_t* ptr = buf;
-    if ((end - ptr) < NP_PACKET_HDR_MIN_BYTELENGTH) {
-        return NULL;
-    }
-    
-    WRITE_FORWARD_U32(ptr, hdr->nsi_cp);
-    WRITE_FORWARD_U32(ptr, hdr->nsi_sp);
-    WRITE_FORWARD_U8(ptr, hdr->type);
-    WRITE_FORWARD_U8(ptr, hdr->version);
-    WRITE_FORWARD_U8(ptr, hdr->rsvd);
-    WRITE_FORWARD_U8(ptr, hdr->flags);
-    WRITE_FORWARD_U16(ptr, hdr->seq);
-    WRITE_FORWARD_U16(ptr, hdr->len);
+    ptr = write_forward_u32(ptr, end, hdr->nsi_cp);
+    ptr = write_forward_u32(ptr, end, hdr->nsi_sp);
+    ptr = write_forward_u8(ptr, end, hdr->type);
+    ptr = write_forward_u8(ptr, end, hdr->version);
+    ptr = write_forward_u8(ptr, end, hdr->rsvd);
+    ptr = write_forward_u8(ptr, end, hdr->flags);
+    ptr = write_forward_u16(ptr, end, hdr->seq);
+    ptr = write_forward_u16(ptr, end, hdr->len);
 
     if (hdr->flags & NP_PACKET_HDR_FLAG_NSI_CO) {
-        if ((end - ptr) < 8) {
-            return NULL;
-        }
-        memcpy(ptr, hdr->nsi_co, 8); ptr += 8;
+        ptr = write_forward_mem(ptr, end, hdr->nsi_co, 8);
     }
-    
+
     if (hdr->flags & NP_PACKET_HDR_FLAG_TAG) {
-        if ((end - ptr) < 2) {
-            return NULL;
-        }
-        WRITE_FORWARD_U16(ptr, hdr->tag);
+        ptr = write_forward_u16(ptr, end, hdr->tag);
     }
     return ptr;
 }
@@ -270,21 +260,15 @@ uint8_t* insert_payload(uint8_t* buf, uint8_t* end, uint8_t type, const uint8_t*
     if (buf == NULL) {
         return buf;
     }
-    if (end - buf < NP_PAYLOAD_HDR_BYTELENGTH) {
-        return NULL;
-    }
     /* Add payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes) */
-    WRITE_FORWARD_U8(buf,                     type);
-    WRITE_FORWARD_U8(buf, NP_PAYLOAD_HDR_FLAG_NONE);
-    WRITE_FORWARD_U16(buf, (uint16_t)(size + NP_PAYLOAD_HDR_BYTELENGTH));
-    
+    buf = write_forward_u8(buf, end, type);
+    buf = write_forward_u8(buf, end, NP_PAYLOAD_HDR_FLAG_NONE);
+    buf = write_forward_u16(buf, end, (uint16_t)(size + NP_PAYLOAD_HDR_BYTELENGTH));
+    if (buf == NULL) { return NULL; }
+
     /* Add payload data */
     if (content && size) {
-        if (end - buf < (ptrdiff_t)size) {
-            return NULL;
-        }
-        memcpy(buf, content, size);
-        buf += size;
+        buf = write_forward_mem(buf, end, content, size);
     }
 
     return buf; /* return end of payload */

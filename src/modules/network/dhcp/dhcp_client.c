@@ -383,26 +383,28 @@ static void send_discover_message(void)
 {
   dhcp_message* message = (dhcp_message*) nabtoCommunicationBuffer;
   uint8_t* options = message->options;
+  const uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
 
   prepare_message();
 
   // Add options
 
   // DHCP message type
-  WRITE_FORWARD_U8(options, BOOTP_OPTION_DHCP_MESSAGE_TYPE);
-  WRITE_FORWARD_U8(options, 1);
-  WRITE_FORWARD_U8(options, DHCP_MESSAGE_TYPE_DISCOVER);
+  options = write_forward_u8(options, end, BOOTP_OPTION_DHCP_MESSAGE_TYPE);
+  options = write_forward_u8(options, end, 1);
+  options = write_forward_u8(options, end, DHCP_MESSAGE_TYPE_DISCOVER);
 
   // Parameter request list
-  WRITE_FORWARD_U8(options, BOOTP_OPTION_PARAMETER_REQUEST_LIST);
-  WRITE_FORWARD_U8(options, 3);
-  WRITE_FORWARD_U8(options, PARAMETER_REQUEST_ITEM_SUBNET_MASK);
-  WRITE_FORWARD_U8(options, PARAMETER_REQUEST_ITEM_ROUTER);
-  WRITE_FORWARD_U8(options, PARAMETER_REQUEST_ITEM_DOMAIN_NAME_SERVER);
+  options = write_forward_u8(options, end, BOOTP_OPTION_PARAMETER_REQUEST_LIST);
+  options = write_forward_u8(options, end, 3);
+  options = write_forward_u8(options, end, PARAMETER_REQUEST_ITEM_SUBNET_MASK);
+  options = write_forward_u8(options, end, PARAMETER_REQUEST_ITEM_ROUTER);
+  options = write_forward_u8(options, end, PARAMETER_REQUEST_ITEM_DOMAIN_NAME_SERVER);
 
   // End
-  WRITE_FORWARD_U8(options, BOOTP_OPTION_END);
+  options = write_forward_u8(options, end, BOOTP_OPTION_END);
 
+  if (options == NULL) { return; }
   send_message();
 }
 
@@ -410,35 +412,37 @@ static void send_request_message(uint32_t offeredIp)
 {
   dhcp_message* message = (dhcp_message*) nabtoCommunicationBuffer;
   uint8_t* options = message->options;
+  const uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
 
   prepare_message();
 
   // Add options
 
   // DHCP message type
-  WRITE_FORWARD_U8(options, BOOTP_OPTION_DHCP_MESSAGE_TYPE);
-  WRITE_FORWARD_U8(options, 1);
-  WRITE_FORWARD_U8(options, DHCP_MESSAGE_TYPE_REQUEST);
+  options = write_forward_u8(options, end, BOOTP_OPTION_DHCP_MESSAGE_TYPE);
+  options = write_forward_u8(options, end, 1);
+  options = write_forward_u8(options, end, DHCP_MESSAGE_TYPE_REQUEST);
 
   // DHCP server identifier
-  WRITE_FORWARD_U8(options, BOOTP_OPTION_DHCP_SERVER_IDENTIFIER);
-  WRITE_FORWARD_U8(options, 4);
-  WRITE_FORWARD_U32(options, dhcpClientInformation.serverAddress);
+  options = write_forward_u8(options, end, BOOTP_OPTION_DHCP_SERVER_IDENTIFIER);
+  options = write_forward_u8(options, end, 4);
+  options = write_forward_u32(options, end, dhcpClientInformation.serverAddress);
 
   // Parameter request list
-  WRITE_FORWARD_U8(options, BOOTP_OPTION_PARAMETER_REQUEST_LIST);
-  WRITE_FORWARD_U8(options, 3);
-  WRITE_FORWARD_U8(options, PARAMETER_REQUEST_ITEM_SUBNET_MASK);
-  WRITE_FORWARD_U8(options, PARAMETER_REQUEST_ITEM_ROUTER);
-  WRITE_FORWARD_U8(options, PARAMETER_REQUEST_ITEM_DOMAIN_NAME_SERVER);
+  options = write_forward_u8(options, end, BOOTP_OPTION_PARAMETER_REQUEST_LIST);
+  options = write_forward_u8(options, end, 3);
+  options = write_forward_u8(options, end, PARAMETER_REQUEST_ITEM_SUBNET_MASK);
+  options = write_forward_u8(options, end, PARAMETER_REQUEST_ITEM_ROUTER);
+  options = write_forward_u8(options, end, PARAMETER_REQUEST_ITEM_DOMAIN_NAME_SERVER);
 
   // Rrequested IP address
-  WRITE_FORWARD_U8(options, BOOTP_OPTION_REQUESTED_IP_ADDRESS);
-  WRITE_FORWARD_U8(options, 4);
-  WRITE_FORWARD_U32(options, offeredIp);
+  options = write_forward_u8(options, end, BOOTP_OPTION_REQUESTED_IP_ADDRESS);
+  options = write_forward_u8(options, end, 4);
+  options = write_forward_u32(options, end, offeredIp);
 
   // End
-  WRITE_FORWARD_U8(options, BOOTP_OPTION_END);
+  options = write_forward_u8(options, end, BOOTP_OPTION_END);
 
+  if (options == NULL) { return; }
   send_message();
 }

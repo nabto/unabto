@@ -99,6 +99,7 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
 {
     uint8_t buffer[FP_ACL_RECORD_SIZE];
     uint8_t* ptr = buffer;
+    const uint8_t* end = buffer + FP_ACL_RECORD_SIZE;
     uint32_t users = 0;
     uint32_t i;
     size_t written;
@@ -109,11 +110,12 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
         }
     }
 
-    WRITE_FORWARD_U32(ptr, FP_ACL_FILE_VERSION);
-    WRITE_FORWARD_U32(ptr, acl->settings.systemPermissions);
-    WRITE_FORWARD_U32(ptr, acl->settings.defaultUserPermissions);
-    WRITE_FORWARD_U32(ptr, acl->settings.firstUserPermissions);
-    WRITE_FORWARD_U32(ptr, users);
+    ptr = write_forward_u32(ptr, end, FP_ACL_FILE_VERSION);
+    ptr = write_forward_u32(ptr, end, acl->settings.systemPermissions);
+    ptr = write_forward_u32(ptr, end, acl->settings.defaultUserPermissions);
+    ptr = write_forward_u32(ptr, end, acl->settings.firstUserPermissions);
+    ptr = write_forward_u32(ptr, end, users);
+    if (ptr == NULL) { return FP_ACL_DB_SAVE_FAILED; }
 
     written = fwrite(buffer, 5*sizeof(uint32_t), 1, aclFile);
     if (written != 1) {
@@ -129,24 +131,25 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
         it = &acl->users[i];
         if (!fp_mem_is_slot_free(it)) {
 
-            WRITE_FORWARD_MEM(ptr, it->fp.value.data, FINGERPRINT_LENGTH);
+            ptr = write_forward_mem(ptr, end, it->fp.value.data, FINGERPRINT_LENGTH);
 
-            WRITE_FORWARD_U8(ptr, it->pskId.hasValue);
-            WRITE_FORWARD_MEM(ptr, it->pskId.value.data, PSK_ID_LENGTH);
+            ptr = write_forward_u8(ptr, end, it->pskId.hasValue);
+            ptr = write_forward_mem(ptr, end, it->pskId.value.data, PSK_ID_LENGTH);
 
-            WRITE_FORWARD_U8(ptr, it->psk.hasValue);
-            WRITE_FORWARD_MEM(ptr, it->psk.value.data, PSK_LENGTH);
+            ptr = write_forward_u8(ptr, end, it->psk.hasValue);
+            ptr = write_forward_mem(ptr, end, it->psk.value.data, PSK_LENGTH);
 
 #if NABTO_ENABLE_FCM_TOKEN_STORAGE
-            WRITE_FORWARD_MEM(ptr, it->fcmTok, FP_ACL_FCM_TOKEN_MAX_LENGTH);
+            ptr = write_forward_mem(ptr, end, it->fcmTok, FP_ACL_FCM_TOKEN_MAX_LENGTH);
 #else
             // Skip
             ptr += FP_ACL_FCM_TOKEN_MAX_LENGTH;
 #endif
 
-            WRITE_FORWARD_MEM(ptr, it->name, FP_ACL_FILE_USERNAME_LENGTH);
+            ptr = write_forward_mem(ptr, end, it->name, FP_ACL_FILE_USERNAME_LENGTH);
 
-            WRITE_FORWARD_U32(ptr, it->permissions);
+            ptr = write_forward_u32(ptr, end, it->permissions);
+            if (ptr == NULL) { return FP_ACL_DB_SAVE_FAILED; }
 
             written = fwrite(buffer, ptr-buffer, 1, aclFile);
             if (written != 1) {

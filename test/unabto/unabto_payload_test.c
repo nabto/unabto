@@ -8,10 +8,11 @@ int test_read_payload(void)
 {
     uint8_t buffer[42];
     uint8_t* ptr = buffer;
-    WRITE_FORWARD_U8(ptr, 42);
-    WRITE_FORWARD_U8(ptr, 42);
-    WRITE_FORWARD_U16(ptr, 6);
-    WRITE_FORWARD_U16(ptr, 42);
+    const uint8_t* end = buffer + sizeof(buffer);
+    ptr = write_forward_u8(ptr, end, 42);
+    ptr = write_forward_u8(ptr, end, 42);
+    ptr = write_forward_u16(ptr, end, 6);
+    ptr = write_forward_u16(ptr, end, 42);
     struct unabto_payload_packet payload;
     const uint8_t* result = unabto_read_payload(buffer, buffer+42, &payload);
 

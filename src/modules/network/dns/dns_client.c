@@ -108,6 +108,7 @@ void dns_client_tick(void)
     {
       dns_packet* packet = (dns_packet*) nabtoCommunicationBuffer;
       uint8_t* p = packet->data;
+      const uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
       uint8_t* name = (uint8_t*) currentHost;
       uint8_t* labelLengthPointer;
       struct nabto_ip_address ip;
@@ -123,7 +124,7 @@ void dns_client_tick(void)
         *labelLengthPointer = 0;
         while(*name != '.' && *name != 0)
         {
-          WRITE_FORWARD_U8(p, *name++);
+          p = write_forward_u8(p, end, *name++);
           *labelLengthPointer = *labelLengthPointer + 1;
         }
 
@@ -132,10 +133,15 @@ void dns_client_tick(void)
           name++;
         }
       }
-      WRITE_FORWARD_U8(p, 0); // terminating zero
+      p = write_forward_u8(p, end, 0); // terminating zero
 
-      WRITE_FORWARD_U16(p, TYPE_A);
-      WRITE_FORWARD_U16(p, CLASS_IN);
+      p = write_forward_u16(p, end, TYPE_A);
+      p = write_forward_u16(p, end, CLASS_IN);
+
+      if (p == NULL) {
+        state = STATE_NOT_FOUND;
+        break;
+      }
 
       ip.type = NABTO_IP_V4;
       ip.addr.ipv4 = serverIp;

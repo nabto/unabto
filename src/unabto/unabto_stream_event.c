@@ -172,7 +172,7 @@ bool build_and_send_rst_packet(nabto_connect* con, uint16_t tag, struct nabto_wi
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_WINDOW, 0, winLength);
     if (ptr == NULL) return false;
 
-    if (nabto_stream_encode_window(&rst, ptr, &encodeLength)) {
+    if (nabto_stream_encode_window(&rst, ptr, end, &encodeLength)) {
         ptr += encodeLength;
     } else {
         return false;

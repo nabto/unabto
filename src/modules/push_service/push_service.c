@@ -29,14 +29,15 @@ unabto_push_hint send_push_notification(uint16_t pnsid, push_payload_data static
     ptr = buffer[dataHead].data;
     end = ptr + NABTO_PUSH_BUFFER_ELEMENT_SIZE;
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PUSH_DATA, 0,staticData.len+2);
-    WRITE_FORWARD_U8(ptr, staticData.purpose);
-    WRITE_FORWARD_U8(ptr, staticData.encoding);
-    memcpy(ptr,staticData.data,staticData.len); ptr += staticData.len;
-    
+    ptr = write_forward_u8(ptr, end, staticData.purpose);
+    ptr = write_forward_u8(ptr, end, staticData.encoding);
+    ptr = write_forward_mem(ptr, end, staticData.data, staticData.len);
+
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PUSH_DATA, 0,msg.len+2);
-    WRITE_FORWARD_U8(ptr, msg.purpose);
-    WRITE_FORWARD_U8(ptr, msg.encoding);
-    memcpy(ptr,msg.data,msg.len); ptr += msg.len;
+    ptr = write_forward_u8(ptr, end, msg.purpose);
+    ptr = write_forward_u8(ptr, end, msg.encoding);
+    ptr = write_forward_mem(ptr, end, msg.data, msg.len);
+    if (ptr == NULL) { return UNABTO_PUSH_HINT_INVALID_DATA_PROVIDED; }
 
     buffer[dataHead].cb = cb;
     buffer[dataHead].args = cbArgs;
@@ -69,15 +70,17 @@ bool init_push_message(push_message* msg, uint16_t pnsid, const char* staticData
 static bool add_tlv(push_message* msg, uint8_t type, const char* value){
     size_t len = strlen(value);
     uint8_t* ptr = msg->dynamicData.data + msg->dynamicData.len;
+    const uint8_t* end = msg->dynamicData.data + NABTO_PUSH_BUFFER_ELEMENT_SIZE;
     if(len + 2 > 255){
         return false;
     }
     if(msg->dynamicData.len + len + 2 > NABTO_PUSH_BUFFER_ELEMENT_SIZE){
         return false;
     }
-    WRITE_FORWARD_U8(ptr, type);
-    WRITE_FORWARD_U8(ptr, len+2);
-    memcpy(ptr, value, len);
+    ptr = write_forward_u8(ptr, end, type);
+    ptr = write_forward_u8(ptr, end, (uint8_t)(len+2));
+    ptr = write_forward_mem(ptr, end, value, len);
+    if (ptr == NULL) { return false; }
     msg->dynamicData.len += len + 2;
     return true;
 }

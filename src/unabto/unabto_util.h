@@ -130,10 +130,6 @@
 #define READ_FORWARD_U16(value, pointer) do { READ_U16(value, pointer); pointer += 2; } while(0)
 #define READ_FORWARD_U32(value, pointer) do { READ_U32(value, pointer); pointer += 4; } while(0)
 #define READ_FORWARD_MEM(value, pointer, len) do { memcpy(value, pointer, len); pointer += len; } while(0)
-#define WRITE_FORWARD_U8(pointer, value) do { WRITE_U8(pointer, value); pointer += 1; } while (0)
-#define WRITE_FORWARD_U16(pointer, value) do { WRITE_U16(pointer, value); pointer += 2; } while (0)
-#define WRITE_FORWARD_U32(pointer, value) do { WRITE_U32(pointer, value); pointer += 4; } while (0)
-#define WRITE_FORWARD_MEM(pointer, value, len) do {memcpy(pointer, value, len); pointer += len; } while(0)
 
 /******************************************************************************/
 /* Bounds-checked write helpers. Each returns the advanced pointer, or NULL  */

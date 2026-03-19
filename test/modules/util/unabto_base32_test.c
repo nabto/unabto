@@ -9,10 +9,11 @@ bool unabto_base32_test(void)
     bool status = true;
     uint8_t input[7];
     uint8_t* ptr = input;
-    WRITE_FORWARD_U8(ptr, 0x6f);
-    WRITE_FORWARD_U16(ptr, 0x0007);
-    WRITE_FORWARD_U16(ptr, 0);
-    WRITE_FORWARD_U16(ptr, 0x4242);
+    const uint8_t* input_end = input + sizeof(input);
+    ptr = write_forward_u8(ptr, input_end, 0x6f);
+    ptr = write_forward_u16(ptr, input_end, 0x0007);
+    ptr = write_forward_u16(ptr, input_end, 0);
+    ptr = write_forward_u16(ptr, input_end, 0x4242);
 
     uint8_t base32output[12];
     uint8_t* end = unabto_base32_encode(base32output, base32output+12, input, input+7);
