@@ -9,10 +9,6 @@
 #define UNABTO_PLATFORM_PIC18 1
 #endif
 
-// Override default text functions with PIC18 specific versions (the PIC has strings stored in program memory which required special instructions to reach).
-#define textcmp(romString, ramString) strcmpram2pgm(romString, ramString)
-#define textcpy(destination, source, destinationSize) strncpypgm2ram(destination, source, destinationSize)
-
 #include <unabto_platform_types.h>
 #include <unabto_platform_logging.h>
 

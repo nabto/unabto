@@ -60,7 +60,7 @@ bool init_push_message(push_message* msg, uint16_t pnsid, const char* staticData
     if(msg->staticData.len > NABTO_PUSH_BUFFER_ELEMENT_SIZE){
         return false;
     }
-    strcpy((char *)msg->staticData.data,staticData);
+    memcpy(msg->staticData.data, staticData, msg->staticData.len);
     msg->pnsId = pnsid;
     msg->dynamicData.purpose = NP_PAYLOAD_PUSH_DATA_PURPOSE_DYNAMIC;
     msg->dynamicData.encoding = NP_PAYLOAD_PUSH_DATA_ENCODING_TLV;

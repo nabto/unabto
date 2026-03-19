@@ -297,7 +297,8 @@ fp_acl_db_status fp_acl_file_add_entry(struct configuration* config, struct fp_a
     user.fp.hasValue = 1;
 
 
-    strncpy(user.name, config->user, FP_ACL_USERNAME_MAX_LENGTH);
+    strncpy(user.name, config->user, FP_ACL_USERNAME_MAX_LENGTH - 1);
+    user.name[FP_ACL_USERNAME_MAX_LENGTH - 1] = '\0';
 
     return db->save(&user);
 }

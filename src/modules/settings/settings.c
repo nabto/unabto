@@ -71,7 +71,7 @@ bool settings_write_string(const char* key, const char* value)
         initialize();
     }
 
-    sprintf(newLine, "%s=%s", key, value);
+    snprintf(newLine, sizeof(newLine), "%s=%s", key, value);
 
     testLength = strlen(key) + 1;
 
@@ -175,7 +175,7 @@ bool settings_write_int(const char* key, int value)
 {
     char rawValue[20];
 
-    sprintf(rawValue, "%i", value);
+    snprintf(rawValue, sizeof(rawValue), "%i", value);
     
     return settings_write_string(key, rawValue);
 }

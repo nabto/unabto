@@ -401,8 +401,8 @@ void populateNabtoId()
 
     if (strncmp((char *) uCmdRspFrame.uCmdRspBuf, "OK", 2) == 0) {
         char macString[13];
-        sprintf(macString, "%x%x%x%x%x%x", uCmdRspFrame.uCmdRspBuf[2], uCmdRspFrame.uCmdRspBuf[3], uCmdRspFrame.uCmdRspBuf[4], uCmdRspFrame.uCmdRspBuf[5], uCmdRspFrame.uCmdRspBuf[6], uCmdRspFrame.uCmdRspBuf[7]);
-        strncpy(nabtoId, macString, 12);
+        snprintf(macString, sizeof(macString), "%x%x%x%x%x%x", uCmdRspFrame.uCmdRspBuf[2], uCmdRspFrame.uCmdRspBuf[3], uCmdRspFrame.uCmdRspBuf[4], uCmdRspFrame.uCmdRspBuf[5], uCmdRspFrame.uCmdRspBuf[6], uCmdRspFrame.uCmdRspBuf[7]);
+        memcpy(nabtoId, macString, 12);
     }
 }
 

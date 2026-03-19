@@ -153,13 +153,16 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
     uint32_t header;
     READ_U32(header, buf);
 
-    NABTO_NOT_USED(ilen);
+    if (ilen <= NP_LEGACY_PACKET_HDR_SIZE) return;
+    if (memchr(buf + NP_LEGACY_PACKET_HDR_SIZE,
+               '\0',
+               ilen - NP_LEGACY_PACKET_HDR_SIZE) == NULL) return;
 
     NABTO_LOG_TRACE(("local_discover_event"));
 
     NABTO_LOG_TRACE(("discover: %s", (char*)buf + NP_LEGACY_PACKET_HDR_SIZE));
 
-    if (strcmp(nmc.nabtoMainSetup.id, (const char*) (buf + NP_LEGACY_PACKET_HDR_SIZE)) == 0 || textcmp("*", (const char*) (buf + NP_LEGACY_PACKET_HDR_SIZE)) == 0) {
+    if (strcmp(nmc.nabtoMainSetup.id, (const char*) (buf + NP_LEGACY_PACKET_HDR_SIZE)) == 0 || strcmp("*", (const char*) (buf + NP_LEGACY_PACKET_HDR_SIZE)) == 0) {
         uint8_t* ptr = buf + NP_LEGACY_PACKET_HDR_SIZE;
         uint8_t* end = buf + bufsize;
         uint32_t localIp = 0;
