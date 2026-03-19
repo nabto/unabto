@@ -30,6 +30,30 @@ int main() {
         ret = false;
     }
 
+    r = test_insert_header_bounds();
+    if (!r) {
+        NABTO_LOG_ERROR(("test insert_header bounds failed"));
+        ret = false;
+    }
+
+    r = test_insert_optional_payload_null();
+    if (!r) {
+        NABTO_LOG_ERROR(("test insert_optional_payload NULL failed"));
+        ret = false;
+    }
+
+    r = test_insert_length_bounds();
+    if (!r) {
+        NABTO_LOG_ERROR(("test insert_length bounds failed"));
+        ret = false;
+    }
+
+    r = test_insert_length_from_cursor();
+    if (!r) {
+        NABTO_LOG_ERROR(("test insert_length_from_cursor failed"));
+        ret = false;
+    }
+
     r = fp_acl_mem_test();
     if (!r) {
         NABTO_LOG_ERROR(("test of acl memory state failed"));

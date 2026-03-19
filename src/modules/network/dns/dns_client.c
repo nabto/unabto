@@ -64,7 +64,7 @@ enum
   STATE_NO_SOCKET
 };
 
-static uint8_t* dump_name(uint8_t* p);
+static const uint8_t* dump_name(const uint8_t* p, const uint8_t* end);
 
 static uint32_t serverIp;
 static nabto_socket_t clientSocket;
@@ -108,6 +108,7 @@ void dns_client_tick(void)
     {
       dns_packet* packet = (dns_packet*) nabtoCommunicationBuffer;
       uint8_t* p = packet->data;
+      const uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
       uint8_t* name = (uint8_t*) currentHost;
       uint8_t* labelLengthPointer;
       struct nabto_ip_address ip;
@@ -123,7 +124,7 @@ void dns_client_tick(void)
         *labelLengthPointer = 0;
         while(*name != '.' && *name != 0)
         {
-          WRITE_FORWARD_U8(p, *name++);
+          p = write_forward_u8(p, end, *name++);
           *labelLengthPointer = *labelLengthPointer + 1;
         }
 
@@ -132,10 +133,15 @@ void dns_client_tick(void)
           name++;
         }
       }
-      WRITE_FORWARD_U8(p, 0); // terminating zero
+      p = write_forward_u8(p, end, 0); // terminating zero
 
-      WRITE_FORWARD_U16(p, TYPE_A);
-      WRITE_FORWARD_U16(p, CLASS_IN);
+      p = write_forward_u16(p, end, TYPE_A);
+      p = write_forward_u16(p, end, CLASS_IN);
+
+      if (p == NULL) {
+        state = STATE_NOT_FOUND;
+        break;
+      }
 
       ip.type = NABTO_IP_V4;
       ip.addr.ipv4 = serverIp;
@@ -161,7 +167,8 @@ void dns_client_tick(void)
 
       if(length > 0)
       {
-        uint8_t* p = dnsPacket->data;
+        const uint8_t* end = nabtoCommunicationBuffer + length;
+        const uint8_t* p = dnsPacket->data;
         bool done = false;
 
         //        NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_TRACE, ("DNS response:"), buffer, length);
@@ -178,27 +185,41 @@ void dns_client_tick(void)
           // dump queries
           while(dnsPacket->questionCount--)
           {
-            p = dump_name(p);
-            p += 2 + 2;
+            p = dump_name(p, end);
+            if (p == NULL) {
+              break;
+            }
+            p = read_forward_u16(&type, p, end);
+            p = read_forward_u16(&classCode, p, end);
           }
 
           // parse answers
-          while(done == false && dnsPacket->answerRecordCount--)
+          while(p != NULL && done == false && dnsPacket->answerRecordCount--)
           {
-            p = dump_name(p);
-            READ_FORWARD_U16(type, p);
-            READ_FORWARD_U16(classCode, p);
-            READ_FORWARD_U32(timeToLive, p);
-            READ_FORWARD_U16(dataLength, p);
+            p = dump_name(p, end);
+            p = read_forward_u16(&type, p, end);
+            p = read_forward_u16(&classCode, p, end);
+            p = read_forward_u32(&timeToLive, p, end);
+            p = read_forward_u16(&dataLength, p, end);
+
+            if (p == NULL) {
+              break;
+            }
 
             if(type == TYPE_A && classCode == CLASS_IN && dataLength == 4)
             {
-              READ_U32(currentIp, p);
+              p = read_forward_u32(&currentIp, p, end);
+              if (p == NULL) {
+                break;
+              }
               //              NABTO_LOG_TRACE(("IP found at offset %u: " PRIip, p - buffer, MAKE_IP_PRINTABLE_(currentIp)));
               done = true;
             }
-
-            p += dataLength;
+            else
+            {
+              if (p + dataLength > end) { p = NULL; break; }
+              p += dataLength;
+            }
           }
 
           if(done)
@@ -284,20 +305,32 @@ nabto_dns_status_t dns_client_nabto_dns_is_resolved(const char* host, uint32_t* 
 
 // Helpers
 
-static uint8_t* dump_name(uint8_t* p)
+static const uint8_t* dump_name(const uint8_t* p, const uint8_t* end)
 {
-  while(*p)
+  if (p == NULL) {
+    return NULL;
+  }
+  while(p < end && *p)
   {
     if(*p >= 0xc0)
     {
-      return p + 2;
+      if (p + 2 <= end) {
+        return p + 2;
+      }
+      return NULL;
     }
     else
     {
       p += 1 + *p;
+      if (p > end) {
+        return NULL;
+      }
     }
   }
 
+  if (p >= end) {
+    return NULL;
+  }
   p++;
 
   return p;

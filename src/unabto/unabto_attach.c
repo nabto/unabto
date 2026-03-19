@@ -89,8 +89,8 @@ text stName(nabto_state state)
 #include "unabto_push.h"
 #define PUSHNOTIFY unabto_push_notify_reattach();
 #else
-#define PUSHNOTIFY 
-#endif                                                              
+#define PUSHNOTIFY
+#endif
 
 /**
  * Set a new state, and log the change
@@ -178,7 +178,7 @@ static size_t verification_complete(verification_t* verif, uint8_t* buf, uint8_t
 
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_VERIFY, 0, sizeof(data));
     len = ptr - buf + sizeof(data);
-    insert_length(buf, (uint16_t)len);
+    insert_packet_length(buf, end, (uint16_t)len);
     verification_add(verif, buf, ptr);
     sum = verif->sum;
     ix = sizeof(data);
@@ -227,7 +227,7 @@ bool verification_check(verification_t* verif, const uint8_t* buf, const uint8_t
 static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
 {
     size_t len;
-    uint8_t* ptr = insert_header(buf, 0, 0, U_INVITE, false, 0, 0, 0);
+    uint8_t* ptr = insert_header(buf, end, 0, 0, U_INVITE, false, 0, 0, 0);
     size_t sid_len = strlen(nmc.nabtoMainSetup.id);
 
     NABTO_LOG_TRACE(("len=%" PRIsize, sid_len));
@@ -236,7 +236,7 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
     if (ptr == NULL) {
         return 0;
     }
-    
+
     if (toGSP) {
         const char dummy[2] = { '-', 0 };
         const char* version;
@@ -246,6 +246,7 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
         uint16_t code;
         code = nmc.nabtoMainSetup.cryptoSuite;
         ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_NONCE, nmc.context.nonceMicro, nmc.context.nonceSize);
+        if (ptr == NULL) return 0;
 
         if (nmc.nabtoMainSetup.version) {
             version = nmc.nabtoMainSetup.version;
@@ -255,15 +256,17 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
             sz = 1;
         }
         ptr = insert_optional_payload(ptr, end, NP_PAYLOAD_TYPE_DESCR, 0, sz + 1);
-        WRITE_U8(ptr, NP_PAYLOAD_DESCR_TYPE_VERSION); ptr += 1;
-        memcpy(ptr, version, sz); ptr += sz;
+        ptr = write_forward_u8(ptr, end, NP_PAYLOAD_DESCR_TYPE_VERSION);
+        ptr = write_forward_mem(ptr, end, version, sz);
+        if (ptr == NULL) return 0;
 
         if (nmc.nabtoMainSetup.url) {
             url = nmc.nabtoMainSetup.url;
             sz = strlen(url);
             ptr = insert_optional_payload(ptr, end, NP_PAYLOAD_TYPE_DESCR, 0, sz + 1);
-            WRITE_U8(ptr, NP_PAYLOAD_DESCR_TYPE_URL); ptr += 1;
-            memcpy(ptr, url, sz); ptr += sz;
+            ptr = write_forward_u8(ptr, end, NP_PAYLOAD_DESCR_TYPE_URL);
+            ptr = write_forward_mem(ptr, end, url, sz);
+            if (ptr == NULL) return 0;
         } else {
             url = dummy;
         }
@@ -271,21 +274,19 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
 
         // send encryption capabilities
         ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CAPABILITY, 0, 9 + 2*2);
-        *ptr++ = 0; /* type */
-        WRITE_U32(ptr,   0l); ptr += 4; // mask
-        WRITE_U32(ptr,   0l); ptr += 4; // bits
-        WRITE_U16(ptr,    1); ptr += 2; // number of codes
-        WRITE_U16(ptr, code); ptr += 2;
+        if (ptr == NULL) return 0;
+        ptr = write_forward_u8(ptr, end, 0); /* type */
+        ptr = write_forward_u32(ptr, end, 0l); // mask
+        ptr = write_forward_u32(ptr, end, 0l); // bits
+        ptr = write_forward_u16(ptr, end, 1); // number of codes
+        ptr = write_forward_u16(ptr, end, code);
     }
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_SP_ID, 0, sid_len + 1);
-    *ptr++ = NP_PAYLOAD_SP_ID_TYPE_URL; /* SPID_URL */
-    memcpy(ptr, nmc.nabtoMainSetup.id, sid_len);
-    
-    ptr += sid_len;
-    
-    len = ptr - buf;
+    ptr = write_forward_u8(ptr, end, NP_PAYLOAD_SP_ID_TYPE_URL); /* SPID_URL */
+    ptr = write_forward_mem(ptr, end, nmc.nabtoMainSetup.id, sid_len);
 
-    insert_length(buf, (uint16_t)len);
+    if (!insert_packet_length_from_cursor(buf, ptr)) { return 0; }
+    len = ptr - buf;
 
     return len;
 }
@@ -305,7 +306,7 @@ static void send_gsp_invite(void) {
     size_t bytes;
 
     NABTO_LOG_DEBUG(("Sending INVITE to GSP: %i", nmc.context.counter));
-    
+
     bytes = mk_invite(nabtoCommunicationBuffer, nabtoCommunicationBuffer + nabtoCommunicationBufferSize, true); /* Send Packet(3) */
     if (bytes) {
         if (nmc.context.nonceSize == NONCE_SIZE_OLD) {
@@ -336,13 +337,16 @@ static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uin
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
 
     bool res = false;
-    uint8_t* ptr = insert_header(buf, 0, nmc.context.gspnsi, U_ATTACH, true, seq, 0, 0);
+    uint8_t* ptr = insert_header(buf, end, 0, nmc.context.gspnsi, U_ATTACH, true, seq, 0, 0);
     uint32_t localIpV4 = 0;
     uint32_t globalIpV4 = 0;
+    if (ptr == NULL) return false;
     ptr = insert_capabilities(ptr, end, nmc.context.clearTextData);
+    if (ptr == NULL) return false;
 
     ptr = insert_payload(ptr, end,  NP_PAYLOAD_TYPE_IPX, 0, 13);
-    
+    if (ptr == NULL) return false;
+
     if (nmc.socketGSPLocalEndpoint.addr.type == NABTO_IP_V4) {
         localIpV4 = nmc.socketGSPLocalEndpoint.addr.addr.ipv4;
     }
@@ -350,13 +354,11 @@ static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uin
         globalIpV4 = nmc.context.globalAddress.addr.addr.ipv4;
     }
 
-    
-    WRITE_U32(ptr, localIpV4); ptr += 4;
-    WRITE_U16(ptr, nmc.socketGSPLocalEndpoint.port); ptr += 2;
-    
-    WRITE_U32(ptr, globalIpV4); ptr += 4;
-    WRITE_U16(ptr, nmc.context.globalAddress.port); ptr += 2;
-    WRITE_U8(ptr, nmc.context.natType); ptr++;
+    ptr = write_forward_u32(ptr, end, localIpV4);
+    ptr = write_forward_u16(ptr, end, nmc.socketGSPLocalEndpoint.port);
+    ptr = write_forward_u32(ptr, end, globalIpV4);
+    ptr = write_forward_u16(ptr, end, nmc.context.globalAddress.port);
+    ptr = write_forward_u8(ptr, end, nmc.context.natType);
 
     ptr = insert_notify_payload(ptr, end, NP_PAYLOAD_NOTIFY_ATTACH_OK);
 
@@ -367,15 +369,16 @@ static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uin
         res = true;
     } else {
 #if NABTO_ENABLE_UCRYPTO
-        uint8_t tmp[NONCE_SIZE + SEED_SIZE];
+        uint8_t tmp[SEED_SIZE];
 
-        memcpy(tmp, nonceGSP, NONCE_SIZE);
-        nabto_random(tmp + NONCE_SIZE, SEED_SIZE);
-        unabto_crypto_reinit_c(nonceGSP, tmp + NONCE_SIZE, seedGSP);
+        nabto_random(tmp, SEED_SIZE);
+        unabto_crypto_reinit_c(nonceGSP, tmp, seedGSP);
 
-        ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
+        uint8_t* plaintextStart = ptr;
+        ptr = write_forward_mem(ptr, end, nonceGSP, NONCE_SIZE);
+        ptr = write_forward_mem(ptr, end, tmp, SEED_SIZE);
 
-        return send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoAttach, buf, end, tmp, sizeof(tmp), ptr - NP_PAYLOAD_HDR_BYTELENGTH);
+        return send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoAttach, buf, end, plaintextStart, ptr, plaintextStart, NP_PAYLOAD_HDR_FLAG_NONE);
 
 #else
         NABTO_LOG_FATAL(("AES encryption unavailable"));
@@ -408,7 +411,10 @@ static size_t mk_gsp_alive_rsp(uint16_t seq, size_t piggySize, uint8_t* piggyDat
       return 0;
     }
 
-    ptr = insert_header(buf, 0, nmc.context.gspnsi, U_ALIVE, true, seq, 0, 0);
+    ptr = insert_header(buf, end, 0, nmc.context.gspnsi, U_ALIVE, true, seq, 0, 0);
+    if (ptr == NULL) {
+        return 0;
+    }
 
     ptr = insert_notify_payload(ptr, end, NP_PAYLOAD_NOTIFY_ALIVE_OK);
     if (ptr == NULL) {
@@ -421,8 +427,8 @@ static size_t mk_gsp_alive_rsp(uint16_t seq, size_t piggySize, uint8_t* piggyDat
             return 0;
         }
     }
+    if (!insert_packet_length_from_cursor(buf, ptr)) { return 0; }
     len = ptr - buf;
-    insert_length(buf, (uint16_t)len);
     return len;
 }
 
@@ -432,7 +438,7 @@ static void send_gsp_alive_poll(void) {
     olen = mk_gsp_alive_rsp(0, 0, 0);
     nabtoSetFutureStamp(&nmc.context.timestamp, nmc.nabtoMainSetup.gspPollTimeout);
     send_to_basestation(nabtoCommunicationBuffer, olen, &nmc.context.gsp);
-} 
+}
 
 /******************************************************************************/
 
@@ -475,7 +481,7 @@ bool nabto_invite_event(nabto_packet_header* hdr)
 
 void handle_ok_invite_event(void)
 {
-    
+
     if (nmc.context.state == NABTO_AS_WAIT_BS) {
         SET_CTX_STATE_STAMP(NABTO_AS_WAIT_GSP, 0);
         NABTO_LOG_INFO(("GSP address: " PRIep, MAKE_EP_PRINTABLE(nmc.context.gsp)));
@@ -579,14 +585,14 @@ bool nabto_attach_event(nabto_packet_header* hdr)
     if (hdr->nsi_sp == 0) {
         NABTO_LOG_TRACE(("hdr->nsi_sp = 0"));
     }
-    
+
     {
         /* Receive Packet (4) */
         uint8_t* end = nabtoCommunicationBuffer + hdr->len;
-        
+
         uint16_t res = hdr->hlen;
         NABTO_LOG_TRACE(("received ATTACH event"));
-        
+
         if (hdr->flags != 0) {
             NABTO_LOG_TRACE(("Illegal header in U_ATTACH request (2/0): %" PRIu32 "/%i", hdr->nsi_cp, (int)hdr->flags));
         } else {
@@ -604,7 +610,7 @@ bool nabto_attach_event(nabto_packet_header* hdr)
                 NABTO_NOT_USED(ep); /* Needed to avoid warning -> error */
 
                 /**
-                 * If the endpoint given from the attach differs from the endpoint address 
+                 * If the endpoint given from the attach differs from the endpoint address
                  * the controller gave then, we are behind a symmetric nat.
                  */
                 if (!nabto_ep_is_equal(&ep, &nmc.context.globalAddress)) {
@@ -613,7 +619,7 @@ bool nabto_attach_event(nabto_packet_header* hdr)
 
                 NABTO_LOG_DEBUG(("nmc.ctx.privat     : " PRIep, MAKE_EP_PRINTABLE(nmc.socketGSPLocalEndpoint)));
                 NABTO_LOG_DEBUG(("nmc.ctx.global     : " PRIep, MAKE_EP_PRINTABLE(nmc.context.globalAddress)));
-                
+
                 res = nabto_rd_payload(ptr, end, &type); ptr += SIZE_PAYLOAD_HEADER;
                 // Here, we verify that the nonce is present and has the expected size
                 if (res != nmc.context.nonceSize || type != NP_PAYLOAD_TYPE_NONCE) {
@@ -679,18 +685,18 @@ bool nabto_alive_event(nabto_packet_header* hdr)
 
 #if NABTO_ENABLE_EVENTCHANNEL
         /*
-         * fill_event_buffer should return a pointer to a butter_t 
+         * fill_event_buffer should return a pointer to a butter_t
          * which can first be released when the application restarts or
-         * 
+         *
          * We hold the eventdata in a buffer if we need to resend it later.
          */
-        
+
         // create an input event buffer and fill it if there's data
         if (hdr->seq != nmc.context.piggyOldHeaderSequence) {
             // The old piggyback message has been received by the GSP, ask for a new one
-            
+
             /**
-             * The keep alive response consists of 
+             * The keep alive response consists of
              *  * A minimal nabto header.
              *  * A notify payload
              *  * An optional piggyback message
@@ -730,7 +736,7 @@ bool nabto_alive_event(nabto_packet_header* hdr)
 
 void fix_for_broken_routers(void) {
     /**
-     * fix for NABTO-1012 
+     * fix for NABTO-1012
      *
      * On some routers the nat mechanishm fails without any
      * notice. This means at some point a udp socket can go into a
@@ -760,7 +766,7 @@ void handle_as_idle(void) {
 #if NABTO_ENABLE_GET_LOCAL_IP
     nabto_get_local_ipv4(&nmc.socketGSPLocalEndpoint.addr);
 #endif
-    
+
     fix_for_broken_routers();
     nmc.controllerEp = nmc.nabtoMainSetup.controllerArg;
     if (nmc.nabtoMainSetup.controllerArg.addr.type != NABTO_IP_NONE) {
@@ -811,7 +817,7 @@ void handle_as_wait_bs(void) {
     if (newip.type != NABTO_IP_NONE) {
         nmc.controllerEp.addr = newip;
     }
-    
+
     SET_CTX_STATE_STAMP(NABTO_AS_WAIT_BS, EXP_WAIT(INTERVAL_BS_INVITE, nmc.context.counter));
     if(++nmc.context.counter > 6) {
         nmc.context.errorCount = 0;
@@ -820,7 +826,7 @@ void handle_as_wait_bs(void) {
         SET_CTX_STATE_STAMP(NABTO_AS_IDLE, INTERVAL_ERROR_RETRY_BASE);
         return;
     }
-    
+
     send_controller_invite();
 }
 
@@ -892,9 +898,9 @@ uint8_t* insert_attach_stats_payload(uint8_t* ptr, uint8_t* end, uint8_t statusC
 
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_ATTACH_STATS, 0, 3);
 
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_ATTACH_STATS_VERSION);
+    ptr = write_forward_u8(ptr, end, NP_PAYLOAD_ATTACH_STATS_VERSION);
 
-    WRITE_FORWARD_U8(ptr, statusCode);
+    ptr = write_forward_u8(ptr, end, statusCode);
 
     flags = 0;
 
@@ -902,15 +908,18 @@ uint8_t* insert_attach_stats_payload(uint8_t* ptr, uint8_t* end, uint8_t statusC
         flags |= NP_PAYLOAD_ATTACH_STATS_FLAGS_SECURE_ATTACH;
     }
 
-    WRITE_FORWARD_U8(ptr, flags);
+    ptr = write_forward_u8(ptr, end, flags);
 
     return ptr;
 }
 
 void send_basestation_attach_failure(uint8_t statusCode) {
     uint16_t length;
-    uint8_t* ptr = insert_header(nabtoCommunicationBuffer, 0, 0, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
+    uint8_t* ptr = insert_header(nabtoCommunicationBuffer, end, 0, 0, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
+    if (ptr == NULL) {
+        return;
+    }
 
     ptr = insert_stats_payload(ptr, end, NP_PAYLOAD_STATS_TYPE_DEVICE_ATTACH_FAIL);
     if (ptr == NULL) {
@@ -929,8 +938,8 @@ void send_basestation_attach_failure(uint8_t statusCode) {
 
     ptr = insert_attach_stats_payload(ptr, end, statusCode);
 
+    if (!insert_packet_length_from_cursor(nabtoCommunicationBuffer, ptr)) { return; }
     length = (uint16_t)(ptr - nabtoCommunicationBuffer);
-    insert_length(nabtoCommunicationBuffer, length);
 
     if (nmc.controllerEp.addr.type == NABTO_IP_NONE) {
         NABTO_LOG_TRACE(("There is no valid address to send statistics packets to"));
@@ -940,4 +949,4 @@ void send_basestation_attach_failure(uint8_t statusCode) {
 }
 
 
-#endif 
+#endif

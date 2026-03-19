@@ -281,16 +281,18 @@ bool nabto_connect_event_from_gsp(message_event* event, nabto_packet_header* hdr
  */
 static size_t mk_connect_rsp(uint8_t* buf, uint8_t* end, uint16_t seq, uint32_t notif, uint32_t nsi, uint32_t cpnsi, uint32_t spnsi, bool isLocalConnectRsp)
 {
-    uint8_t* ptr = insert_header(buf, cpnsi, spnsi, U_CONNECT, true, seq, 0, 0);
+    uint8_t* ptr = insert_header(buf, end, cpnsi, spnsi, U_CONNECT, true, seq, 0, 0);
+    if (ptr == NULL) return 0;
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_NOTIFY, 0, 8);
-    WRITE_U32(ptr, notif); ptr += 4;
-    WRITE_U32(ptr, nsi);   ptr += 4;
+    if (ptr == NULL) return 0;
+    ptr = write_forward_u32(ptr, end, notif);
+    ptr = write_forward_u32(ptr, end, nsi);
 
     if (isLocalConnectRsp) {
         ptr = insert_capabilities(ptr, end, 1 /*unenc*/);
     }
 
-    insert_length(buf, (uint16_t)(ptr - buf));
+    if (!insert_packet_length_from_cursor(buf, ptr)) { return 0; }
     return ptr - buf;
 }
 
@@ -354,29 +356,33 @@ static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, ui
     uint32_t destIpV4 = 0;
 
 
-    ptr = insert_header(buf, 0, con->spnsi, U_CONNECT, false, seq, 0, 0);
+    ptr = insert_header(buf, end, 0, con->spnsi, U_CONNECT, false, seq, 0, 0);
+    if (ptr == NULL) return;
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_EP, 0, 6);
+    if (ptr == NULL) return;
 
     if (dest->addr.type == NABTO_IP_V4) {
         destIpV4 = dest->addr.addr.ipv4;
     }
 
-    WRITE_U32(ptr, destIpV4); ptr += 4;
-    WRITE_U16(ptr, dest->port); ptr += 2;
+    ptr = write_forward_u32(ptr, end, destIpV4);
+    ptr = write_forward_u16(ptr, end, dest->port);
     if (seq > 0) {
         if (!myAddress || myAddress->addr.type != NABTO_IP_V4) {
             NABTO_LOG_ERROR(("Send rendezvous called with an invalid address"));
             return;
         } else {
             ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_EP, 0, 6);
-            WRITE_U32(ptr, myAddress->addr.addr.ipv4); ptr += 4;
-            WRITE_U16(ptr, myAddress->port); ptr += 2;
+            if (ptr == NULL) return;
+            ptr = write_forward_u32(ptr, end, myAddress->addr.addr.ipv4);
+            ptr = write_forward_u16(ptr, end, myAddress->port);
         }
     }
     {
-        size_t len = ptr - buf;
+        size_t len;
 
-        insert_length(buf, (uint16_t)len);
+        if (!insert_packet_length_from_cursor(buf, ptr)) { return; }
+        len = ptr - buf;
 
         if (seq) {
             NABTO_LOG_DEBUG((PRInsi " RENDEZVOUS Send to " PRIep ": seq=%" PRIu16, MAKE_NSI_PRINTABLE(0, con->spnsi, 0), MAKE_EP_PRINTABLE(*dest), seq));
@@ -998,11 +1004,11 @@ uint8_t* insert_rendezvous_stats_payload(uint8_t* ptr, uint8_t* end, nabto_conne
     }
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_RENDEZVOUS_STATS, 0, 7);
 
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_RENDEZVOUS_STATS_VERSION);
-    WRITE_FORWARD_U8(ptr, con->clientNatType);
-    WRITE_FORWARD_U8(ptr, nmc.context.natType);
-    WRITE_FORWARD_U16(ptr, con->rendezvousConnectState.portsOpened);
-    WRITE_FORWARD_U16(ptr, con->rendezvousConnectState.socketsOpened);
+    ptr = write_forward_u8(ptr, end, NP_PAYLOAD_RENDEZVOUS_STATS_VERSION);
+    ptr = write_forward_u8(ptr, end, con->clientNatType);
+    ptr = write_forward_u8(ptr, end, nmc.context.natType);
+    ptr = write_forward_u16(ptr, end, con->rendezvousConnectState.portsOpened);
+    ptr = write_forward_u16(ptr, end, con->rendezvousConnectState.socketsOpened);
 
     return ptr;
 }
@@ -1017,10 +1023,8 @@ uint8_t* insert_cp_id_payload(uint8_t* ptr, uint8_t* end, nabto_connect* con) {
 
     ptr = insert_payload(ptr, end,  NP_PAYLOAD_TYPE_CP_ID, 0, 1+cpIdLength);
 
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_CP_ID_TYPE_MAIL);
-    memcpy(ptr, (const void*) con->clientId, cpIdLength);
-
-    ptr += cpIdLength;
+    ptr = write_forward_u8(ptr, end, NP_PAYLOAD_CP_ID_TYPE_MAIL);
+    ptr = write_forward_mem(ptr, end, (const void*) con->clientId, cpIdLength);
 
     return ptr;
 }
@@ -1069,10 +1073,11 @@ uint8_t* insert_connection_info_payload(uint8_t* ptr, uint8_t* end, nabto_connec
 
 void send_connection_statistics(nabto_connect* con, uint8_t event) {
     size_t length;
-    uint8_t* ptr = insert_header(nabtoCommunicationBuffer, 0, con->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
-
-
+    uint8_t* ptr = insert_header(nabtoCommunicationBuffer, end, 0, con->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
+    if (ptr == NULL) {
+        return;
+    }
 
     ptr = insert_stats_payload(ptr, end, event);
     if (ptr == NULL) {
@@ -1112,15 +1117,18 @@ void send_connection_statistics(nabto_connect* con, uint8_t event) {
         return;
     }
 
+    if (!insert_packet_length_from_cursor(nabtoCommunicationBuffer, ptr)) { return; }
     length = ptr - nabtoCommunicationBuffer;
-    insert_length(nabtoCommunicationBuffer, (uint16_t)length);
     send_to_basestation(nabtoCommunicationBuffer, length, &nmc.context.gsp);
 }
 
 void send_connection_ended_statistics(nabto_connect* con) {
     size_t length;
-    uint8_t* ptr = insert_header(nabtoCommunicationBuffer, 0, con->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
+    uint8_t* ptr = insert_header(nabtoCommunicationBuffer, end, 0, con->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
+    if (ptr == NULL) {
+        return;
+    }
 
     ptr = insert_stats_payload(ptr, end, NP_PAYLOAD_STATS_TYPE_DEVICE_CONNECTION_CLOSE);
     if (ptr == NULL) {
@@ -1148,8 +1156,8 @@ void send_connection_ended_statistics(nabto_connect* con) {
         return;
     }
 
+    if (!insert_packet_length_from_cursor(nabtoCommunicationBuffer, ptr)) { return; }
     length = ptr - nabtoCommunicationBuffer;
-    insert_length(nabtoCommunicationBuffer, (uint16_t)length);
 
     send_to_basestation(nabtoCommunicationBuffer, length, &nmc.context.gsp);
 }

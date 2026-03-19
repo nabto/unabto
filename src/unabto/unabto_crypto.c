@@ -49,7 +49,7 @@ static void nabto_crypto_reset_a(nabto_crypto_context* cryptoContext)
         NABTO_LOG_FATAL(("aes chosen but no support is present"));
 #endif
         break;
-    } 
+    }
     case CRYPT_W_NULL_DATA: // nothing to do for this cipher here.
         break;
     }
@@ -130,14 +130,14 @@ void nabto_crypto_init_aes_128_hmac_sha256_psk_context(nabto_crypto_context* cry
 {
     unabto_buffer nonces[1];
     unabto_buffer seeds[1];
-    
+
     unabto_buffer_init(&nonces[0], (uint8_t*)nmc.nabtoMainSetup.id, (uint16_t)strlen(nmc.nabtoMainSetup.id));
     unabto_buffer_init(&seeds[0], (uint8_t*)psk, PRE_SHARED_KEY_SIZE);
-    
+
     nabto_crypto_create_key_material(nonces, 1,
                                      seeds, 1,
                                      cryptoContext->key, KEY_MATERIAL_LENGTH);
-    
+
     cryptoContext->code = CRYPT_W_AES_CBC_HMAC_SHA256;
     nabto_crypto_init_key(cryptoContext, false);
 }
@@ -149,13 +149,13 @@ void nabto_crypto_init_aes_128_hmac_sha256_psk_context_from_handshake_data(
 {
     unabto_buffer nonces[2];
     unabto_buffer seeds[2];
-    
+
     unabto_buffer_init(&nonces[0], (uint8_t*)initiatorNonce, NONCE_SIZE);
     unabto_buffer_init(&nonces[1], (uint8_t*)responderNonce, NONCE_SIZE);
-    
+
     unabto_buffer_init(&seeds[0], (uint8_t*)initiatorRandom, SEED_SIZE);
     unabto_buffer_init(&seeds[1], (uint8_t*)responderRandom, SEED_SIZE);
-    
+
     nabto_crypto_create_key_material(
         nonces, 2,
         seeds, 2,
@@ -182,7 +182,7 @@ void nabto_crypto_create_key_material(const unabto_buffer nonces[], uint8_t nonc
     unabto_buffer skeyseeds[1];
 
     prf_sha256(nonces, nonces_size, seeds, seeds_size, skeyseed, skeyseed_len);
-    
+
     unabto_buffer_init(skeyseeds, skeyseed, skeyseed_len);
 
     prfplus_sha256(skeyseeds, 1, nonces, nonces_size, keyData, keyDataLength);
@@ -239,7 +239,7 @@ void nabto_crypto_init(nabto_crypto_context* cryptoContext, crypto_application c
             // Nothing to do for them here.
             break;
     }
-#else 
+#else
         NABTO_LOG_FATAL(("no aes support"));
 #endif
         break;
@@ -399,14 +399,14 @@ bool unabto_decrypt(nabto_crypto_context* cryptoContext, uint8_t* ptr, uint16_t 
                 NABTO_LOG_TRACE(("Padding longer than 16 bytes"));
                 break;
             }
-            
+
             if (size-16 < padding_length) {
                 NABTO_LOG_TRACE(("Packet to short for padding"));
                 break;
             }
             *decrypted_size = size-16-padding_length;
-            
-            memmove(ptr,(const uint8_t*)(ptr+16), *decrypted_size);          
+
+            memmove(ptr,(const uint8_t*)(ptr+16), *decrypted_size);
             res = true;
             break;
         }
@@ -434,8 +434,9 @@ bool unabto_decrypt(nabto_crypto_context* cryptoContext, uint8_t* ptr, uint16_t 
 
 /******************************************************************************/
 
-bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, uint16_t size, uint8_t* dst, uint8_t* dstEnd, uint8_t **encryptedEnd)
+bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, const uint8_t* srcEnd, uint8_t* dst, uint8_t* dstEnd, uint8_t **encryptedEnd)
 {
+    uint16_t size = (srcEnd != NULL) ? (uint16_t)(srcEnd - src) : 0;
     bool res = false;
     switch(cryptoContext->code) {
     case CRYPT_W_AES_CBC_HMAC_SHA256: {
@@ -454,23 +455,18 @@ bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, uin
              break;
          }
          *encryptedEnd = dst + encryptedSize;
-         // Write length to payload header   
-         WRITE_U16(dst - SIZE_CODE - 2, (uint16_t)(SIZE_PAYLOAD_HEADER + SIZE_CODE + encryptedSize)); // 2 is packet length field
-            
+
          // First move the data because src and dst may overlap
          ptr += 16; // iv length
-         memmove(ptr, src, size); ptr += size;        
-            
-         // Write crypto code to payload
-         WRITE_U16(dst - SIZE_CODE, cryptoContext->code);
-         
+         memmove(ptr, src, size); ptr += size;
+
          // put the iv into the start of the buffer
          nabto_random(dst, 16);
-            
+
          paddingSize = (size/16+1)*16 - size;
          // insert the padding length on all the padding bytes
          memset(ptr, (int)paddingSize, paddingSize); ptr += paddingSize;
-            
+
          UNABTO_ASSERT(ptr - dst <= 0xFFFF);
          res = unabto_aes128_cbc_encrypt(cryptoContext->encryptkey, dst, (uint16_t)(ptr-dst));
         }
@@ -488,13 +484,9 @@ bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, uin
         }
         else
         {
-            // Write payload length
-            WRITE_U16(dst - 4, (uint16_t)(SIZE_PAYLOAD_HEADER + SIZE_CODE + encryptedSize)); // add 2 for integrity
             if (size && src != dst) {
                 memmove(dst, src, size);
             }
-            // Write crypto code to payload
-            WRITE_U16(dst - 2, CRYPT_W_NULL_DATA);
             pad = (uint8_t)((encryptedSize-2) - size);
             memset(dst + size, pad, pad);
             res = true;
@@ -521,7 +513,7 @@ bool unabto_insert_integrity(nabto_crypto_context* cryptoContext, uint8_t* start
         } else {
             unabto_buffer keys[1];
             unabto_buffer messages[1];
-            
+
             unabto_buffer_init(keys, cryptoContext->ourhmackey, HMAC_KEY_LENGTH);
             unabto_buffer_init(messages, start, plen-16);
 
@@ -531,7 +523,7 @@ bool unabto_insert_integrity(nabto_crypto_context* cryptoContext, uint8_t* start
             res = true;
             break;
         }
-#else 
+#else
         NABTO_LOG_FATAL(("aes not supported"));
 #endif
         break;
@@ -558,18 +550,18 @@ bool unabto_crypto_verify_and_decrypt(const nabto_packet_header* hdr,
 {
     uint16_t verifSize;
     uint16_t dlen;
-    
+
     if (!unabto_verify_integrity(cryptoContext, crypto->code, nabtoCommunicationBuffer, hdr->len, &verifSize)) {
         NABTO_LOG_TRACE(("Could not verify integrity in packet type %i", hdr->type));
         return false;
     }
 
-    
+
     if (!unabto_decrypt(cryptoContext, (uint8_t*)crypto->dataBegin, (uint16_t)((crypto->dataEnd - crypto->dataBegin) - verifSize), &dlen)) {
         NABTO_LOG_TRACE(("Decryption fail in packet type %i", hdr->type));
         return false;
     }
-    
+
     *decryptedDataLength = dlen;
     *decryptedDataBegin = (uint8_t*)crypto->dataBegin;
     return true;

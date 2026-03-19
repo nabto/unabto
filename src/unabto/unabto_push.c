@@ -107,8 +107,7 @@ uint16_t unabto_push_notification_data_size()
     return nabtoCommunicationBufferSize
         -NP_PACKET_HDR_MIN_BYTELENGTH
         -NP_PAYLOAD_PUSH_BYTELENGTH
-        -NP_PAYLOAD_CRYPTO_BYTELENGTH
-        -NP_PAYLOAD_VERIFY_BYTELENGTH;
+        -NP_PAYLOAD_CRYPTO_MAX_OVERHEAD;
 }
 
 void nabto_time_event_push(void)
@@ -215,21 +214,30 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
     }
 
 
-    uint8_t* ptr = insert_header(buf,0, nmc.context.gspnsi, U_PUSH, false, 0, 0, NULL);
+    uint8_t* ptr = insert_header(buf, end, 0, nmc.context.gspnsi, U_PUSH, false, 0, 0, NULL);
     uint8_t* cryptoPayloadStart;
-    uint8_t* cryptDataStart;
+
+    if (ptr == NULL) {
+        unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
+        unabto_push_notification_callback(elem->seq,&hint);
+        unabto_push_notification_remove(elem->seq);
+        return;
+    }
 
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PUSH, 0, NP_PAYLOAD_PUSH_BYTELENGTH-NP_PAYLOAD_HDR_BYTELENGTH);
-    WRITE_FORWARD_U32(ptr, elem->seq);
-    WRITE_FORWARD_U16(ptr, elem->pnsId);
-    WRITE_FORWARD_U8(ptr, NP_PAYLOAD_PUSH_FLAG_SEND);
-    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
-    WRITE_U8((ptr-3), NP_PAYLOAD_HDR_FLAG_NONE | NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS);
-    cryptoPayloadStart = ptr - NP_PAYLOAD_HDR_BYTELENGTH;
-
-    cryptDataStart = ptr;
-    ptr = unabto_push_notification_get_data(ptr, end-NP_PAYLOAD_VERIFY_BYTELENGTH, elem->seq);
-    if(ptr > end-NP_PAYLOAD_VERIFY_BYTELENGTH || ptr < cryptDataStart){
+    ptr = write_forward_u32(ptr, end, elem->seq);
+    ptr = write_forward_u16(ptr, end, elem->pnsId);
+    ptr = write_forward_u8(ptr, end, NP_PAYLOAD_PUSH_FLAG_SEND);
+    if (ptr == NULL) {
+        unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
+        unabto_push_notification_callback(elem->seq,&hint);
+        unabto_push_notification_remove(elem->seq);
+        return;
+    }
+    cryptoPayloadStart = ptr;
+    /* Write data at cryptoPayloadStart; encrypt_packet will relocate it. */
+    ptr = unabto_push_notification_get_data(ptr, end - NP_PAYLOAD_CRYPTO_MAX_OVERHEAD, elem->seq);
+    if(ptr > end - NP_PAYLOAD_CRYPTO_MAX_OVERHEAD || ptr < cryptoPayloadStart){
         unabto_push_hint hint = UNABTO_PUSH_HINT_INVALID_DATA_PROVIDED;
         unabto_push_notification_callback(elem->seq,&hint);
         unabto_push_notification_remove(elem->seq);
@@ -241,7 +249,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         unabto_push_notification_remove(elem->seq);
         return;
     }
-    if(!send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoConnect, buf, end, cryptDataStart, (uint16_t)(ptr-cryptDataStart), cryptoPayloadStart)){
+    if(!send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoConnect, buf, end, cryptoPayloadStart, ptr, cryptoPayloadStart, NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS)){
         unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
         unabto_push_notification_callback(elem->seq,&hint);
         unabto_push_notification_remove(elem->seq);

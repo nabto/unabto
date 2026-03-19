@@ -287,6 +287,12 @@ enum np_payload_type_e {
 
 #define NP_PAYLOAD_CRYPTO_BYTELENGTH   6  ///< size of a CRYPTO payload without data
 
+/**
+ * Maximum overhead added by encryption around the plaintext:
+ * payload header (4) + code (2) + IV (16) + max padding (16) + integrity (16).
+ */
+#define NP_PAYLOAD_CRYPTO_MAX_OVERHEAD (NP_PAYLOAD_CRYPTO_BYTELENGTH + 16 + 16 + 16)
+
 /* Bit values and bit masks for crypto code */
 /* -- operations -- (4 values) */
 #define NP_PAYLOAD_CRYPTO_OPER_NONE           0x0000

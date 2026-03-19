@@ -210,7 +210,7 @@ enum {
     NOTIFY_ERROR_BUSY_MICRO        = NP_PAYLOAD_NOTIFY_ERROR_BUSY_MICRO,        ///< See #NP_PAYLOAD_NOTIFY_ERROR_BUSY_MICRO
     NOTIFY_ERROR_MICRO_REQ_ERR     = NP_PAYLOAD_NOTIFY_ERROR_MICRO_REQ_ERR,     ///< See #NP_PAYLOAD_NOTIFY_ERROR_MICRO_REQ_ERR
     NOTIFY_ERROR_MICRO_REATTACHING = NP_PAYLOAD_NOTIFY_ERROR_MICRO_REATTACHING, ///< See #NP_PAYLOAD_NOTIFY_ERROR_MICRO_REATTACHING
-    NOTIFY_LAST_ERROR 
+    NOTIFY_LAST_ERROR
 };
 
 /**
@@ -237,7 +237,7 @@ uint16_t nabto_rd_header(const uint8_t* buf, const uint8_t* end, nabto_packet_he
  * @param buf  databuffer
  * @param end  databuffer end
  * @param hdr  header
- * @return ptr to end of written header or NULL if the header could not be written.   
+ * @return ptr to end of written header or NULL if the header could not be written.
  */
 uint8_t* nabto_wr_header(uint8_t* buf, const uint8_t* end, const nabto_packet_header* hdr);
 
@@ -277,26 +277,28 @@ bool unabto_find_payload(const uint8_t* buf, const uint8_t* end, uint8_t type, s
 /**
  * Write the packet header (excl the length field)
  * @param buf    the start of the packet
+ * @param end    the end of the buffer
  * @param cpnsi  the stream ID, cp part
  * @param spnsi  the stream ID, sp part
  * @param type   the packet type
  * @param rsp    response flag
  * @param seq    the sequence number
  * @param tag    tag
- * @return       the first byte after the header
+ * @return       the first byte after the header, or NULL if buffer too small
  */
-uint8_t* insert_header(uint8_t* buf, uint32_t cpnsi, uint32_t spnsi, uint8_t type, bool rsp, uint16_t seq, uint16_t tag, uint8_t* nsico);
+uint8_t* insert_header(uint8_t* buf, const uint8_t* end, uint32_t cpnsi, uint32_t spnsi, uint8_t type, bool rsp, uint16_t seq, uint16_t tag, uint8_t* nsico);
 
 
 /**
  * Write the packet header of a DATA packet (excl the length field)
  * @param buf    the start of the packet
+ * @param end    the end of the buffer
  * @param nsi    the stream ID
  * @param nsico  the nsi.co to be inserted or zero to exclude it from the header
  * @param tag    tag
- * @return       the first byte after the header
+ * @return       the first byte after the header, or NULL if buffer too small
  */
-uint8_t* insert_data_header(uint8_t* buf, uint32_t nsi, uint8_t* nsico, uint16_t tag);
+uint8_t* insert_data_header(uint8_t* buf, const uint8_t* end, uint32_t nsi, uint8_t* nsico, uint16_t tag);
 
 /**
  * Write packet flags.
@@ -315,9 +317,19 @@ uint8_t* insert_data_header(uint8_t* buf, uint32_t nsi, uint8_t* nsico, uint16_t
 /**
  * Write packet length.
  * @param buf  (uint8_t*) the start of the packet
+ * @param end  the end of the buffer
  * @param len  (size_t) the total length of the payload
+ * @return     true if length was written, false if buffer too small
  */
-void insert_length(uint8_t* buf, uint16_t length);
+bool insert_packet_length(uint8_t* buf, const uint8_t* end, uint16_t length);
+
+/**
+ * Compute packet length from the start and end of the packet and write it into the header.
+ * @param packetBegin  the start of the packet
+ * @param packetEnd    the end of the packet
+ * @return             true if length was written, false on NULL/range/overflow error
+ */
+bool insert_packet_length_from_cursor(uint8_t* packetBegin, const uint8_t* packetEnd);
 
 /**
  * Write the Payload
@@ -342,7 +354,7 @@ uint8_t* insert_payload(uint8_t* buf, uint8_t* end, uint8_t type, const uint8_t*
  */
 uint8_t* insert_optional_payload(uint8_t* buf, uint8_t* end, uint8_t type, const uint8_t* content, size_t size);
 
-/** 
+/**
  * insert a capabilities packet
  * @param buf           the buffer
  * @param cap_encr_off  true if we accept unencrypted connections
@@ -366,13 +378,6 @@ uint8_t* insert_random_payload(uint8_t* ptr, uint8_t* end, uint8_t* randomData, 
  * insert type, bits, mask and codesLength but no encryption codes
  */
 uint8_t* insert_capabilities_payload(uint8_t* ptr, uint8_t* end, struct unabto_capabilities* capabilities, uint16_t encryptionCodes);
-
-/**
- * Return a pointer to the first byte after the code in the payload
- * the payload has the bit set which says it has payloads within the
- * packet.
- */
-uint8_t* insert_crypto_payload_with_payloads(uint8_t* ptr, uint8_t* end);
 
 /**
  * read a payload, return true iff it succeedes

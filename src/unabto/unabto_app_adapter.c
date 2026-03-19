@@ -147,7 +147,7 @@ void framework_event(struct naf_handle_s* handle,
     switch (res) {
         case AER_REQ_RESPONSE_READY:
             add_flags(buf, NP_PACKET_HDR_FLAG_RESPONSE);
-            send_and_encrypt_packet_con(con, buf, end, iobuf, unabto_query_response_used(&queryResponse), iobuf - SIZE_CODE - NP_PAYLOAD_HDR_BYTELENGTH);
+            send_and_encrypt_packet_con(con, buf, end, iobuf, iobuf + unabto_query_response_used(&queryResponse), iobuf - SIZE_CODE - NP_PAYLOAD_HDR_BYTELENGTH, NP_PAYLOAD_HDR_FLAG_NONE);
             break;
 
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
@@ -223,17 +223,8 @@ bool framework_get_async_response(struct naf_handle_s *handle)
     }
     add_flags(buf, NP_PACKET_HDR_FLAG_RESPONSE);
 
-    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, NULL, 0);
-    if (ptr == NULL) {
-        return false;
-    }
-    ptr += 2; // skip over crypto code
-    if (ptr > end) {
-        return false;
-    }
-    
-    /* Set up a write buffer to write into buf (after crypto payload header). */
-    availableForData = unabto_crypto_max_data(&con->cryptoctx, (uint16_t)(end - ptr));
+    /* Write response data at ptr; encrypt_packet will relocate it. */
+    availableForData = unabto_crypto_max_data(&con->cryptoctx, (uint16_t)(end - ptr - NP_PAYLOAD_CRYPTO_BYTELENGTH));
     unabto_buffer_init(&w_buf, ptr, MIN(availableForData, NABTO_RESPONSE_MAX_SIZE));
     unabto_query_response_init(&queryResponse, &w_buf);
 
@@ -243,7 +234,7 @@ bool framework_get_async_response(struct naf_handle_s *handle)
     if (res != AER_REQ_RESPONSE_READY) {
         return send_exception(handle->connection, &handle->header, res);
     } else {
-        return send_and_encrypt_packet_con(handle->connection, buf, end, ptr, unabto_query_response_used(&queryResponse), ptr - 6);
+        return send_and_encrypt_packet_con(handle->connection, buf, end, ptr, ptr + unabto_query_response_used(&queryResponse), ptr, NP_PAYLOAD_HDR_FLAG_NONE);
     }
 }
 #endif

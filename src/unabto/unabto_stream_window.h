@@ -355,7 +355,7 @@ void nabto_stream_tcb_update_next_event(struct nabto_stream_s * stream, nabto_st
 void nabto_stream_make_rst_response_window(const struct nabto_win_info* win, struct nabto_win_info* rstWin);
 bool nabto_stream_read_window(const uint8_t* start, uint16_t length, struct nabto_win_info* win);
 uint16_t nabto_stream_window_payload_length(struct nabto_win_info* win);
-bool nabto_stream_encode_window(const struct nabto_win_info* win, uint8_t* start, uint16_t* length);
+bool nabto_stream_encode_window(const struct nabto_win_info* win, uint8_t* start, const uint8_t* end, uint16_t* length);
 
 // Calculate the advertised window in
 uint16_t unabto_stream_advertised_window_size(struct nabto_stream_tcb* tcb);

@@ -137,13 +137,16 @@ void nabto_stream_event(nabto_connect*       con,
 
     memset(&sackData, 0, sizeof(sackData));
     {
-        uint8_t* ptr = sackStart;
-        while(sackLength >= 8 && sackData.nPairs < NP_PAYLOAD_SACK_MAX_PAIRS) {
-            uint32_t sackSeqStart; // start of sack
-            uint32_t sackSeqEnd; // end of sack one larger than actual acked window.
-            READ_FORWARD_U32(sackSeqStart, ptr);
-            READ_FORWARD_U32(sackSeqEnd, ptr);
-            sackLength -= 8;
+        const uint8_t* ptr = sackStart;
+        const uint8_t* end = sackStart + sackLength;
+        while(sackData.nPairs < NP_PAYLOAD_SACK_MAX_PAIRS) {
+            uint32_t sackSeqStart;
+            uint32_t sackSeqEnd;
+            ptr = read_forward_u32(&sackSeqStart, ptr, end);
+            ptr = read_forward_u32(&sackSeqEnd, ptr, end);
+            if (ptr == NULL) {
+                break;
+            }
 
             sackData.pairs[sackData.nPairs].start = sackSeqStart;
             sackData.pairs[sackData.nPairs].end = sackSeqEnd;
@@ -167,18 +170,18 @@ bool build_and_send_rst_packet(nabto_connect* con, uint16_t tag, struct nabto_wi
     nabto_stream_make_rst_response_window(win, &rst);
     winLength = nabto_stream_window_payload_length(&rst);
 
-    ptr = insert_data_header(buf, con->spnsi, con->nsico, tag);
+    ptr = insert_data_header(buf, end, con->spnsi, con->nsico, tag);
+    if (ptr == NULL) return false;
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_WINDOW, 0, winLength);
+    if (ptr == NULL) return false;
 
-    if (nabto_stream_encode_window(&rst, ptr, &encodeLength)) {
+    if (nabto_stream_encode_window(&rst, ptr, end, &encodeLength)) {
         ptr += encodeLength;
     } else {
         return false;
     }
 
-    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CRYPTO, 0, 0);
-
-    return send_and_encrypt_packet_con(con, buf, end, 0, 0, ptr - NP_PAYLOAD_HDR_BYTELENGTH);
+    return send_and_encrypt_packet_con(con, buf, end, NULL, NULL, ptr, NP_PAYLOAD_HDR_FLAG_NONE);
 }
 
 void unabto_time_event_stream(void)
@@ -462,7 +465,10 @@ void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
         return;
     }
 
-    ptr = insert_header(nabtoCommunicationBuffer, 0, stream->connection->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
+    ptr = insert_header(nabtoCommunicationBuffer, end, 0, stream->connection->spnsi, NP_PACKET_HDR_TYPE_STATS, false, 0, 0, 0);
+    if (ptr == NULL) {
+        return;
+    }
 
     if (stream->state == STREAM_IDLE) {
         return;
@@ -493,8 +499,8 @@ void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event)
         return;
     }
 
+    if (!insert_packet_length_from_cursor(nabtoCommunicationBuffer, ptr)) { return; }
     length = ptr - nabtoCommunicationBuffer;
-    insert_length(nabtoCommunicationBuffer, (uint16_t)length);
     send_to_basestation(nabtoCommunicationBuffer, length, &nmc.context.gsp);
 }
 

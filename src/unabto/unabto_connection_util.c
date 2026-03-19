@@ -172,15 +172,21 @@ bool unabto_connection_util_verify_capabilities(nabto_connect* connection, struc
 
     connection->cpAsync = true;
 
-    ptr = capabilities->codesStart;
-    
+    {
+    const uint8_t* cptr = capabilities->codesStart;
+    const uint8_t* cend = capabilities->codesStart + capabilities->codesLength * 2;
+
     for (i = 0; i < capabilities->codesLength; i++) {
         uint16_t code;
-        READ_FORWARD_U16(code, ptr);
+        cptr = read_forward_u16(&code, cptr, cend);
+        if (cptr == NULL) {
+            break;
+        }
         if (code == CRYPT_W_AES_CBC_HMAC_SHA256) {
             codeFound = true;
             break;
         }
+    }
     }
     if (!codeFound) {
         NABTO_LOG_WARN(("no suitable encryption code is found in psk connect packet"));
