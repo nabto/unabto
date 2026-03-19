@@ -133,7 +133,7 @@ uint16_t nabto_rd_payload(const uint8_t* buf, const uint8_t* end, uint8_t* type)
     if (len < SIZE_PAYLOAD_HEADER) {
         return 0;
     }
-    
+
     // The length of the payload should be smaller than the buffer.
     if (end - buf < len) {
         return 0;
@@ -213,23 +213,23 @@ uint8_t* insert_header(uint8_t* buf, const uint8_t* end, uint32_t cpnsi, uint32_
     if ((size_t)(end - buf) < required) return NULL;
 
     /* Write fixed part of packet header */
-    WRITE_U32(buf,       cpnsi);   buf += 4; /* NSI.cp              */
-    WRITE_U32(buf,       spnsi);   buf += 4; /* NSI.sp              */
-    WRITE_U8(buf,         type);   buf += 1; /* type: U_INVITE, ... */
-    WRITE_U8(buf, PROTOVERSION);   buf += 1; /* version             */
-    WRITE_U8(buf,            0);   buf += 1; /* reserved            */
-    WRITE_U8(buf,        flags);   buf += 1; /* flags               */
-    WRITE_U16(buf,         seq);   buf += 2; /* seq                 */
-    /*WRITE_U16(buf,         len);*/ buf += 2; /*   length to be patched later */
+    buf = write_forward_u32(buf, end, cpnsi);        /* NSI.cp              */
+    buf = write_forward_u32(buf, end, spnsi);        /* NSI.sp              */
+    buf = write_forward_u8(buf, end, type);          /* type: U_INVITE, ... */
+    buf = write_forward_u8(buf, end, PROTOVERSION);  /* version             */
+    buf = write_forward_u8(buf, end, 0);             /* reserved            */
+    buf = write_forward_u8(buf, end, flags);         /* flags               */
+    buf = write_forward_u16(buf, end, seq);          /* seq                 */
+    buf = write_forward_u16(buf, end, 0);            /* length to be patched later */
 
     /* Write controller nsi to the packet header (optional) */
     if (nsico) {
-        memcpy(buf, (const void*)nsico, 8);     buf += 8;
+        buf = write_forward_mem(buf, end, nsico, 8);
     }
 
     /* Write tag to packet header (optional) */
     if (tag) {
-        WRITE_U16(buf,     tag);   buf += 2;
+        buf = write_forward_u16(buf, end, tag);
     }
 
     return buf; /* return end of packet header */
@@ -339,7 +339,7 @@ uint8_t* insert_ipx_payload(uint8_t* ptr, uint8_t* end) {
     if (nmc.context.globalAddress.addr.type == NABTO_IP_V4) {
         globalAddr = nmc.context.globalAddress.addr.addr.ipv4;
     }
-    
+
     ptr = write_forward_u32(ptr, end, localAddr);
     ptr = write_forward_u16(ptr, end, nmc.socketGSPLocalEndpoint.port);
     ptr = write_forward_u32(ptr, end, globalAddr);
@@ -357,7 +357,7 @@ uint8_t* insert_version_payload(uint8_t* ptr, uint8_t* end)
     if (end-ptr < (ptrdiff_t)(NP_PAYLOAD_VERSION_BYTELENGTH_PATCH + prereleaseLength + buildLength)) {
         return NULL;
     }
-    
+
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_VERSION, 0, (14+prereleaseLength+buildLength));
 
     ptr = write_forward_u16(ptr, end, NP_PAYLOAD_VERSION_TYPE_UD);
@@ -402,7 +402,7 @@ uint8_t* insert_notify_payload(uint8_t* ptr, uint8_t* end, uint32_t notifyValue)
     if (end-ptr < NP_PAYLOAD_NOTIFY_BYTELENGTH) {
         return NULL;
     }
-    
+
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_NOTIFY, 0, 4);
     ptr = write_forward_u32(ptr, end, notifyValue);
     return ptr;
@@ -413,11 +413,11 @@ uint8_t* insert_piggy_payload(uint8_t* ptr, uint8_t* end, uint8_t* piggyData, ui
     if ((uint16_t)(end-ptr) < (NP_PAYLOAD_PIGGY_SIZE_WO_DATA + piggySize)) {
         return NULL;
     }
-    
+
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PIGGY, 0, 4 + piggySize);
     ptr = write_forward_u32(ptr, end, 0);
     ptr = write_forward_mem(ptr, end, (const void*) piggyData, piggySize);
-    
+
     return ptr;
 }
 
@@ -441,11 +441,11 @@ uint8_t* insert_capabilities_payload(uint8_t* ptr, uint8_t* end, struct unabto_c
     if (encryptionCodes > 0) {
         dataLength += 2 + encryptionCodes * 2;
     }
-    
+
     if (end - ptr < 4 + dataLength) {
         return NULL;
     }
-        
+
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CAPABILITY, 0, dataLength);
     if (ptr == NULL) {
         return NULL;
@@ -585,7 +585,7 @@ bool unabto_payload_find_and_read_crypto(const uint8_t* buf, const uint8_t* end,
     }
 
     return true;
-    
+
 }
 
 bool unabto_payload_read_notify(struct unabto_payload_packet* payload, struct unabto_payload_notify* notify)
