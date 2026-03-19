@@ -16,6 +16,7 @@ external/Microchip/
 *#*#
 TAGS
 build-dir
+build-clang-tidy
 builddir
 _build
 build
