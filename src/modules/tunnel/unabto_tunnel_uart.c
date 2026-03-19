@@ -265,7 +265,8 @@ void unabto_tunnel_uart_parse_command(tunnel* t, tunnel_event_source event_sourc
         t->state = TS_FAILED_COMMAND;
         return;
     }
-    strncpy(t->staticMemory->stmu.uart_sm.deviceName, uart_tunnel_get_default_device(), MAX_DEVICE_NAME_LENGTH);
+    strncpy(t->staticMemory->stmu.uart_sm.deviceName, uart_tunnel_get_default_device(), MAX_DEVICE_NAME_LENGTH - 1);
+    t->staticMemory->stmu.uart_sm.deviceName[MAX_DEVICE_NAME_LENGTH - 1] = '\0';
     t->tunnelType = TUNNEL_TYPE_UART;
     
     unabto_tunnel_uart_steal_port(t, tunnels, tunnelsLength);

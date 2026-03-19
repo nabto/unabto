@@ -275,7 +275,7 @@ unabto_buffer* get_event_buffer2(size_t maximumLength)
         
         buffer_write_t writeBuffer;
 
-        sprintf((char*)body, "%d", lastTemperature_);
+        snprintf((char*)body, sizeof(body), "%d", lastTemperature_);
         
         // limit number of bytes to what uNabto indicates it can handle
         if((size_t)(BODYLENGTH + OVERHEAD) > maximumLength)

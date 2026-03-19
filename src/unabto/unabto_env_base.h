@@ -86,27 +86,6 @@
 
 typedef char _nabtoDummyType; // Some compilers (e.g. the MPLAB C18 compiler for PIC18) don't accept C files with no statements. This typedef solves this.
 
-/**
- * Compare a constant string (possibly in ROM) to the contents of a buffer
- * @param romString  the string
- * @param ramString  the buffer
- * @return           depending on the implementation (don't use)
- */
-#ifndef textcmp
-#   define textcmp(romString, ramString) strcmp(romString, ramString)
-#endif
-
-/**
- * Copy a constant string (possibly in ROM) to a buffer
- * @param destination         the destination buffer
- * @param destinationSize     size of the destination buffer
- * @param source              the source buffer
- * @return                    depending on the implementation (don't use)
- */
-#ifndef textcpy
-#   define textcpy(destination, source, destinationSize) strncpy(destination, source, destinationSize)
-#endif
-
 #define NABTO_STRINGIFY(x) _NABTO_STRINGIFY(x)
 #define _NABTO_STRINGIFY(x) #x
 

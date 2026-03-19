@@ -47,7 +47,4 @@ typedef int64_t nabto_stamp_diff_t;
 //#define copy_string(destination, destinationSize, source) strcpy_s(destination, destinationSize, source)
 //#define copy_text(destination, destinationSize, source) strcpy_s(destination, destinationSize, source)
 
-//#define textcmp(romString, ramString) strcmp(romString, ramString)
-//#define textcpy(destination, destinationSize, source) strcpy_s(destination, destinationSize, source)
-
 #endif

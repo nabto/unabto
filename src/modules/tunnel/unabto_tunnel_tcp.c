@@ -297,7 +297,8 @@ void unabto_tunnel_tcp_parse_command(tunnel* tunnel, tunnel_event_source event_s
         memcpy(tunnel->staticMemory->stmu.tcp_sm.host, s, length);
         tunnel->staticMemory->stmu.tcp_sm.host[length] = '\0';
     } else {
-        strncpy(tunnel->staticMemory->stmu.tcp_sm.host, unabto_tunnel_tcp_get_default_host(), MAX_HOST_LENGTH);
+        strncpy(tunnel->staticMemory->stmu.tcp_sm.host, unabto_tunnel_tcp_get_default_host(), MAX_HOST_LENGTH - 1);
+        tunnel->staticMemory->stmu.tcp_sm.host[MAX_HOST_LENGTH - 1] = '\0';
     }
     tunnel->tunnelType = TUNNEL_TYPE_TCP;
 

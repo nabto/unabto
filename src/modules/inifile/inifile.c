@@ -353,7 +353,7 @@ int writeIniString(const char *Section,
    if (!InF)
       return 0;
 
-   sprintf(TempFileName, "%s.XXXXXX", FileName);
+   snprintf(TempFileName, sizeof(TempFileName), "%s.XXXXXX", FileName);
    fh = mkstemp(TempFileName);
    if (fh == -1)
    {
