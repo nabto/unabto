@@ -196,6 +196,8 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
         }
 #endif
 
+        if (ptr == NULL) { return; }
+
         olen = (uint16_t)(ptr - buf); // HSIZE is added again before returning
         header |= NP_LEGACY_PACKET_HDR_FLAG_RSP;
         WRITE_U32(buf, header);
