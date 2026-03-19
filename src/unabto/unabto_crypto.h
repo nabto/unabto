@@ -203,13 +203,13 @@ bool unabto_crypto_verify_and_decrypt(const nabto_packet_header* hdr,
  * Src and dst may overlap so move data before e.g. an iv is written to dst.
  * @param cryptoContext   the cryptocontext
  * @param src         the clear text data
- * @param size        the size of the clear text data
+ * @param srcEnd      end of the clear text data
  * @param dst         the location to put the encrypted data
  * @param dstEnd      the end of the destination buffer (must be large enough to the later appended verification)
  * @param encryptedEnd the end of the encrypted data including the integrity value.
  * @return            true if successfully
  */
-bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, uint16_t size, uint8_t* dst, uint8_t* dstEnd, uint8_t **encryptedEnd);
+bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, const uint8_t* srcEnd, uint8_t* dst, uint8_t* dstEnd, uint8_t **encryptedEnd);
 
 
 /**

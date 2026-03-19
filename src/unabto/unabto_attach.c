@@ -89,8 +89,8 @@ text stName(nabto_state state)
 #include "unabto_push.h"
 #define PUSHNOTIFY unabto_push_notify_reattach();
 #else
-#define PUSHNOTIFY 
-#endif                                                              
+#define PUSHNOTIFY
+#endif
 
 /**
  * Set a new state, and log the change
@@ -236,7 +236,7 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
     if (ptr == NULL) {
         return 0;
     }
-    
+
     if (toGSP) {
         const char dummy[2] = { '-', 0 };
         const char* version;
@@ -284,7 +284,7 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_SP_ID, 0, sid_len + 1);
     ptr = write_forward_u8(ptr, end, NP_PAYLOAD_SP_ID_TYPE_URL); /* SPID_URL */
     ptr = write_forward_mem(ptr, end, nmc.nabtoMainSetup.id, sid_len);
-    
+
     if (!insert_packet_length_from_cursor(buf, ptr)) { return 0; }
     len = ptr - buf;
 
@@ -306,7 +306,7 @@ static void send_gsp_invite(void) {
     size_t bytes;
 
     NABTO_LOG_DEBUG(("Sending INVITE to GSP: %i", nmc.context.counter));
-    
+
     bytes = mk_invite(nabtoCommunicationBuffer, nabtoCommunicationBuffer + nabtoCommunicationBufferSize, true); /* Send Packet(3) */
     if (bytes) {
         if (nmc.context.nonceSize == NONCE_SIZE_OLD) {
@@ -369,13 +369,16 @@ static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uin
         res = true;
     } else {
 #if NABTO_ENABLE_UCRYPTO
-        uint8_t tmp[NONCE_SIZE + SEED_SIZE];
+        uint8_t tmp[SEED_SIZE];
 
-        memcpy(tmp, nonceGSP, NONCE_SIZE);
-        nabto_random(tmp + NONCE_SIZE, SEED_SIZE);
-        unabto_crypto_reinit_c(nonceGSP, tmp + NONCE_SIZE, seedGSP);
+        nabto_random(tmp, SEED_SIZE);
+        unabto_crypto_reinit_c(nonceGSP, tmp, seedGSP);
 
-        return send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoAttach, buf, end, tmp, sizeof(tmp), ptr, NP_PAYLOAD_HDR_FLAG_NONE);
+        uint8_t* plaintextStart = ptr;
+        ptr = write_forward_mem(ptr, end, nonceGSP, NONCE_SIZE);
+        ptr = write_forward_mem(ptr, end, tmp, SEED_SIZE);
+
+        return send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoAttach, buf, end, plaintextStart, ptr, plaintextStart, NP_PAYLOAD_HDR_FLAG_NONE);
 
 #else
         NABTO_LOG_FATAL(("AES encryption unavailable"));
@@ -435,7 +438,7 @@ static void send_gsp_alive_poll(void) {
     olen = mk_gsp_alive_rsp(0, 0, 0);
     nabtoSetFutureStamp(&nmc.context.timestamp, nmc.nabtoMainSetup.gspPollTimeout);
     send_to_basestation(nabtoCommunicationBuffer, olen, &nmc.context.gsp);
-} 
+}
 
 /******************************************************************************/
 
@@ -478,7 +481,7 @@ bool nabto_invite_event(nabto_packet_header* hdr)
 
 void handle_ok_invite_event(void)
 {
-    
+
     if (nmc.context.state == NABTO_AS_WAIT_BS) {
         SET_CTX_STATE_STAMP(NABTO_AS_WAIT_GSP, 0);
         NABTO_LOG_INFO(("GSP address: " PRIep, MAKE_EP_PRINTABLE(nmc.context.gsp)));
@@ -582,14 +585,14 @@ bool nabto_attach_event(nabto_packet_header* hdr)
     if (hdr->nsi_sp == 0) {
         NABTO_LOG_TRACE(("hdr->nsi_sp = 0"));
     }
-    
+
     {
         /* Receive Packet (4) */
         uint8_t* end = nabtoCommunicationBuffer + hdr->len;
-        
+
         uint16_t res = hdr->hlen;
         NABTO_LOG_TRACE(("received ATTACH event"));
-        
+
         if (hdr->flags != 0) {
             NABTO_LOG_TRACE(("Illegal header in U_ATTACH request (2/0): %" PRIu32 "/%i", hdr->nsi_cp, (int)hdr->flags));
         } else {
@@ -607,7 +610,7 @@ bool nabto_attach_event(nabto_packet_header* hdr)
                 NABTO_NOT_USED(ep); /* Needed to avoid warning -> error */
 
                 /**
-                 * If the endpoint given from the attach differs from the endpoint address 
+                 * If the endpoint given from the attach differs from the endpoint address
                  * the controller gave then, we are behind a symmetric nat.
                  */
                 if (!nabto_ep_is_equal(&ep, &nmc.context.globalAddress)) {
@@ -616,7 +619,7 @@ bool nabto_attach_event(nabto_packet_header* hdr)
 
                 NABTO_LOG_DEBUG(("nmc.ctx.privat     : " PRIep, MAKE_EP_PRINTABLE(nmc.socketGSPLocalEndpoint)));
                 NABTO_LOG_DEBUG(("nmc.ctx.global     : " PRIep, MAKE_EP_PRINTABLE(nmc.context.globalAddress)));
-                
+
                 res = nabto_rd_payload(ptr, end, &type); ptr += SIZE_PAYLOAD_HEADER;
                 // Here, we verify that the nonce is present and has the expected size
                 if (res != nmc.context.nonceSize || type != NP_PAYLOAD_TYPE_NONCE) {
@@ -682,18 +685,18 @@ bool nabto_alive_event(nabto_packet_header* hdr)
 
 #if NABTO_ENABLE_EVENTCHANNEL
         /*
-         * fill_event_buffer should return a pointer to a butter_t 
+         * fill_event_buffer should return a pointer to a butter_t
          * which can first be released when the application restarts or
-         * 
+         *
          * We hold the eventdata in a buffer if we need to resend it later.
          */
-        
+
         // create an input event buffer and fill it if there's data
         if (hdr->seq != nmc.context.piggyOldHeaderSequence) {
             // The old piggyback message has been received by the GSP, ask for a new one
-            
+
             /**
-             * The keep alive response consists of 
+             * The keep alive response consists of
              *  * A minimal nabto header.
              *  * A notify payload
              *  * An optional piggyback message
@@ -733,7 +736,7 @@ bool nabto_alive_event(nabto_packet_header* hdr)
 
 void fix_for_broken_routers(void) {
     /**
-     * fix for NABTO-1012 
+     * fix for NABTO-1012
      *
      * On some routers the nat mechanishm fails without any
      * notice. This means at some point a udp socket can go into a
@@ -763,7 +766,7 @@ void handle_as_idle(void) {
 #if NABTO_ENABLE_GET_LOCAL_IP
     nabto_get_local_ipv4(&nmc.socketGSPLocalEndpoint.addr);
 #endif
-    
+
     fix_for_broken_routers();
     nmc.controllerEp = nmc.nabtoMainSetup.controllerArg;
     if (nmc.nabtoMainSetup.controllerArg.addr.type != NABTO_IP_NONE) {
@@ -814,7 +817,7 @@ void handle_as_wait_bs(void) {
     if (newip.type != NABTO_IP_NONE) {
         nmc.controllerEp.addr = newip;
     }
-    
+
     SET_CTX_STATE_STAMP(NABTO_AS_WAIT_BS, EXP_WAIT(INTERVAL_BS_INVITE, nmc.context.counter));
     if(++nmc.context.counter > 6) {
         nmc.context.errorCount = 0;
@@ -823,7 +826,7 @@ void handle_as_wait_bs(void) {
         SET_CTX_STATE_STAMP(NABTO_AS_IDLE, INTERVAL_ERROR_RETRY_BASE);
         return;
     }
-    
+
     send_controller_invite();
 }
 
@@ -946,4 +949,4 @@ void send_basestation_attach_failure(uint8_t statusCode) {
 }
 
 
-#endif 
+#endif

@@ -147,7 +147,7 @@ void framework_event(struct naf_handle_s* handle,
     switch (res) {
         case AER_REQ_RESPONSE_READY:
             add_flags(buf, NP_PACKET_HDR_FLAG_RESPONSE);
-            send_and_encrypt_packet_con(con, buf, end, iobuf, unabto_query_response_used(&queryResponse), iobuf - SIZE_CODE - NP_PAYLOAD_HDR_BYTELENGTH, NP_PAYLOAD_HDR_FLAG_NONE);
+            send_and_encrypt_packet_con(con, buf, end, iobuf, iobuf + unabto_query_response_used(&queryResponse), iobuf - SIZE_CODE - NP_PAYLOAD_HDR_BYTELENGTH, NP_PAYLOAD_HDR_FLAG_NONE);
             break;
 
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
@@ -234,7 +234,7 @@ bool framework_get_async_response(struct naf_handle_s *handle)
     if (res != AER_REQ_RESPONSE_READY) {
         return send_exception(handle->connection, &handle->header, res);
     } else {
-        return send_and_encrypt_packet_con(handle->connection, buf, end, ptr, unabto_query_response_used(&queryResponse), ptr, NP_PAYLOAD_HDR_FLAG_NONE);
+        return send_and_encrypt_packet_con(handle->connection, buf, end, ptr, ptr + unabto_query_response_used(&queryResponse), ptr, NP_PAYLOAD_HDR_FLAG_NONE);
     }
 }
 #endif

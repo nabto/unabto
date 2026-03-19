@@ -181,7 +181,7 @@ bool build_and_send_rst_packet(nabto_connect* con, uint16_t tag, struct nabto_wi
         return false;
     }
 
-    return send_and_encrypt_packet_con(con, buf, end, 0, 0, ptr, NP_PAYLOAD_HDR_FLAG_NONE);
+    return send_and_encrypt_packet_con(con, buf, end, NULL, NULL, ptr, NP_PAYLOAD_HDR_FLAG_NONE);
 }
 
 void unabto_time_event_stream(void)

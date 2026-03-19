@@ -253,8 +253,6 @@ void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const na
     uint8_t* end;
     uint8_t* cryptoPayloadStart;
     uint8_t* plaintextStart;
-    uint8_t* plaintextEnd;
-    uint16_t plaintextLength;
     uint16_t packetLength;
     nabto_header_init(&header, NP_PACKET_HDR_TYPE_U_CONNECT_PSK, connection->cpnsi, connection->spnsi);
 
@@ -289,13 +287,9 @@ void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const na
     // insert nonce_client
     ptr = insert_nonce_payload(ptr, end, connection->psk.handshakeData.initiatorNonce, 32);
 
-    plaintextEnd = ptr;
-
-    plaintextLength = (uint16_t)(plaintextEnd - plaintextStart);
-
     // encrypt and send packet.
 
-    if (encrypt_packet(&connection->cryptoctx, nabtoCommunicationBuffer, end, plaintextStart, plaintextLength, cryptoPayloadStart, NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS, &packetLength)) {
+    if (encrypt_packet(&connection->cryptoctx, nabtoCommunicationBuffer, end, plaintextStart, ptr, cryptoPayloadStart, NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS, &packetLength)) {
         nabto_write(socket, nabtoCommunicationBuffer, packetLength, &peer->addr, peer->port);
     } else {
         NABTO_LOG_WARN(("cannot encrypt packet"));

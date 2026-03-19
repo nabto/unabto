@@ -249,7 +249,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         unabto_push_notification_remove(elem->seq);
         return;
     }
-    if(!send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoConnect, buf, end, cryptoPayloadStart, (uint16_t)(ptr-cryptoPayloadStart), cryptoPayloadStart, NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS)){
+    if(!send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoConnect, buf, end, cryptoPayloadStart, ptr, cryptoPayloadStart, NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS)){
         unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
         unabto_push_notification_callback(elem->seq,&hint);
         unabto_push_notification_remove(elem->seq);
