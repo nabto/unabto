@@ -60,6 +60,24 @@ jobs:
         path: ${{ github.workspace }}/artifacts
         if-no-files-found: warn
 
+  clang-tidy:
+    name: clang-tidy
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v6
+    - name: Install clang-tidy
+      run: sudo apt-get update && sudo apt-get install -y clang-tidy clang
+    - name: Configure CMake
+      run: cmake -S . -B build-clang-tidy -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_C_COMPILER=clang -DCMAKE_C_FLAGS="-std=gnu99"
+    - name: Run clang-tidy
+      run: run-clang-tidy -p build-clang-tidy '(src|apps|test)/' 2>&1 | tee clang-tidy-output.txt
+    - name: Upload results
+      if: failure()
+      uses: actions/upload-artifact@v7
+      with:
+        name: clang-tidy-output
+        path: clang-tidy-output.txt
+
   release-assets:
     name: Release Assets
     needs: build-and-test
