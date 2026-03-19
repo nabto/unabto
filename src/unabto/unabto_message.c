@@ -62,35 +62,43 @@ static void nabto_message_local_legacy_application_event(uint16_t ilen, nabto_en
 
 #if NABTO_ENABLE_LOCAL_ACCESS
 /**
- * When room available, insert a string preceeded by a type field (1 byte), truncate when necesary.
+ * When room available, insert a string preceeded by a type field (1 byte),
+ * truncate when necesary. The written string is null terminated. The null byte
+ * is never omitted. it is the string contents which is truncated if it is
+ * neccessary to truncate it.
+ *
  * @param buf   start of writing area
  * @param end   end of writing area (after)
  * @param type  the type
  * @param str   the string
  * @return      the number of bytes written
  */
-static size_t add_typed_string(uint8_t* buf, uint8_t* end, uint8_t type, const char* str) {
+static uint8_t* add_typed_string(uint8_t* buf, uint8_t* end, uint8_t type, const char* str) {
+    if (buf == NULL || end == NULL || end < buf) {
+        return NULL;
+    }
     size_t avail = end - buf;
     const char dummy[2] = { '-', 0 };
     if (str == 0) {
         str = dummy;
     }
-    if (avail > 1) {
+    if (avail >= 2) {
         // need room for at least type and zeroterm
-        size_t len = strlen(str) + 1;
-        size_t tmp = (len < avail) ? len : avail - 1; // 1 byte used for type
-        *buf = type;
-        memcpy(buf + 1, str, tmp);
-        return 1 + tmp; // add 1 is for 'type'
+        size_t len = strlen(str) + 2;
+        size_t tmp = (len < avail) ? len : avail - 2; // 1 byte used for type, 1 byte used for null termination.
+        buf = write_forward_u8(buf, end, type);
+        buf = write_forward_mem(buf, end, str, tmp);
+        buf = write_forward_u8(buf, end, 0);
+        return buf; // add 1 is for 'type'
     }
-    return 0;
+    return buf;
 }
 #endif
 
 #if NABTO_ENABLE_LOCAL_ACCESS
 void nabto_message_local_event(message_event* event, uint16_t ilen) {
     uint32_t localHdr;
- 
+
     READ_U32(localHdr, nabtoCommunicationBuffer);
 
     NABTO_LOG_TRACE(("localHdr: %" PRIu32 " (%" PRItext ")", localHdr, ((localHdr < NP_PACKET_HDR_MIN_NSI_CP) ? "legacy opcode" : "client nsi")));
@@ -155,19 +163,19 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
         uint8_t* ptr = buf + NP_LEGACY_PACKET_HDR_SIZE;
         uint8_t* end = buf + bufsize;
         uint32_t localIp = 0;
-        
-        WRITE_U32(ptr, localIp);   ptr += 4;
-        WRITE_U16(ptr, nmc.nabtoMainSetup.localPort); ptr += 2;
-        
+
+        ptr = write_forward_u32(ptr, end, localIp);
+        ptr = write_forward_u16(ptr, end, nmc.nabtoMainSetup.localPort);
+
         // cheating a bit using the utility meant for typed strings - same structure
-        ptr += add_typed_string(ptr, end, 1 /*identifies a micro device */, nmc.nabtoMainSetup.id);
-        ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_VERSION, nmc.nabtoMainSetup.version);
-        ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_URL, nmc.nabtoMainSetup.url);
+        ptr = add_typed_string(ptr, end, 1 /*identifies a micro device */, nmc.nabtoMainSetup.id);
+        ptr = add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_VERSION, nmc.nabtoMainSetup.version);
+        ptr = add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_URL, nmc.nabtoMainSetup.url);
 #if NABTO_ENABLE_LOCAL_CONNECTION
         {
             // Send this capability if the device handles local connections.
             char capOk[2] = {'1', 0};
-            ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN, capOk);
+            ptr = add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN, capOk);
         }
 #endif
 
@@ -175,7 +183,7 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
         {
             // Send this capability if the device handles local psk connections.
             char capOk[2] = {'1', 0};
-            ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN_PSK, capOk);
+            ptr = add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_LOCAL_CONN_PSK, capOk);
         }
 #endif
 
@@ -184,7 +192,7 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
             // local connections and local psk connections has
             // fingerprint capabilities in unabto these days.
             char capOk[2] = {'1', 0};
-            ptr += add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_FP, capOk);
+            ptr = add_typed_string(ptr, end, NP_PAYLOAD_DESCR_TYPE_FP, capOk);
         }
 #endif
 
@@ -216,7 +224,7 @@ void nabto_message_local_legacy_application_event(uint16_t ilen, nabto_endpoint*
         // invalid header
         return;
     }
-    
+
     READ_U32(header, buf);
 
     READ_U32(appreq.queryId, ptr);
@@ -296,14 +304,14 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
 #if NABTO_ENABLE_REMOTE_ACCESS
                 nabto_connect_event_from_gsp(event, &hdr);
                 return;
-#endif                
+#endif
             }
 #if NABTO_ENABLE_LOCAL_PSK_CONNECTION
         case U_CONNECT_PSK:
         case U_VERIFY_PSK:
             unabto_psk_connection_dispatch_request(event->udpMessage.socket, &event->udpMessage.peer, &hdr);
             return;
-#endif            
+#endif
 
 #if NABTO_ENABLE_DEBUG_PACKETS
 
@@ -327,7 +335,7 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
         }
     }
 #endif
-            
+
     if (hdr.type == DATA) {
         nabto_packet_event(event, &hdr);
         return;
