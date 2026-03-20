@@ -23,7 +23,7 @@ unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, con
     int status;
     int err;
     
-    status = recv(sock->socket, buf, len, 0);
+    status = (int)recv(sock->socket, buf, len, 0);
     err = errno;
     if (status < 0) {
         if ((err == EAGAIN) || err == EWOULDBLOCK) {
@@ -44,7 +44,7 @@ unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, con
 unabto_tcp_status unabto_tcp_write(struct unabto_tcp_socket* sock, const void* buf, const size_t len, size_t* written){
     int status;
     NABTO_LOG_TRACE(("Writing %i bytes to tcp socket", len));
-    status = send(sock->socket, buf, len, MSG_NOSIGNAL);
+    status = (int)send(sock->socket, buf, len, MSG_NOSIGNAL);
     NABTO_LOG_TRACE(("tcp send status: %i", status));
     if (status < 0) {
         int err = errno;

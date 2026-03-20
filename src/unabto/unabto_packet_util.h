@@ -312,7 +312,7 @@ uint8_t* insert_data_header(uint8_t* buf, const uint8_t* end, uint32_t nsi, uint
  * @param buf    (uint8_t*) the start of the packet
  * @param flags  (uint8_t) the flag bits to be added
  */
-#define add_flags(buf, flags)    do { *((uint8_t*)(buf) + OFS_PACKET_FLAGS) |= flags; } while (0)
+#define add_flags(buf, flags)    do { *((uint8_t*)(buf) + OFS_PACKET_FLAGS) |= (flags); } while (0)
 
 /**
  * Write packet length.

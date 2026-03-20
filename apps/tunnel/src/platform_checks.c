@@ -79,7 +79,7 @@ int check_ulimit_files(int desired) {
             return -1;
         }
     }
-    return rlim.rlim_cur;
+    return (int)rlim.rlim_cur;
 }
 
 #endif

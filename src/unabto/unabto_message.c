@@ -328,6 +328,7 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
             break;
 #endif
 
+        default: break;
         }
     }
 
@@ -337,6 +338,7 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
         case GW_CONN_U:
             nabto_fallback_connect_u_event(ilen, &hdr);
             return;
+        default: break;
         }
     }
 #endif

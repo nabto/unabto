@@ -95,12 +95,12 @@ typedef enum {
 
 /** Transmit buffer */
 typedef struct {
-    uint32_t      seq;                   /**< sequence number       */
-    uint16_t      size;                  /**< number of bytes       */
     uint8_t*      buf;                   /**< buffer                */
-    b_state_t     xstate;                /**< state                 */
-    uint16_t      nRetrans;              /**< Retansmission counter. */
     nabto_stamp_t sentStamp;             /**< When was the data sent. Used to measure rtt */
+    uint32_t      seq;                   /**< sequence number       */
+    b_state_t     xstate;                /**< state                 */
+    uint16_t      size;                  /**< number of bytes       */
+    uint16_t      nRetrans;              /**< Retansmission counter. */
     uint16_t      ackedAfter;            /**< Number of buffers which
                                           * has been acked which is
                                           * after this buffer in the

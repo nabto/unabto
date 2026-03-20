@@ -56,7 +56,7 @@ uint8_t* unabto_base32_decode(uint8_t* outputBuffer, uint8_t* outputBufferEnd, u
     
     while (inputBuffer != inputBufferEnd) {
         buffer <<= 5;
-        buffer |= base32_to_bits(*inputBuffer);
+        buffer |= base32_to_bits((char)*inputBuffer);
         bufferBits += 5;
         inputBuffer++;
         if (bufferBits >= 8) {

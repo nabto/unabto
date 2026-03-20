@@ -687,7 +687,7 @@ enum np_payload_type_e {
 
 #define NP_PAYLOAD_SACK_BYTELENGTH           4  ///< size of a SACK payload without list
 #define NP_PAYLOAD_SACK_MAX_PAIRS            4  ///< Maximum number of sack pairs in a sack payload.
-#define NP_PAYLOAD_SACK_MAX_BYTELENGTH       NP_PAYLOAD_SACK_BYTELENGTH + NP_PAYLOAD_SACK_MAX_PAIRS * 8
+#define NP_PAYLOAD_SACK_MAX_BYTELENGTH       (NP_PAYLOAD_SACK_BYTELENGTH + NP_PAYLOAD_SACK_MAX_PAIRS * 8)
 
 /*****************************************************************************/
 /* Stats payload */

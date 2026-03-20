@@ -73,7 +73,7 @@ void tunnel_loop_select() {
         unabto_tunnel_select_add_to_fd_set(&read_fds, &max_read_fd, &write_fds, &max_write_fd);
 
         timeout_val.tv_sec = (timeout/1000);
-        timeout_val.tv_usec = ((timeout)%1000)*1000;
+        timeout_val.tv_usec = (long)((timeout)%1000)*1000;
 
         fflush(stdout);
 

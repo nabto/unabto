@@ -47,7 +47,7 @@
 /// @param s1  the largest sequence number
 /// @param s2  the smallest sequence number
 /// @return    the ddifference
-#define SEQ_DIFF(s1, s2) ((uint16_t)(s1 - s2))
+#define SEQ_DIFF(s1, s2) ((uint16_t)((s1) - (s2)))
 
 #define CWND_INITIAL_VALUE 4
 #define SLOWSTART_MIN_VALUE 2
@@ -128,10 +128,10 @@ static text stateNameW(nabto_stream_tcb_state state);
  * Set streamState and log state change. @param s  the stream. @param newst  the new state
  */
 #define SET_STATE(s, newst) \
-    if (s->u.tcb.streamState != newst) { \
-        NABTO_LOG_TRACE(("%" PRIu16 " STATE: %" PRItext " -> %" PRItext, s->streamTag, stateNameW(s->u.tcb.streamState), stateNameW(newst))); \
-        nabto_stream_state_transition(s, newst); \
-        LOG_STATE(s); \
+    if ((s)->u.tcb.streamState != (newst)) { \
+        NABTO_LOG_TRACE(("%" PRIu16 " STATE: %" PRItext " -> %" PRItext, (s)->streamTag, stateNameW((s)->u.tcb.streamState), stateNameW(newst))); \
+        nabto_stream_state_transition((s), (newst)); \
+        LOG_STATE((s)); \
     }
 
 void nabto_stream_state_transition(struct nabto_stream_s* stream, nabto_stream_tcb_state new_state) {
@@ -315,9 +315,9 @@ size_t nabto_stream_tcb_read(struct nabto_stream_s * stream, const uint8_t** buf
     }
     {
         struct nabto_stream_tcb* tcb = &stream->u.tcb;
-        int ix = tcb->recvNext % tcb->cfg.recvWinSize;
+        int ix = (int)(tcb->recvNext % tcb->cfg.recvWinSize);
         r_buffer* rbuf = &tcb->recv[ix];
-        size_t avail = rbuf->size - rbuf->used;
+        size_t avail = (size_t)(rbuf->size - rbuf->used);
 
         if (tcb->recvNext == tcb->recvFinSeq) {
             tcb->recvNext++;
@@ -343,9 +343,9 @@ size_t nabto_stream_tcb_read(struct nabto_stream_s * stream, const uint8_t** buf
 
 bool nabto_stream_tcb_ack(struct nabto_stream_s * stream, const uint8_t* buf, size_t used) {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
-    int ix = tcb->recvNext % tcb->cfg.recvWinSize;
+    int ix = (int)(tcb->recvNext % tcb->cfg.recvWinSize);
     r_buffer* rbuf = &tcb->recv[ix];
-    uint16_t avail = rbuf->size - rbuf->used;
+    uint16_t avail = (uint16_t)(rbuf->size - rbuf->used);
     if (used > avail) {
         NABTO_LOG_ERROR(("Trying to acknowledge %u bytes from %p, but only %u was retrieved in last nabto_stream_read()",(int)used, buf, avail));
     } else if (buf != rbuf->buf + rbuf->used) {
@@ -382,14 +382,14 @@ size_t nabto_stream_tcb_write(struct nabto_stream_s * stream, const uint8_t* buf
                congestion_control_accept_more_data(tcb))
         {
             uint16_t sz;
-            int ix = tcb->xmitSeq % tcb->cfg.xmitWinSize;
+            int ix = (int)(tcb->xmitSeq % tcb->cfg.xmitWinSize);
             x_buffer* xbuf = &tcb->xmit[ix];
             if (xbuf->xstate != B_IDLE) {
                 NABTO_LOG_FATAL(("xbuf->xstate != B_IDLE, xmitCount=%u finSent=%u", (int)tcb->xmitLastSent - tcb->xmitFirst, tcb->finSequence));
             }
             reset_xbuf(xbuf);
 
-            sz = size > tcb->cfg.xmitPacketSize ? tcb->cfg.xmitPacketSize : (uint16_t)size;
+            sz = (uint16_t)(size > tcb->cfg.xmitPacketSize ? tcb->cfg.xmitPacketSize : (uint16_t)size);
             NABTO_LOG_TRACE(("-------- nabto_stream_write %i bytes, seq=%i into ix=%i", sz, tcb->xmitSeq, ix));
 
             xbuf->buf = unabto_stream_alloc_send_segment(tcb->cfg.xmitPacketSize);
@@ -618,7 +618,7 @@ bool nabto_stream_check_retransmit_data(struct nabto_stream_s* stream) {
     uint32_t i;
     int ix;
     x_buffer* xbuf;
-    ix = tcb->xmitFirst % tcb->cfg.xmitWinSize;
+    ix = (int)(tcb->xmitFirst % tcb->cfg.xmitWinSize);
     xbuf = &tcb->xmit[ix];
 
     // Check if we have any sent but unacked data.
@@ -636,7 +636,7 @@ bool nabto_stream_check_retransmit_data(struct nabto_stream_s* stream) {
     }
     
     for (i = tcb->xmitFirst; i < tcb->xmitLastSent; i++) {
-        int ix = i % tcb->cfg.xmitWinSize;
+        int ix = (int)(i % tcb->cfg.xmitWinSize);
         xbuf = &tcb->xmit[ix];
 
         if (tcb->retransmitSegmentCount == 0) {
@@ -686,7 +686,7 @@ void nabto_stream_check_new_data_xmit(struct nabto_stream_s* stream) {
     UNABTO_ASSERT(tcb->xmitFirst <= tcb->xmitLastSent);
     UNABTO_ASSERT(tcb->xmitLastSent <= tcb->xmitSeq);
     for (i = tcb->xmitLastSent; i < tcb->xmitSeq; i++) {
-        int ix = i % tcb->cfg.xmitWinSize;
+        int ix = (int)(i % tcb->cfg.xmitWinSize);
         x_buffer* xbuf = &tcb->xmit[ix];
         if (xbuf->xstate != B_DATA) {
             // No more fresh data to send.
@@ -928,14 +928,14 @@ static recv_seq_t accept_xmit_seq(struct nabto_stream_tcb* tcb, uint32_t seq, in
 void update_ack_after_packet(struct nabto_stream_s* stream, uint32_t seq) {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
     uint32_t xmitFirstSeq = tcb->xmitFirst;
-    uint16_t ixOfAckedSeq = seq % tcb->cfg.xmitWinSize;
+    uint16_t ixOfAckedSeq = (uint16_t)(seq % tcb->cfg.xmitWinSize);
     uint32_t i;
 
     nabto_stamp_t sentStampOfAckedSeq = tcb->xmit[ixOfAckedSeq].sentStamp;
 
     for (i = xmitFirstSeq; i < seq; i++) {
         nabto_stamp_t sentStampOfThisSeq;
-        uint16_t ix = i % tcb->cfg.xmitWinSize;
+        uint16_t ix = (uint16_t)(i % tcb->cfg.xmitWinSize);
         x_buffer* xbuf = &tcb->xmit[ix];
         if (xbuf->xstate != B_SENT) {
             continue;
@@ -962,7 +962,7 @@ void update_ack_after_packet(struct nabto_stream_s* stream, uint32_t seq) {
 bool update_triple_ack(struct nabto_stream_s* stream, uint32_t ackSeq)
 {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
-    uint16_t ix = ackSeq % tcb->cfg.xmitWinSize;
+    uint16_t ix = (uint16_t)(ackSeq % tcb->cfg.xmitWinSize);
     x_buffer* xbuf = &tcb->xmit[ix];
     if (xbuf->xstate == B_SENT && xbuf->nRetrans == 0) {
         xbuf->ackedAfter++;
@@ -1002,7 +1002,7 @@ bool handle_ack(struct nabto_stream_s* stream, uint32_t ack_start, uint32_t ack_
         // Check that we are not acking more than is actually sent.
 
         for (i = ack_start; i < ack_end; i++) {
-            int ix = i % tcb->cfg.xmitWinSize;
+            int ix = (int)(i % tcb->cfg.xmitWinSize);
             bool ackOnStartOfWindow = (i == tcb->xmitFirst);
             x_buffer* xbuf = &tcb->xmit[ix];
 
@@ -1014,13 +1014,13 @@ bool handle_ack(struct nabto_stream_s* stream, uint32_t ack_start, uint32_t ack_
             // Only update the last segment in the ack sequence since
             // it will have the most correct timing.
             if (i == tcb->xmitFirst && i == (ack_end - 1)) {
-                unabto_stream_update_congestion_control_receive_stats(stream, ix);
+                unabto_stream_update_congestion_control_receive_stats(stream, (uint16_t)ix);
             }
 
             // Mark segment as acked.
             if (xbuf->xstate == B_SENT) {
                 update_ack_after_packet(stream, i);
-                unabto_stream_congestion_control_handle_ack(tcb, ix, ackOnStartOfWindow);
+                unabto_stream_congestion_control_handle_ack(tcb, (uint16_t)ix, ackOnStartOfWindow);
                 NABTO_LOG_TRACE(("setting buffer %i for seq %i to IDLE", ix, i));
                 {
                     // flightSize is exactly the number of transmitbuffers in the state B_SENT!
@@ -1470,7 +1470,7 @@ bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struct nabto
     // recvMax is the maximum filled recv slot
     // if recvMax + 1 == recvTop there are no sack holes.
     for (i = tcb->recvMax; i >= tcb->recvTop; i--) {
-        uint16_t ix = i % tcb->cfg.recvWinSize;
+        uint16_t ix = (uint16_t)(i % tcb->cfg.recvWinSize);
         r_buffer* rBuf = &tcb->recv[ix];
 
         bool slotused = (rBuf->size > 0 && rBuf->seq == i);
@@ -1821,7 +1821,7 @@ void unabto_stream_congestion_control_timeout(struct nabto_stream_s * stream) {
     {
         int ix;
         x_buffer* xbuf;
-        ix = tcb->xmitFirst % tcb->cfg.xmitWinSize;
+        ix = (int)(tcb->xmitFirst % tcb->cfg.xmitWinSize);
         xbuf = &tcb->xmit[ix];
         NABTO_LOG_TRACE(("timeout, nretrans: %" PRIu16 ", seq: %" PRIu32, xbuf->nRetrans, xbuf->seq));
         if (xbuf->nRetrans > tcb->cfg.maxRetrans) {
