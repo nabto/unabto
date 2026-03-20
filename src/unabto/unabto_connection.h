@@ -102,27 +102,23 @@ typedef struct {
 
 /** The Context of a connection */
 struct nabto_connect_s { // NOLINT(clang-analyzer-optin.performance.Padding)
-    /* Large struct fields */
+#if NABTO_ENABLE_EPOLL
+    int epollEventType;
+#endif
+
     nabto_rendezvous_connect_state rendezvousConnectState;
+    connection_state state; /**< The connection state it's used for
+                             * determining both if the connection is
+                             * free or occupied and when it's in use
+                             * the actual status and type of the
+                             * connection. */
+    nabto_connection_type type;
 
     /**
      * psk handshake state
      */
     unabto_connection_psk_connection psk;
 
-    ipxdata                   cp;           /**< the peer endpoints                       */
-    connectionStats           stats;        /**< connection stats                         */
-    struct unabto_optional_fingerprint fingerprint;  // client public key fingerprint
-    nabto_socket_t            socket;       /**< UDP Socket to use                        */
-    nabto_endpoint            peer;         /**< the peer endpoint                        */
-
-    /* Pointer fields */
-    uint8_t*                  nsico;        /**< addr of consi, 0 if not used             */
-
-    /* nabto_stamp_t fields (up to 8 bytes) */
-    nabto_stamp_t             stamp;        /**< the time stamp                           */
-
-    /* uint32_t fields */
     uint32_t spnsi; /**< Serverpeer connection identifier. For local
                      * connections this identifier is between 100 and
                      * 1000 and assigned by uNabto. If the connection
@@ -132,53 +128,47 @@ struct nabto_connect_s { // NOLINT(clang-analyzer-optin.performance.Padding)
                      * the connection phase */
     uint32_t cpnsi; /**< The clientpeer nsi which should be used for
                      * this connection */
-    uint32_t                  timeOut;      /**< timeout value (keep alive)               */
-
-#if NABTO_ENABLE_EPOLL
-    int epollEventType;
-#endif
-
-    /* Enum fields (typically 4 bytes) */
-    connection_state state; /**< The connection state it's used for
-                             * determining both if the connection is
-                             * free or occupied and when it's in use
-                             * the actual status and type of the
-                             * connection. */
-    nabto_connection_type type;
-
-    /* uint8_t array and scalar fields */
     uint8_t                   consi[8];     /**< the controller identification (opt.)     */
+    uint8_t*                  nsico;        /**< addr of consi, 0 if not used             */
+    nabto_stamp_t             stamp;        /**< the time stamp                           */
+    uint32_t                  timeOut;      /**< timeout value (keep alive)               */
     uint8_t                   conAttr;      /**< connection attrinutes (CON_ATTR_*)       */
     uint8_t                   cpEqual;      /**< the endpoints of the peer (CP) are equal */
     uint8_t                   noRendezvous; /**< connection relayed through GSP           */
     uint8_t                   cpAsync;      /**< the Client understands async dialogues   */
     uint8_t                   clientNatType;      /**< The client nat type */
+    ipxdata                   cp;           /**< the peer endpoints                       */
+    nabto_socket_t            socket;       /**< UDP Socket to use                        */
+    nabto_endpoint            peer;         /**< the peer endpoint                        */
 
-    /* bool fields */
+    connectionStats           stats;        /**< connection stats                         */
     bool                      sendConnectStatistics;
     bool                      sendConnectionEndedStatistics;
-    bool                      isLocal;      /**< used to determine if this is a local connection */
+    struct unabto_optional_fingerprint fingerprint;  // client public key fingerprint
 
 #if NABTO_ENABLE_CLIENT_ID
     char                      clientId[NABTO_CLIENT_ID_MAX_SIZE + 1]; /**< the peer id (e-mail from certificate) */
 #else
     char                      clientId[1];  /**< the peer id (e-mail from certificate)    */
 #endif
+    bool                      isLocal;      /**< used to determine if this is a local connection */
 
 #if NABTO_ENABLE_TCP_FALLBACK
-    nabto_stamp_t tcpFallbackConnectionStamp;
-    nabto_endpoint fallbackHost; /**< The fallback host to connect
-                                  * to. */
-    unabto_tcp_fallback_state tcpFallbackConnectionState;
-    uint8_t gatewayId[20]; /**< The Gateway Id is an unique key which
-                            * both the client and server uses to
-                            * establish a fallback connection. */
-    uint8_t fbConAttr; /** connection attributes for the fallback connection. */
     bool hasTcpFallbackCapabilities; /**< This is true if the
                                       * connection has the
                                       * capabilities and information
                                       * which is needed to make a TCP
                                       * fallback connection. */
+    nabto_stamp_t tcpFallbackConnectionStamp;
+    unabto_tcp_fallback_state tcpFallbackConnectionState;
+    uint8_t fbConAttr; /** connection attributes for the fallback connection. */
+
+    nabto_endpoint fallbackHost; /**< The fallback host to connect
+                                  * to. */
+    uint8_t gatewayId[20]; /**< The Gateway Id is an unique key which
+                            * both the client and server uses to
+                            * establish a fallback connection. */
+
     bool relayIsActive; // data has been transmitted on relay, indicating client has chosen this type
 #endif
 
