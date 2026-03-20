@@ -171,7 +171,7 @@ void nabto_stream_state_transition(struct nabto_stream_s* stream, nabto_stream_t
             nabtoSetFutureStamp(&stream->u.tcb.timeoutStamp, 0);
             stream->applicationEvents.writeClosed = true;
             break;
-        case ST_CLOSED:
+        case ST_CLOSED: // NOLINT(bugprone-branch-clone)
             stream->applicationEvents.closed = true;
             unabto_stream_send_stats(stream, NP_PAYLOAD_STATS_TYPE_DEVICE_STREAM_CLOSE);
             break;
@@ -719,7 +719,7 @@ void nabto_stream_check_new_data_xmit(struct nabto_stream_s* stream) {
 
 void unabto_stream_mark_all_xmit_buffers_as_timed_out(struct nabto_stream_tcb* tcb) {
     uint32_t i;
-    int ix;
+    uint32_t ix;
     x_buffer* xbuf;
 
     for (i = tcb->xmitFirst; i < tcb->xmitLastSent; i++) {
@@ -1401,13 +1401,6 @@ void nabto_stream_tcb_event(struct nabto_stream_s* stream,
             break;
 
         case ST_TIME_WAIT:
-            if (win->type == ACK || win->type == (FIN | ACK) ) {
-                handle_data(stream, win, start, dlen, sackData);
-            } else {
-                nabto_stream_tcb_event_error(stream, win);
-            }
-            break;
-
         case ST_CLOSE_WAIT:
             if (win->type == ACK || win->type == (FIN | ACK)) {
                 handle_data(stream, win, start, dlen, sackData);

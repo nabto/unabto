@@ -41,14 +41,14 @@ typedef enum {
 
 
 /// The data included in a naf_handle
-struct naf_handle_s {
+struct naf_handle_s { // NOLINT(clang-analyzer-optin.performance.Padding)
     naf_state            state;                        ///< state of the entry.
     application_request  applicationRequest;           ///< the request part seen by the application
     nabto_packet_header  header;                       ///< the request packet header
     nabto_connect*       connection;                   ///< the connection
 };
 
-    
+
 /// The initialization of the framework event handler to be called once before usage.
 void init_application_event_framework(void);
 
@@ -58,7 +58,7 @@ void init_application_event_framework(void);
  * should be dropped.
  */
 void framework_connection_released(nabto_connect* connection);
-    
+
 /**
  * Ask for an event handle corresponding to the given client request.
  * This is the first function to call when handling a client request, so
@@ -108,7 +108,7 @@ naf_query_status framework_event_query(nabto_connect* con,
 void framework_event(struct naf_handle_s*     handle,
                      uint8_t*                 iobuf,
                      uint16_t                 ilen);
-    
+
 /**
  * Poll for a response to any of the pending requests in the framework
  * queue. If a response is ready, it will be handled and a response

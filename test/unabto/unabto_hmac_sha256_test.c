@@ -25,7 +25,7 @@ bool test(const char *vector, unsigned char *digest,
 #if __18CXX
     if (strcmpram2pgm(vector, output)) {
 #else
-    if (strcmp(vector, output)) {
+    if (strcmp(vector, output) != 0) {
 #endif
         NABTO_LOG_INFO(("Test failed."));
         return false;

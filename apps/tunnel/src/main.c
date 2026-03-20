@@ -118,6 +118,7 @@ enum {
 };
 
 #if HANDLE_SIGNALS
+// NOLINTBEGIN(bugprone-signal-handler)
 void handle_signal(int signum) {
     if (signum == SIGTERM) {
         // Terminate application with exit,
@@ -141,6 +142,7 @@ void handle_signal(int signum) {
     SetEvent(signal_event);
 #endif
 }
+// NOLINTEND(bugprone-signal-handler)
 #endif
 
 static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {

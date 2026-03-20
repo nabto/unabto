@@ -77,7 +77,7 @@ bool sha256_test(void) {
     /* unsigned char *message3; */
     bool ret = true;
 
-    unsigned char digest[SHA256_DIGEST_SIZE];
+    unsigned char digest[SHA256_DIGEST_SIZE] = {0};
 
     NABTO_LOG_INFO(("SHA-2 FIPS 180-2 Validation tests"));
 
@@ -108,7 +108,7 @@ bool sha256_test(void) {
 int sha256_timing_test(void) {
     nabto_stamp_t future;
     int i = 0;
-    unsigned char digest[SHA256_DIGEST_SIZE];
+    unsigned char digest[SHA256_DIGEST_SIZE] = {0};
     size_t len = strlen(message5);
     nabtoSetFutureStamp(&future, 1000);
 

@@ -545,7 +545,7 @@ static uint8_t handle_actual_attach(nabto_packet_header* hdr, uint8_t* ptr)
                         NABTO_LOG_TRACE(("U_ATTACH Decryption fail"));
                         result = NP_PAYLOAD_ATTACH_STATS_STATUS_DECRYPTION_FAILED;
                         goto final;
-                    } else if (dlen < NONCE_SIZE) {
+                    } else if (dlen < NONCE_SIZE) { // NOLINT(bugprone-branch-clone)
                         NABTO_LOG_TRACE(("U_ATTACH Decryption fail, missing nonce data"));
                         result = NP_PAYLOAD_ATTACH_STATS_STATUS_NONCE_VERIFICATION_FAILED;
                         goto final;

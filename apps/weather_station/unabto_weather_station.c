@@ -279,7 +279,7 @@ unabto_buffer* get_event_buffer2(size_t maximumLength)
         snprintf((char*)body, sizeof(body), "%d", lastTemperature_);
         
         // limit number of bytes to what uNabto indicates it can handle
-        if((size_t)(BODYLENGTH + OVERHEAD) > maximumLength)
+        if(((size_t)BODYLENGTH + (size_t)OVERHEAD) > maximumLength)
         {
             return NULL;
         }

@@ -39,12 +39,12 @@ typedef enum {
 }unabto_push_element_state;
 
 typedef struct unabto_push_element{
-    uint32_t seq;
-    uint8_t retrans;
-    unabto_push_element_state state;
     nabto_stamp_t stamp;
-    uint16_t pnsId;
+    uint32_t seq;
+    unabto_push_element_state state;
     unabto_push_hint hint;
+    uint16_t pnsId;
+    uint8_t retrans;
 }unabto_push_element;
 
 typedef struct unabto_push_context{

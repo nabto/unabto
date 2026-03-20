@@ -124,10 +124,7 @@ void tcp_forward(tunnel* tunnel) {
             size_t maxRead = MIN(NABTO_MEMORY_STREAM_SEGMENT_SIZE, canWriteToStreamBytes);
 
             status = unabto_tcp_read(&tunnel->tunnel_type_vars.tcp.sock, readBuffer, maxRead, &readen);
-            if (status == UTS_EOF) {
-                unabto_tunnel_tcp_close_tcp_reader(tunnel);
-                break;
-            } else if (status == UTS_OK) {
+            if (status == UTS_OK) {
                 unabto_stream_hint hint;
                 size_t written = unabto_stream_write(tunnel->stream, readBuffer, readen, &hint);
                 if (hint != UNABTO_STREAM_HINT_OK) {
@@ -135,14 +132,14 @@ void tcp_forward(tunnel* tunnel) {
                     unabto_tunnel_tcp_close_tcp_reader(tunnel);
                     break;
                 }
-                
+
                 if (written != readen) {
                     // Invalid state
                     NABTO_LOG_ERROR(("Impossible state! wanted to write %i, wrote %i, unabto_said it could write %i bytes", readen, written, canWriteToStreamBytes));
                 }
             } else if (status == UTS_WOULD_BLOCK) {
                 break;
-            } else { // UTS_FAILED or undefined behaviour
+            } else { // UTS_EOF, UTS_FAILED, or undefined
                 unabto_tunnel_tcp_close_tcp_reader(tunnel);
                 break;
             }
