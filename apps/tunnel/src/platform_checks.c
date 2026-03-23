@@ -2,6 +2,7 @@
 #include <unabto/unabto_env_base.h>
 #include <unabto/unabto_logging.h>
 #include <unabto/unabto_util.h>
+#include <limits.h>
 
 #define ENABLE_LO_EXISTS_CHECK() !(defined(WIN32) || defined(MOXA)) && defined(HAVE_IFADDRS_H)
 
@@ -78,6 +79,9 @@ int check_ulimit_files(int desired) {
         if (-1 == setrlimit(RLIMIT_NOFILE, &rlim)) {
             return -1;
         }
+    }
+    if (rlim.rlim_cur == RLIM_INFINITY || rlim.rlim_cur > INT_MAX) {
+        return INT_MAX;
     }
     return (int)rlim.rlim_cur;
 }

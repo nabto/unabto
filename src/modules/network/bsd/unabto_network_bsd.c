@@ -390,7 +390,7 @@ ssize_t nabto_write(nabto_socket_t sock,
                     const struct nabto_ip_address* addr,
                     uint16_t       port)
 {
-    int res;
+    ssize_t res;
     struct nabto_ip_address addrConv;
     if (sock.type == NABTO_SOCKET_IP_V6) {
         struct sockaddr_in6 sa;
@@ -403,7 +403,7 @@ ssize_t nabto_write(nabto_socket_t sock,
             memcpy(sa.sin6_addr.s6_addr, addr->addr.ipv6, 16);
         }
         sa.sin6_port = htons(port);
-        res = (int)sendto(sock.sock, buf, (int)len, 0, (struct sockaddr*)&sa, sizeof(sa));
+        res = sendto(sock.sock, buf, len, 0, (struct sockaddr*)&sa, sizeof(sa));
     } else if (sock.type == NABTO_SOCKET_IP_V4) {
         struct sockaddr_in sa;
         memset(&sa, 0, sizeof(sa));
@@ -420,7 +420,7 @@ ssize_t nabto_write(nabto_socket_t sock,
         }
         sa.sin_family = AF_INET;
         sa.sin_port = htons(port);
-        res = (int)sendto(sock.sock, buf, (int)len, 0, (struct sockaddr*)&sa, sizeof(sa));
+        res = sendto(sock.sock, buf, len, 0, (struct sockaddr*)&sa, sizeof(sa));
     } else {
         NABTO_LOG_TRACE(("invalid address type"));
         return 0;
