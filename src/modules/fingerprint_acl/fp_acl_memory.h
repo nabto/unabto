@@ -9,7 +9,7 @@
 
 struct fp_mem_state {
     struct fp_acl_settings settings;
-    struct fp_acl_user users[FP_MEM_ACL_ENTRIES];    
+    struct fp_acl_user users[FP_MEM_ACL_ENTRIES];
 };
 
 struct fp_mem_persistence {
@@ -46,7 +46,6 @@ fp_acl_db_status fp_mem_remove_user(void* it);
 fp_acl_db_status fp_mem_clear();
 fp_acl_db_status fp_mem_load_settings(struct fp_acl_settings* settings);
 fp_acl_db_status fp_mem_save_settings(struct fp_acl_settings* settings);
-
 
 bool fp_mem_is_slot_free(struct fp_acl_user* ix);
 

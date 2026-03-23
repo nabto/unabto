@@ -5,14 +5,14 @@
 #define _UNABTO_PLATFORM_TYPES_H_
 
 #if (defined(WIN32) && _MSC_VER < 1800) || defined(WINCE)
-typedef __int64     int64_t;
-typedef int         int32_t;
-typedef short int   int16_t;
+typedef __int64 int64_t;
+typedef int int32_t;
+typedef short int int16_t;
 typedef signed char int8_t;
 typedef unsigned _int64 uint64_t;
-typedef unsigned int    uint32_t;
-typedef unsigned short  uint16_t;
-typedef unsigned char   uint8_t;
+typedef unsigned int uint32_t;
+typedef unsigned short uint16_t;
+typedef unsigned char uint8_t;
 #else
 #include <stdint.h>
 #endif
@@ -27,7 +27,8 @@ typedef unsigned char   uint8_t;
 #else
 
 /** for convenience and portability */
-enum { false, true };
+enum { false,
+       true };
 
 /** for convenience and portability */
 typedef unsigned char bool;
@@ -35,11 +36,11 @@ typedef unsigned char bool;
 #endif
 
 #define PRIptrdiff "Id"
-#define PRIsize "Iu"
+#define PRIsize    "Iu"
 
 #include <platforms/unabto_common_types.h>
 
-#include <basetsd.h> // SSIZE_T
+#include <basetsd.h>  // SSIZE_T
 
 /** for convenience and portability */
 //typedef unsigned long  uint32_t;

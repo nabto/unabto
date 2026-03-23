@@ -13,20 +13,25 @@
 #if NABTO_ENABLE_LOGGING == 1
 
 #if NABTO_ENABLE_LOG_TIMESTAMP == 1
-#define print_timestamp() printf("%10"PRIu32" ", TickConvertToMilliseconds(TickGet()));
+#define print_timestamp() printf("%10" PRIu32 " ", TickConvertToMilliseconds(TickGet()));
 #else
 #define print_timestamp()
 #endif
 
 #if NABTO_ENABLE_LOG_FILE_INFO == 1
-#define print_filename() printf("%"PRItext"(%i) ", __FILE__, __LINE__);
+#define print_filename() printf("%" PRItext "(%i) ", __FILE__, __LINE__);
 #else
 #define print_filename()
 #endif
 
-#define NABTO_BASIC_PRINTC(level, cmsg) do { print_timestamp(); print_filename(); printf cmsg; printf("\n"); } while(0)
+#define NABTO_BASIC_PRINTC(level, cmsg) \
+    do {                                \
+        print_timestamp();              \
+        print_filename();               \
+        printf cmsg;                    \
+        printf("\n");                   \
+    } while (0)
 
 #endif
-
 
 #endif

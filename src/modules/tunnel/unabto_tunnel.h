@@ -18,4 +18,4 @@ void deinit_tunnel_module();
 
 void tunnel_event(tunnel* state, tunnel_event_source event_source);
 
-#endif // _TUNNEL_H_
+#endif  // _TUNNEL_H_

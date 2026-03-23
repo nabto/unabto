@@ -9,7 +9,6 @@
 
 #include "trsocket.h"
 
-
 typedef int ssize_t;
 
 #include "modules/network/bsd/unabto_network_bsd.h"

@@ -5,12 +5,12 @@
  * Storing and parsing of provisioning data.
  */
 
-#define UNABTO_PROVISION_FILE_DELIMITER     ':'
+#define UNABTO_PROVISION_FILE_DELIMITER ':'
 
 /**
  * Parse provision data, write id to nms struct and crypto key to key parameter.
  */
-bool unabto_provision_parse_data(nabto_main_setup *nms, char *data, char *key, size_t key_size);
+bool unabto_provision_parse_data(nabto_main_setup* nms, char* data, char* key, size_t key_size);
 
 /**
  * Test that it is possible to create a file. 
@@ -27,7 +27,6 @@ bool unabto_provision_write_file(const char* path, nabto_main_setup* nms);
 /**
  * Read file into text buffer.
  */
-bool unabto_provision_read_file(const char* path, char *text, size_t size);
+bool unabto_provision_read_file(const char* path, char* text, size_t size);
 
 #endif
-

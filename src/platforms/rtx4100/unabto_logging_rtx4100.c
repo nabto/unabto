@@ -17,14 +17,14 @@
 static char print_buffer[128];
 
 void rtx4100_log(const char* fmt, ...) {
-  va_list arg_ptr;
-  va_start(arg_ptr, fmt);
-  vsnprintf(print_buffer, sizeof(print_buffer), fmt, arg_ptr);
-  va_end(arg_ptr);
-  DrvLeuartTxBuf(print_buffer, strlen(print_buffer));
+    va_list arg_ptr;
+    va_start(arg_ptr, fmt);
+    vsnprintf(print_buffer, sizeof(print_buffer), fmt, arg_ptr);
+    va_end(arg_ptr);
+    DrvLeuartTxBuf(print_buffer, strlen(print_buffer));
 }
 
 void rtx4100_shell_log(const char* fmt, ...) {
-  AppShellPrint(fmt);
-  //AppShellPrint("\n");
+    AppShellPrint(fmt);
+    //AppShellPrint("\n");
 }

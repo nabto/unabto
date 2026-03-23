@@ -38,19 +38,18 @@
 #include <application_configuration.h>
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-  bool configuration_store_initialize(__ROM application_configuration* defaultApplicationConfiguration);
-  bool configuration_store_format(__ROM application_configuration* defaultApplicationConfiguration);
-  bool configuration_store_read(uint16_t offset, void* data, uint16_t length);
-  bool configuration_store_write(uint16_t offset, const void* data, uint16_t length);
-  bool configuration_store_set(uint16_t offset, uint8_t value, uint16_t length);
-  bool configuration_store_compare(uint16_t offset, const void* data, uint16_t length, bool* match);
+bool configuration_store_initialize(__ROM application_configuration* defaultApplicationConfiguration);
+bool configuration_store_format(__ROM application_configuration* defaultApplicationConfiguration);
+bool configuration_store_read(uint16_t offset, void* data, uint16_t length);
+bool configuration_store_write(uint16_t offset, const void* data, uint16_t length);
+bool configuration_store_set(uint16_t offset, uint8_t value, uint16_t length);
+bool configuration_store_compare(uint16_t offset, const void* data, uint16_t length, bool* match);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

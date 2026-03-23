@@ -5,7 +5,6 @@
 #define _PUSH_SERVICE_H_
 #include "unabto/unabto_push.h"
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -26,13 +25,12 @@ typedef void (*pushCallback)(void*, const unabto_push_hint*);
  * @param encoding Defines how the data is encoded, 1 for JSON
  * @param data     Pointer to the data 
  */
-typedef struct push_payload_data
-{
+typedef struct push_payload_data {
     uint8_t purpose;
     uint8_t encoding;
-    uint8_t data[NABTO_PUSH_BUFFER_ELEMENT_SIZE]; // reusing the length of a buffer element may be too much!
+    uint8_t data[NABTO_PUSH_BUFFER_ELEMENT_SIZE];  // reusing the length of a buffer element may be too much!
     uint16_t len;
-}push_payload_data;
+} push_payload_data;
 
 /**
  * push message structure defining a complete push notification
@@ -40,25 +38,22 @@ typedef struct push_payload_data
  * @param dynamicData Data containing message specifics from the device
  * @param pnsId       ID of the PNS to be used
  */
-typedef struct push_message
-{
+typedef struct push_message {
     push_payload_data staticData;
     push_payload_data dynamicData;
     uint16_t pnsId;
-}push_message;
+} push_message;
 
 /**
  * Buffer structure for internal use in the module
  */
-typedef struct buffer_element
-{
+typedef struct buffer_element {
     uint8_t data[NABTO_PUSH_BUFFER_ELEMENT_SIZE];
     uint32_t seq;
     uint16_t len;
     pushCallback cb;
-    void * args;
+    void* args;
 } buffer_element;
-
 
 unabto_push_hint send_push_message(push_message* msg, pushCallback cb, void* cbArgs);
 
@@ -77,8 +72,6 @@ bool add_title_loc_key(push_message* msg, const char* titleKey);
 bool add_title_loc_string_arg(push_message* msg, const char* titleArg);
 bool add_body_loc_key(push_message* msg, const char* bodyKey);
 bool add_body_loc_string_arg(push_message* msg, const char* bodyArg);
-
-
 
 /**
  * Function used to send push notifications. Push notifications are sent asyncronously, meaning this 
@@ -104,9 +97,8 @@ unabto_push_hint send_push_notification(uint16_t pnsid, push_payload_data static
 uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq);
 void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
-#endif // _PUSH_SERVICE_H_
+#endif  // _PUSH_SERVICE_H_

@@ -14,10 +14,10 @@ void log_buffer(const uint8_t* buf, size_t buflen);
 void unabto_android_log_start(uint16_t loglevel, const char* file, unsigned int line);
 void unabto_android_log_end(const char* format, ...);
 
-#define NABTO_LOG_BASIC_PRINT(loglevel, cmsg)               \
-do {                                                        \
-    unabto_android_log_start(loglevel, __FILE__, __LINE__); \
-    unabto_android_log_end cmsg;                            \
-} while(0)
+#define NABTO_LOG_BASIC_PRINT(loglevel, cmsg)                   \
+    do {                                                        \
+        unabto_android_log_start(loglevel, __FILE__, __LINE__); \
+        unabto_android_log_end cmsg;                            \
+    } while (0)
 
 #endif

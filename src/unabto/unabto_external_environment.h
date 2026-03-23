@@ -76,10 +76,10 @@ void nabto_socket_close(nabto_socket_t* socket);
  * @return        the number of bytes received
  */
 ssize_t nabto_read(nabto_socket_t socket,
-                   uint8_t*       buf,
-                   size_t         len,
-                   struct nabto_ip_address*  addr,
-                   uint16_t*      port);
+                   uint8_t* buf,
+                   size_t len,
+                   struct nabto_ip_address* addr,
+                   uint16_t* port);
 
 /**
  * Write message to network (blocking) The memory allocation and
@@ -94,10 +94,9 @@ ssize_t nabto_read(nabto_socket_t socket,
  */
 ssize_t nabto_write(nabto_socket_t socket,
                     const uint8_t* buf,
-                    size_t         len,
-                    const struct nabto_ip_address*  addr,
-                    uint16_t       port);
-
+                    size_t len,
+                    const struct nabto_ip_address* addr,
+                    uint16_t port);
 
 /**
  * Resolve an ipv4 address to an nabto_ip_address. One some systems an
@@ -113,8 +112,6 @@ void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip);
  * @return true   iff ip is set to the local ip address.
  */
 bool nabto_get_local_ipv4(struct nabto_ip_address* ip);
-
-
 
 #if NABTO_SET_TIME_FROM_ALIVE
 /**
@@ -166,7 +163,7 @@ nabto_dns_status_t nabto_dns_is_resolved(const char* id, struct nabto_ip_address
  * @param stamp  pointer to the time stamp
  * @return       true if stamp has been passed or is equal
  */
-bool nabtoIsStampPassed(nabto_stamp_t *stamp);
+bool nabtoIsStampPassed(nabto_stamp_t* stamp);
 
 /**
  * Get Current time stamp
@@ -180,7 +177,7 @@ nabto_stamp_t nabtoGetStamp(void);
  * @param stamp  pointer to the oldest time stamp
  * @return       difference between newest and oldest (newest - oldest)
  */
-nabto_stamp_diff_t nabtoStampDiff(nabto_stamp_t * newest, nabto_stamp_t *oldest);
+nabto_stamp_diff_t nabtoStampDiff(nabto_stamp_t* newest, nabto_stamp_t* oldest);
 
 /**
  * Convert the time difference to milliseconds
@@ -189,14 +186,13 @@ nabto_stamp_diff_t nabtoStampDiff(nabto_stamp_t * newest, nabto_stamp_t *oldest)
  */
 int nabtoStampDiff2ms(nabto_stamp_diff_t diff);
 
-
 /** Nabto Attachment state. */
 typedef enum {
-    NABTO_AS_IDLE,      /**< initial state                                          */
-    NABTO_AS_WAIT_DNS,  /**< waiting for dns resolving                              */
-    NABTO_AS_WAIT_BS,   /**< UINVITE request sent to Base Station(BS)               */
-    NABTO_AS_WAIT_GSP,  /**< UINVITE request sent to GSP                            */
-    NABTO_AS_ATTACHED   /**< UATTACH request received from and response sent to GSP */
+    NABTO_AS_IDLE,     /**< initial state                                          */
+    NABTO_AS_WAIT_DNS, /**< waiting for dns resolving                              */
+    NABTO_AS_WAIT_BS,  /**< UINVITE request sent to Base Station(BS)               */
+    NABTO_AS_WAIT_GSP, /**< UINVITE request sent to GSP                            */
+    NABTO_AS_ATTACHED  /**< UATTACH request received from and response sent to GSP */
 } nabto_state;
 
 #if NABTO_ENABLE_STATUS_CALLBACKS
@@ -209,9 +205,8 @@ void unabto_attach_state_changed(nabto_state state);
 
 #endif
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

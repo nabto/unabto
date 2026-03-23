@@ -7,9 +7,8 @@
 #include "async_application_event.h"
 
 void init_request_queue();
-    
-int main(int argc, char* argv[])
-{
+
+int main(int argc, char* argv[]) {
     nabto_main_setup* nms;
 
     // flush stdout
@@ -29,7 +28,7 @@ int main(int argc, char* argv[])
     }
 
     init_request_queue();
-    
+
     while (true) {
         /*
          * Here the main application should do it's work
@@ -44,7 +43,7 @@ int main(int argc, char* argv[])
 #if (_POSIX_C_SOURCE >= 199309L)
         struct timespec sleepTime;
         sleepTime.tv_sec = 0;
-        sleepTime.tv_nsec = 10*1000000;
+        sleepTime.tv_nsec = 10 * 1000000;
         nanosleep(&sleepTime, NULL);
 #endif
     }

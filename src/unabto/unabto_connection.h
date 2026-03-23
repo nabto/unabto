@@ -42,15 +42,15 @@ typedef enum {
 } rendezvous_state;
 
 typedef enum {
-    CS_IDLE,            /* The connection is idle and free. */
-    CS_CONNECTING,      /* We are still in the connecting state. */
-    CS_CONNECTED,       /* We are connected and in some data phase */
-//    CS_UDP,             /* We have a UDP connection, either p2p or direct. */
-//    CS_TCP_FALLBACK,    /* We have a TCP fallback connection. */
-    CS_CLOSE_REQUESTED  /* Close is requested on the connection. */
+    CS_IDLE,           /* The connection is idle and free. */
+    CS_CONNECTING,     /* We are still in the connecting state. */
+    CS_CONNECTED,      /* We are connected and in some data phase */
+                       //    CS_UDP,             /* We have a UDP connection, either p2p or direct. */
+                       //    CS_TCP_FALLBACK,    /* We have a TCP fallback connection. */
+    CS_CLOSE_REQUESTED /* Close is requested on the connection. */
 } connection_state;
 
-#define CONNECTION_TIMEOUT 17500ul ///< Connection timeous (7*5000/2).
+#define CONNECTION_TIMEOUT 17500ul  ///< Connection timeous (7*5000/2).
 
 typedef struct {
     uint32_t packetsReceived;
@@ -83,7 +83,6 @@ typedef struct {
 #endif
 } nabto_rendezvous_connect_state;
 
-
 typedef struct {
     enum {
         WAIT_CONNECT = 0,
@@ -95,10 +94,9 @@ typedef struct {
     struct unabto_capabilities capabilities;
 } unabto_connection_psk_connection;
 
-
-#define CON_ATTR_DEFAULT        0x00  /**< unrealiable connection with keep alive       */
-#define CON_ATTR_NO_KEEP_ALIVE  0x01  /**< no keep alive traffic                        */
-#define CON_ATTR_NO_RETRANSMIT  0x80  /**< no retransmissions (reliable connection)     */
+#define CON_ATTR_DEFAULT       0x00 /**< unrealiable connection with keep alive       */
+#define CON_ATTR_NO_KEEP_ALIVE 0x01 /**< no keep alive traffic                        */
+#define CON_ATTR_NO_RETRANSMIT 0x80 /**< no retransmissions (reliable connection)     */
 
 /** The Context of a connection */
 struct nabto_connect_s {
@@ -119,39 +117,39 @@ struct nabto_connect_s {
      */
     unabto_connection_psk_connection psk;
 
-    uint32_t spnsi; /**< Serverpeer connection identifier. For local
+    uint32_t spnsi;        /**< Serverpeer connection identifier. For local
                      * connections this identifier is between 100 and
                      * 1000 and assigned by uNabto. If the connection
                      * is mediated by the basestation the NSI comes
                      * from the GSP which is the same NSI as the GSP
                      * uses for its communication with the client in
                      * the connection phase */
-    uint32_t cpnsi; /**< The clientpeer nsi which should be used for
+    uint32_t cpnsi;        /**< The clientpeer nsi which should be used for
                      * this connection */
-    uint8_t                   consi[8];     /**< the controller identification (opt.)     */
-    uint8_t*                  nsico;        /**< addr of consi, 0 if not used             */
-    nabto_stamp_t             stamp;        /**< the time stamp                           */
-    uint32_t                  timeOut;      /**< timeout value (keep alive)               */
-    uint8_t                   conAttr;      /**< connection attrinutes (CON_ATTR_*)       */
-    uint8_t                   cpEqual;      /**< the endpoints of the peer (CP) are equal */
-    uint8_t                   noRendezvous; /**< connection relayed through GSP           */
-    uint8_t                   cpAsync;      /**< the Client understands async dialogues   */
-    uint8_t                   clientNatType;      /**< The client nat type */
-    ipxdata                   cp;           /**< the peer endpoints                       */
-    nabto_socket_t            socket;       /**< UDP Socket to use                        */
-    nabto_endpoint            peer;         /**< the peer endpoint                        */
+    uint8_t consi[8];      /**< the controller identification (opt.)     */
+    uint8_t* nsico;        /**< addr of consi, 0 if not used             */
+    nabto_stamp_t stamp;   /**< the time stamp                           */
+    uint32_t timeOut;      /**< timeout value (keep alive)               */
+    uint8_t conAttr;       /**< connection attrinutes (CON_ATTR_*)       */
+    uint8_t cpEqual;       /**< the endpoints of the peer (CP) are equal */
+    uint8_t noRendezvous;  /**< connection relayed through GSP           */
+    uint8_t cpAsync;       /**< the Client understands async dialogues   */
+    uint8_t clientNatType; /**< The client nat type */
+    ipxdata cp;            /**< the peer endpoints                       */
+    nabto_socket_t socket; /**< UDP Socket to use                        */
+    nabto_endpoint peer;   /**< the peer endpoint                        */
 
-    connectionStats           stats;        /**< connection stats                         */
-    bool                      sendConnectStatistics;
-    bool                      sendConnectionEndedStatistics;
+    connectionStats stats; /**< connection stats                         */
+    bool sendConnectStatistics;
+    bool sendConnectionEndedStatistics;
     struct unabto_optional_fingerprint fingerprint;  // client public key fingerprint
 
 #if NABTO_ENABLE_CLIENT_ID
-    char                      clientId[NABTO_CLIENT_ID_MAX_SIZE + 1]; /**< the peer id (e-mail from certificate) */
+    char clientId[NABTO_CLIENT_ID_MAX_SIZE + 1]; /**< the peer id (e-mail from certificate) */
 #else
-    char                      clientId[1];  /**< the peer id (e-mail from certificate)    */
+    char clientId[1]; /**< the peer id (e-mail from certificate)    */
 #endif
-    bool                      isLocal;      /**< used to determine if this is a local connection */
+    bool isLocal; /**< used to determine if this is a local connection */
 
 #if NABTO_ENABLE_TCP_FALLBACK
     bool hasTcpFallbackCapabilities; /**< This is true if the
@@ -165,17 +163,17 @@ struct nabto_connect_s {
 
     nabto_endpoint fallbackHost; /**< The fallback host to connect
                                   * to. */
-    uint8_t gatewayId[20]; /**< The Gateway Id is an unique key which
+    uint8_t gatewayId[20];       /**< The Gateway Id is an unique key which
                             * both the client and server uses to
                             * establish a fallback connection. */
 
-    bool relayIsActive; // data has been transmitted on relay, indicating client has chosen this type
+    bool relayIsActive;  // data has been transmitted on relay, indicating client has chosen this type
 #endif
 
     /*****************************************************************************************/
     /* fields below has specific init, reinit and release methods.                           */
 
-    nabto_crypto_context cryptoctx;         /**< the crypto context                       */
+    nabto_crypto_context cryptoctx; /**< the crypto context                       */
 };
 typedef struct nabto_connect_s nabto_connect;
 
@@ -195,7 +193,6 @@ void nabto_reset_connection(nabto_connect* con);
 /** Request to release the connection has been received. @param con the connection to be released */
 void nabto_release_connection_req(nabto_connect* con);
 
-
 uint16_t nabto_connection_get_fresh_sp_nsi(void);
 
 /** Release a connection. @param con the connection to be released */
@@ -212,15 +209,13 @@ nabto_connect* nabto_find_connection(uint32_t spnsi);
  */
 nabto_connect* nabto_find_local_connection_cp_nsi(uint32_t cpnsi);
 
-
 /** @return the connection index (for logging). @param  con the connection. */
 int nabto_connection_index(nabto_connect* con);
 
 /**
  * Update a connection with a verified event on the connection.
  */
-void
-nabto_connection_event(nabto_connect* con, message_event* event);
+void nabto_connection_event(nabto_connect* con, message_event* event);
 
 void nabto_connection_client_aborted(nabto_connect* con);
 
@@ -254,7 +249,6 @@ nabto_connect* nabto_get_new_connection(uint32_t nsi);
  * One or more packets may be sent
  */
 bool nabto_connect_event(message_event* event, nabto_packet_header* hdr);
-
 
 bool nabto_connect_event_from_gsp(message_event* event, nabto_packet_header* hdr);
 
@@ -291,7 +285,7 @@ void send_connection_ended_statistics(nabto_connect* con);
 uint8_t* insert_connection_info_payload(uint8_t* ptr, uint8_t* end, nabto_connect* con);
 
 #ifdef __cplusplus
-} // extern "C"
+}  // extern "C"
 #endif
 
 #else

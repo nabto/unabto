@@ -59,9 +59,8 @@ uint8_t* unabto_stream_alloc_recv_segment(size_t required);
  */
 void unabto_stream_free_recv_segment(uint8_t* buffer);
 
-
 #ifdef __cplusplus
-} // extern "C"
+}  // extern "C"
 #endif
 
 #endif

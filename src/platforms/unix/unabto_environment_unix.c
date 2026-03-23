@@ -23,13 +23,11 @@
 #include <unistd.h>
 #include <pthread.h>
 
-
 /**
  * Set a socket in non blocking mode.
  * @param sd  the socket
  */
-void nabto_bsd_set_nonblocking(nabto_socket_t* sd)
-{
+void nabto_bsd_set_nonblocking(nabto_socket_t* sd) {
     int flags = fcntl(sd->sock, F_GETFL, 0);
     if (flags == -1) flags = 0;
     fcntl(sd->sock, F_SETFL, flags | O_NONBLOCK);

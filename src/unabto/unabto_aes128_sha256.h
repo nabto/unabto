@@ -20,9 +20,8 @@ bool unabto_truncated_hmac_sha256_verify_integrity(
     const uint8_t *buf, uint16_t bufLength,
     const uint8_t integrity[16]);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

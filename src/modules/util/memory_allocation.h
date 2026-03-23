@@ -13,9 +13,8 @@ extern "C" {
 void* checked_malloc(size_t size);
 void checked_free(void* pointer);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

@@ -1,13 +1,11 @@
 #include <unabto/unabto_stream.h>
 #include "unabto_tunnel.h"
 
-bool init_tunnel_module()
-{
+bool init_tunnel_module() {
     return unabto_tunnel_init_tunnels();
 }
 
-void deinit_tunnel_module()
-{
+void deinit_tunnel_module() {
     unabto_tunnel_deinit_tunnels();
 }
 

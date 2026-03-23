@@ -6,9 +6,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-nabto_stamp_t nabtoGetStamp()
-{
-    return  xTaskGetTickCount();
+nabto_stamp_t nabtoGetStamp() {
+    return xTaskGetTickCount();
 }
 
 /**

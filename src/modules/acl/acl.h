@@ -13,21 +13,20 @@ extern "C" {
 
 #if NABTO_ACL_ENABLE
 
-#define ACL_PERMISSION_NONE                                         0x00000000ul
-#define ACL_PERMISSION_ALL                                          0xfffffffful
+#define ACL_PERMISSION_NONE 0x00000000ul
+#define ACL_PERMISSION_ALL  0xfffffffful
 
-#define ACL_PERMISSION_LOCAL_ACCESS                                 0x80000000ul
-#define ACL_PERMISSION_REMOTE_ACCESS                                0x40000000ul
-#define ACL_PERMISSION_ACCESS_CONTROL                               0x20000000ul
+#define ACL_PERMISSION_LOCAL_ACCESS   0x80000000ul
+#define ACL_PERMISSION_REMOTE_ACCESS  0x40000000ul
+#define ACL_PERMISSION_ACCESS_CONTROL 0x20000000ul
 
-typedef enum
-{
-  ACL_STATUS_OK,
-  ACL_STATUS_CONFIGURATION_STORE_FAILURE,
-  ACL_STATUS_USER_NOT_FOUND,
-  ACL_STATUS_INVALID_ENTRY,
-  ACL_STATUS_NOT_EMPTY,
-  ACL_STATUS_NO_ROOM
+typedef enum {
+    ACL_STATUS_OK,
+    ACL_STATUS_CONFIGURATION_STORE_FAILURE,
+    ACL_STATUS_USER_NOT_FOUND,
+    ACL_STATUS_INVALID_ENTRY,
+    ACL_STATUS_NOT_EMPTY,
+    ACL_STATUS_NO_ROOM
 } acl_status;
 
 #if !UNABTO_PLATFORM_PIC18
@@ -36,8 +35,8 @@ typedef enum
 
 typedef struct
 {
-  char name[NABTO_CLIENT_ID_MAX_SIZE];
-  uint32_t permissions;
+    char name[NABTO_CLIENT_ID_MAX_SIZE];
+    uint32_t permissions;
 } acl_user;
 
 #if !UNABTO_PLATFORM_PIC18
@@ -63,7 +62,7 @@ application_event_result acl_application_event(application_request* request, una
 
 #else
 
-#define acl_is_request_allowed(request, permissions) (true)
+#define acl_is_request_allowed(request, permissions)     (true)
 #define acl_is_stream_allowed(streamHandle, permissions) (true)
 
 #define acl_application_event(request, readBuffer, writeBuffer) (AER_REQ_INV_QUERY_ID)
@@ -71,7 +70,7 @@ application_event_result acl_application_event(application_request* request, una
 #endif
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

@@ -10,13 +10,13 @@
 
 #include "unabto_provision_http.h"
 
-typedef void (*curl_option_callback_func)(CURL *curl, void* userData);
+typedef void (*curl_option_callback_func)(CURL* curl, void* userData);
 
 typedef struct unabto_curl_options_callback {
     curl_option_callback_func func;
     void* data;
     struct unabto_curl_options_callback* next;
-} unabto_curl_options_callback ;
+} unabto_curl_options_callback;
 
 /**
  * Invoke curl. Caller can set callback to modify options passed to curl.
@@ -46,6 +46,6 @@ struct unabto_curl_post_struct {
     struct curl_slist* headers;
 };
 
-void unabto_curl_post_cb(CURL *curl, void* userData);
+void unabto_curl_post_cb(CURL* curl, void* userData);
 
 #endif

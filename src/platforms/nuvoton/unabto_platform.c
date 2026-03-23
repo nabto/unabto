@@ -20,15 +20,14 @@ uint32_t remote_addr = 0xC3F99FBC;
 
 typedef struct
 {
-  uint8_t isOpen;
-  uint8_t hasPrev;
+    uint8_t isOpen;
+    uint8_t hasPrev;
 } internal_socket;
 static internal_socket sockets[N_SOCKETS];
 
-bool platform_initialize(void)
-{
-  memset(sockets, 0, sizeof(sockets));
-  return true;
+bool platform_initialize(void) {
+    memset(sockets, 0, sizeof(sockets));
+    return true;
 }
 
 /**
@@ -36,19 +35,17 @@ bool platform_initialize(void)
  * @param buf  the buffer
  * @param len  the length of the buffer
  */
-void nabto_random(uint8_t* buf, size_t len)
-{
-  uint8_t i;
-  if (NULL == buf) {
-    return;
-  }
-  for (i=0; i < len; i++) {
-    *buf++ = rand();
-  }
+void nabto_random(uint8_t* buf, size_t len) {
+    uint8_t i;
+    if (NULL == buf) {
+        return;
+    }
+    for (i = 0; i < len; i++) {
+        *buf++ = rand();
+    }
 }
 
-void nabto_socket_set_invalid(nabto_socket_t* socket)
-{
+void nabto_socket_set_invalid(nabto_socket_t* socket) {
     socket = NABTO_INVALID_SOCKET;
 }
 
@@ -62,17 +59,13 @@ void nabto_socket_set_invalid(nabto_socket_t* socket)
  * @param socket       To return the created socket descriptor.
  * @return             true iff successfull
  */
-bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket)
-{
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket) {
     uint8_t i;
 
-    for (i = 0; i < N_SOCKETS; i++)
-    {
-        if (sockets[i].isOpen == false)
-        {
+    for (i = 0; i < N_SOCKETS; i++) {
+        if (sockets[i].isOpen == false) {
             uint16_t port = *localPort;
-            if (port == 0)
-            {
+            if (port == 0) {
                 port = 25000 + i;
             }
 
@@ -88,9 +81,8 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket)
     return false;
 }
 
-bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
-{
-    return *s1==*s2;
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2) {
+    return *s1 == *s2;
 }
 
 /**
@@ -99,8 +91,7 @@ bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
  *
  * @param socket the socket to be closed
  */
-void nabto_socket_close(nabto_socket_t* socket)
-{
+void nabto_socket_close(nabto_socket_t* socket) {
     NABTO_LOG_DEBUG(("nabto_close_socket %u", *socket));
     sockets[*socket].isOpen = false;
 }
@@ -117,11 +108,10 @@ void nabto_socket_close(nabto_socket_t* socket)
  * @return        the number of bytes received
  */
 ssize_t nabto_read(nabto_socket_t socket,
-                   uint8_t*       buf,
-                   size_t         len,
-                   struct nabto_ip_address*      addr,
-                   uint16_t*      port)
-{
+                   uint8_t* buf,
+                   size_t len,
+                   struct nabto_ip_address* addr,
+                   uint16_t* port) {
     int eff_data_len = 0;
     uint16_t recvLen = 0;
 
@@ -131,7 +121,7 @@ ssize_t nabto_read(nabto_socket_t socket,
     }
 
     eff_data_len = rakmgr_sockdata_poll_at_recvdata();
-    if (! eff_data_len) {
+    if (!eff_data_len) {
         return 0;
     }
 
@@ -139,28 +129,26 @@ ssize_t nabto_read(nabto_socket_t socket,
 
     do {
         *port = uCmdRspFrame.recvdataFrame.recvdata.destPort[0] |
-                uCmdRspFrame.recvdataFrame.recvdata.destPort[1]<<8;
+                uCmdRspFrame.recvdataFrame.recvdata.destPort[1] << 8;
 
         addr->type = NABTO_IP_V4;
         addr->addr.ipv4 = uCmdRspFrame.recvdataFrame.recvdata.destIp[0] |
-                uCmdRspFrame.recvdataFrame.recvdata.destIp[1]<<8  |
-                uCmdRspFrame.recvdataFrame.recvdata.destIp[2]<<16 |
-                uCmdRspFrame.recvdataFrame.recvdata.destIp[3]<<24;
+                          uCmdRspFrame.recvdataFrame.recvdata.destIp[1] << 8 |
+                          uCmdRspFrame.recvdataFrame.recvdata.destIp[2] << 16 |
+                          uCmdRspFrame.recvdataFrame.recvdata.destIp[3] << 24;
 
-        recvLen = uCmdRspFrame.recvdataFrame.recvdata.recDataLen[0]+uCmdRspFrame.recvdataFrame.recvdata.recDataLen[1]*256;
+        recvLen = uCmdRspFrame.recvdataFrame.recvdata.recDataLen[0] + uCmdRspFrame.recvdataFrame.recvdata.recDataLen[1] * 256;
 
         if (socket != uCmdRspFrame.recvdataFrame.recvdata.socketID) {
             NABTO_LOG_DEBUG(("nabto_read=%u read on wrong socket"));
             // Just return 0 for the requested socket if socket ID doesn't match.
             return 0;
         }
-        if (recvLen < 1)
-        {
+        if (recvLen < 1) {
             NABTO_LOG_DEBUG(("nabto_read=%u empty", socket));
             break;
         }
-        if (recvLen > len)
-        {
+        if (recvLen > len) {
             NABTO_LOG_DEBUG(("nabto_read=%u oversize frame: %u vs %u", socket, recvLen, len));
             break;
         }
@@ -168,8 +156,7 @@ ssize_t nabto_read(nabto_socket_t socket,
         memcpy(buf, uCmdRspFrame.recvdataFrame.recvdata.recvdataBuf, recvLen);
 
         NABTO_LOG_DEBUG(("Received UDP packet from %i.%i.%i.%i: port=%u length=%u", (addr->addr.ipv4 >> 24) & 0xFF, (addr->addr.ipv4 >> 16) & 0xFF, (addr->addr.ipv4 >> 8) & 0xFF, addr->addr.ipv4 & 0xFF, *port, recvLen));
-    }
-    while (0);
+    } while (0);
 
     rakmgr_sockdata_prg(eff_data_len);
 
@@ -189,15 +176,14 @@ ssize_t nabto_read(nabto_socket_t socket,
  */
 ssize_t nabto_write(nabto_socket_t socket,
                     const uint8_t* buf,
-                    size_t         len,
-                    struct nabto_ip_address*       addr,
-                    uint16_t       port)
-{
+                    size_t len,
+                    struct nabto_ip_address* addr,
+                    uint16_t port) {
     NABTO_LOG_DEBUG(("nabto_write: %i.%i.%i.%i: port=%u length=%u", (addr->addr.ipv4 >> 24) & 0xFF, (addr->addr.ipv4 >> 16) & 0xFF, (addr->addr.ipv4 >> 8) & 0xFF, addr->addr.ipv4 & 0xFF, port, len));
     if (addr->type != NABTO_IP_V4) {
         return 0;
     }
-    rak_send_Data(socket, port, addr->addr.ipv4, (uint8_t *)buf, len);
+    rak_send_Data(socket, port, addr->addr.ipv4, (uint8_t*)buf, len);
     return true;
 }
 
@@ -205,24 +191,20 @@ ssize_t nabto_write(nabto_socket_t socket,
  * Get Current time stamp
  * @return current time stamp
  */
-nabto_stamp_t nabtoGetStamp(void)
-{
+nabto_stamp_t nabtoGetStamp(void) {
     return systimer_tick();
 }
 
-bool nabtoIsStampPassed(nabto_stamp_t *stamp)
-{
+bool nabtoIsStampPassed(nabto_stamp_t* stamp) {
     return (nabtoGetStamp() - *stamp) > 0;
 }
 
-nabto_stamp_diff_t nabtoStampDiff(nabto_stamp_t * newest, nabto_stamp_t * oldest)
-{
+nabto_stamp_diff_t nabtoStampDiff(nabto_stamp_t* newest, nabto_stamp_t* oldest) {
     return (*newest - *oldest);
 }
 
-int nabtoStampDiff2ms(nabto_stamp_diff_t diff)
-{
-    return (int) diff;
+int nabtoStampDiff2ms(nabto_stamp_diff_t diff) {
+    return (int)diff;
 }
 
 void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
@@ -234,8 +216,7 @@ void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
  * start resolving an ip address
  * afterwards nabto_resolve_dns will be called until the address is resolved
  */
-void nabto_dns_resolve(const char* id)
-{
+void nabto_dns_resolve(const char* id) {
     // FIXME: Do DNS lookup
 }
 
@@ -249,8 +230,7 @@ void nabto_dns_resolve(const char* id)
  * @param v4addr  pointer to ipaddress
  * @return false if address is not resolved yet
  */
-nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address* v4addr)
-{
+nabto_dns_status_t nabto_dns_is_resolved(const char* id, struct nabto_ip_address* v4addr) {
     // FIXME: DNS resolve is not supported on RAK module yet
     v4addr->type = NABTO_IP_V4;
     v4addr->addr.ipv4 = remote_addr;

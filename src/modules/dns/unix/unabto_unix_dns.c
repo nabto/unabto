@@ -17,7 +17,6 @@ static resolver_state_t resolver_state;
 
 static bool resolver_is_running = false;
 
-
 void* resolver_thread(void* ctx) {
     resolver_state_t* state = (resolver_state_t*)ctx;
 
@@ -25,11 +24,10 @@ void* resolver_thread(void* ctx) {
     struct addrinfo* result;
     int status;
     memset(&hints, 0, sizeof(hints));
-    
+
     hints.ai_socktype = SOCK_DGRAM;
     hints.ai_family = AF_UNSPEC;
 
-    
     status = getaddrinfo(state->id, "4242", &hints, &result);
     if (status != 0) {
         state->status = NABTO_DNS_ERROR;
@@ -57,7 +55,7 @@ void* resolver_thread(void* ctx) {
         }
         freeaddrinfo(result);
     }
-    
+
     resolver_is_running = false;
     return NULL;
 }
@@ -85,7 +83,7 @@ void nabto_dns_resolve(const char* id) {
     if (resolver_is_running) {
         return;
     }
-    memset(resolver_state.resolved_addrs, 0, sizeof(struct nabto_ip_address)*NABTO_DNS_RESOLVED_IPS_MAX);
+    memset(resolver_state.resolved_addrs, 0, sizeof(struct nabto_ip_address) * NABTO_DNS_RESOLVED_IPS_MAX);
     resolver_is_running = true;
     resolver_state.status = NABTO_DNS_NOT_FINISHED;
     resolver_state.id = id;
@@ -96,37 +94,34 @@ void nabto_dns_resolve(const char* id) {
     }
 }
 
-nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address* addrs) {
+nabto_dns_status_t nabto_dns_is_resolved(const char* id, struct nabto_ip_address* addrs) {
     if (resolver_is_running) {
         return NABTO_DNS_NOT_FINISHED;
     }
-    
+
     if (resolver_state.status == NABTO_DNS_OK) {
         uint8_t i;
         for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
             addrs[i] = resolver_state.resolved_addrs[i];
         }
-        
+
         return NABTO_DNS_OK;
     }
     return NABTO_DNS_ERROR;
 }
 
-
-
-void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip)
-{
+void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
     struct addrinfo hints;
     struct addrinfo* result;
     struct nabto_ip_address printIp;
     const char* ipv4String;
     int status;
-    
+
     memset(&hints, 0, sizeof(hints));
-    
+
     hints.ai_socktype = SOCK_DGRAM;
     hints.ai_family = AF_UNSPEC;
-    
+
     printIp.type = NABTO_IP_V4;
     printIp.addr.ipv4 = ipv4;
     ipv4String = nabto_ip_to_string(&printIp);
@@ -156,5 +151,4 @@ void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip)
         }
         freeaddrinfo(result);
     }
-    
 }

@@ -12,7 +12,7 @@ extern "C" {
  * We measure time in ticks.
  */
 typedef uint32_t nabto_stamp_t;
-typedef int32_t  nabto_stamp_diff_t;
+typedef int32_t nabto_stamp_diff_t;
 
 nabto_stamp_t nabtoGetStamp(void);
 
@@ -21,7 +21,7 @@ nabto_stamp_t nabtoGetStamp(void);
  * @param msec  number of milliseconds
  * @return      the stamp difference
  */
-#define nabtoMsec2Stamp(msec)   ((nabto_stamp_t)(msec*(1000ul/*TICK_SECOND*//1000ul)))
+#define nabtoMsec2Stamp(msec) ((nabto_stamp_t)(msec * (1000ul /*TICK_SECOND*/ / 1000ul)))
 
 /**
  * Remove thread/process from active queue (if relevant)
@@ -31,9 +31,8 @@ nabto_stamp_t nabtoGetStamp(void);
  */
 void nabtoYield(int msec);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
-#endif 
+#endif

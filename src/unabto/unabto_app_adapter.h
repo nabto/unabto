@@ -15,7 +15,7 @@
 
 #if NABTO_ENABLE_CONNECTIONS
 
-#include <unabto/unabto_app.h> //declare application_event_result etc
+#include <unabto/unabto_app.h>  //declare application_event_result etc
 #include <unabto/unabto_packet_util.h>
 
 #ifdef __cplusplus
@@ -35,20 +35,18 @@ typedef enum {
 
 /** The states of an application request ressource */
 typedef enum {
-    APPREQ_FREE = 0,    /**< the entry is not in use (MUST have value 0)                     */
-    APPREQ_USED         /**< the entry has been given to the app for treatment               */
+    APPREQ_FREE = 0, /**< the entry is not in use (MUST have value 0)                     */
+    APPREQ_USED      /**< the entry has been given to the app for treatment               */
 } naf_state;
-
 
 /// The data included in a naf_handle
 struct naf_handle_s {
-    naf_state            state;                        ///< state of the entry.
-    application_request  applicationRequest;           ///< the request part seen by the application
-    nabto_packet_header  header;                       ///< the request packet header
-    nabto_connect*       connection;                   ///< the connection
+    naf_state state;                         ///< state of the entry.
+    application_request applicationRequest;  ///< the request part seen by the application
+    nabto_packet_header header;              ///< the request packet header
+    nabto_connect* connection;               ///< the connection
 };
 
-    
 /// The initialization of the framework event handler to be called once before usage.
 void init_application_event_framework(void);
 
@@ -58,7 +56,7 @@ void init_application_event_framework(void);
  * should be dropped.
  */
 void framework_connection_released(nabto_connect* connection);
-    
+
 /**
  * Ask for an event handle corresponding to the given client request.
  * This is the first function to call when handling a client request, so
@@ -86,7 +84,6 @@ naf_query_status framework_event_query(nabto_connect* con,
                                        nabto_packet_header* hdr,
                                        struct naf_handle_s** handle);
 
-
 /**
  * Handle unabto application event.
  * An application event is typically send through a data request in a nabto
@@ -105,10 +102,10 @@ naf_query_status framework_event_query(nabto_connect* con,
  * @param ilen      length of input in bytes
  * @return          void
  */
-void framework_event(struct naf_handle_s*     handle,
-                     uint8_t*                 iobuf,
-                     uint16_t                 ilen);
-    
+void framework_event(struct naf_handle_s* handle,
+                     uint8_t* iobuf,
+                     uint16_t ilen);
+
 /**
  * Poll for a response to any of the pending requests in the framework
  * queue. If a response is ready, it will be handled and a response
@@ -120,9 +117,9 @@ void framework_event(struct naf_handle_s*     handle,
 bool framework_event_poll();
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
-#endif //NABTO_ENABLE_CONNECTIONS
+#endif  //NABTO_ENABLE_CONNECTIONS
 
 #endif

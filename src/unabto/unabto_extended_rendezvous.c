@@ -5,11 +5,10 @@
 
 void unabto_extended_rendezvous_init_port_sequence(unabto_extended_rendezvous_port_sequence* context, uint16_t startGlobalPort) {
     context->startGlobalPort = startGlobalPort;
-    context->lastPortNumber = 4567; // generates a sequence of length 16384
+    context->lastPortNumber = 4567;  // generates a sequence of length 16384
 }
 
-uint16_t unabto_extended_rendezvous_next_port(unabto_extended_rendezvous_port_sequence* context, uint16_t count)
-{
+uint16_t unabto_extended_rendezvous_next_port(unabto_extended_rendezvous_port_sequence* context, uint16_t count) {
     /**
      * Since many symnats are portpredictable we start by trying 100 ports
      * around the known external port number.
@@ -21,16 +20,14 @@ uint16_t unabto_extended_rendezvous_next_port(unabto_extended_rendezvous_port_se
      * Empirical data shows that devices are never using ports below 1024.
      */
     if (count < 100 &&
-        count % 2 == 0)
-    {
-        uint16_t portNumber = context->startGlobalPort + (count/2) + 1;
+        count % 2 == 0) {
+        uint16_t portNumber = context->startGlobalPort + (count / 2) + 1;
         if (portNumber >= 1024) {
             return portNumber;
         }
     } else if (count < 100 &&
-               count % 2 == 1)
-    {
-        uint16_t portNumber = context->startGlobalPort - (count/2) - 1;
+               count % 2 == 1) {
+        uint16_t portNumber = context->startGlobalPort - (count / 2) - 1;
         if (portNumber >= 1024) {
             return portNumber;
         }
@@ -38,7 +35,7 @@ uint16_t unabto_extended_rendezvous_next_port(unabto_extended_rendezvous_port_se
 
     do {
         context->lastPortNumber = context->lastPortNumber * 13;
-    } while(context->lastPortNumber < 1024);
+    } while (context->lastPortNumber < 1024);
 
     return context->lastPortNumber;
 }

@@ -16,20 +16,17 @@ extern "C" {
  * The key is the secret, the seed comes from the nonces.
  */
 
-bool prfplus_sha256(const unabto_buffer keys[],  uint8_t keys_size,
+bool prfplus_sha256(const unabto_buffer keys[], uint8_t keys_size,
                     const unabto_buffer seeds[], uint8_t seeds_size,
                     uint8_t* data, uint16_t dataLength);
-
-
 
 #define prf_sha256 unabto_hmac_sha256_buffers
 /* void prf_sha256(const unabto_buffer keys[], uint16_t  keys_size, */
 /*                 const unabto_buffer messages[], uint16_t  messages_size, */
 /*                 uint8_t *mac, uint16_t  mac_size); */
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

@@ -21,7 +21,7 @@ void uart_write_buffer(const void* buffer, uint16_t length);
 void uart_flush_receiver(void);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

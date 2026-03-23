@@ -9,7 +9,7 @@
 
 int main(int argc, char** argv) {
     int i;
-    
+
     nabto_stamp_t initial = nabtoGetStamp();
 
     // test that going forward in time works as expected.
@@ -22,7 +22,6 @@ int main(int argc, char** argv) {
             printf("test failed stamp: %i, ticks: %i", stamp, ticks);
             return 1;
         }
-
     }
 
     for (i = 0; i < 100000; i++) {
@@ -37,7 +36,7 @@ int main(int argc, char** argv) {
             return 1;
         }
     }
-    
+
     {
         nabto_stamp_t stamp = nabtoGetStamp();
         if (nabtoIsStampPassed(&stamp)) {

@@ -17,9 +17,8 @@ void network_initialize(const uint8_t* mac);
 void network_tick(void);
 bool network_get_current_ip_address(uint32_t* ip);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

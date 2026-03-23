@@ -35,14 +35,12 @@ bool platform_initialize() {
     AppConfig.SecondaryDNSServer.Val = MY_DEFAULT_SECONDARY_DNS_BYTE1 | MY_DEFAULT_SECONDARY_DNS_BYTE2 << 8ul | MY_DEFAULT_SECONDARY_DNS_BYTE3 << 16ul | MY_DEFAULT_SECONDARY_DNS_BYTE4 << 24ul;
 
     TickInit();
-    
+
     StackInit();
 
-    
     unabto_microchip_arp_reset();
-    
 
-// Wait for dhcp.
+    // Wait for dhcp.
     lastIp = AppConfig.MyIPAddr.Val;
 
 #if ENABLE_DHCP_BUG_WORKAROUND == 1
@@ -63,7 +61,7 @@ bool platform_initialize() {
 
     READ_U32(lastIp, &AppConfig.MyIPAddr.Val);
 
-    NABTO_LOG_DEBUG(("Got IP from DHCP server: "PRIip, MAKE_IP_PRINTABLE(lastIp)));
+    NABTO_LOG_DEBUG(("Got IP from DHCP server: " PRIip, MAKE_IP_PRINTABLE(lastIp)));
 
     return true;
 }

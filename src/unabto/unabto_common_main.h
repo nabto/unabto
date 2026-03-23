@@ -140,7 +140,6 @@ nabto_main_context* unabto_get_main_context(void);
  */
 void unabto_notify_ip_changed(struct nabto_ip_address* ip);
 
-
 #if NABTO_ENABLE_NEXT_EVENT
 /**
  * return stamp for next event.
@@ -149,7 +148,7 @@ void unabto_next_event(nabto_stamp_t* stamp);
 #endif
 
 #ifdef __cplusplus
-} // extern "C"
+}  // extern "C"
 #endif
 
 #endif

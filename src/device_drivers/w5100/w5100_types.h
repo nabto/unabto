@@ -3,8 +3,7 @@
 
 #include <unabto_platform_types.h>
 
-#define W5100_INVALID_SOCKET        0xff
+#define W5100_INVALID_SOCKET 0xff
 typedef uint8_t w5100_socket;
-
 
 #endif

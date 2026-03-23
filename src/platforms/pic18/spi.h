@@ -10,20 +10,18 @@
 extern "C" {
 #endif
 
-enum
-{
-  SPI_CLOCK_DIVIDER_4,
-  SPI_CLOCK_DIVIDER_16,
-  SPI_CLOCK_DIVIDER_64
+enum {
+    SPI_CLOCK_DIVIDER_4,
+    SPI_CLOCK_DIVIDER_16,
+    SPI_CLOCK_DIVIDER_64
 };
 
 void spi_initialize(uint8_t clockDivider);
 uint8_t spi_transfer(uint8_t value);
 void spi_transfer_buffer(uint8_t* buffer, uint16_t length);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

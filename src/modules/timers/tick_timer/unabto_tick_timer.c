@@ -14,14 +14,12 @@ bool nabtoIsStampPassed(nabto_stamp_t* stamp) {
 }
 
 void unabto_tick_timer_tick(int32_t ms) {
-    unabto_tick_timer_ticks+=ms;
+    unabto_tick_timer_ticks += ms;
 }
 
-
-nabto_stamp_diff_t nabtoStampDiff(nabto_stamp_t * newest, nabto_stamp_t *oldest) {
+nabto_stamp_diff_t nabtoStampDiff(nabto_stamp_t* newest, nabto_stamp_t* oldest) {
     return *newest - *oldest;
 }
-
 
 int nabtoStampDiff2ms(nabto_stamp_diff_t diff) {
     return diff;

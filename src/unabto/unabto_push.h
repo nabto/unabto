@@ -36,28 +36,27 @@ typedef enum {
     UNABTO_PUSH_WAITING_SEND,
     UNABTO_PUSH_AWAITING_ACK,
     UNABTO_PUSH_RETRANS
-}unabto_push_element_state;
+} unabto_push_element_state;
 
-typedef struct unabto_push_element{
+typedef struct unabto_push_element {
     uint32_t seq;
     uint8_t retrans;
     unabto_push_element_state state;
     nabto_stamp_t stamp;
     uint16_t pnsId;
     unabto_push_hint hint;
-}unabto_push_element;
+} unabto_push_element;
 
-typedef struct unabto_push_context{
+typedef struct unabto_push_context {
     unabto_push_element* nextPushEvent;
     int pushSeqQHead;
     uint32_t nextSeq;
     nabto_stamp_t lastSent;
     nabto_stamp_t backOffLimit;
     bool reattachNeeded;
-}unabto_push_context;
+} unabto_push_context;
 
 extern struct unabto_push_context pushCtx;
-
 
 /* ------------------------------------------------------------- *
  * These next two functions must be implemented by the developer *
@@ -76,7 +75,6 @@ uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* buf
  * @param hint Pointer to a hint showing the status of the push notification
  */
 void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint);
-
 
 /**
  * Send a Push notification. If this function return UNABTO_PUSH_HINT_OK, the
@@ -107,7 +105,6 @@ uint16_t unabto_push_notification_data_size(void);
  */
 void unabto_push_init(void);
 
-
 /**
  * Function to stop push notifications called by the core.
  * This resolves all outstanding push notifications with hint FAILED.
@@ -124,9 +121,9 @@ bool nabto_push_event(nabto_packet_header* hdr);
 void unabto_push_notify_reattach(void);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
-#endif // NABTO_ENABLE_PUSH
+#endif  // NABTO_ENABLE_PUSH
 
-#endif // _UNABTO_PUSH_H_
+#endif  // _UNABTO_PUSH_H_

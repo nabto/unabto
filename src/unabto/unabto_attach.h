@@ -48,7 +48,6 @@ bool nabto_attach_event(nabto_packet_header* hdr);
  */
 bool nabto_alive_event(nabto_packet_header* hdr);
 
-
 void send_basestation_attach_failure(uint8_t error_code);
 
 /******************************************************************************/
@@ -60,7 +59,6 @@ void send_basestation_attach_failure(uint8_t error_code);
  * One or more packets may be sent as response
  */
 void nabto_attach_time_event(void);
-
 
 /**
  * Potentially called if the network configuration has changed
@@ -79,9 +77,8 @@ text stName(nabto_state state);
 #define stName(st) #st
 #endif
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

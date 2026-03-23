@@ -20,7 +20,7 @@ static uint8_t theLight = 0;
  * requesting browser.
  ****************************************************************/
 application_event_result demo_application(application_request* request, unabto_query_request* read_buffer, unabto_query_response* write_buffer) {
-    switch(request->queryId) {
+    switch (request->queryId) {
         case 1: {
             //  <query name="light_write.json" description="Turn light on and off" id="1">
             //    <request>
@@ -88,14 +88,13 @@ application_event_result demo_application(application_request* request, unabto_q
 // only using ID #1 in this simple example
 uint8_t setLight(uint8_t id, uint8_t onOff) {
     theLight = onOff;
-    NABTO_LOG_INFO((theLight?("Nabto: Light turned ON!"):("Nabto: Light turned OFF!")));
+    NABTO_LOG_INFO((theLight ? ("Nabto: Light turned ON!") : ("Nabto: Light turned OFF!")));
 
 #ifdef __arm__
     // Toggle ACT LED on Raspberry Pi
     if (theLight) {
         system("echo 1 | sudo tee /sys/class/leds/led0/brightness");
-    }
-    else {
+    } else {
         system("echo 0 | sudo tee /sys/class/leds/led0/brightness");
     }
 #endif
@@ -115,8 +114,7 @@ uint8_t readLight(uint8_t id) {
 // Holds one saved request
 static application_request* saved_app_req = 0;
 
-application_event_result application_event(application_request* request, uanbto_query_request* r_b, unabto_query_response* w_b)
-{
+application_event_result application_event(application_request* request, uanbto_query_request* r_b, unabto_query_response* w_b) {
     if (request->queryId == 1 || request->queryId == 2 || request->queryId == 3) {
         NABTO_LOG_INFO(("Application event: Respond immediately"));
         return demo_application(request, r_b, w_b);
@@ -132,8 +130,7 @@ application_event_result application_event(application_request* request, uanbto_
 }
 
 // Query whether a response to a queued request is ready
-bool application_poll_query(application_request** appreq)
-{
+bool application_poll_query(application_request** appreq) {
     if (saved_app_req) {
         /**
         * Fake a delay for demonstration purpose.
@@ -143,8 +140,8 @@ bool application_poll_query(application_request** appreq)
         */
         static int fake_delay = 0;
         nabto_yield(20);
-      
-        if (++fake_delay >= 450) { //3000
+
+        if (++fake_delay >= 450) {  //3000
             fake_delay = 0;
             *appreq = saved_app_req;
             NABTO_LOG_INFO(("Application poll query: Response ready"));
@@ -155,8 +152,7 @@ bool application_poll_query(application_request** appreq)
 }
 
 // Retrieve the response from a queued request
-application_event_result application_poll(application_request* request, unabto_query_response* w_b)
-{
+application_event_result application_poll(application_request* request, unabto_query_response* w_b) {
     application_event_result res;
 
     if (saved_app_req == 0) {
@@ -173,8 +169,7 @@ application_event_result application_poll(application_request* request, unabto_q
 }
 
 // Drop the queued request (framework discarded it internally)
-void application_poll_drop(application_request* request)
-{
+void application_poll_drop(application_request* request) {
     NABTO_LOG_INFO(("Application poll drop: Response discarded"));
     saved_app_req = 0;
 }
@@ -183,13 +178,11 @@ void application_poll_drop(application_request* request)
 
 #else
 
-application_event_result application_event(application_request* request, unabto_query_request* r_b, unabto_query_response* w_b)
-{
+application_event_result application_event(application_request* request, unabto_query_request* r_b, unabto_query_response* w_b) {
     return demo_application(request, r_b, w_b);
 }
 
 #endif /* NABTO_APPLICATION_EVENT_MODEL_ASYNC */
 
-void setTimeFromGSP(uint32_t time)
-{
+void setTimeFromGSP(uint32_t time) {
 }

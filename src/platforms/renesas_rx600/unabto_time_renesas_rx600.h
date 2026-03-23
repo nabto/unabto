@@ -13,15 +13,13 @@
 extern "C" {
 #endif
 
-
 typedef system_tick_t nabto_stamp_t;
 void nabtoYield(int msec);
 
 #define nabtoMsec2Stamp(msec) (msec)
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

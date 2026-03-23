@@ -29,31 +29,31 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define NABTO_MICRO_CAP_ASYNC  1   ///< 1 if the MICRO is able to use async dialogue, else 0
+#define NABTO_MICRO_CAP_ASYNC 1  ///< 1 if the MICRO is able to use async dialogue, else 0
 
 /**
  * Write change of state to the event log
  * @param oldst  the old state
  * @param newst  the new state
  */
-#define NABTO_STATE_LOG(oldst, newst)  NABTO_LOG_INFO(("State change from %" PRItext " to %" PRItext, stName(oldst), stName(newst)))
+#define NABTO_STATE_LOG(oldst, newst) NABTO_LOG_INFO(("State change from %" PRItext " to %" PRItext, stName(oldst), stName(newst)))
 
 /** Magic values */
 enum {
-    V_UD         = 5  /**< Version Type: UDEVICE  */
+    V_UD = 5 /**< Version Type: UDEVICE  */
 };
 
 /** Timer values */
 enum {
     INTERVAL_INITIAL_CONFIGURATION_CHECK = 10000,
-    INTERVAL_BS_INVITE   = 2000,
-    INTERVAL_GSP_INVITE  = 2000,
+    INTERVAL_BS_INVITE = 2000,
+    INTERVAL_GSP_INVITE = 2000,
     INTERVAL_DNS_RESOLVE = 100,
-    INTERVAL_ERROR_RETRY_BASE = 2000 // base time from an error occurs to we retry.
+    INTERVAL_ERROR_RETRY_BASE = 2000  // base time from an error occurs to we retry.
 };
 
 /** Calculate exponential fallback interval. @param BASE  base interval. @param NUM  event counter. @return the interval  */
-#define EXP_WAIT(BASE, NUM) ((BASE)<<(MIN((NUM), 4)))
+#define EXP_WAIT(BASE, NUM) ((BASE) << (MIN((NUM), 4)))
 
 /******************************************************************************/
 /******************************************************************************/
@@ -65,14 +65,18 @@ enum {
  * @param state  the state
  * @return textual representation
  */
-text stName(nabto_state state)
-{
+text stName(nabto_state state) {
     switch (state) {
-        case NABTO_AS_IDLE     :                      return "IDLE";
-        case NABTO_AS_WAIT_DNS :                      return "WAIT_DNS";
-        case NABTO_AS_WAIT_BS  :                      return "WAIT_BS";
-        case NABTO_AS_WAIT_GSP :                      return "WAIT_GSP";
-        case NABTO_AS_ATTACHED :                      return "ATTACHED";
+        case NABTO_AS_IDLE:
+            return "IDLE";
+        case NABTO_AS_WAIT_DNS:
+            return "WAIT_DNS";
+        case NABTO_AS_WAIT_BS:
+            return "WAIT_BS";
+        case NABTO_AS_WAIT_GSP:
+            return "WAIT_GSP";
+        case NABTO_AS_ATTACHED:
+            return "ATTACHED";
     }
     return "??";
 }
@@ -80,7 +84,10 @@ text stName(nabto_state state)
 #endif
 
 #if NABTO_ENABLE_STATUS_CALLBACKS
-#define REPORT_STATUS_CALLBACK(state) do { unabto_attach_state_changed(state); } while(0)
+#define REPORT_STATUS_CALLBACK(state)       \
+    do {                                    \
+        unabto_attach_state_changed(state); \
+    } while (0)
 #else
 #define REPORT_STATUS_CALLBACK(state)
 #endif
@@ -97,8 +104,7 @@ text stName(nabto_state state)
  * @param newState  the new state
  */
 #define SET_CTX_STATE(newState)                       \
-    if (nmc.context.state != newState)                \
-    {                                                 \
+    if (nmc.context.state != newState) {              \
         NABTO_STATE_LOG(nmc.context.state, newState); \
         REPORT_STATUS_CALLBACK(newState);             \
         nmc.context.state = newState;                 \
@@ -109,13 +115,12 @@ text stName(nabto_state state)
  * @param newState  the new state
  * Only if the state is changed, the counter is reset
  */
-#define SET_CTX_STATE_CNT(newState)                     \
-    if (nmc.context.state != newState)                  \
-    {                                              \
-        NABTO_STATE_LOG(nmc.context.state, newState);   \
-        REPORT_STATUS_CALLBACK(newState);               \
-        nmc.context.state = newState;                   \
-        nmc.context.counter = 0;  \
+#define SET_CTX_STATE_CNT(newState)                   \
+    if (nmc.context.state != newState) {              \
+        NABTO_STATE_LOG(nmc.context.state, newState); \
+        REPORT_STATUS_CALLBACK(newState);             \
+        nmc.context.state = newState;                 \
+        nmc.context.counter = 0;                      \
     }
 
 /**
@@ -123,14 +128,21 @@ text stName(nabto_state state)
  * @param ctx    pointer to the context
  * @param intv   the interval to add to currrent time (in millisecs)
  */
-#define SET_CTX_STAMP(intv) do { nabtoSetFutureStamp(&nmc.context.timestamp, (intv)); } while (0)
+#define SET_CTX_STAMP(intv)                                  \
+    do {                                                     \
+        nabtoSetFutureStamp(&nmc.context.timestamp, (intv)); \
+    } while (0)
 
 /**
  * Set a new state, set the stamp and log the change
  * @param newst  the new state
  * @param intv   the interval to add to currrent time (in millisecs)
  */
-#define SET_CTX_STATE_STAMP(newst, intv) do { SET_CTX_STATE_CNT(newst); SET_CTX_STAMP(intv); } while (0)
+#define SET_CTX_STATE_STAMP(newst, intv) \
+    do {                                 \
+        SET_CTX_STATE_CNT(newst);        \
+        SET_CTX_STAMP(intv);             \
+    } while (0)
 
 /******************************************************************************/
 
@@ -140,8 +152,7 @@ void handle_ok_invite_event(void);
  * Initialise the verification data.
  * @param verif  the verification data.
  */
-static void verification_init(verification_t* verif)
-{
+static void verification_init(verification_t* verif) {
     verif->sum = 0;
 }
 
@@ -151,8 +162,7 @@ static void verification_init(verification_t* verif)
  * @param buf    the buffer
  * @param end    the end of the buffer
  */
-static void verification_add(verification_t* verif, const uint8_t* buf, const uint8_t* end)
-{
+static void verification_add(verification_t* verif, const uint8_t* buf, const uint8_t* end) {
     /*uint32_t old = verif->sum;*/
     const uint8_t* ptr = buf;
     while (ptr < end) verif->sum += *ptr++;
@@ -168,12 +178,11 @@ static void verification_add(verification_t* verif, const uint8_t* buf, const ui
  * @param ptr    the position to insert the verify payload
  * @return       the size of the completed message
  */
-static size_t verification_complete(verification_t* verif, uint8_t* buf, uint8_t* end, uint8_t* ptr)
-{
-    size_t   len;
+static size_t verification_complete(verification_t* verif, uint8_t* buf, uint8_t* end, uint8_t* ptr) {
+    size_t len;
     uint32_t sum;
-    size_t   ix;
-    uint8_t  data[12];
+    size_t ix;
+    uint8_t data[12];
     memset(data, NP_PAYLOAD_VERIFY_DEV_FILLERBYTE, sizeof(data));
 
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_VERIFY, 0, sizeof(data));
@@ -188,7 +197,7 @@ static size_t verification_complete(verification_t* verif, uint8_t* buf, uint8_t
         if (sum == 0) break;
         sum >>= 8;
     }
-    memcpy(ptr, (const void*) data, sizeof(data));
+    memcpy(ptr, (const void*)data, sizeof(data));
     return len;
 }
 
@@ -199,8 +208,7 @@ static size_t verification_complete(verification_t* verif, uint8_t* buf, uint8_t
  * @param end    end of the received buffer
  * @return       true iff the received buffer contains the correct verification
  */
-bool verification_check(verification_t* verif, const uint8_t* buf, const uint8_t* end)
-{
+bool verification_check(verification_t* verif, const uint8_t* buf, const uint8_t* end) {
     uint32_t sum = 0;
     const uint8_t* ptr = buf;
 
@@ -216,7 +224,6 @@ bool verification_check(verification_t* verif, const uint8_t* buf, const uint8_t
 /******************************************************************************/
 /******************************************************************************/
 
-
 /**
  * Build the U_INVITE to the Base Station or the GroupServerPeer
  * @param buf    the destination buffer
@@ -224,8 +231,7 @@ bool verification_check(verification_t* verif, const uint8_t* buf, const uint8_t
  * @param toGSP  true if the invite is to the GSP (also sends a nonce from ctx)
  * @return       the size of the U_INVITE
  */
-static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
-{
+static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP) {
     size_t len;
     uint8_t* ptr = insert_header(buf, end, 0, 0, U_INVITE, false, 0, 0, 0);
     size_t sid_len = strlen(nmc.nabtoMainSetup.id);
@@ -238,7 +244,7 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
     }
 
     if (toGSP) {
-        const char dummy[2] = { '-', 0 };
+        const char dummy[2] = {'-', 0};
         const char* version;
         const char* url;
         size_t sz;
@@ -273,19 +279,21 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP)
         NABTO_LOG_INFO(("########    U_INVITE with %" PRItext " nonce sent, version: %s URL: %s", nmc.context.nonceSize == NONCE_SIZE ? "LARGE" : "small", version, url));
 
         // send encryption capabilities
-        ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CAPABILITY, 0, 9 + 2*2);
+        ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CAPABILITY, 0, 9 + 2 * 2);
         if (ptr == NULL) return 0;
-        ptr = write_forward_u8(ptr, end, 0); /* type */
-        ptr = write_forward_u32(ptr, end, 0l); // mask
-        ptr = write_forward_u32(ptr, end, 0l); // bits
-        ptr = write_forward_u16(ptr, end, 1); // number of codes
+        ptr = write_forward_u8(ptr, end, 0);    /* type */
+        ptr = write_forward_u32(ptr, end, 0l);  // mask
+        ptr = write_forward_u32(ptr, end, 0l);  // bits
+        ptr = write_forward_u16(ptr, end, 1);   // number of codes
         ptr = write_forward_u16(ptr, end, code);
     }
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_SP_ID, 0, sid_len + 1);
     ptr = write_forward_u8(ptr, end, NP_PAYLOAD_SP_ID_TYPE_URL); /* SPID_URL */
     ptr = write_forward_mem(ptr, end, nmc.nabtoMainSetup.id, sid_len);
 
-    if (!insert_packet_length_from_cursor(buf, ptr)) { return 0; }
+    if (!insert_packet_length_from_cursor(buf, ptr)) {
+        return 0;
+    }
     len = ptr - buf;
 
     return len;
@@ -319,7 +327,6 @@ static void send_gsp_invite(void) {
     }
 }
 
-
 /******************************************************************************/
 
 /**
@@ -331,8 +338,7 @@ static void send_gsp_invite(void) {
  * @param seedGSP   the seed from the GSP
  * @return          the size of the response
  */
-static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uint8_t* seedGSP)
-{
+static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uint8_t* seedGSP) {
     uint8_t* buf = nabtoCommunicationBuffer;
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
 
@@ -344,7 +350,7 @@ static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uin
     ptr = insert_capabilities(ptr, end, nmc.context.clearTextData);
     if (ptr == NULL) return false;
 
-    ptr = insert_payload(ptr, end,  NP_PAYLOAD_TYPE_IPX, 0, 13);
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_IPX, 0, 13);
     if (ptr == NULL) return false;
 
     if (nmc.socketGSPLocalEndpoint.addr.type == NABTO_IP_V4) {
@@ -398,17 +404,15 @@ static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uin
  * @param piggyData  the piggyback data
  * @return       the size of the response
  */
-static size_t mk_gsp_alive_rsp(uint16_t seq, size_t piggySize, uint8_t* piggyData)
-{
+static size_t mk_gsp_alive_rsp(uint16_t seq, size_t piggySize, uint8_t* piggyData) {
     uint8_t* buf = nabtoCommunicationBuffer;
-    uint8_t* end = nabtoCommunicationBuffer+nabtoCommunicationBufferSize;
+    uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
     size_t len;
     uint8_t* ptr;
 
-    if(nabtoCommunicationBufferSize < (NP_PACKET_HDR_MIN_BYTELENGTH))
-    {
-      NABTO_LOG_ERROR(("Communication buffer too small for header!"));
-      return 0;
+    if (nabtoCommunicationBufferSize < (NP_PACKET_HDR_MIN_BYTELENGTH)) {
+        NABTO_LOG_ERROR(("Communication buffer too small for header!"));
+        return 0;
     }
 
     ptr = insert_header(buf, end, 0, nmc.context.gspnsi, U_ALIVE, true, seq, 0, 0);
@@ -427,7 +431,9 @@ static size_t mk_gsp_alive_rsp(uint16_t seq, size_t piggySize, uint8_t* piggyDat
             return 0;
         }
     }
-    if (!insert_packet_length_from_cursor(buf, ptr)) { return 0; }
+    if (!insert_packet_length_from_cursor(buf, ptr)) {
+        return 0;
+    }
     len = ptr - buf;
     return len;
 }
@@ -442,21 +448,20 @@ static void send_gsp_alive_poll(void) {
 
 /******************************************************************************/
 
-bool nabto_invite_event(nabto_packet_header* hdr)
-{
+bool nabto_invite_event(nabto_packet_header* hdr) {
     if (nmc.context.state != NABTO_AS_WAIT_BS) {
         NABTO_LOG_TRACE(("Received an invite response from the basestation but we are not waiting in any invite responses."));
         return false;
     }
     /* Receive Packet (2) */
-    if (hdr->nsi_sp != 0 || hdr->flags != 1 ) {
+    if (hdr->nsi_sp != 0 || hdr->flags != 1) {
         NABTO_LOG_TRACE(("Illegal header in U_INVITE response (2/0/1): (%i, %i, %i)", hdr->nsi_cp, hdr->nsi_sp, (int)hdr->flags));
     } else {
         struct unabto_payload_packet payload;
         uint8_t* begin = nabtoCommunicationBuffer + hdr->hlen;
         uint8_t* end = nabtoCommunicationBuffer + hdr->len;
 
-        if (!unabto_find_payload(begin,end, NP_PAYLOAD_TYPE_IPX, &payload)) {
+        if (!unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_IPX, &payload)) {
             NABTO_LOG_TRACE(("Missing IPX payload in U_INVITE response from BS"));
         } else {
             struct unabto_payload_ipx ipx;
@@ -479,9 +484,7 @@ bool nabto_invite_event(nabto_packet_header* hdr)
     return false;
 }
 
-void handle_ok_invite_event(void)
-{
-
+void handle_ok_invite_event(void) {
     if (nmc.context.state == NABTO_AS_WAIT_BS) {
         SET_CTX_STATE_STAMP(NABTO_AS_WAIT_GSP, 0);
         NABTO_LOG_INFO(("GSP address: " PRIep, MAKE_EP_PRINTABLE(nmc.context.gsp)));
@@ -497,8 +500,7 @@ void handle_ok_invite_event(void)
  * @return      true iff fully treated
  * A response may be sent
  */
-static uint8_t handle_actual_attach(nabto_packet_header* hdr, uint8_t* ptr)
-{
+static uint8_t handle_actual_attach(nabto_packet_header* hdr, uint8_t* ptr) {
     uint8_t result = NP_PAYLOAD_ATTACH_STATS_STATUS_FAILED;
     uint8_t* end = nabtoCommunicationBuffer + hdr->len;
     uint16_t res;
@@ -507,8 +509,10 @@ static uint8_t handle_actual_attach(nabto_packet_header* hdr, uint8_t* ptr)
     uint8_t nonceGSP[NONCE_SIZE];
     uint8_t* seedGSP = 0;
 
-    memcpy(/*ctx->*/nonceGSP, (const void*) ptr, nmc.context.nonceSize); ptr += nmc.context.nonceSize;
-    res = nabto_rd_payload(ptr, end, &type); ptr += SIZE_PAYLOAD_HEADER;
+    memcpy(/*ctx->*/ nonceGSP, (const void*)ptr, nmc.context.nonceSize);
+    ptr += nmc.context.nonceSize;
+    res = nabto_rd_payload(ptr, end, &type);
+    ptr += SIZE_PAYLOAD_HEADER;
     if (nmc.context.nonceSize == NONCE_SIZE_OLD) {
         NABTO_LOG_TRACE(("########    U_ATTACH without cryptographic payload received"));
         if (res != 12 || type != NP_PAYLOAD_TYPE_VERIFY || ptr + res != end) {
@@ -525,20 +529,21 @@ static uint8_t handle_actual_attach(nabto_packet_header* hdr, uint8_t* ptr)
         }
     } else if (nmc.context.nonceSize == NONCE_SIZE) {
         NABTO_LOG_TRACE(("########    U_ATTACH WITH cryptographic payload received"));
-        if (type != NP_PAYLOAD_TYPE_CRYPTO || ptr + res != end ) {
+        if (type != NP_PAYLOAD_TYPE_CRYPTO || ptr + res != end) {
             NABTO_LOG_TRACE(("Illegal payload in U_ATTACH request(len/ %i /avail): %i / %i / %td", NP_PAYLOAD_TYPE_CRYPTO, res, (int)type, (end - ptr)));
             goto final;
         } else {
             uint16_t code;
             uint16_t verifSize;
-            READ_U16(code, ptr); ptr += 2;
+            READ_U16(code, ptr);
+            ptr += 2;
             NABTO_LOG_TRACE(("before verify"));
             if (!unabto_verify_integrity(nmc.context.cryptoAttach, code, nabtoCommunicationBuffer, (uint16_t)(end - nabtoCommunicationBuffer), &verifSize)) {
                 NABTO_LOG_TRACE(("U_ATTACH Integrity fail"));
                 result = NP_PAYLOAD_ATTACH_STATS_STATUS_INTEGRITY_CHECK_FAILED;
                 goto final;
             } else {
-                NABTO_LOG_TRACE(("verifSize: %i end-ptr %td", verifSize, end-ptr));
+                NABTO_LOG_TRACE(("verifSize: %i end-ptr %td", verifSize, end - ptr));
                 {
                     uint16_t dlen;
                     if (!unabto_decrypt(nmc.context.cryptoAttach, ptr, (uint16_t)(end - ptr - verifSize), &dlen)) {
@@ -549,7 +554,7 @@ static uint8_t handle_actual_attach(nabto_packet_header* hdr, uint8_t* ptr)
                         NABTO_LOG_TRACE(("U_ATTACH Decryption fail, missing nonce data"));
                         result = NP_PAYLOAD_ATTACH_STATS_STATUS_NONCE_VERIFICATION_FAILED;
                         goto final;
-                    } else if (memcmp((const void*) ptr, (const void*) nmc.context.nonceMicro, NONCE_SIZE) != 0) {
+                    } else if (memcmp((const void*)ptr, (const void*)nmc.context.nonceMicro, NONCE_SIZE) != 0) {
                         NABTO_LOG_TRACE(("U_ATTACH Decryption fail, challenge not met"));
                         result = NP_PAYLOAD_ATTACH_STATS_STATUS_NONCE_VERIFICATION_FAILED;
                         goto final;
@@ -565,18 +570,17 @@ static uint8_t handle_actual_attach(nabto_packet_header* hdr, uint8_t* ptr)
     }
     nmc.context.gspnsi = hdr->nsi_sp; /* to be required in next messages */
     NABTO_LOG_DEBUG(("GSP-ID(nsi): %u", nmc.context.gspnsi));
-    if(send_gsp_attach_rsp(hdr->seq, nonceGSP, seedGSP)) { /* Send packet (5) */
+    if (send_gsp_attach_rsp(hdr->seq, nonceGSP, seedGSP)) { /* Send packet (5) */
         SET_CTX_STATE_STAMP(NABTO_AS_ATTACHED, nmc.nabtoMainSetup.gspPollTimeout);
         PUSHNOTIFY;
-        result =  NP_PAYLOAD_ATTACH_STATS_STATUS_OK;
+        result = NP_PAYLOAD_ATTACH_STATS_STATUS_OK;
     }
 
 final:
     return result;
 }
 
-bool nabto_attach_event(nabto_packet_header* hdr)
-{
+bool nabto_attach_event(nabto_packet_header* hdr) {
     uint8_t result = NP_PAYLOAD_ATTACH_STATS_STATUS_FAILED;
     if (nmc.context.state != NABTO_AS_WAIT_GSP) {
         NABTO_LOG_TRACE(("Received an attach event from the GSP but we didn't expect such a packet so it will be discarded."));
@@ -598,14 +602,17 @@ bool nabto_attach_event(nabto_packet_header* hdr)
         } else {
             uint8_t type;
             uint8_t* ptr = nabtoCommunicationBuffer + res;
-            res = nabto_rd_payload(ptr, end, &type); ptr += SIZE_PAYLOAD_HEADER;
+            res = nabto_rd_payload(ptr, end, &type);
+            ptr += SIZE_PAYLOAD_HEADER;
             if (res != 6 || type != NP_PAYLOAD_TYPE_EP) {
                 NABTO_LOG_TRACE(("Illegal payload in U_ATTACH request(6/%i): %i/%i", NP_PAYLOAD_TYPE_EP, res, (int)type));
             } else {
                 nabto_endpoint ep;
                 uint32_t ipv4;
-                READ_U32(ipv4, ptr); ptr += 4;
-                READ_U16(ep.port, ptr); ptr += 2;
+                READ_U32(ipv4, ptr);
+                ptr += 4;
+                READ_U16(ep.port, ptr);
+                ptr += 2;
                 nabto_resolve_ipv4(ipv4, &ep.addr);
                 NABTO_NOT_USED(ep); /* Needed to avoid warning -> error */
 
@@ -620,10 +627,11 @@ bool nabto_attach_event(nabto_packet_header* hdr)
                 NABTO_LOG_DEBUG(("nmc.ctx.privat     : " PRIep, MAKE_EP_PRINTABLE(nmc.socketGSPLocalEndpoint)));
                 NABTO_LOG_DEBUG(("nmc.ctx.global     : " PRIep, MAKE_EP_PRINTABLE(nmc.context.globalAddress)));
 
-                res = nabto_rd_payload(ptr, end, &type); ptr += SIZE_PAYLOAD_HEADER;
+                res = nabto_rd_payload(ptr, end, &type);
+                ptr += SIZE_PAYLOAD_HEADER;
                 // Here, we verify that the nonce is present and has the expected size
                 if (res != nmc.context.nonceSize || type != NP_PAYLOAD_TYPE_NONCE) {
-                    NABTO_LOG_TRACE(("Illegal payload in U_ATTACH request: %" PRIu16 " %i ",res ,(int)type));
+                    NABTO_LOG_TRACE(("Illegal payload in U_ATTACH request: %" PRIu16 " %i ", res, (int)type));
                 } else {
                     result = handle_actual_attach(hdr, ptr);
                 }
@@ -640,8 +648,7 @@ bool nabto_attach_event(nabto_packet_header* hdr)
 /******************************************************************************/
 /******************************************************************************/
 
-bool nabto_alive_event(nabto_packet_header* hdr)
-{
+bool nabto_alive_event(nabto_packet_header* hdr) {
     if (nmc.context.state != NABTO_AS_ATTACHED) {
         NABTO_LOG_TRACE(("Received alive event, but we are not attached yet, so wwe discard the alive"));
         return false;
@@ -657,20 +664,22 @@ bool nabto_alive_event(nabto_packet_header* hdr)
     } else if (hdr->flags != 0) {
         NABTO_LOG_TRACE(("Illegal header in U_ALIVE request:%" PRIu32 "/%i", hdr->nsi_cp, (int)hdr->flags));
     } else {
-        size_t   olen;
-        size_t   piggySize;
+        size_t olen;
+        size_t piggySize;
         uint8_t* piggyData;
 
 #if NABTO_SET_TIME_FROM_ALIVE
-        uint8_t  type;
+        uint8_t type;
         uint8_t* ptr = nabtoCommunicationBuffer + hdr->hlen;
-        uint16_t res = nabto_rd_payload(ptr, nabtoCommunicationBuffer + hdr->len, &type); ptr += SIZE_PAYLOAD_HEADER;
+        uint16_t res = nabto_rd_payload(ptr, nabtoCommunicationBuffer + hdr->len, &type);
+        ptr += SIZE_PAYLOAD_HEADER;
         if (res < 5 || type != NP_PAYLOAD_TYPE_TIME) {
             NABTO_LOG_TRACE(("Illegal TIME in U_ALIVE request:%u %u", res, type));
         } else {
-            uint8_t  timeType;
+            uint8_t timeType;
             uint32_t timeStamp;
-            READ_U8(timeType, ptr); ptr += 1;
+            READ_U8(timeType, ptr);
+            ptr += 1;
             READ_U32(timeStamp, ptr);
             NABTO_NOT_USED(timeType);
             setTimeFromGSP(timeStamp);
@@ -704,14 +713,14 @@ bool nabto_alive_event(nabto_packet_header* hdr)
             const uint16_t maxPiggySize = nabtoCommunicationBufferSize - NP_PACKET_HDR_MIN_BYTELENGTH - NP_PAYLOAD_NOTIFY_BYTELENGTH - NP_PAYLOAD_PIGGY_SIZE_WO_DATA;
 
             nmc.context.piggyBuffer = get_event_buffer2(maxPiggySize);
-        } // Else resend the old piggy data.
+        }  // Else resend the old piggy data.
 
         if (nmc.context.piggyBuffer != NULL && nmc.context.piggyBuffer->size > 4) {
             NABTO_LOG_TRACE(("piggy buffer size %i, hdr->seq %i", nmc.context.piggyBuffer->size, hdr->seq));
             piggySize = nmc.context.piggyBuffer->size;
             piggyData = nmc.context.piggyBuffer->data;
         } else
-#endif // NABTO_ENABLE_EVENTCHANNEL
+#endif  // NABTO_ENABLE_EVENTCHANNEL
         {
             piggySize = 0;
             piggyData = 0;
@@ -728,9 +737,6 @@ bool nabto_alive_event(nabto_packet_header* hdr)
     }
     return true; /* accept or ignore silently */
 }
-
-
-
 
 /******************************************************************************/
 
@@ -778,35 +784,34 @@ void handle_as_idle(void) {
     nabto_dns_resolve(nmc.nabtoMainSetup.id);
 }
 
-
 /** timer event when waiting for response to the DNS request. */
 void handle_as_wait_dns(void) {
     nabto_dns_status_t dns_status = nabto_dns_is_resolved(nmc.nabtoMainSetup.id, nmc.controllerAddresses);
     switch (dns_status) {
-    case NABTO_DNS_NOT_FINISHED:
-        SET_CTX_STAMP(INTERVAL_DNS_RESOLVE);
-        break;
-    case NABTO_DNS_ERROR:
-        NABTO_LOG_INFO(("DNS error (returned by application)"));
-        SET_CTX_STATE_STAMP(NABTO_AS_IDLE, EXP_WAIT(INTERVAL_ERROR_RETRY_BASE, nmc.context.errorCount));
-        send_basestation_attach_failure(NP_PAYLOAD_ATTACH_STATS_STATUS_DNS_LOOKUP_FAILED);
-        nmc.context.errorCount += 2;
-        break;
-    case NABTO_DNS_OK:
-        NABTO_LOG_INFO(("Resolved DNS for %s to:", nmc.nabtoMainSetup.id));
-        {
-            uint8_t i;
-            for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
-                struct nabto_ip_address* ip = &nmc.controllerAddresses[i];
-                if (ip->type != NABTO_IP_NONE) {
-                    NABTO_LOG_INFO(("  Controller ip: %s", nabto_ip_to_string(ip)));
+        case NABTO_DNS_NOT_FINISHED:
+            SET_CTX_STAMP(INTERVAL_DNS_RESOLVE);
+            break;
+        case NABTO_DNS_ERROR:
+            NABTO_LOG_INFO(("DNS error (returned by application)"));
+            SET_CTX_STATE_STAMP(NABTO_AS_IDLE, EXP_WAIT(INTERVAL_ERROR_RETRY_BASE, nmc.context.errorCount));
+            send_basestation_attach_failure(NP_PAYLOAD_ATTACH_STATS_STATUS_DNS_LOOKUP_FAILED);
+            nmc.context.errorCount += 2;
+            break;
+        case NABTO_DNS_OK:
+            NABTO_LOG_INFO(("Resolved DNS for %s to:", nmc.nabtoMainSetup.id));
+            {
+                uint8_t i;
+                for (i = 0; i < NABTO_DNS_RESOLVED_IPS_MAX; i++) {
+                    struct nabto_ip_address* ip = &nmc.controllerAddresses[i];
+                    if (ip->type != NABTO_IP_NONE) {
+                        NABTO_LOG_INFO(("  Controller ip: %s", nabto_ip_to_string(ip)));
+                    }
                 }
             }
-        }
 
-        nmc.context.errorCount = 0;
-        SET_CTX_STATE_STAMP(NABTO_AS_WAIT_BS, 0);
-        break;
+            nmc.context.errorCount = 0;
+            SET_CTX_STATE_STAMP(NABTO_AS_WAIT_BS, 0);
+            break;
     }
 }
 
@@ -819,7 +824,7 @@ void handle_as_wait_bs(void) {
     }
 
     SET_CTX_STATE_STAMP(NABTO_AS_WAIT_BS, EXP_WAIT(INTERVAL_BS_INVITE, nmc.context.counter));
-    if(++nmc.context.counter > 6) {
+    if (++nmc.context.counter > 6) {
         nmc.context.errorCount = 0;
         NABTO_LOG_INFO(("Could not connect to controller, retrying from beginning"));
         send_basestation_attach_failure(NP_PAYLOAD_ATTACH_STATS_STATUS_CONTROLLER_INVITE_FAILED);
@@ -838,7 +843,7 @@ void handle_as_wait_gsp(void) {
         SET_CTX_STATE_STAMP(NABTO_AS_IDLE, INTERVAL_ERROR_RETRY_BASE);
         return;
     }
-    SET_CTX_STAMP(EXP_WAIT(INTERVAL_GSP_INVITE, nmc.context.counter) );
+    SET_CTX_STAMP(EXP_WAIT(INTERVAL_GSP_INVITE, nmc.context.counter));
 
     send_gsp_invite();
 }
@@ -856,43 +861,51 @@ void handle_as_attached(void) {
     }
 }
 
-void nabto_attach_time_event(void)
-{
+void nabto_attach_time_event(void) {
     if (!nabtoIsStampPassed(&nmc.context.timestamp)) {
         return;
     }
 
     switch (nmc.context.state) {
-    case NABTO_AS_IDLE:     handle_as_idle();     break;
-    case NABTO_AS_WAIT_DNS: handle_as_wait_dns(); break;
-    case NABTO_AS_WAIT_BS:  handle_as_wait_bs();  break;
-    case NABTO_AS_WAIT_GSP: handle_as_wait_gsp(); break;
-    case NABTO_AS_ATTACHED: handle_as_attached(); break;
+        case NABTO_AS_IDLE:
+            handle_as_idle();
+            break;
+        case NABTO_AS_WAIT_DNS:
+            handle_as_wait_dns();
+            break;
+        case NABTO_AS_WAIT_BS:
+            handle_as_wait_bs();
+            break;
+        case NABTO_AS_WAIT_GSP:
+            handle_as_wait_gsp();
+            break;
+        case NABTO_AS_ATTACHED:
+            handle_as_attached();
+            break;
     }
 }
 
 void nabto_network_changed(void) {
     switch (nmc.context.state) {
-    case NABTO_AS_IDLE:
-    case NABTO_AS_WAIT_DNS:
-    case NABTO_AS_WAIT_BS:
-    case NABTO_AS_WAIT_GSP:
-        SET_CTX_STATE_STAMP(NABTO_AS_IDLE, 0);
-        break;
-    default: break;
+        case NABTO_AS_IDLE:
+        case NABTO_AS_WAIT_DNS:
+        case NABTO_AS_WAIT_BS:
+        case NABTO_AS_WAIT_GSP:
+            SET_CTX_STATE_STAMP(NABTO_AS_IDLE, 0);
+            break;
+        default:
+            break;
     }
 }
 
-void nabto_change_context_state(nabto_state state)
-{
+void nabto_change_context_state(nabto_state state) {
     SET_CTX_STATE_STAMP(state, 0);
 }
-
 
 uint8_t* insert_attach_stats_payload(uint8_t* ptr, uint8_t* end, uint8_t statusCode) {
     uint8_t flags;
 
-    if (end-ptr < NP_PAYLOAD_ATTACH_STATS_BYTELENGTH) {
+    if (end - ptr < NP_PAYLOAD_ATTACH_STATS_BYTELENGTH) {
         return NULL;
     }
 
@@ -938,7 +951,9 @@ void send_basestation_attach_failure(uint8_t statusCode) {
 
     ptr = insert_attach_stats_payload(ptr, end, statusCode);
 
-    if (!insert_packet_length_from_cursor(nabtoCommunicationBuffer, ptr)) { return; }
+    if (!insert_packet_length_from_cursor(nabtoCommunicationBuffer, ptr)) {
+        return;
+    }
     length = (uint16_t)(ptr - nabtoCommunicationBuffer);
 
     if (nmc.controllerEp.addr.type == NABTO_IP_NONE) {
@@ -947,6 +962,5 @@ void send_basestation_attach_failure(uint8_t statusCode) {
         send_to_basestation(nabtoCommunicationBuffer, length, &nmc.controllerEp);
     }
 }
-
 
 #endif

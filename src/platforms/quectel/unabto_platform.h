@@ -23,14 +23,12 @@
 extern "C" {
 #endif
 
-
-#define NABTO_LOG_BASIC_PRINT(Severity,msg) Ql_DebugTrace msg
+#define NABTO_LOG_BASIC_PRINT(Severity, msg) Ql_DebugTrace msg
 
 //extern APP_CONFIG AppConfig; // expose the TCP/IP configuration structure so the application can access it.
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

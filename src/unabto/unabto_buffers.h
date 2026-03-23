@@ -8,7 +8,7 @@
  *   Call init_buffer first to initialize the buffer data structure with a memory area.
  *   Afterward buffer_reset will reset the buffer data structure; 
  */
- 
+
 #ifndef _UNABTO_BUFFERS_H_
 #define _UNABTO_BUFFERS_H_
 
@@ -22,10 +22,9 @@ extern "C" {
  * A buffer access type.
  */
 typedef struct {
-    uint16_t size;   /**< the size of the buffer                    */
+    uint16_t size; /**< the size of the buffer                    */
     uint8_t* data; /**< the content                               */
 } unabto_buffer;
-
 
 /**************************/
 /* Prototypes for buffers */
@@ -37,8 +36,7 @@ typedef struct {
  * @param data    the new content
  * @param size    the size of the new content
  */
-void unabto_buffer_init(unabto_buffer* buffer, uint8_t *data, uint16_t size);
-
+void unabto_buffer_init(unabto_buffer* buffer, uint8_t* data, uint16_t size);
 
 /**
  * Get the raw buffer.
@@ -47,14 +45,12 @@ void unabto_buffer_init(unabto_buffer* buffer, uint8_t *data, uint16_t size);
  */
 uint8_t* unabto_buffer_get_data(const unabto_buffer* buffer);
 
-
 /**
  * Get the size of buffer.
  * @param buffer     the target buffer
  * @return size
  */
 int unabto_buffer_get_size(const unabto_buffer* buffer);
-
 
 /**
  * copy a buffer to another buffer
@@ -64,28 +60,24 @@ int unabto_buffer_get_size(const unabto_buffer* buffer);
  */
 bool unabto_buffer_copy(unabto_buffer* dest, const unabto_buffer* src);
 
-
 /**
  * string compares a buffer with another buffer
  * @param b1  buffer
  * @param b2  buffer
  * @return 0 - equal, -1 - b1 < b2, 1 b1 > b2,     
  */
-int unabto_buffer_cmp(const unabto_buffer *b1, const unabto_buffer *b2);
-
+int unabto_buffer_cmp(const unabto_buffer* b1, const unabto_buffer* b2);
 
 /** move out **/
 
-
 /*
     abuffer 
-*/    
+*/
 
 typedef struct {
-    unabto_buffer *buffer; /**< buffer for data */
-    uint16_t position; /**< pointer to current read/write location in the buffer */
-} unabto_abuffer; // rename 
-
+    unabto_buffer* buffer; /**< buffer for data */
+    uint16_t position;     /**< pointer to current read/write location in the buffer */
+} unabto_abuffer;          // rename
 
 /** 
  * Reset the abuffer to the start
@@ -93,15 +85,13 @@ typedef struct {
  */
 bool unabto_abuffer_reset(unabto_abuffer* aBuffer);
 
-
 /**
  * Initialize the abuffer. Must be called before any other calls to the buffer.
  * @param aBuffer  the target abuffer
  * @param buffer   a unabto_buffer with new content or space for adding new content
  *                 previously initialized with unabto_buffer_init
  */
-bool unabto_abuffer_init(unabto_abuffer* aBuffer, unabto_buffer *buffer);
-
+bool unabto_abuffer_init(unabto_abuffer* aBuffer, unabto_buffer* buffer);
 
 /**
  * Initialize the abuffer. Must be called before any other calls to the buffer.
@@ -119,8 +109,7 @@ bool unabto_abuffer_init(unabto_abuffer* aBuffer, uint8_t *data, uint16_t dataSi
  * @param abuffer     the target abuffer
  * @return a pointer to the current buffer position
  */
-uint8_t *unabto_abuffer_get_head(const unabto_abuffer* aBuffer);
-
+uint8_t* unabto_abuffer_get_head(const unabto_abuffer* aBuffer);
 
 /**
  * Get the total size of the abuffer.
@@ -136,14 +125,12 @@ uint16_t unabto_abuffer_get_size(const unabto_abuffer* aBuffer);
  */
 uint16_t unabto_abuffer_get_used(const unabto_abuffer* aBuffer);
 
-
 /**
  * Get the "unused" data size of the abuffer.
  * @param aBuffer    the target abuffer
  * @return the unused
  */
 uint16_t unabto_abuffer_get_unused(const unabto_abuffer* aBuffer);
-
 
 /**
  * Shifts the current read/write position forward
@@ -160,12 +147,9 @@ bool unabto_abuffer_advance(unabto_abuffer* aBuffer, uint16_t offset);
  * @param srcBuffer    the source abuffer
  * @return true if room in destBuffer
  */
-bool unabto_abuffer_copy(unabto_abuffer* destBuffer, const unabto_abuffer *srcBuffer);
-
-
+bool unabto_abuffer_copy(unabto_abuffer* destBuffer, const unabto_abuffer* srcBuffer);
 
 /** Utility add data functions **/
-
 
 /** 
  * Append a null terminated string to an abuffer
@@ -173,8 +157,7 @@ bool unabto_abuffer_copy(unabto_abuffer* destBuffer, const unabto_abuffer *srcBu
  * @param str        the string
  * @return true if room
  */
-bool unabto_abuffer_add_str(unabto_abuffer* aBuffer, const char *str);
-
+bool unabto_abuffer_add_str(unabto_abuffer* aBuffer, const char* str);
 
 /** 
  * Append a C string terminator to an abuffer
@@ -184,7 +167,6 @@ bool unabto_abuffer_add_str(unabto_abuffer* aBuffer, const char *str);
  */
 bool buffer_abuffer_add_str_terminator(unabto_abuffer* aBuffer);
 
-
 /** 
  * Append a byte array to an abuffer
  * @param aBuffer     the target buffer
@@ -192,8 +174,7 @@ bool buffer_abuffer_add_str_terminator(unabto_abuffer* aBuffer);
  * @param dataLength  the length of the content
  * @return true if room
  */
-bool unabto_abuffer_add_data(unabto_abuffer* aBuffer, const uint8_t *data, uint16_t dataLength);
-
+bool unabto_abuffer_add_data(unabto_abuffer* aBuffer, const uint8_t* data, uint16_t dataLength);
 
 /** 
  * Append the contens of a buffer to an abuffer
@@ -203,21 +184,20 @@ bool unabto_abuffer_add_data(unabto_abuffer* aBuffer, const uint8_t *data, uint1
  */
 bool unabto_abuffer_add_buffer(unabto_abuffer* aBuffer, const unabto_buffer* buffer);
 
-
-
-
 /**************************************************************************
  ******** The following functions are primarily for internal usage ********
  **************************************************************************/
 
 /* "in-liners" with no error checking */
 
-
 #define UNABTO_ABUFFER_POSITION(aBuffer) (aBuffer->position)
 
 #define UNABTO_ABUFFER_GET_USED(aBuffer) UNABTO_ABUFFER_POSITION(aBuffer)
 
-#define UNABTO_ABUFFER_RESET(aBuffer) do {UNABTO_ABUFFER_POSITION(aBuffer) = 0; } while(0)
+#define UNABTO_ABUFFER_RESET(aBuffer)         \
+    do {                                      \
+        UNABTO_ABUFFER_POSITION(aBuffer) = 0; \
+    } while (0)
 
 #define UNABTO_ABUFFER_GET_SIZE(aBuffer) (aBuffer->buffer->size)
 
@@ -225,16 +205,20 @@ bool unabto_abuffer_add_buffer(unabto_abuffer* aBuffer, const unabto_buffer* buf
 
 #define UNABTO_ABUFFER_GET_INITIAL_HEAD(aBuffer) ((aBuffer)->buffer->data)
 
-#define UNABTO_ABUFFER_GET_HEAD(aBuffer) (UNABTO_ABUFFER_GET_INITIAL_HEAD(aBuffer) + UNABTO_ABUFFER_POSITION(aBuffer) )
+#define UNABTO_ABUFFER_GET_HEAD(aBuffer) (UNABTO_ABUFFER_GET_INITIAL_HEAD(aBuffer) + UNABTO_ABUFFER_POSITION(aBuffer))
 
-#define UNABTO_ABUFFER_ADVANCE(aBuffer, offset) do {UNABTO_ABUFFER_POSITION(aBuffer) += offset;} while(0)
+#define UNABTO_ABUFFER_ADVANCE(aBuffer, offset)     \
+    do {                                            \
+        UNABTO_ABUFFER_POSITION(aBuffer) += offset; \
+    } while (0)
 
-#define UNABTO_ABUFFER_SET_USED(aBuffer, pos) do {UNABTO_ABUFFER_POSITION(aBuffer) = pos;} while(0)
-
-
+#define UNABTO_ABUFFER_SET_USED(aBuffer, pos)   \
+    do {                                        \
+        UNABTO_ABUFFER_POSITION(aBuffer) = pos; \
+    } while (0)
 
 #ifdef __cplusplus
-} // extern "C"
+}  // extern "C"
 #endif
 
 #endif /* _UNABTO_BUFFERS_H_ */

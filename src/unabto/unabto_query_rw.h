@@ -1,7 +1,7 @@
 /*
  * Copyright (C) Nabto - All Rights Reserved.
  */
- 
+
 #ifndef _UNABTO_QUERY_BUFFER_H_
 #define _UNABTO_QUERY_BUFFER_H_
 
@@ -13,12 +13,9 @@
 extern "C" {
 #endif
 
-
 /**
  * the query buffers
  */
-
-
 
 typedef unabto_abuffer unabto_query_request;
 typedef unabto_abuffer unabto_query_response;
@@ -28,7 +25,6 @@ typedef unabto_abuffer unabto_query_response;
 #ifndef PLATFORM_MEMCPY
 #define PLATFORM_MEMCPY memcpy
 #endif
-
 
 /**************************************************/
 /* Prototypes for query request parameter reading */
@@ -40,7 +36,7 @@ typedef unabto_abuffer unabto_query_response;
  * @param resultValue       the resulting uint32_t
  * @return true on successreadabl
  */
-bool unabto_query_read_uint32(unabto_query_request* queryRequest, uint32_t *resultValue);
+bool unabto_query_read_uint32(unabto_query_request* queryRequest, uint32_t* resultValue);
 
 /**
  * read an uint16_t from the query request buffer
@@ -48,7 +44,7 @@ bool unabto_query_read_uint32(unabto_query_request* queryRequest, uint32_t *resu
  * @param resultValue       the resulting uint16_t
  * @return true on success
  */
-bool unabto_query_read_uint16(unabto_query_request* queryRequest, uint16_t *resultValue);
+bool unabto_query_read_uint16(unabto_query_request* queryRequest, uint16_t* resultValue);
 
 /**
  * read an uint8_t from the query request buffer
@@ -56,7 +52,7 @@ bool unabto_query_read_uint16(unabto_query_request* queryRequest, uint16_t *resu
  * @param resultValue       the resulting uint8_t
  * @return true on success
  */
-bool unabto_query_read_uint8(unabto_query_request* queryRequest, uint8_t *resultValue);
+bool unabto_query_read_uint8(unabto_query_request* queryRequest, uint8_t* resultValue);
 
 /**
  * read an int32_t from the query request buffer
@@ -64,7 +60,7 @@ bool unabto_query_read_uint8(unabto_query_request* queryRequest, uint8_t *result
  * @param resultValue       the resulting uint32_t
  * @return true on success
  */
-bool unabto_query_read_int32(unabto_query_request* queryRequest, int32_t *resultValue);
+bool unabto_query_read_int32(unabto_query_request* queryRequest, int32_t* resultValue);
 
 /**
  * read an int16_t from the query request buffer
@@ -72,7 +68,7 @@ bool unabto_query_read_int32(unabto_query_request* queryRequest, int32_t *result
  * @param resultValue       the resulting uint16_t
  * @return true on success
  */
-bool unabto_query_read_int16(unabto_query_request* queryRequest, int16_t *resultValue);
+bool unabto_query_read_int16(unabto_query_request* queryRequest, int16_t* resultValue);
 
 /**
  * read an int8_t from the query request buffer
@@ -80,7 +76,7 @@ bool unabto_query_read_int16(unabto_query_request* queryRequest, int16_t *result
  * @param resultValue       the resulting uint8_t
  * @return true on success
  */
-bool unabto_query_read_int8(unabto_query_request* queryRequest, int8_t *resultValue);
+bool unabto_query_read_int8(unabto_query_request* queryRequest, int8_t* resultValue);
 
 /**
  * read a list of uint8 from the query request buffer
@@ -89,7 +85,7 @@ bool unabto_query_read_int8(unabto_query_request* queryRequest, int8_t *resultVa
  * @param listLength   set to length of the uint8 sequence 
  * @return true if success
  */
-bool unabto_query_read_uint8_list(unabto_query_request* queryRequest, uint8_t **list, uint16_t *listLength);
+bool unabto_query_read_uint8_list(unabto_query_request* queryRequest, uint8_t** list, uint16_t* listLength);
 
 /**
  * read uint8 list into unabto_buffer without copying the data
@@ -102,7 +98,7 @@ bool unabto_query_read_uint8_list_to_buffer_nc(unabto_query_request* queryReques
  * @param elementCount  set to number of elements in the list 
  * @return true if success
  */
-bool unabto_query_read_list_length(unabto_query_request* queryRequest, uint16_t *elementCount);
+bool unabto_query_read_list_length(unabto_query_request* queryRequest, uint16_t* elementCount);
 
 /**
  * get the size of the request
@@ -124,7 +120,7 @@ void unabto_query_request_reset(unabto_query_request* queryRequest);
  * @param value        the uint8_t
  * @return false if the operation would have resulted in a buffer overflow.
  */
-bool unabto_query_write_uint8(unabto_query_response *queryResponse, uint8_t value);
+bool unabto_query_write_uint8(unabto_query_response* queryResponse, uint8_t value);
 
 /**
  * Append an uint16_t to the query response buffer
@@ -132,7 +128,7 @@ bool unabto_query_write_uint8(unabto_query_response *queryResponse, uint8_t valu
  * @param value        the uint16_t
  * @return false if the operation would have resulted in a buffer overflow.
  */
-bool unabto_query_write_uint16(unabto_query_response *queryResponse, uint16_t value);
+bool unabto_query_write_uint16(unabto_query_response* queryResponse, uint16_t value);
 
 /**
  * Append an uint32_t to the query response buffer
@@ -140,7 +136,7 @@ bool unabto_query_write_uint16(unabto_query_response *queryResponse, uint16_t va
  * @param value        the uint32_t
  * @return false if the operation would have resulted in a buffer overflow.
  */
-bool unabto_query_write_uint32(unabto_query_response *queryResponse, uint32_t value);
+bool unabto_query_write_uint32(unabto_query_response* queryResponse, uint32_t value);
 
 /**
  * Append an int8_t to the query response buffer
@@ -148,7 +144,7 @@ bool unabto_query_write_uint32(unabto_query_response *queryResponse, uint32_t va
  * @param value        the int8_t
  * @return false if the operation would have resulted in a buffer overflow.
  */
-bool unabto_query_write_int8(unabto_query_response *queryResponse, int8_t value);
+bool unabto_query_write_int8(unabto_query_response* queryResponse, int8_t value);
 
 /**
  * Append an int16_t to the query response buffer
@@ -156,7 +152,7 @@ bool unabto_query_write_int8(unabto_query_response *queryResponse, int8_t value)
  * @param value        the int16_t
  * @return false if the operation would have resulted in a buffer overflow.
  */
-bool unabto_query_write_int16(unabto_query_response *queryResponse, int16_t value);
+bool unabto_query_write_int16(unabto_query_response* queryResponse, int16_t value);
 
 /**
  * Append an int32_t to the query response buffer
@@ -164,7 +160,7 @@ bool unabto_query_write_int16(unabto_query_response *queryResponse, int16_t valu
  * @param value        the int32_t
  * @return false if the operation would have resulted in a buffer overflow.
  */
-bool unabto_query_write_int32(unabto_query_response *queryResponse, int32_t value);
+bool unabto_query_write_int32(unabto_query_response* queryResponse, int32_t value);
 
 /**
  * Append a byte array to the query response buffer 
@@ -174,17 +170,16 @@ bool unabto_query_write_int32(unabto_query_response *queryResponse, int32_t valu
  * @param listLength number of bytes in the byte array
  * @return true on success
  */
-bool unabto_query_write_uint8_list(unabto_query_response * queryResponse, uint8_t *list, uint16_t listLength);
+bool unabto_query_write_uint8_list(unabto_query_response* queryResponse, uint8_t* list, uint16_t listLength);
 
 /**
  * return the number of bytes still available for writing in the buffer
  * @param queryResponse  the query response buffer
  * @return the number of bytes available for writing 0 if the buffer is full
  */
-size_t unabto_query_write_free_bytes(unabto_query_response * queryResponse);
+size_t unabto_query_write_free_bytes(unabto_query_response* queryResponse);
 
-typedef void *unabto_list_ctx; /* ... */
-
+typedef void* unabto_list_ctx; /* ... */
 
 /**
  * Initializes a list 
@@ -192,7 +187,7 @@ typedef void *unabto_list_ctx; /* ... */
  * @param   listCtx on return initialized to with the internal list context 
  * @return true on success
  */
-bool unabto_query_write_list_start(unabto_query_response* queryResponse, unabto_list_ctx *listCtx);
+bool unabto_query_write_list_start(unabto_query_response* queryResponse, unabto_list_ctx* listCtx);
 
 /**
  * Finalizes a list 
@@ -201,14 +196,13 @@ bool unabto_query_write_list_start(unabto_query_response* queryResponse, unabto_
  * @param elementCount number of elements written in the list. 
  * @return true on success
  */
-bool unabto_query_write_list_end(unabto_query_response* queryResponse, unabto_list_ctx *listCtx, uint16_t elementCount);
+bool unabto_query_write_list_end(unabto_query_response* queryResponse, unabto_list_ctx* listCtx, uint16_t elementCount);
 
 /********************************************************************************
  ******** The following functions are primarily for internal usage - TBM ********
  ********************************************************************************/
 
 #define unabto_query_read_init(queryRequest, buffer) unabto_abuffer_init(queryRequest, buffer)
-
 
 #define unabto_query_write_init(queryResponse, buffer) unabto_abuffer_init(queryResponse, buffer)
 
@@ -221,7 +215,6 @@ void unabto_query_request_init(unabto_query_request* queryRequest, unabto_buffer
  * Initialize a query response
  */
 void unabto_query_response_init(unabto_query_response* queryResponse, unabto_buffer* buffer);
-
 
 /**
  * Ask how many bytes have been used in the response
@@ -241,9 +234,8 @@ uint16_t unabto_query_response_used(unabto_query_response* queryResponse);
 
 #define unabto_query_advance_write_head(queryResponse, offset) unabto_abuffer_advance(queryResponse, offset)
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

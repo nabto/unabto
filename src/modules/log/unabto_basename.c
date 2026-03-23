@@ -10,14 +10,12 @@
 #include <unabto/unabto_env_base.h>
 #include <modules/log/unabto_basename.h>
 
-
 #include <string.h>
 
 /** @return the filename part (without preceeding path) of a file pathname.
  * @param  path   pathname to a file.  */
-const char* unabto_basename(const char* path)
-{
-    const char *p;
+const char* unabto_basename(const char* path) {
+    const char* p;
     char ch;
 
     p = path + strlen(path);

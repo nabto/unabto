@@ -9,10 +9,10 @@
 
 typedef struct unabto_tcp_fallback_connection {
     uint8_t sendBuffer[65536];
-    size_t  sendBufferLength;
-    size_t  sendBufferSent;
+    size_t sendBufferLength;
+    size_t sendBufferSent;
     uint8_t recvBuffer[65536];
-    size_t  recvBufferLength;
+    size_t recvBufferLength;
     struct unabto_tcp_socket socket;
 } unabto_tcp_fallback_connection;
 

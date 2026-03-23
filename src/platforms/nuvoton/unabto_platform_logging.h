@@ -9,11 +9,17 @@
 
 #include <stdio.h>
 
-#define NABTO_LOG_BASIC_PRINT(level, message) do { printf message; printf("\n"); } while(0)
+#define NABTO_LOG_BASIC_PRINT(level, message) \
+    do {                                      \
+        printf message;                       \
+        printf("\n");                         \
+    } while (0)
 
 #else
 
-#define NABTO_LOG_BASIC_PRINT(level, message) do { } while(0)
+#define NABTO_LOG_BASIC_PRINT(level, message) \
+    do {                                      \
+    } while (0)
 
 #endif
 

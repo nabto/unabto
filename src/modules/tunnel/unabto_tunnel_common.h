@@ -10,16 +10,15 @@
 #include <sys/epoll.h>
 #endif
 
-
-#define MAX_COMMAND_LENGTH 512
+#define MAX_COMMAND_LENGTH     512
 #define MAX_DEVICE_NAME_LENGTH 128
-#define MAX_HOST_LENGTH 128
+#define MAX_HOST_LENGTH        128
 
 typedef enum {
     TS_IDLE,
     TS_READ_COMMAND,
     TS_PARSE_COMMAND,
-    TS_FAILED_COMMAND, // failed to read/parse command, close connect attempt.
+    TS_FAILED_COMMAND,  // failed to read/parse command, close connect attempt.
     TS_OPEN_SOCKET,
     TS_OPENING_SOCKET,
     TS_FORWARD,
@@ -56,26 +55,24 @@ typedef struct tcp_tunnel_static_memory {
     //~ uint8_t tcpReadBuffer[NABTO_MEMORY_STREAM_SEGMENT_SIZE];
 } tcp_tunnel_static_memory;
 
-union tunnel_static_memory_union{
+union tunnel_static_memory_union {
     struct tcp_tunnel_static_memory tcp_sm;
     struct uart_tunnel_static_memory uart_sm;
 };
 
-typedef struct tunnel_static_memory{
+typedef struct tunnel_static_memory {
     uint8_t command[MAX_COMMAND_LENGTH];
     union tunnel_static_memory_union stmu;
 } tunnel_static_memory;
 
-typedef struct uart_vars{
+typedef struct uart_vars {
     int fd;
 } uart_vars;
 
-typedef struct tcp_vars{
+typedef struct tcp_vars {
     int port;
     struct unabto_tcp_socket sock;
 } tcp_vars;
-
-
 
 typedef struct tunnel {
 #if NABTO_ENABLE_EPOLL
@@ -132,7 +129,7 @@ bool unabto_tunnel_allow_client_access(nabto_connect* connection);
 
 typedef enum {
     NABTO_TCP_TUNNEL_OPENED,
-    NABTO_TCP_TUNNEL_CLOSED 
+    NABTO_TCP_TUNNEL_CLOSED
 } tunnel_status_event;
 
 /**
@@ -152,9 +149,6 @@ typedef struct tunnel_status_tcp_details {
  */
 void unabto_tunnel_status_get_tcp_info(tunnel* tunnel, tunnel_status_tcp_details* info);
 
-
 #endif
 
-
-
-#endif // _UNABTO_TUNNEL_COMMON_H_
+#endif  // _UNABTO_TUNNEL_COMMON_H_

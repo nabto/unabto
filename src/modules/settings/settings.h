@@ -22,7 +22,7 @@ bool settings_write_bool(const char* key, bool value);
 void initialize_settings(const char* file);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

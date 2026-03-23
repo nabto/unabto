@@ -42,7 +42,7 @@ extern "C" {
 #endif
 
 /* Logging helpers - prefix each log line */
-#define PRI_tcp_fb "[%d;%" PRIu32 "] "
+#define PRI_tcp_fb     "[%d;%" PRIu32 "] "
 #define TCP_FB_ARGS(c) nabto_connection_index(c), (c)->cpnsi
 
 typedef enum {
@@ -51,7 +51,6 @@ typedef enum {
     UTFE_QUEUE_FULL,
     UTFE_CONNECTION_CLOSED
 } unabto_tcp_fallback_error;
-
 
 /**
  * Functions which need external implementation in a module.
@@ -66,7 +65,6 @@ bool unabto_tcp_fallback_module_init();
  * Deinitialize the fallback module
  */
 void unabto_tcp_fallback_module_deinit();
- 
 
 /**
  * Initialize the fallback structure. unabto_tcp_fallback_connection
@@ -80,9 +78,6 @@ bool unabto_tcp_fallback_init(nabto_connect* con);
  * trigger a call to unabto_tcp_fallback_socket_closed.
  */
 bool unabto_tcp_fallback_close(nabto_connect* con);
-
-
-
 
 /**
  * Functions which is implemented in uNabto core
@@ -128,7 +123,7 @@ bool unabto_tcp_fallback_is_reliable(nabto_connect* con);
 bool nabto_fallback_connect_u_event(uint16_t ilen, nabto_packet_header* hdr);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

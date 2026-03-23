@@ -17,7 +17,7 @@
  * Make it possible to compile the source without an unabto_config.h
  */
 #ifndef NABTO_NO_CONFIG
-#include <unabto_config.h>                   // user supplied config file, defaults are provided below
+#include <unabto_config.h>  // user supplied config file, defaults are provided below
 #endif
 #include <unabto/unabto_include_platform.h>  // device detection (if not set by user) and device dependant includes
 #include <unabto/unabto_config_defaults.h>   // default configuration values
@@ -27,10 +27,17 @@
 #include <unabto/unabto_logging.h>
 
 /// Avoid compiler warning. @param x  The not used parameter. @return
-#define NABTO_NOT_USED(x) do { (void)(x); } while (0) // if (x) { /* avoid compiler warning */ }
+#define NABTO_NOT_USED(x) \
+    do {                  \
+        (void)(x);        \
+    } while (0)  // if (x) { /* avoid compiler warning */ }
 
 /// Asserts expr is true, expr is only evaluated when compiling.
-#define COMPILE_TIME_ASSERT(expr) switch(0){case 0:case expr:;}
+#define COMPILE_TIME_ASSERT(expr) \
+    switch (0) {                  \
+        case 0:                   \
+        case expr:;               \
+    }
 
 /* Utilities for time handling. */
 /* The utilities are used in a "poll-driven" system. */
@@ -42,7 +49,10 @@
  * void nabtoAddStamp(nabto_stamp_t* stamp, uint32_t msec);
  */
 #ifndef nabtoAddStamp
-#define nabtoAddStamp(stamp, msec)    do { *(stamp) += nabtoMsec2Stamp(msec); } while (0)
+#define nabtoAddStamp(stamp, msec)         \
+    do {                                   \
+        *(stamp) += nabtoMsec2Stamp(msec); \
+    } while (0)
 #endif
 
 /**
@@ -52,7 +62,11 @@
  * void nabtoSetFutureStamp(nabto_stamp_t* stamp, uint32_t msec);
  */
 #ifndef nabtoSetFutureStamp
-#define nabtoSetFutureStamp(stamp, msec) do { *(stamp) = nabtoGetStamp(); nabtoAddStamp(stamp, msec); } while (0)
+#define nabtoSetFutureStamp(stamp, msec) \
+    do {                                 \
+        *(stamp) = nabtoGetStamp();      \
+        nabtoAddStamp(stamp, msec);      \
+    } while (0)
 #endif
 
 /**
@@ -66,13 +80,12 @@
 
 /** @return (*s1 < *s2) */
 #ifndef nabtoStampLess
-#define nabtoStampLess(s1,s2) (*s1 < *s2)
+#define nabtoStampLess(s1, s2) (*s1 < *s2)
 #endif
 
 #ifndef nabtoStampLessOrEqual
-#define nabtoStampLessOrEqual(s1,s2) (*s1 <= *s2)
+#define nabtoStampLessOrEqual(s1, s2) (*s1 <= *s2)
 #endif
-
 
 #ifndef UNABTO_INADDR_NONE
 #define UNABTO_INADDR_NONE (0xffffffffu)
@@ -83,15 +96,13 @@
 
 //#include <unabto/unabto_external_environment.h>
 
+typedef char _nabtoDummyType;  // Some compilers (e.g. the MPLAB C18 compiler for PIC18) don't accept C files with no statements. This typedef solves this.
 
-typedef char _nabtoDummyType; // Some compilers (e.g. the MPLAB C18 compiler for PIC18) don't accept C files with no statements. This typedef solves this.
-
-#define NABTO_STRINGIFY(x) _NABTO_STRINGIFY(x)
+#define NABTO_STRINGIFY(x)  _NABTO_STRINGIFY(x)
 #define _NABTO_STRINGIFY(x) #x
 
-#define NABTO_CONCATENATE(x, y) _NABTO_CONCATENATE(x, y)
-#define _NABTO_CONCATENATE(x, y) x ## y
-
+#define NABTO_CONCATENATE(x, y)  _NABTO_CONCATENATE(x, y)
+#define _NABTO_CONCATENATE(x, y) x##y
 
 /**
  * use the following helper macros as

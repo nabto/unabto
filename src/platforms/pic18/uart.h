@@ -23,7 +23,7 @@ void uart_flush_receiver(void);
 void uart_interrupt_service_handler(void);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

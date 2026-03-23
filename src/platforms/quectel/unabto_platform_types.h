@@ -4,7 +4,7 @@
 #ifndef _UNABTO_PLATFORM_TYPES_H_
 #define _UNABTO_PLATFORM_TYPES_H_
 
-#define NABTO_INVALID_SOCKET    NULL
+#define NABTO_INVALID_SOCKET NULL
 #define nabtoMsec2Stamp
 
 typedef u8 uint8_t;
@@ -18,12 +18,10 @@ typedef u8 nabto_socket_t;
 typedef u64 nabto_stamp_t;
 typedef u64 nabto_stamp_diff_t;
 
-enum
-{
-  false,
-  true
+enum {
+    false,
+    true
 };
 typedef uint8_t bool;
-
 
 #endif

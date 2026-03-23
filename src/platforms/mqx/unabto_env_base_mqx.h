@@ -19,29 +19,29 @@
 
 typedef unsigned char bool;
 
-#define true 1
+#define true  1
 #define false 0
 
 typedef int ssize_t;
 
 typedef uint32_t nabto_socket_t;
-        /**
+/**
          * Defined as in netinet/in.h
          */
-#define INADDR_NONE 0xffffffffu
+#define INADDR_NONE          0xffffffffu
 #define NABTO_INVALID_SOCKET RTCS_SOCKET_ERROR
 
 /************ The Time Handling basics (PC Device), Interface *************/
 
 /** The timestamp definition. @return */
 typedef uint32_t nabto_stamp_t;
-typedef int32_t  nabto_stamp_diff_t;
+typedef int32_t nabto_stamp_diff_t;
 
 /**
  * Convert milleseconds to nabto_stamp_t difference (duration)
  * @param msec  number of milliseconds
  * @return      the stamp difference
  */
-#define nabtoMsec2Stamp(msec)   (msec)
+#define nabtoMsec2Stamp(msec) (msec)
 
 #endif

@@ -13,35 +13,30 @@
 #include "unabto_common_main.h"
 #include "unabto_env_base.h"
 
+uint32_t basestationIPV4 = 0;  // for export
 
+#define UIP_BUFFERS     5
+#define UIP_BUFFER_SIZE 1550  // relocate
+#define MAX_SOCKETS     2
 
-uint32_t basestationIPV4 = 0; // for export
-
-#define UIP_BUFFERS 5
-#define UIP_BUFFER_SIZE 1550 // relocate
-#define MAX_SOCKETS 2
-
-typedef struct XmitBuffer
-{
+typedef struct XmitBuffer {
     uint16_t len;
     uint16_t port;
     uint32_t addr;
     uint8_t buffer[UIP_BUFFER_SIZE];
 } XmitBuffer;
 
-typedef struct Socket
-{
+typedef struct Socket {
     bool used;
     size_t recvLen;
-    struct uip_udp_conn *conn; // matching "connection", appstate is used by dhcp
+    struct uip_udp_conn* conn;  // matching "connection", appstate is used by dhcp
     int xmitBufHead, xmitBufTail, xmitBufElms;
-    XmitBuffer xmitBuffers[UIP_BUFFERS]; // keep data until the matching port is polled by unabto
+    XmitBuffer xmitBuffers[UIP_BUFFERS];  // keep data until the matching port is polled by unabto
 } Socket;
 
-static struct Socket _sockets[MAX_SOCKETS] = { {.used = false }, {.used = false }};    
+static struct Socket _sockets[MAX_SOCKETS] = {{.used = false}, {.used = false}};
 
-XmitBuffer *socketPacketBufferGet(int socket)
-{
+XmitBuffer* socketPacketBufferGet(int socket) {
     if (0 > socket || socket >= MAX_SOCKETS || 0 == _sockets[socket].xmitBufElms)
         return NULL;
     _sockets[socket].xmitBufElms--;
@@ -49,8 +44,7 @@ XmitBuffer *socketPacketBufferGet(int socket)
     return &_sockets[socket].xmitBuffers[_sockets[socket].xmitBufTail];
 }
 
-XmitBuffer *socketPacketBufferNew(int socket)
-{
+XmitBuffer* socketPacketBufferNew(int socket) {
     if (0 > socket || socket >= MAX_SOCKETS || UIP_BUFFERS <= _sockets[socket].xmitBufElms)
         return NULL;
     _sockets[socket].xmitBufElms++;
@@ -58,27 +52,21 @@ XmitBuffer *socketPacketBufferNew(int socket)
     return &_sockets[socket].xmitBuffers[_sockets[socket].xmitBufHead];
 }
 
-
 /** 
  * Fill buffer with random content.
  * @param buf  the buffer
  * @param len  the length of the buffer
  */
-void nabto_random(uint8_t* buf, size_t len)
-{
+void nabto_random(uint8_t* buf, size_t len) {
     int i;
     if (NULL == buf)
         return;
-    for (i=0; i < len; i++)
+    for (i = 0; i < len; i++)
         *buf++ = rand();
 }
 
-
-
-
 /******************************************************************************/
-void nabto_socket_set_invalid(nabto_socket_t* socket)
-{
+void nabto_socket_set_invalid(nabto_socket_t* socket) {
     socket = NABTO_INVALID_SOCKET;
 }
 
@@ -92,31 +80,29 @@ void nabto_socket_set_invalid(nabto_socket_t* socket)
  * @param socket       To return the created socket descriptor.
  * @return             true iff successfull
  */
-bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket)
-{
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket) {
     int i;
     uint32_t localAddr = INADDR_ANY;
-    uint8_t *ap = (uint8_t*)&localAddr;
+    uint8_t* ap = (uint8_t*)&localAddr;
     uip_ipaddr_t ipAddr;
-    struct uip_udp_conn *newConnection;
-    
+    struct uip_udp_conn* newConnection;
+
     if (NULL == socket)
-        return false; 
-    
-    for (i=0; i < MAX_SOCKETS && _sockets[i].used; i++);
+        return false;
+
+    for (i = 0; i < MAX_SOCKETS && _sockets[i].used; i++);
     if (i == MAX_SOCKETS)
         return false;
 
-
-    uip_ipaddr(&ipAddr, ap[3], ap[2], ap[1], ap[1]); // Any address
+    uip_ipaddr(&ipAddr, ap[3], ap[2], ap[1], ap[1]);  // Any address
     newConnection = uip_udp_new(&ipAddr, 0);
     if (NULL == newConnection)
         return false;
-    
+
     if (0 != *localPort)
         uip_udp_bind(newConnection, HTONS(*localPort));
-    newConnection->clrport = 1; // hack
-    uip_listen(HTONS(*localPort));  
+    newConnection->clrport = 1;  // hack
+    uip_listen(HTONS(*localPort));
     *socket = i;
     _sockets[i].conn = newConnection;
     _sockets[i].conn->appstate.callBack = unabto_app;
@@ -126,9 +112,8 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket)
     return true;
 }
 
-bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
-{
-    return *s1==*s2;
+bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2) {
+    return *s1 == *s2;
 }
 
 /**
@@ -137,35 +122,31 @@ bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2)
  *
  * @param socket the socket to be closed
  */
-void nabto_socket_close(nabto_socket_t* socket)
-{
+void nabto_socket_close(nabto_socket_t* socket) {
     if (NULL == socket)
-        return; 
-    
+        return;
+
     if (0 > *socket || *socket >= MAX_SOCKETS)
         return;
-    
+
     _sockets[*socket].used = false;
 }
 
-static uint32_t loops=0;
-
+static uint32_t loops = 0;
 
 // Return with data if the uip has new data for this specific socket
 ssize_t nabto_read(nabto_socket_t socket,
-                   uint8_t*       buf,
-                   size_t         len,
-                   struct nabto_ip_address*      addr,
-                   uint16_t*      port)
-{
+                   uint8_t* buf,
+                   size_t len,
+                   struct nabto_ip_address* addr,
+                   uint16_t* port) {
     size_t res;
-    uint8_t *ap = (uint8_t*)(&addr->addr.ipv4);
-    if (0 > socket || MAX_SOCKETS <= socket  || uip_poll() || socket != uip_udp_conn->appstate.unabto)
+    uint8_t* ap = (uint8_t*)(&addr->addr.ipv4);
+    if (0 > socket || MAX_SOCKETS <= socket || uip_poll() || socket != uip_udp_conn->appstate.unabto)
         return 0;
 
-    res = len  < uip_datalen()?len:uip_datalen();
-    if (0 < res)
-    {
+    res = len < uip_datalen() ? len : uip_datalen();
+    if (0 < res) {
         memcpy(buf, uip_appdata, res);
         // host order little endian
         addr->type = NABTO_IP_V4;
@@ -179,12 +160,11 @@ ssize_t nabto_read(nabto_socket_t socket,
     return res;
 }
 
-static void uipSend(const uint8_t* buf, size_t len, uint32_t addr, uint16_t port)
-{
+static void uipSend(const uint8_t* buf, size_t len, uint32_t addr, uint16_t port) {
     uip_ipaddr_t ipAddr;
-    uint8_t *ap = (uint8_t*)&addr;
+    uint8_t* ap = (uint8_t*)&addr;
     // host order little endian
-    uip_ipaddr(ipAddr,  ap[3], ap[2], ap[1], ap[0]);  
+    uip_ipaddr(ipAddr, ap[3], ap[2], ap[1], ap[0]);
     uip_udp_sendto(buf, len, ipAddr, HTONS(port));
 }
 
@@ -205,32 +185,26 @@ static void uipSend(const uint8_t* buf, size_t len, uint32_t addr, uint16_t port
  */
 ssize_t nabto_write(nabto_socket_t socket,
                     const uint8_t* buf,
-                    size_t         len,
-                    struct nabto_ip_address*       addr,
-                    uint16_t       port)
-{
-    static int dropped=0;
+                    size_t len,
+                    struct nabto_ip_address* addr,
+                    uint16_t port) {
+    static int dropped = 0;
     ssize_t res = -1;
-    XmitBuffer *xmitBuf;
+    XmitBuffer* xmitBuf;
 
     if (0 > socket || socket >= MAX_SOCKETS || addr->type != NABTO_IP_V4)
         return -1;
 
-
-    if (0 == uip_sdatalen() && uip_udp_conn->appstate.unabto == socket)
-    {
+    if (0 == uip_sdatalen() && uip_udp_conn->appstate.unabto == socket) {
         uipSend(buf, len, addr->addr.ipv4, port);
-        res = len; //...
-    }
-    else if (NULL != (xmitBuf = socketPacketBufferNew(socket)))
-    {
+        res = len;  //...
+    } else if (NULL != (xmitBuf = socketPacketBufferNew(socket))) {
         // Keep until uip calls back
         xmitBuf->addr = addr->addr.ipv4;
         xmitBuf->port = port;
         xmitBuf->len = len;
         memcpy(xmitBuf->buffer, buf, len);
-    } 
-    else
+    } else
         dropped++;
     return res;
 }
@@ -243,7 +217,7 @@ ssize_t nabto_write(nabto_socket_t socket,
  * The function is called before first socket operations.
  * @return true if success.
  */
-bool nabto_init_platform(){return true;};
+bool nabto_init_platform() { return true; };
 
 /*****************************************************************************/
 /**
@@ -252,10 +226,9 @@ bool nabto_init_platform(){return true;};
  * When this function is called no further socket invocations will occur. This
  * can be used to make cleanup on the platform.
  */
-void nabto_close_platform(){return;};
+void nabto_close_platform() { return; };
 
-void resolv_found (char *name, u16_t *ipaddr)
-{
+void resolv_found(char* name, u16_t* ipaddr) {
 }
 
 void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
@@ -263,23 +236,21 @@ void nabto_resolve_ipv4(uint32_t ipv4, struct nabto_ip_address* ip) {
     ip->addr.ipv4 = ipv4;
 }
 
-void nabto_dns_resolve(const char* id)
-{
+void nabto_dns_resolve(const char* id) {
     if (NULL != id)
         resolv_query(id);
 }
 
 //TBC
-nabto_dns_status_t nabto_dns_is_resolved(const char *id, struct nabto_ip_address* v4addr)
-{
-//    static ip_addr_t bsAddr;
-    uip_ipaddr_t *ipAddr;
+nabto_dns_status_t nabto_dns_is_resolved(const char* id, struct nabto_ip_address* v4addr) {
+    //    static ip_addr_t bsAddr;
+    uip_ipaddr_t* ipAddr;
 
     if (NULL == (ipAddr = resolv_lookup(id)))
         return NABTO_DNS_ERROR;
 
     v4addr->type = NABTO_IP_V4;
-    uint8_t *ap = (uint8_t*)(&v4addr->addr.ipv4);
+    uint8_t* ap = (uint8_t*)(&v4addr->addr.ipv4);
     // host order little endian
     ap[3] = uip_ipaddr1(ipAddr);
     ap[2] = uip_ipaddr2(ipAddr);
@@ -292,43 +263,37 @@ static nabto_main_context _nmc;
 
 #define MY_ID_POSTFIX "renesas.u.nabto.net"
 
-void initNabto()
-{
+void initNabto() {
     extern struct uip_eth_addr my_mac;
     static char myId[100];
     nabto_init_default_values(&_nmc.nabtoMainSetup);
-    sprintf(myId, "%02x%02x%02x%02x%02x%02x."MY_ID_POSTFIX,
-                   my_mac.addr[0], my_mac.addr[1], my_mac.addr[2], 
-                   my_mac.addr[3],my_mac.addr[4],my_mac.addr[5]);  
+    sprintf(myId, "%02x%02x%02x%02x%02x%02x." MY_ID_POSTFIX,
+            my_mac.addr[0], my_mac.addr[1], my_mac.addr[2],
+            my_mac.addr[3], my_mac.addr[4], my_mac.addr[5]);
     _nmc.nabtoMainSetup.id = myId;
     nabto_main_init(&_nmc);
 }
 
-
-void unabto_app()
-{
+void unabto_app() {
     int i;
 
     if (!dhcp_configured())
-        return; 
+        return;
 
-    for (i=0; i < MAX_SOCKETS; i++)
-        if (_sockets[i].used && uip_udp_conn->appstate.unabto == i)
-        {
-            XmitBuffer *xmitBuf = socketPacketBufferGet(i);
+    for (i = 0; i < MAX_SOCKETS; i++)
+        if (_sockets[i].used && uip_udp_conn->appstate.unabto == i) {
+            XmitBuffer* xmitBuf = socketPacketBufferGet(i);
             if (NULL == xmitBuf)
                 break;
             uipSend(xmitBuf->buffer, xmitBuf->len,
                     xmitBuf->addr, xmitBuf->port);
             break;
         }
-        
-    nabto_main_tick(&_nmc); // unabto will call read and read packet data
+
+    nabto_main_tick(&_nmc);  // unabto will call read and read packet data
 }
 
-void app_dispatcher()
-{
+void app_dispatcher() {
     if (NULL != uip_udp_conn)
         uip_udp_conn->appstate.callBack();
 }
-

@@ -32,15 +32,14 @@
 
 #include <string.h>
 
-
-NABTO_THREAD_LOCAL_STORAGE uint8_t nabtoCommunicationBuffer[NABTO_COMMUNICATION_BUFFER_SIZE];     /**< the communication buffer */
+NABTO_THREAD_LOCAL_STORAGE uint8_t nabtoCommunicationBuffer[NABTO_COMMUNICATION_BUFFER_SIZE]; /**< the communication buffer */
 NABTO_THREAD_LOCAL_STORAGE uint16_t nabtoCommunicationBufferSize = NABTO_COMMUNICATION_BUFFER_SIZE;
 
 #if NABTO_ENABLE_CONNECTIONS
 #if NABTO_ENABLE_REMOTE_ACCESS || NABTO_ENABLE_UCRYPTO
 // These crypto contexts have been split out to reduce maximum object size (specifically for the nmc object) in honour of the PIC18.
-NABTO_THREAD_LOCAL_STORAGE nabto_crypto_context cryptoContextAttach;                            /**< context for U_ATTACH packets    */
-NABTO_THREAD_LOCAL_STORAGE nabto_crypto_context cryptoContextConnection;                        /**< context for U_CONNECT + U_ALIVE */
+NABTO_THREAD_LOCAL_STORAGE nabto_crypto_context cryptoContextAttach;     /**< context for U_ATTACH packets    */
+NABTO_THREAD_LOCAL_STORAGE nabto_crypto_context cryptoContextConnection; /**< context for U_CONNECT + U_ALIVE */
 #endif
 #endif
 
@@ -51,14 +50,14 @@ NABTO_THREAD_LOCAL_STORAGE nabto_main_context nmc;
 
 void unabto_init_default_values(nabto_main_setup* nms) {
     nms->controllerArg.port = 5566;
-    nms->controllerArg.addr.type = NABTO_IP_NONE; // NONE==> use DNS, ANY ==> don't use BS/GSP, other ==> use option as BS address
+    nms->controllerArg.addr.type = NABTO_IP_NONE;  // NONE==> use DNS, ANY ==> don't use BS/GSP, other ==> use option as BS address
     nms->localPort = 5570;
     nms->bufsize = NABTO_COMMUNICATION_BUFFER_SIZE;
     nms->id = 0;
     nms->version = 0;
     nms->url = 0;
     nms->gspPollTimeout = 13000; /* should be between 1 and 2 times the GSP interval(10000) */
-    nms->gspTimeoutCount = 5; /* timeout after 5*13000 msecs                             */
+    nms->gspTimeoutCount = 5;    /* timeout after 5*13000 msecs                             */
     nms->secureAttach = false;
     nms->secureData = false;
     nms->configuredForAttach = true;
@@ -112,14 +111,12 @@ bool unabto_init(void) {
     ensureValidDeviceId(nmc.nabtoMainSetup.id);
     NABTO_LOG_INFO(("Device id: '%s'", nmc.nabtoMainSetup.id));
     NABTO_LOG_INFO(("Program Release " PRIversion, MAKE_VERSION_PRINTABLE()));
-    if(nmc.nabtoMainSetup.version)
-    {
+    if (nmc.nabtoMainSetup.version) {
         NABTO_LOG_INFO(("Version string: '%s'", nmc.nabtoMainSetup.version));
     }
 
 #if NABTO_ENABLE_DYNAMIC_MEMORY
-    if (!unabto_allocate_memory(&nmc.nabtoMainSetup))
-    {
+    if (!unabto_allocate_memory(&nmc.nabtoMainSetup)) {
         unabto_free_memory();
         NABTO_LOG_FATAL(("Could not initialize memory"));
         return false;
@@ -127,7 +124,7 @@ bool unabto_init(void) {
 #endif
 
 #if NABTO_ENABLE_TCP_FALLBACK
-    if(!unabto_tcp_fallback_module_init()) {
+    if (!unabto_tcp_fallback_module_init()) {
         NABTO_LOG_FATAL(("Could not initialize tcp fallback module"));
     }
 #endif
@@ -147,8 +144,7 @@ bool unabto_init(void) {
     nmc.socketGSPLocalEndpoint.port = 0;
     nabto_socket_set_invalid(&nmc.socketGSP);
     if (nmc.nabtoMainSetup.enableRemoteAccess) {
-        if (!nabto_socket_init(&nmc.socketGSPLocalEndpoint.port, &nmc.socketGSP))
-        {
+        if (!nabto_socket_init(&nmc.socketGSPLocalEndpoint.port, &nmc.socketGSP)) {
             return false;
         }
     }
@@ -161,8 +157,8 @@ bool unabto_init(void) {
 
 #if NABTO_ENABLE_CONNECTIONS
     unabto_packet_init_handlers();
-    unabto_packet_set_handler(3,3,&handle_framing_ctrl_packet, 0);
-    unabto_packet_set_handler(0,0,&handle_naf_packet, 0);
+    unabto_packet_set_handler(3, 3, &handle_framing_ctrl_packet, 0);
+    unabto_packet_set_handler(0, 0, &handle_naf_packet, 0);
 #endif
 
 #if NABTO_ENABLE_STREAM
@@ -214,7 +210,6 @@ void unabto_close(void) {
 #if NABTO_ENABLE_DYNAMIC_MEMORY
     unabto_free_memory();
 #endif
-
 }
 
 /***************************************/
@@ -222,13 +217,13 @@ void unabto_close(void) {
 void unabto_tick(void) {
 #if NABTO_ENABLE_LOCAL_ACCESS
     if (unabto_read_socket(nmc.socketLocal)) {
-        return; // local answer produced
+        return;  // local answer produced
     }
 #endif
 
 #if NABTO_ENABLE_REMOTE_ACCESS
     if (unabto_read_socket(nmc.socketGSP)) {
-        return; // remote answer produced
+        return;  // remote answer produced
     }
 #endif
 
@@ -250,14 +245,13 @@ void unabto_time_event(void) {
 #endif
 
 #if NABTO_ENABLE_PUSH
-    if(nmc.context.state == NABTO_AS_ATTACHED){
+    if (nmc.context.state == NABTO_AS_ATTACHED) {
         nabto_time_event_push();
     }
 #endif
-
 }
 
-bool unabto_set_aes_crypto(nabto_main_setup* nms, uint8_t* preSharedKey, size_t pskLength){
+bool unabto_set_aes_crypto(nabto_main_setup* nms, uint8_t* preSharedKey, size_t pskLength) {
     nms->secureAttach = true;
     nms->secureData = true;
     nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
@@ -265,11 +259,11 @@ bool unabto_set_aes_crypto(nabto_main_setup* nms, uint8_t* preSharedKey, size_t 
         NABTO_LOG_ERROR(("The pre shared key buffer needs to be exactly %i bytes", PRE_SHARED_KEY_SIZE));
         return false;
     }
-    memcpy(nms->presharedKey,preSharedKey,pskLength);
+    memcpy(nms->presharedKey, preSharedKey, pskLength);
     return true;
 }
 
-void unabto_set_no_crypto(nabto_main_setup* nms){
+void unabto_set_no_crypto(nabto_main_setup* nms) {
     nms->secureAttach = false;
     nms->secureData = false;
 }
@@ -329,10 +323,8 @@ static void ensureValidDeviceId(const char* id) {
     if (strlen(id) > NABTO_DEVICE_NAME_MAX_SIZE) {
         NABTO_LOG_FATAL(("Device id exceeds NABTO_DEVICE_NAME_MAX_SIZE (%d characters)", NABTO_DEVICE_NAME_MAX_SIZE));
     }
-    while(*id)
-    {
-        if(!((*id >= 'a' && *id <= 'z') || (*id >= '0' && *id <= '9') || *id == '-' || *id == '.'))
-        {
+    while (*id) {
+        if (!((*id >= 'a' && *id <= 'z') || (*id >= '0' && *id <= '9') || *id == '-' || *id == '.')) {
             NABTO_LOG_FATAL(("%s is not a valid device id, only \"a\" to \"z\", \"0\" to \"9\", hyphen (\"-\") and period (\".\") are allowed in a device id.", nmc.nabtoMainSetup.id));
         }
         id++;

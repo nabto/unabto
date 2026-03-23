@@ -27,7 +27,7 @@ enum {
     CRYPT_KEY_LENGTH = 16,
     TRUNCATED_HMAC_LENGTH = 16
 };
-#endif // NABTO_ENABLE_UCRYPTO
+#endif  // NABTO_ENABLE_UCRYPTO
 
 /** the type of a crypto context (the crypto application) */
 typedef enum {
@@ -36,21 +36,19 @@ typedef enum {
     CRYPTO_D  /**< for DATA          */
 } crypto_application;
 
-
 /// The micro crypto context
 typedef struct {
-    uint16_t code;          /**< algorithm code        */
+    uint16_t code; /**< algorithm code        */
 
 #if NABTO_ENABLE_UCRYPTO
-    uint8_t  key[96];       /**< the concatenated keys */
-    uint8_t* ourhmackey;    /**< our hmac key          */
-    uint8_t* theirhmackey;  /**< their hmac key        */
-    uint8_t* encryptkey;    /**< key for encryption    */
-    uint8_t* decryptkey;    /**< key for decryption    */
+    uint8_t key[96];       /**< the concatenated keys */
+    uint8_t* ourhmackey;   /**< our hmac key          */
+    uint8_t* theirhmackey; /**< their hmac key        */
+    uint8_t* encryptkey;   /**< key for encryption    */
+    uint8_t* decryptkey;   /**< key for decryption    */
 #endif
 
 } nabto_crypto_context;
-
 
 // data used in a shared key handshake
 struct shared_key_handshake_data {
@@ -84,7 +82,7 @@ void nabto_crypto_init_psk_handshake_data(struct shared_key_handshake_data* data
  * @param dataLength    the length of the data
  */
 void nabto_crypto_create_key_material(const unabto_buffer nonces[], uint8_t nonces_size,
-                                      const unabto_buffer seeds[],  uint8_t seeds_size,
+                                      const unabto_buffer seeds[], uint8_t seeds_size,
                                       uint8_t* data, uint16_t dataLength);
 
 /**
@@ -95,7 +93,7 @@ void nabto_crypto_create_key_material(const unabto_buffer nonces[], uint8_t nonc
  */
 bool nabto_crypto_init_key(nabto_crypto_context* cryptoContext, bool initiator);
 
-#endif // NABTO_ENABLE_UCRYPTO
+#endif  // NABTO_ENABLE_UCRYPTO
 
 /**
  * Reset a crypto context
@@ -109,19 +107,16 @@ void nabto_crypto_reset(nabto_crypto_context* cryptoContext);
  */
 void nabto_crypto_init(nabto_crypto_context* cryptoContext, crypto_application cryptoApplication);
 
-
 /**
  * Release a cryptocontext.
  * @param cryptoContext  the cryptocontext
  */
 void nabto_crypto_release(nabto_crypto_context* cryptoContext);
 
-
 /**
  * Re-initialise the type A crypto context before reattaching to the GSP.
  */
 void nabto_crypto_reinit_a(void);
-
 
 /**
  * Re-initialise the type C crypto context during attach to the GSP.
@@ -131,7 +126,6 @@ void nabto_crypto_reinit_a(void);
  */
 void unabto_crypto_reinit_c(const uint8_t* nonceGSP, const uint8_t* seedUD, const uint8_t* seedGSP);
 
-
 /**
  * Re-initialise a type D (data) crypto context during connection establishment.
  * @param cryptoContext  the cryptocontext
@@ -139,7 +133,6 @@ void unabto_crypto_reinit_c(const uint8_t* nonceGSP, const uint8_t* seedUD, cons
  * @param keySize    the size of the key
  */
 void unabto_crypto_reinit_d(nabto_crypto_context* cryptoContext, crypto_suite cryptoSuite, const uint8_t* key, uint16_t keysize);
-
 
 /**
  * Query the number of bytes available for data to be encrypted and integrity-protected.
@@ -149,7 +142,6 @@ void unabto_crypto_reinit_d(nabto_crypto_context* cryptoContext, crypto_suite cr
  */
 uint16_t unabto_crypto_max_data(nabto_crypto_context* cryptoContext, uint16_t available);
 
-
 /**
  * Calculate the required length for encryption and integrity data.
  * @param cryptoContext  the cryptocontext
@@ -157,7 +149,6 @@ uint16_t unabto_crypto_max_data(nabto_crypto_context* cryptoContext, uint16_t av
  * @return           the number of bytes required
  */
 uint16_t unabto_crypto_required_length(nabto_crypto_context* cryptoContext, uint16_t size);
-
 
 /**
  * Verify the integrity of a packet and the correctness of the algorithm code.
@@ -170,7 +161,6 @@ uint16_t unabto_crypto_required_length(nabto_crypto_context* cryptoContext, uint
  */
 bool unabto_verify_integrity(nabto_crypto_context* cryptoContext, uint16_t code, const uint8_t* buf, uint16_t size, uint16_t* verifSize);
 
-
 /**
  * Decrypt a CRYPTO payload.
  * @param cryptoContext      the cryptocontext
@@ -181,7 +171,7 @@ bool unabto_verify_integrity(nabto_crypto_context* cryptoContext, uint16_t code,
  *
  * The decrypted data is overwriting the encrypted data.
  */
-bool unabto_decrypt(nabto_crypto_context* cryptoContext, uint8_t* ptr, uint16_t size, uint16_t *decryptedSize);
+bool unabto_decrypt(nabto_crypto_context* cryptoContext, uint8_t* ptr, uint16_t size, uint16_t* decryptedSize);
 
 /**
  * Verify and decrypt CRYPTO payload
@@ -209,8 +199,7 @@ bool unabto_crypto_verify_and_decrypt(const nabto_packet_header* hdr,
  * @param encryptedEnd the end of the encrypted data including the integrity value.
  * @return            true if successfully
  */
-bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, const uint8_t* srcEnd, uint8_t* dst, uint8_t* dstEnd, uint8_t **encryptedEnd);
-
+bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, const uint8_t* srcEnd, uint8_t* dst, uint8_t* dstEnd, uint8_t** encryptedEnd);
 
 /**
  * Insert integrity value into a packet.
@@ -221,9 +210,8 @@ bool unabto_encrypt(nabto_crypto_context* cryptoContext, const uint8_t* src, con
  */
 bool unabto_insert_integrity(nabto_crypto_context* cryptoContext, uint8_t* start, uint16_t plen);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

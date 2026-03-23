@@ -55,23 +55,21 @@ bool allow_client_access(nabto_connect* connection);
 bool unabto_local_psk_connection_get_key(const struct unabto_psk_id* keyId, const char* clientId, const struct unabto_optional_fingerprint* fingerprint, struct unabto_psk* key);
 #endif
 
-    
 /** Identifies the request including the caller */
 typedef struct {
-    uint32_t       queryId;    ///< The query id.
-    const char*    clientId;   ///< Null terminated client acl credentials
-    nabto_connect* connection; ///< The Connection the query is on 
-    bool           isLocal;    ///< True if the request came from a local connection
-    bool           isLegacy;   ///< True if the request came from a legacy connection
-                               ///< Meaning no support for all connection related features.
+    uint32_t queryId;           ///< The query id.
+    const char* clientId;       ///< Null terminated client acl credentials
+    nabto_connect* connection;  ///< The Connection the query is on
+    bool isLocal;               ///< True if the request came from a local connection
+    bool isLegacy;              ///< True if the request came from a legacy connection
+                                ///< Meaning no support for all connection related features.
 } application_request;
-
 
 /** The results of the application_event function (also used by intermediate functions). */
 typedef enum {
-    AER_REQ_RESPONSE_READY = 0, ///< the response is ready and written into the supplied buffer
+    AER_REQ_RESPONSE_READY = 0,  ///< the response is ready and written into the supplied buffer
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
-    AER_REQ_ACCEPTED = -1,      ///< the request has been accepted by the application, the response wil be delivered using #application_poll_query() and #application_poll()
+    AER_REQ_ACCEPTED = -1,  ///< the request has been accepted by the application, the response wil be delivered using #application_poll_query() and #application_poll()
 #endif
 
     // The next values are sent to the ClientPeer in exception packets,
@@ -87,7 +85,6 @@ typedef enum {
     AER_REQ_NO_QUERY_ID = NP_E_NO_QUERY_ID
     // End of values sent to a ClientPeer
 } application_event_result;
-
 
 /**
  * application_event(), The uNabto application request
@@ -164,9 +161,8 @@ typedef enum {
  * void application_poll_drop(application_request* applicationRequest) {
  *     savedRequest = NULL;
  * }
- */    
+ */
 application_event_result application_event(application_request* applicationRequest, unabto_query_request* readBuffer, unabto_query_response* writeBuffer);
-
 
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
 
@@ -176,7 +172,6 @@ application_event_result application_event(application_request* applicationReque
  * @return        true if a response is ready
  */
 bool application_poll_query(application_request** applicationRequest);
-
 
 /**
  * Retrieve the response from a queued request.
@@ -201,8 +196,7 @@ application_event_result application_poll(application_request* applicationReques
  */
 void application_poll_drop(application_request* applicationRequest);
 
-#endif // NABTO_APPLICATION_EVENT_MODEL_ASYNC
-
+#endif  // NABTO_APPLICATION_EVENT_MODEL_ASYNC
 
 #if NABTO_ENABLE_EVENTCHANNEL
 /**
@@ -217,7 +211,7 @@ unabto_buffer* get_event_buffer2(size_t maximumSize);
 #endif
 
 #ifdef __cplusplus
-} // extern "C"
+}  // extern "C"
 #endif
 
 #endif

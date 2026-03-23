@@ -20,17 +20,17 @@ typedef int ssize_t;
  * Socket related definitions
  */
 
-#define     htons(s)   ((s<<8) | (s>>8))
-#define     htonl(l)   ((l<<24) | ((l&0x00FF0000l)>>8) | ((l&0x0000FF00l)<<8) | (l>>24))
-#define     ntohl htonl
-#define     ntohs htons
+#define htons(s) ((s << 8) | (s >> 8))
+#define htonl(l) ((l << 24) | ((l & 0x00FF0000l) >> 8) | ((l & 0x0000FF00l) << 8) | (l >> 24))
+#define ntohl    htonl
+#define ntohs    htons
 
 /**
  * Time related definitions
  */
 
 typedef unsigned long int nabto_stamp_t;
-typedef long int          nabto_stamp_diff_t;
+typedef long int nabto_stamp_diff_t;
 
 #define nabtoGetStamp(void) millis()
 
@@ -39,7 +39,7 @@ typedef long int          nabto_stamp_diff_t;
 /**
  * Logging related definitions
  */
- 
+
 #include <modules/network/w5100/w5100_network.h>
 
 #if NABTO_ENABLE_LOGGING
@@ -49,14 +49,19 @@ typedef long int          nabto_stamp_diff_t;
 extern "C" {
 #endif
 
-void p(char *fmt, ... );
+void p(char *fmt, ...);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
-#define NABTO_LOG_INFO(cmsg) if (0) {} else { p cmsg; p("\n"); }
-#define NABTO_LOG_BASIC_PRINT(Severity,msg) p msg
+#define NABTO_LOG_INFO(cmsg) \
+    if (0) {                 \
+    } else {                 \
+        p cmsg;              \
+        p("\n");             \
+    }
+#define NABTO_LOG_BASIC_PRINT(Severity, msg) p msg
 #endif
 
 #endif

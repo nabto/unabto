@@ -54,29 +54,25 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-void vPrintString( const portCHAR *pcString )
-{
+void vPrintString(const portCHAR *pcString) {
     /* Print the string, suspending the scheduler as method of mutual
     exclusion. */
     vTaskSuspendAll();
     {
-        printf( "%s", pcString );
-        fflush( stdout );
+        printf("%s", pcString);
+        fflush(stdout);
     }
     xTaskResumeAll();
-
 }
 /*-----------------------------------------------------------*/
 
-void vPrintStringAndNumber( const portCHAR *pcString, unsigned portLONG ulValue )
-{
+void vPrintStringAndNumber(const portCHAR *pcString, unsigned portLONG ulValue) {
     /* Print the string, suspending the scheduler as method of mutual
     exclusion. */
     vTaskSuspendAll();
     {
-        printf( "%s %lu\r\n", pcString, ulValue );
-        fflush( stdout );
+        printf("%s %lu\r\n", pcString, ulValue);
+        fflush(stdout);
     }
     xTaskResumeAll();
-
 }

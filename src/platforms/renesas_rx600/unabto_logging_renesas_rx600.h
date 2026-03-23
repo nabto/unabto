@@ -4,6 +4,8 @@
 #ifndef _UNABTO_LOGGING_RX600_
 #define _UNABTO_LOGGING_RX600_
 
-#define FATAL do{}while(0)
+#define FATAL \
+    do {      \
+    } while (0)
 
 #endif

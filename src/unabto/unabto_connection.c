@@ -46,14 +46,10 @@ NABTO_THREAD_LOCAL_STORAGE nabto_connect connections[NABTO_MEMORY_CONNECTIONS_SI
 
 #endif
 
-
-void unabto_connection_set_future_stamp(nabto_stamp_t* stamp, uint16_t future)
-{
+void unabto_connection_set_future_stamp(nabto_stamp_t* stamp, uint16_t future) {
     connection_timeout_cache_cached = false;
     nabtoSetFutureStamp(stamp, future);
 }
-
-
 
 #if NABTO_ENABLE_UCRYPTO
 static bool unabto_connection_verify_and_decrypt_connect_packet(nabto_packet_header* hdr, uint8_t** decryptedDataStart, uint16_t* decryptedDataLength);
@@ -65,7 +61,6 @@ static bool connect_event(message_event* event, nabto_packet_header* hdr);
 static bool conclude_connection(nabto_connect* con, nabto_endpoint* peer, uint32_t interval);
 
 static void send_rendezvous_to_all(nabto_connect* con);
-
 
 /**
  * Called after rendezvous ends and we have found a unique connection
@@ -81,8 +76,7 @@ static void nabto_rendezvous_end(nabto_connect* con);
 static void nabto_rendezvous_start(nabto_connect* con);
 
 /** initialise a connection */
-void nabto_reset_connection(nabto_connect* con)
-{
+void nabto_reset_connection(nabto_connect* con) {
     nabto_stamp_t tmp = nabtoGetStamp();
     NABTO_LOG_TRACE((PRInsi " Reset connection", MAKE_NSI_PRINTABLE(0, con->spnsi, 0)));
     memset(con, 0, offsetof(nabto_connect, cryptoctx));
@@ -98,14 +92,12 @@ void nabto_reset_connection(nabto_connect* con)
 }
 
 /** initialise the connection data */
-void nabto_init_connections(void)
-{
+void nabto_init_connections(void) {
     NABTO_LOG_TRACE(("Init connections"));
     memset(connections, 0, sizeof(struct nabto_connect_s) * (size_t)(NABTO_MEMORY_CONNECTIONS_SIZE));
 }
 
-nabto_connect* nabto_reserve_connection(void)
-{
+nabto_connect* nabto_reserve_connection(void) {
     nabto_connect* con;
 
     for (con = connections; con < connections + NABTO_MEMORY_CONNECTIONS_SIZE; ++con) {
@@ -119,8 +111,7 @@ nabto_connect* nabto_reserve_connection(void)
 }
 
 #define MAX_TIMEOUT 300ul
-void nabto_release_connection_req(nabto_connect* con)
-{
+void nabto_release_connection_req(nabto_connect* con) {
     NABTO_LOG_DEBUG((PRInsi " Release connection req", MAKE_NSI_PRINTABLE(0, con->spnsi, 0)));
     if (con->state != CS_CLOSE_REQUESTED) {
         uint32_t timeout = con->timeOut;
@@ -137,8 +128,7 @@ void nabto_release_connection_req(nabto_connect* con)
     }
 }
 
-void nabto_release_connection(nabto_connect* con)
-{
+void nabto_release_connection(nabto_connect* con) {
     if (con->state != CS_IDLE) {
         NABTO_LOG_INFO((PRInsi " Release connection (record %i)", MAKE_NSI_PRINTABLE(0, con->spnsi, 0), nabto_connection_index(con)));
         if (con->state != CS_CLOSE_REQUESTED) {
@@ -198,8 +188,7 @@ nabto_connect* nabto_find_connection(uint32_t spnsi) {
     return 0;
 }
 
-nabto_connect* nabto_find_local_connection_cp_nsi(uint32_t cpnsi)
-{
+nabto_connect* nabto_find_local_connection_cp_nsi(uint32_t cpnsi) {
     nabto_connect* con;
 
     if (cpnsi == 0) {
@@ -217,8 +206,7 @@ nabto_connect* nabto_find_local_connection_cp_nsi(uint32_t cpnsi)
     return NULL;
 }
 
-int nabto_connection_index(nabto_connect* con)
-{
+int nabto_connection_index(nabto_connect* con) {
     if (con == 0) {
         return -1;
     }
@@ -226,9 +214,7 @@ int nabto_connection_index(nabto_connect* con)
     return (int)(con - connections);
 }
 
-
-bool nabto_connect_event(message_event* event, nabto_packet_header* hdr)
-{
+bool nabto_connect_event(message_event* event, nabto_packet_header* hdr) {
     /**
      * We can get here if we got either a connect request or
      * if the connect request is a rendezvous event.
@@ -236,7 +222,7 @@ bool nabto_connect_event(message_event* event, nabto_packet_header* hdr)
      * If the first payload is an endpoint it's a rendezvous event.
      * If the request is a request for a new connection the first payload will be an IPX payload.
      */
-    const uint8_t* begin = nabtoCommunicationBuffer+hdr->hlen;
+    const uint8_t* begin = nabtoCommunicationBuffer + hdr->hlen;
     const uint8_t* end = nabtoCommunicationBuffer + hdr->len;
     struct unabto_payload_packet payload;
     const uint8_t* next = unabto_read_payload(begin, end, &payload);
@@ -267,7 +253,6 @@ bool nabto_connect_event_from_gsp(message_event* event, nabto_packet_header* hdr
     return connect_event(event, hdr);
 }
 
-
 /**
  * Build U_CONNECT response to the GSP or Local Connection
  * @param buf                the destination buffer
@@ -279,8 +264,7 @@ bool nabto_connect_event_from_gsp(message_event* event, nabto_packet_header* hdr
  * @param isLocalConnectRsp  true if a capabilities packet
  * @return                   the size of the response
  */
-static size_t mk_connect_rsp(uint8_t* buf, uint8_t* end, uint16_t seq, uint32_t notif, uint32_t nsi, uint32_t cpnsi, uint32_t spnsi, bool isLocalConnectRsp)
-{
+static size_t mk_connect_rsp(uint8_t* buf, uint8_t* end, uint16_t seq, uint32_t notif, uint32_t nsi, uint32_t cpnsi, uint32_t spnsi, bool isLocalConnectRsp) {
     uint8_t* ptr = insert_header(buf, end, cpnsi, spnsi, U_CONNECT, true, seq, 0, 0);
     if (ptr == NULL) return 0;
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_NOTIFY, 0, 8);
@@ -292,16 +276,15 @@ static size_t mk_connect_rsp(uint8_t* buf, uint8_t* end, uint16_t seq, uint32_t 
         ptr = insert_capabilities(ptr, end, 1 /*unenc*/);
     }
 
-    if (!insert_packet_length_from_cursor(buf, ptr)) { return 0; }
+    if (!insert_packet_length_from_cursor(buf, ptr)) {
+        return 0;
+    }
     return ptr - buf;
 }
 
-
-bool connect_event(message_event* event, nabto_packet_header* hdr)
-{
+bool connect_event(message_event* event, nabto_packet_header* hdr) {
     nabto_endpoint* peer = &event->udpMessage.peer;
     bool isLocal = nabto_socket_is_equal(&event->udpMessage.socket, &nmc.socketLocal);
-
 
     NABTO_LOG_TRACE(("U_CONNECT: Searching for hdr->nsi_cp=%" PRIu32 " (should not be found)", hdr->nsi_cp));
     if (nabto_find_connection(hdr->nsi_cp) == NULL) {
@@ -315,7 +298,7 @@ bool connect_event(message_event* event, nabto_packet_header* hdr)
 
             if (olen == 0) {
                 NABTO_LOG_ERROR(("U_CONNECT out of resources in connect event."));
-                nabto_release_connection(con); // no resources available
+                nabto_release_connection(con);  // no resources available
             } else {
                 if (nabto_ep_is_equal(peer, &nmc.context.gsp)) {
                     send_to_basestation(nabtoCommunicationBuffer, olen, peer);
@@ -348,13 +331,11 @@ bool connect_event(message_event* event, nabto_packet_header* hdr)
     return false;
 }
 
-static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, uint16_t seq, nabto_endpoint* dest, nabto_endpoint *myAddress)
-{
+static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, uint16_t seq, nabto_endpoint* dest, nabto_endpoint* myAddress) {
     uint8_t* ptr;
     uint8_t* buf = nabtoCommunicationBuffer;
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
     uint32_t destIpV4 = 0;
-
 
     ptr = insert_header(buf, end, 0, con->spnsi, U_CONNECT, false, seq, 0, 0);
     if (ptr == NULL) return;
@@ -381,7 +362,9 @@ static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, ui
     {
         size_t len;
 
-        if (!insert_packet_length_from_cursor(buf, ptr)) { return; }
+        if (!insert_packet_length_from_cursor(buf, ptr)) {
+            return;
+        }
         len = ptr - buf;
 
         if (seq) {
@@ -397,20 +380,19 @@ static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, ui
     }
 }
 
-static void send_rendezvous(nabto_connect* con, uint16_t seq, nabto_endpoint* dest, nabto_endpoint *myAddress) {
+static void send_rendezvous(nabto_connect* con, uint16_t seq, nabto_endpoint* dest, nabto_endpoint* myAddress) {
     send_rendezvous_socket(nmc.socketGSP, con, seq, dest, myAddress);
 }
 
-nabto_connect* nabto_get_new_connection(uint32_t nsi)
-{
+nabto_connect* nabto_get_new_connection(uint32_t nsi) {
     nabto_connect* con;
-    con  = nabto_find_connection(nsi);
+    con = nabto_find_connection(nsi);
     if (con) {
-        return NULL; //nsi is already present - dont allow another one to be created
+        return NULL;  //nsi is already present - dont allow another one to be created
     }
     con = nabto_reserve_connection();
     if (!con) {
-        return NULL; //error - no more connections available
+        return NULL;  //error - no more connections available
     }
     con->spnsi = nsi;
     return con;
@@ -436,15 +418,14 @@ uint16_t nabto_connection_get_fresh_sp_nsi(void) {
             nsiStore = 100;
         }
         i++;
-    } while((i <= 900) && (nabto_find_connection(nsiStore) != NULL));
+    } while ((i <= 900) && (nabto_find_connection(nsiStore) != NULL));
 
     return nsiStore;
 }
 
-#define IPX_PAYLOAD_LENGTH_WITHOUT_NSI  (NP_PAYLOAD_IPX_BYTELENGTH - NP_PAYLOAD_HDR_BYTELENGTH)
-#define IPX_PAYLOAD_LENGTH_WITH_NSI     (NP_PAYLOAD_IPX_NSI_BYTELENGTH - NP_PAYLOAD_HDR_BYTELENGTH)
-#define IPX_PAYLOAD_LENGTH_FULL_NSI     (NP_PAYLOAD_IPX_FULL_NSI_BYTELENGTH - NP_PAYLOAD_HDR_BYTELENGTH)
-
+#define IPX_PAYLOAD_LENGTH_WITHOUT_NSI (NP_PAYLOAD_IPX_BYTELENGTH - NP_PAYLOAD_HDR_BYTELENGTH)
+#define IPX_PAYLOAD_LENGTH_WITH_NSI    (NP_PAYLOAD_IPX_NSI_BYTELENGTH - NP_PAYLOAD_HDR_BYTELENGTH)
+#define IPX_PAYLOAD_LENGTH_FULL_NSI    (NP_PAYLOAD_IPX_FULL_NSI_BYTELENGTH - NP_PAYLOAD_HDR_BYTELENGTH)
 
 #if NABTO_ENABLE_UCRYPTO
 bool unabto_connection_verify_and_decrypt_connect_packet(nabto_packet_header* hdr, uint8_t** decryptedDataStart, uint16_t* decryptedDataLength) {
@@ -465,8 +446,7 @@ bool unabto_connection_verify_and_decrypt_connect_packet(nabto_packet_header* hd
         }
     }
 
-    if (!unabto_crypto_verify_and_decrypt(hdr, nmc.context.cryptoConnect, &crypto, decryptedDataStart, decryptedDataLength))
-    {
+    if (!unabto_crypto_verify_and_decrypt(hdr, nmc.context.cryptoConnect, &crypto, decryptedDataStart, decryptedDataLength)) {
         NABTO_LOG_TRACE(("U_CONNECT verify or decryption failed"));
         return false;
     }
@@ -479,8 +459,7 @@ bool unabto_connection_verify_and_decrypt_connect_packet(nabto_packet_header* hd
 }
 #endif
 
-nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, uint32_t* ec, bool isLocal)
-{
+nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, uint32_t* ec, bool isLocal) {
     nabto_connect* con;
 
     const uint8_t* begin = nabtoCommunicationBuffer + hdr->hlen;
@@ -495,7 +474,7 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
         }
 
         *nsi = 0;
-        *ec  = 0;
+        *ec = 0;
 
         if (!unabto_payload_read_ipx(&ipxPayload, &ipxData)) {
             NABTO_LOG_ERROR(("Cannot parse ipx payload"));
@@ -545,11 +524,11 @@ nabto_connect* nabto_init_connection(nabto_packet_header* hdr, uint32_t* nsi, ui
     con->cp.globalEndpoint.port = ipxData.globalIpPort;
 
     con->noRendezvous = (ipxData.flags & NP_PAYLOAD_IPX_FLAG_NO_RENDEZVOUS) ? 1 : 0;
-    con->cpEqual      = nabto_ep_is_equal(&con->cp.privateEndpoint, &con->cp.globalEndpoint);
-    con->cpAsync      = (ipxData.flags & NP_PAYLOAD_IPX_FLAG_CP_ASYNC) ? 1 : 0;
-    con->clientNatType      = (ipxData.flags & NP_PAYLOAD_IPX_NAT_MASK);
-    con->isLocal      = isLocal;
-    NABTO_LOG_INFO((PRInsi " U_CONNECT: noRdv=%" PRIu8 ", cpeq=%" PRIu8 ", asy=%" PRIu8 ", NATType: %" PRIu8 , MAKE_NSI_PRINTABLE(0, *nsi, 0), con->noRendezvous, con->cpEqual, con->cpAsync, con->clientNatType));
+    con->cpEqual = nabto_ep_is_equal(&con->cp.privateEndpoint, &con->cp.globalEndpoint);
+    con->cpAsync = (ipxData.flags & NP_PAYLOAD_IPX_FLAG_CP_ASYNC) ? 1 : 0;
+    con->clientNatType = (ipxData.flags & NP_PAYLOAD_IPX_NAT_MASK);
+    con->isLocal = isLocal;
+    NABTO_LOG_INFO((PRInsi " U_CONNECT: noRdv=%" PRIu8 ", cpeq=%" PRIu8 ", asy=%" PRIu8 ", NATType: %" PRIu8, MAKE_NSI_PRINTABLE(0, *nsi, 0), con->noRendezvous, con->cpEqual, con->cpAsync, con->clientNatType));
     NABTO_LOG_INFO((PRInsi "   cp.private: " PRIep, MAKE_NSI_PRINTABLE(0, *nsi, 0), MAKE_EP_PRINTABLE(con->cp.privateEndpoint)));
     NABTO_LOG_INFO((PRInsi "   cp.global:  " PRIep, MAKE_NSI_PRINTABLE(0, *nsi, 0), MAKE_EP_PRINTABLE(con->cp.globalEndpoint)));
 
@@ -692,12 +671,9 @@ void nabto_connection_event(nabto_connect* con, message_event* event) {
             con->peer = event->udpMessage.peer;
         }
     }
-
-
 }
 
-void nabto_connection_client_aborted(nabto_connect* con)
-{
+void nabto_connection_client_aborted(nabto_connect* con) {
     NABTO_LOG_TRACE(("Client aborted connection request"));
     nabto_release_connection(con);
 }
@@ -715,9 +691,7 @@ void nabto_rendezvous_end(nabto_connect* con) {
     nabto_rendezvous_stop(con);
 }
 
-
-void nabto_rendezvous_start(nabto_connect* con)
-{
+void nabto_rendezvous_start(nabto_connect* con) {
     nabto_rendezvous_connect_state* rcs = &con->rendezvousConnectState;
     rcs->state = RS_CONNECTING;
 
@@ -741,18 +715,16 @@ void nabto_rendezvous_start(nabto_connect* con)
     send_rendezvous_to_all(con);
 }
 
-
 /******************************************************************************/
 
-bool rendezvous_event(message_event* event, nabto_packet_header* hdr)
-{
-    uint8_t*          begin = nabtoCommunicationBuffer + hdr->hlen;
-    uint8_t*          end = nabtoCommunicationBuffer + hdr->len;
+bool rendezvous_event(message_event* event, nabto_packet_header* hdr) {
+    uint8_t* begin = nabtoCommunicationBuffer + hdr->hlen;
+    uint8_t* end = nabtoCommunicationBuffer + hdr->len;
 
-    nabto_endpoint  epUD;
-    nabto_connect*  con   = 0;
-    nabto_endpoint  src;
-    uint32_t        interval = 5000;
+    nabto_endpoint epUD;
+    nabto_connect* con = 0;
+    nabto_endpoint src;
+    uint32_t interval = 5000;
     struct unabto_payload_packet payload;
 
     src = event->udpMessage.peer;
@@ -790,7 +762,7 @@ bool rendezvous_event(message_event* event, nabto_packet_header* hdr)
         }
     }
 
-    con  = nabto_find_connection(hdr->nsi_sp);
+    con = nabto_find_connection(hdr->nsi_sp);
 
     if (!con) {
         NABTO_LOG_ERROR(("Connection was not found, nsi: %i", hdr->nsi_sp));
@@ -816,8 +788,8 @@ bool rendezvous_event(message_event* event, nabto_packet_header* hdr)
 bool conclude_connection(nabto_connect* con, nabto_endpoint* peer, uint32_t interval) {
     NABTO_LOG_TRACE(("conclude connection, %i", interval));
     if (con->rendezvousConnectState.state != RS_DONE) {
-        con->timeOut = 7*interval/2;
-        unabto_connection_set_future_stamp(&con->stamp, con->timeOut); // Give extra time in the connect phase.
+        con->timeOut = 7 * interval / 2;
+        unabto_connection_set_future_stamp(&con->stamp, con->timeOut);  // Give extra time in the connect phase.
     }
     nabto_rendezvous_stop(con);
     return true;
@@ -829,19 +801,16 @@ void send_rendezvous_to_all(nabto_connect* con) {
     unabto_connection_set_future_stamp(&con->rendezvousConnectState.timestamp, 1000);
 }
 
-void rendezvous_time_event(nabto_connect* con)
-{
+void rendezvous_time_event(nabto_connect* con) {
     nabto_rendezvous_connect_state* rcs = &con->rendezvousConnectState;
     if (rcs->state == RS_CONNECTING) {
-        if (nabtoIsStampPassed(&rcs->timestamp))
-        {
+        if (nabtoIsStampPassed(&rcs->timestamp)) {
             send_rendezvous_to_all(con);
         }
 
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
         if (rcs->openManySockets &&
-            nabtoIsStampPassed(&rcs->openManySocketsStamp))
-        {
+            nabtoIsStampPassed(&rcs->openManySocketsStamp)) {
             if (rcs->socketsOpened < NABTO_EXTENDED_RENDEZVOUS_MAX_SOCKETS) {
                 nabto_socket_t* candidate = &extended_rendezvous_sockets[rcs->socketsOpened];
 
@@ -858,8 +827,7 @@ void rendezvous_time_event(nabto_connect* con)
 
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS
         if (rcs->openManyPorts &&
-            nabtoIsStampPassed(&rcs->openManyPortsStamp))
-        {
+            nabtoIsStampPassed(&rcs->openManyPortsStamp)) {
             int i;
             for (i = 0; i < 10; i++) {
                 nabto_endpoint newEp;
@@ -875,7 +843,7 @@ void rendezvous_time_event(nabto_connect* con)
         }
 #endif
 
-        if(nabtoIsStampPassed(&rcs->timeout)) {
+        if (nabtoIsStampPassed(&rcs->timeout)) {
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
             NABTO_LOG_INFO(("Rendezvous timeout. Extended rendezvous sockets opened %i, 0 is perfectly fine", rcs->socketsOpened));
 #endif
@@ -896,8 +864,7 @@ void statistics_time_event(nabto_connect* con) {
     }
 }
 
-void nabto_time_event_connection(void)
-{
+void nabto_time_event_connection(void) {
     // If the timeout is cached and the timeout is not passed then we
     // should not revisit the connection structure.
     bool nothingToDo = connection_timeout_cache_cached && !nabtoIsStampPassed(&connection_timeout_cache_stamp);
@@ -917,7 +884,7 @@ void nabto_time_event_connection(void)
 #endif
 
                 if (nabto_connection_has_keep_alive(con) && nabtoIsStampPassed(&con->stamp)) {
-                    NABTO_LOG_DEBUG((PRInsi " Connection timeout", MAKE_NSI_PRINTABLE(0, con->spnsi, 0))); //, Stamp value is: %ul", con->spnsi, con->stamp));
+                    NABTO_LOG_DEBUG((PRInsi " Connection timeout", MAKE_NSI_PRINTABLE(0, con->spnsi, 0)));  //, Stamp value is: %ul", con->spnsi, con->stamp));
                     nabto_release_connection(con);
                 }
                 statistics_time_event(con);
@@ -927,7 +894,6 @@ void nabto_time_event_connection(void)
 }
 
 bool verify_connection_encryption(nabto_connect* con) {
-
     // Local connections can use whatever crypto they like.
     if (con->isLocal) {
         return true;
@@ -968,8 +934,7 @@ nabto_connection_type get_connection_type(nabto_connect* con) {
     return NCT_REMOTE_P2P;
 }
 
-uint16_t unabto_count_active_connections()
-{
+uint16_t unabto_count_active_connections() {
     uint16_t activeConnections = 0;
     nabto_connect* con;
 
@@ -999,7 +964,7 @@ bool nabto_write_con(nabto_connect* con, uint8_t* buf, size_t len) {
 
 uint8_t* insert_rendezvous_stats_payload(uint8_t* ptr, uint8_t* end, nabto_connect* con) {
     UNABTO_ASSERT(ptr <= end);
-    if (end-ptr < NP_PAYLOAD_RENDEZVOUS_STATS_BYTELENGTH) {
+    if (end - ptr < NP_PAYLOAD_RENDEZVOUS_STATS_BYTELENGTH) {
         return NULL;
     }
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_RENDEZVOUS_STATS, 0, 7);
@@ -1021,10 +986,10 @@ uint8_t* insert_cp_id_payload(uint8_t* ptr, uint8_t* end, nabto_connect* con) {
         return NULL;
     }
 
-    ptr = insert_payload(ptr, end,  NP_PAYLOAD_TYPE_CP_ID, 0, 1+cpIdLength);
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CP_ID, 0, 1 + cpIdLength);
 
     ptr = write_forward_u8(ptr, end, NP_PAYLOAD_CP_ID_TYPE_MAIL);
-    ptr = write_forward_mem(ptr, end, (const void*) con->clientId, cpIdLength);
+    ptr = write_forward_mem(ptr, end, (const void*)con->clientId, cpIdLength);
 
     return ptr;
 }
@@ -1039,12 +1004,24 @@ uint8_t* insert_connection_info_payload(uint8_t* ptr, uint8_t* end, nabto_connec
     connectionAge = nabtoStampDiff2ms(nabtoStampDiff(&now, &con->stats.connectionStart));
 
     switch (get_connection_type(con)) {
-        case NCT_LOCAL:              connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_LOCAL; break;
-        case NCT_CONNECTING:         connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_CONNECTING; break;
-        case NCT_REMOTE_RELAY:       connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_UDP_RELAY; break;
-        case NCT_REMOTE_RELAY_MICRO: connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_TCP_RELAY; break;
-        case NCT_REMOTE_P2P:         connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_P2P; break;
-        default:                     connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_CONNECTING; break;
+        case NCT_LOCAL:
+            connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_LOCAL;
+            break;
+        case NCT_CONNECTING:
+            connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_CONNECTING;
+            break;
+        case NCT_REMOTE_RELAY:
+            connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_UDP_RELAY;
+            break;
+        case NCT_REMOTE_RELAY_MICRO:
+            connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_TCP_RELAY;
+            break;
+        case NCT_REMOTE_P2P:
+            connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_P2P;
+            break;
+        default:
+            connectionType = NP_PAYLOAD_CONNECT_STATS_CONNECTION_TYPE_CONNECTING;
+            break;
     }
 
     if (ptr == NULL) {
@@ -1117,7 +1094,9 @@ void send_connection_statistics(nabto_connect* con, uint8_t event) {
         return;
     }
 
-    if (!insert_packet_length_from_cursor(nabtoCommunicationBuffer, ptr)) { return; }
+    if (!insert_packet_length_from_cursor(nabtoCommunicationBuffer, ptr)) {
+        return;
+    }
     length = ptr - nabtoCommunicationBuffer;
     send_to_basestation(nabtoCommunicationBuffer, length, &nmc.context.gsp);
 }
@@ -1156,11 +1135,12 @@ void send_connection_ended_statistics(nabto_connect* con) {
         return;
     }
 
-    if (!insert_packet_length_from_cursor(nabtoCommunicationBuffer, ptr)) { return; }
+    if (!insert_packet_length_from_cursor(nabtoCommunicationBuffer, ptr)) {
+        return;
+    }
     length = ptr - nabtoCommunicationBuffer;
 
     send_to_basestation(nabtoCommunicationBuffer, length, &nmc.context.gsp);
 }
-
 
 #endif

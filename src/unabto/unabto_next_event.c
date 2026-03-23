@@ -16,7 +16,6 @@ static void nabto_connection_update_next_event(nabto_stamp_t* current_min_stamp)
 #endif
 #endif
 
-
 #if NABTO_ENABLE_NEXT_EVENT
 void unabto_next_event(nabto_stamp_t* stamp) {
     // return the smallest of context.stamp, connection.stamp, stream.stamp

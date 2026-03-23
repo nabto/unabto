@@ -5,7 +5,7 @@
  * @file
  * The uNabto ServerPeer, common utility parts.
  */
- 
+
 #ifndef _UNABTO_UTIL_H_
 #define _UNABTO_UTIL_H_
 
@@ -31,7 +31,13 @@
  * @param size number of bytes to copy
  * @return
  */
-#define READ(dst, src, size) do { size_t i; for (i = 0; i<size; i++) { dst[i] = src[i]; } } while (0)
+#define READ(dst, src, size)         \
+    do {                             \
+        size_t i;                    \
+        for (i = 0; i < size; i++) { \
+            dst[i] = src[i];         \
+        }                            \
+    } while (0)
 #endif
 
 #ifndef READ_U8
@@ -41,7 +47,10 @@
  * @param src  source address
  * @return
  */
-#define READ_U8(u8, src)        do { u8 = *((uint8_t*)(src)); } while (0)
+#define READ_U8(u8, src)         \
+    do {                         \
+        u8 = *((uint8_t*)(src)); \
+    } while (0)
 #endif
 
 #ifndef WRITE_U8
@@ -51,7 +60,10 @@
  * @param u8   the integer
  * @return
  */
-#define WRITE_U8(dst, u8)       do { *((uint8_t*)(dst)) = u8; } while (0)
+#define WRITE_U8(dst, u8)        \
+    do {                         \
+        *((uint8_t*)(dst)) = u8; \
+    } while (0)
 #endif
 
 #ifndef READ_U16
@@ -61,11 +73,12 @@
  * @param src  source address
  * @return
  */
-#define READ_U16(u16, src) do {           \
-    uint8_t* src8 = (uint8_t*)(src);      \
-    (u16) = (((uint16_t)src8[0]) << 8) |  \
-            ( (uint16_t)src8[1]      );   \
-} while (0)
+#define READ_U16(u16, src)                   \
+    do {                                     \
+        uint8_t* src8 = (uint8_t*)(src);     \
+        (u16) = (((uint16_t)src8[0]) << 8) | \
+                ((uint16_t)src8[1]);         \
+    } while (0)
 #endif
 
 #ifndef WRITE_U16
@@ -75,11 +88,12 @@
  * @param u16  the integer
  * @return
  */
-#define WRITE_U16(dst, u16) do {               \
-    uint8_t* dst8 = (uint8_t*)(dst);           \
-    dst8[0] = (uint8_t)(((uint16_t)(u16) >> 8) & 0xff); \
-    dst8[1] = (uint8_t)( (uint16_t)(u16)       & 0xff);  \
-} while (0);
+#define WRITE_U16(dst, u16)                                 \
+    do {                                                    \
+        uint8_t* dst8 = (uint8_t*)(dst);                    \
+        dst8[0] = (uint8_t)(((uint16_t)(u16) >> 8) & 0xff); \
+        dst8[1] = (uint8_t)((uint16_t)(u16) & 0xff);        \
+    } while (0);
 #endif
 
 #ifndef READ_U32
@@ -89,13 +103,14 @@
  * @param src  source address
  * @return
  */
-#define READ_U32(u32, src) do {            \
-    uint8_t* src8 = (uint8_t*)(src);       \
-    (u32) = (((uint32_t)src8[0]) << 24) |  \
-            (((uint32_t)src8[1]) << 16) |  \
-            (((uint32_t)src8[2]) <<  8) |  \
-            ( (uint32_t)src8[3]       );   \
-} while (0)
+#define READ_U32(u32, src)                    \
+    do {                                      \
+        uint8_t* src8 = (uint8_t*)(src);      \
+        (u32) = (((uint32_t)src8[0]) << 24) | \
+                (((uint32_t)src8[1]) << 16) | \
+                (((uint32_t)src8[2]) << 8) |  \
+                ((uint32_t)src8[3]);          \
+    } while (0)
 #endif
 
 #ifndef WRITE_U32
@@ -105,13 +120,14 @@
  * @param u32  the integer
  * @return
  */
-#define WRITE_U32(dst, u32) do {                \
-    uint8_t* dst8 = (uint8_t*)(dst);            \
-    dst8[0] = (uint8_t)(((uint32_t)(u32) >> 24) & 0xff);  \
-    dst8[1] = (uint8_t)(((uint32_t)(u32) >> 16) & 0xff);  \
-    dst8[2] = (uint8_t)(((uint32_t)(u32) >>  8) & 0xff);  \
-    dst8[3] = (uint8_t)( (uint32_t)(u32)        & 0xff);  \
-} while (0);     
+#define WRITE_U32(dst, u32)                                  \
+    do {                                                     \
+        uint8_t* dst8 = (uint8_t*)(dst);                     \
+        dst8[0] = (uint8_t)(((uint32_t)(u32) >> 24) & 0xff); \
+        dst8[1] = (uint8_t)(((uint32_t)(u32) >> 16) & 0xff); \
+        dst8[2] = (uint8_t)(((uint32_t)(u32) >> 8) & 0xff);  \
+        dst8[3] = (uint8_t)((uint32_t)(u32) & 0xff);         \
+    } while (0);
 #endif
 
 #ifndef WRITE_32
@@ -121,7 +137,7 @@
  * @param s32  the integer
  * @return
  */
-#define WRITE_32(dst, s32)      WRITE_U32(dst, (uint32_t)(s32))
+#define WRITE_32(dst, s32) WRITE_U32(dst, (uint32_t)(s32))
 #endif
 
 #include <string.h> /* memcpy */
@@ -183,13 +199,13 @@ static uint8_t* write_forward_mem(uint8_t* ptr, const uint8_t* end, const void* 
 }
 
 /** @return max of two values. @param x first value @param y second value */
-#define MAX(x, y)                   (((x) > (y)) ? (x) : (y))
-#define MAX3(a, b, c)               MAX(MAX(a, b), c)
-#define MAX4(a, b, c, d)            MAX(MAX(MAX(a, b), c), d)
+#define MAX(x, y)        (((x) > (y)) ? (x) : (y))
+#define MAX3(a, b, c)    MAX(MAX(a, b), c)
+#define MAX4(a, b, c, d) MAX(MAX(MAX(a, b), c), d)
 
 /** @return min of two values. @param x first value @param y second value */
-#define MIN(x, y)                   (((x) < (y)) ? (x) : (y))
-#define MIN3(a, b, c)               MIN(MIN(a, b), c)
-#define MIN4(a, b, c, d)            MIN(MIN(MIN(a, b), c), d)
+#define MIN(x, y)        (((x) < (y)) ? (x) : (y))
+#define MIN3(a, b, c)    MIN(MIN(a, b), c)
+#define MIN4(a, b, c, d) MIN(MIN(MIN(a, b), c), d)
 
 #endif

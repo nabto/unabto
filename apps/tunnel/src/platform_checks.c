@@ -24,19 +24,18 @@ bool platform_checks() {
 bool test_if_lo_exists() {
     bool foundLoopback = false;
 
-    struct ifaddrs *addrs,*tmp;
+    struct ifaddrs *addrs, *tmp;
 
     getifaddrs(&addrs);
     tmp = addrs;
 
-    while (tmp)
-    {
+    while (tmp) {
         const char* lo = "lo";
         if (tmp->ifa_addr) {
             if (strncmp(tmp->ifa_name, lo, strlen(lo)) == 0) {
-                if (! (tmp->ifa_flags & (IFF_UP))) {
+                if (!(tmp->ifa_flags & (IFF_UP))) {
                     NABTO_LOG_FATAL(("Loopback interface exists but it's not up"));
-                } else if (! (tmp->ifa_flags & (IFF_UP))) {
+                } else if (!(tmp->ifa_flags & (IFF_UP))) {
                     NABTO_LOG_FATAL(("Loopback interface exists but it's not running"));
                 } else {
                     foundLoopback = true;

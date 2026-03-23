@@ -34,7 +34,7 @@
  *
  */
 
-#include <string.h>   /* memcpy()/memset() or bcopy()/bzero() */
+#include <string.h> /* memcpy()/memset() or bcopy()/bzero() */
 //#include <assert.h>   /* assert() */
 
 #include "unabto/unabto_env_base.h"
@@ -64,7 +64,6 @@
  *
  */
 
-
 /*** SHA-256 Machine Architecture Definitions *****************/
 
 /*
@@ -81,19 +80,16 @@
  * Thank you, Jun-ichiro itojun Hagino, for suggesting using u_intXX_t
  * types and pointing out recent ANSI C support for uintXX_t in inttypes.h.
  */
-typedef uint8_t  sha2_byte;      /* Exactly 1 byte */
-typedef uint32_t sha2_word32;    /* Exactly 4 bytes */
-// typedef uint64_t sha2_word64;    /* Exactly 8 bytes */ 
-
+typedef uint8_t sha2_byte;    /* Exactly 1 byte */
+typedef uint32_t sha2_word32; /* Exactly 4 bytes */
+// typedef uint64_t sha2_word64;    /* Exactly 8 bytes */
 
 /*** SHA-256/384/512 Various Length Definitions ***********************/
 /* NOTE: Most of these are in sha2.h */
-#define SHA256_SHORT_BLOCK_LENGTH   (SHA256_BLOCK_LENGTH - 8)
+#define SHA256_SHORT_BLOCK_LENGTH (SHA256_BLOCK_LENGTH - 8)
 
-
-#define MEMSET_BZERO(p,l)   memset((p), 0, (l))
-#define MEMCPY_BCOPY(d,s,l) memcpy((d), (s), (l))
-
+#define MEMSET_BZERO(p, l)    memset((p), 0, (l))
+#define MEMCPY_BCOPY(d, s, l) memcpy((d), (s), (l))
 
 /*** THE SIX LOGICAL FUNCTIONS ****************************************/
 /*
@@ -105,19 +101,19 @@ typedef uint32_t sha2_word32;    /* Exactly 4 bytes */
  *   same "backwards" definition.
  */
 /* Shift-right (used in SHA-256, SHA-384, and SHA-512): */
-#define R(b,x)      ((x) >> (b))
+#define R(b, x) ((x) >> (b))
 /* 32-bit Rotate-right (used in SHA-256): */
-#define S32(b,x)    (((x) >> (b)) | ((x) << (32 - (b))))
+#define S32(b, x) (((x) >> (b)) | ((x) << (32 - (b))))
 
 /* Two of six logical functions used in SHA-256, SHA-384, and SHA-512: */
-#define Ch(x,y,z)   (((x) & (y)) ^ ((~(x)) & (z)))
-#define Maj(x,y,z)  (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+#define Ch(x, y, z)  (((x) & (y)) ^ ((~(x)) & (z)))
+#define Maj(x, y, z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
 
 /* Four of six logical functions used in SHA-256: */
-#define Sigma0_256(x)   (S32(2,  (x)) ^ S32(13, (x)) ^ S32(22, (x)))
-#define Sigma1_256(x)   (S32(6,  (x)) ^ S32(11, (x)) ^ S32(25, (x)))
-#define sigma0_256(x)   (S32(7,  (x)) ^ S32(18, (x)) ^ R(3 ,   (x)))
-#define sigma1_256(x)   (S32(17, (x)) ^ S32(19, (x)) ^ R(10,   (x)))
+#define Sigma0_256(x) (S32(2, (x)) ^ S32(13, (x)) ^ S32(22, (x)))
+#define Sigma1_256(x) (S32(6, (x)) ^ S32(11, (x)) ^ S32(25, (x)))
+#define sigma0_256(x) (S32(7, (x)) ^ S32(18, (x)) ^ R(3, (x)))
+#define sigma1_256(x) (S32(17, (x)) ^ S32(19, (x)) ^ R(10, (x)))
 
 /*** INTERNAL FUNCTION PROTOTYPES *************************************/
 /* NOTE: These should not be accessed directly from outside this
@@ -125,7 +121,6 @@ typedef uint32_t sha2_word32;    /* Exactly 4 bytes */
  * only.
  */
 static void SHA256_Transform(sha256_ctx*, const sha2_word32*);
-
 
 /*** SHA-XYZ INITIAL HASH VALUES AND CONSTANTS ************************/
 /* Hash constant words K for SHA-256: */
@@ -145,11 +140,10 @@ static __ROM sha2_word32 K256[64] = {
     0x19a4c116UL, 0x1e376c08UL, 0x2748774cUL, 0x34b0bcb5UL,
     0x391c0cb3UL, 0x4ed8aa4aUL, 0x5b9cca4fUL, 0x682e6ff3UL,
     0x748f82eeUL, 0x78a5636fUL, 0x84c87814UL, 0x8cc70208UL,
-    0x90befffaUL, 0xa4506cebUL, 0xbef9a3f7UL, 0xc67178f2UL
-};
+    0x90befffaUL, 0xa4506cebUL, 0xbef9a3f7UL, 0xc67178f2UL};
 
 /* Initial hash value H for SHA-256: */
- static __ROM sha2_word32 sha256_initial_hash_value[8] = {
+static __ROM sha2_word32 sha256_initial_hash_value[8] = {
     0x6a09e667UL,
     0xbb67ae85UL,
     0x3c6ef372UL,
@@ -157,8 +151,7 @@ static __ROM sha2_word32 K256[64] = {
     0x510e527fUL,
     0x9b05688cUL,
     0x1f83d9abUL,
-    0x5be0cd19UL
-};
+    0x5be0cd19UL};
 
 /*
  * Constant used by SHA256/384/512_End() functions for converting the
@@ -170,7 +163,7 @@ static __ROM sha2_word32 K256[64] = {
 
 void unabto_sha256_init(sha256_ctx* context) {
 #if UNABTO_PLATFORM_PIC18
-  memcpypgm2ram(context->state, sha256_initial_hash_value, sizeof(sha256_initial_hash_value));
+    memcpypgm2ram(context->state, sha256_initial_hash_value, sizeof(sha256_initial_hash_value));
 #else
     memcpy(context->state, sha256_initial_hash_value, sizeof(sha256_initial_hash_value));
 #endif
@@ -182,7 +175,7 @@ void unabto_sha256_init(sha256_ctx* context) {
 static void SHA256_Transform(sha256_ctx* context, const sha2_word32* data) {
     sha2_word32 a, b, c, d, e, f, g, h, s0, s1;
     sha2_word32 T1, T2, *W256;
-    uint8_t     j;
+    uint8_t j;
 
     W256 = (sha2_word32*)context->buffer;
 
@@ -195,12 +188,11 @@ static void SHA256_Transform(sha256_ctx* context, const sha2_word32* data) {
     f = context->state[5];
     g = context->state[6];
     h = context->state[7];
-  
 
     j = 0;
     do {
         /* Copy data while converting to host byte order */
-        READ_U32(W256[j],data++);
+        READ_U32(W256[j], data++);
 
         /* Apply the SHA-256 compression function to update a..h */
         T1 = h + Sigma1_256(e) + Ch(e, f, g) + K256[j] + W256[j];
@@ -219,13 +211,13 @@ static void SHA256_Transform(sha256_ctx* context, const sha2_word32* data) {
 
     do {
         /* Part of the message block expansion: */
-        s0 = W256[(j+1)&0x0f];
+        s0 = W256[(j + 1) & 0x0f];
         s0 = sigma0_256(s0);
-        s1 = W256[(j+14)&0x0f];
+        s1 = W256[(j + 14) & 0x0f];
         s1 = sigma1_256(s1);
 
         /* Apply the SHA-256 compression function to update a..h */
-        T1 = h + Sigma1_256(e) + Ch(e, f, g) + K256[j] + (W256[j&0x0f] += s1 + W256[(j+9)&0x0f] + s0);
+        T1 = h + Sigma1_256(e) + Ch(e, f, g) + K256[j] + (W256[j & 0x0f] += s1 + W256[(j + 9) & 0x0f] + s0);
         T2 = Sigma0_256(a) + Maj(a, b, c);
         h = g;
         g = f;
@@ -253,7 +245,7 @@ static void SHA256_Transform(sha256_ctx* context, const sha2_word32* data) {
     a = b = c = d = e = f = g = h = T1 = T2 = 0;
 }
 
-void unabto_sha256_update(sha256_ctx* context, const sha2_byte *data, uint16_t len) {
+void unabto_sha256_update(sha256_ctx* context, const sha2_byte* data, uint16_t len) {
     uint16_t freespace, usedspace;
 
     if (len == 0) {
@@ -262,7 +254,7 @@ void unabto_sha256_update(sha256_ctx* context, const sha2_byte *data, uint16_t l
     }
 
     /* Sanity check: */
-//    assert(context != (sha256_ctx*)0 && data != (sha2_byte*)0);
+    //    assert(context != (sha256_ctx*)0 && data != (sha2_byte*)0);
 
     usedspace = context->byteCount % SHA256_BLOCK_LENGTH;
     if (usedspace > 0) {
@@ -285,7 +277,7 @@ void unabto_sha256_update(sha256_ctx* context, const sha2_byte *data, uint16_t l
             return;
         }
     }
-//    NABTO_LOG_TRACE(("len %i", len));
+    //    NABTO_LOG_TRACE(("len %i", len));
     while (len >= SHA256_BLOCK_LENGTH) {
         /* Process as many complete blocks as we can */
         SHA256_Transform(context, (sha2_word32*)data);
@@ -306,12 +298,12 @@ void unabto_sha256_update(sha256_ctx* context, const sha2_byte *data, uint16_t l
     usedspace = freespace = 0;
 }
 
-void unabto_sha256_final(sha256_ctx* context,sha2_byte digest[]) {
-    sha2_word32 *d = (sha2_word32*)digest;
+void unabto_sha256_final(sha256_ctx* context, sha2_byte digest[]) {
+    sha2_word32* d = (sha2_word32*)digest;
     unsigned int usedspace;
 
     /* Sanity check: */
-//    assert(context != (sha256_ctx*)0);
+    //    assert(context != (sha256_ctx*)0);
 
     /* If no digest buffer is passed, we don't bother doing this: */
     if (digest != (sha2_byte*)0) {
@@ -344,13 +336,13 @@ void unabto_sha256_final(sha256_ctx* context,sha2_byte digest[]) {
 
         /* Set the bit count: */
         /* Convert FROM host byte order */
-    {
-        // write length in bits in network byte order.
-        uint16_t tmp16 = context->byteCount;
-        tmp16 <<= 3;
-        memset(&context->buffer[SHA256_BLOCK_LENGTH - 8], 0, 6);
-        WRITE_U16(&context->buffer[SHA256_BLOCK_LENGTH - 2], tmp16);
-    }
+        {
+            // write length in bits in network byte order.
+            uint16_t tmp16 = context->byteCount;
+            tmp16 <<= 3;
+            memset(&context->buffer[SHA256_BLOCK_LENGTH - 8], 0, 6);
+            WRITE_U16(&context->buffer[SHA256_BLOCK_LENGTH - 2], tmp16);
+        }
         //print_sha256_ctx(context);
         /* Final transform: */
         SHA256_Transform(context, (sha2_word32*)context->buffer);
@@ -360,8 +352,8 @@ void unabto_sha256_final(sha256_ctx* context,sha2_byte digest[]) {
             /* Convert TO host byte order */
             uint8_t j;
             for (j = 0; j < 8; j++) {
-        WRITE_U32(d, context->state[j]);
-        d++;
+                WRITE_U32(d, context->state[j]);
+                d++;
             }
         }
     }
@@ -377,14 +369,14 @@ void unabto_sha256_final(sha256_ctx* context,sha2_byte digest[]) {
 
 void print_sha256_ctx(sha256_ctx* ctx) {
 #if DEBUG_HMAC_SHA256
-    NABTO_LOG_TRACE(("byteCount %lu",ctx->byteCount));
-//    NABTO_LOG_BUFFER(ctx->buffer, SHA256_BLOCK_LENGTH);
+    NABTO_LOG_TRACE(("byteCount %lu", ctx->byteCount));
+    //    NABTO_LOG_BUFFER(ctx->buffer, SHA256_BLOCK_LENGTH);
     /* NABTO_LOG_TRACE(("%02x %02x %02x %02x %02x %02x %02x %02x", */
     /*               ctx->buffer[0],ctx->buffer[1],ctx->buffer[2],ctx->buffer[3], */
     /*               ctx->buffer[4],ctx->buffer[5],ctx->buffer[6],ctx->buffer[7])); */
     //NABTO_LOG_BUFFER(ctx->block, 2*SHA256_BLOCK_SIZE);
-    NABTO_LOG_TRACE(("h[0-3] %lu %lu %lu %lu",ctx->state[0],ctx->state[1],ctx->state[2],ctx->state[3]));
-    NABTO_LOG_TRACE(("h[4-7] %lu %lu %lu %lu",ctx->state[4],ctx->state[5],ctx->state[6],ctx->state[7]));
+    NABTO_LOG_TRACE(("h[0-3] %lu %lu %lu %lu", ctx->state[0], ctx->state[1], ctx->state[2], ctx->state[3]));
+    NABTO_LOG_TRACE(("h[4-7] %lu %lu %lu %lu", ctx->state[4], ctx->state[5], ctx->state[6], ctx->state[7]));
 #else
     NABTO_NOT_USED(ctx);
 #endif
@@ -392,4 +384,4 @@ void print_sha256_ctx(sha256_ctx* ctx) {
 
 #endif
 
-#endif // NABTO_ENABLE_UCRYPTO
+#endif  // NABTO_ENABLE_UCRYPTO

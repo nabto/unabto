@@ -58,7 +58,6 @@
 #define NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS 1
 #endif
 
-
 /**
  * Enable usage of multiple sockets for extended rendezvous, this
  * makes p2p connections possible from a device behind symmetric nat
@@ -80,7 +79,6 @@
 #ifndef NABTO_ENABLE_GET_LOCAL_IP
 #define NABTO_ENABLE_GET_LOCAL_IP 0
 #endif
-
 
 /**
  * Limit how many addresses the dns resolver can return to unabto after a
@@ -166,29 +164,28 @@
 /* End of connection configuration */
 /***********************************/
 
-
 /*********************************/
 /* packet max size configuration */
 /*********************************/
 
 /** Define default maximum length of the device name */
 #ifndef NABTO_DEVICE_NAME_MAX_SIZE
-#define NABTO_DEVICE_NAME_MAX_SIZE       40
+#define NABTO_DEVICE_NAME_MAX_SIZE 40
 #endif
 
 /** Define default maximum length of the device version string */
 #ifndef NABTO_DEVICE_VERSION_MAX_SIZE
-#define NABTO_DEVICE_VERSION_MAX_SIZE    10
+#define NABTO_DEVICE_VERSION_MAX_SIZE 10
 #endif
 
 /** Define default maximum length of the URL override string */
 #ifndef NABTO_URL_OVERRIDE_MAX_SIZE
-#define NABTO_URL_OVERRIDE_MAX_SIZE      64
+#define NABTO_URL_OVERRIDE_MAX_SIZE 64
 #endif
 
 /** Define default maximum length of the Client Identification (the email) */
 #ifndef NABTO_CLIENT_ID_MAX_SIZE
-#define NABTO_CLIENT_ID_MAX_SIZE         64
+#define NABTO_CLIENT_ID_MAX_SIZE 64
 #endif
 
 /**
@@ -198,23 +195,22 @@
  * as in "1:L:message\nEOM\n" (16 or 18 depending on length of /n)
  */
 #ifndef NABTO_EVENT_CHANNEL_MAX_SIZE
-#define NABTO_EVENT_CHANNEL_MAX_SIZE     224
+#define NABTO_EVENT_CHANNEL_MAX_SIZE 224
 #endif
 
 /** Define default maximum length of the response data in a dialogue */
 #ifndef NABTO_RESPONSE_MAX_SIZE
-#define NABTO_RESPONSE_MAX_SIZE          200
+#define NABTO_RESPONSE_MAX_SIZE 200
 #endif
 
 /** Define default maximum length of the request data in a dialogue */
 #ifndef NABTO_REQUEST_MAX_SIZE
-#define NABTO_REQUEST_MAX_SIZE           NABTO_RESPONSE_MAX_SIZE
+#define NABTO_REQUEST_MAX_SIZE NABTO_RESPONSE_MAX_SIZE
 #endif
 
 /****************************************/
 /* End of packet max size configuration */
 /****************************************/
-
 
 /******************************/
 /* Asynchronous configuration */
@@ -222,12 +218,12 @@
 
 /** Sets synchronous event model as default */
 #ifndef NABTO_APPLICATION_EVENT_MODEL_ASYNC
-#define NABTO_APPLICATION_EVENT_MODEL_ASYNC  0
+#define NABTO_APPLICATION_EVENT_MODEL_ASYNC 0
 #endif
 
 /** Sets the number of request resources queued for execution to 1 */
 #ifndef NABTO_APPREQ_QUEUE_SIZE
-#define NABTO_APPREQ_QUEUE_SIZE              1
+#define NABTO_APPREQ_QUEUE_SIZE 1
 #endif
 
 // Deprecated option
@@ -238,7 +234,6 @@
 /*************************************/
 /* End of asynchronous configuration */
 /*************************************/
-
 
 /*************************/
 /* Logging configuration */
@@ -251,18 +246,13 @@
 #define NABTO_ENABLE_LOGGING 1
 #endif
 
-
 /********************************/
 /* End of logging configuration */
 /********************************/
 
-
-
-
 /****************************/
 /* uStreaming configuration */
 /****************************/
-
 
 /**
  * Define default inclusion of STREAM related functionality.
@@ -290,7 +280,6 @@
 #define NABTO_ENABLE_STREAM_EVENTS 1
 #endif
 
-
 /**
  * Streams can be configured in the following ways.
  * * Number of simultaneous streams
@@ -304,7 +293,6 @@
  *
  * The default memory requirement is 4*((1400*4)+(1400*4)) = 44800 bytes.
  */
-
 
 /** The maximum simultaneous streams. */
 #ifndef NABTO_STREAM_MAX_STREAMS
@@ -366,7 +354,7 @@
  * stream fails.
  */
 #ifndef NABTO_STREAM_SEGMENT_POOL_SIZE
-#define NABTO_STREAM_SEGMENT_POOL_SIZE NABTO_STREAM_SEND_WINDOW_SIZE * NABTO_STREAM_MAX_STREAMS + NABTO_STREAM_RECEIVE_WINDOW_SIZE * NABTO_STREAM_MAX_STREAMS
+#define NABTO_STREAM_SEGMENT_POOL_SIZE NABTO_STREAM_SEND_WINDOW_SIZE* NABTO_STREAM_MAX_STREAMS + NABTO_STREAM_RECEIVE_WINDOW_SIZE* NABTO_STREAM_MAX_STREAMS
 #endif
 
 #if NABTO_STREAM_SEGMENT_POOL_SIZE < NABTO_STREAM_MAX_STREAMS
@@ -380,7 +368,7 @@
  * available for the send windows.
  */
 #ifndef NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS
-#define NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS NABTO_STREAM_RECEIVE_WINDOW_SIZE * NABTO_STREAM_MAX_STREAMS
+#define NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS NABTO_STREAM_RECEIVE_WINDOW_SIZE* NABTO_STREAM_MAX_STREAMS
 #endif
 
 #if NABTO_STREAM_SEGMENT_POOL_MAX_RECEIVE_SEGMENTS > (NABTO_STREAM_SEGMENT_POOL_SIZE - 1)
@@ -411,7 +399,7 @@
  * maximum time between retransmission of a packet.
  */
 #ifndef NABTO_STREAM_MAX_RETRANSMISSION_TIME
-#define NABTO_STREAM_MAX_RETRANSMISSION_TIME 16000 // 16 seconds.
+#define NABTO_STREAM_MAX_RETRANSMISSION_TIME 16000  // 16 seconds.
 #endif
 
 /**
@@ -488,7 +476,6 @@
 /* End of debug packets configuration */
 /**************************************/
 
-
 /****************/
 /* Memory model */
 /****************/
@@ -514,6 +501,5 @@
 /*************************************/
 /* End of memory model configuration */
 /*************************************/
-
 
 #endif

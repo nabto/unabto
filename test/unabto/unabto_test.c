@@ -23,11 +23,11 @@
 
 /** Enable SHA256 test by default */
 #ifndef NABTO_ENABLE_SHA256_TESTS
-#define NABTO_ENABLE_SHA256_TESTS 1 
+#define NABTO_ENABLE_SHA256_TESTS 1
 #endif
 
 bool unabto_test_all(void) {
-//    NABTO_DECLARE_LOCAL_MODULE(NABTO_LOG_APP);
+    //    NABTO_DECLARE_LOCAL_MODULE(NABTO_LOG_APP);
     bool ret = true;
     bool r;
 
@@ -38,7 +38,6 @@ bool unabto_test_all(void) {
         NABTO_LOG_INFO(("sha256 test failed"));
         ret = false;
     }
-
 
 #if NABTO_ENABLE_SHA256_TESTS
     NABTO_LOG_INFO(("Testing hmac_sha256"));
@@ -100,7 +99,7 @@ bool unabto_test_all(void) {
         ret = false;
     }
 #endif
-    
+
     NABTO_LOG_INFO(("Testing unabto_buffer"));
     r = unabto_buffer_test();
     if (!r) {
@@ -125,7 +124,7 @@ bool unabto_test_all(void) {
     }
 
     r = test_state_machine();
-    
+
     if (!r) {
         NABTO_LOG_ERROR(("Test of unabto stream state machine failed."));
         ret = false;
@@ -136,13 +135,13 @@ bool unabto_test_all(void) {
         NABTO_LOG_ERROR(("Test of unabto stream create sack pairs failed."));
         ret = false;
     }
-    
+
     r = unabto_base32_test();
     if (!r) {
         NABTO_LOG_ERROR(("Test of base32 failed."));
         ret = false;
     }
-    
+
     if (ret) {
         NABTO_LOG_INFO(("All uNabto tests succeded"));
     } else {

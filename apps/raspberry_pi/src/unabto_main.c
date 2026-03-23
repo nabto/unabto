@@ -19,8 +19,7 @@ void nabto_yield(int msec);
  *  main using gopt to check command line arguments
  *  -h for help
  */
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
 #if USING_PIFACE
     // init PiFace
     pfio_init();
@@ -65,13 +64,15 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-void nabto_yield(int msec)
-{
+void nabto_yield(int msec) {
 #ifdef WIN32
     Sleep(msec);
 #elif defined(__MACH__)
-    if (msec) usleep(1000*msec);
+    if (msec) usleep(1000 * msec);
 #else
-    if (msec) usleep(1000*msec); else sched_yield();
+    if (msec)
+        usleep(1000 * msec);
+    else
+        sched_yield();
 #endif
 }

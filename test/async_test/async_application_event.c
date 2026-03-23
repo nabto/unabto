@@ -13,16 +13,15 @@
  */
 
 struct queued_request {
-    application_request* request; // Used to keep track of the request.
-    nabto_stamp_t        expire;  // Timestamp when passed the response is ready.
-    nabto_stamp_t        created; // Used to keep track of how long the actual request has been.
+    application_request* request;  // Used to keep track of the request.
+    nabto_stamp_t expire;          // Timestamp when passed the response is ready.
+    nabto_stamp_t created;         // Used to keep track of how long the actual request has been.
 };
 
 #define QUEUE_SIZE 10
 struct queued_request queue[QUEUE_SIZE];
 
-void update_next_async_event_timeout(nabto_stamp_t* ne)
-{
+void update_next_async_event_timeout(nabto_stamp_t* ne) {
     int i;
     for (i = 0; i < QUEUE_SIZE; i++) {
         struct queued_request* req = &queue[i];
@@ -32,28 +31,22 @@ void update_next_async_event_timeout(nabto_stamp_t* ne)
     }
 }
 
-
-void init_request_queue()
-{
+void init_request_queue() {
     memset(queue, 0, QUEUE_SIZE * sizeof(struct queued_request));
 }
 
-void clear_queue_entry(struct queued_request* entry)
-{
+void clear_queue_entry(struct queued_request* entry) {
     memset(entry, 0, sizeof(struct queued_request));
 }
 
-void init_queue_entry(struct queued_request* entry, application_request* request, uint32_t ms)
-{
+void init_queue_entry(struct queued_request* entry, application_request* request, uint32_t ms) {
     entry->request = request;
     nabtoSetFutureStamp(&(entry->expire), ms);
     entry->created = nabtoGetStamp();
     return;
 }
 
-
-struct queued_request* find_empty_queue_slot()
-{
+struct queued_request* find_empty_queue_slot() {
     int i;
     for (i = 0; i < QUEUE_SIZE; i++) {
         if (queue[i].request == NULL) {
@@ -63,8 +56,7 @@ struct queued_request* find_empty_queue_slot()
     return NULL;
 }
 
-struct queued_request* find_queue_entry(application_request* request)
-{
+struct queued_request* find_queue_entry(application_request* request) {
     int i;
     for (i = 0; i < QUEUE_SIZE; i++) {
         if (queue[i].request == request) {
@@ -74,16 +66,14 @@ struct queued_request* find_queue_entry(application_request* request)
     return NULL;
 }
 
-application_event_result application_event(application_request* request, unabto_query_request* r_b, unabto_query_response* w_b)
-{
+application_event_result application_event(application_request* request, unabto_query_request* r_b, unabto_query_response* w_b) {
     switch (request->queryId) {
-        case 1:
-        {
+        case 1: {
             struct queued_request* entry = find_empty_queue_slot();
             if (entry == NULL) {
                 return AER_REQ_OUT_OF_RESOURCES;
             }
-            
+
             uint32_t expire;
             // read 4 bytes from the input buffer
             if (!unabto_query_read_uint32(r_b, &expire)) {
@@ -94,7 +84,7 @@ application_event_result application_event(application_request* request, unabto_
             return AER_REQ_ACCEPTED;
         }
     }
-    return AER_REQ_INV_QUERY_ID;    
+    return AER_REQ_INV_QUERY_ID;
 }
 
 /**
@@ -106,8 +96,7 @@ application_event_result application_event(application_request* request, unabto_
  * responsibility to tell the framework which application requests has
  * an answer ready.
  */
-bool application_poll_query(application_request** applicationRequest)
-{
+bool application_poll_query(application_request** applicationRequest) {
     int i;
     for (i = 0; i < QUEUE_SIZE; i++) {
         if (queue[i].request != NULL) {
@@ -130,8 +119,7 @@ bool application_poll_query(application_request** applicationRequest)
  *
  * The application must release/delete its internal ressouce holding the requested request.
  */
-application_event_result application_poll(application_request* applicationRequest, unabto_query_response* writeBuffer)
-{
+application_event_result application_poll(application_request* applicationRequest, unabto_query_response* writeBuffer) {
     struct queued_request* entry = find_queue_entry(applicationRequest);
 
     if (entry == NULL) {
@@ -148,15 +136,12 @@ application_event_result application_poll(application_request* applicationReques
     }
 }
 
-
 /**
  * Drop the queued request - the framework has discarded it.
  */
-void application_poll_drop(application_request* applicationRequest)
-{
+void application_poll_drop(application_request* applicationRequest) {
     struct queued_request* entry = find_queue_entry(applicationRequest);
     if (entry != NULL) {
         clear_queue_entry(entry);
     }
 }
-

@@ -22,9 +22,8 @@ bool unabto_aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t inpu
  */
 bool unabto_aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t inputLength);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

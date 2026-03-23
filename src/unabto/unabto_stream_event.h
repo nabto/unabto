@@ -21,7 +21,6 @@
 #include <unabto/unabto_stream_types.h>
 #include <unabto/unabto_memory.h>
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,7 +35,6 @@ extern NABTO_THREAD_LOCAL_STORAGE x_buffer x_buffers[(size_t)(NABTO_MEMORY_STREA
 extern NABTO_THREAD_LOCAL_STORAGE r_buffer r_buffers[(size_t)(NABTO_MEMORY_STREAM_MAX_STREAMS) * (size_t)(NABTO_MEMORY_STREAM_RECEIVE_WINDOW_SIZE)];
 #endif
 
-
 /******************************************************************************/
 
 /**
@@ -47,16 +45,13 @@ extern NABTO_THREAD_LOCAL_STORAGE r_buffer r_buffers[(size_t)(NABTO_MEMORY_STREA
  * @param start  the decrypted payload
  * @param dlen   the decrypted payload
  */
-void nabto_stream_event(nabto_connect*       con,
+void nabto_stream_event(nabto_connect* con,
                         nabto_packet_header* hdr,
-                        uint8_t*             info,
-                        uint8_t*             dataStart,
-                        int                  dataLength,
-                        uint8_t*             sackStart,
-                        uint16_t             sackLength);
-
-
-
+                        uint8_t* info,
+                        uint8_t* dataStart,
+                        int dataLength,
+                        uint8_t* sackStart,
+                        uint16_t sackLength);
 
 /******************************************************************************/
 
@@ -75,7 +70,7 @@ bool build_and_send_rst_packet(nabto_connect* con, uint16_t tag, struct nabto_wi
 void unabto_stream_send_stats(struct nabto_stream_s* stream, uint8_t event);
 
 #ifdef __cplusplus
-} // extern "C"
+}  // extern "C"
 #endif
 
 #endif /* NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM */

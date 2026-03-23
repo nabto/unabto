@@ -73,6 +73,4 @@ int main() {
         NABTO_LOG_INFO(("Some tests failed"));
         exit(1);
     }
-
-
 }

@@ -8,8 +8,7 @@
 
 #if NABTO_ENABLE_LOCAL_PSK_CONNECTION
 
-void unabto_psk_connection_dispatch_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
-{
+void unabto_psk_connection_dispatch_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header) {
     if (header->type == NP_PACKET_HDR_TYPE_U_CONNECT_PSK && (header->flags & NP_PACKET_HDR_FLAG_EXCEPTION)) {
         unabto_psk_connection_handle_exception_request(header);
         return;
@@ -22,8 +21,7 @@ void unabto_psk_connection_dispatch_request(nabto_socket_t socket, const nabto_e
     }
 }
 
-void unabto_psk_connection_handle_exception_request(const nabto_packet_header* header)
-{
+void unabto_psk_connection_handle_exception_request(const nabto_packet_header* header) {
     // packet structure:
     // U_CONNECT_PSK(Hdr(exception=1), notify(err) )
     uint8_t* begin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
@@ -52,8 +50,7 @@ void unabto_psk_connection_handle_exception_request(const nabto_packet_header* h
     }
 }
 
-void unabto_psk_connection_create_new_connection(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
-{
+void unabto_psk_connection_create_new_connection(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header) {
     nabto_connect* connection;
     connection = nabto_reserve_connection();
     if (!connection) {
@@ -67,8 +64,7 @@ void unabto_psk_connection_create_new_connection(nabto_socket_t socket, const na
     }
 }
 
-bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header, nabto_connect* connection)
-{
+bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header, nabto_connect* connection) {
     struct unabto_payload_capabilities_read capabilities;
     bool isLocal = nabto_socket_is_equal(&socket, &nmc.socketLocal);
     nabto_reset_connection(connection);
@@ -81,7 +77,6 @@ bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
     connection->rendezvousConnectState.state = RS_DONE;
     connection->noRendezvous = true;
     connection->isLocal = isLocal;
-
 
     // read client id and insert it into the connection
     unabto_connection_util_read_client_id(header, connection);
@@ -123,15 +118,13 @@ bool unabto_psk_connection_handle_connect_request(nabto_socket_t socket, const n
         return false;
     }
 
-
     // the connection was created now send a packet back to the client.
     unabto_psk_connection_send_connect_response(socket, peer, connection);
     connection->psk.state = WAIT_VERIFY;
     return true;
 }
 
-void unabto_psk_connection_dispatch_connect_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
-{
+void unabto_psk_connection_dispatch_connect_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header) {
     // find a connection. If no connection is found make a new
     // connection. If a connection is found respond with the same
     // packet as the request which created the connection.
@@ -148,8 +141,7 @@ void unabto_psk_connection_dispatch_connect_request(nabto_socket_t socket, const
 
     if (connection &&
         connection->state == CS_CONNECTING &&
-        connection->psk.state == WAIT_VERIFY)
-    {
+        connection->psk.state == WAIT_VERIFY) {
         // there is a connection this is a retransmission the CONNECT
         // response is either lost or still on the line. Resend response.
         unabto_psk_connection_send_connect_response(socket, peer, connection);
@@ -157,8 +149,7 @@ void unabto_psk_connection_dispatch_connect_request(nabto_socket_t socket, const
     }
 }
 
-void unabto_psk_connection_handle_verify_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header, nabto_connect* connection)
-{
+void unabto_psk_connection_handle_verify_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header, nabto_connect* connection) {
     // packet format U_VERIFY_PSK(Hdr, Enc(random_client, nonce_device))
 
     struct unabto_payload_crypto cryptoPayload;
@@ -174,8 +165,7 @@ void unabto_psk_connection_handle_verify_request(nabto_socket_t socket, const na
     }
     if (!unabto_crypto_verify_and_decrypt(header, &connection->cryptoctx, &cryptoPayload,
                                           &decryptedDataBegin,
-                                          &decryptedDataLength))
-    {
+                                          &decryptedDataLength)) {
         NABTO_LOG_WARN(("decryption of packet failed"));
         return;
     }
@@ -186,7 +176,6 @@ void unabto_psk_connection_handle_verify_request(nabto_socket_t socket, const na
         const uint8_t* cryptoPayloadsEnd = decryptedDataBegin + decryptedDataLength;
 
         if (!unabto_connection_util_read_random_client(cryptoPayloadsBegin, cryptoPayloadsEnd, connection)) {
-
             return;
         }
 
@@ -201,8 +190,7 @@ void unabto_psk_connection_handle_verify_request(nabto_socket_t socket, const na
     }
 }
 
-void unabto_psk_connection_init_connection(nabto_connect* connection)
-{
+void unabto_psk_connection_init_connection(nabto_connect* connection) {
     // init crypto context
     nabto_crypto_init_aes_128_hmac_sha256_psk_context_from_handshake_data(
         &connection->cryptoctx,
@@ -217,12 +205,10 @@ void unabto_psk_connection_init_connection(nabto_connect* connection)
     // change psk state
     connection->psk.state = CONNECTED;
 
-    NABTO_LOG_INFO(("PSK connection created with client nsi: " PRInsi,  MAKE_NSI_PRINTABLE(connection->cpnsi, connection->spnsi, 0) ));
+    NABTO_LOG_INFO(("PSK connection created with client nsi: " PRInsi, MAKE_NSI_PRINTABLE(connection->cpnsi, connection->spnsi, 0)));
 }
 
-void unabto_psk_connection_dispatch_verify_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header)
-{
-
+void unabto_psk_connection_dispatch_verify_request(nabto_socket_t socket, const nabto_endpoint* peer, const nabto_packet_header* header) {
     // Find a connection if the state is past the verify phase send
     // the same response as the packet which made the state past the
     // verify phase.
@@ -233,17 +219,14 @@ void unabto_psk_connection_dispatch_verify_request(nabto_socket_t socket, const 
         // This is a new unhandled packet for the state.
         unabto_psk_connection_handle_verify_request(socket, peer, header, connection);
         return;
-    } else  if (connection && connection->state > CS_CONNECTING && connection->psk.state == CONNECTED) {
+    } else if (connection && connection->state > CS_CONNECTING && connection->psk.state == CONNECTED) {
         // Probably a retransmission since the old response got lost.
         unabto_psk_connection_send_verify_response(socket, peer, connection);
         return;
     }
-
 }
 
-
-void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const nabto_endpoint* peer, nabto_connect* connection)
-{
+void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const nabto_endpoint* peer, nabto_connect* connection) {
     // packet format:
     // U_CONNECT_PSK(Hdr, Capabilities, nonce_device, Enc(random_device, nonce_client))
 
@@ -258,7 +241,6 @@ void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const na
 
     // set RSP bit
     nabto_header_add_flags(&header, NP_PACKET_HDR_FLAG_RESPONSE);
-
 
     end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
 
@@ -296,8 +278,7 @@ void unabto_psk_connection_send_connect_response(nabto_socket_t socket, const na
     }
 }
 
-void unabto_psk_connection_send_verify_response(nabto_socket_t socket, const nabto_endpoint* peer, nabto_connect* connection)
-{
+void unabto_psk_connection_send_verify_response(nabto_socket_t socket, const nabto_endpoint* peer, nabto_connect* connection) {
     // packet format:
     // U_VERIFY_PSK(Hdr, Notify(ok))
 
@@ -305,7 +286,7 @@ void unabto_psk_connection_send_verify_response(nabto_socket_t socket, const nab
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
 
     // create header
-   // create header
+    // create header
     nabto_packet_header header;
     uint16_t packetLength;
     nabto_header_init(&header, NP_PACKET_HDR_TYPE_U_VERIFY_PSK, connection->cpnsi, connection->spnsi);
@@ -323,25 +304,24 @@ void unabto_psk_connection_send_verify_response(nabto_socket_t socket, const nab
         return;
     }
 
-    if (!insert_packet_length_from_cursor(nabtoCommunicationBuffer, ptr)) { return; }
+    if (!insert_packet_length_from_cursor(nabtoCommunicationBuffer, ptr)) {
+        return;
+    }
     packetLength = (uint16_t)(ptr - nabtoCommunicationBuffer);
 
     // send packet
     nabto_write(socket, nabtoCommunicationBuffer, packetLength, &peer->addr, peer->port);
 }
 
-void unabto_psk_connection_send_connect_error_response(nabto_socket_t socket, const nabto_endpoint* peer, uint32_t cpNsi, uint32_t spNsi, uint32_t errorCode)
-{
+void unabto_psk_connection_send_connect_error_response(nabto_socket_t socket, const nabto_endpoint* peer, uint32_t cpNsi, uint32_t spNsi, uint32_t errorCode) {
     unabto_psk_connection_send_error_response(socket, peer, cpNsi, spNsi, errorCode, NP_PACKET_HDR_TYPE_U_CONNECT_PSK);
 }
 
-void unabto_psk_connection_send_verify_error_response(nabto_socket_t socket, const nabto_endpoint* peer, nabto_connect* connection, uint32_t errorCode)
-{
+void unabto_psk_connection_send_verify_error_response(nabto_socket_t socket, const nabto_endpoint* peer, nabto_connect* connection, uint32_t errorCode) {
     unabto_psk_connection_send_error_response(socket, peer, connection->cpnsi, connection->spnsi, errorCode, NP_PACKET_HDR_TYPE_U_VERIFY_PSK);
 }
 
-void unabto_psk_connection_send_error_response(nabto_socket_t socket, const nabto_endpoint* peer, uint32_t cpNsi, uint32_t spNsi, uint32_t errorCode, uint8_t type)
-{
+void unabto_psk_connection_send_error_response(nabto_socket_t socket, const nabto_endpoint* peer, uint32_t cpNsi, uint32_t spNsi, uint32_t errorCode, uint8_t type) {
     // packet format <type>(Hdr(Exception = 1, RSP = 1), Notify(errorCode))
     uint8_t* ptr = nabtoCommunicationBuffer;
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
@@ -366,7 +346,9 @@ void unabto_psk_connection_send_error_response(nabto_socket_t socket, const nabt
         return;
     }
 
-    if (!insert_packet_length_from_cursor(nabtoCommunicationBuffer, ptr)) { return; }
+    if (!insert_packet_length_from_cursor(nabtoCommunicationBuffer, ptr)) {
+        return;
+    }
     packetLength = (uint16_t)(ptr - nabtoCommunicationBuffer);
 
     // send packet

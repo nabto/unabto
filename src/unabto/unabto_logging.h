@@ -16,57 +16,52 @@
 
 // if NABTO_LOG_ALL is defined to 1 log module and level filters will be overriden and all log messages will be output
 #ifndef NABTO_LOG_ALL
-#define NABTO_LOG_ALL                                               0ul
+#define NABTO_LOG_ALL 0ul
 #endif
 
-
 #ifndef NABTO_ENABLE_LOGGING
-#define NABTO_ENABLE_LOGGING                                        1ul
+#define NABTO_ENABLE_LOGGING 1ul
 #endif
 
 #ifndef NABTO_FATAL_EXIT
 #include <stdlib.h>
-#define NABTO_FATAL_EXIT                                            exit(1)
+#define NABTO_FATAL_EXIT exit(1)
 #endif
-
-
 
 // Module filter - default is to show log output from all modules.
 // Set NABTO_LOG_MODULE_FILTER to a combination of the NABTO_LOG_MODULE_... bit masks.
 #ifndef NABTO_LOG_MODULE_FILTER
-#define NABTO_LOG_MODULE_FILTER                                     NABTO_LOG_MODULE_ALL
+#define NABTO_LOG_MODULE_FILTER NABTO_LOG_MODULE_ALL
 #endif
 
 #ifndef NABTO_LOG_MODULE_CURRENT
-#define NABTO_LOG_MODULE_CURRENT                                    NABTO_LOG_MODULE_DEFAULT
+#define NABTO_LOG_MODULE_CURRENT NABTO_LOG_MODULE_DEFAULT
 #endif
 
 // Check whether the current module should have logging enabled or not.
 #ifndef NABTO_LOG_MODULE_CHECK
-#define NABTO_LOG_MODULE_CHECK                                      ((NABTO_LOG_MODULE_CURRENT) & (NABTO_LOG_MODULE_FILTER))
+#define NABTO_LOG_MODULE_CHECK ((NABTO_LOG_MODULE_CURRENT) & (NABTO_LOG_MODULE_FILTER))
 #endif
-
 
 // Severity filter
 // Set NABTO_LOG_SEVERITY_FILTER to a combination of the NABTO_LOG_SEVERITY_... bit masks and/or levels.
 // Default to info level if none is specified.
 #ifndef NABTO_LOG_SEVERITY_FILTER
-#define NABTO_LOG_SEVERITY_FILTER                                  NABTO_LOG_SEVERITY_LEVEL_INFO
+#define NABTO_LOG_SEVERITY_FILTER NABTO_LOG_SEVERITY_LEVEL_INFO
 #endif
 
 // Check whether the logging at the specified severity level is enabled.
-#define NABTO_LOG_SEVERITY_CHECK(severity)                          ((severity) & (NABTO_LOG_SEVERITY_FILTER))
+#define NABTO_LOG_SEVERITY_CHECK(severity) ((severity) & (NABTO_LOG_SEVERITY_FILTER))
 
 // If fine grained log filtering is used set NABTO_LOG_ALL_FATALS to 1 to enable fatal events from all modules regardless of other filtering.
 #ifndef NABTO_LOG_ALL_FATALS
-#define NABTO_LOG_ALL_FATALS                                        1
+#define NABTO_LOG_ALL_FATALS 1
 #endif
 
 // Check if logging is enabled in this module and at this severity level. Overriden by the NABTO_LOG_ALL flag.
 #ifndef NABTO_LOG_CHECK
-#define NABTO_LOG_CHECK(severity)                                   ((NABTO_ENABLE_LOGGING) && ((NABTO_LOG_ALL) || (NABTO_LOG_ALL_FATALS && (severity & NABTO_LOG_SEVERITY_FATAL)) || ((NABTO_LOG_MODULE_CHECK) && (NABTO_LOG_SEVERITY_CHECK(severity)))))
+#define NABTO_LOG_CHECK(severity) ((NABTO_ENABLE_LOGGING) && ((NABTO_LOG_ALL) || (NABTO_LOG_ALL_FATALS && (severity & NABTO_LOG_SEVERITY_FATAL)) || ((NABTO_LOG_MODULE_CHECK) && (NABTO_LOG_SEVERITY_CHECK(severity)))))
 #endif
-
 
 /**
  * The actual log output functions.
@@ -78,46 +73,53 @@
 
 #ifndef NABTO_LOG_FATAL
 #if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_FATAL)
-#define NABTO_LOG_FATAL(message)                                    do { NABTO_LOG_BASIC_PRINT(NABTO_LOG_SEVERITY_FATAL, message); NABTO_FATAL_EXIT; } while(0)
+#define NABTO_LOG_FATAL(message)                                  \
+    do {                                                          \
+        NABTO_LOG_BASIC_PRINT(NABTO_LOG_SEVERITY_FATAL, message); \
+        NABTO_FATAL_EXIT;                                         \
+    } while (0)
 #else
-#define NABTO_LOG_FATAL(message)                                    do { NABTO_FATAL_EXIT; } while(0)
+#define NABTO_LOG_FATAL(message) \
+    do {                         \
+        NABTO_FATAL_EXIT;        \
+    } while (0)
 #endif
 #endif
 
 #if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_ERROR)
-#define NABTO_LOG_ERROR(message)                                    NABTO_LOG_BASIC_PRINT(NABTO_LOG_SEVERITY_ERROR, message)
+#define NABTO_LOG_ERROR(message) NABTO_LOG_BASIC_PRINT(NABTO_LOG_SEVERITY_ERROR, message)
 #else
 #define NABTO_LOG_ERROR(message)
 #endif
 
 #if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_WARN)
-#define NABTO_LOG_WARN(message)                                     NABTO_LOG_BASIC_PRINT(NABTO_LOG_SEVERITY_WARN, message)
+#define NABTO_LOG_WARN(message) NABTO_LOG_BASIC_PRINT(NABTO_LOG_SEVERITY_WARN, message)
 #else
 #define NABTO_LOG_WARN(message)
 #endif
 
 #ifndef NABTO_LOG_INFO
 #if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_INFO)
-#define NABTO_LOG_INFO(message)                                     NABTO_LOG_BASIC_PRINT(NABTO_LOG_SEVERITY_INFO, message)
+#define NABTO_LOG_INFO(message) NABTO_LOG_BASIC_PRINT(NABTO_LOG_SEVERITY_INFO, message)
 #else
 #define NABTO_LOG_INFO(message)
 #endif
 #endif
 
 #if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_DEBUG)
-#define NABTO_LOG_DEBUG(message)                                    NABTO_LOG_BASIC_PRINT(NABTO_LOG_SEVERITY_DEBUG, message)
+#define NABTO_LOG_DEBUG(message) NABTO_LOG_BASIC_PRINT(NABTO_LOG_SEVERITY_DEBUG, message)
 #else
 #define NABTO_LOG_DEBUG(message)
 #endif
 
 #if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_TRACE)
-#define NABTO_LOG_TRACE(message)                                    NABTO_LOG_BASIC_PRINT(NABTO_LOG_SEVERITY_TRACE, message)
+#define NABTO_LOG_TRACE(message) NABTO_LOG_BASIC_PRINT(NABTO_LOG_SEVERITY_TRACE, message)
 #else
 #define NABTO_LOG_TRACE(message)
 #endif
 
 #if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_STATISTICS)
-#define NABTO_LOG_STATISTIC(message)                                NABTO_LOG_BASIC_PRINT(NABTO_LOG_SEVERITY_STATISTICS, message)
+#define NABTO_LOG_STATISTIC(message) NABTO_LOG_BASIC_PRINT(NABTO_LOG_SEVERITY_STATISTICS, message)
 #else
 #define NABTO_LOG_STATISTIC(message)
 #endif
@@ -132,18 +134,29 @@
 #if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_BUFFERS)
 #include <platforms/unabto_printf_logger.h>
 
-#define NABTO_LOG_BUFFER(severity, message, buffer, length)            do { if (NABTO_LOG_CHECK(severity)) { NABTO_LOG_BASIC_PRINT(severity, message); log_buffer(buffer, length); } } while (0)
+#define NABTO_LOG_BUFFER(severity, message, buffer, length) \
+    do {                                                    \
+        if (NABTO_LOG_CHECK(severity)) {                    \
+            NABTO_LOG_BASIC_PRINT(severity, message);       \
+            log_buffer(buffer, length);                     \
+        }                                                   \
+    } while (0)
 #else
 #define NABTO_LOG_BUFFER(severity, message, buffer, length)
 #endif
 #endif
 
 #ifndef UNABTO_ASSERT
-#  if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_FATAL)
-#    define UNABTO_ASSERT(expr)  do { if (!(expr)) { NABTO_LOG_FATAL(("Assertion fails: %" PRItext, #expr)); } } while(0)
-#  else // no room for asserts in release builds on small platforms
-#    define UNABTO_ASSERT(expr)
-#  endif
+#if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_FATAL)
+#define UNABTO_ASSERT(expr)                                         \
+    do {                                                            \
+        if (!(expr)) {                                              \
+            NABTO_LOG_FATAL(("Assertion fails: %" PRItext, #expr)); \
+        }                                                           \
+    } while (0)
+#else  // no room for asserts in release builds on small platforms
+#define UNABTO_ASSERT(expr)
+#endif
 #endif
 
 #ifndef NABTO_VERIFY_COMPILE_TIME
@@ -153,7 +166,7 @@
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #ifndef PRINT_ENDPOINT
-#define PRINT_ENDPOINT                                              1
+#define PRINT_ENDPOINT 1
 #endif
 
 #if PRINT_ENDPOINT != 1
@@ -168,7 +181,7 @@
 #ifdef PRIep
 #undef PRIep
 #endif
-#define PRIep         "%" PRItext
+#define PRIep "%" PRItext
 
 #endif
 

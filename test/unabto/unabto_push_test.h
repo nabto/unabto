@@ -5,5 +5,5 @@
 #if NABTO_ENABLE_PUSH
 
 bool unabto_push_test(void);
-#endif //NABTO_ENABLE_PUSH
+#endif  //NABTO_ENABLE_PUSH
 #endif

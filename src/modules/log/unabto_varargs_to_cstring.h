@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-char* cppstyle(const char *fmt,...);
+char* cppstyle(const char* fmt, ...);
 
 #ifdef __cplusplus
 }

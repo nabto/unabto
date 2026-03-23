@@ -15,9 +15,8 @@ extern "C" {
 
 void unabto_rtx4100_timer_tick();
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

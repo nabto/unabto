@@ -18,7 +18,7 @@ bool unabto_tcp_fallback_time_event(nabto_connect* con) {
             unabto_tcp_fallback_close(con);
             return false;
         }
-        
+
         if (unabto_tcp_fallback_write(con, handshakePacket, handshakePacketLength) != UTFE_OK) {
             NABTO_LOG_ERROR((PRI_tcp_fb "Could not send handshake packet.", TCP_FB_ARGS(con)));
             return false;
@@ -26,14 +26,14 @@ bool unabto_tcp_fallback_time_event(nabto_connect* con) {
         con->tcpFallbackConnectionState = UTFS_HANDSHAKE_SENT;
         return true;
     }
-        
+
     return false;
 }
 
 bool build_handshake_packet(nabto_connect* con, uint8_t* buffer, size_t bufferLength, size_t* packetLength) {
     uint8_t* packetPtr;
-    uint8_t* bufferEnd = buffer+bufferLength;
-    
+    uint8_t* bufferEnd = buffer + bufferLength;
+
     /*
      * type,   1 bytes
      * flags,  1 bytes
@@ -45,7 +45,7 @@ bool build_handshake_packet(nabto_connect* con, uint8_t* buffer, size_t bufferLe
     size_t nonceLength = 38;
     uint8_t nonce[38];
     uint8_t* noncePtr = nonce;
-    
+
     packetPtr = insert_header(buffer, bufferEnd, con->cpnsi, con->spnsi, NP_PACKET_HDR_TYPE_GW_CONN_U, false, 0, 0, con->consi);
     if (packetPtr == NULL) return false;
 
@@ -66,7 +66,9 @@ bool build_handshake_packet(nabto_connect* con, uint8_t* buffer, size_t bufferLe
     packetPtr = insert_payload(packetPtr, bufferEnd, NP_PAYLOAD_TYPE_NONCE, nonce, nonceLength);
     if (packetPtr == NULL) return false;
 
-    if (!insert_packet_length_from_cursor(buffer, packetPtr)) { return false; }
+    if (!insert_packet_length_from_cursor(buffer, packetPtr)) {
+        return false;
+    }
     *packetLength = packetPtr - buffer;
     return true;
 }
@@ -102,10 +104,11 @@ bool nabto_fallback_connect_u_event(uint16_t packetLength, nabto_packet_header* 
 
     ptr = nonce.dataBegin;
 
-    /*READ_U8(type, ptr);*/  ptr++;
-    READ_U8(flags, ptr); ptr++;
+    /*READ_U8(type, ptr);*/ ptr++;
+    READ_U8(flags, ptr);
+    ptr++;
 
-    isReliable   = (flags & NP_GW_CONN_U_FLAG_RELIABLE) != 0;
+    isReliable = (flags & NP_GW_CONN_U_FLAG_RELIABLE) != 0;
     hasKeepAlive = (flags & NP_GW_CONN_U_FLAG_KEEP_ALIVE) != 0;
 
     con->tcpFallbackConnectionState = UTFS_READY_FOR_DATA;
@@ -122,7 +125,7 @@ bool nabto_fallback_connect_u_event(uint16_t packetLength, nabto_packet_header* 
     } else {
         NABTO_LOG_DEBUG((PRI_tcp_fb "connection needs keep alive", TCP_FB_ARGS(con)));
     }
-    
+
     return true;
 }
 

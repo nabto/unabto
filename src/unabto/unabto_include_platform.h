@@ -15,33 +15,33 @@
  */
 
 #if UNABTO_PLATFORM_CUSTOM
-#    include <unabto_platform.h>
+#include <unabto_platform.h>
 #elif UNABTO_PLATFORM_UNABTO_APP
-#    include <platforms/unabto_app/unabto_platform.h>
+#include <platforms/unabto_app/unabto_platform.h>
 #elif UNABTO_PLATFORM_WIN32 || WIN32
-#    include <platforms/win32/unabto_platform.h>
+#include <platforms/win32/unabto_platform.h>
 #elif UNABTO_PLATFORM_COLDFIRE
-#    include <platforms/coldfire/unabto_env_base_coldfire.h>
+#include <platforms/coldfire/unabto_env_base_coldfire.h>
 #elif UNABTO_PLATFORM_UNIX || __unix || __unix__ || __APPLE__
-#    include <platforms/unix/unabto_platform.h>
+#include <platforms/unix/unabto_platform.h>
 #elif UNABTO_PLATFORM_MQX
-#    include <unabto_env_base_mqx.h>
+#include <unabto_env_base_mqx.h>
 #elif UNABTO_PLATFORM_LWIP
-#    include <platforms/freertos_lwip/unabto_env_base_freertos_lwip.h>
+#include <platforms/freertos_lwip/unabto_env_base_freertos_lwip.h>
 #elif UNABTO_PLATFORM_RTX4100
-#    include <platforms/rtx4100/unabto_env_base_rtx4100.h>
+#include <platforms/rtx4100/unabto_env_base_rtx4100.h>
 #elif UNABTO_PLATFORM_GAINSPAN
-#    include <platforms/gainspan/unabto_env_base_gainspan.h>
+#include <platforms/gainspan/unabto_env_base_gainspan.h>
 #elif UNABTO_PLATFORM_RX600
-#    include <platforms/renesas_rx600/unabto_env_base_renesas_rx600.h>
+#include <platforms/renesas_rx600/unabto_env_base_renesas_rx600.h>
 #elif UNABTO_PLATFORM_FREERTOS_NET
-#    include <platforms/freertos_net/unabto_env_base_freertos_net.h>
+#include <platforms/freertos_net/unabto_env_base_freertos_net.h>
 #elif UNABTO_PLATFORM_RENESAS_RL78
-#    include <platforms/renesas_rl78/unabto_env_base_renesas_rl78.h>
+#include <platforms/renesas_rl78/unabto_env_base_renesas_rl78.h>
 #elif UNABTO_PLATFORM_EVOLUTION
-#    include <platforms/evolution/unabto_env_base_evolution.h>
+#include <platforms/evolution/unabto_env_base_evolution.h>
 #else
-#    include <unabto_platform.h>
+#include <unabto_platform.h>
 #endif
 
 #endif

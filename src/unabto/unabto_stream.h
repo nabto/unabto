@@ -43,8 +43,8 @@ typedef struct unabto_stream_stats_s {
     unsigned int userRead;
     nabto_stamp_t streamStart;
     unsigned int timeouts;
-    unsigned int timeFirstMBReceived; // ms, 0 if not set,
-    unsigned int timeFirstMBSent; // ms, 0 if not set
+    unsigned int timeFirstMBReceived;  // ms, 0 if not set,
+    unsigned int timeFirstMBSent;      // ms, 0 if not set
     unsigned int rttMin;
     unsigned int rttMax;
     unsigned int rttAvg;
@@ -66,15 +66,14 @@ typedef struct unabto_stream_stats_s {
 } unabto_stream_stats;
 
 #ifndef UNABTO_STREAM_STATS_MAKE_PRINTABLE
-#define UNABTO_STREAM_STATS_MAKE_PRINTABLE(stats) (stats.sentPackets), (stats.sentBytes), (stats.sentResentPackets),(stats.receivedPackets), (stats.receivedBytes), (stats.receivedResentPackets), (stats.reorderedOrLostPackets), (stats.timeouts), (stats.rttAvg), (stats.cwndAvg), (stats.ssThresholdAvg), (stats.flightSizeAvg), (stats.sendSegmentAllocFailures), (stats.recvWindowSize), (stats.recvSegmentSize), (stats.sendWindowSize), (stats.sendSegmentSize)
+#define UNABTO_STREAM_STATS_MAKE_PRINTABLE(stats) (stats.sentPackets), (stats.sentBytes), (stats.sentResentPackets), (stats.receivedPackets), (stats.receivedBytes), (stats.receivedResentPackets), (stats.reorderedOrLostPackets), (stats.timeouts), (stats.rttAvg), (stats.cwndAvg), (stats.ssThresholdAvg), (stats.flightSizeAvg), (stats.sendSegmentAllocFailures), (stats.recvWindowSize), (stats.recvSegmentSize), (stats.sendWindowSize), (stats.sendSegmentSize)
 #endif
 
 #ifndef UNABTO_STREAM_STATS_PRI
 #define UNABTO_STREAM_STATS_PRI "sentPackets: %u, sentBytes %u, sentResentPackets %u, receivedPackets %u, receivedBytes %u, receivedResentPackets %u, reorderedOrLostPackets %u, timeouts %u, rtt avg %u, cwnd avg %u, ssthreshold avg %u, flightSize avg %u, sendSegmentAllocFailures %u, recvWindowSize %u, recvSegmentSize %u, sendWindowSize %u, sendSegmentSize %u"
 #endif
 
-typedef enum
-{
+typedef enum {
     UNABTO_STREAM_HINT_OK = 0,
     UNABTO_STREAM_HINT_STREAM_CLOSED = 1,
     UNABTO_STREAM_HINT_INVALID_STREAM = 2,
@@ -132,7 +131,7 @@ void unabto_stream_accept(unabto_stream* stream);
 typedef enum {
     /**
      * Data is ready on the stream for the application to consume.
-     */   
+     */
     UNABTO_STREAM_EVENT_TYPE_DATA_READY,
     /**
      * Data has been acknowledged by the other peer, such that there
@@ -183,8 +182,7 @@ void unabto_stream_event(unabto_stream* stream, unabto_stream_event_type event);
  * -  UNABTO_STREAM_HINT_UNABLE_TO_ACKNOWLEDGE
  * @return        the number of bytes copied to the buffer
  */
- size_t unabto_stream_read_buf(unabto_stream* stream, uint8_t* buf, size_t size, unabto_stream_hint* hint);
-
+size_t unabto_stream_read_buf(unabto_stream* stream, uint8_t* buf, size_t size, unabto_stream_hint* hint);
 
 /**
  * Retrieve access to received data.
@@ -203,7 +201,6 @@ void unabto_stream_event(unabto_stream* stream, unabto_stream_event_type event);
  * See nabto_stream_ack for an example.
  */
 size_t unabto_stream_read(unabto_stream* stream, const uint8_t** buf, unabto_stream_hint* hint);
-
 
 /**
  * Acknowledge data received.
@@ -236,7 +233,6 @@ size_t unabto_stream_read(unabto_stream* stream, const uint8_t** buf, unabto_str
  */
 bool unabto_stream_ack(unabto_stream* stream, const uint8_t* buf, size_t used, unabto_stream_hint* hint);
 
-
 /**
  * Write data to an open stream. Does not block, returns number of
  * bytes immediately accepted (sent or queued).
@@ -252,7 +248,6 @@ bool unabto_stream_ack(unabto_stream* stream, const uint8_t* buf, size_t used, u
  */
 size_t unabto_stream_write(unabto_stream* stream, const uint8_t* buf, size_t size, unabto_stream_hint* hint);
 
-
 /**
  * Returns the number of bytes that can safely be written to the stream.
  * @param stream  the stream
@@ -265,9 +260,7 @@ size_t unabto_stream_write(unabto_stream* stream, const uint8_t* buf, size_t siz
  */
 size_t unabto_stream_can_write(unabto_stream* stream, unabto_stream_hint* hint);
 
-
 /**************** QUERY ************************************/
-
 
 /**
  * Query whether a valid stream is open.
@@ -276,18 +269,15 @@ size_t unabto_stream_can_write(unabto_stream* stream, unabto_stream_hint* hint);
  */
 bool unabto_stream_is_open(unabto_stream* stream);
 
-
 /**
  * Query whether a valid stream is open for reading.
  */
 bool unabto_stream_is_readable(unabto_stream* stream);
 
-
 /**
  * Query whether a valid stream is open for writing.
  */
 bool unabto_stream_is_writeable(unabto_stream* stream);
-
 
 /**
  * Query whether a valid stream is closed.
@@ -301,7 +291,6 @@ bool unabto_stream_is_closed(unabto_stream* stream);
  * @return        the connection (0 if stream isn't valid)
  */
 nabto_connect* unabto_stream_connection(unabto_stream* stream);
-
 
 /**
  * Query connection info from stream
@@ -320,7 +309,6 @@ int unabto_stream_get_stats(unabto_stream* stream, unabto_stream_stats* stats);
  */
 int unabto_stream_index(unabto_stream* stream);
 
-
 /**************** API which is used from the uNabto core ***************************/
 
 /** Initialise the stream data structure */
@@ -336,7 +324,6 @@ void nabto_stream_connection_closed(nabto_connect* con);
 void nabto_stream_connection_released(nabto_connect* con);
 #endif
 
-
 /** Treat timeouts in all streams. */
 void unabto_time_event_stream(void);
 
@@ -346,7 +333,7 @@ void nabto_stream_update_next_event(nabto_stamp_t* current_min_stamp);
 #endif
 
 #ifdef __cplusplus
-} // extern "C"
+}  // extern "C"
 #endif
 
 #endif /* NABTO_ENABLE_STREAM */

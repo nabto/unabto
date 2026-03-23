@@ -5,26 +5,21 @@
 #include <unabto/unabto_app.h>
 #include <unabto/unabto_util.h>
 
-
-
-
 // return true iff a client id was read
-bool unabto_connection_util_read_client_id(const nabto_packet_header* header, nabto_connect* con)
-{
+bool unabto_connection_util_read_client_id(const nabto_packet_header* header, nabto_connect* con) {
     struct unabto_payload_packet cpIdPayload;
-    
+
     uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
     uint8_t* payloadsEnd = unabto_payloads_end(nabtoCommunicationBuffer, header);
     struct unabto_payload_typed_buffer cpId;
-    
+
     if (!unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_CP_ID, &cpIdPayload)) {
         return false;
     }
 
-
     con->clientId[0] = 0;
     if (unabto_payload_read_typed_buffer(&cpIdPayload, &cpId)) {
-        if (cpId.type == 1) { // 1 == EMAIL
+        if (cpId.type == 1) {  // 1 == EMAIL
             size_t sz = cpId.dataLength;
             if (sz >= sizeof(con->clientId)) {
                 if (sizeof(con->clientId) > 1) {
@@ -33,7 +28,7 @@ bool unabto_connection_util_read_client_id(const nabto_packet_header* header, na
                 sz = sizeof(con->clientId) - 1;
             }
             if (sz) {
-                memcpy(con->clientId, (const void*) cpId.dataBegin, sz);
+                memcpy(con->clientId, (const void*)cpId.dataBegin, sz);
             }
             con->clientId[sz] = 0;
         } else {
@@ -47,8 +42,7 @@ bool unabto_connection_util_read_client_id(const nabto_packet_header* header, na
 }
 
 // return true iff a fingerprint was read
-bool unabto_connection_util_read_fingerprint(const nabto_packet_header* header, nabto_connect* con)
-{
+bool unabto_connection_util_read_fingerprint(const nabto_packet_header* header, nabto_connect* con) {
     uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
     uint8_t* payloadsEnd = unabto_payloads_end(nabtoCommunicationBuffer, header);
 
@@ -57,15 +51,15 @@ bool unabto_connection_util_read_fingerprint(const nabto_packet_header* header, 
         struct unabto_payload_typed_buffer fingerprint;
         if (unabto_payload_read_typed_buffer(&fingerprintPayload, &fingerprint)) {
             if (fingerprint.type == NP_PAYLOAD_FP_TYPE_SHA256_TRUNCATED) {
-                if (fingerprint.dataLength  ==  NP_TRUNCATED_SHA256_LENGTH_BYTES) {
+                if (fingerprint.dataLength == NP_TRUNCATED_SHA256_LENGTH_BYTES) {
                     con->fingerprint.hasValue = true;
                     memcpy(con->fingerprint.value.data, fingerprint.dataBegin, FINGERPRINT_LENGTH);
                     return true;
                 } else {
-                    NABTO_LOG_ERROR(("fingerprint has the wrong length %"PRIu16, fingerprint.dataLength));
+                    NABTO_LOG_ERROR(("fingerprint has the wrong length %" PRIu16, fingerprint.dataLength));
                 }
             } else {
-                NABTO_LOG_TRACE(("cannot read fignerprint type: %"PRIu8, fingerprint.type));
+                NABTO_LOG_TRACE(("cannot read fignerprint type: %" PRIu8, fingerprint.type));
             }
         }
     }
@@ -73,8 +67,7 @@ bool unabto_connection_util_read_fingerprint(const nabto_packet_header* header, 
 }
 
 // read unencrypted client nonce
-bool unabto_connection_util_read_nonce_client(const nabto_packet_header* header, nabto_connect* connection)
-{
+bool unabto_connection_util_read_nonce_client(const nabto_packet_header* header, nabto_connect* connection) {
     uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
     uint8_t* payloadsEnd = unabto_payloads_end(nabtoCommunicationBuffer, header);
 
@@ -91,8 +84,7 @@ bool unabto_connection_util_read_nonce_client(const nabto_packet_header* header,
 }
 
 // read encrypted client random
-bool unabto_connection_util_read_random_client(const uint8_t* payloadsBegin, const uint8_t* payloadsEnd, nabto_connect* connection)
-{
+bool unabto_connection_util_read_random_client(const uint8_t* payloadsBegin, const uint8_t* payloadsEnd, nabto_connect* connection) {
     struct unabto_payload_packet randomPayload;
     if (unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_RANDOM, &randomPayload)) {
         if (randomPayload.dataLength != 32) {
@@ -106,8 +98,7 @@ bool unabto_connection_util_read_random_client(const uint8_t* payloadsBegin, con
 }
 
 // read and validate nonce from client in packet
-bool unabto_connection_util_read_and_validate_nonce_client(const uint8_t* payloadsBegin, const uint8_t* payloadsEnd, nabto_connect* connection)
-{
+bool unabto_connection_util_read_and_validate_nonce_client(const uint8_t* payloadsBegin, const uint8_t* payloadsEnd, nabto_connect* connection) {
     struct unabto_payload_packet noncePayload;
     if (unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_NONCE, &noncePayload)) {
         if (noncePayload.dataLength != 32) {
@@ -121,10 +112,8 @@ bool unabto_connection_util_read_and_validate_nonce_client(const uint8_t* payloa
     return false;
 }
 
-
 // read key id
-bool unabto_connection_util_read_key_id(const nabto_packet_header* header, nabto_connect* connection)
-{
+bool unabto_connection_util_read_key_id(const nabto_packet_header* header, nabto_connect* connection) {
     uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
     uint8_t* payloadsEnd = unabto_payloads_end(nabtoCommunicationBuffer, header);
 
@@ -141,26 +130,24 @@ bool unabto_connection_util_read_key_id(const nabto_packet_header* header, nabto
 }
 
 // read capabilities
-bool unabto_connection_util_read_capabilities(const nabto_packet_header* header, struct unabto_payload_capabilities_read* capabilities)
-{
+bool unabto_connection_util_read_capabilities(const nabto_packet_header* header, struct unabto_payload_capabilities_read* capabilities) {
     struct unabto_payload_packet capabilitiesPayload;
     uint8_t* payloadsBegin = unabto_payloads_begin(nabtoCommunicationBuffer, header);
     uint8_t* payloadsEnd = unabto_payloads_end(nabtoCommunicationBuffer, header);
-    
+
     if (unabto_find_payload(payloadsBegin, payloadsEnd, NP_PAYLOAD_TYPE_CAPABILITY, &capabilitiesPayload)) {
         return unabto_payload_read_capabilities(&capabilitiesPayload, capabilities);
     }
     return false;
 }
 
-bool unabto_connection_util_verify_capabilities(nabto_connect* connection, struct unabto_payload_capabilities_read* capabilities)
-{
+bool unabto_connection_util_verify_capabilities(nabto_connect* connection, struct unabto_payload_capabilities_read* capabilities) {
     uint32_t requiredCapabilities = PEER_CAP_TAG | PEER_CAP_FRCTRL | PEER_CAP_ASYNC;
     bool codeFound = false;
     uint16_t i;
     const uint8_t* ptr;
     uint32_t supportedCapabilities;
-    
+
     if ((capabilities->mask & requiredCapabilities) != requiredCapabilities) {
         NABTO_LOG_WARN(("client does not provide enough capabilities in its capability mask"));
         return false;
@@ -173,20 +160,20 @@ bool unabto_connection_util_verify_capabilities(nabto_connect* connection, struc
     connection->cpAsync = true;
 
     {
-    const uint8_t* cptr = capabilities->codesStart;
-    const uint8_t* cend = capabilities->codesStart + capabilities->codesLength * 2;
+        const uint8_t* cptr = capabilities->codesStart;
+        const uint8_t* cend = capabilities->codesStart + capabilities->codesLength * 2;
 
-    for (i = 0; i < capabilities->codesLength; i++) {
-        uint16_t code;
-        cptr = read_forward_u16(&code, cptr, cend);
-        if (cptr == NULL) {
-            break;
+        for (i = 0; i < capabilities->codesLength; i++) {
+            uint16_t code;
+            cptr = read_forward_u16(&code, cptr, cend);
+            if (cptr == NULL) {
+                break;
+            }
+            if (code == CRYPT_W_AES_CBC_HMAC_SHA256) {
+                codeFound = true;
+                break;
+            }
         }
-        if (code == CRYPT_W_AES_CBC_HMAC_SHA256) {
-            codeFound = true;
-            break;
-        }
-    }
     }
     if (!codeFound) {
         NABTO_LOG_WARN(("no suitable encryption code is found in psk connect packet"));
@@ -202,15 +189,13 @@ bool unabto_connection_util_verify_capabilities(nabto_connect* connection, struc
     // limit the proposed capabilities to capabilities we understand.
     connection->psk.capabilities.bits = (capabilities->bits & supportedCapabilities);
 
-    return true;    
+    return true;
 }
 
 #if NABTO_ENABLE_LOCAL_PSK_CONNECTION
-bool unabto_connection_util_psk_connect_init_key(nabto_connect* connection)
-{
+bool unabto_connection_util_psk_connect_init_key(nabto_connect* connection) {
     struct unabto_psk psk;
-    if (!unabto_local_psk_connection_get_key(&connection->psk.keyId, connection->clientId, &connection->fingerprint, &psk))
-    {
+    if (!unabto_local_psk_connection_get_key(&connection->psk.keyId, connection->clientId, &connection->fingerprint, &psk)) {
         return false;
     }
 
@@ -221,8 +206,7 @@ bool unabto_connection_util_psk_connect_init_key(nabto_connect* connection)
 }
 #endif
 
-bool unabto_psk_connection_util_verify_connect(const nabto_packet_header* header, nabto_connect* connection)
-{
+bool unabto_psk_connection_util_verify_connect(const nabto_packet_header* header, nabto_connect* connection) {
     // packet structure
     //U_CONNECT_PSK(Hdr, Capabilities, CpId, Fingerprint, KeyId, nonce_client, Enc())
 

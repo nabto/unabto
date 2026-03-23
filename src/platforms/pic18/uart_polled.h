@@ -29,9 +29,8 @@ void uart_write_uint16(uint16_t value);
 void uart_write_uint8_hex(uint8_t value);
 void uart_write_ip(const uint8_t* ip);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

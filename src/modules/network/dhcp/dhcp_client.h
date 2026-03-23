@@ -13,13 +13,13 @@ extern "C" {
 
 typedef struct
 {
-  bool isBound;
-  uint32_t serverAddress;
-  uint32_t leaseTime;
-  uint32_t localAddress;
-  uint32_t netmask;
-  uint32_t routerAddress;
-  uint32_t dnsAddress;
+    bool isBound;
+    uint32_t serverAddress;
+    uint32_t leaseTime;
+    uint32_t localAddress;
+    uint32_t netmask;
+    uint32_t routerAddress;
+    uint32_t dnsAddress;
 } dhcp_client_information;
 
 extern dhcp_client_information dhcpClientInformation;
@@ -27,9 +27,8 @@ extern dhcp_client_information dhcpClientInformation;
 void dhcp_client_initialize(const uint8_t* mac);
 void dhcp_client_tick(void);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

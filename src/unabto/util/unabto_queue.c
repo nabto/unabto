@@ -4,7 +4,7 @@
 #include <unabto/util/unabto_queue.h>
 #include <unabto/unabto_util.h>
 
-void queue_init(queue_t* q, uint8_t *buffer, uint16_t buffer_length) {
+void queue_init(queue_t* q, uint8_t* buffer, uint16_t buffer_length) {
     q->buffer = buffer;
     q->capacity = buffer_length;
     queue_reset(q);
@@ -29,19 +29,16 @@ bool queue_enqueue(queue_t* q, uint8_t elm) {
     return true;
 }
 
-bool queue_enqueue_array(queue_t* q, const void* data, uint16_t length)
-{
+bool queue_enqueue_array(queue_t* q, const void* data, uint16_t length) {
     uint8_t* p = (uint8_t*)data;
 
-    if ((q->capacity - q->count) < length)
-    {
+    if ((q->capacity - q->count) < length) {
         return false;
     }
 
     q->count += length;
 
-    while (length--)
-    {
+    while (length--) {
         q->buffer[q->head] = *p++;
         q->head = (q->head + 1) % q->capacity;
     }
@@ -62,19 +59,16 @@ bool queue_dequeue(queue_t* q, uint8_t* elm) {
     return true;
 }
 
-bool queue_dequeue_array(queue_t* q, void* data, uint16_t length)
-{
+bool queue_dequeue_array(queue_t* q, void* data, uint16_t length) {
     uint8_t* p = (uint8_t*)data;
 
-    if (q->count < length)
-    {
+    if (q->count < length) {
         return false;
     }
 
     q->count -= length;
 
-    while (length--)
-    {
+    while (length--) {
         *p++ = q->buffer[q->tail];
         q->tail = (q->tail + 1) % q->capacity;
     }

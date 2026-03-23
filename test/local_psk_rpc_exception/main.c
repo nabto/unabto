@@ -9,7 +9,7 @@
 void crossSleep(int ms) {
     struct timespec sleepTime;
     sleepTime.tv_sec = 0;
-    sleepTime.tv_nsec = ms*1000000;
+    sleepTime.tv_nsec = ms * 1000000;
     nanosleep(&sleepTime, NULL);
 }
 
@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
     if (!unabto_init()) {
         NABTO_LOG_FATAL(("unabto_init failed."));
     }
-    while(true) {
+    while (true) {
         unabto_tick();
         crossSleep(10);
     }
@@ -34,15 +34,18 @@ application_event_result application_event(application_request* appreq,
                                            unabto_query_request* request,
                                            unabto_query_response* response) {
     switch (appreq->queryId) {
-    case 0: { // ok.json
-        if (!unabto_query_write_uint8(response, 1)) {
-            return AER_REQ_RSP_TOO_LARGE;
+        case 0: {  // ok.json
+            if (!unabto_query_write_uint8(response, 1)) {
+                return AER_REQ_RSP_TOO_LARGE;
+            }
+            return AER_REQ_RESPONSE_READY;
         }
-        return AER_REQ_RESPONSE_READY;            
-    }
-    case 10: return AER_REQ_NO_ACCESS;
-    case 20: return AER_REQ_OUT_OF_RESOURCES;
-    default: return AER_REQ_NO_QUERY_ID;
+        case 10:
+            return AER_REQ_NO_ACCESS;
+        case 20:
+            return AER_REQ_OUT_OF_RESOURCES;
+        default:
+            return AER_REQ_NO_QUERY_ID;
     }
 }
 

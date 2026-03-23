@@ -8,11 +8,10 @@
 extern "C" {
 #endif
 
-void vPrintString( const portCHAR *pcString );
-
+void vPrintString(const portCHAR *pcString);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

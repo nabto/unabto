@@ -29,7 +29,6 @@
 /** for convenience and portability */
 //typedef int bool;
 
-
 typedef xSocket_t nabto_socket_t;
 #define NABTO_INVALID_SOCKET NULL
 
@@ -45,7 +44,7 @@ typedef nabto_stamp_t nabto_stamp_diff_t;
  * @param msec  number of milliseconds
  * @return      the stamp difference
  */
-#define nabtoMsec2Stamp(milliseconds)  ((milliseconds)/portTICK_RATE_MS) 
+#define nabtoMsec2Stamp(milliseconds) ((milliseconds) / portTICK_RATE_MS)
 #endif
 /**
  * Remove thread/process from active queue (if relevant)

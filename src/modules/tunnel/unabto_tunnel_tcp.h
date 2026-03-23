@@ -22,7 +22,7 @@ void unabto_tunnel_tcp_set_default_host(const char* host);
 void unabto_tunnel_tcp_set_default_port(uint16_t port);
 
 const char* unabto_tunnel_tcp_get_default_host();
-uint16_t    unabto_tunnel_tcp_get_default_port();
+uint16_t unabto_tunnel_tcp_get_default_port();
 
 #ifndef UNABTO_TUNNEL_TCP_DEFAULT_PORT
 #define UNABTO_TUNNEL_TCP_DEFAULT_PORT 22
@@ -32,4 +32,4 @@ uint16_t    unabto_tunnel_tcp_get_default_port();
 #define UNABTO_TUNNEL_TCP_DEFAULT_HOST "127.0.0.1"
 #endif
 
-#endif // _TUNNEL_TCP_H_
+#endif  // _TUNNEL_TCP_H_

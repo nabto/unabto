@@ -14,19 +14,18 @@ typedef unsigned long size_t;
 
 #define NABTO_INVALID_SOCKET NULL
 
-#define INADDR_ANY  0x00000000UL 
+#define INADDR_ANY  0x00000000UL
 #define INADDR_NONE 0xffffffffUL
 
 #define NABTO_ENABLE_MALLOC 0
 #define NABTO_ENABLE_STREAM 0
-#define IPADDR_STRING_SIZE (4+4+4+4)
+#define IPADDR_STRING_SIZE  (4 + 4 + 4 + 4)
 
 //typedef long long nabto_stamp_t;
 void nabtoYield(int msec);
 
-#define printf(...) 
+#define printf(...)
 
 #include "../../modules/timers/tick_timer/unabto_tick_timer.h"
-
 
 #endif

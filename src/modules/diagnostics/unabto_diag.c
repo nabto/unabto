@@ -19,9 +19,8 @@
 #define STR(s) "??"
 #else
 #define STR_H(s) #s
-#define STR(s) STR_H(s)
+#define STR(s)   STR_H(s)
 #endif
-
 
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
 // Until we have restructures the include files, we can not include the
@@ -30,20 +29,18 @@
 enum fake_queue_state { dummy = 0 };
 struct fake_queue_event {
     /* struct naf_handle_s */
-    application_request  applicationRequest;           ///< the request part seen by the application
-    nabto_packet_header  header;                       ///< the request packet header
-    nabto_connect*       connection;                   ///< the connection
-    uint32_t             spnsi;                        ///< the connection consistency id
-    unabto_buffer        applicationRequestBuffer;     ///< pointer to application request
-    unabto_query_request readBuffer;                   ///< read access to r_buf
+    application_request applicationRequest;  ///< the request part seen by the application
+    nabto_packet_header header;              ///< the request packet header
+    nabto_connect *connection;               ///< the connection
+    uint32_t spnsi;                          ///< the connection consistency id
+    unabto_buffer applicationRequestBuffer;  ///< pointer to application request
+    unabto_query_request readBuffer;         ///< read access to r_buf
     /* END of struct naf_handle_s */
     enum fake_queue_state state;
 };
 #endif
 
-
-void unabto_printf_unabto_config(FILE * f, const char *progname)
-{
+void unabto_printf_unabto_config(FILE *f, const char *progname) {
     if (!progname) progname = "";
     fprintf(f, "%s: unabto_config.h\n", progname);
     fprintf(f, "/*=========================================================*/\n");
@@ -61,7 +58,7 @@ void unabto_printf_unabto_config(FILE * f, const char *progname)
     fprintf(f, "/*---------------------------------------------------------*/\n");
     fprintf(f, "#define NABTO_ENABLE_STREAM %d\n", NABTO_ENABLE_STREAM);
     fprintf(f, "#define NABTO_ENABLE_MICRO_STREAM %d\n", NABTO_ENABLE_MICRO_STREAM);
-    
+
     fprintf(f, "/*---------------------------------------------------------*/\n");
     fprintf(f, "#define NABTO_ENABLE_UCRYPTO %d\n", NABTO_ENABLE_UCRYPTO);
     fprintf(f, "/*---------------------------------------------------------*/\n");
@@ -83,8 +80,7 @@ void unabto_printf_unabto_config(FILE * f, const char *progname)
     fprintf(f, "#define NABTO_ENABLE_CONNECTIONS   %d\n", NABTO_ENABLE_CONNECTIONS);
 }
 
-void unabto_printf_memory_sizes(FILE * f, const char *progname)
-{
+void unabto_printf_memory_sizes(FILE *f, const char *progname) {
     if (!progname) progname = "";
     fprintf(f, "%s: Sizes\n", progname);
     fprintf(f, "#define NABTO_COMMUNICATION_BUFFER_SIZE %u\n", NABTO_COMMUNICATION_BUFFER_SIZE);
@@ -98,19 +94,19 @@ void unabto_printf_memory_sizes(FILE * f, const char *progname)
     fprintf(f, "%s: unabto_memory.h\n", progname);
     fprintf(f, "NABTO_THREAD_LOCAL_STORAGE uint8_t nabtoCommunicationBuffer[%u];\n", NABTO_COMMUNICATION_BUFFER_SIZE);
     fprintf(f, "NABTO_THREAD_LOCAL_STORAGE uint16_t nabtoCommunicationBufferSize;\n");
-    fprintf(f, "NABTO_THREAD_LOCAL_STORAGE nabto_main_context nmc;  /* %u bytes */\n", (unsigned int) sizeof(nmc));
+    fprintf(f, "NABTO_THREAD_LOCAL_STORAGE nabto_main_context nmc;  /* %u bytes */\n", (unsigned int)sizeof(nmc));
 #if NABTO_ENABLE_CONNECTIONS
-    fprintf(f, "NABTO_THREAD_LOCAL_STORAGE nabto_connect connections[%u];  /* %u * %u bytes = %u bytes */\n", NABTO_CONNECTIONS_SIZE, NABTO_CONNECTIONS_SIZE, (unsigned int) sizeof(nabto_connect), (unsigned int) sizeof(connections));
+    fprintf(f, "NABTO_THREAD_LOCAL_STORAGE nabto_connect connections[%u];  /* %u * %u bytes = %u bytes */\n", NABTO_CONNECTIONS_SIZE, NABTO_CONNECTIONS_SIZE, (unsigned int)sizeof(nabto_connect), (unsigned int)sizeof(connections));
 #endif
 #if NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM
-    fprintf(f, "NABTO_THREAD_LOCAL_STORAGE nabto_stream stream__[%u];  /* %u * %u bytes = %u bytes */\n", NABTO_STREAM_MAX_STREAMS, NABTO_STREAM_MAX_STREAMS, (unsigned int) sizeof(unabto_stream), (unsigned int) sizeof(unabto_stream) * NABTO_STREAM_MAX_STREAMS);
+    fprintf(f, "NABTO_THREAD_LOCAL_STORAGE nabto_stream stream__[%u];  /* %u * %u bytes = %u bytes */\n", NABTO_STREAM_MAX_STREAMS, NABTO_STREAM_MAX_STREAMS, (unsigned int)sizeof(unabto_stream), (unsigned int)sizeof(unabto_stream) * NABTO_STREAM_MAX_STREAMS);
 #endif
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
     fprintf(f, "\n");
     fprintf(f, "%s: unabto_app_adapter.c\n", progname);
-    fprintf(f, "NABTO_THREAD_LOCAL_STORAGE queue_event queue[%u];  /* %u * %u bytes = %u bytes */\n", NABTO_APPREQ_QUEUE_SIZE, NABTO_APPREQ_QUEUE_SIZE, (unsigned int) sizeof(struct fake_queue_event), (unsigned int) (NABTO_APPREQ_QUEUE_SIZE * sizeof(struct fake_queue_event)));
-    fprintf(f, "     /* sizeof(queue_event) = %u bytes */\n", (unsigned int) sizeof(struct fake_queue_event));
-    fprintf(f, "     /* sizeof(queue_event) = %u + NABTO_REQUEST_MAX_SIZE bytes */\n", (unsigned int) (sizeof(struct fake_queue_event) - NABTO_REQUEST_MAX_SIZE));
+    fprintf(f, "NABTO_THREAD_LOCAL_STORAGE queue_event queue[%u];  /* %u * %u bytes = %u bytes */\n", NABTO_APPREQ_QUEUE_SIZE, NABTO_APPREQ_QUEUE_SIZE, (unsigned int)sizeof(struct fake_queue_event), (unsigned int)(NABTO_APPREQ_QUEUE_SIZE * sizeof(struct fake_queue_event)));
+    fprintf(f, "     /* sizeof(queue_event) = %u bytes */\n", (unsigned int)sizeof(struct fake_queue_event));
+    fprintf(f, "     /* sizeof(queue_event) = %u + NABTO_REQUEST_MAX_SIZE bytes */\n", (unsigned int)(sizeof(struct fake_queue_event) - NABTO_REQUEST_MAX_SIZE));
 #endif
     fprintf(f, "\n");
     fprintf(f, "%s: unabto_config.h\n", progname);
@@ -127,16 +123,16 @@ void unabto_printf_memory_sizes(FILE * f, const char *progname)
     fprintf(f, "#define NABTO_STREAM_RECEIVE_WINDOW_SIZE    %d\n", NABTO_STREAM_RECEIVE_WINDOW_SIZE);
     fprintf(f, "#define NABTO_STREAM_SEND_WINDOW_SIZE       %d\n", NABTO_STREAM_SEND_WINDOW_SIZE);
     fprintf(f, "     /* Streaming buffer storage: %u * %u bytes = %u bytes (included in stream__)*/\n",
-             NABTO_STREAM_MAX_STREAMS,
-             NABTO_STREAM_RECEIVE_WINDOW_SIZE * NABTO_STREAM_SEGMENT_SIZE + NABTO_STREAM_SEND_WINDOW_SIZE * NABTO_STREAM_SEGMENT_SIZE,
-             (NABTO_STREAM_RECEIVE_WINDOW_SIZE * NABTO_STREAM_SEGMENT_SIZE + NABTO_STREAM_SEND_WINDOW_SIZE * NABTO_STREAM_SEGMENT_SIZE) * NABTO_STREAM_MAX_STREAMS);
+            NABTO_STREAM_MAX_STREAMS,
+            NABTO_STREAM_RECEIVE_WINDOW_SIZE * NABTO_STREAM_SEGMENT_SIZE + NABTO_STREAM_SEND_WINDOW_SIZE * NABTO_STREAM_SEGMENT_SIZE,
+            (NABTO_STREAM_RECEIVE_WINDOW_SIZE * NABTO_STREAM_SEGMENT_SIZE + NABTO_STREAM_SEND_WINDOW_SIZE * NABTO_STREAM_SEGMENT_SIZE) * NABTO_STREAM_MAX_STREAMS);
 #endif
 
 #if NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM
     fprintf(f, "     /* Micro streaming union  storage: %u * %u bytes = %u bytes (includes buffer storage)*/\n",
-             NABTO_STREAM_MAX_STREAMS,
-             (unsigned int) sizeof(struct nabto_stream_tcb),
-             NABTO_STREAM_MAX_STREAMS * (unsigned int) sizeof(struct nabto_stream_tcb));
+            NABTO_STREAM_MAX_STREAMS,
+            (unsigned int)sizeof(struct nabto_stream_tcb),
+            NABTO_STREAM_MAX_STREAMS * (unsigned int)sizeof(struct nabto_stream_tcb));
 #endif
     fprintf(f, "\n");
     fprintf(f, "%s: unabto_config_derived.h\n", progname);
@@ -167,4 +163,3 @@ void unabto_printf_memory_sizes(FILE * f, const char *progname)
     fprintf(f, "/*---------------------------------------------------------*/\n");
     fprintf(f, "#define UNABTO_COMMUNICATION_BUFFER_SIZE   %d\n", UNABTO_COMMUNICATION_BUFFER_SIZE);
 }
-

@@ -8,13 +8,12 @@
 #include "unabto_protocol_defines.h"
 #include "unabto_packet.h"
 
-
 #ifndef UNABTO_PUSH_MIN_SEND_INTERVAL
 #define UNABTO_PUSH_MIN_SEND_INTERVAL 100
 #endif
 
 #ifndef UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF
-#define UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF 60000ul //ms (1 minute)
+#define UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF 60000ul  //ms (1 minute)
 #endif
 
 struct unabto_push_context pushCtx;
@@ -22,7 +21,7 @@ struct unabto_push_context pushCtx;
 /* ---------------------------------------------------- *
  * Help function definitions                            *
  * ---------------------------------------------------- */
-void unabto_push_create_and_send_packet(unabto_push_element *elem);
+void unabto_push_create_and_send_packet(unabto_push_element* elem);
 void unabto_push_set_next_event(void);
 bool unabto_push_verify_integrity(nabto_packet_header* header);
 bool unabto_push_seq_exists(uint32_t seq);
@@ -37,7 +36,7 @@ unabto_push_element pushSeqQ[NABTO_PUSH_QUEUE_LENGTH];
  * initialization function called by the core before using push *
  * should not be called from the application                    *
  * -------------------------------------------------------------*/
-void unabto_push_init(void){
+void unabto_push_init(void) {
     pushCtx.nextPushEvent = NULL;
     pushCtx.pushSeqQHead = 0;
     pushCtx.nextSeq = 0;
@@ -45,26 +44,26 @@ void unabto_push_init(void){
     pushCtx.lastSent = nabtoGetStamp();
     pushCtx.backOffLimit = pushCtx.lastSent;
     size_t i;
-    for (i = 0; i<NABTO_PUSH_QUEUE_LENGTH; i++){
+    for (i = 0; i < NABTO_PUSH_QUEUE_LENGTH; i++) {
         pushSeqQ[i].state = UNABTO_PUSH_IDLE;
         pushSeqQ[i].hint = UNABTO_PUSH_HINT_OK;
     }
 }
 
-void unabto_push_stop(void){
+void unabto_push_stop(void) {
     unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
-    while (pushCtx.pushSeqQHead > 0){
+    while (pushCtx.pushSeqQHead > 0) {
         unabto_push_notification_callback(pushSeqQ[0].seq, &hint);
         unabto_push_notification_remove(pushSeqQ[0].seq);
     }
 }
 
-unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq){
+unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq) {
     nabto_stamp_t now = nabtoGetStamp();
     // With reattach needed or queue full we must still call callback without releasing Zalgo
-    if(pushCtx.reattachNeeded){
+    if (pushCtx.reattachNeeded) {
         return UNABTO_PUSH_HINT_QUOTA_EXCEEDED_REATTACH;
-    } else if (pushCtx.pushSeqQHead >= NABTO_PUSH_QUEUE_LENGTH){
+    } else if (pushCtx.pushSeqQHead >= NABTO_PUSH_QUEUE_LENGTH) {
         return UNABTO_PUSH_HINT_QUEUE_FULL;
     } else {
         pushSeqQ[pushCtx.pushSeqQHead].hint = UNABTO_PUSH_HINT_OK;
@@ -74,7 +73,7 @@ unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq){
     pushCtx.nextSeq++;
     pushSeqQ[pushCtx.pushSeqQHead].retrans = 0;
     pushSeqQ[pushCtx.pushSeqQHead].state = UNABTO_PUSH_WAITING_SEND;
-    if(nabtoStampLess(&now, &pushCtx.backOffLimit)){
+    if (nabtoStampLess(&now, &pushCtx.backOffLimit)) {
         pushSeqQ[pushCtx.pushSeqQHead].stamp = pushCtx.backOffLimit;
     } else {
         pushSeqQ[pushCtx.pushSeqQHead].stamp = now;
@@ -86,12 +85,11 @@ unabto_push_hint unabto_send_push_notification(uint16_t pnsId, uint32_t* seq){
     return pushSeqQ[pushCtx.pushSeqQHead - 1].hint;
 }
 
-bool unabto_push_notification_remove(uint32_t seq)
-{
+bool unabto_push_notification_remove(uint32_t seq) {
     int i;
-    for(i = 0; i<pushCtx.pushSeqQHead; i++){
-        if(pushSeqQ[i].seq == seq){
-            memmove(&pushSeqQ[i],&pushSeqQ[pushCtx.pushSeqQHead-1],sizeof(unabto_push_element));
+    for (i = 0; i < pushCtx.pushSeqQHead; i++) {
+        if (pushSeqQ[i].seq == seq) {
+            memmove(&pushSeqQ[i], &pushSeqQ[pushCtx.pushSeqQHead - 1], sizeof(unabto_push_element));
             pushCtx.pushSeqQHead--;
             pushSeqQ[pushCtx.pushSeqQHead].state = UNABTO_PUSH_IDLE;
             unabto_push_set_next_event();
@@ -99,45 +97,38 @@ bool unabto_push_notification_remove(uint32_t seq)
         }
     }
     return false;
-
 }
 
-uint16_t unabto_push_notification_data_size()
-{
-    return nabtoCommunicationBufferSize
-        -NP_PACKET_HDR_MIN_BYTELENGTH
-        -NP_PAYLOAD_PUSH_BYTELENGTH
-        -NP_PAYLOAD_CRYPTO_MAX_OVERHEAD;
+uint16_t unabto_push_notification_data_size() {
+    return nabtoCommunicationBufferSize - NP_PACKET_HDR_MIN_BYTELENGTH - NP_PAYLOAD_PUSH_BYTELENGTH - NP_PAYLOAD_CRYPTO_MAX_OVERHEAD;
 }
 
-void nabto_time_event_push(void)
-{
+void nabto_time_event_push(void) {
     nabto_stamp_t now = nabtoGetStamp();
-    if (!pushCtx.nextPushEvent){
+    if (!pushCtx.nextPushEvent) {
         return;
     }
-    if (!nabtoStampLess(&pushCtx.nextPushEvent->stamp,&now)){
+    if (!nabtoStampLess(&pushCtx.nextPushEvent->stamp, &now)) {
         return;
     } else {
         unabto_push_create_and_send_packet(pushCtx.nextPushEvent);
         unabto_push_set_next_event();
     }
-
 }
 
-bool nabto_push_event(nabto_packet_header* hdr){
+bool nabto_push_event(nabto_packet_header* hdr) {
     const uint8_t* begin = nabtoCommunicationBuffer + hdr->hlen;
     const uint8_t* end = nabtoCommunicationBuffer + hdr->len;
     struct unabto_payload_push pushData;
     unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
 
-    if(!unabto_push_verify_integrity(hdr)){
+    if (!unabto_push_verify_integrity(hdr)) {
         return false;
     }
 
     {
         struct unabto_payload_packet pushPayload;
-        if(!unabto_find_payload(begin,end,NP_PAYLOAD_TYPE_PUSH, &pushPayload)) {
+        if (!unabto_find_payload(begin, end, NP_PAYLOAD_TYPE_PUSH, &pushPayload)) {
             NABTO_LOG_ERROR(("Missing push payload in push response"));
             return false;
         }
@@ -147,27 +138,27 @@ bool nabto_push_event(nabto_packet_header* hdr){
             return false;
         }
     }
-    if(!unabto_push_seq_exists(pushData.sequence)){
-        NABTO_LOG_ERROR(("Push packet with unknown sequence number received. Sequence number: %i",pushData.sequence));
+    if (!unabto_push_seq_exists(pushData.sequence)) {
+        NABTO_LOG_ERROR(("Push packet with unknown sequence number received. Sequence number: %i", pushData.sequence));
         return false;
     }
-    if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_ACK){
+    if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_ACK) {
         hint = UNABTO_PUSH_HINT_OK;
     }
 
-    if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_FAIL){
+    if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_FAIL) {
         hint = UNABTO_PUSH_HINT_FAILED;
     }
 
-    if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_QUOTA_EXCEEDED){
+    if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_QUOTA_EXCEEDED) {
         int i;
-        for (i = 0; i<pushCtx.pushSeqQHead; i++){
-            nabtoAddStamp(&pushSeqQ[i].stamp,UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF);
+        for (i = 0; i < pushCtx.pushSeqQHead; i++) {
+            nabtoAddStamp(&pushSeqQ[i].stamp, UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF);
         }
-        nabtoSetFutureStamp(&pushCtx.backOffLimit,UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF);
+        nabtoSetFutureStamp(&pushCtx.backOffLimit, UNABTO_PUSH_QUOTA_EXCEEDED_BACKOFF);
     }
 
-    if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_QUOTA_EXCEEDED_REATTACH){
+    if (pushData.flags & NP_PAYLOAD_PUSH_FLAG_QUOTA_EXCEEDED_REATTACH) {
         pushCtx.reattachNeeded = true;
     }
     unabto_push_notification_callback(pushData.sequence, &hint);
@@ -176,117 +167,113 @@ bool nabto_push_event(nabto_packet_header* hdr){
     return true;
 }
 
-void unabto_push_notify_reattach(void){
+void unabto_push_notify_reattach(void) {
     pushCtx.reattachNeeded = false;
 }
-
 
 ////////////////////////////
 // Local helper functions //
 ////////////////////////////
-bool unabto_push_seq_exists(uint32_t seq){
+bool unabto_push_seq_exists(uint32_t seq) {
     size_t i;
-    for (i=0; i<pushCtx.pushSeqQHead; i++){
-        if(pushSeqQ[i].seq == seq){
+    for (i = 0; i < pushCtx.pushSeqQHead; i++) {
+        if (pushSeqQ[i].seq == seq) {
             return true;
         }
     }
     return false;
 }
 
-void unabto_push_create_and_send_packet(unabto_push_element *elem){
+void unabto_push_create_and_send_packet(unabto_push_element* elem) {
     uint8_t* buf = nabtoCommunicationBuffer;
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
 
-    if(elem->retrans >= 8){
+    if (elem->retrans >= 8) {
         unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
-        unabto_push_notification_callback(elem->seq,&hint);
+        unabto_push_notification_callback(elem->seq, &hint);
         unabto_push_notification_remove(elem->seq);
         return;
-    } else if (elem->hint == UNABTO_PUSH_HINT_QUOTA_EXCEEDED){
-        unabto_push_notification_callback(elem->seq,&elem->hint);
+    } else if (elem->hint == UNABTO_PUSH_HINT_QUOTA_EXCEEDED) {
+        unabto_push_notification_callback(elem->seq, &elem->hint);
         unabto_push_notification_remove(elem->seq);
         return;
-    } else if (elem->hint == UNABTO_PUSH_HINT_QUOTA_EXCEEDED_REATTACH){
-        unabto_push_notification_callback(elem->seq,&elem->hint);
+    } else if (elem->hint == UNABTO_PUSH_HINT_QUOTA_EXCEEDED_REATTACH) {
+        unabto_push_notification_callback(elem->seq, &elem->hint);
         unabto_push_notification_remove(elem->seq);
         return;
     }
-
 
     uint8_t* ptr = insert_header(buf, end, 0, nmc.context.gspnsi, U_PUSH, false, 0, 0, NULL);
     uint8_t* cryptoPayloadStart;
 
     if (ptr == NULL) {
         unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
-        unabto_push_notification_callback(elem->seq,&hint);
+        unabto_push_notification_callback(elem->seq, &hint);
         unabto_push_notification_remove(elem->seq);
         return;
     }
 
-    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PUSH, 0, NP_PAYLOAD_PUSH_BYTELENGTH-NP_PAYLOAD_HDR_BYTELENGTH);
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PUSH, 0, NP_PAYLOAD_PUSH_BYTELENGTH - NP_PAYLOAD_HDR_BYTELENGTH);
     ptr = write_forward_u32(ptr, end, elem->seq);
     ptr = write_forward_u16(ptr, end, elem->pnsId);
     ptr = write_forward_u8(ptr, end, NP_PAYLOAD_PUSH_FLAG_SEND);
     if (ptr == NULL) {
         unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
-        unabto_push_notification_callback(elem->seq,&hint);
+        unabto_push_notification_callback(elem->seq, &hint);
         unabto_push_notification_remove(elem->seq);
         return;
     }
     cryptoPayloadStart = ptr;
     /* Write data at cryptoPayloadStart; encrypt_packet will relocate it. */
     ptr = unabto_push_notification_get_data(ptr, end - NP_PAYLOAD_CRYPTO_MAX_OVERHEAD, elem->seq);
-    if(ptr > end - NP_PAYLOAD_CRYPTO_MAX_OVERHEAD || ptr < cryptoPayloadStart){
+    if (ptr > end - NP_PAYLOAD_CRYPTO_MAX_OVERHEAD || ptr < cryptoPayloadStart) {
         unabto_push_hint hint = UNABTO_PUSH_HINT_INVALID_DATA_PROVIDED;
-        unabto_push_notification_callback(elem->seq,&hint);
+        unabto_push_notification_callback(elem->seq, &hint);
         unabto_push_notification_remove(elem->seq);
         return;
     }
-    if (nmc.context.cryptoAttach == NULL){
+    if (nmc.context.cryptoAttach == NULL) {
         unabto_push_hint hint = UNABTO_PUSH_HINT_NO_CRYPTO_CONTEXT;
-        unabto_push_notification_callback(elem->seq,&hint);
+        unabto_push_notification_callback(elem->seq, &hint);
         unabto_push_notification_remove(elem->seq);
         return;
     }
-    if(!send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoConnect, buf, end, cryptoPayloadStart, ptr, cryptoPayloadStart, NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS)){
+    if (!send_and_encrypt_packet(&nmc.context.gsp, nmc.context.cryptoConnect, buf, end, cryptoPayloadStart, ptr, cryptoPayloadStart, NP_PAYLOAD_CRYPTO_HEADER_FLAG_PAYLOADS)) {
         unabto_push_hint hint = UNABTO_PUSH_HINT_FAILED;
-        unabto_push_notification_callback(elem->seq,&hint);
+        unabto_push_notification_callback(elem->seq, &hint);
         unabto_push_notification_remove(elem->seq);
         return;
     }
 
     pushCtx.lastSent = nabtoGetStamp();
     elem->retrans++;
-    nabtoSetFutureStamp(&elem->stamp,(1 << elem->retrans)*1000);
+    nabtoSetFutureStamp(&elem->stamp, (1 << elem->retrans) * 1000);
     unabto_push_set_next_event();
 }
 
-
-void unabto_push_set_next_event(void){
+void unabto_push_set_next_event(void) {
     // Find the lowest stamp in the queue
     // if no elements in queue set next event = NULL;
-    if (pushCtx.pushSeqQHead == 0){
+    if (pushCtx.pushSeqQHead == 0) {
         pushCtx.nextPushEvent = NULL;
         return;
     } else {
         pushCtx.nextPushEvent = &pushSeqQ[0];
     }
     int i;
-    for (i = 0; i<pushCtx.pushSeqQHead; i++){
-        if(nabtoStampLess(&pushSeqQ[i].stamp,&pushCtx.nextPushEvent->stamp)){
+    for (i = 0; i < pushCtx.pushSeqQHead; i++) {
+        if (nabtoStampLess(&pushSeqQ[i].stamp, &pushCtx.nextPushEvent->stamp)) {
             pushCtx.nextPushEvent = &pushSeqQ[i];
         }
     }
-    if (nabtoStampLess(&pushCtx.nextPushEvent->stamp,&pushCtx.lastSent)){
+    if (nabtoStampLess(&pushCtx.nextPushEvent->stamp, &pushCtx.lastSent)) {
         nabtoAddStamp(&pushCtx.nextPushEvent->stamp, UNABTO_PUSH_MIN_SEND_INTERVAL);
     }
 }
 
-
-bool unabto_push_verify_integrity(nabto_packet_header* header){
+bool unabto_push_verify_integrity(nabto_packet_header* header) {
     uint8_t* buf = nabtoCommunicationBuffer;
-    uint8_t* end = nabtoCommunicationBuffer+nabtoCommunicationBufferSize;
+    uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
     struct unabto_payload_crypto crypto;
 
     buf += header->hlen;
@@ -311,8 +298,6 @@ bool unabto_push_verify_integrity(nabto_packet_header* header){
         }
     }
     return true;
-
 }
 
-
-#endif //NABTO_ENABLE_PUSH
+#endif  //NABTO_ENABLE_PUSH

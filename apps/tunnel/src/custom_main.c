@@ -9,14 +9,14 @@
  */
 int main() {
     nabto_main_setup* nms = unabto_init_context();
-    uint8_t psk[16] = { 0 };
-    
+    uint8_t psk[16] = {0};
+
     // Setup device id.
     nms->id = "deviceid";
-    
+
     // Setup encryption.
     unabto_set_aes_crypto(nms, psk, 16);
-    
+
     // Loop forever.
     tunnel_loop_select();
     return 0;
@@ -26,8 +26,7 @@ bool tunnel_allow_connection(const char* host, int port) {
     return true;
 }
 
-application_event_result application_event(application_request* request, unabto_query_request* readBuffer, unabto_query_response* writeBuffer)
-{
+application_event_result application_event(application_request* request, unabto_query_request* readBuffer, unabto_query_response* writeBuffer) {
     return AER_REQ_INV_QUERY_ID;
 }
 

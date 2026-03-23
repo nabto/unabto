@@ -14,8 +14,8 @@ typedef uint8_t nabto_socket_t;
 typedef long long nabto_stamp_t;
 typedef long long nabto_stamp_diff_t;
 
-#define NABTO_INVALID_SOCKET    NULL
-#define nabtoMsec2Stamp(msec)   (msec)
-#define NABTO_FATAL_EXIT        while(1);
+#define NABTO_INVALID_SOCKET  NULL
+#define nabtoMsec2Stamp(msec) (msec)
+#define NABTO_FATAL_EXIT      while (1);
 
 #endif

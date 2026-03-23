@@ -22,9 +22,8 @@ typedef int32_t nabto_stamp_diff_t;
 
 void unabto_tick_timer_tick(int32_t ms);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

@@ -1,5 +1,4 @@
 #ifndef UNABTO_PLATFORM_TYPES_H
 #define UNABTO_PLATFORM_TYPES_H
 
-
 #endif

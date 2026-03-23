@@ -12,9 +12,8 @@ extern "C" {
 
 uint16_t Ipv4Checksum_Calculate(uint8_t* buffer, uint16_t offset, uint16_t length);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif
