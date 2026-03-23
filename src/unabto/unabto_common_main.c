@@ -58,12 +58,12 @@ void unabto_init_default_values(nabto_main_setup* nms) {
     nms->url = 0;
     nms->gspPollTimeout = 13000; /* should be between 1 and 2 times the GSP interval(10000) */
     nms->gspTimeoutCount = 5;    /* timeout after 5*13000 msecs                             */
-    nms->secureAttach = false;
-    nms->secureData = false;
+    nms->secureAttach = true;
+    nms->secureData = true;
     nms->configuredForAttach = true;
     nms->enableRemoteAccess = true;
 #if NABTO_ENABLE_CONNECTIONS
-    nms->cryptoSuite = CRYPT_W_NULL_DATA;
+    nms->cryptoSuite = CRYPT_W_AES_CBC_HMAC_SHA256;
 #endif
     memset(nms->presharedKey, 0, PRE_SHARED_KEY_SIZE);
 #if NABTO_ENABLE_TCP_FALLBACK
