@@ -5,13 +5,11 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 /**
    @file eax_encrypt.c
-   EAX implementation, encrypt block by Tom St Denis 
+   EAX implementation, encrypt block by Tom St Denis
 */
 #include "tomcrypt.h"
 
@@ -25,11 +23,11 @@
    @param length     The length of the plaintext (octets)
    @return CRYPT_OK if successful
 */
-int eax_encrypt(eax_state *eax, const unsigned char *pt, unsigned char *ct, 
+int eax_encrypt(eax_state *eax, const unsigned char *pt, unsigned char *ct,
                 unsigned long length)
 {
    int err;
-   
+
    LTC_ARGCHK(eax != NULL);
    LTC_ARGCHK(pt  != NULL);
    LTC_ARGCHK(ct  != NULL);
@@ -46,6 +44,6 @@ int eax_encrypt(eax_state *eax, const unsigned char *pt, unsigned char *ct,
 #endif
 
 
-/* $Source: /cvs/libtom/libtomcrypt/src/encauth/eax/eax_encrypt.c,v $ */
-/* $Revision: 1.6 $ */
-/* $Date: 2007/05/12 14:32:35 $ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

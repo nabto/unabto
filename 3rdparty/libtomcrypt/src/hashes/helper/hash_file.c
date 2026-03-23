@@ -5,12 +5,11 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
-/** 
+#ifndef LTC_NO_FILE
+/**
   @file hash_file.c
   Hash a file, Tom St Denis
 */
@@ -24,9 +23,6 @@
 */
 int hash_file(int hash, const char *fname, unsigned char *out, unsigned long *outlen)
 {
-#ifdef LTC_NO_FILE
-    return CRYPT_NOP;
-#else
     FILE *in;
     int err;
     LTC_ARGCHK(fname  != NULL);
@@ -38,7 +34,7 @@ int hash_file(int hash, const char *fname, unsigned char *out, unsigned long *ou
     }
 
     in = fopen(fname, "rb");
-    if (in == NULL) { 
+    if (in == NULL) {
        return CRYPT_FILE_NOTFOUND;
     }
 
@@ -48,10 +44,10 @@ int hash_file(int hash, const char *fname, unsigned char *out, unsigned long *ou
     }
 
     return err;
-#endif
 }
+#endif /* #ifndef LTC_NO_FILE */
 
 
-/* $Source: /cvs/libtom/libtomcrypt/src/hashes/helper/hash_file.c,v $ */
-/* $Revision: 1.5 $ */
-/* $Date: 2006/12/28 01:27:23 $ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

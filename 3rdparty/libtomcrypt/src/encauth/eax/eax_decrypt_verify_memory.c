@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 /**
@@ -57,6 +55,9 @@ int eax_decrypt_verify_memory(int cipher,
    /* default to zero */
    *stat = 0;
 
+   /* limit taglen */
+   taglen = MIN(taglen, MAXBLOCKSIZE);
+
    /* allocate ram */
    buf = XMALLOC(taglen);
    eax = XMALLOC(sizeof(*eax));
@@ -77,17 +78,17 @@ int eax_decrypt_verify_memory(int cipher,
    if ((err = eax_decrypt(eax, ct, pt, ctlen)) != CRYPT_OK) {
       goto LBL_ERR;
    }
- 
+
    buflen = taglen;
    if ((err = eax_done(eax, buf, &buflen)) != CRYPT_OK) {
       goto LBL_ERR;
    }
 
    /* compare tags */
-   if (buflen >= taglen && XMEMCMP(buf, tag, taglen) == 0) {
+   if (buflen >= taglen && XMEM_NEQ(buf, tag, taglen) == 0) {
       *stat = 1;
    }
-   
+
    err = CRYPT_OK;
 LBL_ERR:
 #ifdef LTC_CLEAN_STACK
@@ -103,6 +104,6 @@ LBL_ERR:
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/encauth/eax/eax_decrypt_verify_memory.c,v $ */
-/* $Revision: 1.7 $ */
-/* $Date: 2007/05/12 14:32:35 $ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

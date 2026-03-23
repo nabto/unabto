@@ -5,17 +5,15 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
 /**
   @file katja_free.c
   Free an Katja key, Tom St Denis
-*/  
+*/
 
-#ifdef MKAT
+#ifdef LTC_MKAT
 
 /**
   Free an Katja key from memory
@@ -30,6 +28,6 @@ void katja_free(katja_key *key)
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/pk/katja/katja_free.c,v $ */
-/* $Revision: 1.3 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

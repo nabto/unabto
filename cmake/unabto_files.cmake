@@ -440,6 +440,8 @@ set(unabto_3rdparty_libtomcrypt_src
   ${UNABTO_ROOT}/3rdparty/libtomcrypt/src/prngs/rng_get_bytes.c
   ${UNABTO_ROOT}/3rdparty/libtomcrypt/src/prngs/rng_make_prng.c
   ${UNABTO_ROOT}/3rdparty/libtomcrypt/src/misc/zeromem.c
+  ${UNABTO_ROOT}/3rdparty/libtomcrypt/src/misc/compare_testvector.c
+  ${UNABTO_ROOT}/3rdparty/libtomcrypt/src/misc/mem_neq.c
   )
 set(unabto_3rdparty_libtomcrypt_include_directories
   ${UNABTO_ROOT}/3rdparty/libtomcrypt/src/headers)
