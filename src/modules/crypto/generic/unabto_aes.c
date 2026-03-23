@@ -463,7 +463,7 @@ void AES_decrypt(const AES_CTX *ctx, uint32_t *data)
     int row;
     int curr_rnd;
     int rounds = ctx->rounds;
-    const uint32_t *k = ctx->ks + ((rounds+1)*4);
+    const uint32_t *k = ctx->ks + ((ptrdiff_t)(rounds+1)*4);
 
     /* pre-round key addition */
     for (row=4; row > 0;row--)

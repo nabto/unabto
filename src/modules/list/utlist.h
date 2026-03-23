@@ -21,6 +21,8 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+// NOLINTBEGIN(bugprone-macro-parentheses)
+
 #ifndef UTLIST_H
 #define UTLIST_H
 
@@ -754,4 +756,6 @@ do {                                                                            
 } while (0)                                                                                    \
 
 #endif /* UTLIST_H */
+
+// NOLINTEND(bugprone-macro-parentheses)
 

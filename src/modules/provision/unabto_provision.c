@@ -48,7 +48,7 @@ bool unabto_provision_set_key(nabto_main_setup *nms, char *key)
     size_t pskLen = strlen(key);
     uint8_t psk[16] = { 0 };
 
-    if (!key || pskLen != PRE_SHARED_KEY_SIZE * 2) {
+    if (!key || pskLen != (size_t)PRE_SHARED_KEY_SIZE * 2) {
         NABTO_LOG_ERROR(("Invalid key: %s", key));
         return false;
     }

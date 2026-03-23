@@ -174,7 +174,7 @@ bool unabto_connection_util_verify_capabilities(nabto_connect* connection, struc
 
     {
     const uint8_t* cptr = capabilities->codesStart;
-    const uint8_t* cend = capabilities->codesStart + capabilities->codesLength * 2;
+    const uint8_t* cend = capabilities->codesStart + (size_t)capabilities->codesLength * 2;
 
     for (i = 0; i < capabilities->codesLength; i++) {
         uint16_t code;

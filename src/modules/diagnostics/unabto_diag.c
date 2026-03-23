@@ -100,7 +100,7 @@ void unabto_printf_memory_sizes(FILE * f, const char *progname)
     fprintf(f, "NABTO_THREAD_LOCAL_STORAGE uint16_t nabtoCommunicationBufferSize;\n");
     fprintf(f, "NABTO_THREAD_LOCAL_STORAGE nabto_main_context nmc;  /* %u bytes */\n", (unsigned int) sizeof(nmc));
 #if NABTO_ENABLE_CONNECTIONS
-    fprintf(f, "NABTO_THREAD_LOCAL_STORAGE nabto_connect connections[%u];  /* %u * %u bytes = %u bytes */\n", NABTO_CONNECTIONS_SIZE, NABTO_CONNECTIONS_SIZE, (unsigned int) sizeof(nabto_connect), (unsigned int) sizeof(connections));
+    fprintf(f, "NABTO_THREAD_LOCAL_STORAGE nabto_connect connections[%u];  /* %u * %u bytes = %u bytes */\n", NABTO_CONNECTIONS_SIZE, NABTO_CONNECTIONS_SIZE, (unsigned int) sizeof(nabto_connect), (unsigned int)(sizeof(nabto_connect) * NABTO_CONNECTIONS_SIZE));
 #endif
 #if NABTO_ENABLE_STREAM && NABTO_ENABLE_MICRO_STREAM
     fprintf(f, "NABTO_THREAD_LOCAL_STORAGE nabto_stream stream__[%u];  /* %u * %u bytes = %u bytes */\n", NABTO_STREAM_MAX_STREAMS, NABTO_STREAM_MAX_STREAMS, (unsigned int) sizeof(unabto_stream), (unsigned int) sizeof(unabto_stream) * NABTO_STREAM_MAX_STREAMS);

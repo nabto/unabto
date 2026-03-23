@@ -213,13 +213,13 @@ bool unabto_abuffer_add_buffer(unabto_abuffer* aBuffer, const unabto_buffer* buf
 /* "in-liners" with no error checking */
 
 
-#define UNABTO_ABUFFER_POSITION(aBuffer) (aBuffer->position)
+#define UNABTO_ABUFFER_POSITION(aBuffer) ((aBuffer)->position)
 
 #define UNABTO_ABUFFER_GET_USED(aBuffer) UNABTO_ABUFFER_POSITION(aBuffer)
 
 #define UNABTO_ABUFFER_RESET(aBuffer) do {UNABTO_ABUFFER_POSITION(aBuffer) = 0; } while(0)
 
-#define UNABTO_ABUFFER_GET_SIZE(aBuffer) (aBuffer->buffer->size)
+#define UNABTO_ABUFFER_GET_SIZE(aBuffer) ((aBuffer)->buffer->size)
 
 #define UNABTO_ABUFFER_GET_UNUSED(aBuffer) ((uint16_t)(UNABTO_ABUFFER_GET_SIZE(aBuffer) - UNABTO_ABUFFER_GET_USED(aBuffer)))
 
@@ -227,7 +227,7 @@ bool unabto_abuffer_add_buffer(unabto_abuffer* aBuffer, const unabto_buffer* buf
 
 #define UNABTO_ABUFFER_GET_HEAD(aBuffer) (UNABTO_ABUFFER_GET_INITIAL_HEAD(aBuffer) + UNABTO_ABUFFER_POSITION(aBuffer) )
 
-#define UNABTO_ABUFFER_ADVANCE(aBuffer, offset) do {UNABTO_ABUFFER_POSITION(aBuffer) += offset;} while(0)
+#define UNABTO_ABUFFER_ADVANCE(aBuffer, offset) do {UNABTO_ABUFFER_POSITION(aBuffer) += (offset);} while(0)
 
 #define UNABTO_ABUFFER_SET_USED(aBuffer, pos) do {UNABTO_ABUFFER_POSITION(aBuffer) = pos;} while(0)
 

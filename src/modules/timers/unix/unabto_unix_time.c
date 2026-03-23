@@ -92,7 +92,7 @@ bool unabto_unix_timer_is_stamppassed(nabto_stamp_t* stamp) {
 }
 
 nabto_stamp_diff_t unabto_unix_timer_stampdiff(nabto_stamp_t * newest, nabto_stamp_t * oldest) {
-    return newest->milliseconds - oldest->milliseconds;
+    return (nabto_stamp_diff_t)(newest->milliseconds - oldest->milliseconds);
 }
 
 int unabto_unix_timer_stampdiff2ms(nabto_stamp_diff_t diff) {

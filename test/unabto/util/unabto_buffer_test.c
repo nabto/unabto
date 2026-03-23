@@ -26,9 +26,11 @@ bool unabto_buffer_test(void)
 
     if (! (buffer_write_uint32(&w_buf, 0x12345678) &&
            buffer_write_uint16(&w_buf, 0x1234) &&
-           buffer_write_uint8(&w_buf, 0x12) && 
+           buffer_write_uint8(&w_buf, 0x12) &&
            buffer_write_raw(&w_buf, &raw_string_buf) ) ) {
         NABTO_LOG_ERROR(("Buffer write test failed"));
+        free(data);
+        free(raw_string_data);
         return false;
     }
     
@@ -43,6 +45,8 @@ bool unabto_buffer_test(void)
             (t = buffer_read_raw(&r_buf, &raw_string_buf)) && buffer_get_size(&raw_string_buf) == strlen(raw_test_string) &&
             0 == strncmp((char*)buffer_get_data(&raw_string_buf), raw_test_string, strlen(raw_test_string)) )) {
         NABTO_LOG_ERROR(("Failed read test failed"));
+        free(data);
+        free(raw_string_data);
         return false;
     }
 
@@ -52,12 +56,16 @@ bool unabto_buffer_test(void)
         buffer_read_raw(&w_buf, &raw_string_buf) ||
         buffer_write_uint32(&w_buf, 0x12345678) ||
         buffer_write_uint16(&w_buf, 0x1234) ||
-        buffer_write_uint8(&w_buf, 0x12) || 
+        buffer_write_uint8(&w_buf, 0x12) ||
         buffer_write_raw(&w_buf, &raw_string_buf) ) {
         NABTO_LOG_ERROR(("Some function should have returned false but returned true"));
+        free(data);
+        free(raw_string_data);
         return false;
     }
 
+    free(data);
+    free(raw_string_data);
     return true;
 
 }

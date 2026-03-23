@@ -97,11 +97,11 @@ text stName(nabto_state state)
  * @param newState  the new state
  */
 #define SET_CTX_STATE(newState)                       \
-    if (nmc.context.state != newState)                \
+    if (nmc.context.state != (newState))              \
     {                                                 \
-        NABTO_STATE_LOG(nmc.context.state, newState); \
-        REPORT_STATUS_CALLBACK(newState);             \
-        nmc.context.state = newState;                 \
+        NABTO_STATE_LOG(nmc.context.state, (newState)); \
+        REPORT_STATUS_CALLBACK((newState));             \
+        nmc.context.state = (newState);                 \
     }
 
 /**
@@ -110,11 +110,11 @@ text stName(nabto_state state)
  * Only if the state is changed, the counter is reset
  */
 #define SET_CTX_STATE_CNT(newState)                     \
-    if (nmc.context.state != newState)                  \
+    if (nmc.context.state != (newState))                \
     {                                              \
-        NABTO_STATE_LOG(nmc.context.state, newState);   \
-        REPORT_STATUS_CALLBACK(newState);               \
-        nmc.context.state = newState;                   \
+        NABTO_STATE_LOG(nmc.context.state, (newState)); \
+        REPORT_STATUS_CALLBACK((newState));             \
+        nmc.context.state = (newState);                 \
         nmc.context.counter = 0;  \
     }
 
@@ -545,7 +545,7 @@ static uint8_t handle_actual_attach(nabto_packet_header* hdr, uint8_t* ptr)
                         NABTO_LOG_TRACE(("U_ATTACH Decryption fail"));
                         result = NP_PAYLOAD_ATTACH_STATS_STATUS_DECRYPTION_FAILED;
                         goto final;
-                    } else if (dlen < NONCE_SIZE) {
+                    } else if (dlen < NONCE_SIZE) { // NOLINT(bugprone-branch-clone)
                         NABTO_LOG_TRACE(("U_ATTACH Decryption fail, missing nonce data"));
                         result = NP_PAYLOAD_ATTACH_STATS_STATUS_NONCE_VERIFICATION_FAILED;
                         goto final;
@@ -652,9 +652,7 @@ bool nabto_alive_event(nabto_packet_header* hdr)
         // probably from old attached context, this device is restarted, let caller log
         return false;
     }
-    if (nmc.context.state != NABTO_AS_ATTACHED) {
-        NABTO_LOG_TRACE(("Alive when not attached ignored"));
-    } else if (hdr->flags != 0) {
+    if (hdr->flags != 0) {
         NABTO_LOG_TRACE(("Illegal header in U_ALIVE request:%" PRIu32 "/%i", hdr->nsi_cp, (int)hdr->flags));
     } else {
         size_t   olen;

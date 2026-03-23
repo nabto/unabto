@@ -72,7 +72,7 @@ void wait_event()
 #endif
 
     timeout_val.tv_sec = (timeout/1000);
-    timeout_val.tv_usec = ((timeout)%1000)*1000;
+    timeout_val.tv_usec = (long)((timeout)%1000)*1000;
 
     nfds = select(MAX(max_read_fd+1, max_write_fd+1), &read_fds, &write_fds, NULL, &timeout_val);
 

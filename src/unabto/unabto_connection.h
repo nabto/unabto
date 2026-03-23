@@ -101,7 +101,7 @@ typedef struct {
 #define CON_ATTR_NO_RETRANSMIT  0x80  /**< no retransmissions (reliable connection)     */
 
 /** The Context of a connection */
-struct nabto_connect_s {
+struct nabto_connect_s { // NOLINT(clang-analyzer-optin.performance.Padding)
 #if NABTO_ENABLE_EPOLL
     int epollEventType;
 #endif

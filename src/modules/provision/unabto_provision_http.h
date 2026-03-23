@@ -12,7 +12,7 @@
 #include <unabto/unabto_main_contexts.h>
 #include "unabto_provision.h"
 
-#define KEY_BUFFER_SIZE PRE_SHARED_KEY_SIZE*2+1 
+#define KEY_BUFFER_SIZE (PRE_SHARED_KEY_SIZE*2+1)
 #define HTTP_MAX_POST_LENGTH 256
 
 typedef enum {

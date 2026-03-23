@@ -203,11 +203,7 @@ void unabto_push_create_and_send_packet(unabto_push_element *elem){
         unabto_push_notification_callback(elem->seq,&hint);
         unabto_push_notification_remove(elem->seq);
         return;
-    } else if (elem->hint == UNABTO_PUSH_HINT_QUOTA_EXCEEDED){
-        unabto_push_notification_callback(elem->seq,&elem->hint);
-        unabto_push_notification_remove(elem->seq);
-        return;
-    } else if (elem->hint == UNABTO_PUSH_HINT_QUOTA_EXCEEDED_REATTACH){
+    } else if (elem->hint == UNABTO_PUSH_HINT_QUOTA_EXCEEDED || elem->hint == UNABTO_PUSH_HINT_QUOTA_EXCEEDED_REATTACH){
         unabto_push_notification_callback(elem->seq,&elem->hint);
         unabto_push_notification_remove(elem->seq);
         return;

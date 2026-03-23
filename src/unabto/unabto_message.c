@@ -272,7 +272,7 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
     if (event->type == MT_UDP) {
         bool fromBS = nabto_ep_is_equal(&event->udpMessage.peer, &nmc.controllerEp);
         bool fromGSP = nabto_ep_is_equal(&event->udpMessage.peer, &nmc.context.gsp);
-        if (fromBS) {
+        if (fromBS) { // NOLINT(bugprone-branch-clone)
             NABTO_LOG_TRACE(("Received from Base Station: %" PRIu16 " bytes", ilen));
         } else if (fromGSP) {
             NABTO_LOG_TRACE(("Received from GSP: %" PRIu16 " bytes", ilen));
@@ -328,6 +328,7 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
             break;
 #endif
 
+        default: break;
         }
     }
 
@@ -337,6 +338,7 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
         case GW_CONN_U:
             nabto_fallback_connect_u_event(ilen, &hdr);
             return;
+        default: break;
         }
     }
 #endif
