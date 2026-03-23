@@ -57,7 +57,9 @@ void wait_event() {
     unabto_next_event(&ne);
     now = nabtoGetStamp();
     timeout = nabtoStampDiff2ms(nabtoStampDiff(&ne, &now));
-    if (timeout < 0) timeout = 0;
+    if (timeout < 0) {
+        timeout = 0;
+    }
 
     FD_ZERO(&read_fds);
     FD_ZERO(&write_fds);
@@ -75,7 +77,9 @@ void wait_event() {
     nfds = select(MAX(max_read_fd + 1, max_write_fd + 1), &read_fds, &write_fds, NULL, &timeout_val);
 
     NABTO_LOG_TRACE(("Select returned %i", nfds));
-    if (nfds < 0) NABTO_LOG_FATAL(("Error in epoll_wait: %d", errno));
+    if (nfds < 0) {
+        NABTO_LOG_FATAL(("Error in epoll_wait: %d", errno));
+    }
     unabto_network_select_read_sockets(&read_fds);
 
 #if NABTO_ENABLE_TCP_FALLBACK

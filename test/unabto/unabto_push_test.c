@@ -17,7 +17,9 @@ uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* buf
 bool callbackCalled = false;
 void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint) {
     callbackCalled = true;
-    if (hint == NULL) return;
+    if (hint == NULL) {
+        return;
+    }
     NABTO_LOG_INFO(("Push_notification_callback with seq: %i, hint: %i", seq, *hint));
 }
 //#endif

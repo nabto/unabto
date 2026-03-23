@@ -135,7 +135,9 @@ static text stateNameW(nabto_stream_tcb_state state);
     }
 
 void nabto_stream_state_transition(struct nabto_stream_s* stream, nabto_stream_tcb_state new_state) {
-    if (stream->u.tcb.streamState == new_state) return;
+    if (stream->u.tcb.streamState == new_state) {
+        return;
+    }
     stream->u.tcb.streamState = new_state;
     switch (new_state) {
         case ST_IDLE:

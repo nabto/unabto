@@ -147,25 +147,33 @@
 /* if the read would exceed the buffer. A NULL input pointer propagates.     */
 
 static const uint8_t* read_forward_u8(uint8_t* value, const uint8_t* ptr, const uint8_t* end) {
-    if (ptr == NULL || end - ptr < 1) return NULL;
+    if (ptr == NULL || end - ptr < 1) {
+        return NULL;
+    }
     READ_U8(*value, ptr);
     return ptr + 1;
 }
 
 static const uint8_t* read_forward_u16(uint16_t* value, const uint8_t* ptr, const uint8_t* end) {
-    if (ptr == NULL || end - ptr < 2) return NULL;
+    if (ptr == NULL || end - ptr < 2) {
+        return NULL;
+    }
     READ_U16(*value, ptr);
     return ptr + 2;
 }
 
 static const uint8_t* read_forward_u32(uint32_t* value, const uint8_t* ptr, const uint8_t* end) {
-    if (ptr == NULL || end - ptr < 4) return NULL;
+    if (ptr == NULL || end - ptr < 4) {
+        return NULL;
+    }
     READ_U32(*value, ptr);
     return ptr + 4;
 }
 
 static const uint8_t* read_forward_mem(void* dst, const uint8_t* ptr, const uint8_t* end, size_t len) {
-    if (ptr == NULL || (size_t)(end - ptr) < len) return NULL;
+    if (ptr == NULL || (size_t)(end - ptr) < len) {
+        return NULL;
+    }
     memcpy(dst, ptr, len);
     return ptr + len;
 }
@@ -175,25 +183,33 @@ static const uint8_t* read_forward_mem(void* dst, const uint8_t* ptr, const uint
 /* if the write would exceed the buffer. A NULL input pointer propagates.    */
 
 static uint8_t* write_forward_u8(uint8_t* ptr, const uint8_t* end, uint8_t val) {
-    if (ptr == NULL || end - ptr < 1) return NULL;
+    if (ptr == NULL || end - ptr < 1) {
+        return NULL;
+    }
     WRITE_U8(ptr, val);
     return ptr + 1;
 }
 
 static uint8_t* write_forward_u16(uint8_t* ptr, const uint8_t* end, uint16_t val) {
-    if (ptr == NULL || end - ptr < 2) return NULL;
+    if (ptr == NULL || end - ptr < 2) {
+        return NULL;
+    }
     WRITE_U16(ptr, val);
     return ptr + 2;
 }
 
 static uint8_t* write_forward_u32(uint8_t* ptr, const uint8_t* end, uint32_t val) {
-    if (ptr == NULL || end - ptr < 4) return NULL;
+    if (ptr == NULL || end - ptr < 4) {
+        return NULL;
+    }
     WRITE_U32(ptr, val);
     return ptr + 4;
 }
 
 static uint8_t* write_forward_mem(uint8_t* ptr, const uint8_t* end, const void* src, size_t len) {
-    if (ptr == NULL || (size_t)(end - ptr) < len) return NULL;
+    if (ptr == NULL || (size_t)(end - ptr) < len) {
+        return NULL;
+    }
     memcpy(ptr, src, len);
     return ptr + len;
 }

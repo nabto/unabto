@@ -290,7 +290,9 @@ uint16_t unabto_crypto_max_data(nabto_crypto_context* cryptoContext, uint16_t av
             l_block = 2;
             break;
     }
-    if (available < l_block + l_iv_integ) return 0;
+    if (available < l_block + l_iv_integ) {
+        return 0;
+    }
     available -= l_iv_integ;
     return (available / l_block) * l_block - 1;
 }
@@ -342,7 +344,9 @@ bool unabto_verify_integrity(nabto_crypto_context* cryptoContext, uint16_t code,
         const uint8_t* begin = buf;
         const uint8_t* endx = buf + size - 2;
         uint16_t sumt;
-        while (begin < endx) sum += *begin++;
+        while (begin < endx) {
+            sum += *begin++;
+        }
         READ_U16(sumt, endx);
         if (sum != sumt) {
             NABTO_LOG_TRACE(("Verification failure: %" PRIu16 "/%" PRIu16, sumt, sum));
@@ -504,7 +508,9 @@ bool unabto_insert_integrity(nabto_crypto_context* cryptoContext, uint8_t* start
             uint8_t* begin = start;
             uint8_t* end = start + plen - 2;
             NABTO_LOG_TRACE(("Crypto default!"));
-            while (begin < end) sum += *begin++;
+            while (begin < end) {
+                sum += *begin++;
+            }
             WRITE_U16(end, sum);
             res = true;
         }

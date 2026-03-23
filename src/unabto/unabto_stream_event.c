@@ -165,9 +165,13 @@ bool build_and_send_rst_packet(nabto_connect* con, uint16_t tag, struct nabto_wi
     winLength = nabto_stream_window_payload_length(&rst);
 
     ptr = insert_data_header(buf, end, con->spnsi, con->nsico, tag);
-    if (ptr == NULL) return false;
+    if (ptr == NULL) {
+        return false;
+    }
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_WINDOW, 0, winLength);
-    if (ptr == NULL) return false;
+    if (ptr == NULL) {
+        return false;
+    }
 
     if (nabto_stream_encode_window(&rst, ptr, end, &encodeLength)) {
         ptr += encodeLength;

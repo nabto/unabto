@@ -60,11 +60,14 @@ void nabto_yield(int msec) {
 #ifdef WIN32
     Sleep(msec);
 #elif defined(__MACH__)
-    if (msec) usleep(1000 * msec);
-#else
-    if (msec)
+    if (msec) {
         usleep(1000 * msec);
-    else
+    }
+#else
+    if (msec) {
+        usleep(1000 * msec);
+    } else {
         sched_yield();
+    }
 #endif
 }

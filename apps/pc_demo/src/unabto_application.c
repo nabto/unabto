@@ -72,13 +72,17 @@ application_event_result application_event(application_request* request, unabto_
             uint8_t light_state;
 
             // Read parameters in request
-            if (!unabto_query_read_uint8(read_buffer, &light_id)) return AER_REQ_TOO_SMALL;
+            if (!unabto_query_read_uint8(read_buffer, &light_id)) {
+                return AER_REQ_TOO_SMALL;
+            }
 
             // Read light state
             light_state = readLight(light_id);
 
             // Write back led state
-            if (!unabto_query_write_uint8(write_buffer, light_state)) return AER_REQ_RSP_TOO_LARGE;
+            if (!unabto_query_write_uint8(write_buffer, light_state)) {
+                return AER_REQ_RSP_TOO_LARGE;
+            }
 
             return AER_REQ_RESPONSE_READY;
         }

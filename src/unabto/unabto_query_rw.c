@@ -64,8 +64,9 @@ bool unabto_query_read_list_length(unabto_query_request* queryRequest, uint16_t*
         return false;
     }
 
-    if (NULL != listLength)
+    if (NULL != listLength) {
         *listLength = length;
+    }
     return true;
 }
 

@@ -88,10 +88,14 @@ application_event_result weather_station_application(application_request* reques
                 int32_t temp;
                 uint32_t ix;
                 // read 4 bytes from the input buffer
-                if (!unabto_query_read_uint32(read_buffer, &ix)) return AER_REQ_TOO_SMALL;
+                if (!unabto_query_read_uint32(read_buffer, &ix)) {
+                    return AER_REQ_TOO_SMALL;
+                }
                 // write 4 bytes to the output buffer
                 temp = getTemperature((int)ix);
-                if (!unabto_query_write_uint32(write_buffer, (uint32_t)temp)) return AER_REQ_RSP_TOO_LARGE;
+                if (!unabto_query_write_uint32(write_buffer, (uint32_t)temp)) {
+                    return AER_REQ_RSP_TOO_LARGE;
+                }
                 return AER_REQ_RESPONSE_READY;
             }
 
@@ -105,7 +109,9 @@ application_event_result weather_station_application(application_request* reques
          *   </response>
          * </query>
          */
-            if (!unabto_query_write_uint32(write_buffer, getWindSpeed())) return AER_REQ_RSP_TOO_LARGE;
+            if (!unabto_query_write_uint32(write_buffer, getWindSpeed())) {
+                return AER_REQ_RSP_TOO_LARGE;
+            }
             return AER_REQ_RESPONSE_READY;
 
         case 3:

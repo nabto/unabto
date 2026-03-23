@@ -771,28 +771,52 @@ application_event_result application_event(application_request* request,
 
     if (request->queryId == 0) {
         // AMP get_interface_info.json
-        if (!write_string(query_response, device_interface_id_)) return AER_REQ_RSP_TOO_LARGE;
-        if (!unabto_query_write_uint16(query_response, device_interface_version_major_)) return AER_REQ_RSP_TOO_LARGE;
-        if (!unabto_query_write_uint16(query_response, device_interface_version_minor_)) return AER_REQ_RSP_TOO_LARGE;
+        if (!write_string(query_response, device_interface_id_)) {
+            return AER_REQ_RSP_TOO_LARGE;
+        }
+        if (!unabto_query_write_uint16(query_response, device_interface_version_major_)) {
+            return AER_REQ_RSP_TOO_LARGE;
+        }
+        if (!unabto_query_write_uint16(query_response, device_interface_version_minor_)) {
+            return AER_REQ_RSP_TOO_LARGE;
+        }
         return AER_REQ_RESPONSE_READY;
 
     } else if (request->queryId == 10000) {
         // AMP get_public_device_info.json
-        if (!write_string(query_response, device_name)) return AER_REQ_RSP_TOO_LARGE;
-        if (!write_string(query_response, product_name)) return AER_REQ_RSP_TOO_LARGE;
-        if (!write_string(query_response, device_icon)) return AER_REQ_RSP_TOO_LARGE;
-        if (!unabto_query_write_uint8(query_response, fp_acl_is_pair_allowed(request))) return AER_REQ_RSP_TOO_LARGE;
-        if (!unabto_query_write_uint8(query_response, fp_acl_is_user_paired(request))) return AER_REQ_RSP_TOO_LARGE;
-        if (!unabto_query_write_uint8(query_response, fp_acl_is_user_owner(request))) return AER_REQ_RSP_TOO_LARGE;
+        if (!write_string(query_response, device_name)) {
+            return AER_REQ_RSP_TOO_LARGE;
+        }
+        if (!write_string(query_response, product_name)) {
+            return AER_REQ_RSP_TOO_LARGE;
+        }
+        if (!write_string(query_response, device_icon)) {
+            return AER_REQ_RSP_TOO_LARGE;
+        }
+        if (!unabto_query_write_uint8(query_response, fp_acl_is_pair_allowed(request))) {
+            return AER_REQ_RSP_TOO_LARGE;
+        }
+        if (!unabto_query_write_uint8(query_response, fp_acl_is_user_paired(request))) {
+            return AER_REQ_RSP_TOO_LARGE;
+        }
+        if (!unabto_query_write_uint8(query_response, fp_acl_is_user_owner(request))) {
+            return AER_REQ_RSP_TOO_LARGE;
+        }
         return AER_REQ_RESPONSE_READY;
 
     } else if (request->queryId == 10010) {
         int res;
         // AMP set_device_info.json
-        if (!fp_acl_is_request_allowed(request, REQUIRES_OWNER)) return AER_REQ_NO_ACCESS;
+        if (!fp_acl_is_request_allowed(request, REQUIRES_OWNER)) {
+            return AER_REQ_NO_ACCESS;
+        }
         res = copy_string(query_request, device_name, sizeof(device_name));
-        if (res != AER_REQ_RESPONSE_READY) return res;
-        if (!write_string(query_response, device_name)) return AER_REQ_RSP_TOO_LARGE;
+        if (res != AER_REQ_RESPONSE_READY) {
+            return res;
+        }
+        if (!write_string(query_response, device_name)) {
+            return AER_REQ_RSP_TOO_LARGE;
+        }
         return AER_REQ_RESPONSE_READY;
 
     } else if (request->queryId >= 11000 && request->queryId < 12000) {
