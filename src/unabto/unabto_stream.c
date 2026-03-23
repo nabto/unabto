@@ -79,7 +79,9 @@ size_t unabto_stream_read_buf(unabto_stream* stream, uint8_t* buf, size_t size, 
             return 0;
         }
         if (avail > 0) {
-            if (avail > size) avail = size;
+            if (avail > size) {
+                avail = size;
+            }
             memcpy(buf, mem, avail);
             buf += avail;
             size -= avail;

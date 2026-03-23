@@ -8,7 +8,8 @@ Checks: >
   clang-analyzer-*,
   -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
   -clang-analyzer-deadcode.DeadStores,
-  portability-*
+  portability-*,
+  readability-braces-around-statements
 WarningsAsErrors: ''
 HeaderFilterRegex: '(src|apps|test)/.*'
 FormatStyle: none

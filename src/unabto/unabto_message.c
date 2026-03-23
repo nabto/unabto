@@ -149,10 +149,14 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
     uint32_t header;
     READ_U32(header, buf);
 
-    if (ilen <= NP_LEGACY_PACKET_HDR_SIZE) return;
+    if (ilen <= NP_LEGACY_PACKET_HDR_SIZE) {
+        return;
+    }
     if (memchr(buf + NP_LEGACY_PACKET_HDR_SIZE,
                '\0',
-               ilen - NP_LEGACY_PACKET_HDR_SIZE) == NULL) return;
+               ilen - NP_LEGACY_PACKET_HDR_SIZE) == NULL) {
+        return;
+    }
 
     NABTO_LOG_TRACE(("local_discover_event"));
 
@@ -281,19 +285,27 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
         switch (hdr.type) {
 #if NABTO_ENABLE_REMOTE_ACCESS
             case U_INVITE:
-                if (fromBS && nabto_invite_event(&hdr)) return;
+                if (fromBS && nabto_invite_event(&hdr)) {
+                    return;
+                }
                 break;
             case U_ATTACH:
-                if (fromGSP && nabto_attach_event(&hdr)) return;
+                if (fromGSP && nabto_attach_event(&hdr)) {
+                    return;
+                }
                 NABTO_LOG_TRACE(("failed to handle U_ATTACH from GSP"));
                 break;
 #if NABTO_ENABLE_PUSH
             case U_PUSH:
-                if (fromGSP && nabto_push_event(&hdr)) return;
+                if (fromGSP && nabto_push_event(&hdr)) {
+                    return;
+                }
                 break;
 #endif
             case U_ALIVE:
-                if (fromGSP && nabto_alive_event(&hdr)) return;
+                if (fromGSP && nabto_alive_event(&hdr)) {
+                    return;
+                }
                 {
                     return;
                 }

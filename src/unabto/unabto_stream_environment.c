@@ -39,7 +39,9 @@ bool build_and_send_packet(struct nabto_stream_s* stream, uint8_t type, uint32_t
     nabtoSetFutureStamp(&tcb->ackStamp, 2 * tcb->cfg.timeoutMsec);
 
     ptr = insert_data_header(buf, end, con->spnsi, con->nsico, stream->streamTag);
-    if (ptr == NULL) return false;
+    if (ptr == NULL) {
+        return false;
+    }
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_WINDOW, 0, l_win + winInfoSize + (type == NP_PAYLOAD_WINDOW_FLAG_ACK ? 2 : 0));
     ptr = write_forward_u8(ptr, end, type);
     ptr = write_forward_u8(ptr, end, NP_STREAM_VERSION);

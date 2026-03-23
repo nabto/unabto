@@ -47,7 +47,9 @@ bool build_handshake_packet(nabto_connect* con, uint8_t* buffer, size_t bufferLe
     uint8_t* noncePtr = nonce;
 
     packetPtr = insert_header(buffer, bufferEnd, con->cpnsi, con->spnsi, NP_PACKET_HDR_TYPE_GW_CONN_U, false, 0, 0, con->consi);
-    if (packetPtr == NULL) return false;
+    if (packetPtr == NULL) {
+        return false;
+    }
 
     //NOTE: These type and flags must match the connection attributes set
     //in the unabto_tcp_fallback_connect_thread when a connection is
@@ -60,11 +62,15 @@ bool build_handshake_packet(nabto_connect* con, uint8_t* buffer, size_t bufferLe
         noncePtr = write_forward_u32(noncePtr, nonceEnd, con->spnsi);
         noncePtr = write_forward_mem(noncePtr, nonceEnd, con->consi, 8);
         noncePtr = write_forward_mem(noncePtr, nonceEnd, con->gatewayId, 20);
-        if (noncePtr == NULL) return false;
+        if (noncePtr == NULL) {
+            return false;
+        }
     }
 
     packetPtr = insert_payload(packetPtr, bufferEnd, NP_PAYLOAD_TYPE_NONCE, nonce, nonceLength);
-    if (packetPtr == NULL) return false;
+    if (packetPtr == NULL) {
+        return false;
+    }
 
     if (!insert_packet_length_from_cursor(buffer, packetPtr)) {
         return false;

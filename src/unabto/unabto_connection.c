@@ -266,9 +266,13 @@ bool nabto_connect_event_from_gsp(message_event* event, nabto_packet_header* hdr
  */
 static size_t mk_connect_rsp(uint8_t* buf, uint8_t* end, uint16_t seq, uint32_t notif, uint32_t nsi, uint32_t cpnsi, uint32_t spnsi, bool isLocalConnectRsp) {
     uint8_t* ptr = insert_header(buf, end, cpnsi, spnsi, U_CONNECT, true, seq, 0, 0);
-    if (ptr == NULL) return 0;
+    if (ptr == NULL) {
+        return 0;
+    }
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_NOTIFY, 0, 8);
-    if (ptr == NULL) return 0;
+    if (ptr == NULL) {
+        return 0;
+    }
     ptr = write_forward_u32(ptr, end, notif);
     ptr = write_forward_u32(ptr, end, nsi);
 
@@ -338,9 +342,13 @@ static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, ui
     uint32_t destIpV4 = 0;
 
     ptr = insert_header(buf, end, 0, con->spnsi, U_CONNECT, false, seq, 0, 0);
-    if (ptr == NULL) return;
+    if (ptr == NULL) {
+        return;
+    }
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_EP, 0, 6);
-    if (ptr == NULL) return;
+    if (ptr == NULL) {
+        return;
+    }
 
     if (dest->addr.type == NABTO_IP_V4) {
         destIpV4 = dest->addr.addr.ipv4;
@@ -354,7 +362,9 @@ static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, ui
             return;
         } else {
             ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_EP, 0, 6);
-            if (ptr == NULL) return;
+            if (ptr == NULL) {
+                return;
+            }
             ptr = write_forward_u32(ptr, end, myAddress->addr.addr.ipv4);
             ptr = write_forward_u16(ptr, end, myAddress->port);
         }

@@ -161,10 +161,11 @@ bool check_args(int argc, char* argv[], nabto_main_setup* nms) {
         progname++;
 #else
     progname = strrchr(argv[0], '/');
-    if (!progname)
+    if (!progname) {
         progname = argv[0];
-    else
+    } else {
         progname++;
+    }
 #endif
 
     if (gopt(options, 'h')) {

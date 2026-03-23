@@ -21,28 +21,35 @@ uint8_t* unabto_buffer_get_data(const unabto_buffer* buffer) {
 }
 
 int unabto_buffer_get_size(const unabto_buffer* buffer) {
-    if (NULL == buffer)
+    if (NULL == buffer) {
         return 0;
-    else
+    } else {
         return (int)buffer->size;
+    }
 }
 
 bool unabto_buffer_copy(unabto_buffer* dest, const unabto_buffer* src) {
-    if (dest->size < src->size) return false;
+    if (dest->size < src->size) {
+        return false;
+    }
     dest->size = src->size;
     memcpy(dest->data, (const void*)src->data, src->size);
     return true;
 }
 
 int unabto_buffer_cmp(const unabto_buffer* b1, const unabto_buffer* b2) {
-    if (NULL == b1 && NULL == b2)
+    if (NULL == b1 && NULL == b2) {
         return 0;
-    if (NULL == b1)
+    }
+    if (NULL == b1) {
         return -1;
-    if (NULL == b2)
+    }
+    if (NULL == b2) {
         return 1;
-    if (unabto_buffer_get_size(b1) != unabto_buffer_get_size(b2))
+    }
+    if (unabto_buffer_get_size(b1) != unabto_buffer_get_size(b2)) {
         return unabto_buffer_get_size(b1) < unabto_buffer_get_size(b2) ? -1 : 1;
+    }
     return strncmp((const char*)unabto_buffer_get_data(b1), (const char*)unabto_buffer_get_data(b2), unabto_buffer_get_size(b1));
 }
 

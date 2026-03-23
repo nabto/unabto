@@ -1,3 +1,4 @@
+// clang-format off
 /*
  * Copyright (C) Nabto - All Rights Reserved.
  */

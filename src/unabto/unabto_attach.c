@@ -165,7 +165,9 @@ static void verification_init(verification_t* verif) {
 static void verification_add(verification_t* verif, const uint8_t* buf, const uint8_t* end) {
     /*uint32_t old = verif->sum;*/
     const uint8_t* ptr = buf;
-    while (ptr < end) verif->sum += *ptr++;
+    while (ptr < end) {
+        verif->sum += *ptr++;
+    }
     /*NABTO_TRACE("verification_add [" << (void*)verif << "] " << end - buf << " bytes, value before: "
         << std::hex << old << ", after: " << verif->sum << std::dec << '\n' << nabto::BufPH(buf, end - buf));*/
 }
@@ -194,7 +196,9 @@ static size_t verification_complete(verification_t* verif, uint8_t* buf, uint8_t
     // Write the 32bit sum in the last bytes without writing zeroes in bigendian.
     while (1) {
         data[--ix] = (uint8_t)(sum & 0xff);
-        if (sum == 0) break;
+        if (sum == 0) {
+            break;
+        }
         sum >>= 8;
     }
     memcpy(ptr, (const void*)data, sizeof(data));
@@ -212,8 +216,12 @@ bool verification_check(verification_t* verif, const uint8_t* buf, const uint8_t
     uint32_t sum = 0;
     const uint8_t* ptr = buf;
 
-    while (ptr < end && *ptr == NP_PAYLOAD_VERIFY_GSP_FILLERBYTE) ++ptr;
-    while (ptr < end) sum = (sum << 8) + *ptr++;
+    while (ptr < end && *ptr == NP_PAYLOAD_VERIFY_GSP_FILLERBYTE) {
+        ++ptr;
+    }
+    while (ptr < end) {
+        sum = (sum << 8) + *ptr++;
+    }
     if (verif->sum == sum) {
         return true;
     }
@@ -252,7 +260,9 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP) {
         uint16_t code;
         code = nmc.nabtoMainSetup.cryptoSuite;
         ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_NONCE, nmc.context.nonceMicro, nmc.context.nonceSize);
-        if (ptr == NULL) return 0;
+        if (ptr == NULL) {
+            return 0;
+        }
 
         if (nmc.nabtoMainSetup.version) {
             version = nmc.nabtoMainSetup.version;
@@ -264,7 +274,9 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP) {
         ptr = insert_optional_payload(ptr, end, NP_PAYLOAD_TYPE_DESCR, 0, sz + 1);
         ptr = write_forward_u8(ptr, end, NP_PAYLOAD_DESCR_TYPE_VERSION);
         ptr = write_forward_mem(ptr, end, version, sz);
-        if (ptr == NULL) return 0;
+        if (ptr == NULL) {
+            return 0;
+        }
 
         if (nmc.nabtoMainSetup.url) {
             url = nmc.nabtoMainSetup.url;
@@ -272,7 +284,9 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP) {
             ptr = insert_optional_payload(ptr, end, NP_PAYLOAD_TYPE_DESCR, 0, sz + 1);
             ptr = write_forward_u8(ptr, end, NP_PAYLOAD_DESCR_TYPE_URL);
             ptr = write_forward_mem(ptr, end, url, sz);
-            if (ptr == NULL) return 0;
+            if (ptr == NULL) {
+                return 0;
+            }
         } else {
             url = dummy;
         }
@@ -280,7 +294,9 @@ static size_t mk_invite(uint8_t* buf, uint8_t* end, bool toGSP) {
 
         // send encryption capabilities
         ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_CAPABILITY, 0, 9 + 2 * 2);
-        if (ptr == NULL) return 0;
+        if (ptr == NULL) {
+            return 0;
+        }
         ptr = write_forward_u8(ptr, end, 0);    /* type */
         ptr = write_forward_u32(ptr, end, 0l);  // mask
         ptr = write_forward_u32(ptr, end, 0l);  // bits
@@ -346,12 +362,18 @@ static bool send_gsp_attach_rsp(uint16_t seq, const uint8_t* nonceGSP, const uin
     uint8_t* ptr = insert_header(buf, end, 0, nmc.context.gspnsi, U_ATTACH, true, seq, 0, 0);
     uint32_t localIpV4 = 0;
     uint32_t globalIpV4 = 0;
-    if (ptr == NULL) return false;
+    if (ptr == NULL) {
+        return false;
+    }
     ptr = insert_capabilities(ptr, end, nmc.context.clearTextData);
-    if (ptr == NULL) return false;
+    if (ptr == NULL) {
+        return false;
+    }
 
     ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_IPX, 0, 13);
-    if (ptr == NULL) return false;
+    if (ptr == NULL) {
+        return false;
+    }
 
     if (nmc.socketGSPLocalEndpoint.addr.type == NABTO_IP_V4) {
         localIpV4 = nmc.socketGSPLocalEndpoint.addr.addr.ipv4;

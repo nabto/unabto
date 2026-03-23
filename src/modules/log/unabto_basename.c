@@ -21,8 +21,9 @@ const char* unabto_basename(const char* path) {
     p = path + strlen(path);
     while (p > path) {
         ch = *(p - 1);
-        if (ch == '/' || ch == '\\' || ch == ':')
+        if (ch == '/' || ch == '\\' || ch == ':') {
             break;
+        }
         --p;
     }
     return p;

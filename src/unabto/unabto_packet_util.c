@@ -66,8 +66,9 @@ uint16_t nabto_rd_header(const uint8_t* buf, const uint8_t* end, nabto_packet_he
         }
         memcpy(header->nsi_co, buf + hlen, 8);
         hlen += 8;
-    } else
+    } else {
         memset(header->nsi_co, 0, 8);
+    }
 
     /* Read tag from packet header (optional) */
     if (header->flags & NP_PACKET_HDR_FLAG_TAG) {
@@ -76,8 +77,9 @@ uint16_t nabto_rd_header(const uint8_t* buf, const uint8_t* end, nabto_packet_he
         }
         READ_U16(header->tag, buf + hlen);
         hlen += 2;
-    } else
+    } else {
         header->tag = 0;
+    }
 
     header->hlen = hlen;
     return hlen;
@@ -184,10 +186,13 @@ uint8_t* insert_header(uint8_t* buf, const uint8_t* end, uint32_t cpnsi, uint32_
     uint8_t flags = NP_PACKET_HDR_FLAG_NONE;
     size_t required = NP_PACKET_HDR_MIN_BYTELENGTH;
 
-    if (buf == NULL) return NULL;
+    if (buf == NULL) {
+        return NULL;
+    }
 
-    if (rsp)
+    if (rsp) {
         flags |= NP_PACKET_HDR_FLAG_RESPONSE;
+    }
     if (tag) {
         flags |= NP_PACKET_HDR_FLAG_TAG;
         required += 2;
@@ -197,7 +202,9 @@ uint8_t* insert_header(uint8_t* buf, const uint8_t* end, uint32_t cpnsi, uint32_
         required += 8;
     }
 
-    if ((size_t)(end - buf) < required) return NULL;
+    if ((size_t)(end - buf) < required) {
+        return NULL;
+    }
 
     /* Write fixed part of packet header */
     buf = write_forward_u32(buf, end, cpnsi);       /* NSI.cp              */
@@ -229,17 +236,25 @@ uint8_t* insert_data_header(uint8_t* buf, const uint8_t* end, uint32_t nsi, uint
 }
 
 bool insert_packet_length(uint8_t* buf, const uint8_t* end, uint16_t length) {
-    if (buf == NULL || (size_t)(end - buf) < OFS_PACKET_LGT + 2) return false;
+    if (buf == NULL || (size_t)(end - buf) < OFS_PACKET_LGT + 2) {
+        return false;
+    }
     WRITE_U16((uint8_t*)(buf) + OFS_PACKET_LGT, (uint16_t)(length));
     return true;
 }
 
 bool insert_packet_length_from_cursor(uint8_t* packetBegin, const uint8_t* packetEnd) {
     ptrdiff_t length;
-    if (packetBegin == NULL || packetEnd == NULL) return false;
-    if (packetEnd < packetBegin) return false;
+    if (packetBegin == NULL || packetEnd == NULL) {
+        return false;
+    }
+    if (packetEnd < packetBegin) {
+        return false;
+    }
     length = packetEnd - packetBegin;
-    if (length > UINT16_MAX) return false;
+    if (length > UINT16_MAX) {
+        return false;
+    }
     return insert_packet_length(packetBegin, packetEnd, (uint16_t)length);
 }
 
@@ -269,9 +284,13 @@ uint8_t* insert_payload(uint8_t* buf, uint8_t* end, uint8_t type, const uint8_t*
 
 uint8_t* insert_optional_payload(uint8_t* buf, uint8_t* end, uint8_t type, const uint8_t* content, size_t size) {
     uint8_t* res;
-    if (buf == NULL) return NULL;
+    if (buf == NULL) {
+        return NULL;
+    }
     res = insert_payload(buf, end, type, content, size);
-    if (res == NULL) return NULL;
+    if (res == NULL) {
+        return NULL;
+    }
     *(buf + 1) |= NP_PAYLOAD_HDR_FLAG_OPTIONAL; /* modify payload header flags */
 
     return res; /* return end of payload */

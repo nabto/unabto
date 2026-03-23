@@ -689,8 +689,9 @@ void AES_decrypt(const AES_CTX *ctx, uint32_t *data) {
     const uint32_t *k = ctx->ks + ((ptrdiff_t)(rounds + 1) * 4);
 
     /* pre-round key addition */
-    for (row = 4; row > 0; row--)
+    for (row = 4; row > 0; row--) {
         data[row - 1] ^= *(--k);
+    }
 
     /* Decrypt one block */
     for (curr_rnd = 0; curr_rnd < rounds; curr_rnd++) {
@@ -719,12 +720,14 @@ void AES_decrypt(const AES_CTX *ctx, uint32_t *data) {
                 xt2 ^= a0 ^ a1 ^ a3 ^ xt4 ^ xt6;
                 xt3 ^= a0 ^ a1 ^ a2 ^ xt5 ^ xt6;
                 tmp[row - 1] = ((xt0 << 24) | (xt1 << 16) | (xt2 << 8) | xt3);
-            } else
+            } else {
                 tmp[row - 1] = ((a0 << 24) | (a1 << 16) | (a2 << 8) | a3);
+            }
         }
 
-        for (row = 4; row > 0; row--)
+        for (row = 4; row > 0; row--) {
             data[row - 1] = tmp[row - 1] ^ *(--k);
+        }
     }
 }
 

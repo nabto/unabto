@@ -41,7 +41,9 @@ struct fake_queue_event {
 #endif
 
 void unabto_printf_unabto_config(FILE *f, const char *progname) {
-    if (!progname) progname = "";
+    if (!progname) {
+        progname = "";
+    }
     fprintf(f, "%s: unabto_config.h\n", progname);
     fprintf(f, "/*=========================================================*/\n");
     fprintf(f, "#define NABTO_ENABLE_REMOTE_CONNECTION            %d\n", NABTO_ENABLE_REMOTE_CONNECTION);
@@ -81,7 +83,9 @@ void unabto_printf_unabto_config(FILE *f, const char *progname) {
 }
 
 void unabto_printf_memory_sizes(FILE *f, const char *progname) {
-    if (!progname) progname = "";
+    if (!progname) {
+        progname = "";
+    }
     fprintf(f, "%s: Sizes\n", progname);
     fprintf(f, "#define NABTO_COMMUNICATION_BUFFER_SIZE %u\n", NABTO_COMMUNICATION_BUFFER_SIZE);
 #if NABTO_ENABLE_CONNECTIONS

@@ -17,7 +17,9 @@ void log_buffer(const uint8_t* buf, size_t buflen) {
         printf("%02x  ", (unsigned int)i * 16);
         for (j = 0; j < 16 && i * 16 + j < buflen; j++) {
             printf("%02x", buf[i * 16 + j]);
-            if (j < 15) printf(" ");
+            if (j < 15) {
+                printf(" ");
+            }
         }
         printf("\n");
     }
