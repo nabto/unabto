@@ -60,7 +60,7 @@ static void udpRecv(void* arg, struct udp_pcb* pcb, struct pbuf* p, struct ip_ad
 
 /******************************************************************************/
 void nabto_socket_set_invalid(nabto_socket_t* socket) {
-    socket = NABTO_INVALID_SOCKET;
+    *socket = NABTO_INVALID_SOCKET;
 }
 
 /**

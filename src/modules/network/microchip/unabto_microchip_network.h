@@ -11,7 +11,7 @@
 typedef UDP_SOCKET nabto_socket_t;
 
 void nabto_socket_set_invalid(nabto_socket_t* socket) {
-    socket = NABTO_INVALID_SOCKET;
+    *socket = NABTO_INVALID_SOCKET;
 }
 bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2) {
     return *s1 == *s2;

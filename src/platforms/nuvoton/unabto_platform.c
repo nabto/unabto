@@ -46,7 +46,7 @@ void nabto_random(uint8_t* buf, size_t len) {
 }
 
 void nabto_socket_set_invalid(nabto_socket_t* socket) {
-    socket = NABTO_INVALID_SOCKET;
+    *socket = NABTO_INVALID_SOCKET;
 }
 
 /**

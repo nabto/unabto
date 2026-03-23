@@ -155,7 +155,7 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* socket) {
 }
 
 void nabto_socket_set_invalid(nabto_socket_t* socket) {
-    socket = NABTO_INVALID_SOCKET;
+    *socket = NABTO_INVALID_SOCKET;
 }
 
 bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2) {
