@@ -114,7 +114,7 @@ uint8_t readLight(uint8_t id) {
 // Holds one saved request
 static application_request* saved_app_req = 0;
 
-application_event_result application_event(application_request* request, uanbto_query_request* r_b, unabto_query_response* w_b) {
+application_event_result application_event(application_request* request, unabto_query_request* r_b, unabto_query_response* w_b) {
     if (request->queryId == 1 || request->queryId == 2 || request->queryId == 3) {
         NABTO_LOG_INFO(("Application event: Respond immediately"));
         return demo_application(request, r_b, w_b);
