@@ -27,7 +27,8 @@ static bool set_default_prov_host(provision_context_t* context) {
 
 static bool set_default_prov_apikey(provision_context_t* context) {
 #ifdef NABTO_PROVISION_API_KEY
-    context->api_key_ = NABTO_PROVISION_API_KEY return true;
+    context->api_key_ = NABTO_PROVISION_API_KEY;
+    return true;
 #else
     return false;
 #endif
@@ -35,7 +36,8 @@ static bool set_default_prov_apikey(provision_context_t* context) {
 
 static bool set_default_prov_file(provision_context_t* context) {
 #ifdef NABTO_PROVISION_FILE
-    context->file_ = NABTO_PROVISION_FILE return true;
+    context->file_ = NABTO_PROVISION_FILE;
+    return true;
 #else
     return false;
 #endif
