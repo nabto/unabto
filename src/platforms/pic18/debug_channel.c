@@ -44,81 +44,141 @@ void debug_channel_uninitialize(void) {
     TRISBbits.TRISB6 = 1;
     LATBbits.LATB6 = 0;
 }
+// clang-format off
+void debug_channel_write(uint8_t value)
+{
+  critical_section_enter();
 
-void debug_channel_write(uint8_t value) {
-    critical_section_enter();
+  tempValue = value;
 
-    tempValue = value;
+  _asm
 
-    _asm
+  // start bit
+startbit:
+  bcf LATB, 6, 0
+  nop
 
-        // start bit
-        startbit : bcf LATB, 6, 0 nop
+  // data bits (lsb first)
 
-                                    // data bits (lsb first)
+  // bit 0
+bit0:
+  BIT_STRETCH
+  //            rrcf value, 1, 0
+  btfss tempValue, 0, 0
+  bra bit0_low
+bit0_high:
+  nop
+  bsf LATB, 6, 0
+  bra bit1
+bit0_low:
+  bcf LATB, 6, 0
+  nop
+  nop
+  // bit 1
+bit1:
+  BIT_STRETCH
+  btfss tempValue, 1, 0
+  bra bit1_low
+bit1_high:
+  nop
+  bsf LATB, 6, 0
+  bra bit2
+bit1_low:
+  bcf LATB, 6, 0
+  nop
+  nop
+  // bit 2
+bit2:
+  BIT_STRETCH
+  btfss tempValue, 2, 0
+  bra bit2_low
+bit2_high:
+  nop
+  bsf LATB, 6, 0
+  bra bit3
+bit2_low:
+  bcf LATB, 6, 0
+  nop
+  nop
+  // bit 3
+bit3:
+  BIT_STRETCH
+  btfss tempValue, 3, 0
+  bra bit3_low
+bit3_high:
+  nop
+  bsf LATB, 6, 0
+  bra bit4
+bit3_low:
+  bcf LATB, 6, 0
+  nop
+  nop
+  // bit 4
+bit4:
+  BIT_STRETCH
+  btfss tempValue, 4, 0
+  bra bit4_low
+bit4_high:
+  nop
+  bsf LATB, 6, 0
+  bra bit5
+bit4_low:
+  bcf LATB, 6, 0
+  nop
+  nop
+  // bit 5
+bit5:
+  BIT_STRETCH
+  btfss tempValue, 5, 0
+  bra bit5_low
+bit5_high:
+  nop
+  bsf LATB, 6, 0
+  bra bit6
+bit5_low:
+  bcf LATB, 6, 0
+  nop
+  nop
+  // bit 6
+bit6:
+  BIT_STRETCH
+  btfss tempValue, 6, 0
+  bra bit6_low
+bit6_high:
+  nop
+  bsf LATB, 6, 0
+  bra bit7
+bit6_low:
+  bcf LATB, 6, 0
+  nop
+  nop
+  // bit 7
+bit7:
+  BIT_STRETCH
+  btfss tempValue, 7, 0
+  bra bit7_low
+bit7_high:
+  nop
+  bsf LATB, 6, 0
+  bra stopbit
+bit7_low:
+  bcf LATB, 6, 0
+  nop
+  nop
 
-                                    // bit 0
-                                    bit0 : BIT_STRETCH
-                                               //            rrcf value, 1, 0
-                                               btfss tempValue,
-                                           0, 0 bra bit0_low bit0_high : nop
-                                                                             bsf LATB,
-                                                                         6, 0 bra bit1 bit0_low : bcf LATB, 6, 0 nop nop
-                                                                                                                   // bit 1
-                                                                                                                   bit1 : BIT_STRETCH
-                                                                                                                              btfss tempValue,
-                                                                                                                          1, 0 bra bit1_low bit1_high : nop
-                                                                                                                                                            bsf LATB,
-                                                                                                                                                        6, 0 bra bit2 bit1_low : bcf LATB, 6, 0 nop nop
-                                                                                                                                                                                                  // bit 2
-                                                                                                                                                                                                  bit2 : BIT_STRETCH
-                                                                                                                                                                                                             btfss tempValue,
-                                                                                                                                                                                                         2, 0 bra bit2_low bit2_high : nop
-                                                                                                                                                                                                                                           bsf LATB,
-                                                                                                                                                                                                                                       6, 0 bra bit3 bit2_low : bcf LATB, 6, 0 nop nop
-                                                                                                                                                                                                                                                                                 // bit 3
-                                                                                                                                                                                                                                                                                 bit3 : BIT_STRETCH
-                                                                                                                                                                                                                                                                                            btfss tempValue,
-                                                                                                                                                                                                                                                                                        3, 0 bra bit3_low bit3_high : nop
-                                                                                                                                                                                                                                                                                                                          bsf LATB,
-                                                                                                                                                                                                                                                                                                                      6, 0 bra bit4 bit3_low : bcf LATB, 6, 0 nop nop
-                                                                                                                                                                                                                                                                                                                                                                // bit 4
-                                                                                                                                                                                                                                                                                                                                                                bit4 : BIT_STRETCH
-                                                                                                                                                                                                                                                                                                                                                                           btfss tempValue,
-                                                                                                                                                                                                                                                                                                                                                                       4, 0 bra bit4_low bit4_high : nop
-                                                                                                                                                                                                                                                                                                                                                                                                         bsf LATB,
-                                                                                                                                                                                                                                                                                                                                                                                                     6, 0 bra bit5 bit4_low : bcf LATB, 6, 0 nop nop
-                                                                                                                                                                                                                                                                                                                                                                                                                                               // bit 5
-                                                                                                                                                                                                                                                                                                                                                                                                                                               bit5 : BIT_STRETCH
-                                                                                                                                                                                                                                                                                                                                                                                                                                                          btfss tempValue,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                      5, 0 bra bit5_low bit5_high : nop
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        bsf LATB,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    6, 0 bra bit6 bit5_low : bcf LATB, 6, 0 nop nop
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              // bit 6
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              bit6 : BIT_STRETCH
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         btfss tempValue,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     6, 0 bra bit6_low bit6_high : nop
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       bsf LATB,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   6, 0 bra bit7 bit6_low : bcf LATB, 6, 0 nop nop
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             // bit 7
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             bit7 : BIT_STRETCH
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        btfss tempValue,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    7, 0 bra bit7_low bit7_high : nop
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      bsf LATB,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  6, 0 bra stopbit bit7_low : bcf LATB, 6, 0 nop nop
+  // stop bit
+stopbit:
+  BIT_STRETCH
+  nop
+  nop
+  nop
+  bsf LATB, 6, 0
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               // stop bit
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               stopbit : BIT_STRETCH
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             nop
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 nop
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     nop
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         bsf LATB,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         6, 0
+  _endasm
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         _endasm
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         critical_section_exit();
+  critical_section_exit();
 }
+// clang-format on
 
 int _user_putc(char c) {
     debug_channel_write(c);

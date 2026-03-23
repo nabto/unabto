@@ -4,9 +4,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-if ! command -v clang-format &>/dev/null; then
-    echo "Error: clang-format not found on PATH" >&2
-    echo "Install with: sudo apt-get install clang-format" >&2
+CLANG_FORMAT="${CLANG_FORMAT:-clang-format-18}"
+
+if ! command -v "$CLANG_FORMAT" &>/dev/null; then
+    echo "Error: $CLANG_FORMAT not found on PATH" >&2
+    echo "Install with: sudo apt-get install clang-format-18" >&2
     exit 1
 fi
 
@@ -15,9 +17,9 @@ FILES=$(find "$PROJECT_DIR/src" "$PROJECT_DIR/apps" "$PROJECT_DIR/test" \
 
 if [ "${1:-}" = "--check" ]; then
     echo "Checking formatting..."
-    clang-format --dry-run --Werror $FILES
+    $CLANG_FORMAT --dry-run --Werror $FILES
 else
     echo "Formatting files..."
-    clang-format -i $FILES
+    $CLANG_FORMAT -i $FILES
     echo "Done."
 fi

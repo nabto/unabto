@@ -670,7 +670,7 @@ void AES_encrypt(const AES_CTX *ctx, uint32_t *data) {
            the MixColumn operation, which must be atomic...*/
         for (row = 0; row < 4; row++) {
             //            NABTO_LOG_TRACE(("roundkey %lu data[%i]: %lu", (uint32_t)*k, row, (uint32_t)data[row]));
-            data[row] = tmp[row] ^ (uint32_t)*(k++);
+            data[row] = tmp[row] ^ (uint32_t) * (k++);
             //            NABTO_LOG_TRACE(("after data[%i]: %lu", row, (uint32_t)data[row]));
         }
     }
