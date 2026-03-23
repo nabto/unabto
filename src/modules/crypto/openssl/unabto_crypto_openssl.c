@@ -121,6 +121,6 @@ void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keys_size,
     EVP_MAC_free(mac_alg);
 }
 
-bool unabto_constant_time_compare(const uint8_t *a, const uint8_t *b, size_t len) {
+bool unabto_constant_time_compare(const uint8_t* a, const uint8_t* b, size_t len) {
     return CRYPTO_memcmp(a, b, len) == 0;
 }
