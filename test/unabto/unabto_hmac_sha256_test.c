@@ -14,17 +14,17 @@ bool test(const char *vector, unsigned char *digest,
     char output[2 * UNABTO_SHA256_DIGEST_LENGTH + 1];
     int i;
 
-    output[2 * digest_size] = '\0';
+    output[(size_t)2 * digest_size] = '\0';
 
     for (i = 0; i < (int)digest_size; i++) {
-        snprintf(output + 2 * i, 3, "%02x", digest[i]);
+        snprintf(output + (size_t)2 * i, 3, "%02x", digest[i]);
     }
 
     NABTO_LOG_INFO(("H: %s", output));
 #if __18CXX
     if (strcmpram2pgm(vector, output)) {
 #else
-    if (strcmp(vector, output)) {
+    if (strcmp(vector, output) != 0) {
 #endif
         NABTO_LOG_INFO(("Test failed."));
         return false;

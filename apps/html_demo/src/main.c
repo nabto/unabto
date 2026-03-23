@@ -9,7 +9,7 @@
 void crossSleep(int ms) {
     struct timespec sleepTime;
     sleepTime.tv_sec = 0;
-    sleepTime.tv_nsec = ms * 1000000;
+    sleepTime.tv_nsec = (long)ms * 1000000;
     nanosleep(&sleepTime, NULL);
 }
 
@@ -183,6 +183,8 @@ application_event_result application_event(application_request* appreq, unabto_q
             }
             return AER_REQ_RESPONSE_READY;
         }
+        default:
+            break;
     }
     return AER_REQ_NO_QUERY_ID;
 }

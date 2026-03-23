@@ -60,7 +60,7 @@
 
 // Check if logging is enabled in this module and at this severity level. Overriden by the NABTO_LOG_ALL flag.
 #ifndef NABTO_LOG_CHECK
-#define NABTO_LOG_CHECK(severity) ((NABTO_ENABLE_LOGGING) && ((NABTO_LOG_ALL) || (NABTO_LOG_ALL_FATALS && (severity & NABTO_LOG_SEVERITY_FATAL)) || ((NABTO_LOG_MODULE_CHECK) && (NABTO_LOG_SEVERITY_CHECK(severity)))))
+#define NABTO_LOG_CHECK(severity) ((NABTO_ENABLE_LOGGING) && ((NABTO_LOG_ALL) || (NABTO_LOG_ALL_FATALS && ((severity) & NABTO_LOG_SEVERITY_FATAL)) || ((NABTO_LOG_MODULE_CHECK) && (NABTO_LOG_SEVERITY_CHECK(severity)))))
 #endif
 
 /**

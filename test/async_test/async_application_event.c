@@ -83,6 +83,8 @@ application_event_result application_event(application_request* request, unabto_
             init_queue_entry(entry, request, expire);
             return AER_REQ_ACCEPTED;
         }
+        default:
+            break;
     }
     return AER_REQ_INV_QUERY_ID;
 }

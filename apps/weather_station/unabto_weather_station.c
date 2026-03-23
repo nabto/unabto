@@ -21,15 +21,15 @@ int32_t calcTemperature(int index) {
     static uint32_t t = 0;
     switch (index) {
         case 0:
-            return 36 + ++t;
+            return (int32_t)(36 + ++t);
         case 1:
-            return 199 + ++t;
+            return (int32_t)(199 + ++t);
         case 2:
-            return -234 + ++t;
+            return (int32_t)(-234 + ++t);
         case 3:
-            return -6 + ++t;
+            return (int32_t)(-6 + ++t);
         case 4:
-            return ++t;
+            return (int32_t)(++t);
         default:
             return 999;
     }
@@ -90,8 +90,8 @@ application_event_result weather_station_application(application_request* reques
                 // read 4 bytes from the input buffer
                 if (!unabto_query_read_uint32(read_buffer, &ix)) return AER_REQ_TOO_SMALL;
                 // write 4 bytes to the output buffer
-                temp = getTemperature(ix);
-                if (!unabto_query_write_uint32(write_buffer, temp)) return AER_REQ_RSP_TOO_LARGE;
+                temp = getTemperature((int)ix);
+                if (!unabto_query_write_uint32(write_buffer, (uint32_t)temp)) return AER_REQ_RSP_TOO_LARGE;
                 return AER_REQ_RESPONSE_READY;
             }
 
@@ -130,6 +130,8 @@ application_event_result weather_station_application(application_request* reques
 
         case 4:
             return AER_REQ_RESPONSE_READY;
+        default:
+            break;
     }
     /**
      * if no opcode matched return it as an error
@@ -263,7 +265,7 @@ unabto_buffer* get_event_buffer2(size_t maximumLength) {
         snprintf((char*)body, sizeof(body), "%d", lastTemperature_);
 
         // limit number of bytes to what uNabto indicates it can handle
-        if ((size_t)(BODYLENGTH + OVERHEAD) > maximumLength) {
+        if (((size_t)BODYLENGTH + (size_t)OVERHEAD) > maximumLength) {
             return NULL;
         }
 

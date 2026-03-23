@@ -34,7 +34,7 @@ struct nabto_socket_t {
     enum nabto_socket_type type;
 };
 
-#define NABTO_INVALID_SOCKET -1
+#define NABTO_INVALID_SOCKET (-1)
 
 #ifdef __cplusplus
 extern "C" {

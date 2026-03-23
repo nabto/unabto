@@ -25,7 +25,7 @@ void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keys_size,
     uint16_t fill = 0;
     uint16_t num;
     const uint8_t *key_used;
-    uint8_t i;
+    uint16_t i;
     uint8_t key_temp[SHA256_BLOCK_LENGTH];
     uint8_t digest_temp[SHA256_DIGEST_LENGTH];
 

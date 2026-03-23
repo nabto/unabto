@@ -189,7 +189,7 @@ int syslog_severity_from_severity(uint32_t severity) {
         case NABTO_LOG_SEVERITY_INFO:
             return SYSLOG_SEVERITY_INFORMATION;
         case NABTO_LOG_SEVERITY_DEBUG:
-            return SYSLOG_SEVERITY_DEBUG;
+            return SYSLOG_SEVERITY_DEBUG;  // NOLINT(bugprone-branch-clone)
         case NABTO_LOG_SEVERITY_TRACE:
             return SYSLOG_SEVERITY_DEBUG;
         case NABTO_LOG_SEVERITY_BUFFERS:

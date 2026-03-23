@@ -148,7 +148,7 @@ bool unabto_query_write_list_start(unabto_query_response* queryResponse, unabto_
         return false;
     }
 
-    *listCtx = (unabto_list_ctx*)UNABTO_ABUFFER_GET_HEAD(queryResponse);
+    *listCtx = (unabto_list_ctx)UNABTO_ABUFFER_GET_HEAD(queryResponse);
     unabto_query_write_uint16(queryResponse, 0);  // won't fail
     return true;
 }

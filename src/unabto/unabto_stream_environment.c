@@ -57,7 +57,7 @@ bool build_and_send_packet(struct nabto_stream_s* stream, uint8_t type, uint32_t
 
     if (sackData && sackData->nPairs > 0) {
         uint8_t i;
-        ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_SACK, 0, 8 * sackData->nPairs);
+        ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_SACK, 0, (size_t)8 * sackData->nPairs);
         for (i = 0; i < sackData->nPairs; i++) {
             ptr = write_forward_u32(ptr, end, sackData->pairs[i].start);
             ptr = write_forward_u32(ptr, end, sackData->pairs[i].end);

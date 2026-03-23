@@ -184,13 +184,13 @@ bool nabto_crypto_init_key(nabto_crypto_context* cryptoContext, bool initiator) 
     if (initiator) {
         cryptoContext->encryptkey = cryptoContext->key;
         cryptoContext->decryptkey = cryptoContext->key + CRYPT_KEY_LENGTH;
-        cryptoContext->ourhmackey = cryptoContext->key + 2 * CRYPT_KEY_LENGTH;
-        cryptoContext->theirhmackey = cryptoContext->key + 2 * CRYPT_KEY_LENGTH + HMAC_KEY_LENGTH;
+        cryptoContext->ourhmackey = cryptoContext->key + (ptrdiff_t)2 * CRYPT_KEY_LENGTH;
+        cryptoContext->theirhmackey = cryptoContext->key + (ptrdiff_t)2 * CRYPT_KEY_LENGTH + HMAC_KEY_LENGTH;
     } else {
         cryptoContext->decryptkey = cryptoContext->key;
         cryptoContext->encryptkey = cryptoContext->key + CRYPT_KEY_LENGTH;
-        cryptoContext->theirhmackey = cryptoContext->key + 2 * CRYPT_KEY_LENGTH;
-        cryptoContext->ourhmackey = cryptoContext->key + 2 * CRYPT_KEY_LENGTH + HMAC_KEY_LENGTH;
+        cryptoContext->theirhmackey = cryptoContext->key + (ptrdiff_t)2 * CRYPT_KEY_LENGTH;
+        cryptoContext->ourhmackey = cryptoContext->key + (ptrdiff_t)2 * CRYPT_KEY_LENGTH + HMAC_KEY_LENGTH;
     }
     return true;
     /* #else */

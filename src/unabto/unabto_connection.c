@@ -288,7 +288,7 @@ bool connect_event(message_event* event, nabto_packet_header* hdr) {
 
     NABTO_LOG_TRACE(("U_CONNECT: Searching for hdr->nsi_cp=%" PRIu32 " (should not be found)", hdr->nsi_cp));
     if (nabto_find_connection(hdr->nsi_cp) == NULL) {
-        uint32_t nsi;
+        uint32_t nsi = 0;
         uint32_t ec = 0;
         nabto_connect* con = nabto_init_connection(hdr, &nsi, &ec, isLocal);
         if (con) {
@@ -367,11 +367,7 @@ static void send_rendezvous_socket(nabto_socket_t socket, nabto_connect* con, ui
         }
         len = ptr - buf;
 
-        if (seq) {
-            NABTO_LOG_DEBUG((PRInsi " RENDEZVOUS Send to " PRIep ": seq=%" PRIu16, MAKE_NSI_PRINTABLE(0, con->spnsi, 0), MAKE_EP_PRINTABLE(*dest), seq));
-        } else {
-            NABTO_LOG_DEBUG((PRInsi " RENDEZVOUS Send to " PRIep ": seq=0", MAKE_NSI_PRINTABLE(0, con->spnsi, 0), MAKE_EP_PRINTABLE(*dest)));
-        }
+        NABTO_LOG_DEBUG((PRInsi " RENDEZVOUS Send to " PRIep ": seq=%" PRIu16, MAKE_NSI_PRINTABLE(0, con->spnsi, 0), MAKE_EP_PRINTABLE(*dest), seq));
         if (dest->addr.type != NABTO_IP_NONE && dest->port != 0) {
             nabto_write(socket, buf, len, &dest->addr, dest->port);
         } else {

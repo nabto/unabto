@@ -20,7 +20,7 @@
 #endif
 
 unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, const size_t len, size_t* read) {
-    int status;
+    ssize_t status;
     int err;
 
     status = recv(sock->socket, buf, len, 0);
@@ -36,16 +36,16 @@ unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, con
         NABTO_LOG_TRACE(("TCP connection closed by peer"));
         return UTS_EOF;
     } else {
-        *read = status;
+        *read = (size_t)status;
         return UTS_OK;
     }
 }
 
 unabto_tcp_status unabto_tcp_write(struct unabto_tcp_socket* sock, const void* buf, const size_t len, size_t* written) {
-    int status;
+    ssize_t status;
     NABTO_LOG_TRACE(("Writing %i bytes to tcp socket", len));
     status = send(sock->socket, buf, len, MSG_NOSIGNAL);
-    NABTO_LOG_TRACE(("tcp send status: %i", status));
+    NABTO_LOG_TRACE(("tcp send status: %zd", status));
     if (status < 0) {
         int err = errno;
         if ((err == EAGAIN) || err == EWOULDBLOCK) {
@@ -55,7 +55,7 @@ unabto_tcp_status unabto_tcp_write(struct unabto_tcp_socket* sock, const void* b
             return UTS_FAILED;
         }
     }
-    *written = status;
+    *written = (size_t)status;
     return UTS_OK;
 }
 

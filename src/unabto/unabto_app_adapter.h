@@ -40,7 +40,7 @@ typedef enum {
 } naf_state;
 
 /// The data included in a naf_handle
-struct naf_handle_s {
+struct naf_handle_s {                        // NOLINT(clang-analyzer-optin.performance.Padding)
     naf_state state;                         ///< state of the entry.
     application_request applicationRequest;  ///< the request part seen by the application
     nabto_packet_header header;              ///< the request packet header

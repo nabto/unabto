@@ -192,7 +192,7 @@ static void send_ack(nabto_connect* con, nabto_packet_header* hdr) {
 /******************************************************************************/
 
 bool send_exception(nabto_connect* con, nabto_packet_header* hdr, uint32_t aer) {
-    uint8_t buf[SIZE_HEADER_MAX + SIZE_PAYLOAD_HEADER + SIZE_CODE + 48];  // maximum length cryptosuites implemented as of aug 2012
+    uint8_t buf[SIZE_HEADER_MAX + SIZE_PAYLOAD_HEADER + SIZE_CODE + 48] = {0};  // maximum length cryptosuites implemented as of aug 2012
     uint8_t* end = buf + sizeof(buf);
     uint8_t* cryptoPayloadStart;
     uint8_t* ptr = buf;

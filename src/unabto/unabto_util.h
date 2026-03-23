@@ -31,12 +31,12 @@
  * @param size number of bytes to copy
  * @return
  */
-#define READ(dst, src, size)         \
-    do {                             \
-        size_t i;                    \
-        for (i = 0; i < size; i++) { \
-            dst[i] = src[i];         \
-        }                            \
+#define READ(dst, src, size)           \
+    do {                               \
+        size_t i;                      \
+        for (i = 0; i < (size); i++) { \
+            (dst)[i] = (src)[i];       \
+        }                              \
     } while (0)
 #endif
 
@@ -47,9 +47,9 @@
  * @param src  source address
  * @return
  */
-#define READ_U8(u8, src)         \
-    do {                         \
-        u8 = *((uint8_t*)(src)); \
+#define READ_U8(u8, src)           \
+    do {                           \
+        (u8) = *((uint8_t*)(src)); \
     } while (0)
 #endif
 

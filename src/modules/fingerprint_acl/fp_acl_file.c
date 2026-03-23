@@ -183,7 +183,7 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
 }
 
 // Read users from version 1 and version 2 of the acl file format.
-static fp_acl_db_status convert_users_from_version_1_2(FILE* aclFile, uint8_t* buffer, uint8_t* ptr, struct fp_mem_state* temp_acl, uint32_t numUsers) {
+static fp_acl_db_status convert_users_from_version_1_2(FILE* aclFile, uint8_t* buffer, struct fp_mem_state* temp_acl, uint32_t numUsers) {
     uint32_t i;
     for (i = 0; i < numUsers && i < FP_MEM_ACL_ENTRIES; i++) {
         uint32_t fp_size = 16;
@@ -221,7 +221,6 @@ static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uin
 
     uint8_t buffer[FP_ACL_RECORD_SIZE];
     size_t nread;
-    uint8_t* ptr;
     uint32_t numUsers;
     fp_acl_db_status status;
 
@@ -245,7 +244,7 @@ static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uin
             }
             temp_acl.settings.firstUserPermissions = 0;
 
-            status = convert_users_from_version_1_2(aclFile, buffer, ptr, &temp_acl, numUsers);
+            status = convert_users_from_version_1_2(aclFile, buffer, &temp_acl, numUsers);
             if (status != FP_ACL_DB_OK) {
                 return status;
             }
@@ -271,7 +270,7 @@ static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uin
                 return FP_ACL_DB_LOAD_FAILED;
             }
 
-            status = convert_users_from_version_1_2(aclFile, buffer, ptr, &temp_acl, numUsers);
+            status = convert_users_from_version_1_2(aclFile, buffer, &temp_acl, numUsers);
             if (status != FP_ACL_DB_OK) {
                 return status;
             }
@@ -339,6 +338,8 @@ static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uin
             }
             break;
         }
+        default:
+            break;
     }
 
     return fp_acl_file_save_file(&temp_acl);

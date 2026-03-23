@@ -82,6 +82,8 @@ application_event_result application_event(application_request* request, unabto_
 
             return AER_REQ_RESPONSE_READY;
         }
+        default:
+            break;
     }
     return AER_REQ_INV_QUERY_ID;
 }

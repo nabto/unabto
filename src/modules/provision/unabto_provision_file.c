@@ -43,7 +43,7 @@ bool unabto_provision_parse_data(nabto_main_setup *nms, char *data, char *key, s
 
     tok = strtok(NULL, delim);
     size_t tok_len = strlen(tok);
-    if (tok_len != PRE_SHARED_KEY_SIZE * 2) {
+    if (tok_len != (size_t)PRE_SHARED_KEY_SIZE * 2) {
         NABTO_LOG_ERROR(("Invalid key in provision string: %s", tok));
         return false;
     }

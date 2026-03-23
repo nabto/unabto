@@ -66,7 +66,7 @@ typedef struct unabto_stream_stats_s {
 } unabto_stream_stats;
 
 #ifndef UNABTO_STREAM_STATS_MAKE_PRINTABLE
-#define UNABTO_STREAM_STATS_MAKE_PRINTABLE(stats) (stats.sentPackets), (stats.sentBytes), (stats.sentResentPackets), (stats.receivedPackets), (stats.receivedBytes), (stats.receivedResentPackets), (stats.reorderedOrLostPackets), (stats.timeouts), (stats.rttAvg), (stats.cwndAvg), (stats.ssThresholdAvg), (stats.flightSizeAvg), (stats.sendSegmentAllocFailures), (stats.recvWindowSize), (stats.recvSegmentSize), (stats.sendWindowSize), (stats.sendSegmentSize)
+#define UNABTO_STREAM_STATS_MAKE_PRINTABLE(stats) ((stats).sentPackets), ((stats).sentBytes), ((stats).sentResentPackets), ((stats).receivedPackets), ((stats).receivedBytes), ((stats).receivedResentPackets), ((stats).reorderedOrLostPackets), ((stats).timeouts), ((stats).rttAvg), ((stats).cwndAvg), ((stats).ssThresholdAvg), ((stats).flightSizeAvg), ((stats).sendSegmentAllocFailures), ((stats).recvWindowSize), ((stats).recvSegmentSize), ((stats).sendWindowSize), ((stats).sendSegmentSize)
 #endif
 
 #ifndef UNABTO_STREAM_STATS_PRI
