@@ -28,7 +28,14 @@ bool unabto_truncated_hmac_sha256_verify_integrity(
                                messages, 1,
                                hmac, TRUNCATED_HMAC_SHA256_LENGTH);  //sizeof(hmac));
 
-    return memcmp((const uint8_t *)hmac, integrity, TRUNCATED_HMAC_SHA256_LENGTH) == 0;
+    {
+        volatile uint8_t result = 0;
+        uint16_t i;
+        for (i = 0; i < TRUNCATED_HMAC_SHA256_LENGTH; i++) {
+            result |= hmac[i] ^ integrity[i];
+        }
+        return result == 0;
+    }
 }
 
 #endif
