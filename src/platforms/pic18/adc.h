@@ -16,7 +16,7 @@ void adc_begin_read(uint8_t channel);
 bool adc_end_read(uint16_t* value);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

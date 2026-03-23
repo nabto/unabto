@@ -30,7 +30,7 @@
 /************ The Time Handling basics (PC Device), Interface *************/
 
 /** The timestamp definition. @return */
-typedef UINT64  nabto_stamp_t;
+typedef UINT64 nabto_stamp_t;
 typedef int64_t nabto_stamp_diff_t;
 
 /**
@@ -38,7 +38,7 @@ typedef int64_t nabto_stamp_diff_t;
  * @param msec  number of milliseconds
  * @return      the stamp difference
  */
-#define nabtoMsec2Stamp(msec)   (msec)
+#define nabtoMsec2Stamp(msec) (msec)
 
 #ifndef lengthof
 #define lengthof(x) (sizeof((x)) / sizeof((x)[0]))

@@ -18,5 +18,4 @@ enum {
 // #define MAKE_IP_PRINTABLE(ip) (uint8_t)(ip >> 24), (uint8_t)(ip >> 16), (uint8_t)(ip >> 8), (uint8_t)(ip)
 #define MAKE_IP_PRINTABLE(ip) !!!!
 
-
 #endif

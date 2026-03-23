@@ -16,24 +16,23 @@
 extern "C" {
 #endif
 
-#define PRINT_ENDPOINT 1   /**< enable printing of endpoints */
+#define PRINT_ENDPOINT 1 /**< enable printing of endpoints */
 
 /** Print debugging info.
  * @param loglevel  logging level
  * @param cmsg      the message
  */
 #ifndef NABTO_LOG_BASIC_PRINT
-#define NABTO_LOG_BASIC_PRINT(loglevel, cmsg) \
-do {                                          \
-    unabto_log_header(__FILE__, __LINE__);       \
-    printf cmsg;                              \
-    printf("\n");                             \
-} while(0)
+#define NABTO_LOG_BASIC_PRINT(loglevel, cmsg)  \
+    do {                                       \
+        unabto_log_header(__FILE__, __LINE__); \
+        printf cmsg;                           \
+        printf("\n");                          \
+    } while (0)
 #endif
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

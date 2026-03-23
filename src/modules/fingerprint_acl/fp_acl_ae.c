@@ -5,13 +5,11 @@
 
 struct fp_acl_db aclDb;
 
-void fp_acl_ae_init(struct fp_acl_db* db)
-{
+void fp_acl_ae_init(struct fp_acl_db* db) {
     aclDb = *db;
 }
 
-static bool read_fingerprint(unabto_query_request* read_buffer, struct unabto_fingerprint* fp)
-{
+static bool read_fingerprint(unabto_query_request* read_buffer, struct unabto_fingerprint* fp) {
     uint8_t* list;
     uint16_t length;
     if (!unabto_query_read_uint8_list(read_buffer, &list, &length)) {
@@ -26,8 +24,7 @@ static bool read_fingerprint(unabto_query_request* read_buffer, struct unabto_fi
 }
 
 // copy a string to out ensure it's null terminated.
-static bool read_string_null_terminated(unabto_query_request* read_buffer, char* out, size_t outlen)
-{
+static bool read_string_null_terminated(unabto_query_request* read_buffer, char* out, size_t outlen) {
     uint8_t* list;
     uint16_t length;
     if (!unabto_query_read_uint8_list(read_buffer, &list, &length)) {
@@ -36,17 +33,15 @@ static bool read_string_null_terminated(unabto_query_request* read_buffer, char*
 
     memset(out, 0, outlen);
 
-    memcpy(out, list, MIN(length, outlen-1));
+    memcpy(out, list, MIN(length, outlen - 1));
     return true;
 }
 
-static bool write_fingerprint(unabto_query_response* write_buffer, struct unabto_fingerprint* fp)
-{
+static bool write_fingerprint(unabto_query_response* write_buffer, struct unabto_fingerprint* fp) {
     return unabto_query_write_uint8_list(write_buffer, fp->data, FINGERPRINT_LENGTH);
 }
 
-static bool write_string(unabto_query_response* write_buffer, const char* string)
-{
+static bool write_string(unabto_query_response* write_buffer, const char* string) {
     size_t len = strlen(string);
     if (len > UINT16_MAX) {
         return false;
@@ -54,43 +49,36 @@ static bool write_string(unabto_query_response* write_buffer, const char* string
     return unabto_query_write_uint8_list(write_buffer, (uint8_t*)string, (uint16_t)len);
 }
 
-application_event_result write_user(unabto_query_response* write_buffer, uint8_t status, struct fp_acl_user* user)
-{
+application_event_result write_user(unabto_query_response* write_buffer, uint8_t status, struct fp_acl_user* user) {
     if (unabto_query_write_uint8(write_buffer, status) &&
         write_fingerprint(write_buffer, &(user->fp.value)) &&
         write_string(write_buffer, user->name) &&
-        unabto_query_write_uint32(write_buffer, user->permissions))
-    {
+        unabto_query_write_uint32(write_buffer, user->permissions)) {
         return AER_REQ_RESPONSE_READY;
     } else {
         return AER_REQ_TOO_LARGE;
     }
 }
 
-application_event_result write_empty_user(unabto_query_response* write_buffer, uint8_t status)
-{
+application_event_result write_empty_user(unabto_query_response* write_buffer, uint8_t status) {
     if (unabto_query_write_uint8(write_buffer, status) &&
         write_string(write_buffer, "") &&
         write_string(write_buffer, "") &&
-        unabto_query_write_uint32(write_buffer, 0))
-    {
+        unabto_query_write_uint32(write_buffer, 0)) {
         return AER_REQ_RESPONSE_READY;
     } else {
         return AER_REQ_TOO_LARGE;
     }
 }
 
-application_event_result write_settings(unabto_query_response* response, struct fp_acl_settings* settings)
-{
+application_event_result write_settings(unabto_query_response* response, struct fp_acl_settings* settings) {
     if (unabto_query_write_uint8(response, FP_ACL_STATUS_OK) &&
         unabto_query_write_uint32(response, settings->systemPermissions) &&
-        unabto_query_write_uint32(response, settings->defaultUserPermissions))
-    {
+        unabto_query_write_uint32(response, settings->defaultUserPermissions)) {
         return AER_REQ_RESPONSE_READY;
     } else {
         return AER_REQ_TOO_LARGE;
     }
-
 }
 
 // getUsers.json?count=nn&start=nn
@@ -99,8 +87,7 @@ application_event_result write_settings(unabto_query_response* response, struct 
 // if more users exists than returned set next to != 0.
 application_event_result fp_acl_ae_users_get(application_request* request,
                                              unabto_query_request* read_buffer,
-                                             unabto_query_response* write_buffer)
-{
+                                             unabto_query_response* write_buffer) {
     uint8_t count;
     uint32_t start;
     size_t aclResponseSize;
@@ -110,9 +97,8 @@ application_event_result fp_acl_ae_users_get(application_request* request,
         return AER_REQ_NO_ACCESS;
     }
 
-    if (! (unabto_query_read_uint8(read_buffer, &count) &&
-           unabto_query_read_uint32(read_buffer, &start)))
-    {
+    if (!(unabto_query_read_uint8(read_buffer, &count) &&
+          unabto_query_read_uint32(read_buffer, &start))) {
         return AER_REQ_TOO_SMALL;
     }
 
@@ -141,16 +127,14 @@ application_event_result fp_acl_ae_users_get(application_request* request,
 
         while (it != NULL &&
                elements < count &&
-               (unabto_query_write_free_bytes(write_buffer) > aclResponseSize))
-        {
+               (unabto_query_write_free_bytes(write_buffer) > aclResponseSize)) {
             struct fp_acl_user user;
             if (aclDb.load(it, &user) != FP_ACL_DB_OK) {
                 return AER_REQ_SYSTEM_ERROR;
             }
-            if (! (write_fingerprint(write_buffer, &(user.fp.value)) &&
-                   write_string(write_buffer, user.name) &&
-                   unabto_query_write_uint32(write_buffer, user.permissions)))
-            {
+            if (!(write_fingerprint(write_buffer, &(user.fp.value)) &&
+                  write_string(write_buffer, user.name) &&
+                  unabto_query_write_uint32(write_buffer, user.permissions))) {
                 return AER_REQ_TOO_SMALL;
             }
             elements++;
@@ -171,17 +155,12 @@ application_event_result fp_acl_ae_users_get(application_request* request,
     }
 
     return AER_REQ_RESPONSE_READY;
-
 }
-
-
-
 
 // getUser.json?fingerprint=<hex>
 application_event_result fp_acl_ae_user_get(application_request* request,
                                             unabto_query_request* read_buffer,
-                                            unabto_query_response* write_buffer)
-{
+                                            unabto_query_response* write_buffer) {
     struct unabto_fingerprint fp;
     void* it;
     struct fp_acl_user user;
@@ -203,8 +182,7 @@ application_event_result fp_acl_ae_user_get(application_request* request,
 
 application_event_result fp_acl_ae_user_me(application_request* request,
                                            unabto_query_request* read_buffer,
-                                           unabto_query_response* write_buffer)
-{
+                                           unabto_query_response* write_buffer) {
     void* it;
     struct fp_acl_user user;
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_NONE)) {
@@ -221,8 +199,7 @@ application_event_result fp_acl_ae_user_me(application_request* request,
 
 application_event_result fp_acl_ae_user_remove(application_request* request,
                                                unabto_query_request* read_buffer,
-                                               unabto_query_response* write_buffer)
-{
+                                               unabto_query_response* write_buffer) {
     struct unabto_fingerprint fp;
     void* it;
     struct fp_acl_user user;
@@ -250,11 +227,9 @@ application_event_result fp_acl_ae_user_remove(application_request* request,
     return AER_REQ_RESPONSE_READY;
 }
 
-
 application_event_result fp_acl_ae_user_set_name(application_request* request,
                                                  unabto_query_request* read_buffer,
-                                                 unabto_query_response* write_buffer)
-{
+                                                 unabto_query_response* write_buffer) {
     struct unabto_fingerprint fp;
     void* it;
     struct fp_acl_user user;
@@ -292,8 +267,7 @@ application_event_result fp_acl_ae_user_set_name(application_request* request,
 application_event_result fp_acl_ae_get_fcm_token(application_request* request,
                                                  unabto_query_request* read_buffer,
                                                  unabto_query_response* write_buffer,
-                                                 struct unabto_fingerprint* fp)
-{
+                                                 struct unabto_fingerprint* fp) {
 #if NABTO_ENABLE_FCM_TOKEN_STORAGE
     void* it = aclDb.find(fp);
     struct fp_acl_user user;
@@ -317,8 +291,7 @@ application_event_result fp_acl_ae_get_fcm_token(application_request* request,
 
 application_event_result fp_acl_ae_user_get_fcm_token(application_request* request,
                                                       unabto_query_request* read_buffer,
-                                                      unabto_query_response* write_buffer)
-{
+                                                      unabto_query_response* write_buffer) {
     struct unabto_fingerprint fp;
 
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ADMIN)) {
@@ -334,8 +307,7 @@ application_event_result fp_acl_ae_user_get_fcm_token(application_request* reque
 
 application_event_result fp_acl_ae_user_get_my_fcm_token(application_request* request,
                                                          unabto_query_request* read_buffer,
-                                                         unabto_query_response* write_buffer)
-{
+                                                         unabto_query_response* write_buffer) {
     struct unabto_fingerprint fp;
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_NONE)) {
         return AER_REQ_NO_ACCESS;
@@ -347,8 +319,7 @@ application_event_result fp_acl_ae_user_get_my_fcm_token(application_request* re
 application_event_result fp_acl_ae_set_fcm_token(application_request* request,
                                                  unabto_query_request* read_buffer,
                                                  unabto_query_response* write_buffer,
-                                                 struct unabto_fingerprint *fp)
-{
+                                                 struct unabto_fingerprint* fp) {
 #if NABTO_ENABLE_FCM_TOKEN_STORAGE
     void* it = aclDb.find(fp);
     struct fp_acl_user user;
@@ -375,8 +346,7 @@ application_event_result fp_acl_ae_set_fcm_token(application_request* request,
 
 application_event_result fp_acl_ae_user_set_fcm_token(application_request* request,
                                                       unabto_query_request* read_buffer,
-                                                      unabto_query_response* write_buffer)
-{
+                                                      unabto_query_response* write_buffer) {
     struct unabto_fingerprint fp;
 
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ADMIN)) {
@@ -392,8 +362,7 @@ application_event_result fp_acl_ae_user_set_fcm_token(application_request* reque
 
 application_event_result fp_acl_ae_user_set_my_fcm_token(application_request* request,
                                                          unabto_query_request* read_buffer,
-                                                         unabto_query_response* write_buffer)
-{
+                                                         unabto_query_response* write_buffer) {
     struct unabto_fingerprint fp;
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_NONE)) {
         return AER_REQ_NO_ACCESS;
@@ -406,8 +375,7 @@ application_event_result fp_acl_ae_user_set_my_fcm_token(application_request* re
 application_event_result fp_acl_ae_user_alter_permissions(application_request* request,
                                                           unabto_query_request* read_buffer,
                                                           unabto_query_response* write_buffer,
-                                                          void (*alterPermissionsFunction)(struct fp_acl_user* user, uint32_t permissions))
-{
+                                                          void (*alterPermissionsFunction)(struct fp_acl_user* user, uint32_t permissions)) {
     struct unabto_fingerprint fp;
     uint32_t permissions;
     void* it;
@@ -448,25 +416,21 @@ application_event_result fp_acl_ae_user_alter_permissions(application_request* r
     return write_user(write_buffer, status, &user);
 }
 
-
 application_event_result fp_acl_ae_user_add_permissions(application_request* request,
                                                         unabto_query_request* read_buffer,
-                                                        unabto_query_response* write_buffer)
-{
+                                                        unabto_query_response* write_buffer) {
     return fp_acl_ae_user_alter_permissions(request, read_buffer, write_buffer, &fp_acl_user_add_permissions);
 }
 
 application_event_result fp_acl_ae_user_remove_permissions(application_request* request,
                                                            unabto_query_request* read_buffer,
-                                                           unabto_query_response* write_buffer)
-{
+                                                           unabto_query_response* write_buffer) {
     return fp_acl_ae_user_alter_permissions(request, read_buffer, write_buffer, &fp_acl_user_remove_permissions);
 }
 
 application_event_result fp_acl_ae_user_set_permissions(application_request* request,
-                                                           unabto_query_request* read_buffer,
-                                                           unabto_query_response* write_buffer)
-{
+                                                        unabto_query_request* read_buffer,
+                                                        unabto_query_response* write_buffer) {
     return fp_acl_ae_user_alter_permissions(request, read_buffer, write_buffer, &fp_acl_user_set_permissions);
 }
 
@@ -484,8 +448,8 @@ application_event_result fp_acl_add_user_no_check(unabto_query_response* write_b
     if (it) {
         if (aclDb.load(it, &existingUser) == FP_ACL_DB_OK) {
             NABTO_LOG_INFO(("User with fingerprint [%02x:%02x:%02x:%02x:...] already exists in acl with name [%s], returning existing user",
-                             user->fp.value.data[0], user->fp.value.data[1], user->fp.value.data[2], user->fp.value.data[3],
-                             existingUser.name));
+                            user->fp.value.data[0], user->fp.value.data[1], user->fp.value.data[2], user->fp.value.data[3],
+                            existingUser.name));
             return write_user(write_buffer, FP_ACL_STATUS_USER_EXISTS, &existingUser);
         } else {
             return AER_REQ_SYSTEM_ERROR;
@@ -502,20 +466,18 @@ application_event_result fp_acl_add_user_no_check(unabto_query_response* write_b
 
     if (status == FP_ACL_DB_OK) {
         NABTO_LOG_INFO(("User with fingerprint [%02x:%02x:%02x:%02x:...] and name [%s] successfully added to acl",
-                         user->fp.value.data[0], user->fp.value.data[1], user->fp.value.data[2], user->fp.value.data[3],
-                         user->name));
+                        user->fp.value.data[0], user->fp.value.data[1], user->fp.value.data[2], user->fp.value.data[3],
+                        user->name));
         return write_user(write_buffer, FP_ACL_STATUS_OK, user);
     } else {
         return write_empty_user(write_buffer, FP_ACL_STATUS_USER_DB_FULL);
     }
 }
 
-
 //addUser.json?fingerprint=<fp>&userName=<string>
 application_event_result fp_acl_ae_user_add(application_request* request,
-                                               unabto_query_request* read_buffer,
-                                               unabto_query_response* write_buffer)
-{
+                                            unabto_query_request* read_buffer,
+                                            unabto_query_response* write_buffer) {
     struct fp_acl_user user;
 
     fp_acl_init_user(&user);
@@ -539,8 +501,7 @@ application_event_result fp_acl_ae_user_add(application_request* request,
 //pairWithDevice.json?userName=<string>
 application_event_result fp_acl_ae_pair_with_device(application_request* request,
                                                     unabto_query_request* read_buffer,
-                                                    unabto_query_response* write_buffer)
-{
+                                                    unabto_query_response* write_buffer) {
     struct fp_acl_user user;
     if (!fp_acl_is_pair_allowed(request)) {
         return AER_REQ_NO_ACCESS;
@@ -554,14 +515,11 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
     user.fp.hasValue = 1;
 
     return fp_acl_add_user_no_check(write_buffer, &user);
-
 }
-
 
 application_event_result fp_acl_ae_system_get_acl_settings(application_request* request,
                                                            unabto_query_request* read_buffer,
-                                                           unabto_query_response* write_buffer)
-{
+                                                           unabto_query_response* write_buffer) {
     struct fp_acl_settings aclSettings;
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ADMIN)) {
         return AER_REQ_NO_ACCESS;
@@ -574,11 +532,9 @@ application_event_result fp_acl_ae_system_get_acl_settings(application_request* 
     return write_settings(write_buffer, &aclSettings);
 }
 
-
 application_event_result fp_acl_ae_system_set_acl_settings(application_request* request,
                                                            unabto_query_request* read_buffer,
-                                                           unabto_query_response* write_buffer)
-{
+                                                           unabto_query_response* write_buffer) {
     struct fp_acl_settings aclSettings;
     if (!fp_acl_is_request_allowed(request, FP_ACL_PERMISSION_ADMIN)) {
         return AER_REQ_NO_ACCESS;
@@ -588,9 +544,8 @@ application_event_result fp_acl_ae_system_set_acl_settings(application_request* 
         return AER_REQ_SYSTEM_ERROR;
     }
 
-    if (! (unabto_query_read_uint32(read_buffer, &aclSettings.systemPermissions) &&
-           unabto_query_read_uint32(read_buffer, &aclSettings.defaultUserPermissions)))
-    {
+    if (!(unabto_query_read_uint32(read_buffer, &aclSettings.systemPermissions) &&
+          unabto_query_read_uint32(read_buffer, &aclSettings.defaultUserPermissions))) {
         return AER_REQ_TOO_SMALL;
     }
 
@@ -605,16 +560,14 @@ application_event_result fp_acl_ae_system_set_acl_settings(application_request* 
     return write_settings(write_buffer, &aclSettings);
 }
 
-
 /**
  * Helper function to check if a paired user is allowed to do the
  * desired action
  */
-bool fp_acl_is_user_allowed(nabto_connect* connection, uint32_t requiredPermissions)
-{
+bool fp_acl_is_user_allowed(nabto_connect* connection, uint32_t requiredPermissions) {
     struct fp_acl_user user;
     void* it;
-    if (! (connection && connection->fingerprint.hasValue)) {
+    if (!(connection && connection->fingerprint.hasValue)) {
         return false;
     }
 
@@ -626,20 +579,17 @@ bool fp_acl_is_user_allowed(nabto_connect* connection, uint32_t requiredPermissi
     return fp_acl_check_user_permissions(&user, connection->isLocal, requiredPermissions);
 }
 
-bool fp_acl_is_request_allowed(application_request* request, uint32_t requiredPermissions)
-{
+bool fp_acl_is_request_allowed(application_request* request, uint32_t requiredPermissions) {
     return fp_acl_is_user_allowed(request->connection, requiredPermissions);
 }
 
-bool fp_acl_is_tunnel_allowed(nabto_connect* connection, uint32_t requiredPermissions)
-{
+bool fp_acl_is_tunnel_allowed(nabto_connect* connection, uint32_t requiredPermissions) {
     return fp_acl_is_user_allowed(connection, requiredPermissions);
 }
 
-bool fp_acl_is_pair_allowed(application_request* request)
-{
+bool fp_acl_is_pair_allowed(application_request* request) {
     struct fp_acl_settings aclSettings;
-    if (! (request->connection && request->connection->fingerprint.hasValue)) {
+    if (!(request->connection && request->connection->fingerprint.hasValue)) {
         return false;
     }
 
@@ -655,8 +605,7 @@ bool fp_acl_is_pair_allowed(application_request* request)
     return false;
 }
 
-bool fp_acl_is_connection_allowed(nabto_connect* connection)
-{
+bool fp_acl_is_connection_allowed(nabto_connect* connection) {
     struct fp_acl_settings aclSettings;
     void* user;
     uint32_t requiredSystemPermissions;
@@ -664,7 +613,7 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
     bool allow;
 
     // require that it's a fingerprint based connection!
-    if (! (connection && connection->fingerprint.hasValue)) {
+    if (!(connection && connection->fingerprint.hasValue)) {
         NABTO_LOG_INFO(("User rejected as it is not a fingerprint based connection"));
         return false;
     }
@@ -723,12 +672,10 @@ bool fp_acl_is_connection_allowed(nabto_connect* connection)
     }
 }
 
-
-bool fp_acl_is_user_owner(application_request* request)
-{
+bool fp_acl_is_user_owner(application_request* request) {
     void* it;
     struct fp_acl_user user;
-    if (! (request->connection && request->connection->fingerprint.hasValue)) {
+    if (!(request->connection && request->connection->fingerprint.hasValue)) {
         return false;
     }
 
@@ -740,10 +687,9 @@ bool fp_acl_is_user_owner(application_request* request)
     return (user.permissions & FP_ACL_PERMISSION_ADMIN) == FP_ACL_PERMISSION_ADMIN;
 }
 
-bool fp_acl_is_user_paired(application_request* request)
-{
+bool fp_acl_is_user_paired(application_request* request) {
     void* it;
-    if (! (request->connection && request->connection->fingerprint.hasValue)) {
+    if (!(request->connection && request->connection->fingerprint.hasValue)) {
         return false;
     }
     it = aclDb.find(&(request->connection->fingerprint.value));
@@ -756,63 +702,62 @@ bool fp_acl_is_user_paired(application_request* request)
 application_event_result fp_acl_ae_dispatch(uint32_t query_id_base,
                                             application_request* request,
                                             unabto_query_request* read_buffer,
-                                            unabto_query_response* write_buffer)
-{
+                                            unabto_query_response* write_buffer) {
     switch (request->queryId - query_id_base) {
-    case 0:
-        // get_users.json
-        return fp_acl_ae_users_get(request, read_buffer, write_buffer); // implied admin priv check
+        case 0:
+            // get_users.json
+            return fp_acl_ae_users_get(request, read_buffer, write_buffer);  // implied admin priv check
 
-    case 10:
-        // pair_with_device.json
-        return fp_acl_ae_pair_with_device(request, read_buffer, write_buffer);
+        case 10:
+            // pair_with_device.json
+            return fp_acl_ae_pair_with_device(request, read_buffer, write_buffer);
 
-    case 20:
-        // get_current_user.json
-        return fp_acl_ae_user_me(request, read_buffer, write_buffer);
+        case 20:
+            // get_current_user.json
+            return fp_acl_ae_user_me(request, read_buffer, write_buffer);
 
-    case 30:
-        // get_system_security_settings.json
-        return fp_acl_ae_system_get_acl_settings(request, read_buffer, write_buffer); // implied admin priv check
+        case 30:
+            // get_system_security_settings.json
+            return fp_acl_ae_system_get_acl_settings(request, read_buffer, write_buffer);  // implied admin priv check
 
-    case 40:
-        // set_system_security_settings.json
-        return fp_acl_ae_system_set_acl_settings(request, read_buffer, write_buffer); // implied admin priv check
+        case 40:
+            // set_system_security_settings.json
+            return fp_acl_ae_system_set_acl_settings(request, read_buffer, write_buffer);  // implied admin priv check
 
-    case 50:
-        // set_user_permissions.json
-        return fp_acl_ae_user_set_permissions(request, read_buffer, write_buffer); // implied admin priv check
+        case 50:
+            // set_user_permissions.json
+            return fp_acl_ae_user_set_permissions(request, read_buffer, write_buffer);  // implied admin priv check
 
-    case 60:
-        // set_user_name.json
-        return fp_acl_ae_user_set_name(request, read_buffer, write_buffer); // implied admin priv check
+        case 60:
+            // set_user_name.json
+            return fp_acl_ae_user_set_name(request, read_buffer, write_buffer);  // implied admin priv check
 
-    case 65:
-        // add_user.json
-        return fp_acl_ae_user_add(request, read_buffer, write_buffer); // implied admin priv check
+        case 65:
+            // add_user.json
+            return fp_acl_ae_user_add(request, read_buffer, write_buffer);  // implied admin priv check
 
-    case 70:
-        // remove_user.json
-        return fp_acl_ae_user_remove(request, read_buffer, write_buffer); // implied admin priv check
+        case 70:
+            // remove_user.json
+            return fp_acl_ae_user_remove(request, read_buffer, write_buffer);  // implied admin priv check
 
-    case 75:
-        // get_user_fcm_token.json
-        return fp_acl_ae_user_get_fcm_token(request, read_buffer, write_buffer);
+        case 75:
+            // get_user_fcm_token.json
+            return fp_acl_ae_user_get_fcm_token(request, read_buffer, write_buffer);
 
-    case 80:
-        // get_my_fcm_token.json
-        return fp_acl_ae_user_get_my_fcm_token(request, read_buffer, write_buffer);
+        case 80:
+            // get_my_fcm_token.json
+            return fp_acl_ae_user_get_my_fcm_token(request, read_buffer, write_buffer);
 
-    case 85:
-        // set_user_fcm_token.json
-        return fp_acl_ae_user_set_fcm_token(request, read_buffer, write_buffer);
+        case 85:
+            // set_user_fcm_token.json
+            return fp_acl_ae_user_set_fcm_token(request, read_buffer, write_buffer);
 
-    case 90:
-        // set_my_fcm_token.json
-        return fp_acl_ae_user_set_my_fcm_token(request, read_buffer, write_buffer);
+        case 90:
+            // set_my_fcm_token.json
+            return fp_acl_ae_user_set_my_fcm_token(request, read_buffer, write_buffer);
 
-    default:
-        NABTO_LOG_WARN(("Unhandled query id: %u", request->queryId));
-        return AER_REQ_INV_QUERY_ID;
+        default:
+            NABTO_LOG_WARN(("Unhandled query id: %u", request->queryId));
+            return AER_REQ_INV_QUERY_ID;
     }
 }

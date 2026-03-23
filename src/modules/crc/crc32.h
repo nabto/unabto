@@ -12,9 +12,8 @@ extern "C" {
 
 uint32_t crc32_calculate(const void* data, uint16_t length);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

@@ -10,18 +10,16 @@
 #include <modules/tunnel/unabto_tunnel_uart.h>
 #include <modules/tunnel/unabto_tunnel_echo.h>
 
-
 #if NABTO_ENABLE_EPOLL
 #include <sys/epoll.h>
 #endif
 
-#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
 NABTO_THREAD_LOCAL_STORAGE tunnel* tunnels = 0;
 NABTO_THREAD_LOCAL_STORAGE tunnel_static_memory* tunnels_static_memory = 0;
 NABTO_THREAD_LOCAL_STORAGE static int tunnelCounter = 0;
-
 
 static const char* defaultUartDevice = 0;
 
@@ -32,8 +30,7 @@ const char* uart_tunnel_get_default_device() {
     return defaultUartDevice;
 }
 
-bool unabto_tunnel_init_tunnels()
-{
+bool unabto_tunnel_init_tunnels() {
     int i;
     tunnels = (tunnel*)malloc(sizeof(struct tunnel) * (size_t)(NABTO_MEMORY_STREAM_MAX_STREAMS));
     if (tunnels == NULL) {
@@ -52,10 +49,11 @@ bool unabto_tunnel_init_tunnels()
     return true;
 }
 
-void unabto_tunnel_deinit_tunnels()
-{
-    free(tunnels); tunnels = 0;
-    free(tunnels_static_memory); tunnels_static_memory = 0;
+void unabto_tunnel_deinit_tunnels() {
+    free(tunnels);
+    tunnels = 0;
+    free(tunnels_static_memory);
+    tunnels_static_memory = 0;
 }
 
 void unabto_tunnel_stream_accept(unabto_stream* stream) {
@@ -80,15 +78,13 @@ void unabto_tunnel_stream_accept(unabto_stream* stream) {
     t->tunnelId = tunnelCounter++;
 }
 
-tunnel* unabto_tunnel_get_tunnel(unabto_stream* stream)
-{
+tunnel* unabto_tunnel_get_tunnel(unabto_stream* stream) {
     tunnel* t;
     t = &tunnels[unabto_stream_index(stream)];
     return t;
 }
 
-void unabto_tunnel_event(tunnel* tunnel, tunnel_event_source event_source)
-{
+void unabto_tunnel_event(tunnel* tunnel, tunnel_event_source event_source) {
     NABTO_LOG_TRACE(("Tunnel event on tunnel %i, source %i", tunnel->tunnelId, event_source));
     if (tunnel->state == TS_IDLE) {
         unabto_tunnel_idle(tunnel, event_source);
@@ -112,8 +108,7 @@ void unabto_tunnel_event(tunnel* tunnel, tunnel_event_source event_source)
     }
 }
 
-void unabto_tunnel_read_command(tunnel* tunnel, tunnel_event_source event_source)
-{
+void unabto_tunnel_read_command(tunnel* tunnel, tunnel_event_source event_source) {
     const uint8_t* buf;
     unabto_stream_hint hint;
     size_t readen;
@@ -148,15 +143,14 @@ void unabto_tunnel_read_command(tunnel* tunnel, tunnel_event_source event_source
     }
 }
 
-void unabto_tunnel_reset_tunnel_struct(tunnel* t)
-{
+void unabto_tunnel_reset_tunnel_struct(tunnel* t) {
     ptrdiff_t offset = t - tunnels;
     memset(t, 0, sizeof(struct tunnel));
     t->staticMemory = &tunnels_static_memory[offset];
     memset(t->staticMemory, 0, sizeof(tunnel_static_memory));
 }
 
-bool unabto_tunnel_has_uart(){
+bool unabto_tunnel_has_uart() {
 #if NABTO_ENABLE_TUNNEL_UART
     return true;
 #else
@@ -165,17 +159,16 @@ bool unabto_tunnel_has_uart(){
 }
 
 #define TUNNEL_TXT "tunnel"
-#define UART_TXT "uart"
-#define ECHO_TXT "echo"
+#define UART_TXT   "uart"
+#define ECHO_TXT   "echo"
 
-void unabto_tunnel_parse_command(tunnel* tunnel, tunnel_event_source tunnel_event)
-{
+void unabto_tunnel_parse_command(tunnel* tunnel, tunnel_event_source tunnel_event) {
 #if NABTO_ENABLE_TUNNEL_UART
-    if (uart_tunnel_get_default_device() != 0){
-       if (strncmp((const char*)tunnel->staticMemory->command, UART_TXT, strlen(UART_TXT)) == 0) {
-           unabto_tunnel_uart_parse_command(tunnel, tunnel_event, tunnels, NABTO_MEMORY_STREAM_MAX_STREAMS);
-           return;
-       }
+    if (uart_tunnel_get_default_device() != 0) {
+        if (strncmp((const char*)tunnel->staticMemory->command, UART_TXT, strlen(UART_TXT)) == 0) {
+            unabto_tunnel_uart_parse_command(tunnel, tunnel_event, tunnels, NABTO_MEMORY_STREAM_MAX_STREAMS);
+            return;
+        }
     }
 #endif
 
@@ -193,13 +186,11 @@ void unabto_tunnel_parse_command(tunnel* tunnel, tunnel_event_source tunnel_even
     }
 #endif
     // if we rend here command parsing failed.
-    NABTO_LOG_INFO(("Failed to parse command: %s",tunnel->staticMemory->command));
+    NABTO_LOG_INFO(("Failed to parse command: %s", tunnel->staticMemory->command));
     tunnel->state = TS_FAILED_COMMAND;
 }
 
-
-void unabto_tunnel_closing(tunnel* tunnel, tunnel_event_source tunnel_event)
-{
+void unabto_tunnel_closing(tunnel* tunnel, tunnel_event_source tunnel_event) {
     if (tunnel->state == TS_CLOSING || tunnel->state == TS_FAILED_COMMAND) {
         const uint8_t* buf;
         unabto_stream_hint hint;
@@ -225,15 +216,11 @@ void unabto_tunnel_closing(tunnel* tunnel, tunnel_event_source tunnel_event)
     }
 }
 
-
-void unabto_tunnel_idle(tunnel* tunnel, tunnel_event_source event_source)
-{
-    NABTO_LOG_ERROR(("Tunnel(%i), Event on tunnel which should not be in IDLE state. source %i, unabtoReadState %i, stream index %i, Tunnel type unrecognized.", tunnel->tunnelId, event_source,tunnel->unabtoReadState, unabto_stream_index(tunnel->stream)));
+void unabto_tunnel_idle(tunnel* tunnel, tunnel_event_source event_source) {
+    NABTO_LOG_ERROR(("Tunnel(%i), Event on tunnel which should not be in IDLE state. source %i, unabtoReadState %i, stream index %i, Tunnel type unrecognized.", tunnel->tunnelId, event_source, tunnel->unabtoReadState, unabto_stream_index(tunnel->stream)));
 }
 
-
-void unabto_tunnel_event_dispatch(tunnel* tunnel, tunnel_event_source tunnel_event)
-{
+void unabto_tunnel_event_dispatch(tunnel* tunnel, tunnel_event_source tunnel_event) {
 #if NABTO_ENABLE_TUNNEL_UART
     if (tunnel->tunnelType == TUNNEL_TYPE_UART) {
         unabto_tunnel_uart_event(tunnel, tunnel_event);
@@ -262,15 +249,13 @@ void unabto_tunnel_event_dispatch(tunnel* tunnel, tunnel_event_source tunnel_eve
     }
 }
 
-void unabto_tunnel_select_add_to_fd_set(fd_set* readFds, int* maxReadFd, fd_set* writeFds, int* maxWriteFd)
-{
+void unabto_tunnel_select_add_to_fd_set(fd_set* readFds, int* maxReadFd, fd_set* writeFds, int* maxWriteFd) {
     int i;
     for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS; i++) {
         if (tunnels[i].state != TS_IDLE) {
 #if NABTO_ENABLE_TUNNEL_UART
-            if (tunnels[i].tunnelType == TUNNEL_TYPE_UART){
+            if (tunnels[i].tunnelType == TUNNEL_TYPE_UART) {
                 if (tunnels[i].state == TS_FORWARD && tunnels[i].extReadState == FS_READ && tunnels[i].tunnel_type_vars.uart.fd != -1) {
-
                     FD_SET(tunnels[i].tunnel_type_vars.uart.fd, readFds);
                     *maxReadFd = MAX(*maxReadFd, tunnels[i].tunnel_type_vars.uart.fd);
                 }
@@ -282,7 +267,7 @@ void unabto_tunnel_select_add_to_fd_set(fd_set* readFds, int* maxReadFd, fd_set*
 #endif
 
 #if NABTO_ENABLE_TUNNEL_TCP
-            if (tunnels[i].tunnelType == TUNNEL_TYPE_TCP){
+            if (tunnels[i].tunnelType == TUNNEL_TYPE_TCP) {
                 if (tunnels[i].state == TS_FORWARD && tunnels[i].extReadState == FS_READ) {
                     FD_SET(tunnels[i].tunnel_type_vars.tcp.sock.socket, readFds);
                     *maxReadFd = MAX(*maxReadFd, (int)(tunnels[i].tunnel_type_vars.tcp.sock.socket));
@@ -298,13 +283,12 @@ void unabto_tunnel_select_add_to_fd_set(fd_set* readFds, int* maxReadFd, fd_set*
     }
 }
 
-void unabto_tunnel_select_handle(fd_set* readFds, fd_set* writeFds)
-{
+void unabto_tunnel_select_handle(fd_set* readFds, fd_set* writeFds) {
     int i;
     for (i = 0; i < NABTO_MEMORY_STREAM_MAX_STREAMS; i++) {
         if (tunnels[i].state != TS_IDLE) {
 #if NABTO_ENABLE_TUNNEL_UART
-            if (tunnels[i].tunnelType == TUNNEL_TYPE_UART){
+            if (tunnels[i].tunnelType == TUNNEL_TYPE_UART) {
                 if (tunnels[i].tunnel_type_vars.uart.fd != -1 && FD_ISSET(tunnels[i].tunnel_type_vars.uart.fd, readFds)) {
                     unabto_tunnel_uart_event(&tunnels[i], TUNNEL_EVENT_SOURCE_UART_READ);
                 }
@@ -315,7 +299,7 @@ void unabto_tunnel_select_handle(fd_set* readFds, fd_set* writeFds)
 #endif
 
 #if NABTO_ENABLE_TUNNEL_TCP
-            if (tunnels[i].tunnelType == TUNNEL_TYPE_TCP){
+            if (tunnels[i].tunnelType == TUNNEL_TYPE_TCP) {
                 if (tunnels[i].tunnel_type_vars.tcp.sock.socket != INVALID_SOCKET && FD_ISSET(tunnels[i].tunnel_type_vars.tcp.sock.socket, readFds)) {
                     unabto_tunnel_tcp_event(&tunnels[i], TUNNEL_EVENT_SOURCE_TCP_READ);
                 }
@@ -334,8 +318,7 @@ void unabto_tunnel_select_handle(fd_set* readFds, fd_set* writeFds)
  * https://www.rfc-editor.org/rfc/rfc1078.txt instead of CRLF only LF
  * is used.
  */
-bool tunnel_send_init_message(tunnel* tunnel, const char* msg)
-{
+bool tunnel_send_init_message(tunnel* tunnel, const char* msg) {
     unabto_stream_hint hint;
     size_t written;
     size_t writeLength = strlen(msg);
@@ -348,8 +331,7 @@ bool tunnel_send_init_message(tunnel* tunnel, const char* msg)
 }
 
 #if NABTO_ENABLE_EPOLL
-void unabto_tunnel_epoll_event(struct epoll_event* event)
-{
+void unabto_tunnel_epoll_event(struct epoll_event* event) {
     unabto_epoll_event_handler* handler = (unabto_epoll_event_handler*)event->data.ptr;
     (void)(handler);
 #if NABTO_ENABLE_TUNNEL_UART

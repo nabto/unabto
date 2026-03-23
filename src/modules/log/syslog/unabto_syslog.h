@@ -20,7 +20,7 @@ void unabto_syslog(uint32_t module, uint32_t severity, const char* file, unsigne
 void unabto_syslog_buffer(uint32_t module, uint32_t severity, const char* file, unsigned int line, uint32_t syslogServer, uint16_t syslogPort, const uint8_t* buffer, size_t buflen, const char* format, va_list ap);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

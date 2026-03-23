@@ -8,18 +8,16 @@
 extern "C" {
 #endif
 
-#define UIP_APPCALL app_dispatcher
+#define UIP_APPCALL     app_dispatcher
 #define UIP_UDP_APPCALL app_dispatcher
 
 void unabto_app();
 
 void app_dispatcher();
 
-
 // typedef enum {APP_DHCP, APP_DNS, APP_UNABTO} app_t;
 
-typedef struct  uip_udp_appstate_t
-{
+typedef struct uip_udp_appstate_t {
     union {
         int unabto;
         int resolv;
@@ -27,9 +25,8 @@ typedef struct  uip_udp_appstate_t
     void (*callBack)(void);
 } uip_udp_appstate_t;
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

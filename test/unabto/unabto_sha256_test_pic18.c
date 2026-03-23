@@ -7,21 +7,19 @@
 #include "crypto/unabto_sha256.h"
 
 bool sha2_test_test(const __ROM char *vector, unsigned char *digest,
-        unsigned int digest_size) {
+                    unsigned int digest_size) {
     char output[2 * SHA256_DIGEST_SIZE + 1];
     int i;
 
     output[2 * digest_size] = '\0';
 
-    for (i = 0; i < (int) digest_size; i++) {
+    for (i = 0; i < (int)digest_size; i++) {
         sprintf(output + 2 * i, "%02x", digest[i]);
     }
 
-
     if (strcmpram2pgm(vector, output) != 0) {
-        NABTO_LOG_INFO(("Test failed. Vec: %"PRItext, vector));
+        NABTO_LOG_INFO(("Test failed. Vec: %" PRItext, vector));
         NABTO_LOG_TRACE(("H: %s", output));
-
 
         return false;
     }
@@ -44,8 +42,7 @@ static const char message5[] = {
     0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
     0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
     0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
-    0xaa, 0xaa, 0xaa, 0x00
-};
+    0xaa, 0xaa, 0xaa, 0x00};
 
 bool sha256_test(void) {
     //    static const char message1[] = "abc";
@@ -56,7 +53,6 @@ bool sha256_test(void) {
     //                                    "nopqklmnopqrlmnopqrsmnopqrstnopqrstu";
 
     //    static const char message4[] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-
 
     //    unsigned char *message3;
     bool ret = true;
@@ -76,7 +72,7 @@ bool sha256_test(void) {
     //    sha256((const unsigned char *) message4, strlen(message4), digest);
     //    ret &= sha2_test_test(vector4, digest, SHA256_DIGEST_SIZE);
     //#endif
-    unabto_sha256((const unsigned char *) message5, strlen(message5), digest);
+    unabto_sha256((const unsigned char *)message5, strlen(message5), digest);
     ret &= sha2_test_test(vector5, digest, SHA256_DIGEST_SIZE);
 
     //#if 0
@@ -100,7 +96,6 @@ bool sha256_test(void) {
         NABTO_LOG_INFO(("sha256 tests succeded"));
     } else {
         NABTO_LOG_INFO(("sha 256 tests failed"));
-
     }
 
     return ret;
@@ -115,10 +110,10 @@ int sha256_timing_test(void) {
     nabtoSetFutureStamp(&future, 1000);
 
     while (!nabtoIsStampPassed(&future)) {
-        unabto_sha256((const unsigned char *) message5, len, digest);
+        unabto_sha256((const unsigned char *)message5, len, digest);
         i++;
     }
-    if (!sha2_test_test(vector5, digest, SHA256_DIGEST_SIZE)) { // sanity check on the last digest calculated
+    if (!sha2_test_test(vector5, digest, SHA256_DIGEST_SIZE)) {  // sanity check on the last digest calculated
         NABTO_LOG_TRACE(("failure in sha_256 timing test"));
     }
     return i;

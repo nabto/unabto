@@ -34,7 +34,6 @@ struct nabto_socket_t {
     enum nabto_socket_type type;
 };
 
-
 #define NABTO_INVALID_SOCKET (-1)
 
 #ifdef __cplusplus
@@ -44,7 +43,7 @@ extern "C" {
 void nabto_bsd_set_nonblocking(nabto_socket_t* socketDescriptor);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

@@ -3,28 +3,26 @@
 #include <unabto/unabto_logging.h>
 
 static const char base32_alphabet[] = "abcdefghijklmnopqrstuvwxyz234567";
-uint8_t base32_to_bits(char value)
-{
+uint8_t base32_to_bits(char value) {
     if (value >= 'a' && value <= 'z') {
-        return (value-'a');
+        return (value - 'a');
     }
 
     if (value >= 'A' && value <= 'Z') {
-        return (value-'A');
+        return (value - 'A');
     }
-    
+
     if (value >= '2' && value <= '7') {
-        return 26+(value-'2');
+        return 26 + (value - '2');
     }
     NABTO_LOG_ERROR(("invalid base32 character %i", value));
     return 0;
 }
 
-uint8_t* unabto_base32_encode(uint8_t* outputBuffer, uint8_t* outputBufferEnd, uint8_t* inputBuffer, uint8_t* inputBufferEnd)
-{
+uint8_t* unabto_base32_encode(uint8_t* outputBuffer, uint8_t* outputBufferEnd, uint8_t* inputBuffer, uint8_t* inputBufferEnd) {
     uint16_t buffer = 0;
     uint8_t bufferBits = 0;
-    while(inputBuffer != inputBufferEnd) {
+    while (inputBuffer != inputBufferEnd) {
         buffer <<= 8;
         buffer |= *inputBuffer;
         inputBuffer++;
@@ -47,13 +45,11 @@ uint8_t* unabto_base32_encode(uint8_t* outputBuffer, uint8_t* outputBufferEnd, u
     }
     return outputBuffer;
 }
-    
 
-uint8_t* unabto_base32_decode(uint8_t* outputBuffer, uint8_t* outputBufferEnd, uint8_t* inputBuffer, uint8_t* inputBufferEnd)
-{
+uint8_t* unabto_base32_decode(uint8_t* outputBuffer, uint8_t* outputBufferEnd, uint8_t* inputBuffer, uint8_t* inputBufferEnd) {
     uint16_t buffer = 0;
     uint8_t bufferBits = 0;
-    
+
     while (inputBuffer != inputBufferEnd) {
         buffer <<= 5;
         buffer |= base32_to_bits((char)*inputBuffer);

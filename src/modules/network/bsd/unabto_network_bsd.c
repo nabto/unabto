@@ -36,26 +36,24 @@
 #include <arpa/inet.h>
 #include <poll.h>
 
-
 #if NABTO_ENABLE_EPOLL
 #include <sys/epoll.h>
 #endif
 
-#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 typedef struct socketListElement {
     nabto_socket_t socket;
 #if NABTO_ENABLE_EPOLL
     unabto_epoll_event_handler_udp* eventHandler;
 #endif
-    struct socketListElement *prev;
-    struct socketListElement *next;
+    struct socketListElement* prev;
+    struct socketListElement* next;
 } socketListElement;
 
 static NABTO_THREAD_LOCAL_STORAGE struct socketListElement* socketList = 0;
 
-static int nabto_socket_domain()
-{
+static int nabto_socket_domain() {
     // try ipv6
     // test if ipv6 socket is dual stack
     // if not then use ipv4
@@ -72,7 +70,7 @@ static int nabto_socket_domain()
     }
 #if defined(IPV6_V6ONLY)
     int no = 0;
-    if (setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (void*) &no, sizeof(no)) != 0) {
+    if (setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (void*)&no, sizeof(no)) != 0) {
         NABTO_LOG_TRACE(("setsocketopt failed to disable IPV6_V6ONLY trying IPv4 socket"));
         close(sock);
         sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -94,10 +92,7 @@ static int nabto_socket_domain()
     return domain;
 }
 
-
-
-static bool open_socket(nabto_socket_t* sd)
-{
+static bool open_socket(nabto_socket_t* sd) {
     int domain = nabto_socket_domain();
 
     if (domain == AF_INET6) {
@@ -109,7 +104,7 @@ static bool open_socket(nabto_socket_t* sd)
         sd->type = NABTO_SOCKET_IP_V6;
 #if defined(IPV6_V6ONLY)
         int no = 0;
-        setsockopt(sd->sock, IPPROTO_IPV6, IPV6_V6ONLY, (void*) &no, sizeof(no));
+        setsockopt(sd->sock, IPPROTO_IPV6, IPV6_V6ONLY, (void*)&no, sizeof(no));
 #endif
         return true;
     } else if (domain == AF_INET) {
@@ -127,8 +122,7 @@ static bool open_socket(nabto_socket_t* sd)
 }
 
 #if NABTO_NETWORK_IPV4_LOOPBACK_ONLY
-static bool open_ipv4_socket(nabto_socket_t* sd)
-{
+static bool open_ipv4_socket(nabto_socket_t* sd) {
     sd->sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sd->sock == -1) {
         NABTO_LOG_ERROR(("Unable to create socket: (%i) '%s'.", errno, strerror(errno)));
@@ -139,8 +133,7 @@ static bool open_ipv4_socket(nabto_socket_t* sd)
 }
 #endif
 
-static bool bind_to_inaddr_any(uint16_t* localPort, nabto_socket_t* sock)
-{
+static bool bind_to_inaddr_any(uint16_t* localPort, nabto_socket_t* sock) {
     int status;
 
     if (sock->type == NABTO_SOCKET_IP_V6) {
@@ -172,8 +165,7 @@ static bool bind_to_inaddr_any(uint16_t* localPort, nabto_socket_t* sock)
 #if NABTO_NETWORK_IPV4_LOOPBACK_ONLY
 // Special case for some systems where we only want to expose the
 // device on the loopback interface.
-static bool bind_to_ipv4_loopback(uint16_t* localPort, nabto_socket_t* sock)
-{
+static bool bind_to_ipv4_loopback(uint16_t* localPort, nabto_socket_t* sock) {
     int status;
 
     struct sockaddr_in sa;
@@ -191,9 +183,7 @@ static bool bind_to_ipv4_loopback(uint16_t* localPort, nabto_socket_t* sock)
 }
 #endif
 
-
-bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
-{
+bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock) {
     nabto_socket_t sd;
     socketListElement* se;
 
@@ -214,15 +204,13 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
     }
 #endif
 
-
-
 #ifdef SO_BINDTODEVICE
     {
         // Used for multiple interfaces
         nabto_main_context* nmc = unabto_get_main_context();
         const char* interface = nmc->nabtoMainSetup.interfaceName;
         if (interface != NULL) {
-            if (setsockopt(sd.sock, SOL_SOCKET, SO_BINDTODEVICE, (void *)interface, strlen(interface)+1) < 0) {
+            if (setsockopt(sd.sock, SOL_SOCKET, SO_BINDTODEVICE, (void*)interface, strlen(interface) + 1) < 0) {
                 NABTO_LOG_FATAL(("Unable to bind to interface: %s, '%s'.", interface, strerror(errno)));
             }
             NABTO_LOG_TRACE(("Bound to device '%s'.", interface));
@@ -232,8 +220,7 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
             // only reuse when user has explicitly set local port and bound to a specific device as this indicates user
             // knows what he is doing...
             int allowReuse = (localPort && *localPort != 0 && interface != NULL);
-            if (setsockopt(sd.sock, SOL_SOCKET, SO_REUSEADDR, (void *) &allowReuse, sizeof(int)))
-            {
+            if (setsockopt(sd.sock, SOL_SOCKET, SO_REUSEADDR, (void*)&allowReuse, sizeof(int))) {
                 NABTO_LOG_FATAL(("Unable to set option: (%i) '%s'.", errno, strerror(errno)));
                 return false;
             }
@@ -262,7 +249,7 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
     {
         struct sockaddr_in sao;
         socklen_t len = sizeof(sao);
-        if ( getsockname(sock->sock, (struct sockaddr*)&sao, &len) != -1) {
+        if (getsockname(sock->sock, (struct sockaddr*)&sao, &len) != -1) {
             *localPort = htons(sao.sin_port);
         } else {
             NABTO_LOG_ERROR(("Unable to get local port of socket: (%i) '%s'.", errno, strerror(errno)));
@@ -270,7 +257,6 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
     }
 
     NABTO_LOG_TRACE(("Socket opened: port=%u", (int)*localPort));
-
 
     se = (socketListElement*)malloc(sizeof(socketListElement));
 
@@ -285,7 +271,7 @@ bool nabto_socket_init(uint16_t* localPort, nabto_socket_t* sock)
 
 #if NABTO_ENABLE_EPOLL
     {
-        unabto_epoll_event_handler_udp* eh = (unabto_epoll_event_handler_udp*) malloc(sizeof(unabto_epoll_event_handler_udp));
+        unabto_epoll_event_handler_udp* eh = (unabto_epoll_event_handler_udp*)malloc(sizeof(unabto_epoll_event_handler_udp));
         se->eventHandler = eh;
         eh->epollEventType = UNABTO_EPOLL_TYPE_UDP;
         eh->fd = sd;
@@ -313,7 +299,7 @@ void nabto_socket_close(nabto_socket_t* sock) {
     if (sock && sock->sock != NABTO_INVALID_SOCKET) {
         socketListElement* se;
         socketListElement* found = 0;
-        DL_FOREACH(socketList,se) {
+        DL_FOREACH(socketList, se) {
             if (se->socket.sock == sock->sock) {
                 found = se;
                 break;
@@ -339,16 +325,14 @@ void nabto_socket_close(nabto_socket_t* sock) {
 #endif
         close(sock->sock);
         sock->sock = NABTO_INVALID_SOCKET;
-
     }
 }
 
 ssize_t nabto_read(nabto_socket_t sock,
-                   uint8_t*       buf,
-                   size_t         len,
-                   struct nabto_ip_address*      addr,
-                   uint16_t*      port)
-{
+                   uint8_t* buf,
+                   size_t len,
+                   struct nabto_ip_address* addr,
+                   uint16_t* port) {
     struct sockaddr_in6 saData;
     struct sockaddr* sa = (struct sockaddr*)&saData;
     nabto_endpoint ep;
@@ -383,13 +367,11 @@ ssize_t nabto_read(nabto_socket_t sock,
     return recvLength;
 }
 
-
 ssize_t nabto_write(nabto_socket_t sock,
                     const uint8_t* buf,
-                    size_t         len,
+                    size_t len,
                     const struct nabto_ip_address* addr,
-                    uint16_t       port)
-{
+                    uint16_t port) {
     ssize_t res;
     struct nabto_ip_address addrConv;
     if (sock.type == NABTO_SOCKET_IP_V6) {
@@ -425,7 +407,7 @@ ssize_t nabto_write(nabto_socket_t sock,
         NABTO_LOG_TRACE(("invalid address type"));
         return 0;
     }
-    NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_BUFFERS, ("nabto_write size: %" PRIsize ", %s:%u", len, nabto_ip_to_string(addr), port) ,buf, len);
+    NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_BUFFERS, ("nabto_write size: %" PRIsize ", %s:%u", len, nabto_ip_to_string(addr), port), buf, len);
 
     if (res < 0) {
         int status = errno;
@@ -433,7 +415,7 @@ ssize_t nabto_write(nabto_socket_t sock,
         if (status == EAGAIN || status == EWOULDBLOCK) {
             // expected
         } else {
-            NABTO_LOG_ERROR(("ERROR: %s (%i) in nabto_write()", strerror(status), (int) status));
+            NABTO_LOG_ERROR(("ERROR: %s (%i) in nabto_write()", strerror(status), (int)status));
         }
     }
     return res;
@@ -455,8 +437,7 @@ void unabto_network_select_read_sockets(fd_set* readFds) {
     }
 }
 
-struct pollfd* unabto_network_poll_add_to_set(struct pollfd* begin, struct pollfd* end)
-{
+struct pollfd* unabto_network_poll_add_to_set(struct pollfd* begin, struct pollfd* end) {
     socketListElement* se;
     DL_FOREACH(socketList, se) {
         if (begin != end) {
@@ -468,8 +449,7 @@ struct pollfd* unabto_network_poll_add_to_set(struct pollfd* begin, struct pollf
     return begin;
 }
 
-void unabto_network_poll_read_sockets(struct pollfd* begin, struct pollfd* end)
-{
+void unabto_network_poll_read_sockets(struct pollfd* begin, struct pollfd* end) {
     while (begin != end) {
         if (begin->revents == POLLIN) {
             socketListElement* se;
@@ -484,8 +464,7 @@ void unabto_network_poll_read_sockets(struct pollfd* begin, struct pollfd* end)
 }
 
 #if NABTO_ENABLE_EPOLL
-void unabto_network_epoll_read(struct epoll_event* event)
-{
+void unabto_network_epoll_read(struct epoll_event* event) {
     unabto_epoll_event_handler_udp* udpHandler = (unabto_epoll_event_handler_udp*)event->data.ptr;
     if (udpHandler->epollEventType == UNABTO_EPOLL_TYPE_UDP) {
         bool status;
@@ -495,8 +474,7 @@ void unabto_network_epoll_read(struct epoll_event* event)
     }
 }
 
-bool unabto_network_epoll_read_one(struct epoll_event* event)
-{
+bool unabto_network_epoll_read_one(struct epoll_event* event) {
     unabto_epoll_event_handler_udp* udpHandler = (unabto_epoll_event_handler_udp*)event->data.ptr;
     if (udpHandler->epollEventType == UNABTO_EPOLL_TYPE_UDP) {
         return unabto_read_socket(udpHandler->fd);
@@ -509,7 +487,7 @@ bool nabto_get_local_ipv4(struct nabto_ip_address* ip) {
     struct sockaddr_in si_me, si_other;
     int s;
 
-    if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1) {
+    if ((s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
         NABTO_LOG_ERROR(("Cannot create socket"));
         return false;
     }
@@ -525,7 +503,7 @@ bool nabto_get_local_ipv4(struct nabto_ip_address* ip) {
     si_other.sin_family = AF_INET;
     si_other.sin_port = htons(4567);
     si_other.sin_addr.s_addr = inet_addr("8.8.8.8");
-    if(connect(s,(struct sockaddr*)&si_other,sizeof si_other) == -1) {
+    if (connect(s, (struct sockaddr*)&si_other, sizeof si_other) == -1) {
         NABTO_LOG_ERROR(("Cannot connect to host"));
         return false;
     }
@@ -533,7 +511,7 @@ bool nabto_get_local_ipv4(struct nabto_ip_address* ip) {
     {
         struct sockaddr_in my_addr;
         socklen_t len = sizeof my_addr;
-        if(getsockname(s,(struct sockaddr*)&my_addr,&len) == -1) {
+        if (getsockname(s, (struct sockaddr*)&my_addr, &len) == -1) {
             NABTO_LOG_ERROR(("getsockname failed"));
             return false;
         }

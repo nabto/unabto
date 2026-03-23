@@ -18,9 +18,8 @@ typedef __ROM const char* text;
 
 // Define default formatter for strings.
 #ifndef PRItext
-#define PRItext         "s"
+#define PRItext "s"
 #endif
-
 
 #ifndef __LENGTH_MODIFIER_8
 #define __LENGTH_MODIFIER_8 ""
@@ -63,80 +62,79 @@ typedef __ROM const char* text;
 #endif
 
 #ifndef PRId8
-#define PRId8         __LENGTH_MODIFIER_8 __DECIMAL_MODIFIER
+#define PRId8 __LENGTH_MODIFIER_8 __DECIMAL_MODIFIER
 #endif
 #ifndef PRIi8
-#define PRIi8         __LENGTH_MODIFIER_8 __INTEGER_MODIFIER
+#define PRIi8 __LENGTH_MODIFIER_8 __INTEGER_MODIFIER
 #endif
 #ifndef PRIo8
-#define PRIo8         __LENGTH_MODIFIER_8 __OCTAL_MODIFIER
+#define PRIo8 __LENGTH_MODIFIER_8 __OCTAL_MODIFIER
 #endif
 #ifndef PRIu8
-#define PRIu8         __LENGTH_MODIFIER_8 __UNSIGNED_MODIFIER
+#define PRIu8 __LENGTH_MODIFIER_8 __UNSIGNED_MODIFIER
 #endif
 #ifndef PRIx8
-#define PRIx8         __LENGTH_MODIFIER_8 __LOWER_CASE_HEX_MODIFIER
+#define PRIx8 __LENGTH_MODIFIER_8 __LOWER_CASE_HEX_MODIFIER
 #endif
 #ifndef PRIX8
-#define PRIX8         __LENGTH_MODIFIER_8 __UPPER_CASE_HEX_MODIFIER
+#define PRIX8 __LENGTH_MODIFIER_8 __UPPER_CASE_HEX_MODIFIER
 #endif
 #ifndef PRId16
-#define PRId16        __LENGTH_MODIFIER_16 __DECIMAL_MODIFIER
+#define PRId16 __LENGTH_MODIFIER_16 __DECIMAL_MODIFIER
 #endif
 #ifndef PRIi16
-#define PRIi16        __LENGTH_MODIFIER_16 __INTEGER_MODIFIER
+#define PRIi16 __LENGTH_MODIFIER_16 __INTEGER_MODIFIER
 #endif
 #ifndef PRIo16
-#define PRIo16        __LENGTH_MODIFIER_16 __OCTAL_MODIFIER
+#define PRIo16 __LENGTH_MODIFIER_16 __OCTAL_MODIFIER
 #endif
 #ifndef PRIu16
-#define PRIu16        __LENGTH_MODIFIER_16 __UNSIGNED_MODIFIER
+#define PRIu16 __LENGTH_MODIFIER_16 __UNSIGNED_MODIFIER
 #endif
 #ifndef PRIx16
-#define PRIx16        __LENGTH_MODIFIER_16 __LOWER_CASE_HEX_MODIFIER
+#define PRIx16 __LENGTH_MODIFIER_16 __LOWER_CASE_HEX_MODIFIER
 #endif
 #ifndef PRIX16
-#define PRIX16        __LENGTH_MODIFIER_16 __UPPER_CASE_HEX_MODIFIER
+#define PRIX16 __LENGTH_MODIFIER_16 __UPPER_CASE_HEX_MODIFIER
 #endif
 
 #ifndef PRId32
-#define PRId32        __LENGTH_MODIFIER_32 __DECIMAL_MODIFIER
+#define PRId32 __LENGTH_MODIFIER_32 __DECIMAL_MODIFIER
 #endif
 #ifndef PRIi32
-#define PRIi32        __LENGTH_MODIFIER_32 __INTEGER_MODIFIER
+#define PRIi32 __LENGTH_MODIFIER_32 __INTEGER_MODIFIER
 #endif
 #ifndef PRIo32
-#define PRIo32        __LENGTH_MODIFIER_32 __OCTAL_MODIFIER
+#define PRIo32 __LENGTH_MODIFIER_32 __OCTAL_MODIFIER
 #endif
 #ifndef PRIu32
-#define PRIu32        __LENGTH_MODIFIER_32 __UNSIGNED_MODIFIER
+#define PRIu32 __LENGTH_MODIFIER_32 __UNSIGNED_MODIFIER
 #endif
 #ifndef PRIx32
-#define PRIx32        __LENGTH_MODIFIER_32 __LOWER_CASE_HEX_MODIFIER
+#define PRIx32 __LENGTH_MODIFIER_32 __LOWER_CASE_HEX_MODIFIER
 #endif
 #ifndef PRIX32
-#define PRIX32        __LENGTH_MODIFIER_32 __UPPER_CASE_HEX_MODIFIER
+#define PRIX32 __LENGTH_MODIFIER_32 __UPPER_CASE_HEX_MODIFIER
 #endif
 
 #ifndef PRId64
-#define PRId64        __LENGTH_MODIFIER_64 __DECIMAL_MODIFIER
+#define PRId64 __LENGTH_MODIFIER_64 __DECIMAL_MODIFIER
 #endif
 #ifndef PRIi64
-#define PRIi64        __LENGTH_MODIFIER_64 __INTEGER_MODIFIER
+#define PRIi64 __LENGTH_MODIFIER_64 __INTEGER_MODIFIER
 #endif
 #ifndef PRIo64
-#define PRIo64        __LENGTH_MODIFIER_64 __OCTAL_MODIFIER
+#define PRIo64 __LENGTH_MODIFIER_64 __OCTAL_MODIFIER
 #endif
 #ifndef PRIu64
-#define PRIu64        __LENGTH_MODIFIER_64 __UNSIGNED_MODIFIER
+#define PRIu64 __LENGTH_MODIFIER_64 __UNSIGNED_MODIFIER
 #endif
 #ifndef PRIx64
-#define PRIx64        __LENGTH_MODIFIER_64 __LOWER_CASE_HEX_MODIFIER
+#define PRIx64 __LENGTH_MODIFIER_64 __LOWER_CASE_HEX_MODIFIER
 #endif
 #ifndef PRIX64
-#define PRIX64        __LENGTH_MODIFIER_64 __UPPER_CASE_HEX_MODIFIER
+#define PRIX64 __LENGTH_MODIFIER_64 __UPPER_CASE_HEX_MODIFIER
 #endif
-
 
 // define default (nabto) version of pointer specific size (any *)
 #ifndef PRIptr
@@ -168,23 +166,20 @@ typedef __ROM const char* text;
 #define MAKE_NSI_PRINTABLE(cp, sp, cont) (uint32_t)(cp), (uint32_t)(sp), (uint32_t)(cont)
 #endif
 
-
 #ifndef PRIip
-#define PRIip         "%" PRIu8 ".%" PRIu8 ".%" PRIu8 ".%" PRIu8
+#define PRIip "%" PRIu8 ".%" PRIu8 ".%" PRIu8 ".%" PRIu8
 #endif
 
 #ifndef PRInsi
-#define PRInsi        "(%" PRIu32 ".%" PRIu32 ".%" PRIu32 ")"
+#define PRInsi "(%" PRIu32 ".%" PRIu32 ".%" PRIu32 ")"
 #endif
-
 
 #ifndef MAKE_EP_PRINTABLE
 #define MAKE_EP_PRINTABLE(ep) MAKE_IP_PRINTABLE((ep).addr), (ep).port
 #endif
 
 #ifndef PRIep
-#define PRIep         PRIip ":%" PRIu16
+#define PRIep PRIip ":%" PRIu16
 #endif
-
 
 #endif

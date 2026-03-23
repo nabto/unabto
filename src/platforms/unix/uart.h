@@ -10,8 +10,7 @@
 extern "C" {
 #endif
 
-typedef enum
-{
+typedef enum {
     UART_PARITY_NONE,
     UART_PARITY_EVEN,
     UART_PARITY_ODD,
@@ -19,8 +18,7 @@ typedef enum
     UART_PARITY_SPACE
 } uart_parity;
 
-typedef enum
-{
+typedef enum {
     UART_STOPBITS_ONE,
     UART_STOPBITS_TWO
 } uart_stopbits;
@@ -42,9 +40,8 @@ void uart_flush_receiver(uint8_t channel);
 // block until the transmission queue is empty
 void uart_flush_transmitter(uint8_t channel);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

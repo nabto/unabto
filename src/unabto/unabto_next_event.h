@@ -10,7 +10,7 @@ extern "C" {
 void nabto_update_min_stamp(nabto_stamp_t* current_minimum_stamp, nabto_stamp_t* stamp);
 
 #ifdef __cplusplus
-} // extern "C"
+}  // extern "C"
 #endif
 
 #endif

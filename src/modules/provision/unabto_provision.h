@@ -19,7 +19,7 @@
  */
 typedef struct {
     const char* scheme_;   // http/https
-    const char* host_;     // provisioning webservice hostname 
+    const char* host_;     // provisioning webservice hostname
     const char* api_key_;  // apikey to obtain access to webservices
     const char* token_;    // optional one-time token (activation code)
     const char* id_;       // device id input as configured for project (e.g. mac address)
@@ -31,7 +31,7 @@ typedef struct {
  * device id and crypto key in nms struct. Returns true iff both were
  * successfully read and set.
  */
-bool unabto_provision_try_existing(nabto_main_setup *nms, provision_context_t* context);
+bool unabto_provision_try_existing(nabto_main_setup* nms, provision_context_t* context);
 
 /**
  * Invoke provision service as specified in context, write id and key
@@ -47,7 +47,6 @@ bool unabto_provision_new(nabto_main_setup* nms, provision_context_t* context);
 /**
  * Insert key into nms struct.
  */
-bool unabto_provision_set_key(nabto_main_setup *nms, char *key);
-
+bool unabto_provision_set_key(nabto_main_setup* nms, char* key);
 
 #endif

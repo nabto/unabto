@@ -6,9 +6,9 @@
 #include "unabto_microchip_arp.h"
 #include <unabto/unabto_external_environment.h>
 
-#define INVALID_ENTRY 255
+#define INVALID_ENTRY  255
 #define ARP_CACHE_SIZE 5
-#define ARP_EXPIRE_MS (180000ul)
+#define ARP_EXPIRE_MS  (180000ul)
 
 typedef enum {
     IDLE,
@@ -30,15 +30,15 @@ void unabto_microchip_arp_tick(void) {
     arp_entry* ptr;
     uint8_t i;
 
-    if (entry == INVALID_ENTRY) { // if resolver logic is currently idle...
+    if (entry == INVALID_ENTRY) {  // if resolver logic is currently idle...
         for (i = 0; i < ARP_CACHE_SIZE; i++) {
             ptr = &arp_cache[i];
-            if (ptr->state == RESOLVED && nabtoIsStampPassed(&ptr->expire_time)) { // make the cache entry timeout a period of time after being resolved
+            if (ptr->state == RESOLVED && nabtoIsStampPassed(&ptr->expire_time)) {  // make the cache entry timeout a period of time after being resolved
                 NABTO_LOG_TRACE(("ARP: " PRIip " timed out.", MAKE_IP_PRINTABLE(swapl(ptr->node.IPAddr.Val))));
                 ptr->state = IDLE;
             }
 
-            if (ptr->state == RESOLVING) { // start resolving an address if a resolve request has been made
+            if (ptr->state == RESOLVING) {  // start resolving an address if a resolve request has been made
                 NABTO_LOG_TRACE(("ARP: Starting resolve of " PRIip ".", MAKE_IP_PRINTABLE(swapl(ptr->node.IPAddr.Val))));
                 ARPResolve(&ptr->node.IPAddr);
                 nabtoSetFutureStamp(&timeout, 1000);
@@ -48,15 +48,15 @@ void unabto_microchip_arp_tick(void) {
         }
     }
 
-    if (entry != INVALID_ENTRY) { // if resolver logic is currently busy...
+    if (entry != INVALID_ENTRY) {  // if resolver logic is currently busy...
         ptr = &arp_cache[entry];
 
-        if (ARPIsResolved(&ptr->node.IPAddr, &ptr->node.MACAddr)) { // if address has been resolved store the result
+        if (ARPIsResolved(&ptr->node.IPAddr, &ptr->node.MACAddr)) {  // if address has been resolved store the result
             NABTO_LOG_TRACE(("ARP: " PRIip " resolved.", MAKE_IP_PRINTABLE(swapl(ptr->node.IPAddr.Val))));
             ptr->state = RESOLVED;
             nabtoSetFutureStamp(&ptr->expire_time, ARP_EXPIRE_MS);
             entry = INVALID_ENTRY;
-        } else if (nabtoIsStampPassed(&timeout)) { // if the resolve failed release the cache slot
+        } else if (nabtoIsStampPassed(&timeout)) {  // if the resolve failed release the cache slot
             NABTO_LOG_TRACE(("ARP: Resolve failed for " PRIip ".", MAKE_IP_PRINTABLE(swapl(ptr->node.IPAddr.Val))));
             ptr->state = IDLE;
             entry = INVALID_ENTRY;
@@ -104,12 +104,12 @@ bool unabto_microchip_arp_resolve(const uint32_t ipNetworkOrder, MAC_ADDR* mac) 
 
     for (i = 0; i < ARP_CACHE_SIZE; i++) {
         ptr = &arp_cache[i];
-        if (gwAddr == ptr->node.IPAddr.Val && ptr->state != IDLE) { // cache hit
-            if (ptr->state == RESOLVED) { // address already resolved
+        if (gwAddr == ptr->node.IPAddr.Val && ptr->state != IDLE) {  // cache hit
+            if (ptr->state == RESOLVED) {                            // address already resolved
                 *mac = ptr->node.MACAddr;
                 NABTO_LOG_TRACE(("ARP: Request succeeded for " PRIip ".", MAKE_IP_PRINTABLE(swapl(ptr->node.IPAddr.Val))));
                 return true;
-            } else if (ptr->state == RESOLVING) { // address is currently being resolved
+            } else if (ptr->state == RESOLVING) {  // address is currently being resolved
                 NABTO_LOG_TRACE(("ARP: Request failed for " PRIip ".", MAKE_IP_PRINTABLE(swapl(ptr->node.IPAddr.Val))));
                 return false;
             }
@@ -118,7 +118,7 @@ bool unabto_microchip_arp_resolve(const uint32_t ipNetworkOrder, MAC_ADDR* mac) 
 
     // cache miss
 
-    slot = find_free_slot(); // start new resolve by allocating a cache slot
+    slot = find_free_slot();  // start new resolve by allocating a cache slot
 
     ptr = &arp_cache[slot];
     ptr->node.IPAddr.Val = gwAddr;
@@ -151,7 +151,6 @@ void unabto_microchip_arp_add_resolved(NODE_INFO* node) {
             break;
         }
 
-
         //        ptr = &arp_cache[i];
         //        if (ptr->node.IPAddr.Val == gwAddr) {
         //            break;
@@ -168,6 +167,6 @@ void unabto_microchip_arp_add_resolved(NODE_INFO* node) {
 }
 
 void unabto_microchip_arp_reset(void) {
-    memset(arp_cache, 0, sizeof (arp_cache));
+    memset(arp_cache, 0, sizeof(arp_cache));
     entry = INVALID_ENTRY;
 }

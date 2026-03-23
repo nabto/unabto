@@ -22,9 +22,8 @@ void unabto_debug_packet(message_event* event, nabto_packet_header* header) {
 }
 
 bool handle_debug_packet(message_event* event, nabto_packet_header* header) {
-
     uint8_t* buf = nabtoCommunicationBuffer;
-    uint8_t* end = nabtoCommunicationBuffer+header->len;
+    uint8_t* end = nabtoCommunicationBuffer + header->len;
     struct unabto_payload_crypto crypto;
 
     buf += header->hlen;
@@ -55,7 +54,7 @@ bool handle_debug_packet(message_event* event, nabto_packet_header* header) {
             NABTO_LOG_ERROR(("No syslog config packet which is the only one understand at the moment."));
             return false;
         }
-        
+
         if (!handle_syslog_config(&payload)) {
             return false;
         }
@@ -102,12 +101,11 @@ bool handle_syslog_config(struct unabto_payload_packet* payload) {
 #endif
 }
 
-void send_debug_packet_response(nabto_packet_header* header, uint32_t notification) 
-{
+void send_debug_packet_response(nabto_packet_header* header, uint32_t notification) {
     uint8_t* buf = nabtoCommunicationBuffer;
     uint8_t* ptr = nabtoCommunicationBuffer;
-    uint8_t* end = nabtoCommunicationBuffer+nabtoCommunicationBufferSize;
-    
+    uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
+
     ptr = insert_header(ptr, end, header->nsi_cp, header->nsi_sp, U_DEBUG, true, header->seq, 0, NULL);
 
     if (ptr == NULL) {
@@ -123,11 +121,12 @@ void send_debug_packet_response(nabto_packet_header* header, uint32_t notificati
 
     {
         uint16_t length;
-        if (!insert_packet_length_from_cursor(buf, ptr)) { return; }
+        if (!insert_packet_length_from_cursor(buf, ptr)) {
+            return;
+        }
         length = (uint16_t)(ptr - buf);
         send_to_basestation(buf, length, &nmc.context.gsp);
     }
-
 }
 
 #endif

@@ -1,4 +1,4 @@
- 
+
 #include <unabto/unabto_stream.h>
 #include <unabto/unabto_memory.h>
 #include <unabto/unabto_util.h>
@@ -21,31 +21,30 @@
 static const char* tunnel_host = UNABTO_TUNNEL_TCP_DEFAULT_HOST;
 static uint16_t tunnel_port = UNABTO_TUNNEL_TCP_DEFAULT_PORT;
 
-
 void unabto_tunnel_tcp_close_stream_reader(tunnel* tunnel);
 void unabto_tunnel_tcp_close_tcp_reader(tunnel* tunnel);
 void unabto_tunnel_tcp_closing(tunnel* tunnel, tunnel_event_source event_source);
 
 #if NABTO_ENABLE_TUNNEL_STATUS_CALLBACKS
-#define INVOKE_STATUS_CALLBACK(event, tunnel) do { unabto_tunnel_status_callback(event, tunnel); } while(0)
+#define INVOKE_STATUS_CALLBACK(event, tunnel)         \
+    do {                                              \
+        unabto_tunnel_status_callback(event, tunnel); \
+    } while (0)
 #else
 #define INVOKE_STATUS_CALLBACK(event, tunnel)
 #endif
 
-
-void unabto_tunnel_tcp_init(tunnel* tunnel)
-{
+void unabto_tunnel_tcp_init(tunnel* tunnel) {
     tunnel->tunnel_type_vars.tcp.sock.socket = INVALID_SOCKET;
 }
 
-void unabto_tunnel_tcp_event(tunnel* tunnel, tunnel_event_source event_source)
-{
+void unabto_tunnel_tcp_event(tunnel* tunnel, tunnel_event_source event_source) {
     if (tunnel->state == TS_OPENING_SOCKET && event_source == TUNNEL_EVENT_SOURCE_TCP_WRITE) {
         if (!opening_socket(tunnel)) {
             tunnel->state = TS_CLOSING;
         }
     }
-    
+
     if (tunnel->state == TS_OPEN_SOCKET) {
         if (open_socket(tunnel)) {
             INVOKE_STATUS_CALLBACK(NABTO_TCP_TUNNEL_OPENED, tunnel);
@@ -57,37 +56,36 @@ void unabto_tunnel_tcp_event(tunnel* tunnel, tunnel_event_source event_source)
         tcp_forward(tunnel);
         unabto_forward_tcp(tunnel);
     }
-    
+
     if (tunnel->extReadState == FS_CLOSING && tunnel->unabtoReadState == FS_CLOSING) {
         tunnel->state = TS_CLOSING;
     }
-    
+
     if (tunnel->state == TS_CLOSING) {
         unabto_tunnel_tcp_closing(tunnel, event_source);
     }
 }
 
-void unabto_tunnel_tcp_closing(tunnel* tunnel, tunnel_event_source event_source)
-{
+void unabto_tunnel_tcp_closing(tunnel* tunnel, tunnel_event_source event_source) {
     const uint8_t* buf;
     unabto_stream_hint hint;
     size_t readen;
-    
+
     do {
         readen = unabto_stream_read(tunnel->stream, &buf, &hint);
         if (readen > 0) {
             unabto_stream_ack(tunnel->stream, buf, readen, &hint);
         }
     } while (readen > 0);
-    
+
     if (unabto_stream_close(tunnel->stream)) {
         unabto_stream_stats info;
         unabto_stream_get_stats(tunnel->stream, &info);
-        
+
         NABTO_LOG_TRACE(("Closed tunnel successfully"));
         NABTO_LOG_INFO(("Tunnel(%i) closed, " UNABTO_STREAM_STATS_PRI, tunnel->tunnelId, UNABTO_STREAM_STATS_MAKE_PRINTABLE(info)));
         INVOKE_STATUS_CALLBACK(NABTO_TCP_TUNNEL_CLOSED, tunnel);
-        
+
         unabto_tcp_close(&tunnel->tunnel_type_vars.tcp.sock);
         unabto_stream_release(tunnel->stream);
         unabto_tunnel_reset_tunnel_struct(tunnel);
@@ -96,12 +94,12 @@ void unabto_tunnel_tcp_closing(tunnel* tunnel, tunnel_event_source event_source)
 
 /**
  * read from tcp, write to unabto
- */ 
+ */
 void tcp_forward(tunnel* tunnel) {
-    while(true) {
+    while (true) {
         unabto_stream_hint hint;
         size_t canWriteToStreamBytes;
-        
+
         if (tunnel->extReadState == FS_CLOSING) {
             break;
         }
@@ -139,7 +137,7 @@ void tcp_forward(tunnel* tunnel) {
                 }
             } else if (status == UTS_WOULD_BLOCK) {
                 break;
-            } else { // UTS_EOF, UTS_FAILED, or undefined
+            } else {  // UTS_EOF, UTS_FAILED, or undefined
                 unabto_tunnel_tcp_close_tcp_reader(tunnel);
                 break;
             }
@@ -153,15 +151,12 @@ bool opening_socket(tunnel* tunnel) {
     status = unabto_tcp_connect_poll(&tunnel->tunnel_type_vars.tcp.sock);
     if (status == UTS_OK) {
         tunnel->state = TS_FORWARD;
-    } else { // UTS_CONNECTING OR UTS_FAILED
+    } else {  // UTS_CONNECTING OR UTS_FAILED
         NABTO_LOG_ERROR(("Error opening tcp tunnelsocket"));
         return false;
     }
     return true;
 }
-
-
-
 
 bool open_socket(tunnel* tunnel) {
     unabto_tcp_status status;
@@ -169,19 +164,19 @@ bool open_socket(tunnel* tunnel) {
 #if NABTO_ENABLE_EPOLL
     tunnel->epollEventType = UNABTO_EPOLL_TYPE_TCP_TUNNEL;
 #endif
-    status = unabto_tcp_open(&tunnel->tunnel_type_vars.tcp.sock, NABTO_IP_V4, (void *)tunnel);
-    if(status == UTS_OK) {
+    status = unabto_tcp_open(&tunnel->tunnel_type_vars.tcp.sock, NABTO_IP_V4, (void*)tunnel);
+    if (status == UTS_OK) {
         unabto_tcp_status conStat;
         nabto_endpoint ep;
         ep.addr.type = NABTO_IP_V4;
         ep.addr.addr.ipv4 = ntohl(inet_addr(tunnel->staticMemory->stmu.tcp_sm.host));
         ep.port = tunnel->tunnel_type_vars.tcp.port;
         conStat = unabto_tcp_connect(&tunnel->tunnel_type_vars.tcp.sock, &ep);
-        if(conStat == UTS_CONNECTING) {
+        if (conStat == UTS_CONNECTING) {
             tunnel->state = TS_OPENING_SOCKET;
         } else if (conStat == UTS_OK) {
             tunnel->state = TS_FORWARD;
-        } else { // UTS_FAILED
+        } else {  // UTS_FAILED
             unabto_tcp_close(&tunnel->tunnel_type_vars.tcp.sock);
             NABTO_LOG_ERROR(("connect failed"));
             return false;
@@ -197,11 +192,10 @@ bool open_socket(tunnel* tunnel) {
  * read from unabto, write to tcp
  */
 void unabto_forward_tcp(tunnel* tunnel) {
-
     if (tunnel->unabtoReadState == FS_WRITE) {
         tunnel->unabtoReadState = FS_READ;
     }
-    while(true) {
+    while (true) {
         if (tunnel->unabtoReadState == FS_READ) {
             const uint8_t* buf;
             unabto_stream_hint hint;
@@ -219,7 +213,7 @@ void unabto_forward_tcp(tunnel* tunnel) {
 
                     status = unabto_tcp_write(&tunnel->tunnel_type_vars.tcp.sock, buf, readen, &written);
 
-                    if(status == UTS_OK) {
+                    if (status == UTS_OK) {
                         if (written > 0) {
                             NABTO_LOG_TRACE(("Wrote to tcp stream %i", written));
                             unabto_stream_ack(tunnel->stream, buf, written, &hint);
@@ -235,7 +229,7 @@ void unabto_forward_tcp(tunnel* tunnel) {
                         tunnel->unabtoReadState = FS_WRITE;
                         break;
 
-                    } else { // UTS_FAILED
+                    } else {  // UTS_FAILED
                         unabto_tunnel_tcp_close_stream_reader(tunnel);
                         break;
                     }
@@ -256,12 +250,10 @@ void unabto_forward_tcp(tunnel* tunnel) {
 #define PORT_KW_TXT "port="
 #define HOST_KW_TXT "host="
 
-void unabto_tunnel_tcp_parse_command(tunnel* tunnel, tunnel_event_source event_source)
-{
+void unabto_tunnel_tcp_parse_command(tunnel* tunnel, tunnel_event_source event_source) {
     char* s;
 
-    if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, PORT_KW_TXT)))
-    {
+    if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, PORT_KW_TXT))) {
         s += strlen(PORT_KW_TXT);
         if (1 != sscanf(s, "%d", &tunnel->tunnel_type_vars.tcp.port)) {
             NABTO_LOG_ERROR(("failed to read port number"));
@@ -271,16 +263,15 @@ void unabto_tunnel_tcp_parse_command(tunnel* tunnel, tunnel_event_source event_s
     } else {
         tunnel->tunnel_type_vars.tcp.port = unabto_tunnel_tcp_get_default_port();
     }
-    
-    if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, HOST_KW_TXT)))
-    {
-        char *sp;
+
+    if (NULL != (s = strstr((const char*)tunnel->staticMemory->command, HOST_KW_TXT))) {
+        char* sp;
         size_t length;
         s += strlen(HOST_KW_TXT);
         sp = strchr(s, ' ');
 
         if (sp != NULL) {
-            length = (size_t)(sp-s);
+            length = (size_t)(sp - s);
         } else {
             length = strlen(s);
         }

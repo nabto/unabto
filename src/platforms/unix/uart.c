@@ -24,14 +24,12 @@ static bool low_level_read_from_uart(uart_channel* uartChannel);
 
 static uart_channel channels[UART_NUMBER_OF_CHANNELS];
 
-void uart_initialize(uint8_t channel, void* name, uint32_t baudrate, uint8_t databits, uart_parity parity, uart_stopbits stopbits)
-{
+void uart_initialize(uint8_t channel, void* name, uint32_t baudrate, uint8_t databits, uart_parity parity, uart_stopbits stopbits) {
     uart_channel* uartChannel;
     const char* _name = (const char*)name;
     struct termios tios;
 
-    if(channel >= UART_NUMBER_OF_CHANNELS)
-    {
+    if (channel >= UART_NUMBER_OF_CHANNELS) {
         NABTO_LOG_FATAL(("Invalid UART channel specified!"));
     }
 
@@ -41,39 +39,37 @@ void uart_initialize(uint8_t channel, void* name, uint32_t baudrate, uint8_t dat
 
     uartChannel->fileDescriptor = open(_name, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
-    if(uartChannel->fileDescriptor == -1)
-    {
+    if (uartChannel->fileDescriptor == -1) {
         NABTO_LOG_FATAL(("Unable to open UART '%s'!", _name));
     }
 
     memset(&tios, 0, sizeof(tios));
     tios.c_iflag = IGNBRK | IGNCR;
-    tios.c_iflag |= ((tcflag_t) INPCK);
+    tios.c_iflag |= ((tcflag_t)INPCK);
     tios.c_oflag &= ~OPOST;
     tios.c_lflag &= ~ICANON;
-    cfmakeraw(&tios); // :...
+    cfmakeraw(&tios);  // :...
     tios.c_cc[VMIN] = 0;
     tios.c_cc[VTIME] = 0;
     tios.c_cflag = CLOCAL | CREAD;
 
-    switch(parity)
-    {
+    switch (parity) {
         case UART_PARITY_NONE:
             break;
-            
+
         case UART_PARITY_EVEN:
-            tios.c_cflag |= ((tcflag_t) PARENB);
+            tios.c_cflag |= ((tcflag_t)PARENB);
             break;
-            
+
         case UART_PARITY_ODD:
-            tios.c_cflag |= ((tcflag_t) PARENB | PARODD);
+            tios.c_cflag |= ((tcflag_t)PARENB | PARODD);
             break;
-            
-        // case UART_PARITY_MARK:
+
+            // case UART_PARITY_MARK:
             // tios.c_cflag |= ((tcflag_t) PARENB | CMSPAR | PARODD);
             // break;
-            
-        // case UART_PARITY_SPACE:
+
+            // case UART_PARITY_SPACE:
             // tios.c_cflag |= ((tcflag_t) PARENB | CMSPAR);
             // break;
 
@@ -81,40 +77,37 @@ void uart_initialize(uint8_t channel, void* name, uint32_t baudrate, uint8_t dat
             NABTO_LOG_FATAL(("Invalid number of databits for UART!"));
     }
 
-    switch(stopbits)
-    {
+    switch (stopbits) {
         case UART_STOPBITS_ONE:
             break;
 
         case UART_STOPBITS_TWO:
-            tios.c_cflag |= ((tcflag_t) CSTOPB);
+            tios.c_cflag |= ((tcflag_t)CSTOPB);
             break;
 
         default:
             NABTO_LOG_FATAL(("Invalid number of stopbits for UART!"));
     }
 
-    switch(databits)
-    {
+    switch (databits) {
         case 5:
-            tios.c_cflag |= ((tcflag_t) CS5);
+            tios.c_cflag |= ((tcflag_t)CS5);
             break;
         case 6:
-            tios.c_cflag |= ((tcflag_t) CS6);
+            tios.c_cflag |= ((tcflag_t)CS6);
             break;
         case 7:
-            tios.c_cflag |= ((tcflag_t) CS7);
+            tios.c_cflag |= ((tcflag_t)CS7);
             break;
         case 8:
-            tios.c_cflag |= ((tcflag_t) CS8);
+            tios.c_cflag |= ((tcflag_t)CS8);
             break;
         default:
             NABTO_LOG_FATAL(("Invalid number of databits specified for UART '%s'.", _name));
             return;
     }
 
-    switch(baudrate)
-    {
+    switch (baudrate) {
         case 300:
             cfsetispeed(&tios, B300);
             cfsetospeed(&tios, B300);
@@ -157,53 +150,45 @@ void uart_initialize(uint8_t channel, void* name, uint32_t baudrate, uint8_t dat
             return;
     }
 
-    if (-1 == tcsetattr(uartChannel->fileDescriptor, TCSANOW, &tios))
-    {
+    if (-1 == tcsetattr(uartChannel->fileDescriptor, TCSANOW, &tios)) {
         NABTO_LOG_FATAL(("Unable to configure UART '%s'.", _name));
     }
 
     NABTO_LOG_TRACE(("UART '%s' opened with handle %i.", _name, uartChannel->fileDescriptor));
 }
 
-void uart_shutdown(uint8_t channel)
-{
+void uart_shutdown(uint8_t channel) {
     uart_channel* uartChannel;
-    
-    if(channel >= UART_NUMBER_OF_CHANNELS)
-    {
+
+    if (channel >= UART_NUMBER_OF_CHANNELS) {
         NABTO_LOG_FATAL(("Invalid UART channel specified!"));
     }
 
     uartChannel = &channels[channel];
 
-    if(uartChannel->fileDescriptor > -1)
-    {
+    if (uartChannel->fileDescriptor > -1) {
         close(uartChannel->fileDescriptor);
         uartChannel->fileDescriptor = -1;
     }
 }
 
-uint16_t uart_can_read(uint8_t channel)
-{
+uint16_t uart_can_read(uint8_t channel) {
     uart_channel* uartChannel;
-    
-    if(channel >= UART_NUMBER_OF_CHANNELS)
-    {
+
+    if (channel >= UART_NUMBER_OF_CHANNELS) {
         NABTO_LOG_FATAL(("Invalid UART channel specified!"));
         return 0;
     }
 
     uartChannel = &channels[channel];
 
-    low_level_read_from_uart(uartChannel); // ensure that all data has been read into the driver buffer
-    
+    low_level_read_from_uart(uartChannel);  // ensure that all data has been read into the driver buffer
+
     return queue_count(&uartChannel->receiveQueue);
 }
 
-uint16_t uart_can_write(uint8_t channel)
-{
-    if(channel >= UART_NUMBER_OF_CHANNELS)
-    {
+uint16_t uart_can_write(uint8_t channel) {
+    if (channel >= UART_NUMBER_OF_CHANNELS) {
         NABTO_LOG_FATAL(("Invalid UART channel specified!"));
         return 0;
     }
@@ -211,15 +196,13 @@ uint16_t uart_can_write(uint8_t channel)
     return 4096;
 }
 
-uint8_t uart_read(uint8_t channel)
-{
+uint8_t uart_read(uint8_t channel) {
     uint8_t value;
     uint16_t count;
     uart_channel* uartChannel;
     struct timespec sleepTime;
-    
-    if(channel >= UART_NUMBER_OF_CHANNELS)
-    {
+
+    if (channel >= UART_NUMBER_OF_CHANNELS) {
         NABTO_LOG_FATAL(("Invalid UART channel specified!"));
         return 0;
     }
@@ -229,10 +212,8 @@ uint8_t uart_read(uint8_t channel)
     sleepTime.tv_sec = 0;
     sleepTime.tv_nsec = 1000000;
 
-    while(queue_is_empty(&uartChannel->receiveQueue))
-    {
-        if(low_level_read_from_uart(uartChannel) == false)
-        {
+    while (queue_is_empty(&uartChannel->receiveQueue)) {
+        if (low_level_read_from_uart(uartChannel) == false) {
             nanosleep(&sleepTime, NULL);
         }
     }
@@ -244,29 +225,24 @@ uint8_t uart_read(uint8_t channel)
     return value;
 }
 
-void uart_read_buffer(uint8_t channel, void* buffer, uint16_t length)
-{
-    uint8_t* b = (uint8_t*) buffer;
+void uart_read_buffer(uint8_t channel, void* buffer, uint16_t length) {
+    uint8_t* b = (uint8_t*)buffer;
     uint16_t originalLength = length;
-    
-    if(channel >= UART_NUMBER_OF_CHANNELS)
-    {
+
+    if (channel >= UART_NUMBER_OF_CHANNELS) {
         NABTO_LOG_FATAL(("Invalid UART channel specified!"));
         return;
     }
 
-    while (length--)
-    {
+    while (length--) {
         *b++ = uart_read(channel);
     }
 
     NABTO_LOG_TRACE(("Read %i bytes from UART.", (int)originalLength));
 }
 
-void uart_write(uint8_t channel, uint8_t value)
-{
-    if(channel >= UART_NUMBER_OF_CHANNELS)
-    {
+void uart_write(uint8_t channel, uint8_t value) {
+    if (channel >= UART_NUMBER_OF_CHANNELS) {
         NABTO_LOG_FATAL(("Invalid UART channel specified!"));
         return;
     }
@@ -274,13 +250,11 @@ void uart_write(uint8_t channel, uint8_t value)
     uart_write_buffer(channel, &value, 1);
 }
 
-void uart_write_buffer(uint8_t channel, const void* buffer, uint16_t length)
-{
+void uart_write_buffer(uint8_t channel, const void* buffer, uint16_t length) {
     ssize_t bytesWritten;
     uart_channel* uartChannel;
-    
-    if(channel >= UART_NUMBER_OF_CHANNELS)
-    {
+
+    if (channel >= UART_NUMBER_OF_CHANNELS) {
         NABTO_LOG_FATAL(("Invalid UART channel specified!"));
         return;
     }
@@ -289,42 +263,36 @@ void uart_write_buffer(uint8_t channel, const void* buffer, uint16_t length)
 
     bytesWritten = write(uartChannel->fileDescriptor, buffer, (size_t)length);
 
-    if(bytesWritten < 0)
-    {
+    if (bytesWritten < 0) {
         NABTO_LOG_FATAL(("Error writing bytes to UART with handle %i (error code=%i).", uartChannel->fileDescriptor, (int)bytesWritten));
     }
 
-    if(length != bytesWritten)
-    {
+    if (length != bytesWritten) {
         NABTO_LOG_FATAL(("Unable to write all bytes to the UART (only %" PRIu16 " out of %" PRIu16 " was written)!", bytesWritten, length));
     }
 
     NABTO_LOG_TRACE(("Wrote %i bytes to UART.", (int)length));
 }
 
-void uart_flush_receiver(uint8_t channel)
-{
+void uart_flush_receiver(uint8_t channel) {
     uart_channel* uartChannel;
-    
-    if(channel >= UART_NUMBER_OF_CHANNELS)
-    {
+
+    if (channel >= UART_NUMBER_OF_CHANNELS) {
         NABTO_LOG_FATAL(("Invalid UART channel specified!"));
         return;
     }
 
     uartChannel = &channels[channel];
 
-    while(low_level_read_from_uart(uartChannel)); // keep reading until no more data is available
+    while (low_level_read_from_uart(uartChannel));  // keep reading until no more data is available
 
     queue_reset(&uartChannel->receiveQueue);
 }
 
-void uart_flush_transmitter(uint8_t channel)
-{   
+void uart_flush_transmitter(uint8_t channel) {
     uart_channel* uartChannel;
-    
-    if(channel >= UART_NUMBER_OF_CHANNELS)
-    {
+
+    if (channel >= UART_NUMBER_OF_CHANNELS) {
         NABTO_LOG_FATAL(("Invalid UART channel specified!"));
         return;
     }
@@ -334,41 +302,34 @@ void uart_flush_transmitter(uint8_t channel)
     tcdrain(uartChannel->fileDescriptor);
 }
 
-static bool low_level_read_from_uart(uart_channel* uartChannel)
-{
+static bool low_level_read_from_uart(uart_channel* uartChannel) {
     uint8_t buffer[1024];
     ssize_t bytesRead;
     uint16_t i;
-    
-    if(queue_free(&uartChannel->receiveQueue) == 0)
-    {
+
+    if (queue_free(&uartChannel->receiveQueue) == 0) {
         return false;
     }
 
     bytesRead = read(uartChannel->fileDescriptor, buffer, MIN(sizeof(buffer), queue_free(&uartChannel->receiveQueue)));
-    if(bytesRead < 0)
-    {
+    if (bytesRead < 0) {
         NABTO_LOG_ERROR(("Unable to read from UART!"));
         return false;
     }
 
-    if(bytesRead > 0)
-    {
+    if (bytesRead > 0) {
         uint16_t length = MIN(queue_free(&uartChannel->receiveQueue), bytesRead);
         queue_enqueue_array(&uartChannel->receiveQueue, buffer, length);
 
-        if(length != bytesRead)
-        {
+        if (length != bytesRead) {
             NABTO_LOG_TRACE(("UART buffer overflow!"));
         }
         // for(i = 0; i < bytesRead; i++)
         // {
-            // queue_enqueue(&uartChannel->receiveQueue, buffer[i]);
+        // queue_enqueue(&uartChannel->receiveQueue, buffer[i]);
         // }
         return true;
-    }
-    else
-    {
+    } else {
         return false;
     }
 }

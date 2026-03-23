@@ -11,10 +11,9 @@
  */
 
 /** Major release number (uint32_t) */
-#define RELEASE_MAJOR    123
+#define RELEASE_MAJOR 123
 
 /** Minor release number (uint32_t) */
-#define RELEASE_MINOR    456
-
+#define RELEASE_MINOR 456
 
 #endif

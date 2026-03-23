@@ -22,7 +22,7 @@
 // Exit a critical section.
 #define critical_section_exit() __enable_irq()
 
-#define NABTO_INVALID_SOCKET        255
+#define NABTO_INVALID_SOCKET 255
 typedef uint8_t nabto_socket_t;
 typedef uint32_t nabto_stamp_t;
 typedef int32_t nabto_stamp_diff_t;
@@ -30,7 +30,7 @@ typedef int32_t nabto_stamp_diff_t;
 extern char* wifiSsid;
 extern char* wifiKey;
 
-#define nabtoMsec2Stamp(milliseconds)   (milliseconds)
+#define nabtoMsec2Stamp(milliseconds) (milliseconds)
 
 void platform_initialize_pre(void);
 bool platform_initialize(void* tcb);

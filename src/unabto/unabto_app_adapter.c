@@ -31,7 +31,7 @@
  * of bytes written to buf.
  * All other return values are error codes. In that case all buffers
  * are unmodified. */
-static bool framework_get_async_response(struct naf_handle_s *handle);
+static bool framework_get_async_response(struct naf_handle_s* handle);
 
 /**
  * Release the event handle returned by #framework_event_query().
@@ -49,7 +49,7 @@ static NABTO_THREAD_LOCAL_STORAGE struct naf_handle_s handles[NABTO_APPREQ_QUEUE
 
 // query list of requests
 struct naf_handle_s* find_existing_request_handle(nabto_connect* con, uint16_t reqId);
-struct naf_handle_s* find_handle(application_request *req);
+struct naf_handle_s* find_handle(application_request* req);
 struct naf_handle_s* find_free_handle();
 void free_all_handles_for_connection(nabto_connect* connection);
 
@@ -60,19 +60,15 @@ void free_all_handles_for_connection(nabto_connect* connection);
 static text result_s(application_event_result result);
 #endif
 
-
-void init_application_event_framework(void)
-{
+void init_application_event_framework(void) {
     memset(handles, 0, sizeof(struct naf_handle_s));
 }
 
-void framework_connection_released(nabto_connect* connection)
-{
+void framework_connection_released(nabto_connect* connection) {
     free_all_handles_for_connection(connection);
 }
 
-naf_query_status framework_event_query(nabto_connect* con, nabto_packet_header* hdr, struct naf_handle_s** handle)
-{
+naf_query_status framework_event_query(nabto_connect* con, nabto_packet_header* hdr, struct naf_handle_s** handle) {
     uint16_t reqId = hdr->seq;
     NABTO_LOG_TRACE(("APPREQ framework_event_query: reqId: %" PRIu16, reqId));
 
@@ -95,21 +91,19 @@ naf_query_status framework_event_query(nabto_connect* con, nabto_packet_header* 
     return NAF_QUERY_NEW;
 }
 
-
 /* Handle application event.
  * Initialize the handle and call applicaion_event. */
 void framework_event(struct naf_handle_s* handle,
-                     uint8_t*             iobuf,
-                     uint16_t             ilen)
-{
-    unabto_buffer                 w_buf;
-    unabto_query_response         queryResponse;
-    unabto_buffer                 r_buf;
-    unabto_query_request          queryRequest;
-    application_event_result      res;
-    uint32_t                      query_id;
-    nabto_connect*                con = handle->connection;
-    application_request*          req = &handle->applicationRequest;
+                     uint8_t* iobuf,
+                     uint16_t ilen) {
+    unabto_buffer w_buf;
+    unabto_query_response queryResponse;
+    unabto_buffer r_buf;
+    unabto_query_request queryRequest;
+    application_event_result res;
+    uint32_t query_id;
+    nabto_connect* con = handle->connection;
+    application_request* req = &handle->applicationRequest;
     uint8_t* buf = nabtoCommunicationBuffer;
     uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
 
@@ -121,7 +115,6 @@ void framework_event(struct naf_handle_s* handle,
     /* Set up a read buffer that reads from iobuf. */
     unabto_buffer_init(&r_buf, iobuf, ilen);
     unabto_query_request_init(&queryRequest, &r_buf);
-
 
     if (unabto_query_request_size(&queryRequest) > NABTO_REQUEST_MAX_SIZE) {
         send_exception(con, &handle->header, AER_REQ_TOO_LARGE);
@@ -136,7 +129,7 @@ void framework_event(struct naf_handle_s* handle,
     req->isLocal = con->isLocal;
     req->isLegacy = false;
     req->connection = con;
-    req->clientId = (const char *) con->clientId;
+    req->clientId = (const char*)con->clientId;
     req->queryId = query_id;
 
     NABTO_LOG_TRACE(("APPREQ application_event: %" PRIu32, query_id));
@@ -165,8 +158,7 @@ void framework_event(struct naf_handle_s* handle,
 }
 
 #if !NABTO_APPLICATION_EVENT_MODEL_ASYNC
-bool framework_event_poll()
-{
+bool framework_event_poll() {
     return false;
 }
 #endif
@@ -175,10 +167,9 @@ bool framework_event_poll()
 /* Poll a pending event.
  * Returns true iff a response is sent to the client
  */
-bool framework_event_poll()
-{
-    application_request     *req;
-    struct naf_handle_s     *handle;
+bool framework_event_poll() {
+    application_request* req;
+    struct naf_handle_s* handle;
     bool status;
 
     //Ask for the request in the application
@@ -204,18 +195,17 @@ bool framework_event_poll()
 
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
 /* Handle event by polling application - use data from header stored in handle */
-bool framework_get_async_response(struct naf_handle_s *handle)
-{
-    unabto_buffer              w_buf;
-    unabto_query_response      queryResponse;
-    uint8_t                   *ptr;
-    application_event_result   res;
-    uint8_t*                   buf = nabtoCommunicationBuffer;
-    uint8_t*                   end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
-    nabto_connect*             con = handle->connection;
-    uint16_t                   availableForData;
+bool framework_get_async_response(struct naf_handle_s* handle) {
+    unabto_buffer w_buf;
+    unabto_query_response queryResponse;
+    uint8_t* ptr;
+    application_event_result res;
+    uint8_t* buf = nabtoCommunicationBuffer;
+    uint8_t* end = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
+    nabto_connect* con = handle->connection;
+    uint16_t availableForData;
     ptr = buf;
-    
+
     /* Write packet header and crypto payload header into buf. */
     ptr = nabto_wr_header(buf, end, &handle->header);
     if (ptr == NULL) {
@@ -239,7 +229,6 @@ bool framework_get_async_response(struct naf_handle_s *handle)
 }
 #endif
 
-
 struct naf_handle_s* find_existing_request_handle(nabto_connect* con, uint16_t reqId) {
     int i;
     for (i = 0; i < NABTO_APPREQ_QUEUE_SIZE; i++) {
@@ -251,8 +240,7 @@ struct naf_handle_s* find_existing_request_handle(nabto_connect* con, uint16_t r
     return NULL;
 }
 
-struct naf_handle_s* find_handle(application_request *req)
-{
+struct naf_handle_s* find_handle(application_request* req) {
     int i;
     for (i = 0; i < NABTO_APPREQ_QUEUE_SIZE; i++) {
         struct naf_handle_s* h = &handles[i];
@@ -263,8 +251,7 @@ struct naf_handle_s* find_handle(application_request *req)
     return NULL;
 }
 
-struct naf_handle_s* find_free_handle()
-{
+struct naf_handle_s* find_free_handle() {
     int i;
     for (i = 0; i < NABTO_APPREQ_QUEUE_SIZE; i++) {
         struct naf_handle_s* h = &handles[i];
@@ -287,13 +274,11 @@ void free_all_handles_for_connection(nabto_connect* connection) {
 #endif
 }
 
-
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
 /**
  * Release the event handle returned by framework_event_query.
  */
-void framework_release_handle(struct naf_handle_s* handle)
-{
+void framework_release_handle(struct naf_handle_s* handle) {
     if (!handle) {
         return;
     }
@@ -302,24 +287,33 @@ void framework_release_handle(struct naf_handle_s* handle)
 }
 #endif
 
-
 #if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_TRACE)
-text result_s(application_event_result result)
-{
+text result_s(application_event_result result) {
     switch (result) {
-        case AER_REQ_RESPONSE_READY:   return "RESPONSE_READY";
+        case AER_REQ_RESPONSE_READY:
+            return "RESPONSE_READY";
 #if NABTO_APPLICATION_EVENT_MODEL_ASYNC
-        case AER_REQ_ACCEPTED:         return "ACCEPTED";
+        case AER_REQ_ACCEPTED:
+            return "ACCEPTED";
 #endif
-        case AER_REQ_NOT_READY:        return "NOT_READY";
-        case AER_REQ_NO_ACCESS:        return "NO_ACCESS";
-        case AER_REQ_TOO_SMALL:        return "TOO_SMALL";
-        case AER_REQ_TOO_LARGE:        return "TOO_LARGE";
-        case AER_REQ_INV_QUERY_ID:     return "INV_QUERY_ID";
-        case AER_REQ_RSP_TOO_LARGE:    return "RSP_TOO_LARGE";
-        case AER_REQ_OUT_OF_RESOURCES: return "OUT_OF_RESOURCES";
-        case AER_REQ_SYSTEM_ERROR:     return "SYSTEM_ERROR";
-        case AER_REQ_NO_QUERY_ID:      return "NO_QUERY_ID";
+        case AER_REQ_NOT_READY:
+            return "NOT_READY";
+        case AER_REQ_NO_ACCESS:
+            return "NO_ACCESS";
+        case AER_REQ_TOO_SMALL:
+            return "TOO_SMALL";
+        case AER_REQ_TOO_LARGE:
+            return "TOO_LARGE";
+        case AER_REQ_INV_QUERY_ID:
+            return "INV_QUERY_ID";
+        case AER_REQ_RSP_TOO_LARGE:
+            return "RSP_TOO_LARGE";
+        case AER_REQ_OUT_OF_RESOURCES:
+            return "OUT_OF_RESOURCES";
+        case AER_REQ_SYSTEM_ERROR:
+            return "SYSTEM_ERROR";
+        case AER_REQ_NO_QUERY_ID:
+            return "NO_QUERY_ID";
     }
     return "??";
 }

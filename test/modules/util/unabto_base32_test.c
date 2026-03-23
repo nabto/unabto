@@ -3,8 +3,7 @@
 #include <modules/util/unabto_base32.h>
 #include <unabto/unabto_util.h>
 
-bool unabto_base32_test(void)
-{
+bool unabto_base32_test(void) {
     NABTO_LOG_INFO(("base32 encode test"));
     bool status = true;
     uint8_t input[7];
@@ -16,10 +15,10 @@ bool unabto_base32_test(void)
     ptr = write_forward_u16(ptr, input_end, 0x4242);
 
     uint8_t base32output[12];
-    uint8_t* end = unabto_base32_encode(base32output, base32output+12, input, input+7);
+    uint8_t* end = unabto_base32_encode(base32output, base32output + 12, input, input + 7);
 
-    uint8_t result[12] = { 'n', '4', 'a', 'a', 'o', 'a', 'a', 'a', 'i', 'j', 'b', 'a' };
-    if (end != base32output+12) {
+    uint8_t result[12] = {'n', '4', 'a', 'a', 'o', 'a', 'a', 'a', 'i', 'j', 'b', 'a'};
+    if (end != base32output + 12) {
         NABTO_LOG_INFO(("invalid length"));
         status = false;
     }
@@ -30,8 +29,8 @@ bool unabto_base32_test(void)
     }
 
     uint8_t decoded[7];
-    end = unabto_base32_decode(decoded, decoded+7, base32output, base32output+12);
-    
+    end = unabto_base32_decode(decoded, decoded + 7, base32output, base32output + 12);
+
     if (memcmp(decoded, input, 7) != 0) {
         NABTO_LOG_INFO(("base32 decode failed."));
         status = false;

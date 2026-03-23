@@ -21,32 +21,31 @@ bool unabto_provision_new(nabto_main_setup* nms, provision_context_t* context) {
         NABTO_LOG_FATAL(("Error creating provisioning file '%s'", context->file_));
         return false;
     }
-    
+
     char key[KEY_BUFFER_SIZE];
     unabto_provision_status_t status = unabto_provision_http(nms, context, key, sizeof(key));
     if (status == UPS_OK) {
         return unabto_provision_set_key(nms, key) &&
-            unabto_provision_write_file(context->file_, nms);
+               unabto_provision_write_file(context->file_, nms);
     } else {
         switch (status) {
-        case UPS_PROV_ALREADY_PROVISIONED:
-            NABTO_LOG_FATAL(("Device is already provisioned - use service administration interface to re-open for new attempt"));
-            break;
-        case UPS_PROV_INVALID_TOKEN:
-            NABTO_LOG_FATAL(("Invalid user token specified to provisioning service - check token or contact customer service"));
-            break;
-        default:
-            NABTO_LOG_FATAL(("Provisoning failed with status [%d]", status));
-            break;
+            case UPS_PROV_ALREADY_PROVISIONED:
+                NABTO_LOG_FATAL(("Device is already provisioned - use service administration interface to re-open for new attempt"));
+                break;
+            case UPS_PROV_INVALID_TOKEN:
+                NABTO_LOG_FATAL(("Invalid user token specified to provisioning service - check token or contact customer service"));
+                break;
+            default:
+                NABTO_LOG_FATAL(("Provisoning failed with status [%d]", status));
+                break;
         }
         return false;
     }
 }
 
-bool unabto_provision_set_key(nabto_main_setup *nms, char *key)
-{
+bool unabto_provision_set_key(nabto_main_setup* nms, char* key) {
     size_t pskLen = strlen(key);
-    uint8_t psk[16] = { 0 };
+    uint8_t psk[16] = {0};
 
     if (!key || pskLen != (size_t)PRE_SHARED_KEY_SIZE * 2) {
         NABTO_LOG_ERROR(("Invalid key: %s", key));
@@ -62,8 +61,7 @@ bool unabto_provision_set_key(nabto_main_setup *nms, char *key)
     return true;
 }
 
-bool unabto_provision_try_existing(nabto_main_setup *nms, provision_context_t* context)
-{
+bool unabto_provision_try_existing(nabto_main_setup* nms, provision_context_t* context) {
     char text[256];
     if (!unabto_provision_read_file(context->file_, text, sizeof(text))) {
         return false;

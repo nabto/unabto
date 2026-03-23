@@ -23,7 +23,6 @@
 /* /\** for convenience and portability *\/ */
 /* typedef unsigned char uint8_t; */
 
-
 //#define nabto_init_socket microchip_udp_open
 
 //#define nabto_close_socket microchip_udp_close
@@ -39,17 +38,19 @@
 // or
 //#include "modules/timers/freertos/unabto_time_freertos.h
 
-#define NABTO_FATAL_EXIT do { SoftReset(); } while (0)
+#define NABTO_FATAL_EXIT \
+    do {                 \
+        SoftReset();     \
+    } while (0)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern APP_CONFIG AppConfig; // expose the TCP/IP configuration structure so the application can access it.
-
+extern APP_CONFIG AppConfig;  // expose the TCP/IP configuration structure so the application can access it.
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

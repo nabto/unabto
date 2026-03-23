@@ -11,13 +11,13 @@ nabto_stamp_t nabtoGetStamp() {
 #define MAX_STAMP_DIFF 0x7fffffff;
 
 bool nabtoIsStampPassed(nabto_stamp_t *stamp) {
-    return *(uint32_t*)stamp - (uint32_t)nabtoGetStamp() > MAX_STAMP_DIFF;
+    return *(uint32_t *)stamp - (uint32_t)nabtoGetStamp() > MAX_STAMP_DIFF;
 }
 
-nabto_stamp_diff_t nabtoStampDiff(nabto_stamp_t * newest, nabto_stamp_t * oldest) {
+nabto_stamp_diff_t nabtoStampDiff(nabto_stamp_t *newest, nabto_stamp_t *oldest) {
     return (*newest - *oldest);
 }
 
 int nabtoStampDiff2ms(nabto_stamp_diff_t diff) {
-    return (int) diff*portTICK_PERIOD_MS;
+    return (int)diff * portTICK_PERIOD_MS;
 }

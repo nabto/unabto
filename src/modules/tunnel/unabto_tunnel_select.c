@@ -38,11 +38,11 @@ void tunnel_loop_select() {
 #if defined(WINSOCK)
     unabto_winsock_initialize();
 #endif
-    
+
     unabto_time_auto_update(false);
     // time is updated here and after the select since that's the only blocking point.
     unabto_time_update_stamp();
-    while(true) {
+    while (true) {
         nabto_stamp_t nextEvent;
         nabto_stamp_t now;
         int timeout;
@@ -52,7 +52,7 @@ void tunnel_loop_select() {
         int max_write_fd = 0;
         struct timeval timeout_val;
         int nfds;
-        
+
         unabto_next_event(&nextEvent);
         now = nabtoGetStamp();
         timeout = nabtoStampDiff2ms(nabtoStampDiff(&nextEvent, &now));
@@ -72,12 +72,12 @@ void tunnel_loop_select() {
 
         unabto_tunnel_select_add_to_fd_set(&read_fds, &max_read_fd, &write_fds, &max_write_fd);
 
-        timeout_val.tv_sec = (timeout/1000);
-        timeout_val.tv_usec = (long)((timeout)%1000)*1000;
+        timeout_val.tv_sec = (timeout / 1000);
+        timeout_val.tv_usec = (long)((timeout) % 1000) * 1000;
 
         fflush(stdout);
 
-        nfds = select(MAX(max_read_fd+1, max_write_fd+1), &read_fds, &write_fds, NULL, &timeout_val);
+        nfds = select(MAX(max_read_fd + 1, max_write_fd + 1), &read_fds, &write_fds, NULL, &timeout_val);
 
         if (nfds < 0) {
 #if defined(WINSOCK)
@@ -114,4 +114,3 @@ void tunnel_loop_select() {
     deinit_tunnel_module();
     unabto_close();
 }
-

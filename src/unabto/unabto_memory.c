@@ -20,8 +20,7 @@ NABTO_THREAD_LOCAL_STORAGE x_buffer* x_buffers = 0;
 
 #endif
 
-bool unabto_allocate_memory(nabto_main_setup* nms)
-{
+bool unabto_allocate_memory(nabto_main_setup* nms) {
 #if NABTO_ENABLE_CONNECTIONS
     connections = (nabto_connect*)malloc(sizeof(struct nabto_connect_s) * (size_t)(NABTO_MEMORY_CONNECTIONS_SIZE));
     if (connections == NULL) {
@@ -77,14 +76,19 @@ bool unabto_allocate_memory(nabto_main_setup* nms)
     return true;
 }
 
-void unabto_free_memory()
-{
-    free(connections); connections = 0;
-    free(stream__); stream__ = 0;
-    free(stream_segment_pool); stream_segment_pool = 0;
-    free(stream_buffer_data); stream_buffer_data = 0;
-    free(r_buffers); r_buffers = 0;
-    free(x_buffers); x_buffers = 0;
+void unabto_free_memory() {
+    free(connections);
+    connections = 0;
+    free(stream__);
+    stream__ = 0;
+    free(stream_segment_pool);
+    stream_segment_pool = 0;
+    free(stream_buffer_data);
+    stream_buffer_data = 0;
+    free(r_buffers);
+    r_buffers = 0;
+    free(x_buffers);
+    x_buffers = 0;
 }
 
 #else

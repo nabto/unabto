@@ -9,4 +9,3 @@
 typedef int nabto_socket_t;
 
 #endif
-

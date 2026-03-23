@@ -45,14 +45,14 @@ unabto_tcp_status unabto_tcp_write(struct unabto_tcp_socket* sock, const void* b
             return UTS_WOULD_BLOCK;
         } else {
             NABTO_LOG_ERROR(("Send of tcp packet failed"));
-            return UTS_FAILED; 
+            return UTS_FAILED;
         }
     }
     *written = status;
     return UTS_OK;
 }
 
-unabto_tcp_status unabto_tcp_close(struct unabto_tcp_socket* sock){
+unabto_tcp_status unabto_tcp_close(struct unabto_tcp_socket* sock) {
     if (sock->socket == INVALID_SOCKET) {
         NABTO_LOG_ERROR(("trying to close invalid socket"));
     } else {
@@ -62,8 +62,7 @@ unabto_tcp_status unabto_tcp_close(struct unabto_tcp_socket* sock){
     return UTS_OK;
 }
 
-
-unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock){
+unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock) {
     shutdown(sock->socket, SD_SEND);
     return UTS_OK;
 }
@@ -71,10 +70,10 @@ unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock){
 /*
  * TCP sockets are currently blocking until connected on windows
  */
-unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, enum nabto_ip_address_type addressType, void* epollDataPtr){
+unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, enum nabto_ip_address_type addressType, void* epollDataPtr) {
     int flags = 1;
 
-    if(!unabto_winsock_initialize()){
+    if (!unabto_winsock_initialize()) {
         NABTO_LOG_ERROR(("unabto_winsock_initialize failed"));
         return UTS_FAILED;
     }
@@ -93,7 +92,7 @@ unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, enum nabto_ip_
         return UTS_FAILED;
     }
 
-    if (setsockopt(sock->socket, IPPROTO_TCP, TCP_NODELAY, (char *) &flags, sizeof(int)) != 0) {
+    if (setsockopt(sock->socket, IPPROTO_TCP, TCP_NODELAY, (char*)&flags, sizeof(int)) != 0) {
         NABTO_LOG_ERROR(("Could not set socket option TCP_NODELAY with error: %d", WSAGetLastError()));
         unabto_tcp_close(sock);
         return UTS_FAILED;
@@ -102,19 +101,18 @@ unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, enum nabto_ip_
     return UTS_OK;
 }
 
-
-unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpoint *ep){
+unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpoint* ep) {
     int status;
     struct sockaddr_in host;
 
-    memset(&host,0,sizeof(struct sockaddr_in));
+    memset(&host, 0, sizeof(struct sockaddr_in));
     host.sin_family = AF_INET;
     host.sin_addr.s_addr = htonl(ep->addr.addr.ipv4);
     host.sin_port = htons(ep->port);
     NABTO_LOG_TRACE(("Connecting to %d.%d.%d.%d:%d ", MAKE_EP_PRINTABLE(*ep)));
-    
+
     status = connect(sock->socket, (struct sockaddr*)&host, sizeof(struct sockaddr_in));
-   
+
     if (status == 0) {
         int flags = 1;
         if (ioctlsocket(sock->socket, FIONBIO, &flags) != 0) {
@@ -132,11 +130,10 @@ unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpo
     }
 }
 
-
 /* Polls if socket has been connected.
  * Windows does not have async connect,
  * and this function should never be used
  */
-unabto_tcp_status unabto_tcp_connect_poll(struct unabto_tcp_socket* sock){
+unabto_tcp_status unabto_tcp_connect_poll(struct unabto_tcp_socket* sock) {
     return UTS_FAILED;
 }

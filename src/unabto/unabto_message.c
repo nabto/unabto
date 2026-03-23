@@ -52,7 +52,6 @@
  *
  */
 
-
 #if NABTO_ENABLE_LOCAL_ACCESS
 static void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer);
 #endif
@@ -78,18 +77,18 @@ static uint8_t* add_typed_string(uint8_t* buf, uint8_t* end, uint8_t type, const
         return NULL;
     }
     size_t avail = end - buf;
-    const char dummy[2] = { '-', 0 };
+    const char dummy[2] = {'-', 0};
     if (str == 0) {
         str = dummy;
     }
     if (avail >= 2) {
         // need room for at least type and zeroterm
         size_t len = strlen(str) + 2;
-        size_t tmp = (len < avail) ? len : avail - 2; // 1 byte used for type, 1 byte used for null termination.
+        size_t tmp = (len < avail) ? len : avail - 2;  // 1 byte used for type, 1 byte used for null termination.
         buf = write_forward_u8(buf, end, type);
         buf = write_forward_mem(buf, end, str, tmp);
         buf = write_forward_u8(buf, end, 0);
-        return buf; // add 1 is for 'type'
+        return buf;  // add 1 is for 'type'
     }
     return buf;
 }
@@ -108,20 +107,17 @@ void nabto_message_local_event(message_event* event, uint16_t ilen) {
         // this is either a discovery or an legacy application event.
         uint8_t mainOpcode = (uint8_t)localHdr;
         switch (mainOpcode) {
-            case NP_LEGACY_PACKET_HDR_TYPE_DISCOVERY:
-            {
+            case NP_LEGACY_PACKET_HDR_TYPE_DISCOVERY: {
                 nabto_message_local_discovery_event(ilen, &event->udpMessage.peer);
                 break;
             }
-            case NP_LEGACY_PACKET_HDR_TYPE_APPLICATION:
-            {
+            case NP_LEGACY_PACKET_HDR_TYPE_APPLICATION: {
 #if NABTO_ENABLE_LOCAL_ACCESS_LEGACY_PROTOCOL
                 nabto_message_local_legacy_application_event(ilen, &event->udpMessage.peer);
 #endif
                 break;
             }
-            default:
-            {
+            default: {
                 NABTO_LOG_ERROR(("Unknown legacy opcode: 0x%" PRIu8, mainOpcode));
                 return;
             }
@@ -162,7 +158,7 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
 
     NABTO_LOG_TRACE(("discover: %s", (char*)buf + NP_LEGACY_PACKET_HDR_SIZE));
 
-    if (strcmp(nmc.nabtoMainSetup.id, (const char*) (buf + NP_LEGACY_PACKET_HDR_SIZE)) == 0 || strcmp("*", (const char*) (buf + NP_LEGACY_PACKET_HDR_SIZE)) == 0) {
+    if (strcmp(nmc.nabtoMainSetup.id, (const char*)(buf + NP_LEGACY_PACKET_HDR_SIZE)) == 0 || strcmp("*", (const char*)(buf + NP_LEGACY_PACKET_HDR_SIZE)) == 0) {
         uint8_t* ptr = buf + NP_LEGACY_PACKET_HDR_SIZE;
         uint8_t* end = buf + bufsize;
         uint32_t localIp = 0;
@@ -182,7 +178,7 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
         }
 #endif
 
-# if NABTO_ENABLE_LOCAL_PSK_CONNECTION
+#if NABTO_ENABLE_LOCAL_PSK_CONNECTION
         {
             // Send this capability if the device handles local psk connections.
             char capOk[2] = {'1', 0};
@@ -199,15 +195,17 @@ void nabto_message_local_discovery_event(uint16_t ilen, nabto_endpoint* peer) {
         }
 #endif
 
-        if (ptr == NULL) { return; }
+        if (ptr == NULL) {
+            return;
+        }
 
-        olen = (uint16_t)(ptr - buf); // HSIZE is added again before returning
+        olen = (uint16_t)(ptr - buf);  // HSIZE is added again before returning
         header |= NP_LEGACY_PACKET_HDR_FLAG_RSP;
         WRITE_U32(buf, header);
         NABTO_LOG_TRACE(("local_discover_event -> sending rsp olen=%" PRIu16, olen));
         nabto_write(nmc.socketLocal, nabtoCommunicationBuffer, olen, &peer->addr, peer->port);
     } else {
-        NABTO_LOG_TRACE(("Discover target: '%s' this device: '%s'", buf+sizeof(header), nmc.nabtoMainSetup.id));
+        NABTO_LOG_TRACE(("Discover target: '%s' this device: '%s'", buf + sizeof(header), nmc.nabtoMainSetup.id));
     }
 }
 #endif
@@ -233,7 +231,7 @@ void nabto_message_local_legacy_application_event(uint16_t ilen, nabto_endpoint*
     READ_U32(header, buf);
 
     READ_U32(appreq.queryId, ptr);
-    appreq.clientId = NULL; // the local legacy protocol does not support client ids.
+    appreq.clientId = NULL;  // the local legacy protocol does not support client ids.
     appreq.connection = NULL;
     appreq.isLegacy = true;
     appreq.isLocal = true;
@@ -272,7 +270,7 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
     if (event->type == MT_UDP) {
         bool fromBS = nabto_ep_is_equal(&event->udpMessage.peer, &nmc.controllerEp);
         bool fromGSP = nabto_ep_is_equal(&event->udpMessage.peer, &nmc.context.gsp);
-        if (fromBS) { // NOLINT(bugprone-branch-clone)
+        if (fromBS) {  // NOLINT(bugprone-branch-clone)
             NABTO_LOG_TRACE(("Received from Base Station: %" PRIu16 " bytes", ilen));
         } else if (fromGSP) {
             NABTO_LOG_TRACE(("Received from GSP: %" PRIu16 " bytes", ilen));
@@ -282,63 +280,65 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
 
         switch (hdr.type) {
 #if NABTO_ENABLE_REMOTE_ACCESS
-        case U_INVITE:
-            if (fromBS && nabto_invite_event(&hdr)) return;
-            break;
-        case U_ATTACH:
-            if (fromGSP && nabto_attach_event(&hdr)) return;
-            NABTO_LOG_TRACE(("failed to handle U_ATTACH from GSP"));
-            break;
+            case U_INVITE:
+                if (fromBS && nabto_invite_event(&hdr)) return;
+                break;
+            case U_ATTACH:
+                if (fromGSP && nabto_attach_event(&hdr)) return;
+                NABTO_LOG_TRACE(("failed to handle U_ATTACH from GSP"));
+                break;
 #if NABTO_ENABLE_PUSH
-        case U_PUSH:
-            if (fromGSP && nabto_push_event(&hdr)) return;
-            break;
+            case U_PUSH:
+                if (fromGSP && nabto_push_event(&hdr)) return;
+                break;
 #endif
-        case U_ALIVE:
-            if (fromGSP && nabto_alive_event(&hdr)) return;
-            {
-                return;
-            }
-            break;
+            case U_ALIVE:
+                if (fromGSP && nabto_alive_event(&hdr)) return;
+                {
+                    return;
+                }
+                break;
 #endif
-        case U_CONNECT:
-            if (!fromGSP) {
-                nabto_connect_event(event, &hdr);
-                return;
-            } else {
+            case U_CONNECT:
+                if (!fromGSP) {
+                    nabto_connect_event(event, &hdr);
+                    return;
+                } else {
 #if NABTO_ENABLE_REMOTE_ACCESS
-                nabto_connect_event_from_gsp(event, &hdr);
-                return;
+                    nabto_connect_event_from_gsp(event, &hdr);
+                    return;
 #endif
-            }
+                }
 #if NABTO_ENABLE_LOCAL_PSK_CONNECTION
-        case U_CONNECT_PSK:
-        case U_VERIFY_PSK:
-            unabto_psk_connection_dispatch_request(event->udpMessage.socket, &event->udpMessage.peer, &hdr);
-            return;
+            case U_CONNECT_PSK:
+            case U_VERIFY_PSK:
+                unabto_psk_connection_dispatch_request(event->udpMessage.socket, &event->udpMessage.peer, &hdr);
+                return;
 #endif
 
 #if NABTO_ENABLE_DEBUG_PACKETS
 
-        case U_DEBUG:
-            if (fromGSP) {
-                unabto_debug_packet(event, &hdr);
-                return;
-            }
-            break;
+            case U_DEBUG:
+                if (fromGSP) {
+                    unabto_debug_packet(event, &hdr);
+                    return;
+                }
+                break;
 #endif
 
-        default: break;
+            default:
+                break;
         }
     }
 
 #if NABTO_ENABLE_TCP_FALLBACK
     if (event->type == MT_TCP_FALLBACK) {
         switch (hdr.type) {
-        case GW_CONN_U:
-            nabto_fallback_connect_u_event(ilen, &hdr);
-            return;
-        default: break;
+            case GW_CONN_U:
+                nabto_fallback_connect_u_event(ilen, &hdr);
+                return;
+            default:
+                break;
         }
     }
 #endif
@@ -354,7 +354,7 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
 
 #if NABTO_ENABLE_CONNECTIONS
 bool nabto_message_async_response_poll(void) {
-    bool             result = false;
+    bool result = false;
 
     while (framework_event_poll()) {
         result = true;

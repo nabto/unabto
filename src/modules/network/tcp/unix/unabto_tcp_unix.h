@@ -8,4 +8,4 @@ struct unabto_tcp_socket {
     int socket;
 };
 
-#endif //_UNABTO_TCP_UNIX_H_
+#endif  //_UNABTO_TCP_UNIX_H_

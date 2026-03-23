@@ -8,10 +8,10 @@
  */
 extern NABTO_THREAD_LOCAL_STORAGE int unabto_epoll_fd;
 
-#define UNABTO_EPOLL_TYPE_UDP 1
+#define UNABTO_EPOLL_TYPE_UDP          1
 #define UNABTO_EPOLL_TYPE_TCP_FALLBACK 2
-#define UNABTO_EPOLL_TYPE_UART_TUNNEL 3
-#define UNABTO_EPOLL_TYPE_TCP_TUNNEL 4
+#define UNABTO_EPOLL_TYPE_UART_TUNNEL  3
+#define UNABTO_EPOLL_TYPE_TCP_TUNNEL   4
 
 typedef struct {
     int epollEventType;
@@ -23,7 +23,6 @@ typedef struct {
 } unabto_epoll_event_handler_udp;
 
 void unabto_epoll_init();
-
 
 /**
  * default disable epoll such that we are default compatible with most
@@ -40,6 +39,5 @@ void unabto_epoll_init();
 void unabto_network_epoll_read(struct epoll_event* event);
 bool unabto_network_epoll_read_one(struct epoll_event* event);
 #endif
-
 
 #endif

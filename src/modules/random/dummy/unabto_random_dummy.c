@@ -5,12 +5,12 @@
 
 /* Because #warning is not a known pragma in MSC */
 #define STRINGISE_IMPL(x) #x
-#define STRINGISE(x) STRINGISE_IMPL(x)
+#define STRINGISE(x)      STRINGISE_IMPL(x)
 #if _MSC_VER
-#   define FILE_LINE_LINK __FILE__ "(" STRINGISE(__LINE__) ") : "
-#   define WARN(exp) (FILE_LINE_LINK "WARNING: " exp)
+#define FILE_LINE_LINK __FILE__ "(" STRINGISE(__LINE__) ") : "
+#define WARN(exp)      (FILE_LINE_LINK "WARNING: " exp)
 #else
-#   define WARN(exp) ("WARNING: " exp)
+#define WARN(exp) ("WARNING: " exp)
 #endif
 
 #pragma message WARN("Using an incomplete random implementation. Please use a real random implementation.")

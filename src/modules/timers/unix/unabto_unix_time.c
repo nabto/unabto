@@ -55,7 +55,6 @@ void unabto_time_update_stamp() {
     }
 }
 
-
 struct unabto_unix_time unabto_unix_timer_get_stamp() {
     if (auto_update_enabled) {
         unabto_time_update_stamp();
@@ -85,16 +84,15 @@ bool unabto_unix_timer_stamp_less_equal(nabto_stamp_t* s1, nabto_stamp_t* s2) {
     return false;
 }
 
-
 bool unabto_unix_timer_is_stamppassed(nabto_stamp_t* stamp) {
     nabto_stamp_t now = nabtoGetStamp();
     return unabto_unix_timer_stamp_less_equal(stamp, &now);
 }
 
-nabto_stamp_diff_t unabto_unix_timer_stampdiff(nabto_stamp_t * newest, nabto_stamp_t * oldest) {
+nabto_stamp_diff_t unabto_unix_timer_stampdiff(nabto_stamp_t* newest, nabto_stamp_t* oldest) {
     return (nabto_stamp_diff_t)(newest->milliseconds - oldest->milliseconds);
 }
 
 int unabto_unix_timer_stampdiff2ms(nabto_stamp_diff_t diff) {
-    return (int) (diff);
+    return (int)(diff);
 }

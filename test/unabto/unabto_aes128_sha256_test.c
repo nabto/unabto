@@ -48,26 +48,23 @@ static const uint8_t buffer[164] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x
                                     0x69, 0xb5, 0xd9, 0x98, 0x52, 0xfe, 0xe2, 0x56, 0x86, 0xa5, 0xd4, 0x2f, 0x1a, 0xcb, 0x12, 0xd2,
                                     0xfd, 0x4a, 0x69, 0x03};
 
-void truncated_hmac_sha256_verify_integrity_test(bool *a)
-{
-  *a = unabto_truncated_hmac_sha256_verify_integrity(key, 32, buffer, 164, integrity);
+void truncated_hmac_sha256_verify_integrity_test(bool *a) {
+    *a = unabto_truncated_hmac_sha256_verify_integrity(key, 32, buffer, 164, integrity);
 }
 
-int integrity_verify_timing(void)
-{
-  nabto_stamp_t future;
-  bool a;
-  int i = 0;
+int integrity_verify_timing(void) {
+    nabto_stamp_t future;
+    bool a;
+    int i = 0;
 
-  nabtoSetFutureStamp(&future, 1000);
+    nabtoSetFutureStamp(&future, 1000);
 
-  while(!nabtoIsStampPassed(&future))
-  {
-    truncated_hmac_sha256_verify_integrity_test(&a);
-    i++;
-  }
+    while (!nabtoIsStampPassed(&future)) {
+        truncated_hmac_sha256_verify_integrity_test(&a);
+        i++;
+    }
 
-  return i;
+    return i;
 }
 
 #endif

@@ -28,9 +28,8 @@ void log_buffer_pgm(const __ROM void* buffer, uint24_t length);
 
 #endif
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

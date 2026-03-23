@@ -33,7 +33,6 @@
 #define MAX_HANDLERS 5
 static NABTO_THREAD_LOCAL_STORAGE unabto_packet_data_handler_entry handlers[MAX_HANDLERS];
 
-
 void unabto_packet_init_handlers(void) {
     memset(handlers, 0, sizeof(handlers));
 }
@@ -62,7 +61,6 @@ unabto_packet_data_handler_entry* unabto_packet_find_handler(uint16_t tag) {
     return 0;
 }
 
-
 /**
  * When a data packet is received we have several ways of handling
  * it. But all data packets has a crypto payload which we need to
@@ -73,18 +71,16 @@ unabto_packet_data_handler_entry* unabto_packet_find_handler(uint16_t tag) {
  * function which handles the data based on the tag type.
  */
 
-void nabto_packet_event(message_event* event, nabto_packet_header* hdr)
-{
-    uint8_t*                   firstPayload;
-    uint16_t                   vlen;
-    nabto_connect*             con;
-    uint8_t*                   start;
-    uint16_t                   expectedCode;
-    uint16_t                   ilen = hdr->len;
+void nabto_packet_event(message_event* event, nabto_packet_header* hdr) {
+    uint8_t* firstPayload;
+    uint16_t vlen;
+    nabto_connect* con;
+    uint8_t* start;
+    uint16_t expectedCode;
+    uint16_t ilen = hdr->len;
     struct unabto_payload_packet cryptoPayload;
-    uint16_t                   dlen;
+    uint16_t dlen;
     unabto_packet_data_handler_entry* handler;
-
 
     /* remove compiler warning about unused variable since the variable is only used
      * if trace output is enabled
@@ -113,7 +109,7 @@ void nabto_packet_event(message_event* event, nabto_packet_header* hdr)
 
     firstPayload = nabtoCommunicationBuffer + hdr->hlen;
 
-    if (!unabto_find_payload(firstPayload,nabtoCommunicationBuffer +ilen, NP_PAYLOAD_TYPE_CRYPTO, &cryptoPayload)) {
+    if (!unabto_find_payload(firstPayload, nabtoCommunicationBuffer + ilen, NP_PAYLOAD_TYPE_CRYPTO, &cryptoPayload)) {
         NABTO_LOG_ERROR(("Packet without crypto payload"));
         return;
     }
@@ -157,7 +153,7 @@ void nabto_packet_event(message_event* event, nabto_packet_header* hdr)
     if (handler == 0) {
         NABTO_LOG_ERROR(("no handler for data with tag %i", hdr->tag));
     } else {
-        handler->handler(con, hdr, start, (uint16_t)dlen, nabtoCommunicationBuffer+hdr->hlen, nabtoCommunicationBuffer+ilen, event, handler->userData);
+        handler->handler(con, hdr, start, (uint16_t)dlen, nabtoCommunicationBuffer + hdr->hlen, nabtoCommunicationBuffer + ilen, event, handler->userData);
     }
 }
 
@@ -172,31 +168,31 @@ void nabto_packet_event(message_event* event, nabto_packet_header* hdr)
  *
  * The ACK is sent as a packet with a NOTIFICATION.
  */
-static void send_ack(nabto_connect* con, nabto_packet_header* hdr)
-{
+static void send_ack(nabto_connect* con, nabto_packet_header* hdr) {
     uint8_t buf[SIZE_HEADER_MAX + NP_PAYLOAD_NOTIFY_BYTELENGTH];
     uint8_t* end = buf + SIZE_HEADER_MAX + NP_PAYLOAD_NOTIFY_BYTELENGTH;
-    uint16_t hlen  = hdr->hlen;
+    uint16_t hlen = hdr->hlen;
     uint8_t* ptr = buf;
 
-    memcpy(buf, (const void*) nabtoCommunicationBuffer, hlen);
+    memcpy(buf, (const void*)nabtoCommunicationBuffer, hlen);
     ptr += hlen;
 
     ptr = insert_notify_payload(ptr, end, NOTIFY_MICRO_ACK);
 
-    if (!insert_packet_length_from_cursor(buf, ptr)) { return; }
+    if (!insert_packet_length_from_cursor(buf, ptr)) {
+        return;
+    }
 
-    add_flags(buf, NP_PACKET_HDR_FLAG_RESPONSE); // | NP_PACKET_HDR_FLAG_EXCEPTION);
+    add_flags(buf, NP_PACKET_HDR_FLAG_RESPONSE);  // | NP_PACKET_HDR_FLAG_EXCEPTION);
     NABTO_LOG_TRACE(("(." PRInsi ".) send Dialogue-Ack to client, seq: %" PRIu16, MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), hdr->seq));
 
-    nabto_write_con(con, buf, ptr-buf);
+    nabto_write_con(con, buf, ptr - buf);
 }
 
 /******************************************************************************/
 
-bool send_exception(nabto_connect* con, nabto_packet_header* hdr, uint32_t aer)
-{
-    uint8_t  buf[SIZE_HEADER_MAX + SIZE_PAYLOAD_HEADER + SIZE_CODE + 48] = {0}; // maximum length cryptosuites implemented as of aug 2012
+bool send_exception(nabto_connect* con, nabto_packet_header* hdr, uint32_t aer) {
+    uint8_t buf[SIZE_HEADER_MAX + SIZE_PAYLOAD_HEADER + SIZE_CODE + 48] = {0};  // maximum length cryptosuites implemented as of aug 2012
     uint8_t* end = buf + sizeof(buf);
     uint8_t* cryptoPayloadStart;
     uint8_t* ptr = buf;
@@ -218,12 +214,14 @@ void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, ui
     uint8_t* packetStart = nabtoCommunicationBuffer;
     uint8_t* packetBufferEnd = nabtoCommunicationBuffer + nabtoCommunicationBufferSize;
     enum {
-        FRAMING_KEEP_ALIVE = 0, // Framing::CMD_KEEPALIVE
-        FRAMING_CLOSED_OLD = 2, // Framing::CMD_UDT_CLOSED
-        FRAMING_CLOSED     = 3  // Framing::CMD_UDP_CLOSED
+        FRAMING_KEEP_ALIVE = 0,  // Framing::CMD_KEEPALIVE
+        FRAMING_CLOSED_OLD = 2,  // Framing::CMD_UDT_CLOSED
+        FRAMING_CLOSED = 3       // Framing::CMD_UDP_CLOSED
     };
 
-    (void)payloadsStart; (void)payloadsEnd; (void)userData; /* Unused */
+    (void)payloadsStart;
+    (void)payloadsEnd;
+    (void)userData; /* Unused */
 
     if (dlen < 4) {
         NABTO_LOG_TRACE((PRInsi " FRAMING CTRL short dlen=%i", MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), dlen));
@@ -232,8 +230,7 @@ void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, ui
         uint32_t cmd;
         READ_U32(cmd, dataStart);
         switch (cmd) {
-            case FRAMING_KEEP_ALIVE:
-            {
+            case FRAMING_KEEP_ALIVE: {
                 uint32_t no;
                 if (dlen < 8) {
                     NABTO_LOG_TRACE((PRInsi " FRAMING CTRL KEEPALIVE short dlen=%i", MAKE_NSI_PRINTABLE(0, hdr->nsi_sp, 0), dlen));
@@ -246,8 +243,7 @@ void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, ui
                 nabtoSetFutureStamp(&con->stamp, con->timeOut);
                 /* Keep alive, respond by echoing 8 bytes */
                 olen = 8;
-            }
-            break;
+            } break;
             case FRAMING_CLOSED_OLD:
             case FRAMING_CLOSED:
                 WRITE_U32(dataStart, (uint32_t)FRAMING_CLOSED);
@@ -278,16 +274,16 @@ void handle_framing_ctrl_packet(nabto_connect* con, nabto_packet_header* hdr, ui
 
     // TODO we are reusing the structure from the request, simplify this in the future.
 
-    send_and_encrypt_packet_con(con, packetStart, packetBufferEnd, dataStart, dataStart + olen, dataStart-SIZE_CODE-NP_PAYLOAD_HDR_BYTELENGTH, NP_PAYLOAD_HDR_FLAG_NONE);
+    send_and_encrypt_packet_con(con, packetStart, packetBufferEnd, dataStart, dataStart + olen, dataStart - SIZE_CODE - NP_PAYLOAD_HDR_BYTELENGTH, NP_PAYLOAD_HDR_FLAG_NONE);
 }
 
-
-void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* start, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, message_event* event, void* userData)
-{
+void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* start, uint16_t dlen, uint8_t* payloadsStart, uint8_t* payloadsEnd, message_event* event, void* userData) {
     struct naf_handle_s* handle = NULL;
 
     naf_query_status nqs;
-    (void)payloadsStart; (void)payloadsEnd; (void)userData; /* Unused */
+    (void)payloadsStart;
+    (void)payloadsEnd;
+    (void)userData; /* Unused */
 
 #if NABTO_ENABLE_TCP_FALLBACK
     if (event->type == MT_TCP_FALLBACK) {
@@ -317,7 +313,7 @@ void handle_naf_packet(nabto_connect* con, nabto_packet_header* hdr, uint8_t* st
 
         case NAF_QUERY_OUT_OF_RESOURCES:
             if (con->cpAsync) {
-                send_exception(con, hdr,  NP_E_SYSTEM_ERROR);
+                send_exception(con, hdr, NP_E_SYSTEM_ERROR);
             }
             break;
     }
@@ -344,13 +340,15 @@ bool encrypt_packet(nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8
     }
 
     /* Write crypto payload header (forward writes) */
-    WRITE_U8(cryptoPayloadStart,     NP_PAYLOAD_TYPE_CRYPTO);
+    WRITE_U8(cryptoPayloadStart, NP_PAYLOAD_TYPE_CRYPTO);
     WRITE_U8(cryptoPayloadStart + 1, cryptoFlags);
     WRITE_U16(cryptoPayloadStart + 2, (uint16_t)(cryptoPayloadEnd - cryptoPayloadStart));
     WRITE_U16(cryptoPayloadStart + NP_PAYLOAD_HDR_BYTELENGTH, cryptoCtx->code);
 
     {
-        if (!insert_packet_length_from_cursor(packetStart, cryptoPayloadEnd)) { return false; }
+        if (!insert_packet_length_from_cursor(packetStart, cryptoPayloadEnd)) {
+            return false;
+        }
         *len = (uint16_t)(cryptoPayloadEnd - packetStart);
         if (!unabto_insert_integrity(cryptoCtx, packetStart, *len)) {
             NABTO_LOG_ERROR(("Integrity insertion failing"));
@@ -360,7 +358,6 @@ bool encrypt_packet(nabto_crypto_context* cryptoCtx, uint8_t* packetStart, uint8
     }
     return true;
 }
-
 
 bool send_and_encrypt_packet_con(nabto_connect* con, uint8_t* packetStart, uint8_t* packetEnd, uint8_t* plaintextStart, uint8_t* plaintextEnd, uint8_t* cryptoPayloadStart, uint8_t cryptoFlags) {
     uint16_t len;
@@ -385,8 +382,7 @@ bool send_and_encrypt_packet(nabto_endpoint* peer, nabto_crypto_context* cryptoC
     return send_to_basestation(packetStart, len, peer);
 }
 
-bool send_to_basestation(uint8_t* buffer, size_t buflen, nabto_endpoint* peer)
-{
+bool send_to_basestation(uint8_t* buffer, size_t buflen, nabto_endpoint* peer) {
     if (peer->addr.type != NABTO_IP_NONE && peer->port != 0) {
         return (nabto_write(nmc.socketGSP, buffer, buflen, &peer->addr, peer->port) > 0);
     } else {
@@ -394,24 +390,21 @@ bool send_to_basestation(uint8_t* buffer, size_t buflen, nabto_endpoint* peer)
     }
 }
 
-uint8_t* unabto_stats_write_u32(uint8_t* ptr, uint8_t* end, uint8_t type, uint32_t value)
-{
+uint8_t* unabto_stats_write_u32(uint8_t* ptr, uint8_t* end, uint8_t type, uint32_t value) {
     ptr = write_forward_u8(ptr, end, type);
     ptr = write_forward_u8(ptr, end, 6);
     ptr = write_forward_u32(ptr, end, value);
     return ptr;
 }
 
-uint8_t* unabto_stats_write_u16(uint8_t* ptr, uint8_t* end, uint8_t type, uint16_t value)
-{
+uint8_t* unabto_stats_write_u16(uint8_t* ptr, uint8_t* end, uint8_t type, uint16_t value) {
     ptr = write_forward_u8(ptr, end, type);
     ptr = write_forward_u8(ptr, end, 4);
     ptr = write_forward_u16(ptr, end, value);
     return ptr;
 }
 
-uint8_t* unabto_stats_write_u8(uint8_t* ptr, uint8_t* end, uint8_t type, uint8_t value)
-{
+uint8_t* unabto_stats_write_u8(uint8_t* ptr, uint8_t* end, uint8_t type, uint8_t value) {
     ptr = write_forward_u8(ptr, end, type);
     ptr = write_forward_u8(ptr, end, 3);
     ptr = write_forward_u8(ptr, end, value);

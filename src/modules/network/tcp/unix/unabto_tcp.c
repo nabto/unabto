@@ -41,7 +41,7 @@ unabto_tcp_status unabto_tcp_read(struct unabto_tcp_socket* sock, void* buf, con
     }
 }
 
-unabto_tcp_status unabto_tcp_write(struct unabto_tcp_socket* sock, const void* buf, const size_t len, size_t* written){
+unabto_tcp_status unabto_tcp_write(struct unabto_tcp_socket* sock, const void* buf, const size_t len, size_t* written) {
     ssize_t status;
     NABTO_LOG_TRACE(("Writing %i bytes to tcp socket", len));
     status = send(sock->socket, buf, len, MSG_NOSIGNAL);
@@ -59,7 +59,7 @@ unabto_tcp_status unabto_tcp_write(struct unabto_tcp_socket* sock, const void* b
     return UTS_OK;
 }
 
-unabto_tcp_status unabto_tcp_close(struct unabto_tcp_socket* sock){
+unabto_tcp_status unabto_tcp_close(struct unabto_tcp_socket* sock) {
     if (sock->socket == INVALID_SOCKET) {
         NABTO_LOG_ERROR(("trying to close invalid socket"));
     } else {
@@ -76,12 +76,12 @@ unabto_tcp_status unabto_tcp_close(struct unabto_tcp_socket* sock){
     return UTS_OK;
 }
 
-unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock){
+unabto_tcp_status unabto_tcp_shutdown(struct unabto_tcp_socket* sock) {
     shutdown(sock->socket, SHUT_WR);
     return UTS_OK;
 }
 
-unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, enum nabto_ip_address_type addressType, void* epollDataPtr){
+unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, enum nabto_ip_address_type addressType, void* epollDataPtr) {
     if (addressType == NABTO_IP_V4) {
         sock->socket = socket(AF_INET, SOCK_STREAM, 0);
     } else if (addressType == NABTO_IP_V6) {
@@ -103,7 +103,7 @@ unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, enum nabto_ip_
 
     {
         int flags = 1;
-        if (setsockopt(sock->socket, IPPROTO_TCP, TCP_NODELAY, (char *) &flags, sizeof(int)) != 0) {
+        if (setsockopt(sock->socket, IPPROTO_TCP, TCP_NODELAY, (char*)&flags, sizeof(int)) != 0) {
             NABTO_LOG_ERROR(("Could not set socket option TCP_NODELAY"));
         }
         flags = fcntl(sock->socket, F_GETFL, 0);
@@ -119,28 +119,28 @@ unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, enum nabto_ip_
         }
 
         flags = 1;
-        if(setsockopt(sock->socket, SOL_SOCKET, SO_KEEPALIVE, &flags, sizeof(flags)) < 0) {
+        if (setsockopt(sock->socket, SOL_SOCKET, SO_KEEPALIVE, &flags, sizeof(flags)) < 0) {
             NABTO_LOG_ERROR(("could not enable KEEPALIVE"));
         }
 
 #ifndef __MACH__
         flags = 9;
-        if(setsockopt(sock->socket, SOL_TCP, TCP_KEEPCNT, &flags, sizeof(flags)) < 0) {
+        if (setsockopt(sock->socket, SOL_TCP, TCP_KEEPCNT, &flags, sizeof(flags)) < 0) {
             NABTO_LOG_ERROR(("could not set TCP_KEEPCNT"));
         }
 
         flags = 60;
-        if(setsockopt(sock->socket, SOL_TCP, TCP_KEEPIDLE, &flags, sizeof(flags)) < 0) {
+        if (setsockopt(sock->socket, SOL_TCP, TCP_KEEPIDLE, &flags, sizeof(flags)) < 0) {
             NABTO_LOG_ERROR(("could not set TCP_KEEPIDLE"));
         }
 
         flags = 60;
-        if(setsockopt(sock->socket, SOL_TCP, TCP_KEEPINTVL, &flags, sizeof(flags)) < 0) {
+        if (setsockopt(sock->socket, SOL_TCP, TCP_KEEPINTVL, &flags, sizeof(flags)) < 0) {
             NABTO_LOG_ERROR(("could not set TCP KEEPINTVL"));
         }
 #else
         flags = 60;
-        if(setsockopt(sock->socket, IPPROTO_TCP, TCP_KEEPALIVE, &flags, sizeof(flags)) < 0) {
+        if (setsockopt(sock->socket, IPPROTO_TCP, TCP_KEEPALIVE, &flags, sizeof(flags)) < 0) {
             NABTO_LOG_ERROR(("could not set TCP_KEEPCNT"));
         }
 #endif
@@ -148,34 +148,33 @@ unabto_tcp_status unabto_tcp_open(struct unabto_tcp_socket* sock, enum nabto_ip_
     }
 }
 
-
-unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpoint* ep){
+unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpoint* ep) {
     int status;
     if (ep->addr.type == NABTO_IP_V4) {
         struct sockaddr_in host;
-        
-        memset(&host,0,sizeof(struct sockaddr_in));
+
+        memset(&host, 0, sizeof(struct sockaddr_in));
         host.sin_family = AF_INET;
         host.sin_addr.s_addr = htonl(ep->addr.addr.ipv4);
         host.sin_port = htons(ep->port);
         NABTO_LOG_TRACE(("Connecting to ", PRIep, MAKE_EP_PRINTABLE(*ep)));
-    
+
         status = connect(sock->socket, (struct sockaddr*)&host, sizeof(struct sockaddr_in));
     } else if (ep->addr.type == NABTO_IP_V6) {
         struct sockaddr_in6 host;
-        
-        memset(&host,0,sizeof(struct sockaddr_in6));
+
+        memset(&host, 0, sizeof(struct sockaddr_in6));
         host.sin6_family = AF_INET6;
         memcpy(host.sin6_addr.s6_addr, ep->addr.addr.ipv6, 16);
         host.sin6_port = htons(ep->port);
         NABTO_LOG_TRACE(("Connecting to ", PRIep, MAKE_EP_PRINTABLE(*ep)));
-    
+
         status = connect(sock->socket, (struct sockaddr*)&host, sizeof(struct sockaddr_in6));
-        
+
     } else {
         return UTS_FAILED;
     }
-   
+
     if (status == 0) {
         return UTS_OK;
     } else {
@@ -189,10 +188,9 @@ unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpo
     }
 }
 
-
 /* Polls if socket has been connected
  */
-unabto_tcp_status unabto_tcp_connect_poll(struct unabto_tcp_socket* sock){
+unabto_tcp_status unabto_tcp_connect_poll(struct unabto_tcp_socket* sock) {
     int err;
     socklen_t len;
     len = sizeof(err);
@@ -201,7 +199,7 @@ unabto_tcp_status unabto_tcp_connect_poll(struct unabto_tcp_socket* sock){
     } else {
         if (err == 0) {
             return UTS_OK;
-        } else if ( err == EINPROGRESS) {
+        } else if (err == EINPROGRESS) {
             return UTS_CONNECTING;
         } else {
             NABTO_LOG_ERROR(("Socket not open %d", err));
@@ -210,4 +208,3 @@ unabto_tcp_status unabto_tcp_connect_poll(struct unabto_tcp_socket* sock){
     }
     return UTS_OK;
 }
-

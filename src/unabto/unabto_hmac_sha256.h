@@ -23,9 +23,8 @@ void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keysSize,
                                 const unabto_buffer messages[], uint8_t messagesSize,
                                 uint8_t* mac, uint16_t macSize);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

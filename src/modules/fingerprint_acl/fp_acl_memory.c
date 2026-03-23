@@ -13,13 +13,11 @@ static fp_acl_db_status fp_mem_persistence_null_load(struct fp_mem_state* unused
 
 // The acl list is a compacted memory representation of the devices.
 
-bool fp_mem_is_slot_free(struct fp_acl_user* ix)
-{
+bool fp_mem_is_slot_free(struct fp_acl_user* ix) {
     return !ix->fp.hasValue;
 }
 
-struct fp_acl_user* fp_mem_find_free_slot()
-{
+struct fp_acl_user* fp_mem_find_free_slot() {
     int i;
     for (i = 0; i < FP_MEM_ACL_ENTRIES; i++) {
         struct fp_acl_user* ix = &state.users[i];
@@ -32,8 +30,7 @@ struct fp_acl_user* fp_mem_find_free_slot()
 
 fp_acl_db_status fp_mem_init(struct fp_acl_db* db,
                              struct fp_acl_settings* defaultSettings,
-                             struct fp_mem_persistence* p)
-{
+                             struct fp_mem_persistence* p) {
     if (db == NULL || defaultSettings == NULL) {
         return FP_ACL_DB_FAILED;
     }
@@ -43,7 +40,7 @@ fp_acl_db_status fp_mem_init(struct fp_acl_db* db,
         persistence.save = &fp_mem_persistence_null_save;
         persistence.load = &fp_mem_persistence_null_load;
     }
-    
+
     memset(&state, 0, sizeof(struct fp_mem_state));
     state.settings = *defaultSettings;
 
@@ -61,8 +58,7 @@ fp_acl_db_status fp_mem_init(struct fp_acl_db* db,
     return persistence.load(&state);
 }
 
-void* fp_mem_get_first_user()
-{
+void* fp_mem_get_first_user() {
     int i;
     for (i = 0; i < FP_MEM_ACL_ENTRIES; i++) {
         struct fp_acl_user* ix = &state.users[i];
@@ -73,8 +69,7 @@ void* fp_mem_get_first_user()
     return NULL;
 }
 
-void* fp_mem_next(void* current)
-{
+void* fp_mem_next(void* current) {
     struct fp_acl_user* it = (struct fp_acl_user*)current;
     it++;
     for (; it < state.users + FP_MEM_ACL_ENTRIES; it++) {
@@ -85,8 +80,7 @@ void* fp_mem_next(void* current)
     return NULL;
 }
 
-void* fp_mem_find(const struct unabto_fingerprint* fp)
-{
+void* fp_mem_find(const struct unabto_fingerprint* fp) {
     int i;
     for (i = 0; i < FP_MEM_ACL_ENTRIES; i++) {
         struct fp_acl_user* ix = &state.users[i];
@@ -97,14 +91,13 @@ void* fp_mem_find(const struct unabto_fingerprint* fp)
     return NULL;
 }
 
-fp_acl_db_status fp_mem_save_user(struct fp_acl_user* user)
-{
+fp_acl_db_status fp_mem_save_user(struct fp_acl_user* user) {
     void* index = fp_mem_find(&(user->fp.value));
 
     if (index == NULL) {
         index = fp_mem_find_free_slot();
     }
-    
+
     if (index != NULL) {
         memcpy((struct fp_acl_user*)index, user, sizeof(struct fp_acl_user));
         return persistence.save(&state);
@@ -113,35 +106,29 @@ fp_acl_db_status fp_mem_save_user(struct fp_acl_user* user)
     }
 }
 
-fp_acl_db_status fp_mem_load_user(void* it, struct fp_acl_user* user)
-{
+fp_acl_db_status fp_mem_load_user(void* it, struct fp_acl_user* user) {
     struct fp_acl_user* ix = (struct fp_acl_user*)(it);
     memcpy(user, ix, sizeof(struct fp_acl_user));
     return FP_ACL_DB_OK;
 }
 
-fp_acl_db_status fp_mem_remove_user(void* it)
-{
+fp_acl_db_status fp_mem_remove_user(void* it) {
     struct fp_acl_user* ix = (struct fp_acl_user*)(it);
     memset(ix, 0, sizeof(struct fp_acl_user));
     return persistence.save(&state);
 }
 
-fp_acl_db_status fp_mem_clear()
-{
+fp_acl_db_status fp_mem_clear() {
     memset(&state, 0, sizeof(struct fp_mem_state));
     return persistence.save(&state);
 }
 
-
-fp_acl_db_status fp_mem_load_settings(struct fp_acl_settings* settings)
-{
+fp_acl_db_status fp_mem_load_settings(struct fp_acl_settings* settings) {
     memcpy(settings, &state.settings, sizeof(struct fp_acl_settings));
     return FP_ACL_DB_OK;
 }
 
-fp_acl_db_status fp_mem_save_settings(struct fp_acl_settings* settings)
-{
+fp_acl_db_status fp_mem_save_settings(struct fp_acl_settings* settings) {
     memcpy(&state.settings, settings, sizeof(struct fp_acl_settings));
     return persistence.save(&state);
 }

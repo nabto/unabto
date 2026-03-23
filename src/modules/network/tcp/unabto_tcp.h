@@ -15,7 +15,7 @@ typedef enum {
     UTS_WOULD_BLOCK,
     UTS_FAILED,
     UTS_CONNECTING,
-    UTS_EOF // no more data from the other side
+    UTS_EOF  // no more data from the other side
 } unabto_tcp_status;
 
 /**
@@ -55,5 +55,4 @@ unabto_tcp_status unabto_tcp_connect(struct unabto_tcp_socket* sock, nabto_endpo
  */
 unabto_tcp_status unabto_tcp_connect_poll(struct unabto_tcp_socket* sock);
 
-
-#endif //_UNABTO_TCP_H_
+#endif  //_UNABTO_TCP_H_

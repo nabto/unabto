@@ -7,7 +7,6 @@
 #include "unabto_microchip_arp.h"
 #include <unabto/unabto_util.h>
 
-
 ssize_t microchip_udp_write(UDP_SOCKET socket, const uint8_t* buf, size_t len, uint32_t addr, uint16_t port) {
     NODE_INFO remoteInfo;
     ssize_t size;
@@ -20,12 +19,12 @@ ssize_t microchip_udp_write(UDP_SOCKET socket, const uint8_t* buf, size_t len, u
     if (addr == 0 || port == 0) {
         return 0;
     }
-    
+
     WRITE_U32(&addrNetworkOrder, addr);
 
     if (unabto_microchip_arp_resolve(addrNetworkOrder, &remoteInfo.MACAddr)) {
         remoteInfo.IPAddr.Val = addrNetworkOrder;
-        memcpy((void*) &UDPSocketInfo[socket].remote.remoteNode, (void*) &remoteInfo, sizeof (NODE_INFO));
+        memcpy((void*)&UDPSocketInfo[socket].remote.remoteNode, (void*)&remoteInfo, sizeof(NODE_INFO));
     } else {
         if (UDPSocketInfo[socket].remote.remoteNode.IPAddr.Val != addrNetworkOrder) {
             return 0;
@@ -40,7 +39,7 @@ ssize_t microchip_udp_write(UDP_SOCKET socket, const uint8_t* buf, size_t len, u
 #endif
 
         UDPSocketInfo[socket].remotePort = port;
-        size = (ssize_t) UDPPutArray((BYTE*) buf, len);
+        size = (ssize_t)UDPPutArray((BYTE*)buf, len);
         UDPFlush();
         NABTO_LOG_TRACE(("UDP write length: %i, %" PRIu16 " -> " PRIip ":%" PRIu16, size, debug->localPort, MAKE_IP_PRINTABLE(sourceIp), debug->remotePort));
 
@@ -70,7 +69,7 @@ ssize_t microchip_udp_read(UDP_SOCKET socket, uint8_t* buf, size_t len, uint32_t
         //        *addr = ntohl(UDPSocketInfo[socket].remote.remoteNode.IPAddr.Val);
         WRITE_U32(addr, UDPSocketInfo[socket].remote.remoteNode.IPAddr.Val);
         *port = UDPSocketInfo[socket].remotePort;
-        rlen = (ssize_t) UDPGetArray(buf, len);
+        rlen = (ssize_t)UDPGetArray(buf, len);
         NABTO_LOG_TRACE(("UDP read length: %i, %" PRIu16 " <- " PRIip ":%" PRIu16, rlen, debug->localPort, MAKE_IP_PRINTABLE(sourceIp), debug->remotePort));
 
         NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_TRACE, ("UDP in datagram"), buf, rlen);
@@ -92,7 +91,7 @@ bool microchip_udp_open(uint16_t* localPort, UDP_SOCKET* socketDescriptor) {
     UDP_SOCKET sd;
     sd = UDPOpenEx(0, UDP_OPEN_SERVER, *localPort, 0);
 
-        NABTO_LOG_INFO(("create socket..."));
+    NABTO_LOG_INFO(("create socket..."));
 
     if (sd == INVALID_UDP_SOCKET) {
         NABTO_LOG_INFO(("failed to create socket"));

@@ -31,22 +31,20 @@
 static near uint8_t tempValue;
 #pragma udata
 
-void debug_channel_initialize(void)
-{
-  LATBbits.LATB6 = 1;
-  TRISBbits.TRISB6 = 0;
+void debug_channel_initialize(void) {
+    LATBbits.LATB6 = 1;
+    TRISBbits.TRISB6 = 0;
 
-  stdout = _H_USER;
+    stdout = _H_USER;
 
-  debug_channel_write('\n');
+    debug_channel_write('\n');
 }
 
-void debug_channel_uninitialize(void)
-{
-  TRISBbits.TRISB6 = 1;
-  LATBbits.LATB6 = 0;
+void debug_channel_uninitialize(void) {
+    TRISBbits.TRISB6 = 1;
+    LATBbits.LATB6 = 0;
 }
-
+// clang-format off
 void debug_channel_write(uint8_t value)
 {
   critical_section_enter();
@@ -180,52 +178,45 @@ stopbit:
 
   critical_section_exit();
 }
+// clang-format on
 
-int _user_putc(char c)
-{
-  debug_channel_write(c);
-  return c;
+int _user_putc(char c) {
+    debug_channel_write(c);
+    return c;
 }
 
 static const rom uint8_t letters[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
-void debug_channel_write_string(const char* string)
-{
-  while(*string)
-  {
-    debug_channel_write(*string++);
-  }
+void debug_channel_write_string(const char* string) {
+    while (*string) {
+        debug_channel_write(*string++);
+    }
 }
 
-void debug_channel_write_string_pgm(const far rom char* string)
-{
-  while(*string)
-  {
-    debug_channel_write(*string++);
-  }
+void debug_channel_write_string_pgm(const far rom char* string) {
+    while (*string) {
+        debug_channel_write(*string++);
+    }
 }
 
-void debug_channel_write_uint8_hex(uint8_t value)
-{
-  debug_channel_write(letters[value >> 4]);
-  debug_channel_write(letters[value & 0x0f]);
+void debug_channel_write_uint8_hex(uint8_t value) {
+    debug_channel_write(letters[value >> 4]);
+    debug_channel_write(letters[value & 0x0f]);
 }
 
-void debug_channel_write_uint16_hex(uint16_t value)
-{
-  debug_channel_write(letters[value >> 12]);
-  debug_channel_write(letters[(value >> 8) & 0x0f]);
-  debug_channel_write(letters[(value >> 4) & 0x0f]);
-  debug_channel_write(letters[value & 0x0f]);
+void debug_channel_write_uint16_hex(uint16_t value) {
+    debug_channel_write(letters[value >> 12]);
+    debug_channel_write(letters[(value >> 8) & 0x0f]);
+    debug_channel_write(letters[(value >> 4) & 0x0f]);
+    debug_channel_write(letters[value & 0x0f]);
 }
 
-void debug_channel_write_int32(int32_t value)
-{
-  char buffer[12];
+void debug_channel_write_int32(int32_t value) {
+    char buffer[12];
 
-  ltoa(value, buffer);
+    ltoa(value, buffer);
 
-  debug_channel_write_string(buffer);
+    debug_channel_write_string(buffer);
 }
 
 #endif

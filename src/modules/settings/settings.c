@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <unabto/unabto_external_environment.h>
 
-#define MAXIMUM_LINE_LENGTH             1024
+#define MAXIMUM_LINE_LENGTH 1024
 
 static bool initialized = false;
 static char settingsFile[1024];
@@ -15,34 +15,28 @@ static char tempSettingsFile[1024];
 
 static void initialize(void);
 
-bool settings_read_string(const char* key, char* value, size_t value_size)
-{
+bool settings_read_string(const char* key, char* value, size_t value_size) {
     bool keyFound = false;
     FILE* file;
 
-    if(initialized == false)
-    {
+    if (initialized == false) {
         initialize();
     }
 
     file = fopen(settingsFile, "r");
 
-    if(file != NULL)
-    {
+    if (file != NULL) {
         int keyLength = strlen(key);
         char line[MAXIMUM_LINE_LENGTH];
 
-        while(fgets(line, sizeof(line), file) == line && keyFound == false)
-        {
-            if(memcmp(line, key, keyLength) == 0 && line[keyLength] == '=')
-            {
+        while (fgets(line, sizeof(line), file) == line && keyFound == false) {
+            if (memcmp(line, key, keyLength) == 0 && line[keyLength] == '=') {
                 int valueLength;
 
                 snprintf(value, value_size, "%s", line + keyLength + 1);
 
                 valueLength = strlen(value);
-                if(valueLength > 0 && value[valueLength - 1] == '\n')
-                {
+                if (valueLength > 0 && value[valueLength - 1] == '\n') {
                     value[valueLength - 1] = 0;
                 }
 
@@ -56,8 +50,7 @@ bool settings_read_string(const char* key, char* value, size_t value_size)
     return keyFound;
 }
 
-bool settings_write_string(const char* key, const char* value)
-{
+bool settings_write_string(const char* key, const char* value) {
     char newLine[MAXIMUM_LINE_LENGTH];
     int testLength;
     FILE* tempFile;
@@ -65,9 +58,8 @@ bool settings_write_string(const char* key, const char* value)
     bool writeDone = false;
     bool writeLineFeedDone = false;
     bool fileIsEmpty = true;
-    
-    if(initialized == false)
-    {
+
+    if (initialized == false) {
         initialize();
     }
 
@@ -76,32 +68,24 @@ bool settings_write_string(const char* key, const char* value)
     testLength = strlen(key) + 1;
 
     tempFile = fopen(tempSettingsFile, "w");
-    if(tempFile == NULL)
-    {
+    if (tempFile == NULL) {
         return false;
     }
 
     // if the settings file already exist copy it to the new settings file replacing the specified setting if it exists.
     existingFile = fopen(settingsFile, "r");
-    if(existingFile != NULL)
-    {
+    if (existingFile != NULL) {
         char existingLine[MAXIMUM_LINE_LENGTH];
-        while(fgets(existingLine, sizeof(existingLine), existingFile) == existingLine)
-        {
-            if(strlen(existingLine) > 0)
-            {
+        while (fgets(existingLine, sizeof(existingLine), existingFile) == existingLine) {
+            if (strlen(existingLine) > 0) {
                 fileIsEmpty = false;
-                if(memcmp(existingLine, newLine, testLength) != 0)
-                {
-                    if(writeDone == true && writeLineFeedDone == false)
-                    {
+                if (memcmp(existingLine, newLine, testLength) != 0) {
+                    if (writeDone == true && writeLineFeedDone == false) {
                         fputc('\n', tempFile);
                         writeLineFeedDone = true;
                     }
                     fputs(existingLine, tempFile);
-                }
-                else
-                {
+                } else {
                     fputs(newLine, tempFile);
                     writeDone = true;
                 }
@@ -111,10 +95,8 @@ bool settings_write_string(const char* key, const char* value)
         fclose(existingFile);
     }
 
-    if(writeDone == false)
-    {
-        if(fileIsEmpty == false)
-        {
+    if (writeDone == false) {
+        if (fileIsEmpty == false) {
             fputc('\n', tempFile);
         }
         fputs(newLine, tempFile);
@@ -126,21 +108,17 @@ bool settings_write_string(const char* key, const char* value)
         bool done = false;
         nabto_stamp_t timeout;
         nabtoSetFutureStamp(&timeout, 300);
-        
-        do
-        {
+
+        do {
             NABTO_LOG_TRACE(("Trying to swap temp settings file to actual settings file..."));
-            remove(settingsFile); // this may fail if file has already been deleted so don't test the return value
-            if(rename(tempSettingsFile, settingsFile) == 0)
-            {
+            remove(settingsFile);  // this may fail if file has already been deleted so don't test the return value
+            if (rename(tempSettingsFile, settingsFile) == 0) {
                 done = true;
-            }
-            else if(nabtoIsStampPassed(&timeout))
-            {
+            } else if (nabtoIsStampPassed(&timeout)) {
                 NABTO_LOG_TRACE(("Unable to swap settings files!"));
                 return false;
             }
-        } while(done == false);
+        } while (done == false);
 
         //while(remove(settingsFile) != 0 || rename(tempSettingsFile, settingsFile) != 0)
         //{
@@ -153,16 +131,14 @@ bool settings_write_string(const char* key, const char* value)
         //}
         NABTO_LOG_TRACE(("Settings files swapped successfully"));
     }
-    
+
     return true;
 }
 
-bool settings_read_int(const char* key, int* value)
-{
+bool settings_read_int(const char* key, int* value) {
     char rawValue[100];
 
-    if(settings_read_string(key, rawValue, sizeof(rawValue)) == false)
-    {
+    if (settings_read_string(key, rawValue, sizeof(rawValue)) == false) {
         return false;
     }
 
@@ -171,21 +147,18 @@ bool settings_read_int(const char* key, int* value)
     return true;
 }
 
-bool settings_write_int(const char* key, int value)
-{
+bool settings_write_int(const char* key, int value) {
     char rawValue[20];
 
     snprintf(rawValue, sizeof(rawValue), "%i", value);
-    
+
     return settings_write_string(key, rawValue);
 }
 
-bool settings_read_bool(const char* key, bool* value)
-{
+bool settings_read_bool(const char* key, bool* value) {
     char rawValue[100];
 
-    if(settings_read_string(key, rawValue, sizeof(rawValue)) == false)
-    {
+    if (settings_read_string(key, rawValue, sizeof(rawValue)) == false) {
         return false;
     }
 
@@ -194,13 +167,11 @@ bool settings_read_bool(const char* key, bool* value)
     return true;
 }
 
-bool settings_write_bool(const char* key, bool value)
-{
+bool settings_write_bool(const char* key, bool value) {
     return settings_write_string(key, value ? "true" : "false");
 }
 
-static void initialize(void)
-{
+static void initialize(void) {
     initialized = true;
 
 #if WIN32
@@ -211,8 +182,7 @@ static void initialize(void)
     snprintf(tempSettingsFile, sizeof(tempSettingsFile), "settings.txt.%u", getpid());
 #endif
 }
-void initialize_settings(const char *file)
-{
+void initialize_settings(const char* file) {
     if (snprintf(settingsFile, sizeof(settingsFile), "%s", file) >= (int)sizeof(settingsFile)) {
         return;
     }

@@ -11,12 +11,11 @@
 extern "C" {
 #endif
 
-extern void unabto_printf_unabto_config(FILE * f, const char *progname);
-extern void unabto_printf_memory_sizes(FILE * f, const char *progname);
-
+extern void unabto_printf_unabto_config(FILE *f, const char *progname);
+extern void unabto_printf_memory_sizes(FILE *f, const char *progname);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

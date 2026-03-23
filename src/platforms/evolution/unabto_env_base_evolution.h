@@ -30,7 +30,7 @@
  * ** This function is provided for compatibility with platforms with a
  * ** segmented architecture.
  * */
-#define FAR 
+#define FAR
 
 /*!
  * ** \brief Type modifier to force pointers to be huge.
@@ -38,8 +38,7 @@
  * ** This function is provided for compatibility with platforms with a
  * ** segmented architecture.
  * */
-#define HUGE 
-
+#define HUGE
 
 /** Unsigned 8 bit quantity */
 typedef unsigned char uint8_t;
@@ -52,7 +51,7 @@ typedef unsigned long uint32_t;
 
 /** Unsigned 64 bit quantity */
 typedef unsigned long long uint64_t; /* NOT AVAILABLE ON ALL PLATFORMS */
-  
+
 /** Signed 8 bit quantity */
 typedef signed char sint8_t;
 
@@ -73,7 +72,7 @@ typedef unsigned char bool;
  **
  ** Use this to indicate a true condition or result.
  */
-#define true 1          
+#define true 1
 
 /*!
  ** \brief Boolean false.
@@ -91,11 +90,11 @@ typedef unsigned char bool;
 #ifndef _SYS_TYPES_H
 typedef long int ssize_t;
 #endif
-typedef uint8_t nabto_socket_t;     ///< Handle for UDP stack
-typedef long long nabto_stamp_t;    ///< Nabto time stamp
+typedef uint8_t nabto_socket_t;   ///< Handle for UDP stack
+typedef long long nabto_stamp_t;  ///< Nabto time stamp
 
-#define NABTO_INVALID_SOCKET    -1
-#define nabtoMsec2Stamp(msec)   (msec)
-#define NABTO_FATAL_EXIT        KillThread(0);
+#define NABTO_INVALID_SOCKET  -1
+#define nabtoMsec2Stamp(msec) (msec)
+#define NABTO_FATAL_EXIT      KillThread(0);
 
 #endif

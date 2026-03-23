@@ -14,6 +14,6 @@
  * @param message  the message to print
  */
 void nabto_renesas_rl78_log(char *message) {
-  // printf(message)
-  ConsolePrintf(message);
+    // printf(message)
+    ConsolePrintf(message);
 }

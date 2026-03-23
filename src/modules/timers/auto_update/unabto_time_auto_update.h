@@ -10,5 +10,4 @@
 void unabto_time_auto_update(bool enabled);
 void unabto_time_update_stamp();
 
-
 #endif

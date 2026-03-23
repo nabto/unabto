@@ -10,14 +10,12 @@
 extern "C" {
 #endif
 
-typedef struct list_element
-{
+typedef struct list_element {
     struct list_element* next;
     void* data;
 } list_element;
 
-typedef struct list
-{
+typedef struct list {
     list_element* head;
     list_element* tail;
     size_t count;
@@ -34,11 +32,10 @@ bool list_is_empty(list* list);
 size_t list_count(list* list);
 bool list_contains(list* list, void* data);
 
-#define list_foreach(_list, _element) for((_element) = (_list)->head; (_element) != NULL; (_element) = (_element)->next)
-
+#define list_foreach(_list, _element) for ((_element) = (_list)->head; (_element) != NULL; (_element) = (_element)->next)
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

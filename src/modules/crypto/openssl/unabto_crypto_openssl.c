@@ -9,8 +9,7 @@
 
 #include <string.h>
 
-bool unabto_aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t input_len)
-{
+bool unabto_aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t input_len) {
     EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
     if (ctx == NULL) {
         NABTO_LOG_ERROR(("cannot allocate cipher ctx"));
@@ -22,12 +21,12 @@ bool unabto_aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t inpu
     EVP_CIPHER_CTX_set_padding(ctx, 0);
 
     int outLength;
-    if(EVP_EncryptUpdate(ctx, input+16, &outLength, input+16, input_len-16) != 1) {
+    if (EVP_EncryptUpdate(ctx, input + 16, &outLength, input + 16, input_len - 16) != 1) {
         NABTO_LOG_ERROR(("EVP_EncryptUpdate should return 1"));
     }
 
     int tmpLength;
-    if(EVP_EncryptFinal_ex(ctx, input + 16 + outLength, &tmpLength) != 1) {
+    if (EVP_EncryptFinal_ex(ctx, input + 16 + outLength, &tmpLength) != 1) {
         NABTO_LOG_ERROR(("EVP_EncryptFinal_ex should return 1"));
     }
 
@@ -35,8 +34,7 @@ bool unabto_aes128_cbc_encrypt(const uint8_t* key, uint8_t* input, uint16_t inpu
     return true;
 }
 
-bool unabto_aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t input_len)
-{
+bool unabto_aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t input_len) {
     EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
     if (ctx == NULL) {
         NABTO_LOG_ERROR(("cannot allocate cipher ctx"));
@@ -48,12 +46,12 @@ bool unabto_aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t inpu
     EVP_CIPHER_CTX_set_padding(ctx, 0);
 
     int outLength;
-    if (EVP_DecryptUpdate(ctx, input+16, &outLength, input+16, input_len-16) != 1) {
+    if (EVP_DecryptUpdate(ctx, input + 16, &outLength, input + 16, input_len - 16) != 1) {
         NABTO_LOG_ERROR(("EVP_DecryptUpdate should return 1"));
     }
 
     int tmpLength;
-    if(EVP_DecryptFinal_ex(ctx, input + 16 + outLength, &tmpLength) != 1) {
+    if (EVP_DecryptFinal_ex(ctx, input + 16 + outLength, &tmpLength) != 1) {
         NABTO_LOG_ERROR(("EVP_EncryptFinal_ex should return 1"));
     }
 
@@ -63,7 +61,7 @@ bool unabto_aes128_cbc_decrypt(const uint8_t* key, uint8_t* input, uint16_t inpu
 
 void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keys_size,
                                 const unabto_buffer messages[], uint8_t messages_size,
-                                uint8_t *mac, uint16_t mac_size) {
+                                uint8_t* mac, uint16_t mac_size) {
     uint16_t key_size = 0;
     uint8_t i;
     uint8_t* key;
@@ -75,9 +73,9 @@ void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keys_size,
         for (i = 0; i < keys_size; i++) {
             key_size += keys[i].size;
         }
-        
+
         UNABTO_ASSERT(key_size <= UNABTO_SHA256_BLOCK_LENGTH);
-        
+
         uint8_t* key_ptr = key_buffer;
         for (i = 0; i < keys_size; i++) {
             memcpy(key_ptr, keys[i].data, keys[i].size);
@@ -88,20 +86,19 @@ void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keys_size,
 
     uint8_t hash[EVP_MAX_MD_SIZE];
 
-    EVP_MAC *mac_alg = EVP_MAC_fetch(NULL, "HMAC", NULL);
+    EVP_MAC* mac_alg = EVP_MAC_fetch(NULL, "HMAC", NULL);
     if (mac_alg == NULL) {
         NABTO_LOG_ERROR(("EVP_MAC_fetch failed"));
     }
 
-    EVP_MAC_CTX *ctx = EVP_MAC_CTX_new(mac_alg);
+    EVP_MAC_CTX* ctx = EVP_MAC_CTX_new(mac_alg);
     if (ctx == NULL) {
         NABTO_LOG_ERROR(("EVP_MAC_CTX_new failed"));
     }
 
     OSSL_PARAM params[] = {
         OSSL_PARAM_construct_utf8_string(OSSL_MAC_PARAM_DIGEST, "SHA256", 0),
-        OSSL_PARAM_construct_end()
-    };
+        OSSL_PARAM_construct_end()};
 
     if (EVP_MAC_init(ctx, key, key_size, params) != 1) {
         NABTO_LOG_ERROR(("EVP_MAC_init failed"));

@@ -29,9 +29,8 @@ void dns_client_nabto_dns_resolve(const char* host);
  */
 nabto_dns_status_t dns_client_nabto_dns_is_resolved(const char* host, uint32_t* ip);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

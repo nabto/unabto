@@ -97,7 +97,6 @@ bool send_and_encrypt_packet(nabto_endpoint* peer, nabto_crypto_context* cryptoC
  */
 bool send_exception(nabto_connect* con, nabto_packet_header* hdr, uint32_t aer);
 
-    
 /**
  * send and encrypt a packet on a connection.
  * @param con                     The connection.
@@ -125,9 +124,8 @@ uint8_t* unabto_stats_write_u32(uint8_t* ptr, uint8_t* end, uint8_t type, uint32
 uint8_t* unabto_stats_write_u16(uint8_t* ptr, uint8_t* end, uint8_t type, uint16_t value);
 uint8_t* unabto_stats_write_u8(uint8_t* ptr, uint8_t* end, uint8_t type, uint8_t value);
 
-
 #ifdef __cplusplus
-} // extern "C"
+}  // extern "C"
 #endif
 
 #endif

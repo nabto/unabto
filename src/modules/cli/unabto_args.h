@@ -5,7 +5,7 @@
  * @file
  * The argument parsing for pc and boost versions of unabto
  */
- 
+
 #ifndef _UNABTO_ARGS_H_
 #define _UNABTO_ARGS_H_
 
@@ -23,7 +23,7 @@ extern "C" {
  * @param nmc          the main context
  * @return             true if successfull
  */
-bool check_args(int argc, char* argv[], nabto_main_setup *nms);
+bool check_args(int argc, char *argv[], nabto_main_setup *nms);
 
 /**
  * Try to convert the hostname given in nmc->id
@@ -33,9 +33,8 @@ bool check_args(int argc, char* argv[], nabto_main_setup *nms);
  */
 bool resolve_hostname(nabto_main_setup *nms);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

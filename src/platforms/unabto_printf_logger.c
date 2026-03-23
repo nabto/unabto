@@ -14,7 +14,7 @@ void log_buffer(const uint8_t* buf, size_t buflen) {
     size_t i, j;
     size_t linenums = (buflen + 15) / 16;
     for (i = 0; i < linenums; i++) {
-        printf("%02x  ", (unsigned int) i * 16);
+        printf("%02x  ", (unsigned int)i * 16);
         for (j = 0; j < 16 && i * 16 + j < buflen; j++) {
             printf("%02x", buf[i * 16 + j]);
             if (j < 15) printf(" ");
@@ -25,7 +25,7 @@ void log_buffer(const uint8_t* buf, size_t buflen) {
 
 #if UNABTO_PLATFORM_PIC18
 
-#define LINE_WIDTH      64ul
+#define LINE_WIDTH 64ul
 
 void log_buffer_pgm(const far rom void* buffer, uint24_t length) {
     uint24_t index = 0;
@@ -35,10 +35,10 @@ void log_buffer_pgm(const far rom void* buffer, uint24_t length) {
     uint16_t numberOfLines = (length + (LINE_WIDTH - 1)) / LINE_WIDTH;
 
     for (line = 0; line < numberOfLines; line++) {
-        printf("%05"PRIx32"  ", (uint32_t) index);
+        printf("%05" PRIx32 "  ", (uint32_t)index);
 
         for (i = 0; i < LINE_WIDTH && index < length; i++) {
-            printf("%02"PRIx8, b[index]);
+            printf("%02" PRIx8, b[index]);
             if (i < (LINE_WIDTH - 1)) {
                 printf(" ");
             }
@@ -53,8 +53,7 @@ void log_buffer_pgm(const far rom void* buffer, uint24_t length) {
 #else
 
 #if !UNABTO_PLATFORM_PIC18
-void log_buffer(const uint8_t* buf, size_t buflen)
-{ }
+void log_buffer(const uint8_t* buf, size_t buflen) {}
 #endif
 
 //void log_buffer(const uint8_t* buf, size_t buflen)
@@ -69,4 +68,4 @@ void log_buffer(const uint8_t* buf, size_t buflen)
 
 #endif
 
-#endif //NABTO_ENABLE_LOGGING
+#endif  //NABTO_ENABLE_LOGGING

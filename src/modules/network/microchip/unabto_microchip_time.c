@@ -3,8 +3,7 @@
  */
 #include <unabto/unabto_env_base.h>
 
-nabto_stamp_t nabtoGetStamp(void)
-{
+nabto_stamp_t nabtoGetStamp(void) {
     return TickGet();
 }
 
@@ -20,16 +19,13 @@ bool nabtoIsStampPassed(nabto_stamp_t *stamp) {
     return *stamp - nabtoGetStamp() > MAX_STAMP_DIFF;
 }
 
-
-nabto_stamp_diff_t nabtoStampDiff(nabto_stamp_t * newest, nabto_stamp_t * oldest) {
+nabto_stamp_diff_t nabtoStampDiff(nabto_stamp_t *newest, nabto_stamp_t *oldest) {
     return (*newest - *oldest);
 }
-
 
 int nabtoStampDiff2ms(nabto_stamp_diff_t tickDiff) {
     // TICK_MILLISECONDS have unit ticks/ms.
     // tickDiff have unit ticks.
     // ticks / TICK_MILLISECOND = ticks / (ticks/ms) = ticks * (ms/ticks) = ms
-    return (int) tickDiff / TICK_MILLISECOND;
+    return (int)tickDiff / TICK_MILLISECOND;
 }
-

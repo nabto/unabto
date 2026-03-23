@@ -21,18 +21,16 @@
 char* appname = "axistunnel";
 
 static void
-handle_sigterm(int signo)
-{
+handle_sigterm(int signo) {
     exit(1);
 }
 
 static void
-init_signals(void)
-{
+init_signals(void) {
     struct sigaction sa;
-    
+
     sa.sa_flags = 0;
-    
+
     sigemptyset(&sa.sa_mask);
     sa.sa_handler = handle_sigterm;
     sigaction(SIGTERM, &sa, NULL);
@@ -42,7 +40,7 @@ init_signals(void)
 int main(int argc, char* argv[]) {
     openlog(appname, LOG_PID, LOG_LOCAL4);
     init_signals();
-    daemon(0,0);
+    daemon(0, 0);
     if (param_init(appname) < 0) {
         syslog(LOG_CRIT, "Could not initialize parameter handling\n");
         exit(1);
@@ -54,15 +52,15 @@ int main(int argc, char* argv[]) {
     char* deviceid;
     char* preSharedKey;
     uint8_t psk[16];
-    if (param_get ("deviceid", &deviceid) != 0) {
+    if (param_get("deviceid", &deviceid) != 0) {
         syslog(LOG_CRIT, "Could not get parameter deviceid\n");
         exit(1);
     }
-    
+
     nms->id = strdup(deviceid);
     param_free(deviceid);
 
-    if (param_get ("presharedkey", &preSharedKey) != 0) {
+    if (param_get("presharedkey", &preSharedKey) != 0) {
         syslog(LOG_CRIT, "Could not get parameter sharedkey\n");
         exit(1);
     }
@@ -76,7 +74,6 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-
 bool tunnel_allow_connection(const char* host, int port) {
     if (strcmp(host, "127.0.0.1") == 0 || strcmp(host, "127.0.0.1") == 0) {
         return true;
@@ -84,9 +81,7 @@ bool tunnel_allow_connection(const char* host, int port) {
     return false;
 }
 
-
-application_event_result application_event(application_request* request, unabto_query_request* readBuffer, unabto_query_response* writeBuffer)
-{
+application_event_result application_event(application_request* request, unabto_query_request* readBuffer, unabto_query_response* writeBuffer) {
     return AER_REQ_INV_QUERY_ID;
 }
 

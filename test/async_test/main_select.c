@@ -27,15 +27,14 @@
 
 void wait_event();
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     nabto_main_setup* nms;
 
     // flush stdout
     setvbuf(stdout, NULL, _IONBF, 0);
 
     nms = unabto_init_context();
-    
+
     /**
      * Overwrite default values with command line args
      */
@@ -46,19 +45,18 @@ int main(int argc, char* argv[])
     if (!unabto_init()) {
         NABTO_LOG_FATAL(("Failed at nabto_main_init"));
     }
-    
+
     init_request_queue();
 
     unabto_time_auto_update(false);
-    while(true) {
+    while (true) {
         unabto_time_update_stamp();
         wait_event();
     }
     unabto_close();
 }
 
-void wait_event()
-{
+void wait_event() {
     int timeout;
     nabto_stamp_t ne;
     nabto_stamp_t now;
@@ -68,7 +66,7 @@ void wait_event()
     fd_set read_fds;
     fd_set write_fds;
     struct timeval timeout_val;
-    
+
     unabto_next_event(&ne);
     update_next_async_event_timeout(&ne);
     now = nabtoGetStamp();
@@ -78,23 +76,21 @@ void wait_event()
     FD_ZERO(&read_fds);
     FD_ZERO(&write_fds);
 
-    
     unabto_network_select_add_to_read_fd_set(&read_fds, &max_read_fd);
-    
+
 #if NABTO_ENABLE_TCP_FALLBACK
     unabto_tcp_fallback_select_add_to_read_fd_set(&read_fds, &max_read_fd);
     unabto_tcp_fallback_select_add_to_write_fd_set(&write_fds, &max_write_fd);
 #endif
 
-    timeout_val.tv_sec = (timeout/1000);
-    timeout_val.tv_usec = (long)((timeout)%1000)*1000;
+    timeout_val.tv_sec = (timeout / 1000);
+    timeout_val.tv_usec = (long)((timeout) % 1000) * 1000;
 
-    nfds = select(MAX(max_read_fd+1, max_write_fd+1), &read_fds, &write_fds, NULL, &timeout_val);
+    nfds = select(MAX(max_read_fd + 1, max_write_fd + 1), &read_fds, &write_fds, NULL, &timeout_val);
 
     NABTO_LOG_TRACE(("Select returned %i", nfds));
     if (nfds < 0) NABTO_LOG_FATAL(("Error in epoll_wait: %d", errno));
     unabto_network_select_read_sockets(&read_fds);
-    
+
     unabto_time_event();
 }
-

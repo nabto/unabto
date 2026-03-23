@@ -50,17 +50,16 @@ void unabto_stream_event(unabto_stream* stream, unabto_stream_event_type type) {
     if (echo->state == ECHO_STATE_IDLE) {
         return;
     }
-    
+
     if (echo->state == ECHO_STATE_READ_COMMAND) {
         const uint8_t* buf;
         unabto_stream_hint hint;
         size_t readLength = unabto_stream_read(stream, &buf, &hint);
-        
 
         if (readLength > 0) {
             size_t i;
             size_t ackLength = 0;
-            
+
             for (i = 0; i < readLength; i++) {
                 ackLength++;
                 if (echo->commandLength == strlen(echoString)) {
@@ -76,19 +75,18 @@ void unabto_stream_event(unabto_stream* stream, unabto_stream_event_type type) {
                     }
                     echo->commandLength++;
                 }
-                
             }
             if (!unabto_stream_ack(stream, buf, ackLength, &hint)) {
                 echo->state = ECHO_STATE_CLOSING;
             }
-            
+
         } else {
             if (hint != UNABTO_STREAM_HINT_OK) {
                 echo->state = ECHO_STATE_CLOSING;
             }
         }
     }
-    
+
     if (echo->state == ECHO_STATE_COMMAND_FAIL) {
         const char* failString = "-\n";
         unabto_stream_hint hint;
@@ -105,14 +103,13 @@ void unabto_stream_event(unabto_stream* stream, unabto_stream_event_type type) {
         } else {
             echo->state = ECHO_STATE_FORWARDING;
         }
-
     }
 
     if (echo->state == ECHO_STATE_FORWARDING) {
         const uint8_t* buf;
         unabto_stream_hint hint;
         size_t readLength = unabto_stream_read(stream, &buf, &hint);
-        
+
         if (readLength > 0) {
             size_t writeLength = unabto_stream_write(stream, buf, readLength, &hint);
             if (writeLength > 0) {
@@ -125,7 +122,7 @@ void unabto_stream_event(unabto_stream* stream, unabto_stream_event_type type) {
                 }
             }
         } else {
-            if (hint !=  UNABTO_STREAM_HINT_OK) {
+            if (hint != UNABTO_STREAM_HINT_OK) {
                 echo->state = ECHO_STATE_CLOSING;
             }
         }

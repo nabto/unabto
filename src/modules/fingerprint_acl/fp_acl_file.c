@@ -1,13 +1,12 @@
 #ifdef _MSC_VER
-#pragma warning(disable: 4996) /* fopen: consider using fopen_s */
+#pragma warning(disable : 4996) /* fopen: consider using fopen_s */
 #endif
 
 #include "fp_acl_file.h"
 
 #include <unabto/unabto_util.h>
 
-fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
-{
+fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl) {
     uint8_t buffer[FP_ACL_RECORD_SIZE];
     size_t nread;
     uint32_t version;
@@ -37,16 +36,16 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
     }
 
     {
-    const uint8_t* end = buffer + 16;
-    const uint8_t* rptr = buffer;
+        const uint8_t* end = buffer + 16;
+        const uint8_t* rptr = buffer;
 
-    rptr = read_forward_u32(&acl->settings.systemPermissions, rptr, end);
-    rptr = read_forward_u32(&acl->settings.defaultUserPermissions, rptr, end);
-    rptr = read_forward_u32(&acl->settings.firstUserPermissions, rptr, end);
-    rptr = read_forward_u32(&numUsers, rptr, end);
-    if (rptr == NULL) {
-        return FP_ACL_DB_LOAD_FAILED;
-    }
+        rptr = read_forward_u32(&acl->settings.systemPermissions, rptr, end);
+        rptr = read_forward_u32(&acl->settings.defaultUserPermissions, rptr, end);
+        rptr = read_forward_u32(&acl->settings.firstUserPermissions, rptr, end);
+        rptr = read_forward_u32(&numUsers, rptr, end);
+        if (rptr == NULL) {
+            return FP_ACL_DB_LOAD_FAILED;
+        }
     }
 
     for (i = 0; i < numUsers && i < FP_MEM_ACL_ENTRIES; i++) {
@@ -62,10 +61,18 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
 
         rptr = read_forward_mem(acl->users[i].fp.value.data, rptr, end, FINGERPRINT_LENGTH);
 
-        { uint8_t tmp; rptr = read_forward_u8(&tmp, rptr, end); acl->users[i].pskId.hasValue = tmp; }
+        {
+            uint8_t tmp;
+            rptr = read_forward_u8(&tmp, rptr, end);
+            acl->users[i].pskId.hasValue = tmp;
+        }
         rptr = read_forward_mem(acl->users[i].pskId.value.data, rptr, end, PSK_ID_LENGTH);
 
-        { uint8_t tmp; rptr = read_forward_u8(&tmp, rptr, end); acl->users[i].psk.hasValue = tmp; }
+        {
+            uint8_t tmp;
+            rptr = read_forward_u8(&tmp, rptr, end);
+            acl->users[i].psk.hasValue = tmp;
+        }
         rptr = read_forward_mem(acl->users[i].psk.value.data, rptr, end, PSK_LENGTH);
 
 #if NABTO_ENABLE_FCM_TOKEN_STORAGE
@@ -92,8 +99,7 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl)
 static char* filename = NULL;
 static char* tempFilename = NULL;
 
-fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl)
-{
+fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl) {
     fp_acl_db_status status;
     FILE* aclFile = fopen(filename, "rb+");
     if (aclFile == NULL) {
@@ -101,7 +107,7 @@ fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl)
         return FP_ACL_DB_OK;
     }
 
-	status = fp_acl_file_read_file(aclFile, acl);
+    status = fp_acl_file_read_file(aclFile, acl);
 
     // close file, otherwise fp_acl_file_save_file() might throw error when updating the file
     fclose(aclFile);
@@ -109,8 +115,7 @@ fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl)
     return status;
 }
 
-fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* acl)
-{
+fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* acl) {
     uint8_t buffer[FP_ACL_RECORD_SIZE];
     uint8_t* ptr = buffer;
     const uint8_t* end = buffer + FP_ACL_RECORD_SIZE;
@@ -129,9 +134,11 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
     ptr = write_forward_u32(ptr, end, acl->settings.defaultUserPermissions);
     ptr = write_forward_u32(ptr, end, acl->settings.firstUserPermissions);
     ptr = write_forward_u32(ptr, end, users);
-    if (ptr == NULL) { return FP_ACL_DB_SAVE_FAILED; }
+    if (ptr == NULL) {
+        return FP_ACL_DB_SAVE_FAILED;
+    }
 
-    written = fwrite(buffer, 5*sizeof(uint32_t), 1, aclFile);
+    written = fwrite(buffer, 5 * sizeof(uint32_t), 1, aclFile);
     if (written != 1) {
         return FP_ACL_DB_SAVE_FAILED;
     }
@@ -144,7 +151,6 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
         memset(buffer, 0, FP_ACL_RECORD_SIZE);
         it = &acl->users[i];
         if (!fp_mem_is_slot_free(it)) {
-
             ptr = write_forward_mem(ptr, end, it->fp.value.data, FINGERPRINT_LENGTH);
 
             ptr = write_forward_u8(ptr, end, it->pskId.hasValue);
@@ -163,9 +169,11 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
             ptr = write_forward_mem(ptr, end, it->name, FP_ACL_FILE_USERNAME_LENGTH);
 
             ptr = write_forward_u32(ptr, end, it->permissions);
-            if (ptr == NULL) { return FP_ACL_DB_SAVE_FAILED; }
+            if (ptr == NULL) {
+                return FP_ACL_DB_SAVE_FAILED;
+            }
 
-            written = fwrite(buffer, ptr-buffer, 1, aclFile);
+            written = fwrite(buffer, ptr - buffer, 1, aclFile);
             if (written != 1) {
                 return FP_ACL_DB_SAVE_FAILED;
             }
@@ -175,8 +183,7 @@ fp_acl_db_status fp_acl_file_save_file_temp(FILE* aclFile, struct fp_mem_state* 
 }
 
 // Read users from version 1 and version 2 of the acl file format.
-static fp_acl_db_status convert_users_from_version_1_2(FILE* aclFile, uint8_t* buffer, struct fp_mem_state* temp_acl, uint32_t numUsers)
-{
+static fp_acl_db_status convert_users_from_version_1_2(FILE* aclFile, uint8_t* buffer, struct fp_mem_state* temp_acl, uint32_t numUsers) {
     uint32_t i;
     for (i = 0; i < numUsers && i < FP_MEM_ACL_ENTRIES; i++) {
         uint32_t fp_size = 16;
@@ -189,28 +196,27 @@ static fp_acl_db_status convert_users_from_version_1_2(FILE* aclFile, uint8_t* b
             return FP_ACL_DB_LOAD_FAILED;
         }
         {
-        const uint8_t* end = buffer + size;
-        const uint8_t* rptr = buffer;
+            const uint8_t* end = buffer + size;
+            const uint8_t* rptr = buffer;
 
-        temp_acl->users[i].fp.hasValue = 1;
-        rptr = read_forward_mem(temp_acl->users[i].fp.value.data, rptr, end, fp_size);
+            temp_acl->users[i].fp.hasValue = 1;
+            rptr = read_forward_mem(temp_acl->users[i].fp.value.data, rptr, end, fp_size);
 
-        temp_acl->users[i].pskId.hasValue = 0;
-        temp_acl->users[i].psk.hasValue = 0;
+            temp_acl->users[i].pskId.hasValue = 0;
+            temp_acl->users[i].psk.hasValue = 0;
 
-        rptr = read_forward_mem(temp_acl->users[i].name, rptr, end, name_size);
+            rptr = read_forward_mem(temp_acl->users[i].name, rptr, end, name_size);
 
-        rptr = read_forward_u32(&temp_acl->users[i].permissions, rptr, end);
-        if (rptr == NULL) {
-            return FP_ACL_DB_LOAD_FAILED;
-        }
+            rptr = read_forward_u32(&temp_acl->users[i].permissions, rptr, end);
+            if (rptr == NULL) {
+                return FP_ACL_DB_LOAD_FAILED;
+            }
         }
     }
     return FP_ACL_DB_OK;
 }
 
-static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uint32_t from_version)
-{
+static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uint32_t from_version) {
     struct fp_mem_state temp_acl = {0};
 
     uint8_t buffer[FP_ACL_RECORD_SIZE];
@@ -233,7 +239,9 @@ static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uin
             rptr = read_forward_u32(&temp_acl.settings.systemPermissions, rptr, end);
             rptr = read_forward_u32(&temp_acl.settings.defaultUserPermissions, rptr, end);
             rptr = read_forward_u32(&numUsers, rptr, end);
-            if (rptr == NULL) { return FP_ACL_DB_LOAD_FAILED; }
+            if (rptr == NULL) {
+                return FP_ACL_DB_LOAD_FAILED;
+            }
             temp_acl.settings.firstUserPermissions = 0;
 
             status = convert_users_from_version_1_2(aclFile, buffer, &temp_acl, numUsers);
@@ -258,7 +266,9 @@ static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uin
             rptr = read_forward_u32(&temp_acl.settings.defaultUserPermissions, rptr, end);
             rptr = read_forward_u32(&temp_acl.settings.firstUserPermissions, rptr, end);
             rptr = read_forward_u32(&numUsers, rptr, end);
-            if (rptr == NULL) { return FP_ACL_DB_LOAD_FAILED; }
+            if (rptr == NULL) {
+                return FP_ACL_DB_LOAD_FAILED;
+            }
 
             status = convert_users_from_version_1_2(aclFile, buffer, &temp_acl, numUsers);
             if (status != FP_ACL_DB_OK) {
@@ -284,7 +294,9 @@ static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uin
             rptr = read_forward_u32(&temp_acl.settings.defaultUserPermissions, rptr, end);
             rptr = read_forward_u32(&temp_acl.settings.firstUserPermissions, rptr, end);
             rptr = read_forward_u32(&numUsers, rptr, end);
-            if (rptr == NULL) { return FP_ACL_DB_LOAD_FAILED; }
+            if (rptr == NULL) {
+                return FP_ACL_DB_LOAD_FAILED;
+            }
 
             for (i = 0; i < numUsers && i < FP_MEM_ACL_ENTRIES; i++) {
                 uint32_t fp_size = 16;
@@ -303,17 +315,26 @@ static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uin
                 temp_acl.users[i].fp.hasValue = 1;
                 rptr = read_forward_mem(temp_acl.users[i].fp.value.data, rptr, end, fp_size);
 
-                { uint8_t tmp; rptr = read_forward_u8(&tmp, rptr, end); temp_acl.users[i].pskId.hasValue = tmp; }
+                {
+                    uint8_t tmp;
+                    rptr = read_forward_u8(&tmp, rptr, end);
+                    temp_acl.users[i].pskId.hasValue = tmp;
+                }
                 rptr = read_forward_mem(temp_acl.users[i].pskId.value.data, rptr, end, psk_id_size);
 
-                { uint8_t tmp; rptr = read_forward_u8(&tmp, rptr, end); temp_acl.users[i].psk.hasValue = tmp; }
+                {
+                    uint8_t tmp;
+                    rptr = read_forward_u8(&tmp, rptr, end);
+                    temp_acl.users[i].psk.hasValue = tmp;
+                }
                 rptr = read_forward_mem(temp_acl.users[i].psk.value.data, rptr, end, psk_size);
 
                 rptr = read_forward_mem(temp_acl.users[i].name, rptr, end, name_size);
 
                 rptr = read_forward_u32(&temp_acl.users[i].permissions, rptr, end);
-                if (rptr == NULL) { return FP_ACL_DB_LOAD_FAILED; }
-
+                if (rptr == NULL) {
+                    return FP_ACL_DB_LOAD_FAILED;
+                }
             }
             break;
         }
@@ -327,16 +348,14 @@ static fp_acl_db_status fp_acl_file_convert_to_newest_version(FILE* aclFile, uin
 /**
  * Do the best possible to ensure a file is written to the disk.
  */
-static void fp_acl_file_flush_and_sync_to_disk(FILE* file)
-{
+static void fp_acl_file_flush_and_sync_to_disk(FILE* file) {
     fflush(file);
 #ifndef WIN32
     fsync(fileno(file));
 #endif
 }
 
-fp_acl_db_status fp_acl_file_save_file(struct fp_mem_state* acl)
-{
+fp_acl_db_status fp_acl_file_save_file(struct fp_mem_state* acl) {
     fp_acl_db_status status;
     FILE* aclFile = fopen(tempFilename, "wb+");
 
@@ -361,8 +380,7 @@ fp_acl_db_status fp_acl_file_save_file(struct fp_mem_state* acl)
     return status;
 }
 
-fp_acl_db_status fp_acl_file_init(const char* file, const char* tempFile, struct fp_mem_persistence* p)
-{
+fp_acl_db_status fp_acl_file_init(const char* file, const char* tempFile, struct fp_mem_persistence* p) {
     fp_acl_db_status status;
     FILE* aclFile;
 
@@ -398,5 +416,4 @@ fp_acl_db_status fp_acl_file_init(const char* file, const char* tempFile, struct
     } else {
         return FP_ACL_DB_OK;
     }
-
 }

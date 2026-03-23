@@ -14,7 +14,7 @@ bool eeprom_write(uint8_t channel, uint32_t address, const void* data, uint16_t 
 bool eeprom_read(uint8_t channel, uint32_t address, void* data, uint16_t length);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

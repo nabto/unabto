@@ -50,13 +50,12 @@ extern "C" {
 
 enum {
     SHA256_BLOCK_LENGTH = 64,
-#ifndef SHA256_DIGEST_LENGTH // Defined in openssl hence we need to avoid collision.
+#ifndef SHA256_DIGEST_LENGTH  // Defined in openssl hence we need to avoid collision.
     SHA256_DIGEST_LENGTH = 32,
 #endif
-    SHA256_BLOCK_SIZE = SHA256_BLOCK_LENGTH, // deprecated
-    SHA256_DIGEST_SIZE = SHA256_DIGEST_LENGTH // deprecated
+    SHA256_BLOCK_SIZE = SHA256_BLOCK_LENGTH,   // deprecated
+    SHA256_DIGEST_SIZE = SHA256_DIGEST_LENGTH  // deprecated
 };
-
 
 /*** SHA-256/384/512 Various Length Definitions ***********************/
 
@@ -66,12 +65,11 @@ typedef struct {
     uint16_t byteCount;
 } sha256_ctx;
 
-
 /**
  * Initialize the sha256 context
  * @param sha256_ctx context to be initialized
  */
-void unabto_sha256_init(sha256_ctx *context);
+void unabto_sha256_init(sha256_ctx* context);
 
 /**
  * Update the sha256 context with the given data
@@ -80,9 +78,8 @@ void unabto_sha256_update(sha256_ctx* context, const uint8_t* data, uint16_t len
 
 void unabto_sha256_final(sha256_ctx* context, uint8_t* digest);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

@@ -11,11 +11,10 @@ static bool validate_string(char *string) {
     for (i = 0; i < strlen(string); i++) {
         count += (string[i] == delim);
     }
-    return count == 1 && string[i-1] != delim && string[0] != delim;
+    return count == 1 && string[i - 1] != delim && string[0] != delim;
 }
 
-static bool set_unabto_id(nabto_main_setup *nms, char *id)
-{
+static bool set_unabto_id(nabto_main_setup *nms, char *id) {
     char *nabtoId = malloc(sizeof(char) * strlen(id) + 1);
     if (!nabtoId) {
         NABTO_LOG_ERROR(("Failed to allocate id"));
@@ -27,10 +26,9 @@ static bool set_unabto_id(nabto_main_setup *nms, char *id)
     return true;
 }
 
-bool unabto_provision_parse_data(nabto_main_setup *nms, char *data, char *key, size_t key_size)
-{
+bool unabto_provision_parse_data(nabto_main_setup *nms, char *data, char *key, size_t key_size) {
     NABTO_LOG_TRACE(("Parsing provision data: [%s]", data));
-    char* tok;
+    char *tok;
     if (!validate_string(data)) {
         NABTO_LOG_ERROR(("Invalid provision string: %s", data));
         return false;
@@ -59,8 +57,7 @@ bool unabto_provision_parse_data(nabto_main_setup *nms, char *data, char *key, s
     return true;
 }
 
-bool unabto_provision_read_file(const char* path, char *text, size_t size)
-{
+bool unabto_provision_read_file(const char *path, char *text, size_t size) {
     FILE *fp = fopen(path, "r");
     if (!fp) {
         NABTO_LOG_TRACE(("Provisioning file not found at '%s'", path));
@@ -73,8 +70,7 @@ bool unabto_provision_read_file(const char* path, char *text, size_t size)
     return (fclose(fp) == 0) && ok;
 }
 
-bool unabto_provision_test_create_file(const char* path)
-{
+bool unabto_provision_test_create_file(const char *path) {
     FILE *fp = fopen(path, "wb");
     if (!fp) {
         NABTO_LOG_ERROR(("Could not open provisioning file '%s' for writing", path));
@@ -84,14 +80,13 @@ bool unabto_provision_test_create_file(const char* path)
     return (fclose(fp) == 0) && ok;
 }
 
-bool unabto_provision_write_file(const char* path, nabto_main_setup* nms)
-{
+bool unabto_provision_write_file(const char *path, nabto_main_setup *nms) {
     char text[128] = {0};
     size_t i = 0;
     size_t len = 0;
 
     len = snprintf(text, sizeof(text), "%s%c", nms->id, UNABTO_PROVISION_FILE_DELIMITER);
-    for (i = 0; i < sizeof(nms->presharedKey)/sizeof(nms->presharedKey[0]) && len < sizeof(text); i++) {
+    for (i = 0; i < sizeof(nms->presharedKey) / sizeof(nms->presharedKey[0]) && len < sizeof(text); i++) {
         len += sprintf(text + len, "%02x", nms->presharedKey[i]);
     }
 

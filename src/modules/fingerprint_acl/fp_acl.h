@@ -4,44 +4,43 @@
 #include <unabto_platform_types.h>
 #include <unabto/unabto_types.h>
 
-#define FP_ACL_FP_LENGTH FINGERPRINT_LENGTH
+#define FP_ACL_FP_LENGTH            FINGERPRINT_LENGTH
 #define FP_ACL_FCM_TOKEN_MAX_LENGTH 256
-#define FP_ACL_USERNAME_MAX_LENGTH 64
-#define FP_ACL_PSK_ID_LENGTH 16
-#define FP_ACL_PSK_KEY_LENGTH 16
-
+#define FP_ACL_USERNAME_MAX_LENGTH  64
+#define FP_ACL_PSK_ID_LENGTH        16
+#define FP_ACL_PSK_KEY_LENGTH       16
 
 // ACL permissions they are used on a per connection basis bit in the
 // bits for general usage.
-#define FP_ACL_PERMISSION_MASK_GENERAL                              0xffff0000ul
+#define FP_ACL_PERMISSION_MASK_GENERAL 0xffff0000ul
 // Bits for custom application specific usage.
-#define FP_ACL_PERMISSION_MASK_CUSTOM                               0x0000fffful
+#define FP_ACL_PERMISSION_MASK_CUSTOM 0x0000fffful
 
 // Empty permission value.
-#define FP_ACL_PERMISSION_NONE                                      0x00000000ul
+#define FP_ACL_PERMISSION_NONE 0x00000000ul
 // All permissions value.
-#define FP_ACL_PERMISSION_ALL                                       0xfffffffful
+#define FP_ACL_PERMISSION_ALL 0xfffffffful
 // The LOCAL ACCESS bit gives a user access to the device locally.
-#define FP_ACL_PERMISSION_LOCAL_ACCESS                              0x80000000ul
+#define FP_ACL_PERMISSION_LOCAL_ACCESS 0x80000000ul
 // The REMOTE ACCESS bit gives a user access to the device remotely
 // via the internet.
-#define FP_ACL_PERMISSION_REMOTE_ACCESS                             0x40000000ul
+#define FP_ACL_PERMISSION_REMOTE_ACCESS 0x40000000ul
 // The ADMIN bit gives a user administrative access to a device. This
 // will normally atleast imply that the user can add, remove, change
 // users and system permissions.
-#define FP_ACL_PERMISSION_ADMIN                                     0x20000000ul
+#define FP_ACL_PERMISSION_ADMIN 0x20000000ul
 
 // SYSTEM permissions they are used to tell what the system can do
-#define FP_ACL_SYSTEM_PERMISSION_NONE                               0x00000000ul
-#define FP_ACL_SYSTEM_PERMISSION_ALL                                0xfffffffful
+#define FP_ACL_SYSTEM_PERMISSION_NONE 0x00000000ul
+#define FP_ACL_SYSTEM_PERMISSION_ALL  0xfffffffful
 // The LOCAL ACCESS bit tells if the system is allowed to accept local
 // connections.
-#define FP_ACL_SYSTEM_PERMISSION_LOCAL_ACCESS                       0x80000000ul
+#define FP_ACL_SYSTEM_PERMISSION_LOCAL_ACCESS 0x80000000ul
 // The REMOTE ACCESS bit tells if the system is allowed to accept
 // remote connections.
-#define FP_ACL_SYSTEM_PERMISSION_REMOTE_ACCESS                      0x40000000ul
+#define FP_ACL_SYSTEM_PERMISSION_REMOTE_ACCESS 0x40000000ul
 // The PAIRING bit tells if the system is allowed to make pairings.
-#define FP_ACL_SYSTEM_PERMISSION_PAIRING                            0x20000000ul
+#define FP_ACL_SYSTEM_PERMISSION_PAIRING 0x20000000ul
 
 typedef char username[FP_ACL_USERNAME_MAX_LENGTH];
 typedef char unabto_fcm_token[FP_ACL_FCM_TOKEN_MAX_LENGTH];
@@ -58,9 +57,9 @@ struct fp_acl_user {
 };
 
 struct fp_acl_settings {
-    uint32_t systemPermissions;      ///< permission bits controlling the system
-    uint32_t defaultUserPermissions; ///< default permissions for new users
-    uint32_t firstUserPermissions;   ///< permissions to give the first user of the system
+    uint32_t systemPermissions;       ///< permission bits controlling the system
+    uint32_t defaultUserPermissions;  ///< default permissions for new users
+    uint32_t firstUserPermissions;    ///< permissions to give the first user of the system
 };
 
 typedef enum {
@@ -70,7 +69,6 @@ typedef enum {
     FP_ACL_DB_LOAD_FAILED,
     FP_ACL_DB_FAILED
 } fp_acl_db_status;
-
 
 /**
  * This is a structure of function pointer which describes the

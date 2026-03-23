@@ -23,7 +23,6 @@ void unabto_microchip_arp_tick(void);
  */
 bool unabto_microchip_arp_resolve(const uint32_t ipNetworkOrder, MAC_ADDR* node);
 
-
 /**
  * This function is called when a network packets arrives to update
  * the cache with arp information about the sender ip, mac.
@@ -36,9 +35,8 @@ void unabto_microchip_arp_add_resolved(NODE_INFO* node);
  */
 void unabto_microchip_arp_reset(void);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

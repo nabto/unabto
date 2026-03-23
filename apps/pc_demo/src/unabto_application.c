@@ -22,7 +22,7 @@ static uint8_t theLight = 0;
  * requesting browser.
  ****************************************************************/
 application_event_result application_event(application_request* request, unabto_query_request* read_buffer, unabto_query_response* write_buffer) {
-    switch(request->queryId) {
+    switch (request->queryId) {
         case 1: {
             //  <query name="light_write.json" description="Turn light on and off" id="1">
             //    <request>
@@ -82,7 +82,8 @@ application_event_result application_event(application_request* request, unabto_
 
             return AER_REQ_RESPONSE_READY;
         }
-        default: break;
+        default:
+            break;
     }
     return AER_REQ_INV_QUERY_ID;
 }
@@ -91,14 +92,13 @@ application_event_result application_event(application_request* request, unabto_
 // only using ID #1 in this simple example
 uint8_t setLight(uint8_t id, uint8_t onOff) {
     theLight = onOff;
-    NABTO_LOG_INFO((theLight?("Nabto: Light turned ON!"):("Nabto: Light turned OFF!")));
+    NABTO_LOG_INFO((theLight ? ("Nabto: Light turned ON!") : ("Nabto: Light turned OFF!")));
 
 #ifdef __arm__
     // Toggle ACT LED on Raspberry Pi
     if (theLight) {
         system("echo 1 | sudo tee /sys/class/leds/led0/brightness");
-    }
-    else {
+    } else {
         system("echo 0 | sudo tee /sys/class/leds/led0/brightness");
     }
 #endif

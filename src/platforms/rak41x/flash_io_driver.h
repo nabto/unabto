@@ -10,11 +10,11 @@
 extern "C" {
 #endif
 
-#define FLASH_ERASE_BLOCK_SIZE           (512)
-#define FLASH_WRITE_BLOCK_SIZE           (4)
+#define FLASH_ERASE_BLOCK_SIZE (512)
+#define FLASH_WRITE_BLOCK_SIZE (4)
 
 bool flash_io_driver_initialize(void);
-  
+
 // Erase a 512 byte block of flash.
 bool flash_io_driver_erase_block(__ROM void* address);
 
@@ -23,7 +23,7 @@ bool flash_io_driver_erase_block(__ROM void* address);
 bool flash_io_driver_write(__ROM void* address, const void* data, uint16_t length);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

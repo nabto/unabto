@@ -8,47 +8,45 @@ extern void unabto_push_init(void);
 //#ifndef UNABTO_PUSH_CALLBACK_FUNCTIONS
 //#define UNABTO_PUSH_CALLBACK_FUNCTIONS 1
 bool getDataCalled = false;
-uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq){
+uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq) {
     NABTO_LOG_INFO(("Getting data"));
     getDataCalled = true;
     return bufStart;
 }
 
 bool callbackCalled = false;
-void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint){
+void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint) {
     callbackCalled = true;
-    if(hint == NULL) return;
-    NABTO_LOG_INFO(("Push_notification_callback with seq: %i, hint: %i",seq,*hint));
+    if (hint == NULL) return;
+    NABTO_LOG_INFO(("Push_notification_callback with seq: %i, hint: %i", seq, *hint));
 }
 //#endif
 
-
-bool unabto_push_test(void){
-
+bool unabto_push_test(void) {
     NABTO_LOG_INFO(("push test starting"));
     unabto_push_init();
 
-    if (pushCtx.pushSeqQHead != 0){
+    if (pushCtx.pushSeqQHead != 0) {
         NABTO_LOG_INFO(("Queue not initialized to 0 elements"));
         return false;
     }
 
     uint32_t seq;
-    unabto_push_hint ret = unabto_send_push_notification(1,&seq);
-    if (ret != UNABTO_PUSH_HINT_OK){
+    unabto_push_hint ret = unabto_send_push_notification(1, &seq);
+    if (ret != UNABTO_PUSH_HINT_OK) {
         NABTO_LOG_INFO(("send push notification did not return OK"));
         return false;
     }
-    if (pushCtx.pushSeqQHead != 1){
+    if (pushCtx.pushSeqQHead != 1) {
         NABTO_LOG_INFO(("Push notification not in push queue"));
         return false;
     }
-    ret = unabto_send_push_notification(1,&seq);
-    ret = unabto_send_push_notification(1,&seq);
-    ret = unabto_send_push_notification(1,&seq);
-    ret = unabto_send_push_notification(1,&seq);
-    if (pushCtx.pushSeqQHead != 5){
-        NABTO_LOG_INFO(("Push Queue does not contain 5 elements, it contains: %d",pushCtx.pushSeqQHead));
+    ret = unabto_send_push_notification(1, &seq);
+    ret = unabto_send_push_notification(1, &seq);
+    ret = unabto_send_push_notification(1, &seq);
+    ret = unabto_send_push_notification(1, &seq);
+    if (pushCtx.pushSeqQHead != 5) {
+        NABTO_LOG_INFO(("Push Queue does not contain 5 elements, it contains: %d", pushCtx.pushSeqQHead));
         return false;
     }
 
@@ -70,4 +68,4 @@ bool unabto_push_test(void){
     NABTO_LOG_INFO(("Push test succeeded"));
     return true;
 }
-#endif //NABTO_ENABLE_PUSH
+#endif  //NABTO_ENABLE_PUSH

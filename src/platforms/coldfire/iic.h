@@ -17,9 +17,8 @@ void iic_stop(uint8_t channel);
 void iic_read(uint8_t channel, void* data, uint16_t length);
 bool iic_write(uint8_t channel, void* data, uint16_t length);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

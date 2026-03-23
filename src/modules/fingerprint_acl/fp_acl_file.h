@@ -81,12 +81,12 @@
 
 #define FP_ACL_FILE_VERSION 4
 
-#define FP_ACL_RECORD_SIZE   (FINGERPRINT_LENGTH +          \
-                             1 + PSK_ID_LENGTH +           \
-                             1 + PSK_LENGTH +              \
-                             FP_ACL_USERNAME_MAX_LENGTH +  \
-                             FP_ACL_FCM_TOKEN_MAX_LENGTH + \
-                             sizeof(uint32_t))
+#define FP_ACL_RECORD_SIZE (FINGERPRINT_LENGTH +          \
+                            1 + PSK_ID_LENGTH +           \
+                            1 + PSK_LENGTH +              \
+                            FP_ACL_USERNAME_MAX_LENGTH +  \
+                            FP_ACL_FCM_TOKEN_MAX_LENGTH + \
+                            sizeof(uint32_t))
 
 #if FP_ACL_USERNAME_MAX_LENGTH != FP_ACL_FILE_USERNAME_LENGTH
 #error incompatible user name length with current acl file format
@@ -106,6 +106,5 @@ fp_acl_db_status fp_acl_file_load_file(struct fp_mem_state* acl);
  * file.
  */
 fp_acl_db_status fp_acl_file_init(const char* file, const char* tempFile, struct fp_mem_persistence* p);
-
 
 #endif

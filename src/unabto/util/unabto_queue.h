@@ -26,13 +26,13 @@ typedef struct queue {
  * @param buffer_length length of the buffer
  * @return     true on success
  */
-void queue_init(queue_t *q, uint8_t *buffer, uint16_t buffer_length);
+void queue_init(queue_t* q, uint8_t* buffer, uint16_t buffer_length);
 
 /**
  * remove all data from the queue
  * @param q    the queue
  */
-void queue_reset(queue_t *q);
+void queue_reset(queue_t* q);
 
 /**
  * enqueue at the tail of the queue
@@ -87,7 +87,7 @@ uint16_t queue_count(queue_t* q);
 uint16_t queue_free(queue_t* q);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

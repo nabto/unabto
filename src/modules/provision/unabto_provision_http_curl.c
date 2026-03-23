@@ -6,33 +6,33 @@
 
 #include <curl/curl.h>
 
-void unabto_curl_header_cb(CURL *curl, void* userData);
+void unabto_curl_header_cb(CURL* curl, void* userData);
 
 struct memory_struct {
-  char *memory;
-  size_t size;
+    char* memory;
+    size_t size;
 };
 
 size_t curl_writer_cb(char* contents, size_t size, size_t nmemb, void* userp) {
     size_t realsize = size * nmemb;
-    struct memory_struct *mem = (struct memory_struct *)userp;
- 
-    char *tmp = realloc(mem->memory, mem->size + realsize + 1);
-    if(tmp == NULL) {
+    struct memory_struct* mem = (struct memory_struct*)userp;
+
+    char* tmp = realloc(mem->memory, mem->size + realsize + 1);
+    if (tmp == NULL) {
         /* out of memory! */
         printf("not enough memory (realloc returned NULL)\n");
         return 0;
     }
     mem->memory = tmp;
-    
+
     memcpy(&(mem->memory[mem->size]), contents, realsize);
     mem->size += realsize;
     mem->memory[mem->size] = 0;
-    
+
     return realsize;
 }
 
-void unabto_curl_post_cb(CURL *curl, void* userData) {
+void unabto_curl_post_cb(CURL* curl, void* userData) {
     struct unabto_curl_post_struct* data = (struct unabto_curl_post_struct*)userData;
     curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data->postData);
@@ -41,16 +41,15 @@ void unabto_curl_post_cb(CURL *curl, void* userData) {
     }
 }
 
-void unabto_curl_header_cb(CURL *curl, void* userData) {
+void unabto_curl_header_cb(CURL* curl, void* userData) {
     struct unabto_curl_post_struct* data = (struct unabto_curl_post_struct*)userData;
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, data->headers);
 }
 
-unabto_provision_status_t unabto_provision_http_invoke_curl(const char* url, uint16_t* http_status, char** response, unabto_curl_options_callback* options_cb)
-{
+unabto_provision_status_t unabto_provision_http_invoke_curl(const char* url, uint16_t* http_status, char** response, unabto_curl_options_callback* options_cb) {
     NABTO_LOG_TRACE(("Invoking %s", url));
 
-    CURL *curl;       
+    CURL* curl;
     curl = curl_easy_init();
     if (!curl) {
         NABTO_LOG_ERROR(("Curl could not be initialized"));
@@ -84,7 +83,7 @@ unabto_provision_status_t unabto_provision_http_invoke_curl(const char* url, uin
     unabto_provision_status_t status = UPS_OK;
 
     if (res == CURLE_OK) {
-        char *tmp = realloc(chunk.memory, chunk.size+1);
+        char* tmp = realloc(chunk.memory, chunk.size + 1);
         if (tmp == NULL) {
             free(chunk.memory);
             curl_easy_cleanup(curl);
@@ -113,7 +112,7 @@ unabto_provision_status_t unabto_provision_http_invoke_curl(const char* url, uin
                res == CURLE_SSL_CERTPROBLEM) {
         status = UPS_HTTP_SSL_PROBLEM;
         NABTO_LOG_ERROR(("Curl perform failed - SSL problem: [%d]", res));
-        
+
     } else {
         NABTO_LOG_ERROR(("Curl perform failed: [%d] \"%s\"", res, curl_easy_strerror(res)));
         status = UPS_HTTP_OTHER;
@@ -129,10 +128,10 @@ unabto_provision_status_t unabto_provision_http_post_curl(const char* url, const
     NABTO_LOG_TRACE(("Posting to url [%s]: [%s]", url, data));
     postStruct.headers = NULL;
     if (strlen(headers) > 0) {
-        postStruct.extra_options_cb = unabto_curl_header_cb;    
+        postStruct.extra_options_cb = unabto_curl_header_cb;
         postStruct.headers = curl_slist_append(postStruct.headers, headers);
     } else {
-        postStruct.extra_options_cb = NULL;    
+        postStruct.extra_options_cb = NULL;
     }
     char* response;
 
@@ -140,7 +139,7 @@ unabto_provision_status_t unabto_provision_http_post_curl(const char* url, const
     cb.func = unabto_curl_post_cb;
     cb.data = &postStruct;
     cb.next = NULL;
-    
+
     unabto_provision_status_t status = unabto_provision_http_invoke_curl(url, http_status, &response, &cb);
     curl_slist_free_all(postStruct.headers);
     if (status == UPS_OK || status == UPS_HTTP_COMPLETE_NOT_200) {
@@ -150,5 +149,3 @@ unabto_provision_status_t unabto_provision_http_post_curl(const char* url, const
     NABTO_LOG_INFO(("Posted data to url %s, internal status %d", url, status));
     return status;
 }
-
-

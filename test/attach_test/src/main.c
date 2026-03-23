@@ -21,8 +21,7 @@ void nabto_yield(int msec);
  *  main using gopt to check command line arguments
  *  -h for help
  */
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     // Set nabto to default values
 
     nabto_main_setup* nms = unabto_init_context();
@@ -42,8 +41,8 @@ int main(int argc, char* argv[])
 
     nabto_stamp_t attachExpireStamp;
     // 20 seconds
-    nabtoSetFutureStamp(&attachExpireStamp, 1000*20);
-        
+    nabtoSetFutureStamp(&attachExpireStamp, 1000 * 20);
+
     // The main loop gives nabto a tick from time to time.
     // Everything else is taken care of behind the scenes.
     while (true) {
@@ -61,7 +60,7 @@ int main(int argc, char* argv[])
 
     NABTO_LOG_ERROR(("we should not end here"));
     exit(5);
-    
+
     unabto_close();
     return 0;
 }
@@ -69,13 +68,15 @@ int main(int argc, char* argv[])
 application_event_result application_event(application_request* request, unabto_query_request* read_buffer, unabto_query_response* write_buffer) {
     return AER_REQ_INV_QUERY_ID;
 }
-void nabto_yield(int msec)
-{
+void nabto_yield(int msec) {
 #ifdef WIN32
     Sleep(msec);
 #elif defined(__MACH__)
-    if (msec) usleep(1000*msec);
+    if (msec) usleep(1000 * msec);
 #else
-    if (msec) usleep(1000*msec); else sched_yield();
+    if (msec)
+        usleep(1000 * msec);
+    else
+        sched_yield();
 #endif
 }

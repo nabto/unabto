@@ -25,7 +25,8 @@ uint16_t unabto_android_map_log_level(uint16_t loglevel) {
             return ANDROID_LOG_INFO;
         case NABTO_LOG_SEVERITY_DEBUG:
             return ANDROID_LOG_DEBUG;
-        default: return ANDROID_LOG_VERBOSE;
+        default:
+            return ANDROID_LOG_VERBOSE;
     }
 }
 
@@ -34,7 +35,7 @@ void unabto_android_log_start(uint16_t loglevel, const char *file, unsigned int 
     snprintf(log_buffer_temp, ANDROID_LOG_BUFFER_SIZE, "%s(%u):", unabto_basename(file), (line));
 }
 
-void unabto_android_log_end(const char* format, ...) {
+void unabto_android_log_end(const char *format, ...) {
     char buffer[ANDROID_LOG_BUFFER_SIZE];
 
     va_list args;

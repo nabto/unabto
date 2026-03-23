@@ -10,40 +10,42 @@ buffer_element buffer[NABTO_PUSH_QUEUE_LENGTH];
 
 uint8_t dataHead = 0;
 
-unabto_push_hint send_push_message(push_message *msg, pushCallback cb, void* cbArgs){
-    return send_push_notification(msg->pnsId, msg->staticData, msg->dynamicData,cb,cbArgs);
+unabto_push_hint send_push_message(push_message* msg, pushCallback cb, void* cbArgs) {
+    return send_push_notification(msg->pnsId, msg->staticData, msg->dynamicData, cb, cbArgs);
 }
 
-unabto_push_hint send_push_notification(uint16_t pnsid, push_payload_data staticData, push_payload_data msg, pushCallback cb, void* cbArgs){
+unabto_push_hint send_push_notification(uint16_t pnsid, push_payload_data staticData, push_payload_data msg, pushCallback cb, void* cbArgs) {
     uint32_t seq;
     uint8_t* ptr;
     uint8_t* end;
     unabto_push_hint hint;
-    if(dataHead >= NABTO_PUSH_QUEUE_LENGTH){
+    if (dataHead >= NABTO_PUSH_QUEUE_LENGTH) {
         return UNABTO_PUSH_HINT_QUEUE_FULL;
     }
-    buffer[dataHead].len = staticData.len+msg.len+2*NP_PAYLOAD_PUSH_DATA_SIZE_WO_DATA;
-    if(buffer[dataHead].len > NABTO_PUSH_BUFFER_ELEMENT_SIZE){
+    buffer[dataHead].len = staticData.len + msg.len + 2 * NP_PAYLOAD_PUSH_DATA_SIZE_WO_DATA;
+    if (buffer[dataHead].len > NABTO_PUSH_BUFFER_ELEMENT_SIZE) {
         return UNABTO_PUSH_HINT_INVALID_DATA_PROVIDED;
     }
     ptr = buffer[dataHead].data;
     end = ptr + NABTO_PUSH_BUFFER_ELEMENT_SIZE;
-    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PUSH_DATA, 0,staticData.len+2);
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PUSH_DATA, 0, staticData.len + 2);
     ptr = write_forward_u8(ptr, end, staticData.purpose);
     ptr = write_forward_u8(ptr, end, staticData.encoding);
     ptr = write_forward_mem(ptr, end, staticData.data, staticData.len);
 
-    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PUSH_DATA, 0,msg.len+2);
+    ptr = insert_payload(ptr, end, NP_PAYLOAD_TYPE_PUSH_DATA, 0, msg.len + 2);
     ptr = write_forward_u8(ptr, end, msg.purpose);
     ptr = write_forward_u8(ptr, end, msg.encoding);
     ptr = write_forward_mem(ptr, end, msg.data, msg.len);
-    if (ptr == NULL) { return UNABTO_PUSH_HINT_INVALID_DATA_PROVIDED; }
+    if (ptr == NULL) {
+        return UNABTO_PUSH_HINT_INVALID_DATA_PROVIDED;
+    }
 
     buffer[dataHead].cb = cb;
     buffer[dataHead].args = cbArgs;
-    
+
     hint = unabto_send_push_notification(pnsid, &seq);
-    if(hint == UNABTO_PUSH_HINT_OK){
+    if (hint == UNABTO_PUSH_HINT_OK) {
         buffer[dataHead].seq = seq;
         dataHead++;
         return hint;
@@ -52,12 +54,11 @@ unabto_push_hint send_push_notification(uint16_t pnsid, push_payload_data static
     }
 }
 
-
-bool init_push_message(push_message* msg, uint16_t pnsid, const char* staticData){
+bool init_push_message(push_message* msg, uint16_t pnsid, const char* staticData) {
     msg->staticData.purpose = NP_PAYLOAD_PUSH_DATA_PURPOSE_STATIC;
     msg->staticData.encoding = NP_PAYLOAD_PUSH_DATA_ENCODING_JSON;
     msg->staticData.len = strlen(staticData);
-    if(msg->staticData.len > NABTO_PUSH_BUFFER_ELEMENT_SIZE){
+    if (msg->staticData.len > NABTO_PUSH_BUFFER_ELEMENT_SIZE) {
         return false;
     }
     memcpy(msg->staticData.data, staticData, msg->staticData.len);
@@ -67,65 +68,66 @@ bool init_push_message(push_message* msg, uint16_t pnsid, const char* staticData
     msg->dynamicData.len = 0;
     return true;
 }
-static bool add_tlv(push_message* msg, uint8_t type, const char* value){
+static bool add_tlv(push_message* msg, uint8_t type, const char* value) {
     size_t len = strlen(value);
     uint8_t* ptr = msg->dynamicData.data + msg->dynamicData.len;
     const uint8_t* end = msg->dynamicData.data + NABTO_PUSH_BUFFER_ELEMENT_SIZE;
-    if(len + 2 > 255){
+    if (len + 2 > 255) {
         return false;
     }
-    if(msg->dynamicData.len + len + 2 > NABTO_PUSH_BUFFER_ELEMENT_SIZE){
+    if (msg->dynamicData.len + len + 2 > NABTO_PUSH_BUFFER_ELEMENT_SIZE) {
         return false;
     }
     ptr = write_forward_u8(ptr, end, type);
-    ptr = write_forward_u8(ptr, end, (uint8_t)(len+2));
+    ptr = write_forward_u8(ptr, end, (uint8_t)(len + 2));
     ptr = write_forward_mem(ptr, end, value, len);
-    if (ptr == NULL) { return false; }
+    if (ptr == NULL) {
+        return false;
+    }
     msg->dynamicData.len += len + 2;
     return true;
 }
-bool add_title(push_message* msg, const char* title){
+bool add_title(push_message* msg, const char* title) {
     return add_tlv(msg, NP_PAYLOAD_PUSH_DATA_VALUE_TITLE, title);
 }
-bool add_body(push_message* msg, const char* body){
+bool add_body(push_message* msg, const char* body) {
     return add_tlv(msg, NP_PAYLOAD_PUSH_DATA_VALUE_BODY, body);
 }
-bool add_title_loc_key(push_message* msg, const char* titleKey){
+bool add_title_loc_key(push_message* msg, const char* titleKey) {
     return add_tlv(msg, NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_KEY, titleKey);
 }
-bool add_title_loc_string_arg(push_message* msg, const char* titleArg){
+bool add_title_loc_string_arg(push_message* msg, const char* titleArg) {
     return add_tlv(msg, NP_PAYLOAD_PUSH_DATA_VALUE_TITLE_LOC_STRING_ARG, titleArg);
 }
-bool add_body_loc_key(push_message* msg, const char* bodyKey){
+bool add_body_loc_key(push_message* msg, const char* bodyKey) {
     return add_tlv(msg, NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_KEY, bodyKey);
 }
-bool add_body_loc_string_arg(push_message* msg, const char* bodyArg){
+bool add_body_loc_string_arg(push_message* msg, const char* bodyArg) {
     return add_tlv(msg, NP_PAYLOAD_PUSH_DATA_VALUE_BODY_LOC_STRING_ARG, bodyArg);
 }
 
-
-uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq){
+uint8_t* unabto_push_notification_get_data(uint8_t* bufStart, const uint8_t* bufEnd, uint32_t seq) {
     int i;
-    for(i=0;i<dataHead;i++){
-        if(buffer[i].seq == seq){
-            if(buffer[i].len>bufEnd-bufStart){
+    for (i = 0; i < dataHead; i++) {
+        if (buffer[i].seq == seq) {
+            if (buffer[i].len > bufEnd - bufStart) {
                 return NULL;
             }
-            memcpy( bufStart,buffer[i].data,buffer[i].len);
-            return bufStart+buffer[i].len;
+            memcpy(bufStart, buffer[i].data, buffer[i].len);
+            return bufStart + buffer[i].len;
         }
     }
     return NULL;
 }
 
-void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint){
+void unabto_push_notification_callback(uint32_t seq, unabto_push_hint* hint) {
     int i;
-    for(i=0;i<dataHead;i++){
-        if(buffer[i].seq == seq){
-            buffer[i].cb(buffer[i].args,hint);
-            memmove(&buffer[i].data, &buffer[dataHead-1].data,sizeof(buffer_element));
+    for (i = 0; i < dataHead; i++) {
+        if (buffer[i].seq == seq) {
+            buffer[i].cb(buffer[i].args, hint);
+            memmove(&buffer[i].data, &buffer[dataHead - 1].data, sizeof(buffer_element));
             dataHead--;
             return;
         }
-    }   
+    }
 }

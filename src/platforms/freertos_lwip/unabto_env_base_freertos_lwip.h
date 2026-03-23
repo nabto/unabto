@@ -30,15 +30,19 @@ typedef int16_t ssize_t;
 
 #define NABTO_INVALID_SOCKET NULL
 
-//#define INADDR_ANY IPADDR_ANY 
+//#define INADDR_ANY IPADDR_ANY
 //#define INADDR_NONE IPADDR_NONE
 
-// #define printf(...) 
+// #define printf(...)
 
-#define NABTO_LOG_BASIC_PRINT(s, m) do { printf m; printf("\n");  } while(0)
+#define NABTO_LOG_BASIC_PRINT(s, m) \
+    do {                            \
+        printf m;                   \
+        printf("\n");               \
+    } while (0)
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

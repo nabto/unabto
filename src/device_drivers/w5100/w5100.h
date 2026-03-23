@@ -37,7 +37,7 @@ bool nabto_socket_is_equal(const nabto_socket_t* s1, const nabto_socket_t* s2);
 void nabto_socket_set_invalid(nabto_socket_t* sock);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

@@ -24,13 +24,12 @@
 void wait_event();
 
 int main(int argc, char** argv) {
-
     unabto_epoll_init();
-    
+
     nabto_main_setup* nms = unabto_init_context();
 
     stream_echo_init();
-    
+
     if (!check_args(argc, argv, nms)) {
         return 1;
     }
@@ -38,27 +37,26 @@ int main(int argc, char** argv) {
     if (!unabto_init()) {
         return 1;
     }
-    
+
     unabto_time_auto_update(false);
-    while(true) {
+    while (true) {
         unabto_time_update_stamp();
         wait_event();
     }
-    
+
     unabto_close();
 }
 
 #define MAX_EVENTS 16
 
-void wait_event()
-{
+void wait_event() {
     struct epoll_event events[MAX_EVENTS];
     int timeout;
     nabto_stamp_t ne;
     nabto_stamp_t now;
     int nfds;
     int i;
-    
+
     unabto_next_event(&ne);
     now = nabtoGetStamp();
     timeout = nabtoStampDiff2ms(nabtoStampDiff(&ne, &now));
@@ -71,16 +69,14 @@ void wait_event()
     NABTO_LOG_TRACE(("Select returned %i", nfds));
     if (nfds < 0) {
         if (errno == EINTR) {
-            
         } else {
             NABTO_LOG_FATAL(("Error in epoll_wait: %d", errno));
         }
     }
 
-    
     for (i = 0; i < nfds; i++) {
         unabto_epoll_event_handler* handler = (unabto_epoll_event_handler*)events[i].data.ptr;
-        
+
         if (handler->epollEventType == UNABTO_EPOLL_TYPE_UDP) {
             unabto_epoll_event_handler_udp* udpHandler = (unabto_epoll_event_handler_udp*)handler;
             unabto_read_socket(udpHandler->fd);
@@ -96,9 +92,8 @@ void wait_event()
             }
         }
 #endif
-        
     }
-    
+
     unabto_time_event();
 }
 

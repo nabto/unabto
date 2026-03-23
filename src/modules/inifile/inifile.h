@@ -91,7 +91,6 @@ extern unsigned int getIniString(const char *Section,
                                  unsigned int Size,
                                  const char *FileName);
 
-
 /**
  *  Copies a string into the specified section of an
  *  initialization file.
@@ -139,7 +138,7 @@ extern int writeIniString(const char *Section,
                           const char *FileName);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif /* INIFILE_H */

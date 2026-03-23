@@ -19,13 +19,12 @@ void unabto_prng_inc_counter(unabto_prng_state* state);
 void unabto_prng_init_state(unabto_prng_state* state);
 void unabto_prng_generate_block(unabto_prng_state* state, uint8_t* buf, size_t bytes);
 
-void unabto_prng_random_seed(uint8_t* buf, size_t bytes)
-{
+void unabto_prng_random_seed(uint8_t* buf, size_t bytes) {
     unsigned long x;
-    FILE *f;
+    FILE* f;
     f = fopen("/dev/urandom", "rb");
     if (f == NULL)
-       f = fopen("/dev/random", "rb");
+        f = fopen("/dev/random", "rb");
     if (f == NULL) {
         NABTO_LOG_FATAL(("Could not open random source tried /dev/urandom and /dev/random"));
         return;
@@ -33,11 +32,11 @@ void unabto_prng_random_seed(uint8_t* buf, size_t bytes)
 
     /* disable buffering */
     if (setvbuf(f, NULL, _IONBF, 0) != 0) {
-       fclose(f);
-       NABTO_LOG_FATAL(("Could not disable buffering"));
-       return;
-    }   
- 
+        fclose(f);
+        NABTO_LOG_FATAL(("Could not disable buffering"));
+        return;
+    }
+
     x = (unsigned long)fread(buf, 1, bytes, f);
     fclose(f);
 
@@ -49,7 +48,7 @@ void unabto_prng_random_seed(uint8_t* buf, size_t bytes)
 
 void nabto_random(uint8_t* buf, size_t bytes) {
     static bool unabto_prng_is_initialized = false;
-    
+
     if (!unabto_prng_is_initialized) {
         unabto_prng_init_state(&prng_state);
         unabto_prng_is_initialized = true;
@@ -71,7 +70,7 @@ void unabto_prng_generate_block(unabto_prng_state* state, uint8_t* buf, size_t b
 
     uint8_t r[16];
     AES_encrypt(state->counter, r, &state->key);
-    
+
     memcpy(buf, r, bytes);
 }
 
@@ -81,7 +80,6 @@ void unabto_prng_init_state(unabto_prng_state* state) {
     unabto_prng_random_seed(state->counter, UNABTO_PRNG_COUNTER_BYTE_LENGTH);
 
     private_AES_set_encrypt_key(aeskey, 128, &state->key);
-    
 }
 
 void unabto_prng_inc_counter(unabto_prng_state* state) {

@@ -18,13 +18,13 @@
 ******************************************************************************/
 
 /* Exception codes - always positive - must *never* be changed! */
-#define NP_E_NOT_READY         3  ///< the application isn't ready yet (still initialising)
-#define NP_E_NO_ACCESS         4  ///< the application doesn't allow this request to be answered
-#define NP_E_TOO_SMALL         5  ///< the request is too small, i.e. required fields aren't present
-#define NP_E_TOO_LARGE         6  ///< the request is too large
-#define NP_E_INV_QUERY_ID      7  ///< the request queryId is invalid
-#define NP_E_RSP_TOO_LARGE     8  ///< the response is larger than the space allocated
-#define NP_E_OUT_OF_RESOURCES  9  ///< no ressources available (out of memory)
+#define NP_E_NOT_READY        3   ///< the application isn't ready yet (still initialising)
+#define NP_E_NO_ACCESS        4   ///< the application doesn't allow this request to be answered
+#define NP_E_TOO_SMALL        5   ///< the request is too small, i.e. required fields aren't present
+#define NP_E_TOO_LARGE        6   ///< the request is too large
+#define NP_E_INV_QUERY_ID     7   ///< the request queryId is invalid
+#define NP_E_RSP_TOO_LARGE    8   ///< the response is larger than the space allocated
+#define NP_E_OUT_OF_RESOURCES 9   ///< no ressources available (out of memory)
 #define NP_E_SYSTEM_ERROR     10  ///< internal error
 #define NP_E_NO_QUERY_ID      11  ///< the request is so small that no queryId is present
 

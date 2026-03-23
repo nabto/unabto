@@ -9,7 +9,7 @@
  * For the buffer_t type, use the unabto_buffers files
  * 
  */
- 
+
 #ifndef _UNABTO_BUFFER_H_
 #define _UNABTO_BUFFER_H_
 
@@ -23,8 +23,7 @@
 extern "C" {
 #endif
 
-typedef unabto_buffer buffer_t; 
-
+typedef unabto_buffer buffer_t;
 
 /**********************************/
 /* Prototypes for the buffer type */
@@ -36,8 +35,7 @@ typedef unabto_buffer buffer_t;
  * @param data    the new content or just space for usage
  * @param size    the size of the new content or available space
  */
-#define buffer_init(buffer, data, size) unabto_buffer_init(buffer, data, size) 
-
+#define buffer_init(buffer, data, size) unabto_buffer_init(buffer, data, size)
 
 /** Deprecated - use unabto_buffer_get_data
  * Get the raw buffere.
@@ -46,14 +44,12 @@ typedef unabto_buffer buffer_t;
  */
 #define buffer_get_data(buffer) unabto_buffer_get_data(buffer)
 
-
 /** Deprecated - use unabto_buffer_get_size
  * Get the size of buffer.
  * @param buffer     the target buffer
  * @return size
  */
-#define buffer_get_size(buffer) unabto_buffer_get_size(buffer) 
-
+#define buffer_get_size(buffer) unabto_buffer_get_size(buffer)
 
 /** Deprecated - use unabto_buffer_copy
  * copy a buffer to another buffer
@@ -71,11 +67,9 @@ typedef unabto_buffer buffer_t;
  */
 #define buffer_cmp(b1, b2) unabto_buffer_cmp(b1, b2)
 
-
-
-typedef unabto_query_request buffer_read_t;    
+typedef unabto_query_request buffer_read_t;
 typedef unabto_query_response buffer_write_t;
-//#define buffer_write_t unabto_query_response     
+//#define buffer_write_t unabto_query_response
 
 /***************************************************/
 /* Prototypes for application query buffer reading */
@@ -89,7 +83,6 @@ typedef unabto_query_response buffer_write_t;
  */
 #define buffer_read_uint32(read_buf, res) unabto_query_read_uint32(read_buf, res)
 
-
 /** Deprecated - use unabto_query_read_uint16
  * read an uint16_t from a readable buffer
  * @param read_buf  the readable buffer to read from
@@ -97,7 +90,6 @@ typedef unabto_query_response buffer_write_t;
  * @return true on success
  */
 #define buffer_read_uint16(read_buf, res) unabto_query_read_uint16(read_buf, res)
-
 
 /** Deprecated - use unabto_query_read_uint8
  * read an uint16_t from a readable buffer
@@ -107,7 +99,6 @@ typedef unabto_query_response buffer_write_t;
  */
 #define buffer_read_uint8(read_buf, res) unabto_query_read_uint8(read_buf, res)
 
-
 /** Deprecated - use unabto_query_read_uint8_list
  * read raw data from a buffer
  * @param read_buf  the reaable buffer
@@ -115,7 +106,6 @@ typedef unabto_query_response buffer_write_t;
  * @return true if success
  */
 bool buffer_read_raw(buffer_read_t* read_buf, buffer_t* buf);
-
 
 /** Deprecated - use unabto_query_read_uint8_list
  * read raw data from a buffer without copying data
@@ -137,7 +127,6 @@ void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
 
 #define buffer_read_reset(buffer) unabto_abuffer_reset(buffer)
 
-
 /*******************************************************************************/
 /* Prototypes for unabto and optionally application query read buffer handling */
 /*******************************************************************************/
@@ -149,14 +138,12 @@ void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
  */
 #define buffer_read_available(read_buf) unabto_abuffer_get_size(read_buf)
 
-
 /** Deprecated - use unabto_abuffer_get_unused ...
  * Get the number of bytes that can be read from the buffer.
  * @param read_buf the readable buffer.
  * @return the number of bytes which have not yet be read from the buffer.
  */
 #define buffer_read_remaining(read_buf) unabto_abuffer_get_unused(read_buf)
-
 
 /** Deprecated  - use unabto_abuffer_get_head 
  * return the head of the buffer we read from 
@@ -165,14 +152,12 @@ void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
  */
 #define buffer_read_head(read_buf) unabto_query_get_read_head(read_buf)
 
-
 /** Deprecated - use unabto_abuffer_get_size
  * Is the buffer empty.
  * @param buffer     the target buffer
  * @return true if buffer is empty
  */
 #define buffer_read_is_empty(buffer) (0 == unabto_abuffer_get_size(buffer))
-
 
 /***************************************************/
 /* Prototypes for application query buffer writing */
@@ -184,8 +169,7 @@ void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
  * @param buffer_in  the buffer to write
  * @return true on success
  */
-#define buffer_write_raw(writeBuffer, buffer_in)   unabto_query_write_uint8_list(writeBuffer, unabto_buffer_get_data(buffer_in), unabto_buffer_get_size(buffer_in))
-
+#define buffer_write_raw(writeBuffer, buffer_in) unabto_query_write_uint8_list(writeBuffer, unabto_buffer_get_data(buffer_in), unabto_buffer_get_size(buffer_in))
 
 /** Deprecated - use unabto_query_write_uint8_list
  * write an array to a writeable buffer encoded as 16bit length and data.
@@ -196,7 +180,6 @@ void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
  */
 #define buffer_write_raw_from_array(w_buf, data, length) unabto_query_write_uint8_list(w_buf, data, length)
 
-
 /** Deprecated - use unabto_query_write_uint8
  * Append an uint8_t to the buffer
  * @param buffer     the target buffer
@@ -204,7 +187,6 @@ void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
  * @return false if the operation would have resulted in a buffer overflow.
  */
 #define buffer_write_uint8(buffer, elm) unabto_query_write_uint8(buffer, elm)
-
 
 /** Deprecated - use unabto_query_write_uint16
  * Append an uint16_t to the buffer
@@ -214,7 +196,6 @@ void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
  */
 #define buffer_write_uint16(buffer, elm) unabto_query_write_uint16(buffer, elm)
 
-
 /** Deprecated - use unabto_query_write_uint32
  * Append an uint32_t to the buffer
  * @param buffer     the target buffer
@@ -222,7 +203,6 @@ void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
  * @return false if the operation would have resulted in a buffer overflow.
  */
 #define buffer_write_uint32(buffer, elm) unabto_query_write_uint32(buffer, elm)
-
 
 /*************************************************************************************/
 /* Prototypes for unabto core and optionally application query write buffer handling */
@@ -234,7 +214,6 @@ void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
  */
 #define buffer_write_reset(buffer) unabto_abuffer_reset(buffer)
 
-
 /**
  * Initialise a writeable buffer.
  */
@@ -243,17 +222,14 @@ void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
 */
 #define buffer_write_init(b_w, buf) unabto_query_response_init(b_w, buf)
 
-
 /**
  * Return the head of the buffer.
  * @param buffer     the target buffer
  * @return a pointer to the head of the buffer.
  */
-#define buffer_write_head(buffer)  unabto_query_get_write_head(buffer)
-
+#define buffer_write_head(buffer) unabto_query_get_write_head(buffer)
 
 #define buffer_write_used(buffer) unabto_query_get_write_used(buffer)
-
 
 #define buffer_write_data(buffer) unabto_query_get_write_initial_head(buffer)
 
@@ -268,7 +244,6 @@ void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
  */
 #define buffer_write_null_terminate(buffer) unabto_abuffer_add_str_terminator(buffer)
 
-
 /** Deprecated - use unabto_abuffer_add_str
  * Append a null terminated string to a buffer
  * @param buffer     the target buffer
@@ -276,7 +251,6 @@ void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
  * @return true if room
  */
 #define buffer_write_str(buffer, str) unabto_abuffer_add_str(buffer, str)
-
 
 /** Deprecated - use unabto_abuffer_add_buffer
  * Append buffer_in to the buffer. 
@@ -286,7 +260,6 @@ void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
  */
 #define buffer_write_buffer(writeBuffer, buffer_in) unabto_abuffer_add_buffer(writeBuffer, buffer_in);
 
-
 /** Deprecated - use buffer_abuffer_add_str_terminator
  * Null terminates a buffer if there's room for it.
  * @param buffer     the target buffer
@@ -294,13 +267,11 @@ void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
  */
 #define buffer_write_null_terminate(buffer) unabto_abuffer_add_str_terminator(buffer)
 
-
 /***********************************************************************************************/
 /* Prototypes for application and platform specific query and non query related buffer writing */
 /***********************************************************************************************/
 
 #define buffer_write_text(buffer, string) buffer_write_str(buffer, string)
-
 
 /** Deprecated - no substitute check in modules
  * Append all contents of a queue into the buffer.
@@ -312,7 +283,7 @@ void buffer_read_init(buffer_read_t* read_buf, buffer_t* buf);
 bool buffer_write_raw_from_queue(buffer_write_t* w_buf, queue_t* q);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

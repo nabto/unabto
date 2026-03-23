@@ -70,19 +70,17 @@ static HANDLE signal_event = NULL;
 static bool useSelectBased = false;
 #endif
 
-static char* default_hosts[] = { "127.0.0.1", "localhost", 0 };
+static char* default_hosts[] = {"127.0.0.1", "localhost", 0};
 
 uint8_t obscurity_key_id[] = {
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 uint8_t obscurity_key[] = {
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 // AMP video client
-#define AMP_MAX_NAME_LENGTH 50
-#define AMP_DEVICE_NAME_DEFAULT "Tunnel"
+#define AMP_MAX_NAME_LENGTH      50
+#define AMP_DEVICE_NAME_DEFAULT  "Tunnel"
 #define AMP_PRODUCT_NAME_DEFAULT "uNabto Video"
 static char device_name[AMP_MAX_NAME_LENGTH];
 static char product_name[AMP_MAX_NAME_LENGTH];
@@ -146,93 +144,128 @@ void handle_signal(int signum) {
 #endif
 
 static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
+    const char* tunnel_port_str;
+    const char* display_name_str;
 
-    const char *tunnel_port_str;
-    const char *display_name_str;
-
-    const char x1s[] = "h";      const char* x1l[] = { "help", 0 };
-    const char x2s[] = "V";      const char* x2l[] = { "version", 0 };
-    const char x3s[] = "C";      const char* x3l[] = { "config", 0 };
-    const char x4s[] = "S";      const char* x4l[] = { "size", 0 };
-    const char x9s[] = "d";      const char* x9l[] = { "device-name", 0 };
-    const char x10s[] = "H";     const char* x10l[] = { "tunnel-default-host", 0 }; // only used together with the tunnel.
-    const char x11s[] = "P";     const char* x11l[] = { "tunnel-default-port", 0 };
-    const char x12s[] = "s";     const char* x12l[] = { "dummy-key", 0 };
-    const char x13s[] = "k";     const char* x13l[] = { "encryption-key", 0 };
-    const char x14s[] = "p";     const char* x14l[] = { "localport", 0 };
-    const char x16s[] = "";      const char* x16l[] = { "allow-port", 0};
-    const char x17s[] = "";      const char* x17l[] = { "allow-host", 0};
-    const char x18s[] = "x";     const char* x18l[] = { "nice-exit", 0};
-    const char x19s[] = "";      const char* x19l[] = { "allow-all-ports", 0};
-    const char x21s[] = "l";     const char* x21l[] = { "nabtolog", 0 };
-    const char x22s[] = "A";     const char* x22l[] = { "controller", 0 };
-    const char x23s[] = "";      const char* x23l[] = { "disable-tcp-fb", 0 };
-    const char x24s[] = "";      const char* x24l[] = { "controller-port", 0 };
+    const char x1s[] = "h";
+    const char* x1l[] = {"help", 0};
+    const char x2s[] = "V";
+    const char* x2l[] = {"version", 0};
+    const char x3s[] = "C";
+    const char* x3l[] = {"config", 0};
+    const char x4s[] = "S";
+    const char* x4l[] = {"size", 0};
+    const char x9s[] = "d";
+    const char* x9l[] = {"device-name", 0};
+    const char x10s[] = "H";
+    const char* x10l[] = {"tunnel-default-host", 0};  // only used together with the tunnel.
+    const char x11s[] = "P";
+    const char* x11l[] = {"tunnel-default-port", 0};
+    const char x12s[] = "s";
+    const char* x12l[] = {"dummy-key", 0};
+    const char x13s[] = "k";
+    const char* x13l[] = {"encryption-key", 0};
+    const char x14s[] = "p";
+    const char* x14l[] = {"localport", 0};
+    const char x16s[] = "";
+    const char* x16l[] = {"allow-port", 0};
+    const char x17s[] = "";
+    const char* x17l[] = {"allow-host", 0};
+    const char x18s[] = "x";
+    const char* x18l[] = {"nice-exit", 0};
+    const char x19s[] = "";
+    const char* x19l[] = {"allow-all-ports", 0};
+    const char x21s[] = "l";
+    const char* x21l[] = {"nabtolog", 0};
+    const char x22s[] = "A";
+    const char* x22l[] = {"controller", 0};
+    const char x23s[] = "";
+    const char* x23l[] = {"disable-tcp-fb", 0};
+    const char x24s[] = "";
+    const char* x24l[] = {"controller-port", 0};
 #if NABTO_ENABLE_EPOLL
-    const char x25s[] = "";      const char* x25l[] = { "select-based", 0 };
+    const char x25s[] = "";
+    const char* x25l[] = {"select-based", 0};
 #endif
 
-    const char x26s[] = "";      const char* x26l[] = { "tunnels", 0 };
-    const char x27s[] = "";      const char* x27l[] = { "stream-recv-window-size", 0 };
-    const char x28s[] = "";      const char* x28l[] = { "connections", 0 };
-    const char x29s[] = "";      const char* x29l[] = { "disable-extended-rendezvous-multiple-sockets", 0 };
-    const char x29_1s[] = "";    const char* x29_1l[] = { "disable-extended-rendezvous-multiple-ports", 0 };
-    const char x30s[] = "";      const char* x30l[] = { "allow-all-hosts", 0};
-    const char x31s[] = "";      const char* x31l[] = { "no-access-control", 0};
-    const char x32s[] = "";      const char* x32l[] = { "no-crypto", 0};
-    const char x33s[] = "";      const char* x33l[] = { "uart-device", 0 };
-    const char x34s[] = "";      const char* x34l[] = { "stream-segment-pool-size", 0 };
-    const char x35s[] = "";      const char* x35l[] = { "stream-send-window-size", 0 };
-    const char x36s[] = "N";     const char* x36l[] = { "display-name", 0 };
-    const char x37s[] = "R";     const char* x37l[] = { "product-name", 0 };
-    const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
-        { 'h', GOPT_NOARG,   x1s, x1l },
-        { 'V', GOPT_NOARG,   x2s, x2l },
-        { 'C', GOPT_NOARG,   x3s, x3l },
-        { 'S', GOPT_NOARG,   x4s, x4l },
-        { 'd', GOPT_ARG,     x9s, x9l },
-        { 'H', GOPT_ARG,     x10s, x10l },
-        { 'P', GOPT_ARG,     x11s, x11l },
-        { 's', GOPT_NOARG,   x12s, x12l },
-        { 'k', GOPT_ARG,     x13s, x13l },
-        { 'p', GOPT_ARG,     x14s, x14l },
-        { ALLOW_PORT_OPTION, GOPT_REPEAT|GOPT_ARG, x16s, x16l },
-        { ALLOW_HOST_OPTION, GOPT_REPEAT|GOPT_ARG, x17s, x17l },
-        { 'x', GOPT_NOARG, x18s, x18l },
-        { ALLOW_ALL_PORTS_OPTION, GOPT_NOARG, x19s, x19l },
-        { 'l', GOPT_REPEAT|GOPT_ARG,  x21s, x21l },
-        { 'A', GOPT_ARG, x22s, x22l },
-        { DISABLE_TCP_FALLBACK_OPTION, GOPT_NOARG, x23s, x23l },
-        { DISABLE_CRYPTO_OPTION, GOPT_NOARG, x32s, x32l },
-        { CONTROLLER_PORT_OPTION, GOPT_ARG, x24s, x24l },
+    const char x26s[] = "";
+    const char* x26l[] = {"tunnels", 0};
+    const char x27s[] = "";
+    const char* x27l[] = {"stream-recv-window-size", 0};
+    const char x28s[] = "";
+    const char* x28l[] = {"connections", 0};
+    const char x29s[] = "";
+    const char* x29l[] = {"disable-extended-rendezvous-multiple-sockets", 0};
+    const char x29_1s[] = "";
+    const char* x29_1l[] = {"disable-extended-rendezvous-multiple-ports", 0};
+    const char x30s[] = "";
+    const char* x30l[] = {"allow-all-hosts", 0};
+    const char x31s[] = "";
+    const char* x31l[] = {"no-access-control", 0};
+    const char x32s[] = "";
+    const char* x32l[] = {"no-crypto", 0};
+    const char x33s[] = "";
+    const char* x33l[] = {"uart-device", 0};
+    const char x34s[] = "";
+    const char* x34l[] = {"stream-segment-pool-size", 0};
+    const char x35s[] = "";
+    const char* x35l[] = {"stream-send-window-size", 0};
+    const char x36s[] = "N";
+    const char* x36l[] = {"display-name", 0};
+    const char x37s[] = "R";
+    const char* x37l[] = {"product-name", 0};
+    const struct {
+        int k;
+        int f;
+        const char* s;
+        const char* const* l;
+    } opts[] = {
+        {'h', GOPT_NOARG, x1s, x1l},
+        {'V', GOPT_NOARG, x2s, x2l},
+        {'C', GOPT_NOARG, x3s, x3l},
+        {'S', GOPT_NOARG, x4s, x4l},
+        {'d', GOPT_ARG, x9s, x9l},
+        {'H', GOPT_ARG, x10s, x10l},
+        {'P', GOPT_ARG, x11s, x11l},
+        {'s', GOPT_NOARG, x12s, x12l},
+        {'k', GOPT_ARG, x13s, x13l},
+        {'p', GOPT_ARG, x14s, x14l},
+        {ALLOW_PORT_OPTION, GOPT_REPEAT | GOPT_ARG, x16s, x16l},
+        {ALLOW_HOST_OPTION, GOPT_REPEAT | GOPT_ARG, x17s, x17l},
+        {'x', GOPT_NOARG, x18s, x18l},
+        {ALLOW_ALL_PORTS_OPTION, GOPT_NOARG, x19s, x19l},
+        {'l', GOPT_REPEAT | GOPT_ARG, x21s, x21l},
+        {'A', GOPT_ARG, x22s, x22l},
+        {DISABLE_TCP_FALLBACK_OPTION, GOPT_NOARG, x23s, x23l},
+        {DISABLE_CRYPTO_OPTION, GOPT_NOARG, x32s, x32l},
+        {CONTROLLER_PORT_OPTION, GOPT_ARG, x24s, x24l},
 #if NABTO_ENABLE_EPOLL
-        { SELECT_BASED_OPTION, GOPT_NOARG, x25s, x25l },
+        {SELECT_BASED_OPTION, GOPT_NOARG, x25s, x25l},
 #endif
 #if NABTO_ENABLE_DYNAMIC_MEMORY
-        { TUNNELS_OPTION, GOPT_ARG, x26s, x26l },
-        { STREAM_WINDOW_RECV_SIZE_OPTION, GOPT_ARG, x27s, x27l },
-        { STREAM_WINDOW_SEND_SIZE_OPTION, GOPT_ARG, x35s, x35l },
-        { CONNECTIONS_SIZE_OPTION, GOPT_ARG, x28s, x28l },
-        { STREAM_SEGMENT_POOL_SIZE_OPTION, GOPT_ARG, x34s, x34l },
+        {TUNNELS_OPTION, GOPT_ARG, x26s, x26l},
+        {STREAM_WINDOW_RECV_SIZE_OPTION, GOPT_ARG, x27s, x27l},
+        {STREAM_WINDOW_SEND_SIZE_OPTION, GOPT_ARG, x35s, x35l},
+        {CONNECTIONS_SIZE_OPTION, GOPT_ARG, x28s, x28l},
+        {STREAM_SEGMENT_POOL_SIZE_OPTION, GOPT_ARG, x34s, x34l},
 #endif
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS
-        { DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS, GOPT_NOARG, x29s, x29l },
+        {DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_SOCKETS, GOPT_NOARG, x29s, x29l},
 #endif
 #if NABTO_ENABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS
-        { DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS, GOPT_NOARG, x29_1s, x29_1l },
+        {DISABLE_EXTENDED_RENDEZVOUS_MULTIPLE_PORTS, GOPT_NOARG, x29_1s, x29_1l},
 #endif
 
-        { ALLOW_ALL_HOSTS_OPTION, GOPT_NOARG, x30s, x30l },
-        { NO_ACCESS_CONTROL_OPTION, GOPT_NOARG, x31s, x31l },
-        { UART_DEVICE_OPTION, GOPT_ARG, x33s, x33l },
-        { 'N', GOPT_ARG, x36s, x36l },
-        { 'R', GOPT_ARG, x37s, x37l },
-        { 0,0,0,0 }
-    };
+        {ALLOW_ALL_HOSTS_OPTION, GOPT_NOARG, x30s, x30l},
+        {NO_ACCESS_CONTROL_OPTION, GOPT_NOARG, x31s, x31l},
+        {UART_DEVICE_OPTION, GOPT_ARG, x33s, x33l},
+        {'N', GOPT_ARG, x36s, x36l},
+        {'R', GOPT_ARG, x37s, x37l},
+        {0, 0, 0, 0}};
 
-    void *options = gopt_sort( & argc, (const char**)argv, opts);
+    void* options = gopt_sort(&argc, (const char**)argv, opts);
 
-    const char * h;
+    const char* h;
     int p;
     const char* localPortStr;
     const char* optionString;
@@ -247,7 +280,6 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     const char* preSharedKey;
     bool fatalPortError = true;
     uint32_t addr;
-
 
     if (gopt(options, 'h')) {
         printf("Usage: unabto_tunnel [options] -d devicename\n");
@@ -272,7 +304,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         printf("      --allow-host            Hostnames that tunnel is allowed to connect to in addition to localhost \n");
         printf("      --allow-all-hosts       Allow connections to all TCP hosts.\n");
         printf("      --no-access-control     Do not enforce client access control on incoming connections. \n");
-        if(unabto_tunnel_has_uart()){
+        if (unabto_tunnel_has_uart()) {
             printf("      --uart-device           Sets the uart device\n");
         }
         printf("  -x, --nice-exit             Close the tunnels nicely when pressing Ctrl+C.\n");
@@ -327,39 +359,37 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         } else {
             unabto_log_system_enable_stdout_pattern("*.info");
         }
-
     }
 
-
-    if (!gopt_arg( options, 'd', &nms->id)) {
+    if (!gopt_arg(options, 'd', &nms->id)) {
         NABTO_LOG_FATAL(("Specify a serverId with -d. Try -h for help."));
     }
 
-    if (gopt_arg( options, 'N', &display_name_str)) {
+    if (gopt_arg(options, 'N', &display_name_str)) {
         snprintf(device_name, sizeof(device_name), "%s", display_name_str);
     } else {
         snprintf(device_name, sizeof(device_name), AMP_DEVICE_NAME_DEFAULT);
     }
 
-    if (gopt_arg( options, 'R', &display_name_str)) {
+    if (gopt_arg(options, 'R', &display_name_str)) {
         snprintf(product_name, sizeof(product_name), "%s", display_name_str);
     } else {
         snprintf(product_name, sizeof(product_name), AMP_PRODUCT_NAME_DEFAULT);
     }
 
-    if(gopt_arg(options, 'H', &h)) {
+    if (gopt_arg(options, 'H', &h)) {
         unabto_tunnel_tcp_set_default_host(h);
     }
 
     if (gopt_arg(options, 'P', &tunnel_port_str)) {
-        if(1 != sscanf(tunnel_port_str, "%d", &p)) {
+        if (1 != sscanf(tunnel_port_str, "%d", &p)) {
             NABTO_LOG_FATAL(("Reading of port parameter failed."));
         } else {
             unabto_tunnel_tcp_set_default_port(p);
         }
     }
 
-    if( gopt_arg( options, 'p', &localPortStr) ){
+    if (gopt_arg(options, 'p', &localPortStr)) {
         int localPort = atoi(localPortStr);
         nms->localPort = localPort;
     }
@@ -368,27 +398,27 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         unabto_set_no_crypto(nms);
     } else {
         uint8_t psk[PRE_SHARED_KEY_SIZE];
-        if ( gopt_arg( options, 'k', &preSharedKey)) {
-            if (!unabto_read_psk_from_hex(preSharedKey, psk ,PRE_SHARED_KEY_SIZE)) {
+        if (gopt_arg(options, 'k', &preSharedKey)) {
+            if (!unabto_read_psk_from_hex(preSharedKey, psk, PRE_SHARED_KEY_SIZE)) {
                 NABTO_LOG_FATAL(("Cannot read psk"));
             }
-            if(!unabto_set_aes_crypto(nms, psk, PRE_SHARED_KEY_SIZE)){
+            if (!unabto_set_aes_crypto(nms, psk, PRE_SHARED_KEY_SIZE)) {
                 NABTO_LOG_FATAL(("init_nms_crypto failed"));
             }
         } else {
-            if (!gopt( options, 's' )) {
+            if (!gopt(options, 's')) {
                 NABTO_LOG_FATAL(("Specify a preshared key with -k. Try -h for help."));
             } else {
                 // using zero key, undocumented but handy for testing
-                memset(psk,0,PRE_SHARED_KEY_SIZE);
-                if(!unabto_set_aes_crypto(nms, psk, PRE_SHARED_KEY_SIZE)){
+                memset(psk, 0, PRE_SHARED_KEY_SIZE);
+                if (!unabto_set_aes_crypto(nms, psk, PRE_SHARED_KEY_SIZE)) {
                     NABTO_LOG_FATAL(("init_nms_crypto failed"));
                 }
             }
         }
     }
 
-    if( gopt_arg( options, 'A', & basestationAddress ) ){
+    if (gopt_arg(options, 'A', &basestationAddress)) {
         addr = inet_addr(basestationAddress);
         if (addr == INADDR_NONE) {
             NABTO_LOG_FATAL(("Invalid basestation address"));
@@ -401,11 +431,10 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         nice_exit = true;
     }
 
-
     hosts_length = gopt(options, ALLOW_HOST_OPTION);
     if (hosts_length > 0) {
         size_t i;
-        hosts = (char**) malloc(hosts_length*sizeof(char*));
+        hosts = (char**)malloc(hosts_length * sizeof(char*));
         for (i = 0; i < hosts_length; i++) {
             const char* opt = gopt_arg_i(options, ALLOW_HOST_OPTION, i);
             hosts[i] = strdup(opt);
@@ -420,8 +449,8 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
     ports_length = gopt(options, ALLOW_PORT_OPTION);
     if (ports_length > 0) {
         size_t i;
-        ports = (uint16_t*) malloc(ports_length*sizeof(uint16_t));
-        memset(ports,0,ports_length*sizeof(uint16_t));
+        ports = (uint16_t*)malloc(ports_length * sizeof(uint16_t));
+        memset(ports, 0, ports_length * sizeof(uint16_t));
         for (i = 0; i < ports_length; i++) {
             const char* opt = gopt_arg_i(options, ALLOW_PORT_OPTION, i);
             ports[i] = atoi(opt);
@@ -437,8 +466,8 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         no_access_control = true;
     }
 
-    if(unabto_tunnel_has_uart()){
-        if(gopt_arg(options, UART_DEVICE_OPTION, &uartDevice)) {
+    if (unabto_tunnel_has_uart()) {
+        if (gopt_arg(options, UART_DEVICE_OPTION, &uartDevice)) {
             uart_tunnel_set_default_device(uartDevice);
             fatalPortError = false;
         } else {
@@ -493,13 +522,12 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         nms->enableExtendedRendezvousMultipleSockets = false;
     } else {
 #if NABTO_ENABLE_DYNAMIC_MEMORY
-        int desiredFds = NABTO_EXTENDED_RENDEZVOUS_MAX_SOCKETS + nms->connectionsSize + nms->streamMaxStreams + 50/*arbitrary number*/;
+        int desiredFds = NABTO_EXTENDED_RENDEZVOUS_MAX_SOCKETS + nms->connectionsSize + nms->streamMaxStreams + 50 /*arbitrary number*/;
 #else
-        int desiredFds = NABTO_EXTENDED_RENDEZVOUS_MAX_SOCKETS + NABTO_CONNECTIONS_SIZE + NABTO_STREAM_MAX_STREAMS + 50/*arbitrary number*/;
+        int desiredFds = NABTO_EXTENDED_RENDEZVOUS_MAX_SOCKETS + NABTO_CONNECTIONS_SIZE + NABTO_STREAM_MAX_STREAMS + 50 /*arbitrary number*/;
 #endif
         int actualFds = check_ulimit_files(desiredFds);
         if (actualFds == -1) {
-
         } else if (actualFds < desiredFds) {
             NABTO_LOG_ERROR(("Disabling extended rendezvous with multiple sockets since the platform cannot give the required number of file descriptors"));
             nms->enableExtendedRendezvousMultipleSockets = false;
@@ -511,7 +539,7 @@ static bool tunnel_parse_args(int argc, char* argv[], nabto_main_setup* nms) {
         nms->enableExtendedRendezvousMultiplePorts = false;
     }
 #endif
-    if(fatalPortError == true) {
+    if (fatalPortError == true) {
         NABTO_LOG_FATAL(("You did not allow client to connect to anything. For TCP tunnels please specify ports with '--allow-port' or '--allow-all-ports. For UART tunnel please specify a UART device with '--uart_device'. Try -h for help."));
     }
     return true;
@@ -532,9 +560,9 @@ void debug_dump_acl() {
             }
             if (user.fp.hasValue) {
                 NABTO_LOG_DEBUG((" - %s [%02x:%02x:%02x:%02x:...]: %04x",
-                                user.name,
-                                user.fp.value.data[0], user.fp.value.data[1], user.fp.value.data[2], user.fp.value.data[3],
-                                user.permissions));
+                                 user.name,
+                                 user.fp.value.data[0], user.fp.value.data[1], user.fp.value.data[2], user.fp.value.data[3],
+                                 user.permissions));
             }
             it = fp_acl_db.next(it);
         }
@@ -573,7 +601,6 @@ void acl_init() {
     fp_acl_ae_init(&fp_acl_db);
 }
 
-
 void educate_user() {
     printf("================================================================================\n");
     printf("IMPORTANT INFORMATION ABOUT SECURITY BEFORE USING IN PRODUCTION\n");
@@ -594,8 +621,7 @@ void educate_user() {
     printf("================================================================================\n\n");
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     nabto_main_setup* nms = unabto_init_context();
     educate_user();
     platform_checks();
@@ -691,7 +717,7 @@ bool tunnel_allow_connection(const char* host, int port) {
     if (allow_all_hosts || is_default_host(host)) {
         hostFound = true;
     } else {
-        for(i = 0; i < hosts_length; i++) {
+        for (i = 0; i < hosts_length; i++) {
             if (strcmp(host, hosts[i]) == 0) {
                 hostFound = true;
             }
@@ -721,7 +747,7 @@ int copy_buffer(unabto_query_request* read_buffer, uint8_t* dest, uint16_t bufSi
 
 int copy_string(unabto_query_request* read_buffer, char* dest, uint16_t destSize) {
     uint16_t len;
-    int res = copy_buffer(read_buffer, (uint8_t*)dest, destSize-1, &len);
+    int res = copy_buffer(read_buffer, (uint8_t*)dest, destSize - 1, &len);
     if (res != AER_REQ_RESPONSE_READY) {
         return res;
     }
@@ -734,13 +760,12 @@ int write_string(unabto_query_response* write_buffer, const char* string) {
     if (len > UINT16_MAX) {
         return 0;
     }
-    return unabto_query_write_uint8_list(write_buffer, (uint8_t *)string, (uint16_t)len);
+    return unabto_query_write_uint8_list(write_buffer, (uint8_t*)string, (uint16_t)len);
 }
 
 application_event_result application_event(application_request* request,
                                            unabto_query_request* query_request,
-                                           unabto_query_response* query_response)
-{
+                                           unabto_query_response* query_response) {
     NABTO_LOG_INFO(("Nabto application_event: %u", request->queryId));
     debug_dump_acl();
 

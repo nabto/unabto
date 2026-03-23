@@ -2,15 +2,13 @@
 
 static void unabto_tunnel_echo_closing(tunnel* tunnel, tunnel_event_source event_source);
 
-void unabto_tunnel_echo_parse_command(tunnel* tunnel, tunnel_event_source event_source)
-{
+void unabto_tunnel_echo_parse_command(tunnel* tunnel, tunnel_event_source event_source) {
     tunnel->tunnelType = TUNNEL_TYPE_ECHO;
     tunnel_send_init_message(tunnel, "+\n");
     tunnel->state = TS_FORWARD;
 }
 
-void unabto_tunnel_echo_event(tunnel* tunnel, tunnel_event_source event_source)
-{
+void unabto_tunnel_echo_event(tunnel* tunnel, tunnel_event_source event_source) {
     if (tunnel->state == TS_FORWARD) {
         unabto_tunnel_echo_forward(tunnel);
     }
@@ -20,8 +18,7 @@ void unabto_tunnel_echo_event(tunnel* tunnel, tunnel_event_source event_source)
     }
 }
 
-void unabto_tunnel_echo_forward(tunnel* tunnel)
-{
+void unabto_tunnel_echo_forward(tunnel* tunnel) {
     const uint8_t* buf;
     unabto_stream_hint hint;
     size_t readLength = unabto_stream_read(tunnel->stream, &buf, &hint);
@@ -38,14 +35,13 @@ void unabto_tunnel_echo_forward(tunnel* tunnel)
             }
         }
     } else {
-        if (hint !=  UNABTO_STREAM_HINT_OK) {
+        if (hint != UNABTO_STREAM_HINT_OK) {
             tunnel->state = TS_CLOSING;
         }
     }
 }
 
-void unabto_tunnel_echo_closing(tunnel* tunnel, tunnel_event_source event_source)
-{
+void unabto_tunnel_echo_closing(tunnel* tunnel, tunnel_event_source event_source) {
     const uint8_t* buf;
     unabto_stream_hint hint;
     size_t readen;

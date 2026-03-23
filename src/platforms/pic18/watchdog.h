@@ -12,9 +12,8 @@ extern void watchdog_enable();
 extern void watchdog_disable();
 extern void watchdog_reset();
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

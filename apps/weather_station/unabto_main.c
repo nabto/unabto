@@ -34,8 +34,7 @@
  * - 3 log
  * @return      the result
  */
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     nabto_main_setup* nms;
 
     // flush stdout
@@ -71,7 +70,7 @@ int main(int argc, char* argv[])
 #if (_POSIX_C_SOURCE >= 199309L)
         struct timespec sleepTime;
         sleepTime.tv_sec = 0;
-        sleepTime.tv_nsec = (long)10*1000000;
+        sleepTime.tv_nsec = (long)10 * 1000000;
         nanosleep(&sleepTime, NULL);
 #endif
     }

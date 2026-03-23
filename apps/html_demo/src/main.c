@@ -9,7 +9,7 @@
 void crossSleep(int ms) {
     struct timespec sleepTime;
     sleepTime.tv_sec = 0;
-    sleepTime.tv_nsec = (long)ms*1000000;
+    sleepTime.tv_nsec = (long)ms * 1000000;
     nanosleep(&sleepTime, NULL);
 }
 
@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
     if (!unabto_init()) {
         NABTO_LOG_FATAL(("unabto_init failed."));
     }
-    while(true) {
+    while (true) {
         unabto_tick();
         crossSleep(10);
     }
@@ -39,7 +39,7 @@ application_event_result application_event(application_request* appreq, unabto_q
             }
             return AER_REQ_RESPONSE_READY;
         }
-        
+
         // writeExample.json
         case 2: {
             uint8_t foo;
@@ -48,33 +48,33 @@ application_event_result application_event(application_request* appreq, unabto_q
             }
             return AER_REQ_RESPONSE_READY;
         }
-            
+
         // readMultipleExample.json
         case 3: {
             if (!unabto_query_write_uint8(w_b, 1) ||
                 !unabto_query_write_uint8(w_b, 2)) {
                 return AER_REQ_RSP_TOO_LARGE;
             }
-            
+
             return AER_REQ_RESPONSE_READY;
         }
-        
+
         // requestResponseExample.json
         case 4: {
             uint8_t foo, bar;
-            
+
             if (!unabto_query_read_uint8(r_b, &foo) ||
                 !unabto_query_read_uint8(r_b, &bar)) {
                 return AER_REQ_TOO_SMALL;
             }
-            
-            if (!unabto_query_write_uint8(w_b, foo+1) ||
-                !unabto_query_write_uint8(w_b, bar+1)) {
+
+            if (!unabto_query_write_uint8(w_b, foo + 1) ||
+                !unabto_query_write_uint8(w_b, bar + 1)) {
                 return AER_REQ_RSP_TOO_LARGE;
             }
             return AER_REQ_RESPONSE_READY;
         }
-        
+
         // listExample.json
         case 5: {
             uint16_t listLength;
@@ -84,7 +84,7 @@ application_event_result application_event(application_request* appreq, unabto_q
 
             // Read list length then each item in list
             unabto_query_read_list_length(r_b, &listLength);
-            listItems = (uint8_t*)malloc(listLength*sizeof(uint8_t));
+            listItems = (uint8_t*)malloc(listLength * sizeof(uint8_t));
 
             for (i = 0; i < listLength; i++) {
                 if (!unabto_query_read_uint8(r_b, &listItems[i])) {
@@ -96,7 +96,7 @@ application_event_result application_event(application_request* appreq, unabto_q
             for (i = 0; i < listLength; i++) {
                 listItems[i]++;
             }
-            
+
             // Start list, write each item to list and end list
             unabto_query_write_list_start(w_b, &listCtx);
             for (i = 0; i < listLength; i++) {
@@ -109,28 +109,28 @@ application_event_result application_event(application_request* appreq, unabto_q
             free(listItems);
             return AER_REQ_RESPONSE_READY;
         }
-        
+
         // rawExample.json
         case 6: {
             uint16_t length;
-            uint8_t *buffer;
-            uint8_t *data;
-            
+            uint8_t* buffer;
+            uint8_t* data;
+
             // Receive pointer to raw data and data length
             if (!unabto_query_read_uint8_list(r_b, &buffer, &length)) {
                 return AER_REQ_TOO_SMALL;
             }
             data = (uint8_t*)malloc(length * sizeof(uint8_t));
             memcpy(data, buffer, length);
-            
+
             // Change data for demo purpose
             data[0] = '1';
-            
+
             // Write back raw data
             if (!unabto_query_write_uint8_list(w_b, data, length)) {
                 return AER_REQ_RSP_TOO_LARGE;
             }
-            
+
             free(data);
             return AER_REQ_RESPONSE_READY;
         }
@@ -142,7 +142,7 @@ application_event_result application_event(application_request* appreq, unabto_q
             uint8_t string1[] = "foo";
             uint8_t string2[] = "bar";
             uint16_t i;
-            
+
             // Start outer list
             unabto_query_write_list_start(w_b, &listCtx);
 
@@ -173,17 +173,18 @@ application_event_result application_event(application_request* appreq, unabto_q
 
             return AER_REQ_RESPONSE_READY;
         }
-        
+
         // rawJsonExample.json
         case 8: {
             uint8_t string1[] = "{points : [ {\"x\":1, \"y\":1}, {\"x\":2, \"y\":2}, {\"x\":3, \"y\":3}, {\"x\":4, \"y\":4} ]}";
-            
+
             if (!unabto_query_write_uint8_list(w_b, string1, strlen((const char*)string1))) {
                 return AER_REQ_RSP_TOO_LARGE;
             }
             return AER_REQ_RESPONSE_READY;
         }
-        default: break;
+        default:
+            break;
     }
     return AER_REQ_NO_QUERY_ID;
 }

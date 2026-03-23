@@ -12,9 +12,8 @@ typedef int nabto_socket_t;
 
 #define NABTO_INVALID_SOCKET 0
 
-
-#define htons(n) (uint16_t)(((uint16_t) (n) << 8) | (uint16_t) (n) >> 8)
-#define htonl(n) (uint32_t)( ((uint32_t) htons(n) << 16) | htons((uint32_t) (n) >> 16) )
+#define htons(n) (uint16_t)(((uint16_t)(n) << 8) | (uint16_t)(n) >> 8)
+#define htonl(n) (uint32_t)(((uint32_t)htons(n) << 16) | htons((uint32_t)(n) >> 16))
 //
 #define ntohs htons
 #define ntohl htonl

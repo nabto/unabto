@@ -20,15 +20,15 @@
 #endif
 
 struct configuration {
-    const char *device_id;
-    const char *pre_shared_key;
-    const char *notification;
-    const char *pnsid_str;
+    const char* device_id;
+    const char* pre_shared_key;
+    const char* notification;
+    const char* pnsid_str;
 };
 
 bool isCallbackReceived = false;
-void callback(void* ptr,const unabto_push_hint* hint){
-    switch(*hint){
+void callback(void* ptr, const unabto_push_hint* hint) {
+    switch (*hint) {
         case UNABTO_PUSH_HINT_OK:
             NABTO_LOG_INFO(("Callback with hint: OK"));
             break;
@@ -56,20 +56,19 @@ void callback(void* ptr,const unabto_push_hint* hint){
         default:
             NABTO_LOG_INFO(("Callback with unknown hint"));
     }
-    NABTO_LOG_INFO(("Got the context value: %i",*(int*)ptr));
+    NABTO_LOG_INFO(("Got the context value: %i", *(int*)ptr));
     isCallbackReceived = true;
 }
 
 void nabto_yield(int msec);
-static void help(const char* errmsg, const char *progname);
+static void help(const char* errmsg, const char* progname);
 bool parse_argv(int argc, char* argv[], struct configuration* config);
 
 /**
  *  main using gopt to check command line arguments
  *  -h for help
  */
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     struct configuration conf;
     memset(&conf, 0, sizeof(struct configuration));
     // Overwrite default values with command line args
@@ -79,7 +78,7 @@ int main(int argc, char* argv[])
     }
 
     // Set nabto to default values
-    nabto_main_setup* nms = unabto_init_context(); 
+    nabto_main_setup* nms = unabto_init_context();
     nms->id = strdup(conf.device_id);
 
     nms->secureAttach = true;
@@ -102,7 +101,7 @@ int main(int argc, char* argv[])
 
     int testContext = 1;
     push_message pm;
-    if(!init_push_message(&pm, pnsID, conf.notification)){
+    if (!init_push_message(&pm, pnsID, conf.notification)) {
         NABTO_LOG_ERROR(("init_push_message failed"));
         return 1;
     }
@@ -114,8 +113,8 @@ int main(int argc, char* argv[])
 
     nabto_stamp_t attachExpireStamp;
     // 20 seconds
-    nabtoSetFutureStamp(&attachExpireStamp, 1000*20);
-        
+    nabtoSetFutureStamp(&attachExpireStamp, 1000 * 20);
+
     // The main loop gives nabto a tick from time to time.
     // Everything else is taken care of behind the scenes.
     bool first = true;
@@ -123,7 +122,7 @@ int main(int argc, char* argv[])
         unabto_tick();
         nabto_yield(10);
         if (nabtoIsStampPassed(&attachExpireStamp)) {
-            if(first){
+            if (first) {
                 NABTO_LOG_ERROR(("Timeout before getting attached"));
                 exit(3);
             } else {
@@ -133,11 +132,11 @@ int main(int argc, char* argv[])
         }
         if (unabto_is_connected_to_gsp() && first) {
             NABTO_LOG_INFO(("Successfully attached to the gsp, sending push notification"));
-//            send_push_notification(pnsid,staticData,msg,&callback, (void*)&testContext);
+            //            send_push_notification(pnsid,staticData,msg,&callback, (void*)&testContext);
             send_push_message(&pm, &callback, (void*)&testContext);
             first = false;
         }
-        if (isCallbackReceived){
+        if (isCallbackReceived) {
             NABTO_LOG_INFO(("Successfully received push callback"));
             exit(0);
         }
@@ -145,7 +144,7 @@ int main(int argc, char* argv[])
 
     NABTO_LOG_ERROR(("we should not end here"));
     exit(5);
-    
+
     unabto_close();
     return 0;
 }
@@ -153,35 +152,46 @@ int main(int argc, char* argv[])
 application_event_result application_event(application_request* request, unabto_query_request* read_buffer, unabto_query_response* write_buffer) {
     return AER_REQ_INV_QUERY_ID;
 }
-void nabto_yield(int msec)
-{
+void nabto_yield(int msec) {
 #ifdef WIN32
     Sleep(msec);
 #elif defined(__MACH__)
-    if (msec) usleep(1000*msec);
+    if (msec) usleep(1000 * msec);
 #else
-    if (msec) usleep(1000*msec); else sched_yield();
+    if (msec)
+        usleep(1000 * msec);
+    else
+        sched_yield();
 #endif
 }
 
 bool parse_argv(int argc, char* argv[], struct configuration* config) {
-    const char x0s[] = "h?";     const char* x0l[] = { "help", 0 };
-    const char x1s[] = "d";      const char* x1l[] = { "deviceid", 0 };
-    const char x2s[] = "k";      const char* x2l[] = { "presharedkey", 0 };
-    const char x3s[] = "n";      const char* x3l[] = { "notification", 0 };
-    const char x4s[] = "i";      const char* x4l[] = { "PNS ID", 0 };
+    const char x0s[] = "h?";
+    const char* x0l[] = {"help", 0};
+    const char x1s[] = "d";
+    const char* x1l[] = {"deviceid", 0};
+    const char x2s[] = "k";
+    const char* x2l[] = {"presharedkey", 0};
+    const char x3s[] = "n";
+    const char* x3l[] = {"notification", 0};
+    const char x4s[] = "i";
+    const char* x4l[] = {"PNS ID", 0};
 
-    const struct { int k; int f; const char *s; const char*const* l; } opts[] = {
-        { 'h', 0,           x0s, x0l },
-        { 'd', GOPT_ARG,    x1s, x1l },
-        { 'k', GOPT_ARG,    x2s, x2l },
-        { 'n', GOPT_ARG,    x3s, x3l },
-        { 'i', GOPT_ARG,    x4s, x4l },
-        { 0, 0, 0, 0 }
-    };
-    void *options = gopt_sort( & argc, (const char**)argv, opts);
+    const struct {
+        int k;
+        int f;
+        const char* s;
+        const char* const* l;
+    } opts[] = {
+        {'h', 0, x0s, x0l},
+        {'d', GOPT_ARG, x1s, x1l},
+        {'k', GOPT_ARG, x2s, x2l},
+        {'n', GOPT_ARG, x3s, x3l},
+        {'i', GOPT_ARG, x4s, x4l},
+        {0, 0, 0, 0}};
+    void* options = gopt_sort(&argc, (const char**)argv, opts);
 
-    if( gopt( options, 'h')) {
+    if (gopt(options, 'h')) {
         help(0, argv[0]);
         exit(0);
     }
@@ -202,12 +212,10 @@ bool parse_argv(int argc, char* argv[], struct configuration* config) {
         return false;
     }
 
-
     return true;
 }
 
-static void help(const char* errmsg, const char *progname)
-{
+static void help(const char* errmsg, const char* progname) {
     if (errmsg) {
         printf("ERROR: %s\n", errmsg);
     }

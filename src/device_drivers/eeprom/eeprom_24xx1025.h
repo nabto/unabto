@@ -11,9 +11,8 @@ extern "C" {
 bool eeprom_write(uint32_t address, void* data, uint16_t length);
 bool eeprom_read(uint32_t address, void* data, uint16_t length);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

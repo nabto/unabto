@@ -13,22 +13,22 @@ extern "C" {
 
 ssize_t microchip_udp_write(UDP_SOCKET socket,
                             const uint8_t* buf,
-                            size_t         len,
-                            uint32_t       addr,
-                            uint16_t       port);
+                            size_t len,
+                            uint32_t addr,
+                            uint16_t port);
 
 ssize_t microchip_udp_read(UDP_SOCKET socket,
-                           uint8_t*       buf,
-                           size_t         len,
-                           uint32_t*      addr,
-                           uint16_t*      port);
+                           uint8_t* buf,
+                           size_t len,
+                           uint32_t* addr,
+                           uint16_t* port);
 
 void microchip_udp_close(UDP_SOCKET* socketDescriptor);
 
 bool microchip_udp_open(uint16_t* localPort, UDP_SOCKET* socketDescriptor);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

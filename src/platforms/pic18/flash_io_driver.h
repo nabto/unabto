@@ -18,7 +18,7 @@ bool flash_io_driver_erase_block(__ROM void* address);
 bool flash_io_driver_write_block(__ROM void* address, const void* data);
 
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
 #endif

@@ -9,11 +9,11 @@ void uart_initialize(uint32_t baudrate) {
     TXSTA = 0x20;
     RCSTA = 0x90;
 
-    if (((GetPeripheralClock() + 2ul * baudrate) / baudrate / 4ul - 1ul) <= 255ul) // See if we can use the high baud rate setting
+    if (((GetPeripheralClock() + 2ul * baudrate) / baudrate / 4ul - 1ul) <= 255ul)  // See if we can use the high baud rate setting
     {
         SPBRG = (GetPeripheralClock() + 2ul * baudrate) / baudrate / 4ul - 1ul;
         TXSTAbits.BRGH = 1;
-    } else // Use the low baud rate setting
+    } else  // Use the low baud rate setting
     {
         SPBRG = (GetPeripheralClock() + 8ul * baudrate) / baudrate / 16ul - 1ul;
     }
@@ -78,7 +78,7 @@ void uart_write_buffer(const uint8_t* buffer, uint16_t length) {
 void uart_write_uint16(uint16_t value) {
     char buffer[6];
 
-    uitoa(value, (BYTE*) buffer);
+    uitoa(value, (BYTE*)buffer);
 
     uart_write_string(buffer);
 }

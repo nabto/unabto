@@ -1,13 +1,11 @@
 #include <modules/network/tcp/unabto_tcp.h>
 #include <unabto/unabto_context.h>
 
-
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     struct unabto_tcp_socket sock;
     nabto_endpoint ep;
     enum unabto_tcp_status ret;
-    const char buf[] = { "Hello world\n" };
+    const char buf[] = {"Hello world\n"};
     char recBuf[65535];
     size_t written = 0;
     size_t read = 0;
@@ -39,10 +37,9 @@ int main(int argc, char** argv)
     }
 
     ret = unabto_tcp_shutdown(&sock);
-    NABTO_LOG_INFO(("shutdown return value was: %d",ret));
+    NABTO_LOG_INFO(("shutdown return value was: %d", ret));
 
-    
     ret = unabto_tcp_close(&sock);
-    NABTO_LOG_INFO(("close return value was: %d",ret));
+    NABTO_LOG_INFO(("close return value was: %d", ret));
     return 0;
 }

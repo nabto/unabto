@@ -1,0 +1,7 @@
+BasedOnStyle: Google
+Language: Cpp
+SortIncludes: Never
+ColumnLimit: 0
+ReflowComments: false
+IndentWidth: 4
+AlignConsecutiveMacros: true

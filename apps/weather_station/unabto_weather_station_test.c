@@ -10,5 +10,5 @@ int main(int argc, char** argv) {
     NABTO_LOG_INFO(("Running the uNabto test suites"));
 
     ret = unabto_test_all();
-    exit(ret?0:1);
+    exit(ret ? 0 : 1);
 }

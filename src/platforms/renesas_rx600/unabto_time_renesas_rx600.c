@@ -16,11 +16,7 @@ nabto_stamp_t nabtoGetStamp()
     return getSystemTick();
 } /* nabto_stamp_t nabtoGetStamp() */
 
-
-
-void nabtoYield(int msec)
-{
-
+void nabtoYield(int msec) {
 } /* void nabtoYield(int msec) */
 
 /*

@@ -10,7 +10,6 @@
 #include <unabto/unabto_env_base.h>
 #endif
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -26,22 +25,19 @@ struct nabto_ip_address {
     enum nabto_ip_address_type type;
 
     union {
-        uint32_t ipv4; ///< IP address
-        uint8_t  ipv6[16];
+        uint32_t ipv4;  ///< IP address
+        uint8_t ipv6[16];
     } addr;
-     
 };
 
 /** 
  * The IP endpoint type.
  */
 typedef struct {
-    uint16_t port; ///< port number
+    uint16_t port;  ///< port number
     struct nabto_ip_address addr;
-        
+
 } nabto_endpoint;
-
-
 
 void nabto_ip_convert_v4_mapped_to_v4(const struct nabto_ip_address* a, struct nabto_ip_address* out);
 
@@ -55,9 +51,8 @@ bool nabto_ep_is_equal(const nabto_endpoint* ep1, const nabto_endpoint* ep2);
 
 const char* nabto_ip_to_string(const struct nabto_ip_address* addr);
 
-
 #ifdef __cplusplus
-} //extern "C"
+}  //extern "C"
 #endif
 
-#endif // UNABTO_ENDPOINT_H
+#endif  // UNABTO_ENDPOINT_H

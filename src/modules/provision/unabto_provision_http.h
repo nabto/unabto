@@ -12,7 +12,7 @@
 #include <unabto/unabto_main_contexts.h>
 #include "unabto_provision.h"
 
-#define KEY_BUFFER_SIZE (PRE_SHARED_KEY_SIZE*2+1)
+#define KEY_BUFFER_SIZE      (PRE_SHARED_KEY_SIZE * 2 + 1)
 #define HTTP_MAX_POST_LENGTH 256
 
 typedef enum {
@@ -31,12 +31,12 @@ typedef enum {
     UPS_PROV_INVALID_APIKEY
 } unabto_provision_status_t;
 
-#define SERVICE_URL_MAX_LENGTH 1024
+#define SERVICE_URL_MAX_LENGTH   1024
 #define SERVICE_TOKEN_MAX_LENGTH 40
-#define SERVICE_POST_MAX_LENGTH 256
+#define SERVICE_POST_MAX_LENGTH  256
 
-#define NABTO_PROVISION_CREATE_PATH                 "/api/1/device/provision"
-#define NABTO_PROVISION_VALIDATE_PATH               "/api/1/device/validate"
+#define NABTO_PROVISION_CREATE_PATH   "/api/1/device/provision"
+#define NABTO_PROVISION_VALIDATE_PATH "/api/1/device/validate"
 
 /**
  * Invoke provisioning webservice as specified in context. Upon
@@ -114,6 +114,5 @@ unabto_provision_status_t unabto_provision_http_post_json(const char* url, const
  * delimiter found, empty string otherwise. Caller frees response.
  */
 void unabto_provision_http_extract_body(char** body, char* response);
-
 
 #endif

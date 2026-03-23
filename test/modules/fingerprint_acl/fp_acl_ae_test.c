@@ -5,11 +5,10 @@
 struct fp_acl_db db;
 
 #define DEFAULT_USER_PERMISSIONS (FP_ACL_PERMISSION_LOCAL_ACCESS | FP_ACL_PERMISSION_REMOTE_ACCESS)
-#define FIRST_USER_PERMISSIONS (FP_ACL_PERMISSION_ALL)
-#define SYSTEM_PERMISSIONS (FP_ACL_SYSTEM_PERMISSION_ALL)
+#define FIRST_USER_PERMISSIONS   (FP_ACL_PERMISSION_ALL)
+#define SYSTEM_PERMISSIONS       (FP_ACL_SYSTEM_PERMISSION_ALL)
 
-bool init_empty_users()
-{
+bool init_empty_users() {
     struct fp_acl_settings defaultSettings;
     defaultSettings.systemPermissions = SYSTEM_PERMISSIONS;
     defaultSettings.defaultUserPermissions = DEFAULT_USER_PERMISSIONS;
@@ -19,8 +18,7 @@ bool init_empty_users()
     return true;
 }
 
-bool init_users()
-{
+bool init_users() {
     if (!init_empty_users()) {
         return false;
     }
@@ -30,7 +28,7 @@ bool init_users()
         user.fp.hasValue = 1;
         memset(user.fp.value.data, 42, 16);
         const char* name = "admin";
-        memcpy(user.name, name, strlen(name)+1);
+        memcpy(user.name, name, strlen(name) + 1);
         user.permissions = FP_ACL_PERMISSION_ALL;
         db.save(&user);
     }
@@ -39,16 +37,14 @@ bool init_users()
         struct fp_acl_user user;
         memset(&user, 0, sizeof(struct fp_acl_user));
         user.fp.hasValue = 1;
-        memset(user.fp.value.data, 128+i, 16);
+        memset(user.fp.value.data, 128 + i, 16);
         const char* name = "foobar";
-        memcpy(user.name, name, strlen(name)+1);
+        memcpy(user.name, name, strlen(name) + 1);
         user.permissions = 0x42424242;
         db.save(&user);
     }
     return true;
 }
-
-
 
 void init_connection(nabto_connect* connection) {
     memset(connection, 0, sizeof(nabto_connect));
@@ -57,15 +53,13 @@ void init_connection(nabto_connect* connection) {
     memset(connection->fingerprint.value.data, 42, FP_ACL_FP_LENGTH);
 }
 
-void init_request(application_request* request, nabto_connect* connection)
-{
+void init_request(application_request* request, nabto_connect* connection) {
     init_connection(connection);
     request->connection = connection;
     request->isLocal = connection->isLocal;
 }
 
-bool fp_acl_test_list_users()
-{
+bool fp_acl_test_list_users() {
     init_users();
     application_request request;
     nabto_connect connection;
@@ -111,11 +105,7 @@ bool fp_acl_test_list_users()
     return true;
 }
 
-
-
-
-bool fp_acl_test_get_user()
-{
+bool fp_acl_test_get_user() {
     init_users();
     application_request req;
     nabto_connect connection;
@@ -167,15 +157,14 @@ bool fp_acl_test_get_user()
     return true;
 }
 
-bool fp_acl_test_get_me()
-{
+bool fp_acl_test_get_me() {
     init_users();
     application_request req;
     nabto_connect connection;
     init_request(&req, &connection);
 
     uint8_t buffer[256];
-    memset(buffer,0, 256);
+    memset(buffer, 0, 256);
     unabto_buffer inout;
     unabto_buffer_init(&inout, buffer, 256);
 
@@ -186,8 +175,8 @@ bool fp_acl_test_get_me()
     unabto_query_response_init(&queryResponse, &inout);
 
     application_event_result res = fp_acl_ae_user_me(&req,
-                                                      &queryRequest,
-                                                      &queryResponse);
+                                                     &queryRequest,
+                                                     &queryResponse);
     if (res != AER_REQ_RESPONSE_READY) {
         NABTO_LOG_ERROR(("expected response to be ready"));
         return false;
@@ -208,15 +197,14 @@ bool fp_acl_test_get_me()
     return true;
 }
 
-bool fp_acl_test_user_remove()
-{
+bool fp_acl_test_user_remove() {
     init_users();
     application_request req;
     nabto_connect connection;
     init_request(&req, &connection);
 
     uint8_t buffer[256];
-    memset(buffer,0, 256);
+    memset(buffer, 0, 256);
     unabto_buffer inout;
     unabto_buffer_init(&inout, buffer, 256);
 
@@ -228,7 +216,6 @@ bool fp_acl_test_user_remove()
         unabto_query_response_init(&writer, &inout);
         unabto_query_write_uint8_list(&writer, fp, 16);
     }
-    
 
     unabto_query_request queryRequest;
     unabto_query_response queryResponse;
@@ -259,15 +246,14 @@ bool fp_acl_test_user_remove()
     return true;
 }
 
-bool fp_acl_pair(struct unabto_fingerprint* fp, const char* name, struct fp_acl_user* result)
-{
+bool fp_acl_pair(struct unabto_fingerprint* fp, const char* name, struct fp_acl_user* result) {
     application_request req;
     nabto_connect connection;
     init_request(&req, &connection);
     memcpy(connection.fingerprint.value.data, fp->data, 16);
 
     uint8_t buffer[256];
-    memset(buffer,0, 256);
+    memset(buffer, 0, 256);
     unabto_buffer inout;
     unabto_buffer_init(&inout, buffer, 256);
     {
@@ -316,7 +302,7 @@ bool fp_acl_pair(struct unabto_fingerprint* fp, const char* name, struct fp_acl_
             return false;
         }
         memcpy(result->name, list, length);
-        
+
         if (!unabto_query_read_uint32(&testOutput, &result->permissions)) {
             return false;
         }
@@ -324,8 +310,7 @@ bool fp_acl_pair(struct unabto_fingerprint* fp, const char* name, struct fp_acl_
     return true;
 }
 
-bool fp_acl_test_pair()
-{
+bool fp_acl_test_pair() {
     init_empty_users();
 
     struct fp_acl_user firstUser;
@@ -333,12 +318,12 @@ bool fp_acl_test_pair()
 
     memset(&firstUser, 0, sizeof(struct fp_acl_user));
     memset(&secondUser, 0, sizeof(struct fp_acl_user));
-    
+
     {
         // pair user 1
         struct unabto_fingerprint fp;
         memset(fp.data, 41, 16);
-        
+
         if (!fp_acl_pair(&fp, "first", &firstUser)) {
             return false;
         }
@@ -348,45 +333,42 @@ bool fp_acl_test_pair()
         // pair second user
         struct unabto_fingerprint fp;
         memset(fp.data, 40, 16);
-        
+
         if (!fp_acl_pair(&fp, "second", &secondUser)) {
             return false;
         }
     }
 
-    if ( (firstUser.permissions != FP_ACL_PERMISSION_ALL) ||
-         (strcmp(firstUser.name, "first") != 0) ||
-         (firstUser.fp.value.data[0] != 41))
-    {
+    if ((firstUser.permissions != FP_ACL_PERMISSION_ALL) ||
+        (strcmp(firstUser.name, "first") != 0) ||
+        (firstUser.fp.value.data[0] != 41)) {
         return false;
     }
 
-    if ( (secondUser.permissions != (FP_ACL_PERMISSION_LOCAL_ACCESS | FP_ACL_PERMISSION_REMOTE_ACCESS)) ||
-         (strcmp(secondUser.name, "second") != 0) ||
-         (secondUser.fp.value.data[0] != 40))
-    {
+    if ((secondUser.permissions != (FP_ACL_PERMISSION_LOCAL_ACCESS | FP_ACL_PERMISSION_REMOTE_ACCESS)) ||
+        (strcmp(secondUser.name, "second") != 0) ||
+        (secondUser.fp.value.data[0] != 40)) {
         return false;
     }
-    
+
     return true;
 }
 
-bool fp_acl_test_set_name()
-{
+bool fp_acl_test_set_name() {
     init_users();
     application_request req;
     nabto_connect connection;
     init_request(&req, &connection);
 
     uint8_t buffer[256];
-    memset(buffer,0, 256);
+    memset(buffer, 0, 256);
     unabto_buffer inout;
     unabto_buffer_init(&inout, buffer, 256);
 
     {
         uint8_t fp[16];
-        memset(fp, 128+1, 16);
-        
+        memset(fp, 128 + 1, 16);
+
         const char* name = "newuser";
         // write test data to input
         unabto_query_response writer;
@@ -394,7 +376,6 @@ bool fp_acl_test_set_name()
         unabto_query_write_uint8_list(&writer, fp, 16);
         unabto_query_write_uint8_list(&writer, (uint8_t*)name, (uint16_t)strlen(name));
     }
-
 
     unabto_query_request queryRequest;
     unabto_query_response queryResponse;
@@ -423,31 +404,28 @@ bool fp_acl_test_set_name()
     }
 
     return true;
-    
 }
 
-bool fp_acl_test_add_permissions()
-{
+bool fp_acl_test_add_permissions() {
     init_users();
     application_request req;
     nabto_connect connection;
     init_request(&req, &connection);
 
     uint8_t buffer[256];
-    memset(buffer,0, 256);
+    memset(buffer, 0, 256);
     unabto_buffer inout;
     unabto_buffer_init(&inout, buffer, 256);
 
     {
         uint8_t fp[16];
-        memset(fp, 128+1, 16);
+        memset(fp, 128 + 1, 16);
 
         unabto_query_response writer;
         unabto_query_response_init(&writer, &inout);
         unabto_query_write_uint8_list(&writer, fp, 16);
         unabto_query_write_uint32(&writer, 0xfffffffful);
     }
-    
 
     unabto_query_request queryRequest;
     unabto_query_response queryResponse;
@@ -484,35 +462,31 @@ bool fp_acl_test_add_permissions()
             NABTO_LOG_ERROR(("failed to set permissions"));
             return false;
         }
-        
     }
 
     return true;
-    
 }
 
-bool fp_acl_test_remove_permissions()
-{
+bool fp_acl_test_remove_permissions() {
     init_users();
     application_request req;
     nabto_connect connection;
     init_request(&req, &connection);
 
     uint8_t buffer[256];
-    memset(buffer,0, 256);
+    memset(buffer, 0, 256);
     unabto_buffer inout;
     unabto_buffer_init(&inout, buffer, 256);
 
     {
         uint8_t fp[16];
-        memset(fp, 128+1, 16);
+        memset(fp, 128 + 1, 16);
 
         unabto_query_response writer;
         unabto_query_response_init(&writer, &inout);
         unabto_query_write_uint8_list(&writer, fp, 16);
         unabto_query_write_uint32(&writer, 0xfffffffful);
     }
-    
 
     unabto_query_request queryRequest;
     unabto_query_response queryResponse;
@@ -549,22 +523,19 @@ bool fp_acl_test_remove_permissions()
             NABTO_LOG_ERROR(("failed to remove permissions"));
             return false;
         }
-        
     }
 
     return true;
-    
 }
 
-bool fp_acl_test_system_get_acl_settings()
-{
+bool fp_acl_test_system_get_acl_settings() {
     init_users();
     application_request req;
     nabto_connect connection;
     init_request(&req, &connection);
 
     uint8_t buffer[256];
-    memset(buffer,0, 256);
+    memset(buffer, 0, 256);
     unabto_buffer inout;
     unabto_buffer_init(&inout, buffer, 256);
 
@@ -595,8 +566,6 @@ bool fp_acl_test_system_get_acl_settings()
             return false;
         }
 
-        
-        
         unabto_query_read_uint32(&testOutput, &systemPermissions);
         unabto_query_read_uint32(&testOutput, &defaultUserPermissions);
 
@@ -610,18 +579,16 @@ bool fp_acl_test_system_get_acl_settings()
     }
 
     return true;
-    
 }
 
-bool fp_acl_test_system_set_acl_settings()
-{
+bool fp_acl_test_system_set_acl_settings() {
     init_users();
     application_request req;
     nabto_connect connection;
     init_request(&req, &connection);
 
     uint8_t buffer[256];
-    memset(buffer,0, 256);
+    memset(buffer, 0, 256);
     unabto_buffer inout;
     unabto_buffer_init(&inout, buffer, 256);
 
@@ -631,7 +598,7 @@ bool fp_acl_test_system_set_acl_settings()
         unabto_query_write_uint32(&writer, 0x00000000ul);
         unabto_query_write_uint32(&writer, 0x00000000ul);
     }
-    
+
     unabto_query_request queryRequest;
     unabto_query_response queryResponse;
 
@@ -659,8 +626,6 @@ bool fp_acl_test_system_set_acl_settings()
             return false;
         }
 
-        
-        
         unabto_query_read_uint32(&testOutput, &systemPermissions);
         unabto_query_read_uint32(&testOutput, &defaultUserPermissions);
 
@@ -674,23 +639,19 @@ bool fp_acl_test_system_set_acl_settings()
     }
 
     return true;
-    
 }
 
-bool fp_acl_ae_test()
-{
+bool fp_acl_ae_test() {
     init_users();
 
-    return
-        fp_acl_test_get_user() &&
-        fp_acl_test_list_users() &&
-        fp_acl_test_get_me() &&
-        fp_acl_test_user_remove() &&
-        fp_acl_test_pair() &&
-        fp_acl_test_set_name() &&
-        fp_acl_test_add_permissions() &&
-        fp_acl_test_remove_permissions() &&
-        fp_acl_test_system_get_acl_settings() &&
-        fp_acl_test_system_set_acl_settings();
+    return fp_acl_test_get_user() &&
+           fp_acl_test_list_users() &&
+           fp_acl_test_get_me() &&
+           fp_acl_test_user_remove() &&
+           fp_acl_test_pair() &&
+           fp_acl_test_set_name() &&
+           fp_acl_test_add_permissions() &&
+           fp_acl_test_remove_permissions() &&
+           fp_acl_test_system_get_acl_settings() &&
+           fp_acl_test_system_set_acl_settings();
 }
-

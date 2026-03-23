@@ -4,20 +4,17 @@
 
 #include <string.h>
 
-bool cmp_strings(const char* str1Start, const char* str1End, const char* str2)
-{
+bool cmp_strings(const char* str1Start, const char* str1End, const char* str2) {
     size_t str1len = str1End - str1Start;
     size_t str2len = strlen(str2);
     if (str1len != str2len) {
         return false;
     }
-    
-    return (strncmp(str1Start, str2, str1len) == 0);
 
+    return (strncmp(str1Start, str2, str1len) == 0);
 }
 
-bool convert_module(const char* moduleStart, const char* moduleEnd, uint32_t* module) 
-{
+bool convert_module(const char* moduleStart, const char* moduleEnd, uint32_t* module) {
     if (cmp_strings(moduleStart, moduleEnd, "none")) {
         *module = NABTO_LOG_MODULE_NONE;
         return true;
@@ -102,8 +99,7 @@ bool convert_module(const char* moduleStart, const char* moduleEnd, uint32_t* mo
     return false;
 }
 
-bool convert_severity(const char* severityStart, const char* severityEnd, uint32_t* severity)
-{
+bool convert_severity(const char* severityStart, const char* severityEnd, uint32_t* severity) {
     if (cmp_strings(severityStart, severityEnd, "none")) {
         *severity = NABTO_LOG_SEVERITY_LEVEL_NONE;
         return true;

@@ -1,7 +1,7 @@
 #ifndef _UNABTO_SHA256_H_
 #define _UNABTO_SHA256_H_
 
-#define SHA256_BLOCK_LENGTH 64
+#define SHA256_BLOCK_LENGTH  64
 #define SHA256_DIGEST_LENGTH 32
 
 typedef unsigned char uint8_t;
