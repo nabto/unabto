@@ -18,7 +18,10 @@ uint16_t unabto_query_request_get_size(unabto_query_request* queryRequest) {
 
 #define QUERY_INT_READ_FUNCTION_DEF(sign, bitSize)                                                                         \
     bool unabto_query_read_##sign##int##bitSize(unabto_query_request* queryRequest, sign##int##bitSize##_t* resultValue) { \
-        if (NULL != queryRequest && UNABTO_ABUFFER_GET_UNUSED(queryRequest) < sizeof(uint##bitSize##_t)) {                 \
+        if (NULL == queryRequest) {                                                                                        \
+            return false;                                                                                                  \
+        }                                                                                                                  \
+        if (UNABTO_ABUFFER_GET_UNUSED(queryRequest) < sizeof(uint##bitSize##_t)) {                                         \
             return false;                                                                                                  \
         }                                                                                                                  \
         if (NULL != resultValue) {                                                                                         \
