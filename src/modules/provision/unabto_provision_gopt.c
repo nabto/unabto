@@ -102,8 +102,8 @@ bool unabto_provision_gopt_apply(nabto_main_setup* nms, const char* progname, vo
 
     gopt_arg(options, UNABTO_PROVISION_GOPT_USER_TOKEN, (const char**)(&(context.token_)));
 
-    NABTO_LOG_TRACE(("Provisioning context: host_=%s, api_key_=%s, token_=%s, id_=%s, file_=%s",
-                     context.host_, context.api_key_, context.token_, context.id_, context.file_));
+    NABTO_LOG_TRACE(("Provisioning context: host_=%s, id_=%s, file_=%s",
+                     context.host_, context.id_, context.file_));
 
     return unabto_provision_new(nms, &context);
 }
