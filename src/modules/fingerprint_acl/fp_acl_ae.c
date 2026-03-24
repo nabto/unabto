@@ -60,6 +60,15 @@ application_event_result write_user(unabto_query_response* write_buffer, uint8_t
     }
 }
 
+application_event_result write_empty_fcm_token(unabto_query_response* write_buffer, uint8_t status) {
+    if (unabto_query_write_uint8(write_buffer, status) &&
+        write_string(write_buffer, "")) {
+        return AER_REQ_RESPONSE_READY;
+    } else {
+        return AER_REQ_TOO_LARGE;
+    }
+}
+
 application_event_result write_empty_user(unabto_query_response* write_buffer, uint8_t status) {
     if (unabto_query_write_uint8(write_buffer, status) &&
         write_string(write_buffer, "") &&
@@ -274,15 +283,16 @@ application_event_result fp_acl_ae_get_fcm_token(application_request* request,
     uint8_t status;
 
     if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
-        status = FP_ACL_STATUS_NO_SUCH_USER;
-    } else {
-        if (!unabto_query_write_uint8(write_buffer, status)) {
-            return AER_REQ_TOO_LARGE;
-        }
+        return write_empty_fcm_token(write_buffer, FP_ACL_STATUS_NO_SUCH_USER);
+    }
 
-        if (!write_string(write_buffer, user.fcmTok)) {
-            return AER_REQ_TOO_LARGE;
-        }
+    status = FP_ACL_STATUS_OK;
+    if (!unabto_query_write_uint8(write_buffer, status)) {
+        return AER_REQ_TOO_LARGE;
+    }
+
+    if (!write_string(write_buffer, user.fcmTok)) {
+        return AER_REQ_TOO_LARGE;
     }
     return AER_REQ_RESPONSE_READY;
 #endif
@@ -503,6 +513,7 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
                                                     unabto_query_request* read_buffer,
                                                     unabto_query_response* write_buffer) {
     struct fp_acl_user user;
+    fp_acl_init_user(&user);
     if (!fp_acl_is_pair_allowed(request)) {
         return AER_REQ_NO_ACCESS;
     }
