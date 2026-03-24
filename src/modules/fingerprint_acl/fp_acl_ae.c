@@ -284,11 +284,6 @@ application_event_result fp_acl_ae_get_fcm_token(application_request* request,
 
     if (it == 0 || aclDb.load(it, &user) != FP_ACL_DB_OK) {
         return write_empty_fcm_token(write_buffer, FP_ACL_STATUS_NO_SUCH_USER);
-    } else {
-        status = FP_ACL_STATUS_OK;
-        if (!unabto_query_write_uint8(write_buffer, status)) {
-            return AER_REQ_TOO_LARGE;
-        }
     }
 
     status = FP_ACL_STATUS_OK;
