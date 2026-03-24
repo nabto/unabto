@@ -364,10 +364,19 @@ bool unabto_decrypt(nabto_crypto_context* cryptoContext, uint8_t* ptr, uint16_t 
     switch (cryptoContext->code) {
         case CRYPT_W_AES_CBC_HMAC_SHA256: {
 #if NABTO_ENABLE_UCRYPTO
+            /* Validate basic AES-CBC constraints before decrypting:
+             * - At least 16 bytes IV + 16 bytes ciphertext (one block).
+             * - Total size is a multiple of the AES block size (16 bytes).
+             */
+            if (size < 32 || (size % 16) != 0) {
+                NABTO_LOG_TRACE(("Invalid AES-CBC packet size: %u", size));
+                return false;
+            }
             /**
              * we have a hmac verified packet of some multiple of 16 in length, we need to make an
              * inbuffer decrypt and return the length without the padding.
              */
+
             uint8_t padding_length;
             uint16_t i;
             if (!unabto_aes128_cbc_decrypt(cryptoContext->decryptkey,
@@ -382,10 +391,8 @@ bool unabto_decrypt(nabto_crypto_context* cryptoContext, uint8_t* ptr, uint16_t 
                 return false;
             }
 
-            if (size - 16 < padding_length) {
-                NABTO_LOG_TRACE(("Packet too short for padding"));
-                return false;
-            }
+           // from the earlier size check we know that the packet had atleast
+           // one block of which some or all bytes are padding.
 
             /* Validate all PKCS#7 padding bytes. Each padding byte
              * must equal the padding length. */
