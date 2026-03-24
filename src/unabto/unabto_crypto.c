@@ -391,8 +391,8 @@ bool unabto_decrypt(nabto_crypto_context* cryptoContext, uint8_t* ptr, uint16_t 
                 return false;
             }
 
-           // from the earlier size check we know that the packet had atleast
-           // one block of which some or all bytes are padding.
+            // from the earlier size check we know that the packet had atleast
+            // one block of which some or all bytes are padding.
 
             /* Validate all PKCS#7 padding bytes. Each padding byte
              * must equal the padding length. */
