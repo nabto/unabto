@@ -21,7 +21,13 @@ enum {
  */
 void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keysSize,
                                 const unabto_buffer messages[], uint8_t messagesSize,
-                                uint8_t* mac, uint16_t macSize);
+                                uint8_t *mac, uint16_t macSize);
+
+/**
+ * Constant-time memory comparison to prevent timing side-channel attacks.
+ * Returns true if the first @p len bytes of @p a and @p b are equal.
+ */
+bool unabto_constant_time_compare(const uint8_t *a, const uint8_t *b, size_t len);
 
 #ifdef __cplusplus
 }  //extern "C"

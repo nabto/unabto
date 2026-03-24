@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -19,9 +17,9 @@
 
 /**
   Initialize the LRW context
-  @param cipher        The cipher desired, must be a 128-bit block cipher 
+  @param cipher        The cipher desired, must be a 128-bit block cipher
   @param IV            The index value, must be 128-bits
-  @param key           The cipher key 
+  @param key           The cipher key
   @param keylen        The length of the cipher key in octets
   @param tweak         The tweak value (second key), must be 128-bits
   @param num_rounds    The number of rounds for the cipher (0 == default)
@@ -32,19 +30,19 @@ int lrw_start(               int   cipher,
               const unsigned char *IV,
               const unsigned char *key,       int keylen,
               const unsigned char *tweak,
-                             int  num_rounds, 
+                             int  num_rounds,
                    symmetric_LRW *lrw)
 {
    int           err;
-#ifdef LRW_TABLES
+#ifdef LTC_LRW_TABLES
    unsigned char B[16];
    int           x, y, z, t;
 #endif
 
-  LTC_ARGCHK(IV    != NULL);
-  LTC_ARGCHK(key   != NULL);
-  LTC_ARGCHK(tweak != NULL);
-  LTC_ARGCHK(lrw   != NULL);
+   LTC_ARGCHK(IV    != NULL);
+   LTC_ARGCHK(key   != NULL);
+   LTC_ARGCHK(tweak != NULL);
+   LTC_ARGCHK(lrw   != NULL);
 
 #ifdef LTC_FAST
    if (16 % sizeof(LTC_FAST_TYPE)) {
@@ -69,7 +67,7 @@ int lrw_start(               int   cipher,
    /* copy the IV and tweak */
    XMEMCPY(lrw->tweak, tweak, 16);
 
-#ifdef LRW_TABLES
+#ifdef LTC_LRW_TABLES
    /* setup tables */
    /* generate the first table as it has no shifting (from which we make the other tables) */
    zeromem(B, 16);
@@ -88,8 +86,8 @@ int lrw_start(               int   cipher,
          }
          lrw->PC[x][y][0]  = gcm_shift_table[t<<1];
          lrw->PC[x][y][1] ^= gcm_shift_table[(t<<1)+1];
-     }
-  }
+      }
+   }
 #endif
 
    /* generate first pad */
@@ -98,6 +96,6 @@ int lrw_start(               int   cipher,
 
 
 #endif
-/* $Source: /cvs/libtom/libtomcrypt/src/modes/lrw/lrw_start.c,v $ */
-/* $Revision: 1.12 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

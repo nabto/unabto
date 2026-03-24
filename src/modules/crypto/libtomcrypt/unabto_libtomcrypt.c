@@ -104,3 +104,7 @@ void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keysSize,
         NABTO_LOG_FATAL(("This should not fail"));
     }
 }
+
+bool unabto_constant_time_compare(const uint8_t* a, const uint8_t* b, size_t len) {
+    return mem_neq(a, b, len) == 0;
+}

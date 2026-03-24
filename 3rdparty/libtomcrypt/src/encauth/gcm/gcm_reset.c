@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 
 /**
@@ -33,12 +31,12 @@ int gcm_reset(gcm_state *gcm)
    gcm->buflen   = 0;
    gcm->totlen   = 0;
    gcm->pttotlen = 0;
-  
+
    return CRYPT_OK;
 }
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/encauth/gcm/gcm_reset.c,v $ */
-/* $Revision: 1.6 $ */
-/* $Date: 2007/05/12 14:32:35 $ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

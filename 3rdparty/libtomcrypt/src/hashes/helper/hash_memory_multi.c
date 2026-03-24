@@ -5,18 +5,18 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 #include <stdarg.h>
+
+#ifdef LTC_HASH_HELPERS
 /**
   @file hash_memory_multi.c
   Hash (multiple buffers) memory helper, Tom St Denis
 */
 
 /**
-  Hash multiple (non-adjacent) blocks of memory at once.  
+  Hash multiple (non-adjacent) blocks of memory at once.
   @param hash   The index of the hash you wish to use
   @param out    [out] Where to store the digest
   @param outlen [in/out] Max size and resulting size of the digest
@@ -24,7 +24,7 @@
   @param inlen  The length of the data to hash (octets)
   @param ...    tuples of (data,len) pairs to hash, terminated with a (NULL,x) (x=don't care)
   @return CRYPT_OK if successful
-*/  
+*/
 int hash_memory_multi(int hash, unsigned char *out, unsigned long *outlen,
                       const unsigned char *in, unsigned long inlen, ...)
 {
@@ -57,7 +57,7 @@ int hash_memory_multi(int hash, unsigned char *out, unsigned long *outlen,
     }
 
     va_start(args, inlen);
-    curptr = in; 
+    curptr = in;
     curlen = inlen;
     for (;;) {
        /* process buf */
@@ -81,7 +81,8 @@ LBL_ERR:
     va_end(args);
     return err;
 }
+#endif /* #ifdef LTC_HASH_HELPERS */
 
-/* $Source: /cvs/libtom/libtomcrypt/src/hashes/helper/hash_memory_multi.c,v $ */
-/* $Revision: 1.6 $ */
-/* $Date: 2006/12/28 01:27:23 $ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

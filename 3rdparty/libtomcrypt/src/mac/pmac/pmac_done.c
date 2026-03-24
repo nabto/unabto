@@ -5,14 +5,12 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
-/** 
+/**
   @file pmac_done.c
-  PMAC implementation, terminate a session, by Tom St Denis 
+  PMAC implementation, terminate a session, by Tom St Denis
 */
 
 #ifdef LTC_PMAC
@@ -69,6 +67,6 @@ int pmac_done(pmac_state *state, unsigned char *out, unsigned long *outlen)
 #endif
 
 
-/* $Source: /cvs/libtom/libtomcrypt/src/mac/pmac/pmac_done.c,v $ */
-/* $Revision: 1.9 $ */
-/* $Date: 2006/12/28 01:27:23 $ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

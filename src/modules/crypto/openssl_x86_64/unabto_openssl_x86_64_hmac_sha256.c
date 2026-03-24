@@ -80,3 +80,12 @@ void unabto_hmac_sha256_buffers(const unabto_buffer keys[], uint8_t keys_size,
     //UNABTO_ASSERT(mac_size <= 32 );
     memcpy(mac, (void *)digest_temp, mac_size);
 }
+
+bool unabto_constant_time_compare(const uint8_t *a, const uint8_t *b, size_t len) {
+    volatile uint8_t result = 0;
+    size_t i;
+    for (i = 0; i < len; i++) {
+        result |= a[i] ^ b[i];
+    }
+    return result == 0;
+}

@@ -5,8 +5,6 @@
  *
  * The library is free for all purposes without any express
  * guarantee it works.
- *
- * Tom St Denis, tomstdenis@gmail.com, http://libtom.org
  */
 #include "tomcrypt.h"
 
@@ -25,27 +23,27 @@
   @param outlen   [in/out] The max size and resulting size of the DER BOOLEAN
   @return CRYPT_OK if successful
 */
-int der_encode_boolean(int in, 
+int der_encode_boolean(int in,
                        unsigned char *out, unsigned long *outlen)
 {
    LTC_ARGCHK(outlen != NULL);
    LTC_ARGCHK(out    != NULL);
-   
+
    if (*outlen < 3) {
        *outlen = 3;
        return CRYPT_BUFFER_OVERFLOW;
    }
-   
+
    *outlen = 3;
    out[0] = 0x01;
    out[1] = 0x01;
    out[2] = in ? 0xFF : 0x00;
-   
+
    return CRYPT_OK;
 }
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/pk/asn1/der/boolean/der_encode_boolean.c,v $ */
-/* $Revision: 1.4 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* ref:         tag: v1.18.2, master */
+/* git commit:  7e7eb695d581782f04b24dc444cbfde86af59853 */
+/* commit time: 2018-07-01 22:49:01 +0200 */

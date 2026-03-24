@@ -28,7 +28,7 @@ bool unabto_truncated_hmac_sha256_verify_integrity(
                                messages, 1,
                                hmac, TRUNCATED_HMAC_SHA256_LENGTH);  //sizeof(hmac));
 
-    return memcmp((const uint8_t *)hmac, integrity, TRUNCATED_HMAC_SHA256_LENGTH) == 0;
+    return unabto_constant_time_compare(hmac, integrity, TRUNCATED_HMAC_SHA256_LENGTH);
 }
 
 #endif
