@@ -361,52 +361,60 @@ bool unabto_verify_integrity(nabto_crypto_context* cryptoContext, uint16_t code,
 /******************************************************************************/
 
 bool unabto_decrypt(nabto_crypto_context* cryptoContext, uint8_t* ptr, uint16_t size, uint16_t* decrypted_size) {
-    bool res = false;
     switch (cryptoContext->code) {
         case CRYPT_W_AES_CBC_HMAC_SHA256: {
 #if NABTO_ENABLE_UCRYPTO
             /**
-     * we have a hmac verified packet of some multiple of 16 in length, we need to make an
-     * inbuffer decrypt and return the length without the padding.
-     */
+             * we have a hmac verified packet of some multiple of 16 in length, we need to make an
+             * inbuffer decrypt and return the length without the padding.
+             */
+            uint8_t padding_length;
+            uint16_t i;
             if (!unabto_aes128_cbc_decrypt(cryptoContext->decryptkey,
                                            ptr, size)) {
                 NABTO_LOG_TRACE(("Decrypting of packet failed size: %u", size));
-            } else {
-                uint8_t padding_length;
-                READ_U8(padding_length, (ptr + size - 1));
-                if (padding_length > 16) {
-                    NABTO_LOG_TRACE(("Padding longer than 16 bytes"));
-                    break;
-                }
-
-                if (size - 16 < padding_length) {
-                    NABTO_LOG_TRACE(("Packet to short for padding"));
-                    break;
-                }
-                *decrypted_size = size - 16 - padding_length;
-
-                memmove(ptr, (const uint8_t*)(ptr + 16), *decrypted_size);
-                res = true;
-                break;
+                return false;
             }
+
+            READ_U8(padding_length, (ptr + size - 1));
+            if (padding_length < 1 || padding_length > 16) {
+                NABTO_LOG_TRACE(("Invalid padding length: %" PRIu8, padding_length));
+                return false;
+            }
+
+            if (size - 16 < padding_length) {
+                NABTO_LOG_TRACE(("Packet too short for padding"));
+                return false;
+            }
+
+            /* Validate all PKCS#7 padding bytes. Each padding byte
+             * must equal the padding length. */
+            for (i = 0; i < padding_length; i++) {
+                if (ptr[size - 1 - i] != padding_length) {
+                    NABTO_LOG_TRACE(("Invalid PKCS#7 padding bytes"));
+                    return false;
+                }
+            }
+
+            *decrypted_size = size - 16 - padding_length;
+            memmove(ptr, (const uint8_t*)(ptr + 16), *decrypted_size);
+            return true;
 #else
             NABTO_LOG_FATAL(("aes not supported"));
+            return false;
 #endif
-            break;
         }
         default: {
             uint8_t pad;
             READ_U8(pad, ptr + size - 1);
             if (pad > size) {
                 NABTO_LOG_TRACE(("Padding error: %" PRIu8 " of %" PRIu16, pad, size));
-            } else {
-                *decrypted_size = size - pad;
-                res = true;
+                return false;
             }
+            *decrypted_size = size - pad;
+            return true;
         }
     }
-    return res;
 }
 
 /******************************************************************************/
