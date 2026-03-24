@@ -47,7 +47,7 @@ void unabto_curl_header_cb(CURL* curl, void* userData) {
 }
 
 unabto_provision_status_t unabto_provision_http_invoke_curl(const char* url, uint16_t* http_status, char** response, unabto_curl_options_callback* options_cb) {
-    NABTO_LOG_TRACE(("Invoking %s", url));
+    NABTO_LOG_TRACE(("Invoking <redacted>"));
 
     CURL* curl;
     curl = curl_easy_init();
@@ -125,7 +125,7 @@ unabto_provision_status_t unabto_provision_http_invoke_curl(const char* url, uin
 unabto_provision_status_t unabto_provision_http_post_curl(const char* url, const char* data, uint16_t* http_status, char** body, const char* headers) {
     struct unabto_curl_post_struct postStruct;
     snprintf(postStruct.postData, sizeof(postStruct.postData), "%s", data);
-    NABTO_LOG_TRACE(("Posting to url [%s]", url));
+    NABTO_LOG_TRACE(("Posting to url <redacted>"));
     postStruct.headers = NULL;
     if (strlen(headers) > 0) {
         postStruct.extra_options_cb = unabto_curl_header_cb;
@@ -146,6 +146,6 @@ unabto_provision_status_t unabto_provision_http_post_curl(const char* url, const
         unabto_provision_http_extract_body(body, response);
         free(response);
     }
-    NABTO_LOG_INFO(("Posted data to url %s, internal status %d", url, status));
+    NABTO_LOG_INFO(("Posted data to url <redacted>, internal status %d", status));
     return status;
 }
