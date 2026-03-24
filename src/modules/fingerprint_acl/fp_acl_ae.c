@@ -503,6 +503,7 @@ application_event_result fp_acl_ae_pair_with_device(application_request* request
                                                     unabto_query_request* read_buffer,
                                                     unabto_query_response* write_buffer) {
     struct fp_acl_user user;
+    fp_acl_init_user(&user);
     if (!fp_acl_is_pair_allowed(request)) {
         return AER_REQ_NO_ACCESS;
     }
