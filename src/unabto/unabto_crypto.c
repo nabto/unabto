@@ -373,7 +373,7 @@ bool unabto_decrypt(nabto_crypto_context* cryptoContext, uint8_t* ptr, uint16_t 
                 return false;
             }
             /**
-             * we have a hmac verified packet of some multiple of 16 in length, we need to make an
+             * We have a hmac verified packet of some multiple of 16 in length, we need to make an
              * inbuffer decrypt and return the length without the padding.
              */
 
@@ -381,7 +381,7 @@ bool unabto_decrypt(nabto_crypto_context* cryptoContext, uint8_t* ptr, uint16_t 
             uint16_t i;
             if (!unabto_aes128_cbc_decrypt(cryptoContext->decryptkey,
                                            ptr, size)) {
-                NABTO_LOG_TRACE(("Decrypting of packet failed size: %u", size));
+                NABTO_LOG_TRACE(("Decrypting of packet failed size: %" PRIu16, size));
                 return false;
             }
 
@@ -391,7 +391,7 @@ bool unabto_decrypt(nabto_crypto_context* cryptoContext, uint8_t* ptr, uint16_t 
                 return false;
             }
 
-            // from the earlier size check we know that the packet had atleast
+            // From the earlier size check we know that the packet had at least
             // one block of which some or all bytes are padding.
 
             /* Validate all PKCS#7 padding bytes. Each padding byte
