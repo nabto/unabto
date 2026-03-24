@@ -228,7 +228,7 @@ void unabto_push_create_and_send_packet(unabto_push_element* elem) {
         unabto_push_notification_remove(elem->seq);
         return;
     }
-    if (nmc.context.cryptoAttach == NULL) {
+    if (nmc.context.cryptoConnect == NULL) {
         unabto_push_hint hint = UNABTO_PUSH_HINT_NO_CRYPTO_CONTEXT;
         unabto_push_notification_callback(elem->seq, &hint);
         unabto_push_notification_remove(elem->seq);
