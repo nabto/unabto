@@ -1,4 +1,5 @@
 // clang-format off
+// NOLINTBEGIN
 /*
  * Copyright (C) Nabto - All Rights Reserved.
  */
@@ -271,3 +272,4 @@ size_t gopt_args( const void *vptr_opts, int key, const char **args, size_t args
 void gopt_free( void *vptr_opts ){
   free( vptr_opts );
 }
+// NOLINTEND

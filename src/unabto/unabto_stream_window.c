@@ -692,7 +692,8 @@ void nabto_stream_check_new_data_xmit(struct nabto_stream_s* stream) {
         if (!(unabto_stream_congestion_control_can_send(tcb))) {
             NABTO_LOG_TRACE(("Congestion control limits data sending"));
             break;
-        } else if (!send_data_packet(stream, xbuf->seq, xbuf->buf, xbuf->size, xbuf->nRetrans, ix)) {
+        }
+        if (!send_data_packet(stream, xbuf->seq, xbuf->buf, xbuf->size, xbuf->nRetrans, ix)) {
             // we can't send data do not try to send more data.
             NABTO_LOG_TRACE(("Cannot send data, probably because of congestion."));
             break;

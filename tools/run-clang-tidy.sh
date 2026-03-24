@@ -25,10 +25,10 @@ fi
 FILE_REGEX='(src|apps|test)/'
 
 if command -v run-clang-tidy &>/dev/null; then
-    run-clang-tidy -p "$BUILD_DIR" "$FILE_REGEX" "$@"
+    run-clang-tidy -p "$BUILD_DIR" -warnings-as-errors='*' "$FILE_REGEX" "$@"
 else
     echo "run-clang-tidy not found, falling back to manual invocation..." >&2
     find "$PROJECT_DIR/src" "$PROJECT_DIR/apps" "$PROJECT_DIR/test" \
         -name '*.c' -o -name '*.h' \
-        | xargs -P "$(nproc)" -I{} clang-tidy -p "$BUILD_DIR" "$@" {}
+        | xargs -P "$(nproc)" -I{} clang-tidy -p "$BUILD_DIR" -warnings-as-errors='*' "$@" {}
 fi
