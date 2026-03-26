@@ -247,19 +247,21 @@ void unabto_tcp_fallback_read_packets(nabto_connect* con) {
                 return;
             }
 
-            status = unabto_tcp_read(&fbConn->socket, fbConn->recvBuffer + fbConn->recvBufferLength, packetLength - fbConn->recvBufferLength, &readen);
+            if (fbConn->recvBufferLength < packetLength) {
+                status = unabto_tcp_read(&fbConn->socket, fbConn->recvBuffer + fbConn->recvBufferLength, packetLength - fbConn->recvBufferLength, &readen);
 
-            if (status == UTS_OK) {
-                fbConn->recvBufferLength += readen;
-            } else if (status == UTS_EOF) {
-                close_tcp_socket(con);
-                return;
-            } else if (status == UTS_WOULD_BLOCK) {
-                return;
-            } else {  // UTS_FAILED
-                close_tcp_socket(con);
-                NABTO_LOG_ERROR((PRI_tcp_fb "Tcp read failed", TCP_FB_ARGS(con)));
-                return;
+                if (status == UTS_OK) {
+                    fbConn->recvBufferLength += readen;
+                } else if (status == UTS_EOF) {
+                    close_tcp_socket(con);
+                    return;
+                } else if (status == UTS_WOULD_BLOCK) {
+                    return;
+                } else {  // UTS_FAILED
+                    close_tcp_socket(con);
+                    NABTO_LOG_ERROR((PRI_tcp_fb "Tcp read failed", TCP_FB_ARGS(con)));
+                    return;
+                }
             }
 
             if (fbConn->recvBufferLength == packetLength) {
