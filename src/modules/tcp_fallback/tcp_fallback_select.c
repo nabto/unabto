@@ -229,6 +229,12 @@ void unabto_tcp_fallback_read_packets(nabto_connect* con) {
             size_t readen;
             READ_U16(packetLength, fbConn->recvBuffer + 14);
 
+            if (packetLength > NABTO_COMMUNICATION_BUFFER_SIZE) {
+                NABTO_LOG_ERROR((PRI_tcp_fb "Received tcp fallback packet too large: %" PRIu16, TCP_FB_ARGS(con), packetLength));
+                close_tcp_socket(con);
+                return;
+            }
+
             status = unabto_tcp_read(&fbConn->socket, fbConn->recvBuffer + fbConn->recvBufferLength, packetLength - fbConn->recvBufferLength, &readen);
 
             if (status == UTS_OK) {
