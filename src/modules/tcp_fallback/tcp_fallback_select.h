@@ -7,11 +7,13 @@
 #include <modules/network/select/unabto_select.h>
 #include <modules/network/tcp/unabto_tcp.h>
 
+#define UNABTO_TCP_FALLBACK_RECV_BUFFER_SIZE 65536
+
 typedef struct unabto_tcp_fallback_connection {
     uint8_t sendBuffer[65536];
     size_t sendBufferLength;
     size_t sendBufferSent;
-    uint8_t recvBuffer[65536];
+    uint8_t recvBuffer[UNABTO_TCP_FALLBACK_RECV_BUFFER_SIZE];
     size_t recvBufferLength;
     struct unabto_tcp_socket socket;
 } unabto_tcp_fallback_connection;
