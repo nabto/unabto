@@ -12,6 +12,47 @@ the release and a new unreleased section is added.
 
 ## 4.6 [Unreleased]
 
+### Added
+- Constant-time memcmp helper for security-sensitive comparisons.
+- `clang-tidy` CI job; the build fails on tidy errors.
+- `clang-format` configuration pinned to an explicit version, and the full source tree reformatted to match.
+- Linux build script under `build-scripts/`.
+
+### Changed
+- Upgraded bundled `libtomcrypt` to the latest upstream release (which provides a constant-time memcmp).
+- Updated the OpenSSL integration to support OpenSSL 3.0+ (now the officially supported version).
+- Migrated CI from Travis and AppVeyor to GitHub Actions.
+- Replaced unchecked `WRITE_FORWARD` macros and manual buffer writes with bounds-checked `write_forward_*` helpers throughout packet construction.
+- Replaced unchecked read macros with bounds-checked `read_forward_*` helpers.
+- Reworked crypto payload encryption to use start/end pointers and to never read outside the caller-supplied buffer.
+- Raised the minimum required CMake version.
+- Moved content out of the top-level `build/` directory, which is reserved for CMake output.
+- Removed dead code that is not used by any current project.
+
+### Fixed
+- Validate all padding bytes in `CRYPT_W_AES_CBC_HMAC_SHA256` and require at least IV + padding to be present.
+- Use the correct crypto context in the push module NULL check.
+- Added the missing NULL check in `unabto_query_read`.
+- Fixed an out-of-bounds read and an XOR-vs-exponentiation bug.
+- Multiple fixes in the provision and settings modules: reject strings that do not fit, avoid writing the NUL terminator outside the buffer, and leave the stored length intact when validation fails.
+- Fixed several missing bounds checks when inserting packet length and headers.
+- Initialize the `status` field before it is written to the application response.
+- Initialize the user struct before use.
+- Write an empty FCM token and status when the user is not found, instead of leaving the response undefined.
+- Initialize the push hint to a well-defined value.
+- Fixed notification removal, which modified the list it was iterating.
+- Fixed debug packet handling.
+- Fixed a wrong socket assignment when marking sockets invalid.
+- Require the device id to be non-NULL and non-empty.
+- Fixed a missing NUL termination.
+- Free memory on allocation failure in the affected paths.
+- Corrected a wrong `sizeof` usage.
+- Check size before reading additional bytes.
+- Silenced remaining Windows build warnings.
+- Enforced braces on all conditional statements (no naked `if`s) and addressed a large number of clang-tidy warnings.
+- Removed the non-C89 `inline` keyword where it had slipped in.
+
+
 ## 4.5 2022-09-14
 
 ### Added
