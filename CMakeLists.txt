@@ -7,6 +7,7 @@ add_subdirectory(apps/pc_demo)
 add_subdirectory(apps/weather_station)
 add_subdirectory(apps/tunnel)
 add_subdirectory(apps/stream_echo)
+add_subdirectory(apps/aclcli)
 
 if (NOT MSVC)
   add_subdirectory(apps/html_demo)
