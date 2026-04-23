@@ -9,18 +9,17 @@
  * 
  ************************************************************************************************/
 
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <sys/types.h>
+#include "unabto/unabto_env_base.h"
 
 #include "modules/cli/gopt/gopt.h"
-#include "modules/util/read_hex.h"
-#include "unabto/unabto_env_base.h"
 #include "modules/fingerprint_acl/fp_acl_file.h"
+#include "modules/util/read_hex.h"
 #include "unabto/unabto_types.h"
+
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 struct configuration {
     const char* action;
@@ -41,7 +40,7 @@ bool fp_get_fingerprint(const char*, struct unabto_fingerprint* fpLocal);
 bool fp_get_psk_id(const char* fpargv, struct unabto_psk_id* pskId);
 bool fp_get_psk_key(const char* fpargv, struct unabto_psk* pskKey);
 
-#define splithex(x) x >> 16, x & 0xffff
+#define splithex(x) ((x) >> 16), ((x) & 0xffff)
 
 static void help(const char* errmsg, const char* progname) {
     if (errmsg) {
@@ -319,8 +318,9 @@ bool fp_read_hex(const char* fpargv, uint8_t* buf, size_t len) {
     j = 0;
     bool last;
 
-    if (strlen(fpargv) != len * 3 - 1)
+    if (strlen(fpargv) != len * 3 - 1) {
         return false;
+    }
 
     for (j = 0; j < len; j++) {
         last = (j == len - 1);
@@ -391,8 +391,10 @@ bool parse_argv(int argc, char* argv[], struct configuration* config) {
         exit(0);
     }
 
-    if (argc <= 1) return false;
-    config->action = strdup(argv[1]);
+    if (argc <= 1) {
+        return false;
+    }
+    config->action = argv[1];
     if (strcmp(config->action, "list") != 0 &&
         strcmp(config->action, "add") != 0 &&
         strcmp(config->action, "remove") != 0 &&
