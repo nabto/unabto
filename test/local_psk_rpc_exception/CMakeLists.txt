@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15...4.2)
 project(local_psk_rpc_exception)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/unabto_project.cmake)
