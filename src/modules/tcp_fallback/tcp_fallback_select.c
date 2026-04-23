@@ -235,7 +235,7 @@ void unabto_tcp_fallback_read_packets(nabto_connect* con) {
                 return;
             }
 
-            if (packetLength > UNABTO_TCP_FALLBACK_RECV_BUFFER_SIZE) {
+            if ((size_t)packetLength > (size_t)UNABTO_TCP_FALLBACK_RECV_BUFFER_SIZE) {
                 NABTO_LOG_ERROR((PRI_tcp_fb "Received tcp fallback packet exceeds recv buffer: %" PRIu16, TCP_FB_ARGS(con), packetLength));
                 close_tcp_socket(con);
                 return;
