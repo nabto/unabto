@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15...4.2)
 project(unabto C)
 
 option(UNABTO_ENABLE_TESTS "Enable testing of unabto, disable this if you are crosscompiling" ON)

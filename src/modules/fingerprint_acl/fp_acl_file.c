@@ -10,7 +10,6 @@ fp_acl_db_status fp_acl_file_read_file(FILE* aclFile, struct fp_mem_state* acl) 
     uint8_t buffer[FP_ACL_RECORD_SIZE];
     size_t nread;
     uint32_t version;
-    uint8_t* ptr;
     uint32_t numUsers;
     uint32_t i;
 

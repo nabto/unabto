@@ -56,7 +56,6 @@ static void help(const char* errmsg, const char* progname) {
 
 int main(int argc, char* argv[]) {
     struct configuration config;
-    struct fp_mem_state acl;
     struct fp_acl_settings defaultSettings;
     struct fp_acl_db db;
     struct fp_mem_persistence p;
@@ -252,8 +251,6 @@ fp_acl_db_status fp_acl_file_remove_entry(struct configuration* config, struct f
 
 // adding an entry to ACL file
 fp_acl_db_status fp_acl_file_add_entry(struct configuration* config, struct fp_acl_db* db) {
-    fp_acl_db_status status;
-
     struct fp_acl_user user;
     struct fp_acl_settings aclSettings;
 

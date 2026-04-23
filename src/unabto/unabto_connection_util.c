@@ -145,7 +145,6 @@ bool unabto_connection_util_verify_capabilities(nabto_connect* connection, struc
     uint32_t requiredCapabilities = PEER_CAP_TAG | PEER_CAP_FRCTRL | PEER_CAP_ASYNC;
     bool codeFound = false;
     uint16_t i;
-    const uint8_t* ptr;
     uint32_t supportedCapabilities;
 
     if ((capabilities->mask & requiredCapabilities) != requiredCapabilities) {

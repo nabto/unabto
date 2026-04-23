@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15...4.2)
 set(UNABTO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 include(${UNABTO_ROOT}/cmake/unabto_files.cmake)
 
