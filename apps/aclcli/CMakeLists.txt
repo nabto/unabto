@@ -35,8 +35,13 @@ set(nabto_src
   ${UNABTO_MODULES_SRC_DIR}/cli/gopt/gopt.c
   ${UNABTO_MODULES_SRC_DIR}/cli/gopt/gopt.h
   ${unabto_module_read_hex}
-  ${unabto_module_log_unix_src}
   )
+
+if (WIN32)
+  list(APPEND nabto_src ${unabto_module_log_win32_src})
+else()
+  list(APPEND nabto_src ${unabto_module_log_unix_src})
+endif()
 
 add_definitions(${unabto_definitions})
 

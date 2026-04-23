@@ -21,8 +21,11 @@ if [ ! -f "$BUILD_DIR/compile_commands.json" ]; then
         -DCMAKE_C_FLAGS="-std=gnu99"
 fi
 
-# Build file regex to match only project sources (exclude 3rdparty)
-FILE_REGEX='(src|apps|test)/'
+# Build file regex to match only project sources (exclude 3rdparty).
+# The lookahead rejects paths containing "/3rdparty/" — needed because the
+# compile_commands.json has absolute paths where "src/" also appears as
+# "3rdparty/libtomcrypt/src/...".
+FILE_REGEX='^(?!.*/3rdparty/).*/(src|apps|test)/'
 
 if command -v run-clang-tidy &>/dev/null; then
     run-clang-tidy -p "$BUILD_DIR" -warnings-as-errors='*' "$FILE_REGEX" "$@"

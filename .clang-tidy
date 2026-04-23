@@ -12,5 +12,6 @@ Checks: >
   readability-braces-around-statements
 WarningsAsErrors: ''
 HeaderFilterRegex: '(src|apps|test)/.*'
+ExcludeHeaderFilterRegex: '.*/3rdparty/.*'
 FormatStyle: none
 ...
