@@ -106,10 +106,16 @@ jobs:
           path: macos
       - name: List assets
         run: ls -R
+      - name: Rename assets per platform
+        run: |
+          mkdir -p release
+          cp linux/bin/${{ matrix.binary }}       release/${{ matrix.binary }}_linux
+          cp macos/bin/${{ matrix.binary }}       release/${{ matrix.binary }}_macos
+          cp windows/bin/${{ matrix.binary }}.exe release/${{ matrix.binary }}_windows.exe
       - name: Upload release assets
         uses: softprops/action-gh-release@v3
         with:
           files: |
-            linux/bin/${{ matrix.binary }}
-            windows/bin/${{ matrix.binary }}.exe
-            macos/bin/${{ matrix.binary }}
+            release/${{ matrix.binary }}_linux
+            release/${{ matrix.binary }}_macos
+            release/${{ matrix.binary }}_windows.exe
