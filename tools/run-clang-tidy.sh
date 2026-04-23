@@ -27,11 +27,17 @@ fi
 # "3rdparty/libtomcrypt/src/...".
 FILE_REGEX='^(?!.*/3rdparty/).*/(src|apps|test)/'
 
+# Anchor the header filter on the project root so headers under 3rdparty/
+# (e.g. libtomcrypt) aren't scanned. Overrides HeaderFilterRegex from
+# .clang-tidy — we can't express this exclusion there since llvm::Regex
+# has no negative lookahead and older clang-tidy lacks ExcludeHeaderFilterRegex.
+HEADER_FILTER="^$PROJECT_DIR/(src|apps|test)/"
+
 if command -v run-clang-tidy &>/dev/null; then
-    run-clang-tidy -p "$BUILD_DIR" -warnings-as-errors='*' "$FILE_REGEX" "$@"
+    run-clang-tidy -p "$BUILD_DIR" -warnings-as-errors='*' -header-filter="$HEADER_FILTER" "$FILE_REGEX" "$@"
 else
     echo "run-clang-tidy not found, falling back to manual invocation..." >&2
     find "$PROJECT_DIR/src" "$PROJECT_DIR/apps" "$PROJECT_DIR/test" \
         -name '*.c' -o -name '*.h' \
-        | xargs -P "$(nproc)" -I{} clang-tidy -p "$BUILD_DIR" -warnings-as-errors='*' "$@" {}
+        | xargs -P "$(nproc)" -I{} clang-tidy -p "$BUILD_DIR" -warnings-as-errors='*' -header-filter="$HEADER_FILTER" "$@" {}
 fi
