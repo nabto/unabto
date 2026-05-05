@@ -80,10 +80,8 @@ static void nabto_stream_state_transition(struct nabto_stream_s* stream, nabto_s
  */
 static bool congestion_control_accept_more_data(struct nabto_stream_tcb* tcb);
 
-static NABTO_THREAD_LOCAL_STORAGE uint16_t idSP__ = 0; /**< the one and only */
-static NABTO_THREAD_LOCAL_STORAGE uint16_t idCP__ = 0; /**< the one and only */
-static uint16_t nabto_stream_next_sp_id(void);
-static uint16_t nabto_stream_next_cp_id(void);
+static bool nabto_stream_next_sp_id(nabto_connect* con, uint16_t* idSP);
+static bool nabto_stream_next_cp_id(nabto_connect* con, uint16_t* idCP);
 
 static bool send_syn(struct nabto_stream_s* stream);
 static bool send_syn_ack(struct nabto_stream_s* stream);
@@ -102,7 +100,7 @@ void unabto_cwnd_flightsize_add(unabto_cwnd* cwnd, uint16_t flightSize);
 /**
  * Initialize state
  */
-static void nabto_init_stream_state(unabto_stream* stream, const struct nabto_win_info* info);
+static bool nabto_init_stream_state(unabto_stream* stream, const struct nabto_win_info* info);
 
 #if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_DEBUG)
 /**
@@ -302,12 +300,17 @@ text nabto_stream_tcb_state_name(const struct nabto_stream_tcb* tcb) {
     return stateNameW(tcb->streamState);
 }
 
-void nabto_stream_tcb_open(struct nabto_stream_s* stream) {
+bool nabto_stream_tcb_open(struct nabto_stream_s* stream) {
+    uint16_t idCP;
     nabto_init_stream_state_initiator(stream);
-    stream->idCP = nabto_stream_next_cp_id();
+    if (!nabto_stream_next_cp_id(stream->connection, &idCP)) {
+        return false;
+    }
+    stream->idCP = idCP;
     stream->state = STREAM_IN_USE;
     SET_STATE(stream, ST_SYN_SENT);
     nabtoSetFutureStamp(&stream->u.tcb.timeoutStamp, 0);
+    return true;
 }
 
 /******************************************************************************/
@@ -1218,7 +1221,15 @@ void nabto_stream_tcb_event(struct nabto_stream_s* stream,
     switch (tcb->streamState) {
         case ST_IDLE:
             if (win->type == SYN) {
-                nabto_init_stream_state(stream, win);  // calls nabto_init_stream_tcb_state
+                if (!nabto_init_stream_state(stream, win)) {
+                    // Per-connection stream id space exhausted; reply
+                    // RST with idSP=0 sentinel so the initiator can
+                    // tear down immediately instead of timing out.
+                    NABTO_LOG_ERROR(("stream id space exhausted on connection, sending RST"));
+                    send_rst(stream);
+                    unabto_stream_release(stream);
+                    return;
+                }
                 if (!unabto_stream_init_buffers(stream)) {
                     // release the stream as we cannot allocate buffers for the stream.
                     send_rst(stream);
@@ -1977,27 +1988,39 @@ void unabto_stream_dump_state(struct nabto_stream_s* stream) {
  * @param stream  the stream
  * @param info    the request
  */
-static void nabto_init_stream_state(struct nabto_stream_s* stream, const struct nabto_win_info* info) {
-    stream->state = STREAM_IN_USE;
-    stream->idCP = info->idCP;
-    stream->idSP = nabto_stream_next_sp_id();
-    nabto_init_stream_tcb_state(&stream->u.tcb, info, stream);
-}
-
-static uint16_t nabto_stream_next_sp_id(void) {
+static bool nabto_init_stream_state(struct nabto_stream_s* stream, const struct nabto_win_info* info) {
     uint16_t idSP;
-    do {
-        idSP = ++idSP__;
-    } while (idSP == 0);
-    return idSP;
+    if (!nabto_stream_next_sp_id(stream->connection, &idSP)) {
+        // Id space exhausted on this connection. Set idSP=0 (reserved
+        // sentinel) and copy idCP so the SYN handler can send a
+        // meaningful RST.
+        stream->idSP = 0;
+        stream->idCP = info->idCP;
+        return false;
+    }
+    stream->idSP = idSP;
+    stream->idCP = info->idCP;
+    stream->state = STREAM_IN_USE;
+    nabto_init_stream_tcb_state(&stream->u.tcb, info, stream);
+    return true;
 }
 
-static uint16_t nabto_stream_next_cp_id(void) {
-    uint16_t idCP;
-    do {
-        idCP = ++idCP__;
-    } while (idCP == 0);
-    return idCP;
+static bool nabto_stream_next_sp_id(nabto_connect* con, uint16_t* idSP) {
+    if (con->nextIdSP == UINT16_MAX) {
+        return false;
+    }
+    ++con->nextIdSP;
+    *idSP = con->nextIdSP;
+    return true;
+}
+
+static bool nabto_stream_next_cp_id(nabto_connect* con, uint16_t* idCP) {
+    if (con->nextIdCP == UINT16_MAX) {
+        return false;
+    }
+    ++con->nextIdCP;
+    *idCP = con->nextIdCP;
+    return true;
 }
 
 void unabto_stat_time_init(struct unabto_stats_time* stat) {

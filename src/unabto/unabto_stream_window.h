@@ -247,7 +247,7 @@ extern "C" {
  * Precondition: The stream structure has been initialized and
  * prepared for opening by giving it a tag and a connection.
  */
-void nabto_stream_tcb_open(struct nabto_stream_s* stream);
+bool nabto_stream_tcb_open(struct nabto_stream_s* stream);
 
 /**
  * Read data

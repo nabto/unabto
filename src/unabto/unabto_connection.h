@@ -170,6 +170,18 @@ struct nabto_connect_s {  // NOLINT(clang-analyzer-optin.performance.Padding)
     bool relayIsActive;  // data has been transmitted on relay, indicating client has chosen this type
 #endif
 
+    /* Per-connection stream-id counters. Monotonic for the lifetime
+     * of the connection slot — never wrapped, never reused. The
+     * value 0 is reserved as a sentinel meaning "no id assigned":
+     * the generators in unabto_stream_window.c skip 0 by starting
+     * these at 0 and incrementing before use, and the SYN handler
+     * sends idSP=0 in the RST it issues when allocation fails. Once
+     * a counter reaches 0xFFFF, further allocations on this
+     * connection fail (the peer can open a new connection to
+     * recover). Auto-zeroed by nabto_reset_connection. */
+    uint16_t nextIdCP;
+    uint16_t nextIdSP;
+
     /*****************************************************************************************/
     /* fields below has specific init, reinit and release methods.                           */
 
