@@ -80,9 +80,6 @@ static void nabto_stream_state_transition(struct nabto_stream_s* stream, nabto_s
  */
 static bool congestion_control_accept_more_data(struct nabto_stream_tcb* tcb);
 
-static bool nabto_stream_next_sp_id(nabto_connect* con, uint16_t* idSP);
-static bool nabto_stream_next_cp_id(nabto_connect* con, uint16_t* idCP);
-
 static bool send_syn(struct nabto_stream_s* stream);
 static bool send_syn_ack(struct nabto_stream_s* stream);
 static bool send_syn_or_syn_ack(struct nabto_stream_s* stream, uint8_t type);
@@ -301,12 +298,13 @@ text nabto_stream_tcb_state_name(const struct nabto_stream_tcb* tcb) {
 }
 
 bool nabto_stream_tcb_open(struct nabto_stream_s* stream) {
-    uint16_t idCP;
-    nabto_init_stream_state_initiator(stream);
-    if (!nabto_stream_next_cp_id(stream->connection, &idCP)) {
+    // Precondition: caller has assigned stream->idCP from its per-session
+    // allocator (e.g. FramingStreamManagerC::nextCpid in the C++ build, or
+    // an allocation site in the firmware that calls into this function).
+    if (stream->idCP == 0) {
         return false;
     }
-    stream->idCP = idCP;
+    nabto_init_stream_state_initiator(stream);
     stream->state = STREAM_IN_USE;
     SET_STATE(stream, ST_SYN_SENT);
     nabtoSetFutureStamp(&stream->u.tcb.timeoutStamp, 0);
@@ -1989,37 +1987,16 @@ void unabto_stream_dump_state(struct nabto_stream_s* stream) {
  * @param info    the request
  */
 static bool nabto_init_stream_state(struct nabto_stream_s* stream, const struct nabto_win_info* info) {
-    uint16_t idSP;
-    if (!nabto_stream_next_sp_id(stream->connection, &idSP)) {
-        // Id space exhausted on this connection. Set idSP=0 (reserved
-        // sentinel) and copy idCP so the SYN handler can send a
-        // meaningful RST.
-        stream->idSP = 0;
+    // Precondition: caller has assigned stream->idSP from its per-connection
+    // allocator (e.g. nabto_stream_event in the firmware build) before
+    // dispatching the SYN here.
+    if (stream->idSP == 0) {
         stream->idCP = info->idCP;
         return false;
     }
-    stream->idSP = idSP;
     stream->idCP = info->idCP;
     stream->state = STREAM_IN_USE;
     nabto_init_stream_tcb_state(&stream->u.tcb, info, stream);
-    return true;
-}
-
-static bool nabto_stream_next_sp_id(nabto_connect* con, uint16_t* idSP) {
-    if (con->nextIdSP == UINT16_MAX) {
-        return false;
-    }
-    ++con->nextIdSP;
-    *idSP = con->nextIdSP;
-    return true;
-}
-
-static bool nabto_stream_next_cp_id(nabto_connect* con, uint16_t* idCP) {
-    if (con->nextIdCP == UINT16_MAX) {
-        return false;
-    }
-    ++con->nextIdCP;
-    *idCP = con->nextIdCP;
     return true;
 }
 

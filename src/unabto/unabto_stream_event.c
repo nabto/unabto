@@ -39,6 +39,15 @@ static struct nabto_stream_s* find_free_stream(uint16_t tag, nabto_connect* con)
 
 static bool nabto_stream_validate_win(struct nabto_win_info* info, struct nabto_stream_s* stream);
 
+static bool nabto_stream_next_sp_id(nabto_connect* con, uint16_t* idSP) {
+    if (con->nextIdSP == UINT16_MAX) {
+        return false;
+    }
+    ++con->nextIdSP;
+    *idSP = con->nextIdSP;
+    return true;
+}
+
 /******************************************************************************/
 
 void handle_stream_packet(nabto_connect* con, nabto_packet_header* hdr,
@@ -108,6 +117,16 @@ void nabto_stream_event(nabto_connect* con,
             stream = find_free_stream(hdr->tag, con);
             if (stream == NULL) {
                 NABTO_LOG_DEBUG(("Stream with tag %i not accepted", hdr->tag));
+            } else {
+                uint16_t idSP;
+                if (!nabto_stream_next_sp_id(con, &idSP)) {
+                    NABTO_LOG_ERROR(("Per-connection SPID space exhausted, sending RST"));
+                    unabto_stream_release(stream);
+                    stream = NULL;
+                } else {
+                    stream->idSP = idSP;
+                    stream->idCP = win.idCP;
+                }
             }
         } else {
             NABTO_LOG_DEBUG(("Received non syn packet for stream which is not available tag %i", hdr->tag));

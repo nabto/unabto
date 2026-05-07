@@ -173,7 +173,7 @@ struct nabto_connect_s {  // NOLINT(clang-analyzer-optin.performance.Padding)
     /* Per-connection stream-id counters. Monotonic for the lifetime
      * of the connection slot — never wrapped, never reused. The
      * value 0 is reserved as a sentinel meaning "no id assigned":
-     * the generators in unabto_stream_window.c skip 0 by starting
+     * the generator in unabto_stream_event.c skips 0 by starting
      * these at 0 and incrementing before use, and the SYN handler
      * sends idSP=0 in the RST it issues when allocation fails. Once
      * a counter reaches 0xFFFF, further allocations on this

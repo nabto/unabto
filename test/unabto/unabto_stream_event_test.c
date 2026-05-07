@@ -50,6 +50,10 @@ void resetStream(struct nabto_stream_s* stream) {
     memset(r_buffers2, 0, sizeof(r_buffers2));
     memset(&test_connection, 0, sizeof(test_connection));
     stream->connection = &test_connection;
+    // SPID is now allocated by nabto_stream_event before reaching the
+    // TCB state machine; simulate that here so the SYN handler sees a
+    // non-zero idSP.
+    stream->idSP = 1;
     nmc.nabtoMainSetup.id = "";
     stream_initial_config(stream);
     stream_init_static_config(stream);
