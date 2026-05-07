@@ -297,18 +297,14 @@ text nabto_stream_tcb_state_name(const struct nabto_stream_tcb* tcb) {
     return stateNameW(tcb->streamState);
 }
 
-bool nabto_stream_tcb_open(struct nabto_stream_s* stream) {
-    // Precondition: caller has assigned stream->idCP from its per-session
-    // allocator (e.g. FramingStreamManagerC::nextCpid in the C++ build, or
-    // an allocation site in the firmware that calls into this function).
-    if (stream->idCP == 0) {
-        return false;
-    }
+void nabto_stream_tcb_open(struct nabto_stream_s* stream, uint16_t idCP) {
+    // Precondition: idCP is non-zero. Allocation is the caller's job
+    // (e.g. FramingStreamManagerC::nextCpid in the C++ build).
+    stream->idCP = idCP;
     nabto_init_stream_state_initiator(stream);
     stream->state = STREAM_IN_USE;
     SET_STATE(stream, ST_SYN_SENT);
     nabtoSetFutureStamp(&stream->u.tcb.timeoutStamp, 0);
-    return true;
 }
 
 /******************************************************************************/

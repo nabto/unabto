@@ -242,12 +242,13 @@ extern "C" {
 #endif
 
 /**
- * open a stream
+ * Open a stream as the initiator. The caller supplies the per-session
+ * client-peer stream id (idCP); allocation is the caller's responsibility.
  *
- * Precondition: The stream structure has been initialized and
- * prepared for opening by giving it a tag and a connection.
+ * Precondition: the stream structure has been initialized and given a tag,
+ * and idCP is non-zero (0 is the reserved "no id assigned" sentinel).
  */
-bool nabto_stream_tcb_open(struct nabto_stream_s* stream);
+void nabto_stream_tcb_open(struct nabto_stream_s* stream, uint16_t idCP);
 
 /**
  * Read data
