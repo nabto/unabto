@@ -126,6 +126,7 @@ void nabto_stream_event(nabto_connect* con,
                 } else {
                     stream->idSP = idSP;
                     stream->idCP = win.idCP;
+                    stream->state = STREAM_IN_USE;
                 }
             }
         } else {

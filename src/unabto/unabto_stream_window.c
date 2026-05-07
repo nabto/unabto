@@ -94,11 +94,6 @@ void unabto_cwnd_add(unabto_cwnd* cwnd, uint16_t value);
 void unabto_cwnd_sub_one(unabto_cwnd* cwnd);
 void unabto_cwnd_flightsize_add(unabto_cwnd* cwnd, uint16_t flightSize);
 
-/**
- * Initialize state
- */
-static bool nabto_init_stream_state(unabto_stream* stream, const struct nabto_win_info* info);
-
 #if NABTO_LOG_CHECK(NABTO_LOG_SEVERITY_DEBUG)
 /**
  * convert a window type to a const string
@@ -1215,15 +1210,7 @@ void nabto_stream_tcb_event(struct nabto_stream_s* stream,
     switch (tcb->streamState) {
         case ST_IDLE:
             if (win->type == SYN) {
-                if (!nabto_init_stream_state(stream, win)) {
-                    // Per-connection stream id space exhausted; reply
-                    // RST with idSP=0 sentinel so the initiator can
-                    // tear down immediately instead of timing out.
-                    NABTO_LOG_ERROR(("stream id space exhausted on connection, sending RST"));
-                    send_rst(stream);
-                    unabto_stream_release(stream);
-                    return;
-                }
+                nabto_init_stream_tcb_state(&stream->u.tcb, win, stream);
                 if (!unabto_stream_init_buffers(stream)) {
                     // release the stream as we cannot allocate buffers for the stream.
                     send_rst(stream);
@@ -1975,25 +1962,6 @@ void unabto_stream_dump_state(struct nabto_stream_s* stream) {
     NABTO_LOG_TRACE(("  ssThreshold %" PRIu16, tcb->cCtrl.ssThreshold));
     NABTO_LOG_TRACE(("  flightSize %" PRIu16, tcb->cCtrl.flightSize));
 #endif
-}
-
-/**
- * Initialise the stream configuration from received request.
- * @param stream  the stream
- * @param info    the request
- */
-static bool nabto_init_stream_state(struct nabto_stream_s* stream, const struct nabto_win_info* info) {
-    // Precondition: caller has assigned stream->idSP from its per-connection
-    // allocator (e.g. nabto_stream_event in the firmware build) before
-    // dispatching the SYN here.
-    if (stream->idSP == 0) {
-        stream->idCP = info->idCP;
-        return false;
-    }
-    stream->idCP = info->idCP;
-    stream->state = STREAM_IN_USE;
-    nabto_init_stream_tcb_state(&stream->u.tcb, info, stream);
-    return true;
 }
 
 void unabto_stat_time_init(struct unabto_stats_time* stat) {
