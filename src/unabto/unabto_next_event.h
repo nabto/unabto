@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-void nabto_update_min_stamp(nabto_stamp_t* current_minimum_stamp, nabto_stamp_t* stamp);
+void nabto_update_min_stamp(nabto_stamp_t* current_minimum_stamp, const nabto_stamp_t* stamp);
 
 #ifdef __cplusplus
 }  // extern "C"

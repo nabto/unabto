@@ -224,7 +224,7 @@ void nabto_init_stream_tcb_state(struct nabto_stream_tcb* tcb, const struct nabt
 void nabto_limit_stream_config_syn_ack(struct nabto_stream_s* stream, const struct nabto_win_info* info) {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
     nabto_limit_stream_config(&stream->u.tcb, &info->u.syn.cfg);
-    stream->idSP = info->idSP;
+    
     // This is a bug it should have been info->seq+1
     stream->u.tcb.recvNext = info->seq;
     stream->u.tcb.recvTop = stream->u.tcb.recvNext;
@@ -308,7 +308,7 @@ void nabto_stream_tcb_open(struct nabto_stream_s* stream, uint16_t idCP) {
 size_t nabto_stream_tcb_read(struct nabto_stream_s* stream, const uint8_t** buf, unabto_stream_hint* hint) {
     // recv while recvNext < recvTop
 
-    if (nabto_stream_tcb_is_closed(stream)) {
+    if (nabto_stream_tcb_is_closed(&stream->u.tcb)) {
         *hint = UNABTO_STREAM_HINT_STREAM_CLOSED;
         return 0;
     }
@@ -465,7 +465,7 @@ static bool send_data_packet(struct nabto_stream_s* stream, uint32_t seq, uint8_
     NABTO_NOT_USED(ackNumber);
     NABTO_NOT_USED(tcb);
 
-    unabto_stream_create_sack_pairs(stream, &sackData);
+    unabto_stream_create_sack_pairs(tcb, &sackData);
 
     if (build_and_send_packet(stream, ACK, seq, 0, 0, data, size, &sackData)) {
         if (size) {
@@ -1417,8 +1417,7 @@ bool nabto_stream_tcb_handle_fin(struct nabto_stream_tcb* tcb, struct nabto_win_
  *
  * @return true iff there are any sack pairs available.
  */
-bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struct nabto_stream_sack_data* sackData) {
-    struct nabto_stream_tcb* tcb = &stream->u.tcb;
+bool unabto_stream_create_sack_pairs(struct nabto_stream_tcb* tcb, struct nabto_stream_sack_data* sackData) {
     uint32_t end = 0;
     uint32_t i;
 
@@ -1517,7 +1516,7 @@ bool nabto_stream_tcb_close(struct nabto_stream_s* stream) {
         }
     }
 
-    return nabto_stream_tcb_is_closed(stream);
+    return nabto_stream_tcb_is_closed(&stream->u.tcb);
 }
 
 bool nabto_stream_tcb_force_close(struct nabto_stream_s* stream) {
@@ -1557,16 +1556,14 @@ void nabto_stream_tcb_on_connection_released(struct nabto_stream_s* stream) {
     }
 }
 
-void nabto_stream_tcb_release(struct nabto_stream_s* stream) {
+void nabto_stream_tcb_release(struct nabto_stream_tcb* tcb) {
     size_t i;
-    struct nabto_stream_tcb* tcb;
-    if (!nabto_stream_tcb_is_closed(stream)) {
-        NABTO_LOG_TRACE(("Releasing stream in state %d - %" PRItext, stream->u.tcb.streamState, nabto_stream_tcb_state_name(&stream->u.tcb)));
+    if (!nabto_stream_tcb_is_closed(tcb)) {
+        NABTO_LOG_TRACE(("Releasing stream in state %d - %" PRItext, tcb->streamState, nabto_stream_tcb_state_name(tcb)));
     }
     // run through the stream send window and free all unfreed send
     // segments.  there can be unfreed segments if the stream is
     // closed without all the data being acked.
-    tcb = &stream->u.tcb;
     if (tcb->xmit != NULL) {
         for (i = 0; i < tcb->cfg.xmitWinSize; i++) {
             if (tcb->xmit[i].xstate != B_IDLE) {
@@ -1586,13 +1583,12 @@ void nabto_stream_tcb_release(struct nabto_stream_s* stream) {
     }
 }
 
-bool nabto_stream_tcb_is_closed(struct nabto_stream_s* stream) {
-    return stream->u.tcb.streamState == ST_CLOSED || stream->u.tcb.streamState == ST_CLOSED_ABORTED;
+bool nabto_stream_tcb_is_closed(const struct nabto_stream_tcb* tcb) {
+    return tcb->streamState == ST_CLOSED || tcb->streamState == ST_CLOSED_ABORTED;
 }
 
 #if NABTO_ENABLE_NEXT_EVENT
-void nabto_stream_tcb_update_next_event(struct nabto_stream_s* stream, nabto_stamp_t* current_min_stamp) {
-    struct nabto_stream_tcb* tcb = &stream->u.tcb;
+void nabto_stream_tcb_update_next_event(const struct nabto_stream_tcb* tcb, nabto_stamp_t* current_min_stamp) {
     if (tcb->streamState == ST_CLOSED || tcb->streamState == ST_CLOSED_ABORTED) {
         return;
     }

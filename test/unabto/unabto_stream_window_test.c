@@ -40,7 +40,7 @@ bool unabto_stream_create_sack_pairs_test() {
     init_rbuf(tcb, 241);
 
     struct nabto_stream_sack_data sackData;
-    if (!unabto_stream_create_sack_pairs(&stream, &sackData)) {
+    if (!unabto_stream_create_sack_pairs(tcb, &sackData)) {
         return false;
     }
 

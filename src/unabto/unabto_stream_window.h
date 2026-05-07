@@ -332,15 +332,15 @@ text nabto_stream_tcb_state_name(const struct nabto_stream_tcb* tcb);
  */
 void nabto_init_stream_tcb_state(struct nabto_stream_tcb* tcb, const struct nabto_win_info* info, struct nabto_stream_s* stream);
 
-void nabto_stream_tcb_release(struct nabto_stream_s* stream);
+void nabto_stream_tcb_release(struct nabto_stream_tcb* tcb);
 
-bool nabto_stream_tcb_is_closed(struct nabto_stream_s* stream);
+bool nabto_stream_tcb_is_closed(const struct nabto_stream_tcb* tcb);
 
 #if NABTO_ENABLE_NEXT_EVENT
 /**
  * Update time stamp with the time until next event
  */
-void nabto_stream_tcb_update_next_event(struct nabto_stream_s* stream, nabto_stamp_t* current_min_stamp);
+void nabto_stream_tcb_update_next_event(const struct nabto_stream_tcb* tcb, nabto_stamp_t* current_min_stamp);
 #endif
 
 void nabto_stream_make_rst_response_window(const struct nabto_win_info* win, struct nabto_win_info* rstWin);
@@ -352,7 +352,7 @@ bool nabto_stream_encode_window(const struct nabto_win_info* win, uint8_t* start
 uint16_t unabto_stream_advertised_window_size(struct nabto_stream_tcb* tcb);
 uint32_t unabto_stream_ack_number_to_send(struct nabto_stream_tcb* tcb);
 
-bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struct nabto_stream_sack_data* sackData);
+bool unabto_stream_create_sack_pairs(struct nabto_stream_tcb* tcb, struct nabto_stream_sack_data* sackData);
 /******************************************************************************/
 /******************************************************************************/
 

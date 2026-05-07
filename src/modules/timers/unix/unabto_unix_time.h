@@ -14,8 +14,8 @@ extern "C" {
 
 nabto_stamp_t unabto_unix_timer_get_stamp();
 void unabto_unix_timer_add_stamp(nabto_stamp_t* stamp, int msec);
-bool unabto_unix_timer_stamp_less(nabto_stamp_t* s1, nabto_stamp_t* s2);
-bool unabto_unix_timer_stamp_less_equal(nabto_stamp_t* s1, nabto_stamp_t* s2);
+bool unabto_unix_timer_stamp_less(const nabto_stamp_t* s1, const nabto_stamp_t* s2);
+bool unabto_unix_timer_stamp_less_equal(const nabto_stamp_t* s1, const nabto_stamp_t* s2);
 
 /**
  * Switch auto update of the timestamp on/off

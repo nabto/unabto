@@ -135,7 +135,7 @@ size_t unabto_stream_can_write(unabto_stream* stream, unabto_stream_hint* hint) 
 /******************************************************************************/
 
 bool unabto_stream_is_closed(unabto_stream* stream) {
-    return nabto_stream_tcb_is_closed(stream);
+    return nabto_stream_tcb_is_closed(&stream->u.tcb);
 }
 
 bool unabto_stream_close(unabto_stream* stream) {
@@ -148,7 +148,7 @@ bool unabto_stream_force_close(unabto_stream* stream) {
 }
 
 void unabto_stream_release(unabto_stream* stream) {
-    nabto_stream_tcb_release(stream);
+    nabto_stream_tcb_release(&stream->u.tcb);
     stream_reset(stream);
 }
 

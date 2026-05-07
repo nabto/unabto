@@ -377,7 +377,7 @@ void nabto_stream_update_next_event(nabto_stamp_t* current_min_stamp) {
             }
 
             // If we have unacked packets then check then use the best timeout we know of
-            nabto_stream_tcb_update_next_event(stream, current_min_stamp);
+            nabto_stream_tcb_update_next_event(&stream->u.tcb, current_min_stamp);
         }
     }
 }
