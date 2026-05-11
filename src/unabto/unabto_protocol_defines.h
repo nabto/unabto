@@ -155,7 +155,6 @@ enum np_payload_type_e {
     NP_PAYLOAD_TYPE_CONNECTION_STATS = 0x45, /* 'E' Connection statistics */
     NP_PAYLOAD_TYPE_ATTACH_STATS     = 0x46, /* 'F' Connection statistics */
     NP_PAYLOAD_TYPE_PING             = 0x47, /* 'G' Ping                  */
-    NP_PAYLOAD_TYPE_SYSLOG_CONFIG    = 0x48, /* 'H' Syslog Configuration  */
     NP_PAYLOAD_TYPE_GWWS             = 0x49, /* 'I' websocket gateway payload          */
     NP_PAYLOAD_TYPE_SYSTEM_INFO      = 0x4A, /* 'J' system info payload type           */
     NP_PAYLOAD_TYPE_FP               = 0x4B, /* 'K' fingerprint of certificate payload */
@@ -483,7 +482,6 @@ enum np_payload_type_e {
 /* Notification codes for NP_PACKET_HDR_TYPE_U_DEBUG */
 #define NP_PAYLOAD_NOTIFY_DEBUG_OK           0x0001
 #define NP_PAYLOAD_NOTIFY_DEBUG_ERROR        0x8000
-#define NP_PAYLOAD_NOTIFY_SYSLOG_DISABLED    0x8001
 
 /*****************************************************************************/
 /* VERIFY payload */
@@ -1017,40 +1015,6 @@ enum np_payload_system_info_nat64_e {
 
 #define NP_PAYLOAD_PING_SIZE_WO_DATA      17 ///< Size of the ping payload without data.
 
-
-
-/*****************************************************************************/
-/* Syslog Config Payload */
-/* The Syslog config Payload has the following layout:
-*    +-----+-----------------------------------------------------------------+
-*    |  +0 |  Payload header (NP_PAYLOAD_HDR_BYTELENGTH bytes)               |
-*    +-----+-----------------------------------------------------------------+
-*    |  +4 |  +0 | flags                                                     |
-*    +-----+-----+-----------------------------------------------------------+
-*    |  +5 |  +1 | syslog facility                                           |
-*    +-----+-----+-----------------------------------------------------------+
-*    |  +6 |  +2 | syslog port    (syslog port number)                       |
-*    +-----+-----+-----------------------------------------------------------+
-*    |  +8 |  +4 | syslog ip      (syslog ip4 address)                       |
-*    +-----+-----+-----------------------------------------------------------+
-*    | +12 | +10 | syslog expire  (number of seconds to run syslog)          |
-*    +-----+-----+-----------------------------------------------------------+
-*    | +16 | +12 | string syslog log pattern                                 |
-*    +-----+-----+-----------------------------------------------------------+
-*    |  +? |  +? | string syslog hostname (Syslog hostname)                  |
-*    +-----+-----+-----------------------------------------------------------+
-*
-* The syslog pattern string is of the format module.level e.g. *.trace
-* The syslog hostname string is a possibility tpo override the
-* hostname string the client would otherwise use.
-*/
-
-#define NP_PAYLOAD_SYSLOG_CONFIG_SIZE_WO_STRINGS    16 ///< Size of the syslog payload without data.
-
-/**
- * If this flag is set in the packet syslogging should be disabled.
- */
-#define NP_PAYLOAD_SYSLOG_FLAG_ENABLE              0x01 
 
 
 /******************************************************************************/

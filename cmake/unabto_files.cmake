@@ -52,7 +52,6 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_buffers.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_query_rw.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_tcp_fallback.c
-  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_debug_packet.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_extended_rendezvous.c
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_aes128_sha256.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_aes_cbc.h
@@ -71,7 +70,6 @@ set(unabto_core_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_context.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_crypto.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_push.h
-  ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_debug_packet.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_env_base.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_environment.h
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_extended_rendezvous.h
@@ -245,10 +243,6 @@ source_group(modules\\dns\\win32 FILES ${unabto_module_dns_win32_src})
 
 
 # modules/log
-set(unabto_module_log_syslog_src
-  ${UNABTO_MODULES_SRC_DIR}/log/syslog/unabto_syslog.c
-  ${UNABTO_MODULES_SRC_DIR}/log/syslog/unabto_syslog.h)
-source_group(modules\\log\\syslog FILES ${unabto_module_log_syslog_src})
 
 
 set(unabto_module_log_dynamic_src

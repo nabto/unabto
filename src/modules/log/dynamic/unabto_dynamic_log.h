@@ -19,10 +19,6 @@ bool unabto_log_system_enable_stdout_pattern(const char* pattern);
 bool unabto_log_system_enable_stdout(uint32_t module, uint32_t severity);
 void unabto_log_system_disable_stdout();
 
-bool unabto_log_system_enable_syslog_pattern(const char* pattern, size_t patternLength, uint32_t syslogHost, uint16_t syslogPort, uint32_t expire);
-bool unabto_log_system_enable_syslog(uint32_t module, uint32_t severity, uint32_t syslogHost, uint16_t syslogPort, uint32_t expire);
-void unabto_log_system_disable_syslog();
-
 void unabto_log_system_log(uint32_t module, uint32_t severity, const char* file, unsigned int line, const char* format, ...);
 void unabto_log_system_log_buffer(uint32_t module, uint32_t severity, const char* file, unsigned int line, const uint8_t* buffer, size_t bufferLength, const char* format, ...);
 
