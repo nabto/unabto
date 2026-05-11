@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.15...4.2)
 project(unabto_unittest)
 
 #unittest project which builds all unittests for windows/linux/mac platforms.
