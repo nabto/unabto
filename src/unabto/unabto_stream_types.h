@@ -26,12 +26,16 @@ typedef struct nabto_stream_static_config {
 
 /** Stream state */
 struct nabto_stream_s {
-    uint16_t streamTag;                      /**< the tag                     */
-    struct nabto_connect_s* connection;      /**< the connection              */
+    struct nabto_connect_s* connection; /**< the connection              */
+    struct unabto_stream_stats_s stats; /**< Stats for the stream        */
+    union {
+        struct nabto_stream_tcb tcb; /**< state for unreliable con     */
+    } u;
     enum nabto_stream_state state;           /**< the state of the entry      */
+    nabto_stream_static_config staticConfig; /**< static configuration */
+    uint16_t streamTag;                      /**< the tag                     */
     uint16_t idCP;                           /**< ID, client part             */
     uint16_t idSP;                           /**< ID, serveer part            */
-    nabto_stream_static_config staticConfig; /**< static configuration */
     bool blockedOnMissingSendSegment;        /**< set to true if a stream send operation has been blocked by a missing segment allocation. */
     struct {
         bool dataReady : 1;
@@ -40,11 +44,6 @@ struct nabto_stream_s {
         bool writeClosed : 1;
         bool closed : 1;
     } applicationEvents;
-    struct unabto_stream_stats_s stats; /**< Stats for the stream        */
-
-    union {
-        struct nabto_stream_tcb tcb; /**< state for unreliable con     */
-    } u;
 };
 
 #ifdef __cplusplus

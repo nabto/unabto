@@ -227,7 +227,7 @@ void nabto_init_stream_tcb_state(struct nabto_stream_tcb* tcb, const struct nabt
 void nabto_limit_stream_config_syn_ack(struct nabto_stream_s* stream, const struct nabto_win_info* info) {
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
     nabto_limit_stream_config(&stream->u.tcb, &info->u.syn.cfg);
-    
+
     // This is a bug it should have been info->seq+1
     stream->u.tcb.recvNext = info->seq;
     stream->u.tcb.recvTop = stream->u.tcb.recvNext;
