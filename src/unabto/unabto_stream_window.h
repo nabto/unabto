@@ -22,6 +22,19 @@
 #include <unabto/unabto_protocol_defines.h>
 #include <unabto/unabto_stream.h>
 
+/**
+ * Maximum number of sequence numbers a single stream may consume on either
+ * direction before being force-closed. Each side maintains its own zero-based
+ * counter (independent of the actual starting seq), and the stream is
+ * force-closed when its counter reaches this threshold. This caps the seq
+ * advancement on a stream. If the stream sequence number is reused, the stream is
+ * susceptible to a replay attack where a packet from earlier could be replayed
+ * once the 32bit counter reaches the same value again.
+ */
+#ifndef NABTO_STREAM_SEQ_EXHAUSTION_THRESHOLD
+#define NABTO_STREAM_SEQ_EXHAUSTION_THRESHOLD 0x80000000u
+#endif
+
 /** Stream Transfer Control Block Configuration */
 typedef struct nabto_stream_tcb_config {
     uint16_t recvPacketSize;  ///< receiver packet size
@@ -167,6 +180,24 @@ struct nabto_stream_tcb {
     nabto_stamp_t dataTimeoutStamp; /**< Timeout stamp for data  */
     nabto_stamp_t ackStamp;         /**< time to send unsolicited ACK         */
     uint32_t maxAdvertisedWindow;
+
+    /**
+     * Per-direction zero-based counters used to detect seq exhaustion
+     * independently of the actual initial seq. xmitDataCount increments
+     * each time outgoing data consumes a seq; recvDataCount increments
+     * each time a previously-unseen seq is accepted into the receive
+     * window. Reaching NABTO_STREAM_SEQ_EXHAUSTION_THRESHOLD force-closes
+     * the stream.
+     */
+    uint32_t xmitDataCount;
+    uint32_t recvDataCount;
+
+    /**
+     * True iff this stream was force-closed because either direction's
+     * counter reached the exhaustion threshold. Used to surface
+     * UNABTO_STREAM_HINT_SEQ_EXHAUSTED to the application.
+     */
+    bool seqExhausted;
 
     uint32_t finSequence; /**< The sequence number of the fin. */
 

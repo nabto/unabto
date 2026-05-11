@@ -273,6 +273,7 @@ void stream_init_static_config(struct nabto_stream_s* stream) {
     stream->staticConfig.defaultStreamTimeout = NABTO_STREAM_TIMEOUT;
     stream->staticConfig.minRetrans = NABTO_STREAM_MIN_RETRANS;
     stream->staticConfig.maxRetransmissionTime = NABTO_STREAM_MAX_RETRANSMISSION_TIME;
+    stream->staticConfig.seqExhaustionThreshold = NABTO_STREAM_SEQ_EXHAUSTION_THRESHOLD;
 }
 
 /**

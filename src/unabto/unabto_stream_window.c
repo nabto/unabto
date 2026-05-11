@@ -214,6 +214,9 @@ void nabto_init_stream_tcb_state(struct nabto_stream_tcb* tcb, const struct nabt
     tcb->recvMax = tcb->recvNext;
     tcb->retransCount = 0;
     tcb->maxAdvertisedWindow = info->ack + stream->u.tcb.cfg.xmitWinSize;
+    tcb->xmitDataCount = 0;
+    tcb->recvDataCount = 0;
+    tcb->seqExhausted = false;
 
     unabto_stream_congestion_control_init(tcb);
 }
@@ -379,8 +382,16 @@ size_t nabto_stream_tcb_write(struct nabto_stream_s* stream, const uint8_t* buf,
                (tcb->xmitSeq < tcb->maxAdvertisedWindow) &&
                congestion_control_accept_more_data(tcb)) {
             uint16_t sz;
-            int ix = (int)(tcb->xmitSeq % tcb->cfg.xmitWinSize);
-            x_buffer* xbuf = &tcb->xmit[ix];
+            int ix;
+            x_buffer* xbuf;
+            if (tcb->xmitDataCount >= stream->staticConfig.seqExhaustionThreshold) {
+                NABTO_LOG_WARN(("%" PRIu16 " send seq counter exhausted after %" PRIu32 " packets, force-closing to prevent wrap-around", stream->streamTag, tcb->xmitDataCount));
+                tcb->seqExhausted = true;
+                nabto_stream_tcb_force_close(stream);
+                break;
+            }
+            ix = (int)(tcb->xmitSeq % tcb->cfg.xmitWinSize);
+            xbuf = &tcb->xmit[ix];
             if (xbuf->xstate != B_IDLE) {
                 NABTO_LOG_FATAL(("xbuf->xstate != B_IDLE, xmitCount=%u finSent=%u", (int)tcb->xmitLastSent - tcb->xmitFirst, tcb->finSequence));
             }
@@ -403,6 +414,7 @@ size_t nabto_stream_tcb_write(struct nabto_stream_s* stream, const uint8_t* buf,
             queued += sz;
             size -= sz;
             ++tcb->xmitSeq;  // done here or after sending?
+            ++tcb->xmitDataCount;
 
             if ((tcb->xmitSeq - tcb->xmitFirst) == 1) {
                 // restart retransmission timer
@@ -1124,6 +1136,7 @@ static void handle_data(struct nabto_stream_s* stream,
                     rbuf->size = dlen;
                     rbuf->used = 0;
                     rbuf->seq = win->seq;
+                    ++tcb->recvDataCount;
                     LOG_STATE(stream);
                     // update the highest received data sequence number, used in sack calculation.
                     tcb->recvMax = MAX(tcb->recvMax, win->seq);
@@ -1179,6 +1192,23 @@ void nabto_stream_tcb_event(struct nabto_stream_s* stream,
     struct nabto_stream_tcb* tcb = &stream->u.tcb;
 
     NABTO_LOG_DEBUG(("%" PRIu16 " --> [%" PRIu32 ",%" PRIu32 "] %" PRItext ", advertisedWindow %" PRIu16 ", %d bytes", stream->streamTag, win->seq, win->ack, unabto_stream_type_to_string(win->type), win->advertisedWindow, dlen));
+
+    /**
+     * Refuse to advance the receive window past the seq exhaustion
+     * threshold. Without this, recvNext could wrap to zero and accept old
+     * recorded packets (whose HMAC remains valid under the unchanged
+     * connection key) inside the wrapped window. RST is allowed through
+     * so a peer's exhaustion-driven RST can still tear us down cleanly.
+     */
+    if (!(win->type & RST) &&
+        tcb->recvDataCount >= stream->staticConfig.seqExhaustionThreshold) {
+        if (tcb->streamState != ST_CLOSED && tcb->streamState != ST_CLOSED_ABORTED) {
+            NABTO_LOG_WARN(("%" PRIu16 " recv seq counter exhausted after %" PRIu32 " packets, force-closing to prevent wrap-around", stream->streamTag, tcb->recvDataCount));
+            tcb->seqExhausted = true;
+            nabto_stream_tcb_force_close(stream);
+        }
+        return;
+    }
 
     if (win->type == ACK) {
         uint32_t oldAdvWindow = tcb->maxAdvertisedWindow;

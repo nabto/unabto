@@ -21,7 +21,7 @@ typedef struct nabto_stream_static_config {
     uint16_t defaultStreamTimeout;
     uint16_t minRetrans;
     uint16_t maxRetransmissionTime;
-
+    uint32_t seqExhaustionThreshold;
 } nabto_stream_static_config;
 
 /** Stream state */

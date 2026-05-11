@@ -485,5 +485,6 @@ set(unabto_server_common_src_test
 set(unabto_server_stream_test_src
   ${UNABTO_SERVER_SRC_DIR}/unabto/unabto_stream_event.c
   ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_stream_event_test.c
+  ${UNABTO_SERVER_TEST_DIR}/unabto/unabto_stream_seq_exhaustion_test.c
   ${unabto_core_src}
 )
