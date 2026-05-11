@@ -134,9 +134,10 @@ size_t unabto_stream_write(unabto_stream* stream, const uint8_t* buf, size_t siz
     queued = nabto_stream_tcb_write(stream, buf, size);
 
     NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_BUFFERS, ("Wrote on stream size %" PRIsize, queued), buf, queued);
-    if (queued == 0 && stream->u.tcb.seqExhausted) {
-        /* Send-side guard tripped during this call: report exhaustion
-           rather than silent zero-write. */
+    if (stream->u.tcb.seqExhausted) {
+        /* Send-side guard tripped during this call (possibly after a
+           partial queue): report exhaustion so callers don't treat the
+           force-closed stream as still usable. */
         *hint = UNABTO_STREAM_HINT_SEQ_EXHAUSTED;
     } else {
         *hint = UNABTO_STREAM_HINT_OK;
