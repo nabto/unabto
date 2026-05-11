@@ -1,4 +1,6 @@
 #include <unabto/unabto_env_base.h>
+#include <unabto/unabto_connection.h>
+#include <unabto/unabto_memory.h>
 #include <unabto/unabto_stream_event.h>
 #include <unabto/unabto_stream_window.h>
 #include <unabto/unabto_stream_environment.h>
@@ -40,11 +42,15 @@ void make_ack_window(struct nabto_win_info* window, uint32_t ack, uint32_t seq) 
 
 x_buffer x_buffers2[NABTO_STREAM_SEND_WINDOW_SIZE];
 r_buffer r_buffers2[NABTO_STREAM_RECEIVE_WINDOW_SIZE];
+static struct nabto_connect_s test_connection;
 
 void resetStream(struct nabto_stream_s* stream) {
     memset(stream, 0, sizeof(struct nabto_stream_s));
     memset(x_buffers2, 0, sizeof(x_buffers2));
     memset(r_buffers2, 0, sizeof(r_buffers2));
+    memset(&test_connection, 0, sizeof(test_connection));
+    stream->connection = &test_connection;
+    nmc.nabtoMainSetup.id = "";
     stream_initial_config(stream);
     stream_init_static_config(stream);
     stream->u.tcb.cfg.xmitWinSize = NABTO_STREAM_SEND_WINDOW_SIZE;

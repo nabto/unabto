@@ -84,7 +84,7 @@ static void nabto_connection_update_next_event(nabto_stamp_t* current_min_stamp)
 #endif
 
 #if NABTO_ENABLE_NEXT_EVENT
-void nabto_update_min_stamp(nabto_stamp_t* current_minimum_stamp, nabto_stamp_t* stamp) {
+void nabto_update_min_stamp(nabto_stamp_t* current_minimum_stamp, const nabto_stamp_t* stamp) {
     if (nabtoStampLess(stamp, current_minimum_stamp)) {
         *current_minimum_stamp = *stamp;
     }

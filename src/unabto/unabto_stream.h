@@ -80,7 +80,14 @@ typedef enum {
     UNABTO_STREAM_HINT_READ_OR_WRITE_ERROR = 3,
     UNABTO_STREAM_HINT_ARGUMENT_ERROR = 4,
     UNABTO_STREAM_HINT_UNABLE_TO_ACKNOWLEDGE = 5,
-    UNABTO_STREAM_HINT_ACKNOWLEDGING_TOO_MUCH_DATA = 6
+    UNABTO_STREAM_HINT_ACKNOWLEDGING_TOO_MUCH_DATA = 6,
+    /**
+     * The 32-bit stream sequence counter has reached the safety threshold.
+     * The stream has been force-closed to prevent seq wrap-around, which
+     * could otherwise enable replay of previously-recorded packets under
+     * the still-valid connection key. Open a new stream to continue.
+     */
+    UNABTO_STREAM_HINT_SEQ_EXHAUSTED = 7
 } unabto_stream_hint;
 
 /**************** OPEN/CLOSE *******************************/

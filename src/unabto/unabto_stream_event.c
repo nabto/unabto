@@ -39,6 +39,15 @@ static struct nabto_stream_s* find_free_stream(uint16_t tag, nabto_connect* con)
 
 static bool nabto_stream_validate_win(struct nabto_win_info* info, struct nabto_stream_s* stream);
 
+static bool nabto_stream_next_sp_id(nabto_connect* con, uint16_t* idSP) {
+    if (con->nextIdSP == UINT16_MAX) {
+        return false;
+    }
+    ++con->nextIdSP;
+    *idSP = con->nextIdSP;
+    return true;
+}
+
 /******************************************************************************/
 
 void handle_stream_packet(nabto_connect* con, nabto_packet_header* hdr,
@@ -108,6 +117,17 @@ void nabto_stream_event(nabto_connect* con,
             stream = find_free_stream(hdr->tag, con);
             if (stream == NULL) {
                 NABTO_LOG_DEBUG(("Stream with tag %i not accepted", hdr->tag));
+            } else {
+                uint16_t idSP;
+                if (!nabto_stream_next_sp_id(con, &idSP)) {
+                    NABTO_LOG_ERROR(("Per-connection SPID space exhausted, sending RST"));
+                    unabto_stream_release(stream);
+                    stream = NULL;
+                } else {
+                    stream->idSP = idSP;
+                    stream->idCP = win.idCP;
+                    stream->state = STREAM_IN_USE;
+                }
             }
         } else {
             NABTO_LOG_DEBUG(("Received non syn packet for stream which is not available tag %i", hdr->tag));
@@ -253,6 +273,7 @@ void stream_init_static_config(struct nabto_stream_s* stream) {
     stream->staticConfig.defaultStreamTimeout = NABTO_STREAM_TIMEOUT;
     stream->staticConfig.minRetrans = NABTO_STREAM_MIN_RETRANS;
     stream->staticConfig.maxRetransmissionTime = NABTO_STREAM_MAX_RETRANSMISSION_TIME;
+    stream->staticConfig.seqExhaustionThreshold = NABTO_STREAM_SEQ_EXHAUSTION_THRESHOLD;
 }
 
 /**
@@ -357,7 +378,7 @@ void nabto_stream_update_next_event(nabto_stamp_t* current_min_stamp) {
             }
 
             // If we have unacked packets then check then use the best timeout we know of
-            nabto_stream_tcb_update_next_event(stream, current_min_stamp);
+            nabto_stream_tcb_update_next_event(&stream->u.tcb, current_min_stamp);
         }
     }
 }

@@ -17,6 +17,7 @@
 #include "util/unabto_util_test.h"
 #include "util/unabto_buffer_test.h"
 #include "unabto_stream_event_test.h"
+#include "unabto_stream_seq_exhaustion_test.h"
 #include "unabto_stream_window_test.h"
 #include "modules/util/unabto_base32_test.h"
 #include <unabto/unabto_stream_event_test.h>
@@ -133,6 +134,12 @@ bool unabto_test_all(void) {
     r = unabto_stream_create_sack_pairs_test();
     if (!r) {
         NABTO_LOG_ERROR(("Test of unabto stream create sack pairs failed."));
+        ret = false;
+    }
+
+    r = unabto_stream_seq_exhaustion_test();
+    if (!r) {
+        NABTO_LOG_ERROR(("Test of unabto stream seq exhaustion threshold failed."));
         ret = false;
     }
 

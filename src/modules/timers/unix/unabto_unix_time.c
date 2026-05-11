@@ -64,7 +64,7 @@ struct unabto_unix_time unabto_unix_timer_get_stamp() {
 }
 
 // return s1 < s2
-bool unabto_unix_timer_stamp_less(nabto_stamp_t* s1, nabto_stamp_t* s2) {
+bool unabto_unix_timer_stamp_less(const nabto_stamp_t* s1, const nabto_stamp_t* s2) {
     if (s1->milliseconds < s2->milliseconds) {
         return true;
     }
@@ -74,7 +74,7 @@ bool unabto_unix_timer_stamp_less(nabto_stamp_t* s1, nabto_stamp_t* s2) {
     return false;
 }
 
-bool unabto_unix_timer_stamp_less_equal(nabto_stamp_t* s1, nabto_stamp_t* s2) {
+bool unabto_unix_timer_stamp_less_equal(const nabto_stamp_t* s1, const nabto_stamp_t* s2) {
     if (s1->milliseconds < s2->milliseconds) {
         return true;
     }

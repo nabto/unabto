@@ -22,6 +22,19 @@
 #include <unabto/unabto_protocol_defines.h>
 #include <unabto/unabto_stream.h>
 
+/**
+ * Maximum number of sequence numbers a single stream may consume on either
+ * direction before being force-closed. Each side maintains its own zero-based
+ * counter (independent of the actual starting seq), and the stream is
+ * force-closed when its counter reaches this threshold. This caps the seq
+ * advancement on a stream. If the stream sequence number is reused, the stream is
+ * susceptible to a replay attack where a packet from earlier could be replayed
+ * once the 32bit counter reaches the same value again.
+ */
+#ifndef NABTO_STREAM_SEQ_EXHAUSTION_THRESHOLD
+#define NABTO_STREAM_SEQ_EXHAUSTION_THRESHOLD 0x80000000u
+#endif
+
 /** Stream Transfer Control Block Configuration */
 typedef struct nabto_stream_tcb_config {
     uint16_t recvPacketSize;  ///< receiver packet size
@@ -168,6 +181,24 @@ struct nabto_stream_tcb {
     nabto_stamp_t ackStamp;         /**< time to send unsolicited ACK         */
     uint32_t maxAdvertisedWindow;
 
+    /**
+     * Per-direction zero-based counters used to detect seq exhaustion
+     * independently of the actual initial seq. xmitDataCount increments
+     * each time outgoing data consumes a seq; recvDataCount increments
+     * each time a previously-unseen seq is accepted into the receive
+     * window. Reaching NABTO_STREAM_SEQ_EXHAUSTION_THRESHOLD force-closes
+     * the stream.
+     */
+    uint32_t xmitDataCount;
+    uint32_t recvDataCount;
+
+    /**
+     * True iff this stream was force-closed because either direction's
+     * counter reached the exhaustion threshold. Used to surface
+     * UNABTO_STREAM_HINT_SEQ_EXHAUSTED to the application.
+     */
+    bool seqExhausted;
+
     uint32_t finSequence; /**< The sequence number of the fin. */
 
     /**
@@ -242,12 +273,13 @@ extern "C" {
 #endif
 
 /**
- * open a stream
+ * Open a stream as the initiator. The caller supplies the per-session
+ * client-peer stream id (idCP); allocation is the caller's responsibility.
  *
- * Precondition: The stream structure has been initialized and
- * prepared for opening by giving it a tag and a connection.
+ * Precondition: the stream structure has been initialized and given a tag,
+ * and idCP is non-zero (0 is the reserved "no id assigned" sentinel).
  */
-void nabto_stream_tcb_open(struct nabto_stream_s* stream);
+void nabto_stream_tcb_open(struct nabto_stream_s* stream, uint16_t idCP);
 
 /**
  * Read data
@@ -331,15 +363,15 @@ text nabto_stream_tcb_state_name(const struct nabto_stream_tcb* tcb);
  */
 void nabto_init_stream_tcb_state(struct nabto_stream_tcb* tcb, const struct nabto_win_info* info, struct nabto_stream_s* stream);
 
-void nabto_stream_tcb_release(struct nabto_stream_s* stream);
+void nabto_stream_tcb_release(struct nabto_stream_tcb* tcb);
 
-bool nabto_stream_tcb_is_closed(struct nabto_stream_s* stream);
+bool nabto_stream_tcb_is_closed(const struct nabto_stream_tcb* tcb);
 
 #if NABTO_ENABLE_NEXT_EVENT
 /**
  * Update time stamp with the time until next event
  */
-void nabto_stream_tcb_update_next_event(struct nabto_stream_s* stream, nabto_stamp_t* current_min_stamp);
+void nabto_stream_tcb_update_next_event(const struct nabto_stream_tcb* tcb, nabto_stamp_t* current_min_stamp);
 #endif
 
 void nabto_stream_make_rst_response_window(const struct nabto_win_info* win, struct nabto_win_info* rstWin);
@@ -351,7 +383,7 @@ bool nabto_stream_encode_window(const struct nabto_win_info* win, uint8_t* start
 uint16_t unabto_stream_advertised_window_size(struct nabto_stream_tcb* tcb);
 uint32_t unabto_stream_ack_number_to_send(struct nabto_stream_tcb* tcb);
 
-bool unabto_stream_create_sack_pairs(struct nabto_stream_s* stream, struct nabto_stream_sack_data* sackData);
+bool unabto_stream_create_sack_pairs(struct nabto_stream_tcb* tcb, struct nabto_stream_sack_data* sackData);
 /******************************************************************************/
 /******************************************************************************/
 

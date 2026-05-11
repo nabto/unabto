@@ -53,10 +53,24 @@ bool unabto_stream_is_readable(unabto_stream* stream) {
     return nabto_stream_tcb_is_readable(stream);
 }
 
+/**
+ * If the stream was force-closed because of seq counter exhaustion,
+ * promote a generic close/error hint to UNABTO_STREAM_HINT_SEQ_EXHAUSTED
+ * so the application can distinguish this case and open a new stream.
+ */
+static void promote_seq_exhausted_hint(unabto_stream* stream, unabto_stream_hint* hint) {
+    if (stream->u.tcb.seqExhausted &&
+        (*hint == UNABTO_STREAM_HINT_STREAM_CLOSED ||
+         *hint == UNABTO_STREAM_HINT_READ_OR_WRITE_ERROR)) {
+        *hint = UNABTO_STREAM_HINT_SEQ_EXHAUSTED;
+    }
+}
+
 size_t unabto_stream_read(unabto_stream* stream, const uint8_t** buf, unabto_stream_hint* hint) {
     size_t avail = 0;
     stream->stats.userRead++;
     avail = nabto_stream_tcb_read(stream, buf, hint);
+    promote_seq_exhausted_hint(stream, hint);
     return avail;
 }
 
@@ -76,6 +90,7 @@ size_t unabto_stream_read_buf(unabto_stream* stream, uint8_t* buf, size_t size, 
     do {
         avail = nabto_stream_tcb_read(stream, &mem, hint);
         if (*hint != UNABTO_STREAM_HINT_OK) {
+            promote_seq_exhausted_hint(stream, hint);
             return 0;
         }
         if (avail > 0) {
@@ -113,12 +128,20 @@ size_t unabto_stream_write(unabto_stream* stream, const uint8_t* buf, size_t siz
     NABTO_LOG_TRACE(("write size=%" PRIsize, size));
     if (!nabto_stream_tcb_is_writeable(&stream->u.tcb)) {
         *hint = UNABTO_STREAM_HINT_READ_OR_WRITE_ERROR;
+        promote_seq_exhausted_hint(stream, hint);
         return 0;
     }
     queued = nabto_stream_tcb_write(stream, buf, size);
 
     NABTO_LOG_BUFFER(NABTO_LOG_SEVERITY_BUFFERS, ("Wrote on stream size %" PRIsize, queued), buf, queued);
-    *hint = UNABTO_STREAM_HINT_OK;
+    if (stream->u.tcb.seqExhausted) {
+        /* Send-side guard tripped during this call (possibly after a
+           partial queue): report exhaustion so callers don't treat the
+           force-closed stream as still usable. */
+        *hint = UNABTO_STREAM_HINT_SEQ_EXHAUSTED;
+    } else {
+        *hint = UNABTO_STREAM_HINT_OK;
+    }
     return queued;
 }
 
@@ -127,6 +150,7 @@ size_t unabto_stream_can_write(unabto_stream* stream, unabto_stream_hint* hint) 
 
     if (!nabto_stream_tcb_is_writeable(&stream->u.tcb)) {
         *hint = UNABTO_STREAM_HINT_READ_OR_WRITE_ERROR;
+        promote_seq_exhausted_hint(stream, hint);
         return 0;
     }
     return nabto_stream_tcb_can_write(stream);
@@ -135,7 +159,7 @@ size_t unabto_stream_can_write(unabto_stream* stream, unabto_stream_hint* hint) 
 /******************************************************************************/
 
 bool unabto_stream_is_closed(unabto_stream* stream) {
-    return nabto_stream_tcb_is_closed(stream);
+    return nabto_stream_tcb_is_closed(&stream->u.tcb);
 }
 
 bool unabto_stream_close(unabto_stream* stream) {
@@ -148,7 +172,7 @@ bool unabto_stream_force_close(unabto_stream* stream) {
 }
 
 void unabto_stream_release(unabto_stream* stream) {
-    nabto_stream_tcb_release(stream);
+    nabto_stream_tcb_release(&stream->u.tcb);
     stream_reset(stream);
 }
 
