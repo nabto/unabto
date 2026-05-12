@@ -12,7 +12,6 @@ log
 network
 random
 settings
-syslog
 tcp_fallback
 timers
 list

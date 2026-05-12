@@ -19,7 +19,6 @@
 #include "unabto_packet.h"
 #include "unabto_util.h"
 #include "unabto_logging.h"
-#include "unabto_debug_packet.h"
 #include "unabto_memory.h"
 #include "unabto_external_environment.h"
 #include <unabto/unabto_tcp_fallback.h>
@@ -326,16 +325,6 @@ void nabto_message_event(message_event* event, uint16_t ilen) {
             case U_VERIFY_PSK:
                 unabto_psk_connection_dispatch_request(event->udpMessage.socket, &event->udpMessage.peer, &hdr);
                 return;
-#endif
-
-#if NABTO_ENABLE_DEBUG_PACKETS
-
-            case U_DEBUG:
-                if (fromGSP) {
-                    unabto_debug_packet(event, &hdr);
-                    return;
-                }
-                break;
 #endif
 
             default:

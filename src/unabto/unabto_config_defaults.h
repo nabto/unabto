@@ -464,14 +464,6 @@
 /* Debug packets */
 /*****************/
 
-#ifndef NABTO_ENABLE_DEBUG_PACKETS
-#define NABTO_ENABLE_DEBUG_PACKETS 0
-#endif
-
-#ifndef NABTO_ENABLE_DEBUG_SYSLOG_CONFIG
-#define NABTO_ENABLE_DEBUG_SYSLOG_CONFIG 0
-#endif
-
 /**************************************/
 /* End of debug packets configuration */
 /**************************************/
