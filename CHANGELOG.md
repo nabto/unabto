@@ -10,7 +10,9 @@ Guide: always keep an unreleased section which keeps track of current
 changes. When a release is made the unreleased section is renamed to
 the release and a new unreleased section is added.
 
-## 4.6 [Unreleased]
+## 4.10.0 [Unreleased]
+
+## 4.9.0 2026-06-08
 
 ### Added
 - Constant-time memcmp helper for security-sensitive comparisons.
@@ -25,9 +27,12 @@ the release and a new unreleased section is added.
 - Replaced unchecked `WRITE_FORWARD` macros and manual buffer writes with bounds-checked `write_forward_*` helpers throughout packet construction.
 - Replaced unchecked read macros with bounds-checked `read_forward_*` helpers.
 - Reworked crypto payload encryption to use start/end pointers and to never read outside the caller-supplied buffer.
-- Raised the minimum required CMake version.
+- Raised the minimum required CMake version across all subproject `CMakeLists.txt` files.
 - Moved content out of the top-level `build/` directory, which is reserved for CMake output.
 - Removed dead code that is not used by any current project.
+
+### Removed
+- Removed the `syslog` log adapter (`src/modules/log/syslog`) and debug packet support.
 
 ### Fixed
 - Validate all padding bytes in `CRYPT_W_AES_CBC_HMAC_SHA256` and require at least IV + padding to be present.
@@ -41,14 +46,15 @@ the release and a new unreleased section is added.
 - Write an empty FCM token and status when the user is not found, instead of leaving the response undefined.
 - Initialize the push hint to a well-defined value.
 - Fixed notification removal, which modified the list it was iterating.
-- Fixed debug packet handling.
 - Fixed a wrong socket assignment when marking sockets invalid.
 - Require the device id to be non-NULL and non-empty.
 - Fixed a missing NUL termination.
 - Free memory on allocation failure in the affected paths.
 - Corrected a wrong `sizeof` usage.
 - Check size before reading additional bytes.
-- Silenced remaining Windows build warnings.
+- Silenced remaining Windows build warnings, and additional build warnings across multiple platforms.
+- TCP fallback: reject fallback packets larger than the communication buffer and verify that received data fits in the receive buffer, fixing a potential buffer overflow in the TCP fallback path (`src/modules/tcp_fallback/tcp_fallback_select.c`).
+- Streaming: force-close streams before the 32-bit sequence counter wraps and return an error when sequence numbers are exhausted, instead of reusing stream/connection identifiers.
 - Enforced braces on all conditional statements (no naked `if`s) and addressed a large number of clang-tidy warnings.
 - Removed the non-C89 `inline` keyword where it had slipped in.
 
