@@ -18,6 +18,8 @@ This release is part of the Nabto 4.9 platform security overhaul. It delivers a 
 
 Testing note: uNabto releases are normally smoke-tested on PIC32 hardware for each release (see `src/modules/network/microchip/README.md`). This release has not been tested on PIC32.
 
+All uNabto versions prior to 4.9 should be considered affected by the issues mentioned below.
+
 ### Added
 - Constant-time memcmp helper for security-sensitive comparisons.
 - `clang-tidy` CI job; the build fails on tidy errors.
