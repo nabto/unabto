@@ -14,6 +14,10 @@ the release and a new unreleased section is added.
 
 ## 4.9.0 2026-06-08
 
+This release is part of the Nabto 4.9 platform security overhaul. It delivers a substantial set of memory-safety, input-validation and protocol-handling fixes, several of which could, depending on target platform and build configuration, otherwise be exploited for remote code execution through buffer overflows. It also fixes a stream counter wrap that could let an attacker replay previously captured stream traffic within an active session. Upgrading is strongly recommended for all production deployments and introduces no breaking API changes.
+
+Testing note: uNabto releases are normally smoke-tested on PIC32 hardware for each release (see `src/modules/network/microchip/README.md`). This release has not been tested on PIC32.
+
 ### Added
 - Constant-time memcmp helper for security-sensitive comparisons.
 - `clang-tidy` CI job; the build fails on tidy errors.
